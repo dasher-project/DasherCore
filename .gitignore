@@ -1,65 +1,35 @@
-.DS_Store
-*.a
-*.make
-*.m4
-*.gmo
-*.mo
-*.o
-*.omf
-.tarball-version
-Makefile
-Makefile.in
-dasher.xml
-*.Plo
+# Prerequisites
+*.d
+
+# Compiled Object files
+*.slo
 *.lo
+*.o
+*.obj
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Compiled Dynamic libraries
+*.so
+*.dylib
+*.dll
+
+# Fortran module files
+*.mod
+*.smod
+
+# Compiled Static libraries
+*.lai
 *.la
-autom4te.cache
-*.Po
-build-aux
-stamp-*
-/config.h
-/config.h.in
-/config.log
-/config.status
-/configure
-/libtool
-/po/Makefile.in.in
-/po/Makevars.template
-/po/POTFILES
-/Data/dasher.desktop
-/Data/dasher.desktop.in
-/Data/dasher.gschema.xml
-**/Debug/
-/Doc/user/dasher.1
-**/Release*/
-/Src/Gtk2/generate-schema
-/Src/dasher
-/Template/
-*.suo
-*.filters
-*.sdf
-*~
-*.vcxproj.user
-/Src/Win32/Dasher.aps
-/Src/Win32/Dasher_vc2013.opensdf
-Src/Win32/Dasher_vc2013.VC.db
-Data/Help/Win32/Dasher.chm
-Src/Win32/Dasher.VC.db
-*.opendb
+*.a
+*.lib
 
-Src/DasherCore/.dirstamp
-Src/DasherCore/.deps/
-Src/DasherCore/Alphabet/.deps/
-Src/DasherCore/Alphabet/.dirstamp
+# Executables
+*.exe
+*.out
+*.app
 
-
-# Eclipse
-.autotools
-.cproject
-.project
-
-.gradle/
-.idea
-
-# Visual Studio Code
-.ionide/
+# Build Files
+Build

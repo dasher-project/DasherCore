@@ -21,7 +21,7 @@
 #include "../Common/Common.h"
 
 #ifdef _WIN32
-#include "..\Win32\Common\WinCommon.h"
+//#include "..\Win32\Common\WinCommon.h"
 #endif
 
 #include "DasherViewSquare.h"

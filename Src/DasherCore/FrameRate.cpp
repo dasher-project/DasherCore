@@ -43,7 +43,7 @@ void CFrameRate::RecordFrame(unsigned long Time)
       m_iTime = m_iTime2;
       m_iFrames = 0;
 
-    DASHER_TRACEOUTPUT("Fr %f Steps %d Samples %d Time2 %d\n", dFrNow, m_iSteps, m_iSamples, m_iTime2);
+    //DASHER_TRACEOUTPUT("Fr %f Steps %d Samples %d Time2 %d\n", dFrNow, m_iSteps, m_iSamples, m_iTime2);
 
     }
 
