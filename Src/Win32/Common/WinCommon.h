@@ -9,19 +9,19 @@
 #ifndef __WinCommon_h__
 #define __WinCommon_h__
 // Windows Vista 
-#define _WIN32_WINNT 0x6000 
+//#define _WIN32_WINNT 0x6000 
 //#pragma message("Compiling WinCommon.h.........................")
 
 #define NOMINMAX
 #define WIN32_LEAN_AND_MEAN     // Excludes rarely-used stuff from the Windows headers
-#define STRICT
-#define _ATL_NO_COM_SUPPORT
-#define _ATL_CSTRING_EXPLICIT_CONSTRUCTORS
-#define _ATL_ENABLE_PTM_WARNING
+//#define STRICT
+//#define _ATL_NO_COM_SUPPORT
+//#define _ATL_CSTRING_EXPLICIT_CONSTRUCTORS
+//#define _ATL_ENABLE_PTM_WARNING
 
-#include <atlbase.h>
-#include <atlstr.h>
-#include <atlwin.h>
+//#include <atlbase.h>
+//#include <atlstr.h>
+//#include <atlwin.h>
 
 
 #include <windows.h>
