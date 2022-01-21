@@ -330,7 +330,7 @@ inline const CDasherNode::ChildMap &CDasherNode::GetChildren() const {
 }
 
 inline unsigned int CDasherNode::ChildCount() const {
-  return m_mChildren.size();
+  return static_cast<unsigned int>(m_mChildren.size());
 }
 
 inline bool CDasherNode::GetFlag(int iFlag) const {

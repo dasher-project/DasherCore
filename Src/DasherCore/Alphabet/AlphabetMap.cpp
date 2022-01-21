@@ -87,7 +87,7 @@ void CAlphabetMap::SymbolStream::readMore() {
     DASHER_ASSERT(in.gcount() == 1024-len);
     len = 1024;
   } else {
-    len+=in.gcount();
+    len+= static_cast<off_t>(in.gcount());
     DASHER_ASSERT(len<1024);
     //next attempt to read more will fail.
   }

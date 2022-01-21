@@ -36,7 +36,7 @@ void CBasicLog::StopWriting(float dNats) {
 }
 
 void CBasicLog::AddSymbols(Dasher::VECTOR_SYMBOL_PROB* pVectorNewSymbolProbs, eUserLogEventType iEvent) {
-  m_iSymbolCount += pVectorNewSymbolProbs->size();
+  m_iSymbolCount += static_cast<int>(pVectorNewSymbolProbs->size());
 }
 
 void CBasicLog::DeleteSymbols(int iNumToDelete, eUserLogEventType iEvent) {

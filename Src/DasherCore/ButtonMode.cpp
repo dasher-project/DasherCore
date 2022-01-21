@@ -90,9 +90,9 @@ void CButtonMode::SetupBoxes()
       myint iMid = static_cast<int>(iDasherY / (1.0+dRatio));
 
       m_pBoxes[0].iDisplayTop = 0;
-      m_pBoxes[0].iDisplayBottom = iMid;
+      m_pBoxes[0].iDisplayBottom = static_cast<int>(iMid);
 
-      m_pBoxes[1].iDisplayTop = iMid;
+      m_pBoxes[1].iDisplayTop = static_cast<int>(iMid);
       m_pBoxes[1].iDisplayBottom = iDasherY;
     }
     else {

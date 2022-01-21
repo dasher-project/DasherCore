@@ -38,7 +38,7 @@ void CDynamicButtons::Timer(unsigned long iTime, CDasherView *pDasherView, CDash
     //moving forwards. Check auto speed control...
     if (GetBoolParameter(BP_AUTO_SPEEDCONTROL) && m_uSpeedControlTime < iTime) {
         if (m_uSpeedControlTime > 0) //has actually been set?
-          SetLongParameter(LP_MAX_BITRATE, GetLongParameter(LP_MAX_BITRATE) * (1.0 + GetLongParameter(LP_DYNAMIC_SPEED_INC)/100.0));
+          SetLongParameter(LP_MAX_BITRATE, static_cast<long>(GetLongParameter(LP_MAX_BITRATE) * (1.0 + GetLongParameter(LP_DYNAMIC_SPEED_INC)/100.0)));
         m_uSpeedControlTime = iTime + 1000*GetLongParameter(LP_DYNAMIC_SPEED_FREQ);
     }
     TimerImpl(iTime, pDasherView, pModel, pol);
@@ -117,8 +117,8 @@ void CDynamicButtons::reverse(unsigned long iTime) {
   if (isPaused()) CDynamicFilter::run(iTime);
   if (GetBoolParameter(BP_AUTO_SPEEDCONTROL)) {
     //treat reversing as a sign of distress --> slow down!
-    SetLongParameter(LP_MAX_BITRATE, GetLongParameter(LP_MAX_BITRATE) *
-					 (1.0 - GetLongParameter(LP_DYNAMIC_SPEED_DEC)/100.0));
+    SetLongParameter(LP_MAX_BITRATE, static_cast<long>(GetLongParameter(LP_MAX_BITRATE) *
+					 (1.0 - GetLongParameter(LP_DYNAMIC_SPEED_DEC)/100.0)));
   }
 }
 

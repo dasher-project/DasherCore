@@ -152,7 +152,7 @@ void CTwoButtonDynamicFilter::ActionButton(unsigned long iTime, int iButton, int
     return;
   }
   //fell through to apply offset
-  ApplyOffset(pModel,dFactor * GetLongParameter(LP_TWO_BUTTON_OFFSET) * exp(m_dLagBits * FrameSpeedMul(pModel, iTime)));
+  ApplyOffset(pModel, static_cast<int>(dFactor * GetLongParameter(LP_TWO_BUTTON_OFFSET) * exp(m_dLagBits * FrameSpeedMul(pModel, iTime))));
   pModel->ResetNats();
   
   if(CUserLogBase *pUserLog=m_pInterface->GetUserLogPtr())

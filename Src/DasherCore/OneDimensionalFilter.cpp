@@ -9,7 +9,7 @@ using namespace Dasher;
 }*/
 
 COneDimensionalFilter::COneDimensionalFilter(CSettingsUser *pCreator, CDasherInterfaceBase *pInterface, CFrameRate *pFramerate, ModuleID_t iID, const char *szName)
-  : CDefaultFilter(pCreator, pInterface, pFramerate, iID, szName), forwardmax(CDasherModel::MAX_Y/2.5) {
+  : CDefaultFilter(pCreator, pInterface, pFramerate, iID, szName), forwardmax(static_cast<const Dasher::myint>(CDasherModel::MAX_Y/2.5)) {
 }
 
 void COneDimensionalFilter::ApplyTransform(myint &iDasherX, myint &iDasherY, CDasherView *pView) {
@@ -20,7 +20,7 @@ void COneDimensionalFilter::ApplyTransform(myint &iDasherX, myint &iDasherY, CDa
   double disty,circlesize,yfullrange,yforwardrange,angle,ellipse_eccentricity,ybackrange,yb,x;	
   
   // The distance between the Y coordinate and the centreline in pixels
-  disty=CDasherModel::ORIGIN_Y-iDasherY;
+  disty= static_cast<double>(CDasherModel::ORIGIN_Y-iDasherY);
   
   circlesize=    forwardmax*(1.0-max(0.0,min(1.0,(double)iDasherX/iDasherMaxX)));
   yforwardrange= CDasherModel::MAX_Y/3.2; // Was 1.6

@@ -24,14 +24,14 @@ static char THIS_FILE[] = __FILE__;
 /////////////////////////////////////////////////////////////////////
 
 CRoutingPPMLanguageModel::CRoutingPPMLanguageModel(CSettingsUser *pCreator, const vector<symbol> *pBaseSyms, const vector<set<symbol> > *pRoutes, bool bRoutesContextSensitive)
-:CAbstractPPM(pCreator, pRoutes->size()-1, new CRoutingPPMnode(-1), GetLongParameter(LP_LM_MAX_ORDER)), NodesAllocated(0), m_NodeAlloc(8192), m_pBaseSyms(pBaseSyms), m_pRoutes(pRoutes), m_bRoutesContextSensitive(bRoutesContextSensitive) {
+:CAbstractPPM(pCreator, static_cast<int>(pRoutes->size())-1, new CRoutingPPMnode(-1), GetLongParameter(LP_LM_MAX_ORDER)), NodesAllocated(0), m_NodeAlloc(8192), m_pBaseSyms(pBaseSyms), m_pRoutes(pRoutes), m_bRoutesContextSensitive(bRoutesContextSensitive) {
   DASHER_ASSERT(pBaseSyms->size() >= pRoutes->size());
 }
 
 void CRoutingPPMLanguageModel::GetProbs(Context context, std::vector<unsigned int> &probs, int norm, int iUniform) const {
   const CPPMContext *ppmcontext = (const CPPMContext *)(context);
 
-  const int iNumSymbols(m_pBaseSyms->size()); //i.e., the #routes - so loop from i=1 to <iNumSymbols
+  const int iNumSymbols(static_cast<int>(m_pBaseSyms->size())); //i.e., the #routes - so loop from i=1 to <iNumSymbols
   probs.resize(iNumSymbols);
   
   unsigned int iToSpend = norm;
@@ -115,7 +115,7 @@ void CRoutingPPMLanguageModel::GetProbs(Context context, std::vector<unsigned in
     // which we haven't assigned to any route
     const set<symbol> &routes((*m_pRoutes)[i]);
     //divide it up evenly
-    int iLeft = routes.size();
+    int iLeft = static_cast<int>(routes.size());
     for (set<symbol>::iterator it = routes.begin(); it!=routes.end(); it++) {
       unsigned int p = baseProbs[i] / iLeft;
       probs[*it] += p;

@@ -62,15 +62,15 @@ namespace Dasher {
 
     // Update context with a character - only modifies context
     virtual void EnterSymbol(CLanguageModel::Context context, int Symbol) {
-      lma->EnterSymbol(ContextMap.find(context)->second->GetContextA(), Symbol);
-      lmb->EnterSymbol(ContextMap.find(context)->second->GetContextB(), Symbol);
+      lma->EnterSymbol(ContextMap.find(static_cast<const int>(context))->second->GetContextA(), Symbol);
+      lmb->EnterSymbol(ContextMap.find(static_cast<const int>(context))->second->GetContextB(), Symbol);
     };
 
     // Add character to the language model at the current context and update the context 
     // - modifies both the context and the LanguageModel
     virtual void LearnSymbol(CLanguageModel::Context context, int Symbol) {
-      lma->LearnSymbol(ContextMap[context]->GetContextA(), Symbol);
-      lmb->LearnSymbol(ContextMap[context]->GetContextB(), Symbol);
+      lma->LearnSymbol(ContextMap[static_cast<const int>(context)]->GetContextA(), Symbol);
+      lmb->LearnSymbol(ContextMap[static_cast<const int>(context)]->GetContextB(), Symbol);
     };
 
     /////////////////////////////////////////////////////////////////////////////
@@ -91,8 +91,8 @@ namespace Dasher {
       int iNormB(iNorm - iNormA);
       
       // TODO: Fix uniform here
-        lma->GetProbs(ContextMap.find(context)->second->GetContextA(), ProbsA, iNormA, 0);
-        lmb->GetProbs(ContextMap.find(context)->second->GetContextB(), ProbsB, iNormB, 0);
+        lma->GetProbs(ContextMap.find(static_cast<const int>(context))->second->GetContextA(), ProbsA, iNormA, 0);
+        lmb->GetProbs(ContextMap.find(static_cast<const int>(context))->second->GetContextB(), ProbsB, iNormB, 0);
 
       for(int i(1); i < iNumSymbols; i++) {
         Probs[i] = ProbsA[i] + ProbsB[i];
@@ -152,7 +152,7 @@ namespace Dasher {
 ///////////////////////////////////////////////////////////////////
 
   inline CLanguageModel::Context CMixtureLanguageModel::CloneContext(CLanguageModel::Context Copy) {
-    CMixtureContext *pCopy = ContextMap[Copy];
+    CMixtureContext *pCopy = ContextMap[static_cast<const int>(Copy)];
     CMixtureContext *pCont = new CMixtureContext(lma, lmb, lma->CloneContext(pCopy->GetContextA()), lmb->CloneContext(pCopy->GetContextB()));
 
     ContextMap[NextContext] = pCont;
@@ -164,8 +164,8 @@ namespace Dasher {
 
   inline void CMixtureLanguageModel::ReleaseContext(CLanguageModel::Context release) {
     // m_ContextAlloc.Free( (CMixtureContext*) release );
-    delete ContextMap[release];
-    ContextMap[release] = NULL;
+    delete ContextMap[static_cast<const int>(release)];
+    ContextMap[static_cast<const int>(release)] = NULL;
   }
 }
 

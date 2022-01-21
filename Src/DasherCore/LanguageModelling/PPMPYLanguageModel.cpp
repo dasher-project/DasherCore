@@ -193,7 +193,7 @@ void CPPMPYLanguageModel::GetPartProbs(Context context, std::vector<pair<symbol,
   int i=0;
   for (std::vector<pair<symbol, unsigned int> >::iterator it = vChildren.begin(); it!=vChildren.end(); it++) {
     DASHER_ASSERT(it->first > 0 && it->first < GetSize()); //i.e., is valid CH symbol
-    it->second = iUniformLeft / (vChildren.size() - i);
+    it->second = static_cast<unsigned int>(iUniformLeft / (vChildren.size() - i));
       //  std::cout<<"iUniformLeft: "<<iUniformLeft<<std::endl;
     iUniformLeft -= it->second;
     iToSpend -= it->second;
@@ -253,13 +253,13 @@ void CPPMPYLanguageModel::GetPartProbs(Context context, std::vector<pair<symbol,
   // (ACL: previous code assigned nothing to element. Why? - I'm guessing due to confusion
   //  with other LM code where the first element of the probability array was a dummy,
   // storing 0 probability mass assigned to the 'root symbol' - not the case here!)
-  unsigned int p = iToSpend / vChildren.size();
+  unsigned int p = iToSpend / static_cast<unsigned int>(vChildren.size());
   for (std::vector<pair<symbol, unsigned int> >::iterator it = vChildren.begin(); it!=vChildren.end(); it++) {
     it->second += p;
     iToSpend -= p;
   }
   // std::cout<<"after lan mod fourth loop"<<std::endl;
-  int iLeft = vChildren.size()-1;
+  int iLeft = static_cast<int>(vChildren.size())-1;
 
   //  std::cout<<"iNumsyjbols "<<vChildren.size()<<std::endl;
 

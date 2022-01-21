@@ -736,7 +736,7 @@ string CUserLogTrial::GetStatsXML(const string& strPrefix, const string& strText
 
   // We want the number of symbols which might differ
   // from the actual length of the text history.
-  int iNumChars = m_vHistory.size();
+  int iNumChars = static_cast<int>(m_vHistory.size());
   sprintf(m_szTempBuffer, "%d", iNumChars);
   strResult += m_szTempBuffer;
   strResult += "</Chars>\n";

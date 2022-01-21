@@ -48,7 +48,7 @@ string XMLUtil::StripWhiteSpace(const string& strText)
   while ((iStart < (int) strText.length()) && (IsWhiteSpace(strText[iStart])))
     iStart++;
 
-  int iEnd = strText.length() - 1;
+  int iEnd = static_cast<int>(strText.length()) - 1;
   while ((iEnd > 0) && (IsWhiteSpace(strText[iEnd])))
     iEnd--;
 
@@ -108,8 +108,8 @@ string XMLUtil::GetElementString(const string& strTag, const string& strXML, boo
   strEnd += strTag;
   strEnd += ">";
 
-  int iPosStart = strXML.find(strStart);
-  int iPosEnd = strXML.find(strEnd);
+  int iPosStart = static_cast<int>(strXML.find(strStart));
+  int iPosEnd = static_cast<int>(strXML.find(strEnd));
 
   if ((iPosStart != -1) && (iPosEnd != -1))
   {

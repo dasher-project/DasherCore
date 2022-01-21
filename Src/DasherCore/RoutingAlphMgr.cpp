@@ -33,7 +33,7 @@ void CRoutingAlphMgr::InitMap() {
   for (int i=1; i<m_pAlphabet->iEnd; i++) {
     symbol s = m_map.Get(m_pAlphabet->GetText(i));
     if (s==0) {
-      s=m_vRoutes.size();
+      s=static_cast<Dasher::symbol>(m_vRoutes.size());
       m_vRoutes.push_back(set<symbol>());
       m_map.Add(m_pAlphabet->GetText(i),s);
     }

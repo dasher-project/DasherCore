@@ -256,7 +256,7 @@ void CConversionManager::CConvNode::PopulateChildren() {
 
 int CConversionManager::CConvNode::ExpectedNumChildren() {
   if(bisRoot && !pSCENode) mgr()->BuildTree(this);
-  if (pSCENode && !pSCENode->GetChildren().empty()) return pSCENode->GetChildren().size();
+  if (pSCENode && !pSCENode->GetChildren().empty()) return static_cast<int>(pSCENode->GetChildren().size());
   return 1;//Alphabet root
 }
 

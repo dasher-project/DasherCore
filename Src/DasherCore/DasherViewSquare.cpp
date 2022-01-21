@@ -57,7 +57,7 @@ static char THIS_FILE[] = __FILE__;
 // FIXME - duplicated 'mode' code throught - needs to be fixed (actually, mode related stuff, Input2Dasher etc should probably be at least partially in some other class)
 
 CDasherViewSquare::CDasherViewSquare(CSettingsUser *pCreateFrom, CDasherScreen *DasherScreen, Opts::ScreenOrientations orient)
-: CDasherView(DasherScreen,orient), CSettingsUserObserver(pCreateFrom), m_Y1(4), m_Y2(0.95 * CDasherModel::MAX_Y), m_Y3(0.05 * CDasherModel::MAX_Y), m_bVisibleRegionValid(false) {
+: CDasherView(DasherScreen,orient), CSettingsUserObserver(pCreateFrom), m_Y1(4), m_Y2(static_cast<const Dasher::myint>(0.95 * CDasherModel::MAX_Y)), m_Y3(static_cast<const Dasher::myint>(0.05 * CDasherModel::MAX_Y)), m_bVisibleRegionValid(false) {
 
   //Note, nonlinearity parameters set in SetScaleFactor
   ScreenResized(DasherScreen);
@@ -154,7 +154,7 @@ CDasherViewSquare::CTextString *CDasherViewSquare::DasherDrawText(myint iDasherM
     if (Screen()->MultiSizeFonts() && iSize>4) {
       //font size maxes out at ((iMaxY*3)/2)+iMaxY)/iMaxY = 3/2*smallest
       // which is reached when iDasherMaxX == iMaxY/2, i.e. the crosshair
-      iSize = ((min(iDasherMaxX*3,(iMaxY*3)/2) + iMaxY) * iSize) / iMaxY;
+      iSize = ((min(static_cast<int>(iDasherMaxX*3), static_cast<int>((iMaxY*3)/2)) + static_cast<int>(iMaxY)) * iSize) / static_cast<int>(iMaxY);
     } else {
       //old style fonts; ignore iSize passed-in.
       myint iLeftTimesFontSize = (iMaxY - iDasherMaxX )*iSize;
@@ -322,7 +322,7 @@ void CDasherViewSquare::TruncateTri(myint x, myint y1, myint y2, myint midy1, my
 
   CDasherScreen::point *p_array=new CDasherScreen::point[pts.size()];
   for (unsigned int i = 0; i<pts.size(); i++) p_array[i] = pts[i];
-  Screen()->Polygon(p_array, pts.size(), fillColor, outlineColor, lineWidth);
+  Screen()->Polygon(p_array, static_cast<int>(pts.size()), fillColor, outlineColor, lineWidth);
   delete[] p_array;
 }
 
@@ -370,13 +370,13 @@ void CDasherViewSquare::Circle(myint Range, myint y1, myint y2, int fCol, int oC
   }
   CDasherScreen::point *p_array = new CDasherScreen::point[pts.size()];
   for (unsigned int i=0; i<pts.size(); i++) p_array[i] = pts[i];
-  Screen()->Polygon(p_array, pts.size(), fCol, oCol, lWidth);
+  Screen()->Polygon(p_array, static_cast<int>(pts.size()), fCol, oCol, lWidth);
   delete[] p_array;
 }
 
 void CDasherViewSquare::CircleTo(myint cy, myint r, myint y1, myint x1, myint y3, myint x3, CDasherScreen::point dest, vector<CDasherScreen::point> &pts, double dXMul) {
   myint y2((y1+y3)/2);
-  myint x2(sqrt(double(sq(r)-sq(cy-y2)))*dXMul);
+  myint x2(static_cast<Dasher::myint>(sqrt((sq(r)-sq(cy-y2))*dXMul)));
   CDasherScreen::point mid; //where midpoint of circle/arc should be
   Dasher2Screen(x2, y2, mid.x, mid.y); //(except "midpoint" measured along y axis)
   int lmx=(pts.back().x + dest.x)/2, lmy = (pts.back().y + dest.y)/2; //midpoint of straight line
@@ -406,25 +406,25 @@ void CDasherViewSquare::DasherSpaceArc(myint cy, myint r, myint x1, myint y1, my
   CircleTo(cy, r, y1, x1, y2, x2, p, pts, 1.0);
   CDasherScreen::point *p_array = new CDasherScreen::point[pts.size()];
   for (unsigned int i=0; i<pts.size(); i++) p_array[i] = pts[i];
-  Screen()->Polyline(p_array, pts.size(), iLineWidth, iColour);
+  Screen()->Polyline(p_array, static_cast<int>(pts.size()), iLineWidth, iColour);
 }
 
 void CDasherViewSquare::Quadric(myint Range, myint lowY, myint highY, int fillColor, int outlineColour, int lineWidth) {
   static const double RR2=1.0/sqrt(2.0);
-  const int midY=(lowY+highY)/2;
+  const int midY= static_cast<int>((lowY+highY)/2);
 #define NUM_STEPS 40
   CDasherScreen::point p_array[2*NUM_STEPS+2];
   myint minX,maxX,minY,maxY;
   VisibleRegion(minX, minY, maxX, maxY);
   {
-    myint x1(0), y1(highY), x2(Range*RR2),y2(highY*RR2 + midY*(1.0-RR2)), x3(Range), y3(midY);
+    myint x1(0), y1(highY), x2(static_cast<Dasher::myint>(Range*RR2)),y2(static_cast<Dasher::myint>(highY*RR2 + midY*(1.0-RR2))), x3(Range), y3(midY);
     for (int i=0; i<=NUM_STEPS; i++) {
       double f=i/(double)NUM_STEPS, of = 1.0-f;
       Dasher2Screen(min(maxX,myint(of*of*x1 + 2.0*of*f*x2 + f*f*x3)), max(minY,min(maxY,myint(of*of*y1 + 2.0*of*f*y2 + f*f*y3))), p_array[i].x, p_array[i].y);
     }
   }
   {
-    myint x1(Range), y1(midY), x2(Range*RR2), y2(lowY*RR2 + midY*(1.0-RR2)), x3(0), y3(lowY);
+    myint x1(Range), y1(midY), x2(static_cast<Dasher::myint>(Range*RR2)), y2(static_cast<Dasher::myint>(lowY*RR2 + midY*(1.0-RR2))), x3(0), y3(lowY);
     for (int i=0; i<=NUM_STEPS; i++) {
       double f=i/(double)NUM_STEPS, of = 1.0-f;
       Dasher2Screen(min(maxX,myint(of*of*x1 + 2.0*of*f*x2 + f*f*x3)),max(minY,min(maxY,myint(of*of*y1 + 2.0*of*f*y2 + f*f*y3))), p_array[i+NUM_STEPS+1].x, p_array[i+NUM_STEPS+1].y);
@@ -520,7 +520,7 @@ void CDasherViewSquare::DisjointRender(CDasherNode *pRender, myint y1, myint y2,
   }
   if (pRender->ChildCount() == 0) {
     //allow empty node to be expanded, it's big enough.
-    policy.pushNode(pRender, y1, y2, true, dMaxCost);
+    policy.pushNode(pRender, static_cast<int>(y1), static_cast<int>(y2), true, dMaxCost);
     //and render whole node in one go
     DasherDrawRectangle(std::min(Range,iDasherMaxX), std::max(y1,iDasherMinY),0, std::min(y2,iDasherMaxY), myColor, -1, 0);
     //fall through to draw outline
@@ -534,7 +534,7 @@ void CDasherViewSquare::DisjointRender(CDasherNode *pRender, myint y1, myint y2,
     // - we've got its coordinates, and can recreate its children and set their
     // NF_GAME flags appropriately when it becomes renderable again...
     if (pRender != pOutput)
-      dMaxCost = policy.pushNode(pRender, y1, y2, false, dMaxCost);
+      dMaxCost = policy.pushNode(pRender, static_cast<int>(y1), static_cast<int>(y2), false, dMaxCost);
 
     // Render children
 
@@ -732,7 +732,7 @@ beginning:
       policy.ExpandNode(pRender);
     } else {
       //allow empty node to be expanded, it's big enough.
-      policy.pushNode(pRender, y1, y2, true, dMaxCost);
+      policy.pushNode(pRender, static_cast<int>(y1), static_cast<int>(y2), true, dMaxCost);
       return; //no children atm => nothing more to do
     }
   } else {
@@ -745,7 +745,7 @@ beginning:
     // - we've got its coordinates, and can recreate its children and set their
     // NF_GAME flags appropriately when it becomes renderable again...
     if (pRender != pOutput)
-      dMaxCost = policy.pushNode(pRender, y1, y2, false, dMaxCost);
+      dMaxCost = policy.pushNode(pRender, static_cast<int>(y1), static_cast<int>(y2), false, dMaxCost);
   }
   //Node has children - either it already did, or else it covers the crosshair,
   // and we've just made them...so render them.
@@ -864,14 +864,14 @@ void CDasherViewSquare::SetScaleFactor( void )
         double dMul = max(0.8, dScaleFactorX / dScaleFactorY);
         dScaleFactorY = std::max(dScaleFactorX/dMul, dScaleFactorY / 4.0);
         dScaleFactorX *= 0.9;
-        iMarginWidth = (CDasherModel::MAX_Y/20.0 + iMarginWidth*0.95)/0.9;
+        iMarginWidth = static_cast<Dasher::myint>((CDasherModel::MAX_Y/20.0 + iMarginWidth*0.95)/0.9);
       } else {
         //X has more room; use Y scale for both -> will get lots history
         // however, "compensate" by relaxing the default "relative scaling" of X
         // (normally only 90% of Y) towards 1...
         double dXmpc = std::min(1.0,0.9 * dScaleFactorX / dScaleFactorY);
         dScaleFactorX = max(dScaleFactorY, dScaleFactorX / 4.0)*dXmpc;
-        iMarginWidth = (iMarginWidth + dPixelsX/dScaleFactorX - CDasherModel::MAX_Y)/2;
+        iMarginWidth = static_cast<Dasher::myint>((iMarginWidth + dPixelsX/dScaleFactorX - CDasherModel::MAX_Y)/2);
       }
       break;
     }
@@ -889,7 +889,7 @@ void CDasherViewSquare::SetScaleFactor( void )
       double dDasherXPerPixel( (dAspect<1.0)
                               ? (dMinXPerPixel+pow(dAspect,3.0)*(dDesiredXPerPixel-dMinXPerPixel)) //tall+thin
                               : (1.0/dScaleFactorY)); //square or wide+low
-      iMarginWidth /= 0.9; //this comes from the old scaling by m_dXmpc=0.9. Drop in new scheme?
+      iMarginWidth = static_cast<Dasher::myint>(iMarginWidth/0.9); //this comes from the old scaling by m_dXmpc=0.9. Drop in new scheme?
       if (GetLongParameter(LP_GEOMETRY)==3) {
         //make whole screen logarithmic (but keep xhair in same place)
         myint crosshair(xmap(2048)); //should be 2048...

@@ -53,7 +53,7 @@ bool AbstractXMLParser::Parse(const std::string &strDesc, istream &in, bool bUse
     in.read(Buffer, sizeof(Buffer));
     size_t len = in.gcount();
     Done = len < sizeof(Buffer);
-    if(XML_Parse(Parser, Buffer, len, Done) == XML_STATUS_ERROR) {
+    if(XML_Parse(Parser, Buffer, static_cast<int>(len), Done) == XML_STATUS_ERROR) {
       bRes=false;
       if (m_pMsgs) {
         const XML_LChar *xmle=XML_ErrorString(XML_GetErrorCode(Parser)); //think XML_LChar==char, depends on preprocessor variables...

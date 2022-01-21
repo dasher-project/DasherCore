@@ -106,7 +106,7 @@ void CControlBase::CContNode::PopulateChildren() {
 
   CDasherNode *pNewNode;
 
-  const unsigned int iNChildren( m_pTemplate->successors.size() );
+  const unsigned int iNChildren(static_cast<unsigned int>(m_pTemplate->successors.size()) );
   unsigned int iLbnd(0), iIdx(0);
       int newOffset = m_pTemplate->calculateNewOffset(this, offset());
 
@@ -129,7 +129,7 @@ void CControlBase::CContNode::PopulateChildren() {
 }
 
 int CControlBase::CContNode::ExpectedNumChildren() {
-  return m_pTemplate->successors.size();
+  return static_cast<int>(m_pTemplate->successors.size());
 }
 
 void CControlBase::CContNode::Output() {

@@ -31,7 +31,7 @@ CSimpleTimer::CSimpleTimer()
 #ifdef _WIN32
     ftime(&sTimeBuffer);
     m_iStartMs       = sTimeBuffer.millitm;
-    m_iStartSecond   = sTimeBuffer.time;
+    m_iStartSecond   = static_cast<int>(sTimeBuffer.time);
 #else
     gettimeofday(&sTimeBuffer, &sTimezoneBuffer);
     m_iStartMs       = (int)sTimeBuffer.tv_usec / 1000;
@@ -56,7 +56,7 @@ double CSimpleTimer::GetElapsed()
 #ifdef _WIN32
   ftime(&sTimeBuffer);
   int     iEndMs       = sTimeBuffer.millitm;
-  int     iEndSecond   = sTimeBuffer.time;
+  int     iEndSecond   = static_cast<int>(sTimeBuffer.time);
 #else
   gettimeofday(&sTimeBuffer, &sTimezoneBuffer);
   int     iEndMs       = (int)sTimeBuffer.tv_usec / 1000;

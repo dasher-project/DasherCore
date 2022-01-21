@@ -314,7 +314,7 @@ inline dasherint mysqrt(dasherint in) {
   for (dasherint test=i; test/=2;)
     if (dasherint(1)<<2*(i+test) < in) i+=test;
   //so, first approx:
-  dasherint rt = 1<<i;
+  dasherint rt = 1ULL << i;
   rt = (rt+in/rt)/2;//better
   return (rt+in/rt)/2;//better still
   
@@ -406,7 +406,7 @@ void CDasherModel::ScheduleOneStep(dasherint y1, dasherint y2, int nSteps, int l
     if (targetRange == MAX_Y) {
       frac=1.0/nSteps;
     } else {
-      double tr(targetRange);
+      double tr(static_cast<double>(targetRange));
       //expansion factor (of root node) for one step, post-speed-limit
       double eFac = pow(MAX_Y/tr,1.0/nSteps);
       //fraction of way along linear interpolation Rw->rw that yields that width:
@@ -418,7 +418,7 @@ void CDasherModel::ScheduleOneStep(dasherint y1, dasherint y2, int nSteps, int l
 #ifdef DEBUG_DYNAMICS
     const dasherint m1t=m1*frac, m2t=m2*frac; //keep original m1,m2 to compare
 #else
-    m1*=frac; m2*=frac;
+    m1*= static_cast<Dasher::dasherint>(frac); m2*= static_cast<Dasher::dasherint>(frac);
   } else //conditional - only do one of exact/approx
 #endif
   { //begin block A (regardless of #ifdef)

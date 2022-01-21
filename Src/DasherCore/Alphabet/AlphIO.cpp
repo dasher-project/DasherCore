@@ -127,7 +127,7 @@ CAlphInfo *CAlphIO::CreateDefault() {
 
   //note iSpaceCharacter/iParagraphCharacter, as all symbol numbers, are one _more_
   // than their index into m_vCharacters... (as "unknown symbol" 0 does not appear in vector)
-  Default.iParagraphCharacter = Chars.size()+1;
+  Default.iParagraphCharacter = static_cast<Dasher::symbol>(Chars.size()+1);
   Default.m_vCharacters[Chars.size()].Display = "¶";
 #ifdef _WIN32
   Default.m_vCharacters[Chars.size()].Text = "\r\n";
@@ -136,7 +136,7 @@ CAlphInfo *CAlphIO::CreateDefault() {
 #endif
   Default.m_vCharacters[Chars.size()].Colour = 9;
 
-  Default.iSpaceCharacter = Chars.size()+2;
+  Default.iSpaceCharacter = static_cast<Dasher::symbol>(Chars.size()+2);
   Default.m_vCharacters[Chars.size()+1].Display = "_";
   Default.m_vCharacters[Chars.size()+1].Text = " ";
   Default.m_vCharacters[Chars.size()+1].Colour = 9;
@@ -146,8 +146,8 @@ CAlphInfo *CAlphIO::CreateDefault() {
   Default.ControlCharacter->Text = "";
   Default.ControlCharacter->Colour = 8;
 
-  Default.iStart=1; Default.iEnd=Default.m_vCharacters.size()+1;
-  Default.iNumChildNodes = Default.m_vCharacters.size();
+  Default.iStart=1; Default.iEnd= static_cast<int>(Default.m_vCharacters.size())+1;
+  Default.iNumChildNodes = static_cast<int>(Default.m_vCharacters.size());
   Default.pNext=Default.pChild=NULL;
   
   return &Default;
@@ -284,7 +284,7 @@ void CAlphIO::XmlStartHandler(const XML_Char *name, const XML_Char **atts) {
       }
     }
 
-    pNewGroup->iStart = InputInfo->m_vCharacters.size()+1;
+    pNewGroup->iStart = static_cast<int>(InputInfo->m_vCharacters.size())+1;
 
     pNewGroup->pChild = NULL;
 
@@ -380,13 +380,13 @@ void CAlphIO::XmlEndHandler(const XML_Char *name) {
     Reverse(InputInfo->pChild);
 
     if (ParagraphCharacter) {
-      InputInfo->iParagraphCharacter = InputInfo->m_vCharacters.size()+1;
+      InputInfo->iParagraphCharacter = static_cast<Dasher::symbol>(InputInfo->m_vCharacters.size()+1);
       InputInfo->m_vCharacters.push_back(*ParagraphCharacter);
       InputInfo->iNumChildNodes++;
       delete ParagraphCharacter;
     }
     if (SpaceCharacter) {
-      InputInfo->iSpaceCharacter = InputInfo->m_vCharacters.size()+1;
+      InputInfo->iSpaceCharacter = static_cast<Dasher::symbol>(InputInfo->m_vCharacters.size()+1);
       InputInfo->m_vCharacters.push_back(*SpaceCharacter);
       InputInfo->iNumChildNodes++;
       delete SpaceCharacter;
@@ -394,7 +394,7 @@ void CAlphIO::XmlEndHandler(const XML_Char *name) {
 
     InputInfo->LanguageCode = LanguageCode;
 
-    InputInfo->iEnd = InputInfo->m_vCharacters.size()+1;
+    InputInfo->iEnd = static_cast<int>(InputInfo->m_vCharacters.size())+1;
 
     //if (InputInfo->StartConvertCharacter.Text != "") InputInfo->iNumChildNodes++;
     //if (InputInfo->EndConvertCharacter.Text != "") InputInfo->iNumChildNodes++;
@@ -420,7 +420,7 @@ void CAlphIO::XmlEndHandler(const XML_Char *name) {
   if(!strcmp(name, "group")) {
     SGroupInfo *finished = m_vGroups.back();
     m_vGroups.pop_back();
-    finished->iEnd = InputInfo->m_vCharacters.size()+1;
+    finished->iEnd = static_cast<int>(InputInfo->m_vCharacters.size())+1;
     if (finished->iEnd == finished->iStart) {
       //empty group. Delete it now, and elide from sibling chain
       SGroupInfo *&ptr=(m_vGroups.empty() ? InputInfo : m_vGroups.back())->pChild;
