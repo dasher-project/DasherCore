@@ -36,6 +36,7 @@ ADD_library(DasherCore STATIC
 	${PROJECT_SOURCE_DIR}/Src/DasherCore/AutoSpeedControl.cpp
 	${PROJECT_SOURCE_DIR}/Src/DasherCore/BasicLog.cpp
 	${PROJECT_SOURCE_DIR}/Src/DasherCore/FileLogger.cpp
+	${PROJECT_SOURCE_DIR}/Src/DasherCore/FileUtils.cpp
 	${PROJECT_SOURCE_DIR}/Src/DasherCore/ButtonMode.cpp
 	${PROJECT_SOURCE_DIR}/Src/DasherCore/ButtonMultiPress.cpp
 	${PROJECT_SOURCE_DIR}/Src/DasherCore/CircleStartHandler.cpp
