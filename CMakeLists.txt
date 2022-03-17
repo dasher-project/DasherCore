@@ -114,3 +114,5 @@ target_include_directories(DasherCore PUBLIC ${PROJECT_SOURCE_DIR}/Src/Win32/Com
 
 add_dependencies(DasherCore expat)
 target_link_libraries(DasherCore expat)
+
+set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT DasherCore)

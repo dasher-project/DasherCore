@@ -1,4 +1,3 @@
-
 #pragma once
 #include <DasherInterfaceBase.h>
 #include <Messages.h>
@@ -7,17 +6,18 @@
 namespace Dasher {
 
 //needed File utilities
-class FileUtils : public CFileUtils {
+class FileUtils {
 public:
 	//Return file size on disk
-	virtual int GetFileSize(const std::string& strFileName) override;
+	static int GetFileSize(const std::string& strFileName);
 
 	//Open File with the filename strPattern in the project directory
-	virtual void ScanFiles(AbstractParser* parser, const std::string& strPattern) override;
+	static void ScanFiles(AbstractParser* parser, const std::string& strPattern);
 
 	//Writes into the user file 
-	virtual bool WriteUserDataFile(const std::string& filename, const std::string& strNewText, bool append) override;
+	static bool WriteUserDataFile(const std::string& filename, const std::string& strNewText, bool append);
 };
+
 
 
 //Just a function to Log XML errors
