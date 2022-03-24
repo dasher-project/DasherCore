@@ -69,7 +69,6 @@ ADD_library(DasherCore STATIC
 	${PROJECT_SOURCE_DIR}/Src/DasherCore/FrameRate.cpp
 	${PROJECT_SOURCE_DIR}/Src/DasherCore/GameModule.cpp
 	${PROJECT_SOURCE_DIR}/Src/DasherCore/MandarinAlphMgr.cpp
-	${PROJECT_SOURCE_DIR}/Src/DasherCore/MemoryLeak.cpp
 	${PROJECT_SOURCE_DIR}/Src/DasherCore/Messages.cpp 
 	${PROJECT_SOURCE_DIR}/Src/DasherCore/ModuleManager.cpp
 	${PROJECT_SOURCE_DIR}/Src/DasherCore/NodeCreationManager.cpp

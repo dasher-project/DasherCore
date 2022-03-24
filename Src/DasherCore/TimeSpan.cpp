@@ -10,15 +10,6 @@
 #include <sys/time.h>
 #endif
 
-#ifdef _WIN32
-// In order to track leaks to line number, we need this at the top of every file
-#include "MemoryLeak.h"
-#ifdef _DEBUG
-#define new DEBUG_NEW
-#undef THIS_FILE
-static char THIS_FILE[] = __FILE__;
-#endif
-#endif
 
 CTimeSpan::CTimeSpan(const string& strName, bool bAddDate)
 {
