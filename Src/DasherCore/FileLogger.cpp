@@ -2,16 +2,12 @@
 #include "../Common/Common.h"
 
 #include <cstring>
+#include <filesystem>
+#include <chrono>
 #include "FileLogger.h"
 
 
 
-
-#ifdef _WIN32
-#include <sys/timeb.h>
-#else
-#include <sys/time.h>
-#endif
 
 CFileLogger::CFileLogger(const std::string& strFilenamePath, eLogLevel iLogLevel, int iOptionsMask)
 {
@@ -105,14 +101,8 @@ void CFileLogger::SetFilename(const std::string& strFilename)
   // to remember to delete the file before every new debugging run.
   if (m_bDeleteOldFile)
   {
-    FILE* fp = NULL;
-
-    fp = fopen(m_strFilenamePath.c_str(), "w");
-    if (fp != NULL)
-    {
-      fclose(fp);
-      fp = NULL;
-    }
+	  //old implementation didn't care if a file was actually deleted, so we keep the behaviour
+      std::filesystem::remove(strFilename);
   }
 }
 
@@ -361,53 +351,13 @@ bool CFileLogger::GetFunctionTiming()
 // path and filename on Windows.  This can be used to make sure
 // a relative filename stays pointed at the same location despite
 // changes in the working directory.
+// UPDATED: Replaced windows only method with portable code using the standard library.
 std::string CFileLogger::GetFullFilenamePath(std::string strFilename)
 {
-#ifdef _WIN32    
-
-  // Windows code
-  const int   MAX_PATH_LENGTH = 1024;
-
-#ifdef _UNICODE
-
-  // In Unicode, we need the parameters to GetFullPathName() in wide characters
-  wchar_t     szPath[MAX_PATH_LENGTH];
-  wchar_t*    pszFilePart = NULL;
-  wchar_t     wstrFilenamePath[MAX_PATH_LENGTH];
-  char        szResult[MAX_PATH_LENGTH];
-
-  unsigned int i = 0;
-  for (i = 0; i < strFilename.length(); i++)
-    wstrFilenamePath[i] = (wchar_t) strFilename[i];
-  wstrFilenamePath[i] = '\0';
-
-  ::GetFullPathName(wstrFilenamePath, MAX_PATH_LENGTH, szPath, &pszFilePart);
-  i = 0;
-  while (szPath[i] != '\0')
-  {
-    szResult[i] = (char) szPath[i];
-    i++;
-  }
-  szResult[i] = '\0';
-
-  return szResult;
-
-#else
-  // Using normal non-unicode strings
-  char        szPath[MAX_PATH_LENGTH];
-  char*       pszFilePart = NULL;
-
-  ::GetFullPathName(strFilename.c_str(), MAX_PATH_LENGTH, szPath, &pszFilePart);
-
-  return szPath;
-
-#endif
-
-#else
-  // Non-windows code
-  return strFilename;
-
-#endif
+  auto path = std::filesystem::path(strFilename);
+  std::string canonicalPath  = std::filesystem::canonical(path).u8string();  //u8string to handle unicode characters.
+	
+  return canonicalPath;
 }
 
 /////////////////////////////////////// CFunctionLogger /////////////////////////////////////////////////////////////
@@ -467,63 +417,24 @@ void CFileLogger::SetFunctionLogging(bool bFunctionLogging)
 // by our construction options.
 std::string CFileLogger::GetTimeDateStamp()
 {
-  std::string strTimeStamp = "";
+  std::string strTimeStamp;
+  auto format = "";
+  if(m_bTimeStamp)
+  {
+      format = "%T";
+  }
+  if(m_bDateStamp)
+  {
+      format = "%b %m %Y"; //format as specified by dasher " abbreviated month name, month, year"
+  }
+	
 
   if ((m_bTimeStamp) || (m_bDateStamp))
-  {
-#ifdef _WIN32
-    struct timeb sTimeBuffer;
-#else
-    struct timeval sTimeBuffer;
-    struct timezone sTimezoneBuffer;
-    time_t t;
-#endif
-    char* szTimeLine = NULL;
-
-#ifdef _WIN32
-    ftime(&sTimeBuffer);
-    szTimeLine = ctime(&(sTimeBuffer.time));
-#else
-    gettimeofday(&sTimeBuffer, &sTimezoneBuffer);
-    t = sTimeBuffer.tv_sec;
-    szTimeLine = ctime(&t);
-#endif
- 
-    // Format is:
-    // Wed Jun 22 10:22:00 2005
-    // 0123456789012345678901234
-    if ((szTimeLine != NULL) && (strlen(szTimeLine) > 23))
-    {
-      if (m_bDateStamp)
-      {
-        for (int i = 4; i < 10; i++)
-          strTimeStamp += szTimeLine[i];            
-        for (int i = 19; i < 24; i++)
-          strTimeStamp += szTimeLine[i];            
-        if (m_bTimeStamp)
-          strTimeStamp += " ";
-      }
-
-      if (m_bTimeStamp)
-      {
-        for (int i = 11; i < 19; i++)
-          strTimeStamp += szTimeLine[i];
-        strTimeStamp += ".";
-        char strMs[16];
-#ifdef _WIN32
-        sprintf(strMs, "%d", sTimeBuffer.millitm);
-#else
-        sprintf(strMs, "%d", static_cast<int>(sTimeBuffer.tv_usec / 1000));
-#endif
-        if (strlen(strMs) == 1)
-          strTimeStamp += "00";
-        else if (strlen(strMs) == 2)
-          strTimeStamp += "0";
-        strTimeStamp += strMs;
-      }
-
-      strTimeStamp += "\t";
-    }
+  {  	
+      char buf[80];
+      const auto timestamp = std::chrono::system_clock::now();
+      auto timestamp_t = std::chrono::system_clock::to_time_t(timestamp);
+      strftime(buf, sizeof(buf), format, std::localtime(&timestamp_t));
   }
 
   return strTimeStamp;
