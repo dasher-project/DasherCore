@@ -383,6 +383,8 @@ public:
   /// Flush the/all currently-written text to the user's training file(s).
   /// Just calls through to WriteTrainFileFull(this) on the AlphabetManager;
   /// public so e.g. iPhone can flush the buffer when app is backgrounded.
+  ///
+  /// TODO JAN : IS THIS POINTLESS?
   void WriteTrainFileFull();
 
   /// @name Platform dependent utility functions
@@ -395,7 +397,7 @@ public:
   /// Obtain the size in bytes of a file - the way to do this is
   /// dependent on the OS (TODO: Check this - any posix on Windows?)
   ///
-  // TODO JAN : THIS IS POINTLESS 
+  // TODO JAN : IS THIS POINTLESS?
   int GetFileSize(const std::string& strFileName);
 
 	
@@ -405,7 +407,7 @@ public:
   /// \param pattern string matching just filename (not path), potentially
   /// including '*'s (as per glob)
   ///
-  // TODO JAN : THIS IS POINTLESSS
+  // TODO JAN : IS THIS POINTLESSS?
   void ScanFiles(AbstractParser* parser, const std::string& strPattern);
   
   // @}

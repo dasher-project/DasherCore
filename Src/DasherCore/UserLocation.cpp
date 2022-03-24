@@ -5,15 +5,6 @@
 
 #include <sys/timeb.h>
 
-// Track memory leaks on Windows to the line that new'd the memory
-#ifdef _WIN32
-#ifdef _DEBUG
-#define DEBUG_NEW new( _NORMAL_BLOCK, THIS_FILE, __LINE__ )
-#define new DEBUG_NEW
-#undef THIS_FILE
-static char THIS_FILE[] = __FILE__;
-#endif
-#endif
 
 // Construct a new location at the current point in time and at the specified coordinates.
 // This version only stores the integer coordinate data.
