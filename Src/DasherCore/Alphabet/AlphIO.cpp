@@ -121,11 +121,7 @@ CAlphInfo *CAlphIO::CreateDefault() {
   // than their index into m_vCharacters... (as "unknown symbol" 0 does not appear in vector)
   Default.iParagraphCharacter = static_cast<Dasher::symbol>(Chars.size()+1);
   Default.m_vCharacters[Chars.size()].Display = "¶";
-#ifdef _WIN32
-  Default.m_vCharacters[Chars.size()].Text = "\r\n";
-#else
-  Default.m_vCharacters[Chars.size()].Text = "\n";
-#endif
+  Default.m_vCharacters[Chars.size()].Text = "\n"; //This should be platform independent now.
   Default.m_vCharacters[Chars.size()].Colour = 9;
 
   Default.iSpaceCharacter = static_cast<Dasher::symbol>(Chars.size()+2);
@@ -218,11 +214,7 @@ void CAlphIO::XmlStartHandler(const XML_Char *name, const XML_Char **atts) {
   if(strcmp(name, "paragraph") == 0) {
     if (!ParagraphCharacter) ParagraphCharacter=new CAlphInfo::character();
     ReadCharAtts(atts,*ParagraphCharacter);
-#ifdef _WIN32
-        ParagraphCharacter->Text = "\r\n";
-#else
-        ParagraphCharacter->Text = "\n";
-#endif
+        ParagraphCharacter->Text = "\n"; //This should be platform independent now.
     return;
   }
   if(strcmp(name, "control") == 0) {

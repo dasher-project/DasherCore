@@ -6,7 +6,7 @@
 #ifndef __SIMPLE_TIMER_H__
 #define __SIMPLE_TIMER_H__
 
-#include <time.h>
+#include <chrono>
 
 /// \ingroup Logging
 /// \{
@@ -16,12 +16,10 @@ public:
   CSimpleTimer();
   ~CSimpleTimer();
 
-  double GetElapsed();
+ double GetElapsed() const;
 
 private:
-  int     m_iStartSecond;
-  int     m_iStartMs;
-
+  std::chrono::steady_clock::time_point start;
 };
 /// \}
 
