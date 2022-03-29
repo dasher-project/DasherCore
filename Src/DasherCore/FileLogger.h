@@ -15,6 +15,7 @@
 #include <stdarg.h>
 #include <time.h>
 #include <map>
+#include <chrono>
 #include "DasherTypes.h"
 // Probably better to enable in project settings since FileLogger.h is included from several physical locations.
 // #define DEBUG_ONLY_LOGGING   // Enabled debug logging that has been ifdef'd to prevent performance problems in release build
@@ -62,12 +63,8 @@
   if (g_pLogger != NULL)\
     g_pLogger->LogCritical s ;
 
-#ifdef _WIN32
-// Types required by our high resolution WIN32 timing routines
-#include "WinCommon.h"
-typedef std::map<std::string, __int64> MAP_STRING_INT64;
 
-#endif
+typedef std::map<std::string, double> MAP_STRING_DOUBLE;
 
 
 enum eLogLevel
@@ -110,9 +107,7 @@ public:
 
     void LogFunctionEntry(const std::string& strFunctionName);                  // Used by FunctionLogger to log entry to a function
     void LogFunctionExit(const std::string& strFunctionName);                   // Used by FunctionLogger to log exit from a function
-#ifdef _WIN32
-    void LogFunctionTicks(const std::string& strFunctionName, __int64 iTicks);  // Used by FunctionLogger to log how long was spent in a function
-#endif
+    void LogFunctionTicks(const std::string& strFunctionName, double duration); // Used by FunctionLogger to log how long was spent in a function
     bool GetFunctionTiming();
     
     static std::string GetFullFilenamePath(std::string strFilename);
@@ -131,9 +126,9 @@ private:
     std::string     GetIndentedString(const std::string& strText);
     std::string     GetTimeDateStamp();
 
-#ifdef _WIN32
-    MAP_STRING_INT64    m_mapFunctionTicks;     // Keeps track of how many ticks spent in each of our functions (who create a CFunctionLogger object)
-#endif
+
+    MAP_STRING_DOUBLE    m_mapFunctionDuration;     // Keeps track of how many ticks spent in each of our functions (who create a CFunctionLogger object)
+
 
 };
 
@@ -146,12 +141,10 @@ public:
     ~CFunctionLogger();
 
 private:
-    std::string     m_strFunctionName;          // Name of the function this object is logging
-    CFileLogger*    m_pLogger;                  // Pointer to the logging object to use 
+    std::string                             m_strFunctionName;          // Name of the function this object is logging
+    CFileLogger*                            m_pLogger;                  // Pointer to the logging object to use 
+    std::chrono::steady_clock::time_point   m_startTime;                // Timestamp at start of timing
     
-#ifdef _WIN32
-    LARGE_INTEGER   m_iStartTicks;              // Tick count at start of timing
-#endif
 
 };
 /// @}

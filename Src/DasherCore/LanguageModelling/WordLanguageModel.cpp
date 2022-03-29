@@ -24,10 +24,6 @@ using namespace std;
 // static TCHAR debug[256];
 typedef unsigned long ulong;
 
-#ifdef _WIN32
-#define snprintf _snprintf
-#endif
-
 
 
 ///////////////////////////////////////////////////////////////////

@@ -26,8 +26,11 @@ file(GLOB HEADERS
     ${PROJECT_SOURCE_DIR}/Src/DasherCore/*.h
 )
 
+
+
+
 ADD_library(DasherCore STATIC
-	${PROJECT_SOURCE_DIR}/Src/DasherCore/Parameters.cpp 
+${PROJECT_SOURCE_DIR}/Src/DasherCore/Parameters.cpp 
 	${PROJECT_SOURCE_DIR}/Src/DasherCore/SettingsStore.cpp 
 	${PROJECT_SOURCE_DIR}/Src/DasherCore/XmlSettingsStore.h
 	${PROJECT_SOURCE_DIR}/Src/DasherCore/XmlSettingsStore.cpp
@@ -103,6 +106,7 @@ ADD_library(DasherCore STATIC
 	${PROJECT_SOURCE_DIR}/Src/DasherCore/LanguageModelling/PPMPYLanguageModel.cpp
 	${PROJECT_SOURCE_DIR}/Src/DasherCore/LanguageModelling/RoutingPPMLanguageModel.cpp
 	${PROJECT_SOURCE_DIR}/Src/DasherCore/LanguageModelling/WordLanguageModel.cpp
+	${HEADERS}
 	${HEADERS}
 )
 

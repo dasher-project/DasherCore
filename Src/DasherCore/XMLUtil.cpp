@@ -52,36 +52,8 @@ string XMLUtil::StripWhiteSpace(const string& strText)
 // Return a string containing the contents of a file
 string XMLUtil::LoadFile(const string& strFilename, unsigned int iSizeHint)
 {
-    //This seemed to be too outdated and platform-specific.
-//  string strResult = "";
-//
-//  char szBuffer[XML_UTIL_READ_BUFFER_SIZE];
-//  FILE* fp = NULL;
-//  fp = fopen(strFilename.c_str(), "r");
-//  if (fp != NULL)
-//  {
-//#ifdef _WIN32
-//    struct __stat64 buf;
-//    int result;
-//    result = _stat64(strFilename.c_str(), &buf);
-//    strResult.reserve((unsigned long) buf.st_size + 256);
-//#else
-//    // On unix, we default to 128,000 bytes or whatever the caller passed in as a hint
-//    strResult.reserve(iSizeHint);
-//#endif
-//
-//    while (!feof(fp))
-//    {
-//      memset(szBuffer, 0, XML_UTIL_READ_BUFFER_SIZE);
-//      fread(szBuffer, 1, XML_UTIL_READ_BUFFER_SIZE - 1, fp);
-//      strResult += szBuffer;
-//    }
-//
-//    fclose(fp);
-//    fp = NULL;
-//  }
-    std::ifstream ifs(strFilename);
-    string strResult((std::istreambuf_iterator<char>(ifs)), std::istreambuf_iterator<char>());
+  std::ifstream ifs(strFilename);
+  string strResult((std::istreambuf_iterator<char>(ifs)), std::istreambuf_iterator<char>());
 	
 
   return strResult;

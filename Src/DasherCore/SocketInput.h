@@ -7,6 +7,8 @@
 #ifndef __SocketInput_h__
 #define __SocketInput_h__
 
+#ifndef _WIN32
+
 #include "./SocketInputBase.h"
 #include "./Observable.h"
 
@@ -60,4 +62,5 @@ private:
 };
 }
 /// \}
+#endif
 #endif

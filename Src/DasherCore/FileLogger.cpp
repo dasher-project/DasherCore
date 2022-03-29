@@ -6,7 +6,7 @@
 #include <chrono>
 #include "FileLogger.h"
 
-
+using namespace std::chrono;
 
 
 CFileLogger::CFileLogger(const std::string& strFilenamePath, eLogLevel iLogLevel, int iOptionsMask)
@@ -44,52 +44,46 @@ CFileLogger::CFileLogger(const std::string& strFilenamePath, eLogLevel iLogLevel
 
   // See if we should get rid of any existing filename with our given name.  This prevents having
   // to remember to delete the file before every new debugging run.
-  if (m_bDeleteOldFile)
+  if (m_bDeleteOldFile)  
   {
-    FILE* fp = NULL;
-
-    fp = fopen(m_strFilenamePath.c_str(), "w");
-    if (fp != NULL)
-    {
-      fclose(fp);
-      fp = NULL;
-    }
+	  //old implementation didn't care if a file was actually deleted, so we keep the behaviour
+    std::filesystem::remove(strFilenamePath);
   }
+  
 
 }
 
 CFileLogger::~CFileLogger()
 {
-#ifdef _WIN32
+
   if (m_bFunctionTiming)
   {
     // Dump the results of our function timing logging
 
-    MAP_STRING_INT64::iterator map_iter;
+    MAP_STRING_DOUBLE::iterator map_iter;
 
     Log("%-60s%20s%10s", logNORMAL, "Function","Ticks", "Percent");
     Log("%-60s%20s%10s", logNORMAL, "--------","-----", "-------");
 
-    __int64 iMaxTicks = 0;
+    double max_duration = 0;
 
     // First pass to count the max ticks 
     // We assume that there was a function logger on the outer most (main) program.
-    // This allows the percent reflect the relative time spent inside emedded calls.
+    // This allows the percent reflect the relative time spent inside embedded calls.
 
-    for (map_iter = m_mapFunctionTicks.begin(); map_iter != m_mapFunctionTicks.end(); map_iter++)
+    for (map_iter = m_mapFunctionDuration.begin(); map_iter != m_mapFunctionDuration.end(); ++map_iter)
     {
-      if (map_iter->second > iMaxTicks)
-        iMaxTicks = map_iter->second;
+      if (map_iter->second > max_duration)
+          max_duration = map_iter->second;
     }
 
-    for (map_iter = m_mapFunctionTicks.begin(); map_iter != m_mapFunctionTicks.end(); map_iter++)
+    for (map_iter = m_mapFunctionDuration.begin(); map_iter != m_mapFunctionDuration.end(); ++map_iter)
     {
       std::string name = map_iter->first;
-      __int64 iTicks = map_iter->second;
-      Log("%-60s%20I64Ld%10.2f", logNORMAL, name.c_str(), iTicks, (double) iTicks / (double) iMaxTicks  * (double) 100.0);
+      const double duration = map_iter->second;
+      Log("%-60s%20I64Ld%10.2f", logNORMAL, name.c_str(), duration, static_cast<double>(duration) / max_duration  * 100.0);
     }
   }
-#endif
 }
 
 // Changes the filename of this logging object
@@ -102,7 +96,7 @@ void CFileLogger::SetFilename(const std::string& strFilename)
   if (m_bDeleteOldFile)
   {
 	  //old implementation didn't care if a file was actually deleted, so we keep the behaviour
-      std::filesystem::remove(strFilename);
+    std::filesystem::remove(strFilename);
   }
 }
 
@@ -117,14 +111,14 @@ void CFileLogger::Log(const char* szText, eLogLevel iLogLevel, ...)
 
   if ((m_strFilenamePath.length() > 0) && 
       (m_iLogLevel <= iLogLevel) && 
-      (szText != NULL))
+      (szText != nullptr))
   {
-    FILE* fp = NULL;
+    FILE* fp = nullptr;
     fp = fopen(m_strFilenamePath.c_str(), "a");
 
     std::string strTimeStamp = GetTimeDateStamp();
 
-    if (fp != NULL)
+    if (fp != nullptr)
     {
       std::string strIndented = strTimeStamp + GetIndentedString(szText) + "\n";
 
@@ -141,7 +135,7 @@ void CFileLogger::Log(const char* szText, eLogLevel iLogLevel, ...)
       }
 
       fclose(fp);
-      fp = NULL;
+      fp = nullptr;
     }
   }
 }
@@ -154,12 +148,12 @@ void CFileLogger::Log(const std::string strText, eLogLevel iLogLevel, ...)
   if ((m_strFilenamePath.length() > 0) && 
       (m_iLogLevel <= iLogLevel))
   {
-    FILE* fp = NULL;
+    FILE* fp = nullptr;
     fp = fopen(m_strFilenamePath.c_str(), "a");
 
     std::string strTimeStamp = GetTimeDateStamp();
 
-    if (fp != NULL)
+    if (fp != nullptr)
     {
       std::string strIndented = strTimeStamp + GetIndentedString(strText) + "\n";
 
@@ -176,7 +170,7 @@ void CFileLogger::Log(const std::string strText, eLogLevel iLogLevel, ...)
       }
 
       fclose(fp);
-      fp = NULL;
+      fp = nullptr;
     }
   }
 }
@@ -190,14 +184,14 @@ void CFileLogger::LogDebug(const char* szText, ...)
 
   if ((m_strFilenamePath.length() > 0) && 
       (m_iLogLevel == logDEBUG) &&
-      (szText != NULL))
+      (szText != nullptr))
   {
-    FILE* fp = NULL;
+    FILE* fp = nullptr;
     fp = fopen(m_strFilenamePath.c_str(), "a");
 
     std::string strTimeStamp = GetTimeDateStamp();
 
-    if (fp != NULL)
+    if (fp != nullptr)
     {
       std::string strIndented = strTimeStamp + GetIndentedString(szText) + "\n";
 
@@ -214,7 +208,7 @@ void CFileLogger::LogDebug(const char* szText, ...)
       }
 
       fclose(fp);
-      fp = NULL;
+      fp = nullptr;
     }
   }
 }
@@ -228,14 +222,14 @@ void CFileLogger::LogNormal(const char* szText, ...)
 
   if ((m_strFilenamePath.length() > 0) && 
       (m_iLogLevel <= logNORMAL) &&
-      (szText != NULL))
+      (szText != nullptr))
   {
-    FILE* fp = NULL;
+    FILE* fp = nullptr;
     fp = fopen(m_strFilenamePath.c_str(), "a");
 
     std::string strTimeStamp = GetTimeDateStamp();
 
-    if (fp != NULL)
+    if (fp != nullptr)
     {
       std::string strIndented = strTimeStamp + GetIndentedString(szText) + "\n";
 
@@ -252,7 +246,7 @@ void CFileLogger::LogNormal(const char* szText, ...)
       }
 
       fclose(fp);
-      fp = NULL;
+      fp = nullptr;
     }
   }
 }
@@ -266,14 +260,14 @@ void CFileLogger::LogCritical(const char* szText, ...)
 
   // Always log critical messages
   if ((m_strFilenamePath.length() > 0) &&
-      (szText != NULL))
+      (szText != nullptr))
   {
-    FILE* fp = NULL;
+    FILE* fp = nullptr;
     fp = fopen(m_strFilenamePath.c_str(), "a");
 
     std::string strTimeStamp = GetTimeDateStamp();
 
-    if (fp != NULL)
+    if (fp != nullptr)
     {
       std::string strIndented = strTimeStamp + GetIndentedString(szText) + "\n";
 
@@ -290,7 +284,7 @@ void CFileLogger::LogCritical(const char* szText, ...)
       }
 
       fclose(fp);
-      fp = NULL;
+      fp = nullptr;
     }
   }
 }
@@ -319,17 +313,14 @@ void CFileLogger::LogFunctionExit(const std::string& strFunctionName)
   }
 }
 
-#ifdef _WIN32
-void CFileLogger::LogFunctionTicks(const std::string& strFunctionName, __int64 iTicks)
+
+void CFileLogger::LogFunctionTicks(const std::string& strFunctionName, double duration)
 {
-  __int64 iCurrent;
+  const double duration_old = m_mapFunctionDuration[strFunctionName];
+  duration = duration_old + duration;
 
-  iCurrent = m_mapFunctionTicks[strFunctionName];
-  iCurrent = iCurrent + iTicks;
-
-  m_mapFunctionTicks[strFunctionName] = iCurrent;
+  m_mapFunctionDuration[strFunctionName] = duration;
 }
-#endif
 
 // Gets an indented version of the function name 
 std::string CFileLogger::GetIndentedString(const std::string& strText)
@@ -366,16 +357,14 @@ CFunctionLogger::CFunctionLogger(const std::string& strFunctionName, CFileLogger
 {
   m_pLogger = pLogger;
 
-  if ((m_pLogger != NULL) && (strFunctionName.length() > 0))
+  if ((m_pLogger != nullptr) && (strFunctionName.length() > 0))
   {
     m_strFunctionName = strFunctionName;
 
     if (!m_pLogger->GetFunctionTiming())
       m_pLogger->LogFunctionEntry(m_strFunctionName);
     else {
-#ifdef _WIN32
-      QueryPerformanceCounter(&m_iStartTicks);
-#endif
+        m_startTime = steady_clock::now();
     }
   }
 
@@ -383,19 +372,17 @@ CFunctionLogger::CFunctionLogger(const std::string& strFunctionName, CFileLogger
 
 CFunctionLogger::~CFunctionLogger()
 {
-  if ((m_pLogger != NULL) && (m_strFunctionName.length() > 0))
+  if ((m_pLogger != nullptr) && (m_strFunctionName.length() > 0))
   {
     if (!m_pLogger->GetFunctionTiming())
       m_pLogger->LogFunctionExit(m_strFunctionName);
     else
     {
-#ifdef _WIN32
-      LARGE_INTEGER iEndTicks;
-      QueryPerformanceCounter(&iEndTicks);
+    const auto current_time = steady_clock::now();
+    const auto span = duration_cast<duration<double>>(current_time - m_startTime);
       // Add our total ticks to the tracking map object in the logger object
-	  m_pLogger->LogFunctionTicks(m_strFunctionName,
-		  iEndTicks.QuadPart - m_iStartTicks.QuadPart);
-#endif
+	  m_pLogger->LogFunctionTicks(m_strFunctionName, span.count());
+
     }
   }
 }

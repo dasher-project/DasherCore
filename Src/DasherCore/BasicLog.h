@@ -27,13 +27,13 @@ class CBasicLog : public CUserLogBase, public Dasher::CSettingsUser {
   virtual void OutputFile() {};
   virtual void InitIsDone() {};
   virtual void SetOuputFilename(const string& strFilename = "") {};
-  virtual int GetLogLevelMask() {return 0;};
+  virtual int  GetLogLevelMask() {return 0;};
   virtual void KeyDown(int iId, int iType, int iEffect);
 
  private:
   void StartTrial();
   void EndTrial();
-  std::string GetDateStamp();
+  static std::string GetDateStamp();
 
   bool m_bStarted;
   int m_iSymbolCount;
