@@ -346,9 +346,13 @@ bool CFileLogger::GetFunctionTiming()
 std::string CFileLogger::GetFullFilenamePath(std::string strFilename)
 {
   auto path = std::filesystem::path(strFilename);
-  std::string canonicalPath  = std::filesystem::canonical(path).u8string();  //u8string to handle unicode characters.
+  //We get a weak canonical path in case the path does not exist
+  if (std::filesystem::exists(path)){
+    strFilename  = std::filesystem::weakly_canonical(path).u8string();  //u8string to handle unicode characters.
+  }
+  
 	
-  return canonicalPath;
+  return strFilename;
 }
 
 /////////////////////////////////////// CFunctionLogger /////////////////////////////////////////////////////////////

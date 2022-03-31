@@ -25,9 +25,8 @@ bool Read(const std::map<std::string, T> values, const std::string& key,
 
 }  // namespace
 
-XmlSettingsStore::XmlSettingsStore(const std::string& filename, CFileUtils* fileUtils,
-                                   CMessageDisplay* pDisplay)
-    : AbstractXMLParser(pDisplay), filename_(filename),fileutils_(fileUtils) {}
+XmlSettingsStore::XmlSettingsStore(const std::string& filename, CMessageDisplay* pDisplay)
+    : AbstractXMLParser(pDisplay), filename_(filename) {}
 
 void XmlSettingsStore::Load() {
   Dasher::FileUtils::ScanFiles(this, filename_);
