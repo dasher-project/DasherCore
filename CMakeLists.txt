@@ -7,6 +7,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 add_compile_definitions(HAVE_ROUND XML_STATIC _CRT_SECURE_NO_WARNINGS)
 set(CMAKE_SUPPRESS_REGENERATION true)
 
+
 ###############################
 # Building Expat Library
 ###############################
@@ -107,7 +108,6 @@ ${PROJECT_SOURCE_DIR}/Src/DasherCore/Parameters.cpp
 	${PROJECT_SOURCE_DIR}/Src/DasherCore/LanguageModelling/RoutingPPMLanguageModel.cpp
 	${PROJECT_SOURCE_DIR}/Src/DasherCore/LanguageModelling/WordLanguageModel.cpp
 	${HEADERS}
-	${HEADERS}
 )
 
 
@@ -120,8 +120,6 @@ target_include_directories(DasherCore PUBLIC ${PROJECT_SOURCE_DIR}/Src/Common/Al
 target_include_directories(DasherCore PUBLIC ${PROJECT_SOURCE_DIR}/Src/Common/Platform/)
 target_include_directories(DasherCore PUBLIC ${PROJECT_SOURCE_DIR}/Src/Common/Types/)
 target_include_directories(DasherCore PUBLIC ${PROJECT_SOURCE_DIR}/Src/Common/Unicode/)
-target_include_directories(DasherCore PUBLIC ${PROJECT_SOURCE_DIR}/Src/Win32/Common/)
-
 add_dependencies(DasherCore expat)
 target_link_libraries(DasherCore expat)
 

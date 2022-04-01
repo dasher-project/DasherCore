@@ -1,4 +1,4 @@
-
+#ifndef HAVE_OWN_FILELOGGER
 #include "../Common/Common.h"
 
 #include <cstring>
@@ -7,6 +7,7 @@
 #include "FileLogger.h"
 
 using namespace std::chrono;
+namespace fs = std::filesystem;
 
 
 CFileLogger::CFileLogger(const std::string& strFilenamePath, eLogLevel iLogLevel, int iOptionsMask)
@@ -47,7 +48,7 @@ CFileLogger::CFileLogger(const std::string& strFilenamePath, eLogLevel iLogLevel
   if (m_bDeleteOldFile)  
   {
 	  //old implementation didn't care if a file was actually deleted, so we keep the behaviour
-    std::filesystem::remove(strFilenamePath);
+    fs::remove(strFilenamePath);
   }
   
 
@@ -96,7 +97,7 @@ void CFileLogger::SetFilename(const std::string& strFilename)
   if (m_bDeleteOldFile)
   {
 	  //old implementation didn't care if a file was actually deleted, so we keep the behaviour
-    std::filesystem::remove(strFilename);
+    fs::remove(strFilename);
   }
 }
 
@@ -345,10 +346,10 @@ bool CFileLogger::GetFunctionTiming()
 // UPDATED: Replaced windows only method with portable code using the standard library.
 std::string CFileLogger::GetFullFilenamePath(std::string strFilename)
 {
-  auto path = std::filesystem::path(strFilename);
+  auto path = fs::path(strFilename);
   //We get a weak canonical path in case the path does not exist
-  if (std::filesystem::exists(path)){
-    strFilename  = std::filesystem::weakly_canonical(path).u8string();  //u8string to handle unicode characters.
+  if (fs::exists(path)){
+    strFilename  = fs::weakly_canonical(path).u8string();  //u8string to handle unicode characters.
   }
   
 	
@@ -430,3 +431,4 @@ std::string CFileLogger::GetTimeDateStamp()
 
   return strTimeStamp;
 }
+#endif
