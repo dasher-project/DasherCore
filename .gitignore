@@ -33,3 +33,14 @@
 
 # Build Files
 Build
+
+# Eclipse
+.autotools
+.cproject
+.project
+
+.gradle/
+.idea
+
+# Visual Studio Code
+.ionide/
