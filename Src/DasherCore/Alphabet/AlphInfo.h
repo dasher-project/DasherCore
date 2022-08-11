@@ -132,6 +132,8 @@ private:
   // Basic information
   std::string AlphID;
   bool Mutable;               // If from user we may play. If from system defaults this is immutable. User should take a copy.
+  //AlphIO wants a LanguageCode:
+  std::string LanguageCode;
 
   // Complete description of the alphabet:
   std::string TrainingFile;

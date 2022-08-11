@@ -143,356 +143,171 @@ CAlphInfo *CAlphIO::CreateDefault() {
 // Below here handlers for the Expat XML input library
 ////////////////////////////////////////////////////////////////////////////////////
 
-void CAlphIO::XmlStartHandler(const XML_Char *name, const XML_Char **atts) {
+void CAlphIO::XmlStartHandler(const XML_Char* name, const XML_Char** atts) {
 
-  CData = "";
+    CData = "";
 
-  if (strcmp(name, "alphabets") == 0) {
-    while(*atts != 0) {
-      if(strcmp(*atts, "langcode") == 0) {
-        LanguageCode = *(atts+1);
-      }
-      atts += 2;
-    }
-  }
-
-  if(strcmp(name, "alphabet") == 0) {
-    InputInfo = new CAlphInfo();
-    InputInfo->Mutable = isUser();
-    ParagraphCharacter = NULL;
-    SpaceCharacter = NULL;
-    iGroupIdx = 0;
-    while(*atts != 0) {
-      if(strcmp(*atts, "name") == 0) {
-        InputInfo->AlphID = *(atts+1);
-      } else if (strcmp(*atts, "escape") == 0) {
-        InputInfo->m_strCtxChar = *(atts+1);
-      }
-      atts += 2;
-    }
-    m_vGroups.clear();
-    return;
-  }
-
-  if(strcmp(name, "orientation") == 0) {
-    while(*atts != 0) {
-      if(!strcmp(*atts, "type")) {
-        if(!strcmp(*(atts+1), "RL")) {
-          InputInfo->Orientation = Opts::RightToLeft;
+    if (strcmp(name, "alphabets") == 0) {
+        while (*atts != 0) {
+            if (strcmp(*atts, "langcode") == 0) {
+                LanguageCode = *(atts + 1);
+            }
+            atts += 2;
         }
-        else if(!strcmp(*(atts+1), "TB")) {
-          InputInfo->Orientation = Opts::TopToBottom;
-        }
-        else if(!strcmp(*(atts+1), "BT")) {
-          InputInfo->Orientation = Opts::BottomToTop;
-        }
-        else
-          InputInfo->Orientation = Opts::LeftToRight;
-      }
-      atts += 2;
     }
-    return;
-  }
 
-  if(strcmp(name, "encoding") == 0) {
-    while(*atts != 0) {
-      if(strcmp(*atts, "type") == 0) {
-        InputInfo->Type = StoT[*(atts+1)];
-      }
-      atts += 2;
+    if (strcmp(name, "alphabet") == 0) {
+        InputInfo = new CAlphInfo();
+        InputInfo->Mutable = isUser();
+        ParagraphCharacter = NULL;
+        SpaceCharacter = NULL;
+        iGroupIdx = 0;
+        while (*atts != 0) {
+            if (strcmp(*atts, "name") == 0) {
+                InputInfo->AlphID = *(atts + 1);
+            }
+            else if (strcmp(*atts, "escape") == 0) {
+                InputInfo->m_strCtxChar = *(atts + 1);
+            }
+            atts += 2;
+        }
+        m_vGroups.clear();
+        return;
     }
-    return;
-  }
 
-  if(strcmp(name, "space") == 0) {
-    if (!SpaceCharacter) SpaceCharacter = new CAlphInfo::character();
-    ReadCharAtts(atts,*SpaceCharacter);
-    if (SpaceCharacter->Colour==-1) SpaceCharacter->Colour = 9;
-    return;
-  }
-  if(strcmp(name, "paragraph") == 0) {
-    if (!ParagraphCharacter) ParagraphCharacter=new CAlphInfo::character();
-    ReadCharAtts(atts,*ParagraphCharacter);
+    if (strcmp(name, "orientation") == 0) {
+        while (*atts != 0) {
+            if (!strcmp(*atts, "type")) {
+                if (!strcmp(*(atts + 1), "RL")) {
+                    InputInfo->Orientation = Opts::RightToLeft;
+                }
+                else if (!strcmp(*(atts + 1), "TB")) {
+                    InputInfo->Orientation = Opts::TopToBottom;
+                }
+                else if (!strcmp(*(atts + 1), "BT")) {
+                    InputInfo->Orientation = Opts::BottomToTop;
+                }
+                else
+                    InputInfo->Orientation = Opts::LeftToRight;
+            }
+            atts += 2;
+        }
+        return;
+    }
+
+    if (strcmp(name, "encoding") == 0) {
+        while (*atts != 0) {
+            if (strcmp(*atts, "type") == 0) {
+                InputInfo->Type = StoT[*(atts + 1)];
+            }
+            atts += 2;
+        }
+        return;
+    }
+
+    if (strcmp(name, "space") == 0) {
+        if (!SpaceCharacter) SpaceCharacter = new CAlphInfo::character();
+        ReadCharAtts(atts, *SpaceCharacter);
+        if (SpaceCharacter->Colour == -1) SpaceCharacter->Colour = 9;
+        return;
+    }
+    if (strcmp(name, "paragraph") == 0) {
+        if (!ParagraphCharacter) ParagraphCharacter = new CAlphInfo::character();
+        ReadCharAtts(atts, *ParagraphCharacter);
         ParagraphCharacter->Text = "\n"; //This should be platform independent now.
-    return;
-  }
-  if(strcmp(name, "control") == 0) {
-    if (!InputInfo->ControlCharacter) InputInfo->ControlCharacter = new CAlphInfo::character();
-    ReadCharAtts(atts, *(InputInfo->ControlCharacter));
-    return;
-  }
-
-  if(strcmp(name, "group") == 0) {
-    SGroupInfo *pNewGroup(new SGroupInfo);
-    pNewGroup->iNumChildNodes=0;
-    pNewGroup->iColour = -1; //marker for "none specified"; if so, will compute later
-    if (m_vGroups.empty()) InputInfo->iNumChildNodes++; else m_vGroups.back()->iNumChildNodes++;
-
-    //by default, the first group in the alphabet is invisible
-    pNewGroup->bVisible = (InputInfo->pChild!=NULL);
-
-    while(*atts != 0) {
-      if(strcmp(*atts, "name") == 0)
-         pNewGroup->strName = *(atts+1);
-      else if(strcmp(*atts, "b") == 0) {
-        pNewGroup->iColour = atoi(*(atts+1));
-      } else if(strcmp(*atts, "visible") == 0) {
-        atts++;
-        if(!strcmp(*atts, "yes") || !strcmp(*atts, "on"))
-          pNewGroup->bVisible = true;
-        else if(!strcmp(*atts, "no") || !strcmp(*atts, "off"))
-          pNewGroup->bVisible = false;
-        atts--;
-      } else if(strcmp(*atts, "label") == 0) {
-        pNewGroup->strLabel = *(atts+1);
-      }
-      atts += 2;
+        return;
+    }
+    if (strcmp(name, "control") == 0) {
+        if (!InputInfo->ControlCharacter) InputInfo->ControlCharacter = new CAlphInfo::character();
+        ReadCharAtts(atts, *(InputInfo->ControlCharacter));
+        return;
     }
 
-    SGroupInfo *&prevSibling = (m_vGroups.empty() ? InputInfo->pChild : m_vGroups.back()->pChild);
+    if (strcmp(name, "group") == 0) {
+        SGroupInfo* pNewGroup(new SGroupInfo);
+        pNewGroup->iNumChildNodes = 0;
+        pNewGroup->iColour = -1; //marker for "none specified"; if so, will compute later
+        if (m_vGroups.empty()) InputInfo->iNumChildNodes++; else m_vGroups.back()->iNumChildNodes++;
 
-	if (pNewGroup->iColour==-1 && pNewGroup->bVisible) {
-      //no colour specified. Try to colour cycle, but make sure we choose
-      // a different colour from both its parent and any previous sibling
-      SGroupInfo *parent=NULL;
-      for (vector<SGroupInfo *>::reverse_iterator it = m_vGroups.rbegin(); it!=m_vGroups.rend(); it++)
-        if ((*it)->bVisible) {parent=*it; break;}
-      for (;;) {
-        pNewGroup->iColour=(iGroupIdx++ % 3) + 110;
-        if (parent && parent->iColour == pNewGroup->iColour)
-          continue; //same colour as parent -> try again
-        if (prevSibling && prevSibling->iColour == pNewGroup->iColour)
-          continue; //same colour as previous sibling -> try again
-        break; //different from parent and previous sibling (if any!), so ok
-      }
-    }
+        //by default, the first group in the alphabet is invisible
+        pNewGroup->bVisible = (InputInfo->pChild != NULL);
 
-    pNewGroup->iStart = static_cast<int>(InputInfo->m_vCharacters.size())+1;
-
-    pNewGroup->pChild = NULL;
-
-    pNewGroup->pNext = prevSibling;
-    prevSibling = pNewGroup;
-
-    m_vGroups.push_back(pNewGroup);
-
-    return;
-  }
-
-  if(!strcmp(name, "conversionmode")) {
-    while(*atts != 0) {
-      if(strcmp(*atts, "id") == 0) {
-        InputInfo->m_iConversionID = atoi(*(atts+1));
-      } else if (strcmp(*atts, "start") == 0) {
-        //TODO, should check this is only a single unicode character;
-        // no training will occur, if not...
-        InputInfo->m_strConversionTrainStart = *(atts+1);
-      } else if (strcmp(*atts, "stop") == 0) //similarly
-        InputInfo->m_strConversionTrainStop = *(atts+1);
-      atts += 2;
-    }
-
-    return;
-  }
-
-  // Special characters for character composition
-  if(strcmp(name, "convert") == 0) {
-    if (!InputInfo->StartConvertCharacter) InputInfo->StartConvertCharacter = new CAlphInfo::character();
-    ReadCharAtts(atts, *(InputInfo->StartConvertCharacter));
-    return;
-  }
-
-void CAlphIO::XML_StartElement(void *userData, const XML_Char *name, const XML_Char **atts)
-{
-	CAlphIO* Me = (CAlphIO*) userData;
-	
-	Me->CData = "";
-	
-	if (strcmp(name, "alphabet")==0) {
-		AlphInfo NewInfo;
-		Me->InputInfo = NewInfo;
-		Me->InputInfo.Mutable = Me->LoadMutable;
-		Me->InputInfo.SpaceCharacter.Colour = -1;
-		Me->InputInfo.ParagraphCharacter.Colour = -1;
-		Me->InputInfo.ControlCharacter.Colour = -1;
-		while (*atts!=0) {
-			if (strcmp(*atts, "name")==0) {
-				atts++;
-				Me->InputInfo.AlphID = *atts;
-				atts--;
-			}
-			atts += 2;
-		}
-		return;
-	}
-	
-	if (strcmp(name, "orientation")==0) {
-		while (*atts!=0) {
-			if (strcmp(*atts, "type")) {
-				atts++;
-				if (strcmp(*atts, "RL")) {
-					Me->InputInfo.Orientation = Opts::LeftToRight;
-				} else if (strcmp(*atts, "TB")) {
-					Me->InputInfo.Orientation = Opts::TopToBottom;
-				} else if (strcmp(*atts, "BT")) {
-					Me->InputInfo.Orientation = Opts::BottomToTop;
-				} else
-					Me->InputInfo.Orientation = Opts::LeftToRight;
-				atts--;
-			}
-			atts += 2;
-		}
-		return;
-	}
-	
-	if (strcmp(name, "encoding")==0) {
-		while (*atts!=0) {
-			if (strcmp(*atts, "type")==0) {
-				atts++;
-				Me->InputInfo.Type = Me->StoT[*atts];
-				atts--;
-			}
-			atts += 2;
-		}
-		return;
-	}
-	
-	if (strcmp(name, "space")==0) {
-		while (*atts!=0) {
-			if (strcmp(*atts, "t")==0) {
-				atts++;
-				Me->InputInfo.SpaceCharacter.Text = *atts;
-				atts--;
-			}
-			if (strcmp(*atts, "d")==0) {
-				atts++;
-				Me->InputInfo.SpaceCharacter.Display = *atts;
-				atts--;
-			}
-			if (strcmp(*atts, "b")==0) {
-			  atts++;
-			  Me->InputInfo.SpaceCharacter.Colour = atoi(*atts);
-			  atts--;
-			}
-			if (strcmp(*atts, "f")==0) {
-			  atts++;
-			  Me->InputInfo.SpaceCharacter.Foreground = *atts;
-			  atts--;
-			}
-			atts += 2;
-		}
-		return;
-	}
-	if (strcmp(name, "paragraph")==0) {
-		while (*atts!=0) {
-			if (strcmp(*atts, "d")==0) {
-			  atts++;
-			  Me->InputInfo.ParagraphCharacter.Display = *atts;
-#ifdef WIN32
-			  Me->InputInfo.ParagraphCharacter.Text = "\r\n";
-#else
-			  Me->InputInfo.ParagraphCharacter.Text = "\n";
-#endif	
-			  atts--;
-			}
-			if (strcmp(*atts, "b")==0) {
-			  atts++;
-			  Me->InputInfo.ParagraphCharacter.Colour = atoi(*atts);
-			  atts--;
-			}
-			if (strcmp(*atts, "f")==0) {
-			  atts++;
-			  Me->InputInfo.ParagraphCharacter.Foreground = *atts;
-			  atts--;
-			}
-			atts += 2;
-		}
-		return;
-	}
-	if (strcmp(name, "control")==0) {
-		while (*atts!=0) {
-			if (strcmp(*atts, "t")==0) {
-				atts++;
-				Me->InputInfo.ControlCharacter.Text = *atts;
-				atts--;
-			}
-			if (strcmp(*atts, "d")==0) {
-				atts++;
-				Me->InputInfo.ControlCharacter.Display = *atts;
-				atts--;
-			}
-			if (strcmp(*atts, "b")==0) {
-				atts++;
-				Me->InputInfo.ControlCharacter.Colour = atoi(*atts);
-				atts--;
-			}
-			if (strcmp(*atts, "f")==0) {
-				atts++;
-				Me->InputInfo.ControlCharacter.Foreground = *atts;
-				atts--;
-			}
-			atts += 2;
-		}
-		return;
-	}
-	
-	if (strcmp(name, "group")==0) {
-		AlphInfo::group NewGroup;
-		NewGroup.Colour=-1;
-		NewGroup.Label="";
-		Me->InputInfo.Groups.push_back(NewGroup);
-		while (*atts!=0) {
-			if (strcmp(*atts, "name")==0) {
-				atts++;
-				Me->InputInfo.Groups.back().Description = *atts;
-				atts--;
-			}
-			if (strcmp(*atts, "b")==0) {
-				atts++;
-				Me->InputInfo.Groups.back().Colour = atoi(*atts);
-				atts--;
-			}
-            if (strcmp(*atts, "label")==0) {
+        while (*atts != 0) {
+            if (strcmp(*atts, "name") == 0)
+                pNewGroup->strName = *(atts + 1);
+            else if (strcmp(*atts, "b") == 0) {
+                pNewGroup->iColour = atoi(*(atts + 1));
+            }
+            else if (strcmp(*atts, "visible") == 0) {
                 atts++;
-				Me->InputInfo.Groups.back().Label = *atts; 
+                if (!strcmp(*atts, "yes") || !strcmp(*atts, "on"))
+                    pNewGroup->bVisible = true;
+                else if (!strcmp(*atts, "no") || !strcmp(*atts, "off"))
+                    pNewGroup->bVisible = false;
                 atts--;
             }
-			atts += 2;
-		}
-		return;
-	}
-	
-	if (strcmp(name, "s")==0) {
-		AlphInfo::character NewCharacter;
-		NewCharacter.Colour=-1;
-		Me->InputInfo.Groups.back().Characters.push_back(NewCharacter);
-		AlphInfo::character& Ch = Me->InputInfo.Groups.back().Characters.back();
-		while (*atts!=0) {
-			if (strcmp(*atts, "t")==0) {
-				atts++;
-				Ch.Text = *atts; 
-				atts--;
-			}
-			if (strcmp(*atts, "d")==0) {
-				atts++;
-				Ch.Display = *atts;
-				atts--;
-			}
-			if (strcmp(*atts, "b")==0) {
-			        atts++;
-				Ch.Colour = atoi(*atts);
-				atts--;
-			}
-			if (strcmp(*atts, "f")==0) {
-			        atts++;
-				Ch.Foreground = *atts;
-				atts--;
-			}
-			atts += 2;
-		}
-		return;
-	}
+            else if (strcmp(*atts, "label") == 0) {
+                pNewGroup->strLabel = *(atts + 1);
+            }
+            atts += 2;
+        }
+
+        SGroupInfo*& prevSibling = (m_vGroups.empty() ? InputInfo->pChild : m_vGroups.back()->pChild);
+
+        if (pNewGroup->iColour == -1 && pNewGroup->bVisible) {
+            //no colour specified. Try to colour cycle, but make sure we choose
+            // a different colour from both its parent and any previous sibling
+            SGroupInfo* parent = NULL;
+            for (vector<SGroupInfo*>::reverse_iterator it = m_vGroups.rbegin(); it != m_vGroups.rend(); it++)
+                if ((*it)->bVisible) { parent = *it; break; }
+            for (;;) {
+                pNewGroup->iColour = (iGroupIdx++ % 3) + 110;
+                if (parent && parent->iColour == pNewGroup->iColour)
+                    continue; //same colour as parent -> try again
+                if (prevSibling && prevSibling->iColour == pNewGroup->iColour)
+                    continue; //same colour as previous sibling -> try again
+                break; //different from parent and previous sibling (if any!), so ok
+            }
+        }
+
+        pNewGroup->iStart = static_cast<int>(InputInfo->m_vCharacters.size()) + 1;
+
+        pNewGroup->pChild = NULL;
+
+        pNewGroup->pNext = prevSibling;
+        prevSibling = pNewGroup;
+
+        m_vGroups.push_back(pNewGroup);
+
+        return;
+    }
+
+    if (!strcmp(name, "conversionmode")) {
+        while (*atts != 0) {
+            if (strcmp(*atts, "id") == 0) {
+                InputInfo->m_iConversionID = atoi(*(atts + 1));
+            }
+            else if (strcmp(*atts, "start") == 0) {
+                //TODO, should check this is only a single unicode character;
+                // no training will occur, if not...
+                InputInfo->m_strConversionTrainStart = *(atts + 1);
+            }
+            else if (strcmp(*atts, "stop") == 0) //similarly
+                InputInfo->m_strConversionTrainStop = *(atts + 1);
+            atts += 2;
+        }
+
+        return;
+    }
+
+    // Special characters for character composition
+    if (strcmp(name, "convert") == 0) {
+        if (!InputInfo->StartConvertCharacter) InputInfo->StartConvertCharacter = new CAlphInfo::character();
+        ReadCharAtts(atts, *(InputInfo->StartConvertCharacter));
+        return;
+    }
 }
+
 
 void CAlphIO::ReadCharAtts(const XML_Char **atts, CAlphInfo::character &ch) {
   while(*atts != 0) {
