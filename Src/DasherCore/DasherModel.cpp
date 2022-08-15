@@ -557,7 +557,7 @@ void CDasherModel::ScheduleZoom(dasherint y1, dasherint y2, int nsteps) {
       dFrac = (h-oh)/(nh-oh);
     }
     //and use that fraction to interpolate from R to r
-    m_deGotoQueue.push_back(pair<myint,myint>(R1+dFrac*(r1-R1), R2+dFrac*(r2-R2)));
+    m_deGotoQueue.push_back(pair<myint,myint>(R1+static_cast<myint>(dFrac*static_cast<double>(r1-R1)), R2+static_cast<myint>(dFrac*static_cast<double>(r2-R2))));
   }
   //final point, done accurately/simply:
   m_deGotoQueue.push_back(pair<myint,myint>(r1,r2));

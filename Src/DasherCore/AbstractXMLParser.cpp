@@ -51,7 +51,7 @@ bool AbstractXMLParser::Parse(const std::string &strDesc, istream &in, bool bUse
   int Done;
   do {
     in.read(Buffer, sizeof(Buffer));
-    size_t len = in.gcount();
+    size_t len = static_cast<size_t>(in.gcount());
     Done = len < sizeof(Buffer);
     if(XML_Parse(Parser, Buffer, static_cast<int>(len), Done) == XML_STATUS_ERROR) {
       bRes=false;

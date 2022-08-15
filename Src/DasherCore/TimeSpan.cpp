@@ -102,9 +102,8 @@ string CTimeSpan::GetTimeStamp()
   std::tm time_tm = *std::localtime(&time_t);
   char buf[80];
   std::strftime(buf, sizeof(buf), "%H:%M:%S", &time_tm);
-  std:: string strTimeStamp = (std::string(buf) += ".") += ms.count();
-	
-  return strTimeStamp;
+
+  return std::string(buf) + "." + std::to_string(ms.count());
 }
 
 void CTimeSpan::Stop()

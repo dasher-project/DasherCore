@@ -10,42 +10,22 @@
 #include <functional>
 #include <vector>
 
-template<class T>
-T nthPower(T x, int n)
+// 1/size(v) * Sum_{i \elem v}((i-mean)^n)
+template<class T, class U>
+U nthMoment(int n, const std::vector<T> &v, U mean)
 {
-  T ret = x;
-  for (int i=1; i < n; ++i)
-    ret*=x;
-  return ret;
+  return std::accumulate(v.begin(), v.end(), U(), [mean, n](const U &sum, const T &current){return sum+std::pow(current-mean, n);})/v.size();
 }
 
-template<class T>
-struct SumDiffNthPower 
-{
-  SumDiffNthPower(T x, int n) : m_mean(x), m_n(n) {}
-  T operator()(T sum, T current)
-  {
-    return sum+nthPower(current-m_mean, m_n);
-  }
-  T m_mean;
-  int m_n;
-};
-
-template<class T, class Iter_T>
-  T nthMoment(int n, Iter_T first, Iter_T last, T mean)
-{
-  size_t cnt = last - first;
-  return std::accumulate(first, last, T(), SumDiffNthPower<T>(mean, n))/cnt;
-}
 template<typename T>
 std::string ComputeStats(const std::vector<T> &v)
 {
   if (v.empty()) return "";
   
-  double m1 = nthMoment(1,v.begin(), v.end(), 0.0);
-  double m2 = nthMoment(2,v.begin(), v.end(), m1);
-  double m3 = nthMoment(3,v.begin(), v.end(), m1);
-  double m4 = nthMoment(4,v.begin(), v.end(), m1);
+  double m1 = nthMoment(1, v, 0.0);
+  double m2 = nthMoment(2, v, m1);
+  double m3 = nthMoment(3, v, m1);
+  double m4 = nthMoment(4, v, m1);
   
   double dev = sqrt(m2); // Standard Deviation
   double skew = m3/(m2*dev); // Skewness
@@ -68,7 +48,7 @@ struct MemberSumDiffNthPower
   MemberSumDiffNthPower(A T::* pm, B x, int n) : m_mean(x), m_pm(pm), m_n(n) {}
   B operator()(B sum, T current)
   {
-    return sum+nthPower(current.*m_pm-m_mean, m_n);
+    return sum+std::pow(current.*m_pm-m_mean, m_n);
   }
   B m_mean;
   A T::* m_pm;
