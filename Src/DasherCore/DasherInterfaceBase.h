@@ -41,8 +41,10 @@
 #include "ModuleManager.h"
 #include "ControlManager.h"
 #include "FrameRate.h"
+#include "FileUtils.h"
 #include <set>
 #include <algorithm>
+#include <FileUtils.h>
 
 namespace Dasher {
   class CDasherScreen;
@@ -53,6 +55,7 @@ namespace Dasher {
   class CSettingsStore;
   class CGameModule;
   class CDasherInterfaceBase;
+  class FileUtils;
 }
 
 class CUserLogBase;
@@ -67,26 +70,7 @@ class CNodeCreationManager;
 /// required by the core. A derived class is created for each
 /// supported platform which implements these.
 // @{
-class CFileUtils {
-public:
-	virtual ~CFileUtils(){}
-	///
-	/// Obtain the size in bytes of a file - the way to do this is
-	/// dependent on the OS (TODO: Check this - any posix on Windows?)
-	///
-	virtual int GetFileSize(const std::string &strFileName) = 0;
 
-	///Look for files, matching a filename pattern, in whatever system and/or user
-	/// locations as may exist - e.g. on disk, in app package, on web, whatever.
-	/// TODO, can we add a default implementation that looks on the Dasher website?
-	/// \param pattern string matching just filename (not path), potentially
-	/// including '*'s (as per glob)
-	virtual void ScanFiles(AbstractParser *parser, const std::string &strPattern) = 0;
-
-	// Writes file to user data directory. 
-	virtual bool WriteUserDataFile(const std::string &filename, const std::string &strNewText, bool append) = 0;
-
-};
 
 /// The central class in the core of Dasher. Ties together the rest of
 /// the platform independent stuff and provides a single interface for
@@ -96,7 +80,7 @@ public:
 class Dasher::CDasherInterfaceBase : public CMessageDisplay, public Observable<const CEditEvent *>, protected Observer<int>, protected CSettingsUser, private NoClones {
 public:
   ///Create a new interface by providing the only-and-only settings store that will be used throughout.
-  CDasherInterfaceBase(CSettingsStore *pSettingsStore, CFileUtils* fileUtils);
+  CDasherInterfaceBase(CSettingsStore *pSettingsStore);
   virtual ~CDasherInterfaceBase();
 
   /// @name Access to internal member classes
@@ -250,10 +234,7 @@ public:
   /// \param filename name of training file, without path (e.g. "training_english_GB.txt")
   /// \param strNewText text to append
   ///
-  void WriteTrainFile(const std::string &filename, const std::string &strNewText) {
-    m_fileUtils->WriteUserDataFile(filename, strNewText, true);
-  };
-
+  void WriteTrainFile(const std::string& filename, const std::string& strNewText);
   // App Interface
   // -----------------------------------------------------
 
@@ -402,6 +383,8 @@ public:
   /// Flush the/all currently-written text to the user's training file(s).
   /// Just calls through to WriteTrainFileFull(this) on the AlphabetManager;
   /// public so e.g. iPhone can flush the buffer when app is backgrounded.
+  ///
+  /// TODO JAN : IS THIS POINTLESS?
   void WriteTrainFileFull();
 
   /// @name Platform dependent utility functions
@@ -414,18 +397,18 @@ public:
   /// Obtain the size in bytes of a file - the way to do this is
   /// dependent on the OS (TODO: Check this - any posix on Windows?)
   ///
-  int GetFileSize(const std::string &strFileName) {
-	  return m_fileUtils->GetFileSize(strFileName);
-  }
-  
+  // TODO JAN : IS THIS POINTLESS?
+  int GetFileSize(const std::string& strFileName);
+
+	
   ///Look for files, matching a filename pattern, in whatever system and/or user
   /// locations as may exist - e.g. on disk, in app package, on web, whatever.
   /// TODO, can we add a default implementation that looks on the Dasher website?
   /// \param pattern string matching just filename (not path), potentially
   /// including '*'s (as per glob)
-  void ScanFiles(AbstractParser *parser, const std::string &strPattern)  {
-	  m_fileUtils->ScanFiles(parser, strPattern);
-  }
+  ///
+  // TODO JAN : IS THIS POINTLESSS?
+  void ScanFiles(AbstractParser* parser, const std::string& strPattern);
   
   // @}
   
@@ -535,7 +518,6 @@ protected:
   };
 
   CPreSetObserver m_preSetObserver;
-  CFileUtils* m_fileUtils;
 
   //The default expansion policy to use - an amortized policy depending on the LP_NODE_BUDGET parameter.
   CExpansionPolicy *m_defaultPolicy;

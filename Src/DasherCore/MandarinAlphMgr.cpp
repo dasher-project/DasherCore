@@ -37,15 +37,7 @@
 using namespace std;
 using namespace Dasher;
 
-// Track memory leaks on Windows to the line that new'd the memory
-#ifdef _WIN32
-#ifdef _DEBUG_MEMLEAKS
-#define DEBUG_NEW new( _NORMAL_BLOCK, THIS_FILE, __LINE__ )
-#define new DEBUG_NEW
-#undef THIS_FILE
-static char THIS_FILE[] = __FILE__;
-#endif
-#endif
+
 
 CMandarinAlphMgr::CMandarinAlphMgr(CSettingsUser *pCreator, CDasherInterfaceBase *pInterface, CNodeCreationManager *pNCManager, const CAlphInfo *pAlphabet)
   : CAlphabetManager(pCreator, pInterface, pNCManager, pAlphabet) {
@@ -75,7 +67,7 @@ void CMandarinAlphMgr::InitMap() {
     //add a PY mapping to a single CH-character (already rehashed), i.e. the space/para
     int hashed = m_map.Get(m_pAlphabet->GetText(copy[i]));
     DASHER_ASSERT(hashed);
-    m_vGroupsByConversion[hashed].insert(m_vConversionsByGroup.size()); //identifies the new PY sound
+    m_vGroupsByConversion[hashed].insert(static_cast<int>(m_vConversionsByGroup.size())); //identifies the new PY sound
     m_vConversionsByGroup.push_back(vector<symbol>(1,hashed));
     m_pPYgroups->iEnd++; m_pPYgroups->iNumChildNodes++;
   }
@@ -84,7 +76,7 @@ void CMandarinAlphMgr::InitMap() {
 SGroupInfo *CMandarinAlphMgr::makePYgroup(const SGroupInfo *in) {
   if (!in) return NULL;
   SGroupInfo *ret = new SGroupInfo(*in);
-  ret->iStart = m_vConversionsByGroup.size();//i.e. #py sounds found so far
+  ret->iStart = static_cast<int>(m_vConversionsByGroup.size());//i.e. #py sounds found so far
   
   //process any symbols that are direct children of the group (not descendants)
   ret->iNumChildNodes=0; //we'll have to do a recount
@@ -96,7 +88,7 @@ SGroupInfo *CMandarinAlphMgr::makePYgroup(const SGroupInfo *in) {
       int hashed=m_map.Get(text);
       if (!hashed) {
         //unicode char not seen already, allocate new symbol number
-        hashed = m_vCHtext.size();
+        hashed = static_cast<int>(m_vCHtext.size());
         m_vCHtext.push_back(text);
         m_vCHdisplayText.push_back(m_pAlphabet->GetDisplayText(i));
         m_vCHcolours.push_back(m_pAlphabet->GetColour(i));
@@ -128,7 +120,7 @@ SGroupInfo *CMandarinAlphMgr::makePYgroup(const SGroupInfo *in) {
   }
   //direct children done. process indirect children, i.e. subgroups
   ret->pChild=makePYgroup(ret->pChild);
-  ret->iEnd = m_vConversionsByGroup.size(); //record all indices allocated to this group and descendants
+  ret->iEnd = static_cast<int>(m_vConversionsByGroup.size()); //record all indices allocated to this group and descendants
   ret->pNext = makePYgroup(ret->pNext);
   return ret;
 }
@@ -160,7 +152,7 @@ CMandarinAlphMgr::~CMandarinAlphMgr() {
 void CMandarinAlphMgr::CreateLanguageModel() {
   //std::cout<<"CHALphabet size "<< pCHAlphabet->GetNumberTextSymbols(); [7603]
   //std::cout<<"Setting PPMPY model"<<std::endl;
-  m_pLanguageModel = new CPPMPYLanguageModel(this, m_vGroupsByConversion.size()-1, m_vConversionsByGroup.size()-1);
+  m_pLanguageModel = new CPPMPYLanguageModel(this, static_cast<int>(m_vGroupsByConversion.size())-1, static_cast<int>(m_vConversionsByGroup.size())-1);
 }
 
 CMandarinAlphMgr::CMandarinTrainer::CMandarinTrainer(CMessageDisplay *pMsgs, CMandarinAlphMgr *pMgr)
@@ -327,7 +319,7 @@ CMandarinAlphMgr::CConvRoot::CConvRoot(int iOffset, CMandarinAlphMgr *pMgr, symb
 }
 
 int CMandarinAlphMgr::CConvRoot::ExpectedNumChildren() {
-  return mgr()->m_vConversionsByGroup[m_pySym].size();
+  return static_cast<int>(mgr()->m_vConversionsByGroup[m_pySym].size());
 }
 
 void CMandarinAlphMgr::CConvRoot::PopulateChildren() {
@@ -404,7 +396,7 @@ void CMandarinAlphMgr::GetConversions(std::vector<pair<symbol,unsigned int> > &v
   
   if (long percent=GetLongParameter(LP_PY_PROB_SORT_THRES)) {
     const uint64 iNorm(iRemaining);
-    const unsigned int uniform((GetLongParameter(LP_UNIFORM)*iNorm)/1000);
+    const unsigned int uniform(static_cast<unsigned int>((GetLongParameter(LP_UNIFORM)*iNorm)/1000));
     
     //Set up list of symbols with blank probability entries...
     for(vector<symbol>::const_iterator it = convs.begin(); it != convs.end(); ++it) {
@@ -413,7 +405,7 @@ void CMandarinAlphMgr::GetConversions(std::vector<pair<symbol,unsigned int> > &v
     
     //Then call LM to fill in the probs, passing iNorm and uniform directly -
     // GetPartProbs distributes the last param between however elements there are in vChildren...
-    static_cast<CPPMPYLanguageModel *>(m_pLanguageModel)->GetPartProbs(context, vChildren, iNorm, uniform);
+    static_cast<CPPMPYLanguageModel *>(m_pLanguageModel)->GetPartProbs(context, vChildren, static_cast<int>(iNorm), uniform);
   
     //std::cout<<"after get probs "<<std::endl;
   
@@ -430,7 +422,7 @@ void CMandarinAlphMgr::GetConversions(std::vector<pair<symbol,unsigned int> > &v
     //ok, some symbols as predicted by LM, others not...
     vector<pair<symbol,unsigned int> > probOrder;
     swap(vChildren, probOrder);
-    const unsigned int stop(iNorm - (iNorm*percent)/100);//intermediate values are uint64
+    const unsigned int stop(static_cast<unsigned int>(iNorm - (iNorm*percent)/100));//intermediate values are uint64
     for (vector<pair<symbol, unsigned int> >::iterator it=probOrder.begin(); iRemaining>stop; it++) {
       //assert: the remaining probability mass, divided by the remaining symbols,
       // (i.e. the probability mass each symbol would receive if we uniformed the rest)
@@ -445,7 +437,7 @@ void CMandarinAlphMgr::GetConversions(std::vector<pair<symbol,unsigned int> > &v
   //Now distribute iRemaining uniformly between all remaining symbols,
   // keeping them in alphabet order
   if (iRemaining) {
-    unsigned int iEach(iRemaining / (convs.size() - haveProbs.size()));
+    unsigned int iEach(static_cast<unsigned int>(iRemaining) / (static_cast<unsigned int>(convs.size()) - static_cast<unsigned int>(haveProbs.size())));
     for (vector<symbol>::const_iterator it=convs.begin(); it!=convs.end(); it++) {
       if (haveProbs.count(*it)==0)
         vChildren.push_back(pair<symbol,unsigned int>(*it,iEach));
@@ -454,9 +446,9 @@ void CMandarinAlphMgr::GetConversions(std::vector<pair<symbol,unsigned int> > &v
     //account for rounding error by topping up
     DASHER_ASSERT(vChildren.size() == convs.size());
     iRemaining -= iEach * (convs.size() - haveProbs.size());
-    unsigned int iLeft = vChildren.size();
+    unsigned int iLeft = static_cast<unsigned int>(vChildren.size());
     for (vector<pair<symbol, unsigned int> >::iterator it=vChildren.end(); iRemaining && it-- != vChildren.begin();) {
-      const unsigned int p(iRemaining / iLeft);
+      const unsigned int p(static_cast<unsigned int>(iRemaining / iLeft));
       it->second+=p; iRemaining-=p; iLeft--;
     }
   }

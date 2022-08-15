@@ -1,25 +1,14 @@
-
+#ifndef HAVE_OWN_FILELOGGER
 #include "../Common/Common.h"
 
 #include <cstring>
+#include <filesystem>
+#include <chrono>
 #include "FileLogger.h"
 
-// Track memory leaks on Windows to the line that new'd the memory
-#ifdef _WIN32
-#ifdef _DEBUG
-#define DEBUG_NEW new( _NORMAL_BLOCK, THIS_FILE, __LINE__ )
-#define new DEBUG_NEW
-#undef THIS_FILE
-static char THIS_FILE[] = __FILE__;
-#endif
-#endif
+using namespace std::chrono;
+namespace fs = std::filesystem;
 
-
-#ifdef _WIN32
-#include <sys/timeb.h>
-#else
-#include <sys/time.h>
-#endif
 
 CFileLogger::CFileLogger(const std::string& strFilenamePath, eLogLevel iLogLevel, int iOptionsMask)
 {
@@ -56,52 +45,46 @@ CFileLogger::CFileLogger(const std::string& strFilenamePath, eLogLevel iLogLevel
 
   // See if we should get rid of any existing filename with our given name.  This prevents having
   // to remember to delete the file before every new debugging run.
-  if (m_bDeleteOldFile)
+  if (m_bDeleteOldFile)  
   {
-    FILE* fp = NULL;
-
-    fp = fopen(m_strFilenamePath.c_str(), "w");
-    if (fp != NULL)
-    {
-      fclose(fp);
-      fp = NULL;
-    }
+	  //old implementation didn't care if a file was actually deleted, so we keep the behaviour
+    fs::remove(strFilenamePath);
   }
+  
 
 }
 
 CFileLogger::~CFileLogger()
 {
-#ifdef _WIN32
+
   if (m_bFunctionTiming)
   {
     // Dump the results of our function timing logging
 
-    MAP_STRING_INT64::iterator map_iter;
+    MAP_STRING_DOUBLE::iterator map_iter;
 
     Log("%-60s%20s%10s", logNORMAL, "Function","Ticks", "Percent");
     Log("%-60s%20s%10s", logNORMAL, "--------","-----", "-------");
 
-    __int64 iMaxTicks = 0;
+    double max_duration = 0;
 
     // First pass to count the max ticks 
     // We assume that there was a function logger on the outer most (main) program.
-    // This allows the percent reflect the relative time spent inside emedded calls.
+    // This allows the percent reflect the relative time spent inside embedded calls.
 
-    for (map_iter = m_mapFunctionTicks.begin(); map_iter != m_mapFunctionTicks.end(); map_iter++)
+    for (map_iter = m_mapFunctionDuration.begin(); map_iter != m_mapFunctionDuration.end(); ++map_iter)
     {
-      if (map_iter->second > iMaxTicks)
-        iMaxTicks = map_iter->second;
+      if (map_iter->second > max_duration)
+          max_duration = map_iter->second;
     }
 
-    for (map_iter = m_mapFunctionTicks.begin(); map_iter != m_mapFunctionTicks.end(); map_iter++)
+    for (map_iter = m_mapFunctionDuration.begin(); map_iter != m_mapFunctionDuration.end(); ++map_iter)
     {
       std::string name = map_iter->first;
-      __int64 iTicks = map_iter->second;
-      Log("%-60s%20I64Ld%10.2f", logNORMAL, name.c_str(), iTicks, (double) iTicks / (double) iMaxTicks  * (double) 100.0);
+      const double duration = map_iter->second;
+      Log("%-60s%20I64Ld%10.2f", logNORMAL, name.c_str(), duration, static_cast<double>(duration) / max_duration  * 100.0);
     }
   }
-#endif
 }
 
 // Changes the filename of this logging object
@@ -113,14 +96,8 @@ void CFileLogger::SetFilename(const std::string& strFilename)
   // to remember to delete the file before every new debugging run.
   if (m_bDeleteOldFile)
   {
-    FILE* fp = NULL;
-
-    fp = fopen(m_strFilenamePath.c_str(), "w");
-    if (fp != NULL)
-    {
-      fclose(fp);
-      fp = NULL;
-    }
+	  //old implementation didn't care if a file was actually deleted, so we keep the behaviour
+    fs::remove(strFilename);
   }
 }
 
@@ -135,14 +112,14 @@ void CFileLogger::Log(const char* szText, eLogLevel iLogLevel, ...)
 
   if ((m_strFilenamePath.length() > 0) && 
       (m_iLogLevel <= iLogLevel) && 
-      (szText != NULL))
+      (szText != nullptr))
   {
-    FILE* fp = NULL;
+    FILE* fp = nullptr;
     fp = fopen(m_strFilenamePath.c_str(), "a");
 
     std::string strTimeStamp = GetTimeDateStamp();
 
-    if (fp != NULL)
+    if (fp != nullptr)
     {
       std::string strIndented = strTimeStamp + GetIndentedString(szText) + "\n";
 
@@ -159,7 +136,7 @@ void CFileLogger::Log(const char* szText, eLogLevel iLogLevel, ...)
       }
 
       fclose(fp);
-      fp = NULL;
+      fp = nullptr;
     }
   }
 }
@@ -172,12 +149,12 @@ void CFileLogger::Log(const std::string strText, eLogLevel iLogLevel, ...)
   if ((m_strFilenamePath.length() > 0) && 
       (m_iLogLevel <= iLogLevel))
   {
-    FILE* fp = NULL;
+    FILE* fp = nullptr;
     fp = fopen(m_strFilenamePath.c_str(), "a");
 
     std::string strTimeStamp = GetTimeDateStamp();
 
-    if (fp != NULL)
+    if (fp != nullptr)
     {
       std::string strIndented = strTimeStamp + GetIndentedString(strText) + "\n";
 
@@ -194,7 +171,7 @@ void CFileLogger::Log(const std::string strText, eLogLevel iLogLevel, ...)
       }
 
       fclose(fp);
-      fp = NULL;
+      fp = nullptr;
     }
   }
 }
@@ -208,14 +185,14 @@ void CFileLogger::LogDebug(const char* szText, ...)
 
   if ((m_strFilenamePath.length() > 0) && 
       (m_iLogLevel == logDEBUG) &&
-      (szText != NULL))
+      (szText != nullptr))
   {
-    FILE* fp = NULL;
+    FILE* fp = nullptr;
     fp = fopen(m_strFilenamePath.c_str(), "a");
 
     std::string strTimeStamp = GetTimeDateStamp();
 
-    if (fp != NULL)
+    if (fp != nullptr)
     {
       std::string strIndented = strTimeStamp + GetIndentedString(szText) + "\n";
 
@@ -232,7 +209,7 @@ void CFileLogger::LogDebug(const char* szText, ...)
       }
 
       fclose(fp);
-      fp = NULL;
+      fp = nullptr;
     }
   }
 }
@@ -246,14 +223,14 @@ void CFileLogger::LogNormal(const char* szText, ...)
 
   if ((m_strFilenamePath.length() > 0) && 
       (m_iLogLevel <= logNORMAL) &&
-      (szText != NULL))
+      (szText != nullptr))
   {
-    FILE* fp = NULL;
+    FILE* fp = nullptr;
     fp = fopen(m_strFilenamePath.c_str(), "a");
 
     std::string strTimeStamp = GetTimeDateStamp();
 
-    if (fp != NULL)
+    if (fp != nullptr)
     {
       std::string strIndented = strTimeStamp + GetIndentedString(szText) + "\n";
 
@@ -270,7 +247,7 @@ void CFileLogger::LogNormal(const char* szText, ...)
       }
 
       fclose(fp);
-      fp = NULL;
+      fp = nullptr;
     }
   }
 }
@@ -284,14 +261,14 @@ void CFileLogger::LogCritical(const char* szText, ...)
 
   // Always log critical messages
   if ((m_strFilenamePath.length() > 0) &&
-      (szText != NULL))
+      (szText != nullptr))
   {
-    FILE* fp = NULL;
+    FILE* fp = nullptr;
     fp = fopen(m_strFilenamePath.c_str(), "a");
 
     std::string strTimeStamp = GetTimeDateStamp();
 
-    if (fp != NULL)
+    if (fp != nullptr)
     {
       std::string strIndented = strTimeStamp + GetIndentedString(szText) + "\n";
 
@@ -308,7 +285,7 @@ void CFileLogger::LogCritical(const char* szText, ...)
       }
 
       fclose(fp);
-      fp = NULL;
+      fp = nullptr;
     }
   }
 }
@@ -337,17 +314,14 @@ void CFileLogger::LogFunctionExit(const std::string& strFunctionName)
   }
 }
 
-#ifdef _WIN32
-void CFileLogger::LogFunctionTicks(const std::string& strFunctionName, __int64 iTicks)
+
+void CFileLogger::LogFunctionTicks(const std::string& strFunctionName, double duration)
 {
-  __int64 iCurrent;
+  const double duration_old = m_mapFunctionDuration[strFunctionName];
+  duration = duration_old + duration;
 
-  iCurrent = m_mapFunctionTicks[strFunctionName];
-  iCurrent = iCurrent + iTicks;
-
-  m_mapFunctionTicks[strFunctionName] = iCurrent;
+  m_mapFunctionDuration[strFunctionName] = duration;
 }
-#endif
 
 // Gets an indented version of the function name 
 std::string CFileLogger::GetIndentedString(const std::string& strText)
@@ -369,53 +343,17 @@ bool CFileLogger::GetFunctionTiming()
 // path and filename on Windows.  This can be used to make sure
 // a relative filename stays pointed at the same location despite
 // changes in the working directory.
+// UPDATED: Replaced windows only method with portable code using the standard library.
 std::string CFileLogger::GetFullFilenamePath(std::string strFilename)
 {
-#ifdef _WIN32    
-
-  // Windows code
-  const int   MAX_PATH_LENGTH = 1024;
-
-#ifdef _UNICODE
-
-  // In Unicode, we need the parameters to GetFullPathName() in wide characters
-  wchar_t     szPath[MAX_PATH_LENGTH];
-  wchar_t*    pszFilePart = NULL;
-  wchar_t     wstrFilenamePath[MAX_PATH_LENGTH];
-  char        szResult[MAX_PATH_LENGTH];
-
-  unsigned int i = 0;
-  for (i = 0; i < strFilename.length(); i++)
-    wstrFilenamePath[i] = (wchar_t) strFilename[i];
-  wstrFilenamePath[i] = '\0';
-
-  ::GetFullPathName(wstrFilenamePath, MAX_PATH_LENGTH, szPath, &pszFilePart);
-  i = 0;
-  while (szPath[i] != '\0')
-  {
-    szResult[i] = (char) szPath[i];
-    i++;
+  auto path = fs::path(strFilename);
+  //We get a weak canonical path in case the path does not exist
+  if (fs::exists(path)){
+    strFilename  = fs::weakly_canonical(path).u8string();  //u8string to handle unicode characters.
   }
-  szResult[i] = '\0';
-
-  return szResult;
-
-#else
-  // Using normal non-unicode strings
-  char        szPath[MAX_PATH_LENGTH];
-  char*       pszFilePart = NULL;
-
-  ::GetFullPathName(strFilename.c_str(), MAX_PATH_LENGTH, szPath, &pszFilePart);
-
-  return szPath;
-
-#endif
-
-#else
-  // Non-windows code
+  
+	
   return strFilename;
-
-#endif
 }
 
 /////////////////////////////////////// CFunctionLogger /////////////////////////////////////////////////////////////
@@ -424,16 +362,14 @@ CFunctionLogger::CFunctionLogger(const std::string& strFunctionName, CFileLogger
 {
   m_pLogger = pLogger;
 
-  if ((m_pLogger != NULL) && (strFunctionName.length() > 0))
+  if ((m_pLogger != nullptr) && (strFunctionName.length() > 0))
   {
     m_strFunctionName = strFunctionName;
 
     if (!m_pLogger->GetFunctionTiming())
       m_pLogger->LogFunctionEntry(m_strFunctionName);
     else {
-#ifdef _WIN32
-      QueryPerformanceCounter(&m_iStartTicks);
-#endif
+        m_startTime = steady_clock::now();
     }
   }
 
@@ -441,19 +377,17 @@ CFunctionLogger::CFunctionLogger(const std::string& strFunctionName, CFileLogger
 
 CFunctionLogger::~CFunctionLogger()
 {
-  if ((m_pLogger != NULL) && (m_strFunctionName.length() > 0))
+  if ((m_pLogger != nullptr) && (m_strFunctionName.length() > 0))
   {
     if (!m_pLogger->GetFunctionTiming())
       m_pLogger->LogFunctionExit(m_strFunctionName);
     else
     {
-#ifdef _WIN32
-      LARGE_INTEGER iEndTicks;
-      QueryPerformanceCounter(&iEndTicks);
+    const auto current_time = steady_clock::now();
+    const auto span = duration_cast<duration<double>>(current_time - m_startTime);
       // Add our total ticks to the tracking map object in the logger object
-	  m_pLogger->LogFunctionTicks(m_strFunctionName,
-		  iEndTicks.QuadPart - m_iStartTicks.QuadPart);
-#endif
+	  m_pLogger->LogFunctionTicks(m_strFunctionName, span.count());
+
     }
   }
 }
@@ -475,64 +409,26 @@ void CFileLogger::SetFunctionLogging(bool bFunctionLogging)
 // by our construction options.
 std::string CFileLogger::GetTimeDateStamp()
 {
-  std::string strTimeStamp = "";
+  std::string strTimeStamp;
+  auto format = "";
+  if(m_bTimeStamp)
+  {
+      format = "%T";
+  }
+  if(m_bDateStamp)
+  {
+      format = "%b %m %Y"; //format as specified by dasher " abbreviated month name, month, year"
+  }
+	
 
   if ((m_bTimeStamp) || (m_bDateStamp))
-  {
-#ifdef _WIN32
-    struct timeb sTimeBuffer;
-#else
-    struct timeval sTimeBuffer;
-    struct timezone sTimezoneBuffer;
-    time_t t;
-#endif
-    char* szTimeLine = NULL;
-
-#ifdef _WIN32
-    ftime(&sTimeBuffer);
-    szTimeLine = ctime(&(sTimeBuffer.time));
-#else
-    gettimeofday(&sTimeBuffer, &sTimezoneBuffer);
-    t = sTimeBuffer.tv_sec;
-    szTimeLine = ctime(&t);
-#endif
- 
-    // Format is:
-    // Wed Jun 22 10:22:00 2005
-    // 0123456789012345678901234
-    if ((szTimeLine != NULL) && (strlen(szTimeLine) > 23))
-    {
-      if (m_bDateStamp)
-      {
-        for (int i = 4; i < 10; i++)
-          strTimeStamp += szTimeLine[i];            
-        for (int i = 19; i < 24; i++)
-          strTimeStamp += szTimeLine[i];            
-        if (m_bTimeStamp)
-          strTimeStamp += " ";
-      }
-
-      if (m_bTimeStamp)
-      {
-        for (int i = 11; i < 19; i++)
-          strTimeStamp += szTimeLine[i];
-        strTimeStamp += ".";
-        char strMs[16];
-#ifdef _WIN32
-        sprintf(strMs, "%d", sTimeBuffer.millitm);
-#else
-        sprintf(strMs, "%d", static_cast<int>(sTimeBuffer.tv_usec / 1000));
-#endif
-        if (strlen(strMs) == 1)
-          strTimeStamp += "00";
-        else if (strlen(strMs) == 2)
-          strTimeStamp += "0";
-        strTimeStamp += strMs;
-      }
-
-      strTimeStamp += "\t";
-    }
+  {  	
+      char buf[80];
+      const auto timestamp = std::chrono::system_clock::now();
+      auto timestamp_t = std::chrono::system_clock::to_time_t(timestamp);
+      strftime(buf, sizeof(buf), format, std::localtime(&timestamp_t));
   }
 
   return strTimeStamp;
 }
+#endif

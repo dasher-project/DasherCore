@@ -11,15 +11,7 @@
 using namespace std;
 using namespace Dasher;
 
-// Track memory leaks on Windows to the line that new'd the memory
-#ifdef _WIN32
-#ifdef _DEBUG_MEMLEAKS
-#define DEBUG_NEW new( _NORMAL_BLOCK, THIS_FILE, __LINE__ )
-#define new DEBUG_NEW
-#undef THIS_FILE
-static char THIS_FILE[] = __FILE__;
-#endif
-#endif
+
 
 CRoutingAlphMgr::CRoutingAlphMgr(CSettingsUser *pCreator, CDasherInterfaceBase *pInterface, CNodeCreationManager *pNCManager, const CAlphInfo *pAlphabet)
 : CAlphabetManager(pCreator, pInterface, pNCManager, pAlphabet) {
@@ -33,7 +25,7 @@ void CRoutingAlphMgr::InitMap() {
   for (int i=1; i<m_pAlphabet->iEnd; i++) {
     symbol s = m_map.Get(m_pAlphabet->GetText(i));
     if (s==0) {
-      s=m_vRoutes.size();
+      s=static_cast<Dasher::symbol>(m_vRoutes.size());
       m_vRoutes.push_back(set<symbol>());
       m_map.Add(m_pAlphabet->GetText(i),s);
     }

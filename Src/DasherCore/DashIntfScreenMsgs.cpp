@@ -3,8 +3,8 @@
 
 using namespace Dasher;
 
-CDashIntfScreenMsgs::CDashIntfScreenMsgs(CSettingsStore *pSettingsStore, CFileUtils* fileUtils)
-	: CDashIntfSettings(pSettingsStore, fileUtils) {
+CDashIntfScreenMsgs::CDashIntfScreenMsgs(CSettingsStore *pSettingsStore)
+	: CDashIntfSettings(pSettingsStore) {
 }
 
 void CDashIntfScreenMsgs::Message(const string &strText, bool bInterrupt) {

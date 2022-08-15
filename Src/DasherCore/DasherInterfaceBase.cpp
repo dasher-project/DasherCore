@@ -71,17 +71,8 @@ CFileLogger* g_pLogger = NULL;
 using namespace Dasher;
 using namespace std;
 
-// Track memory leaks on Windows to the line that new'd the memory
-#ifdef _WIN32
-#ifdef _DEBUG_MEMLEAKS
-#define DEBUG_NEW new( _NORMAL_BLOCK, THIS_FILE, __LINE__ )
-#define new DEBUG_NEW
-#undef THIS_FILE
-static char THIS_FILE[] = __FILE__;
-#endif
-#endif
 
-CDasherInterfaceBase::CDasherInterfaceBase(CSettingsStore *pSettingsStore, CFileUtils* fileUtils) 
+CDasherInterfaceBase::CDasherInterfaceBase(CSettingsStore *pSettingsStore) 
   : CSettingsUser(pSettingsStore), 
   m_pDasherModel(new CDasherModel()), 
   m_pFramerate(new CFrameRate(this)), 
@@ -92,8 +83,6 @@ CDasherInterfaceBase::CDasherInterfaceBase(CSettingsStore *pSettingsStore, CFile
   
   pSettingsStore->Register(this);
   pSettingsStore->PreSetObservable().Register(&m_preSetObserver);
-
-  m_fileUtils = fileUtils;
   
   // Ensure that pointers to 'owned' objects are set to NULL.
   m_DasherScreen = NULL;
@@ -855,9 +844,21 @@ const char* CDasherInterfaceBase::ClSet(const std::string &strKey, const std::st
 }
 
 
-void
-CDasherInterfaceBase::ImportTrainingText(const std::string &strPath) {
+void CDasherInterfaceBase::ImportTrainingText(const std::string &strPath) {
   if(m_pNCManager)
     m_pNCManager->ImportTrainingText(strPath);
 }
 
+void CDasherInterfaceBase::WriteTrainFile(const std::string& filename, const std::string& strNewText) {
+    Dasher::FileUtils::WriteUserDataFile(filename, strNewText, true);
+};
+
+
+int CDasherInterfaceBase::GetFileSize(const std::string& strFileName) {
+    return Dasher::FileUtils::GetFileSize(strFileName);
+}
+
+
+void CDasherInterfaceBase::ScanFiles(AbstractParser* parser, const std::string& strPattern) {
+    Dasher::FileUtils::ScanFiles(parser, strPattern);
+}

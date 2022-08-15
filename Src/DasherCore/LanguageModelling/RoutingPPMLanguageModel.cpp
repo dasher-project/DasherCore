@@ -11,27 +11,19 @@
 using namespace Dasher;
 using namespace std;
 
-// Track memory leaks on Windows to the line that new'd the memory
-#ifdef _WIN32
-#ifdef _DEBUG
-#define DEBUG_NEW new( _NORMAL_BLOCK, THIS_FILE, __LINE__ )
-#define new DEBUG_NEW
-#undef THIS_FILE
-static char THIS_FILE[] = __FILE__;
-#endif
-#endif
+
 
 /////////////////////////////////////////////////////////////////////
 
 CRoutingPPMLanguageModel::CRoutingPPMLanguageModel(CSettingsUser *pCreator, const vector<symbol> *pBaseSyms, const vector<set<symbol> > *pRoutes, bool bRoutesContextSensitive)
-:CAbstractPPM(pCreator, pRoutes->size()-1, new CRoutingPPMnode(-1), GetLongParameter(LP_LM_MAX_ORDER)), NodesAllocated(0), m_NodeAlloc(8192), m_pBaseSyms(pBaseSyms), m_pRoutes(pRoutes), m_bRoutesContextSensitive(bRoutesContextSensitive) {
+:CAbstractPPM(pCreator, static_cast<int>(pRoutes->size())-1, new CRoutingPPMnode(-1), GetLongParameter(LP_LM_MAX_ORDER)), NodesAllocated(0), m_NodeAlloc(8192), m_pBaseSyms(pBaseSyms), m_pRoutes(pRoutes), m_bRoutesContextSensitive(bRoutesContextSensitive) {
   DASHER_ASSERT(pBaseSyms->size() >= pRoutes->size());
 }
 
 void CRoutingPPMLanguageModel::GetProbs(Context context, std::vector<unsigned int> &probs, int norm, int iUniform) const {
   const CPPMContext *ppmcontext = (const CPPMContext *)(context);
 
-  const int iNumSymbols(m_pBaseSyms->size()); //i.e., the #routes - so loop from i=1 to <iNumSymbols
+  const int iNumSymbols(static_cast<int>(m_pBaseSyms->size())); //i.e., the #routes - so loop from i=1 to <iNumSymbols
   probs.resize(iNumSymbols);
   
   unsigned int iToSpend = norm;
@@ -115,7 +107,7 @@ void CRoutingPPMLanguageModel::GetProbs(Context context, std::vector<unsigned in
     // which we haven't assigned to any route
     const set<symbol> &routes((*m_pRoutes)[i]);
     //divide it up evenly
-    int iLeft = routes.size();
+    int iLeft = static_cast<int>(routes.size());
     for (set<symbol>::iterator it = routes.begin(); it!=routes.end(); it++) {
       unsigned int p = baseProbs[i] / iLeft;
       probs[*it] += p;

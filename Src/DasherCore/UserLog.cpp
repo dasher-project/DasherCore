@@ -4,22 +4,8 @@
 #include <fstream>
 #include <cstring>
 
-#ifdef _WIN32
-#include <sys/timeb.h>
-#else
-#include <sys/time.h>
-#endif
 
-// Track memory leaks on Windows to the line that new'd the memory
-#ifdef _WIN32
-#ifdef _DEBUG_MEMLEAKS
-#define DEBUG_NEW new( _NORMAL_BLOCK, THIS_FILE, __LINE__ )
-#define new DEBUG_NEW
-#undef THIS_FILE
-static char THIS_FILE[] = __FILE__;
-#endif
-#endif
-
+using namespace std::chrono;
 using namespace Dasher;
 using namespace Dasher::Settings;
 
@@ -702,7 +688,7 @@ void CUserLog::InitMemberVars()
 
   m_strFilename           = "";
   m_pApplicationSpan      = NULL;
-  m_dLastMouseUpdate       = 0.0;
+  m_dLastMouseUpdate      = steady_clock::now();
   m_bSimple               = false;
   m_bDetailed             = false;
   m_pSimpleLogger         = NULL;    
@@ -819,27 +805,12 @@ CUserLogTrial* CUserLog::AddTrial()
 // See if the specified number of milliseconds has elapsed since the last mouse location update
 bool CUserLog::UpdateMouseLocation()
 {
-  //CFunctionLogger f1("CUserLog::UpdateMouseLocation", g_pLogger);
-
-#ifdef _WIN32
-  struct timeb sTimeBuffer;
-#else
-  struct timeval sTimeBuffer;
-  struct timezone sTimezoneBuffer;
-#endif
-
-#ifdef _WIN32
-  ftime(&sTimeBuffer);
-  double dTime = (sTimeBuffer.time * 1000.0) + sTimeBuffer.millitm;
-#else
-  gettimeofday(&sTimeBuffer, &sTimezoneBuffer);
-  double dTime = (sTimeBuffer.tv_sec * 1000.0) + (int)(sTimeBuffer.tv_usec / 1000);
-#endif
-
-  
-  if ((dTime - m_dLastMouseUpdate) > LOG_MOUSE_EVERY_MS)
+  //CFunctionLogger f1("CUserLog::UpdateMouseLocation", g_pLogger);  
+  const auto current_time =steady_clock::now();
+  double d_time = duration_cast<duration<double>>(current_time - m_dLastMouseUpdate).count();  //delta time in seconds
+  if ((d_time*1000) > LOG_MOUSE_EVERY_MS)
   {
-    m_dLastMouseUpdate = dTime;
+    m_dLastMouseUpdate = current_time;
     return true;
   }
   return false;

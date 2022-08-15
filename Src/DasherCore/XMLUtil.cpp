@@ -4,19 +4,11 @@
 #include <cstring>
 
 #include "XMLUtil.h"
+#include <fstream>
 
 #include <sys/types.h>
 #include <sys/stat.h>
 
-// Track memory leaks on Windows to the line that new'd the memory
-#ifdef _WIN32
-#ifdef _DEBUG
-#define DEBUG_NEW new( _NORMAL_BLOCK, THIS_FILE, __LINE__ )
-#define new DEBUG_NEW
-#undef THIS_FILE
-static char THIS_FILE[] = __FILE__;
-#endif
-#endif
 
 bool XMLUtil::IsWhiteSpace(char cLetter)
 {
@@ -48,7 +40,7 @@ string XMLUtil::StripWhiteSpace(const string& strText)
   while ((iStart < (int) strText.length()) && (IsWhiteSpace(strText[iStart])))
     iStart++;
 
-  int iEnd = strText.length() - 1;
+  int iEnd = static_cast<int>(strText.length()) - 1;
   while ((iEnd > 0) && (IsWhiteSpace(strText[iEnd])))
     iEnd--;
 
@@ -60,33 +52,9 @@ string XMLUtil::StripWhiteSpace(const string& strText)
 // Return a string containing the contents of a file
 string XMLUtil::LoadFile(const string& strFilename, unsigned int iSizeHint)
 {
-  string strResult = "";
-
-  char szBuffer[XML_UTIL_READ_BUFFER_SIZE];
-  FILE* fp = NULL;
-  fp = fopen(strFilename.c_str(), "r");
-  if (fp != NULL)
-  {
-#ifdef _WIN32
-    struct __stat64 buf;
-    int result;
-    result = _stat64(strFilename.c_str(), &buf);
-    strResult.reserve((unsigned long) buf.st_size + 256);
-#else
-    // On unix, we default to 128,000 bytes or whatever the caller passed in as a hint
-    strResult.reserve(iSizeHint);
-#endif
-
-    while (!feof(fp))
-    {
-      memset(szBuffer, 0, XML_UTIL_READ_BUFFER_SIZE);
-      fread(szBuffer, 1, XML_UTIL_READ_BUFFER_SIZE - 1, fp);
-      strResult += szBuffer;
-    }
-
-    fclose(fp);
-    fp = NULL;
-  }
+  std::ifstream ifs(strFilename);
+  string strResult((std::istreambuf_iterator<char>(ifs)), std::istreambuf_iterator<char>());
+	
 
   return strResult;
 }
@@ -108,8 +76,8 @@ string XMLUtil::GetElementString(const string& strTag, const string& strXML, boo
   strEnd += strTag;
   strEnd += ">";
 
-  int iPosStart = strXML.find(strStart);
-  int iPosEnd = strXML.find(strEnd);
+  int iPosStart = static_cast<int>(strXML.find(strStart));
+  int iPosEnd = static_cast<int>(strXML.find(strEnd));
 
   if ((iPosStart != -1) && (iPosEnd != -1))
   {
@@ -177,11 +145,8 @@ int64 XMLUtil::GetElementLongLong(const string& strTag, const string& strXML, bo
   {
     if (pFound != NULL)
       *pFound = true;
-#ifdef _WIN32
-    return _atoi64(strElement.c_str());
-#else
     return atoll(strElement.c_str());
-#endif
+
   }
   else
   {

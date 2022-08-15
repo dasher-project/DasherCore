@@ -4,13 +4,10 @@
 
 #include <cmath>
 #include <fstream>
+#include <chrono>
+#include <ctime>
 #include <iostream>
 
-#ifdef _WIN32
-#include <sys/timeb.h>
-#else
-#include <sys/time.h>
-#endif
 
 using namespace Dasher;
 
@@ -36,7 +33,7 @@ void CBasicLog::StopWriting(float dNats) {
 }
 
 void CBasicLog::AddSymbols(Dasher::VECTOR_SYMBOL_PROB* pVectorNewSymbolProbs, eUserLogEventType iEvent) {
-  m_iSymbolCount += pVectorNewSymbolProbs->size();
+  m_iSymbolCount += static_cast<int>(pVectorNewSymbolProbs->size());
 }
 
 void CBasicLog::DeleteSymbols(int iNumToDelete, eUserLogEventType iEvent) {
@@ -76,11 +73,6 @@ void CBasicLog::EndTrial() {
 }
 
 std::string CBasicLog::GetDateStamp() {
-  char* szTimeLine = NULL;
-  time_t t;
-
-  t = time(NULL);
-  szTimeLine = ctime(&t);
-
-  return std::string(szTimeLine).substr(0, 24);
+    auto datestamp = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());  //This is a very long format, should probably be replaced using put_time where its used.
+    return std::ctime(&datestamp);	
 }

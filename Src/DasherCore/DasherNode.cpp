@@ -28,15 +28,6 @@ using namespace Dasher;
 using namespace Opts;
 using namespace std;
 
-// Track memory leaks on Windows to the line that new'd the memory
-#ifdef _WIN32
-#ifdef _DEBUG
-#define DEBUG_NEW new( _NORMAL_BLOCK, THIS_FILE, __LINE__ )
-#define new DEBUG_NEW
-#undef THIS_FILE
-static char THIS_FILE[] = __FILE__;
-#endif
-#endif
 static int iNumNodes = 0;
 
 int Dasher::currentNumNodeObjects() {return iNumNodes;}
@@ -61,91 +52,10 @@ CDasherNode::~CDasherNode() {
 
 /////////////////////////////////////////////////////////////////////////////
 
-void CDasherNode::Get_string_under(const int iNormalization,const myint miY1,const myint miY2,const myint miMousex,const myint miMousey, vector<symbol> &vString) const
-{
-	// we are over (*this) node so add it to the string 
-	vString.push_back(m_Symbol);
-	
-	// look for children who might also be under the coords
-	if (m_ppChildren)
-	{
-		myint miRange=miY2-miY1;
-		unsigned int i;
-		for (i=1;i<m_iChildCount;i++) 
-		{
-			myint miNewy1=miY1+(miRange* Children()[i]->m_iLbnd)/iNormalization;
-			myint miNewy2=miY1+(miRange* Children()[i]->m_iHbnd)/iNormalization;
-			if (miMousey<miNewy2 && miMousey>miNewy1 && miMousex<miNewy2-miNewy1) 
-			{
-				Children()[i]->Get_string_under(iNormalization,miNewy1,miNewy2,miMousex,miMousey,vString);
-				return;
-			}
-		}
-	}
-	return;
-}
+/////////////////////////////////////////////////////////////////////////////
 
 /////////////////////////////////////////////////////////////////////////////
 
-CDasherNode * const CDasherNode::Get_node_under(int iNormalization,myint miY1,myint miY2,myint miMousex,myint miMousey) 
-{
-	if ( Children() ) 
-	{
-		myint miRange=miY2-miY1;
-//		m_iAge=0;
-		m_bAlive=true;
-		unsigned int i;
-		for (i=0;i<m_iChildCount;i++) 
-		{
-			CDasherNode* pChild = Children()[i];
-
-			myint miNewy1=miY1+(miRange*pChild->m_iLbnd)/iNormalization;
-			myint miNewy2=miY1+(miRange*pChild->m_iHbnd)/iNormalization;
-			if (miMousey<miNewy2 && miMousey>miNewy1 && miMousex<miNewy2-miNewy1) 
-				return pChild->Get_node_under(iNormalization,miNewy1,miNewy2,miMousex,miMousey);
-		}
-	}
-	return this;
-}
-
-/////////////////////////////////////////////////////////////////////////////
-
-void CDasherNode::OrphanChild(CDasherNode* pChild)
-{
-	DASHER_ASSERT ( Children() ) ;
-
-	int i; 
-	for (i=0;i< ChildCount(); i++) 
-	{
-		if ( Children()[i] != pChild )
-		{
-			Children()[i]->Delete_children();
-			delete Children()[i];
-		}
-
-	}
-	delete [] m_ppChildren;
-	m_ppChildren=0;
-	m_iChildCount=0;
-}
-
-  pChild->m_pParent=NULL;
-
-// Delete nephews
-void CDasherNode::DeleteNephews(int iChild)
-{
-	DASHER_ASSERT ( Children() ) ;
-
-	int i; 
-	for (i=0;i< ChildCount(); i++) 
-	{
-		if (i != iChild)
-		{
-			Children()[i]->Delete_children();
-		}
-
-	}
-}
 
 // Delete nephews of the child which has the specified symbol
 // TODO: Need to allow for subnode
@@ -160,24 +70,9 @@ void CDasherNode::DeleteNephews(CDasherNode *pChild) {
   }
 }
 
-// TODO: Need to allow for subnodes
-// TODO: Incorporate into above routine
-void CDasherNode::Delete_children() {
-//  std::cout << "Start: " << this << std::endl;
-
 void CDasherNode::Delete_children() 
 {
-	if (m_ppChildren) 
-	{
-		for (int i=0;i<m_iChildCount;i++) 
-		{
-		     m_ppChildren[i]->Delete_children();
-		     delete m_ppChildren[i];
-		}
-		delete [] m_ppChildren;
-		m_ppChildren=0;	
-		m_iChildCount=0;
-	}
+    //TODO: REIMPLEMENT
 }
 
 int CDasherNode::MostProbableChild() {

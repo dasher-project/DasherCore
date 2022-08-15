@@ -3,15 +3,7 @@
 #include <cstring>
 #include "UserLogTrial.h"
 
-// Track memory leaks on Windows to the line that new'd the memory
-#ifdef _WIN32
-#ifdef _DEBUG_MEMLEAKS
-#define DEBUG_NEW new( _NORMAL_BLOCK, THIS_FILE, __LINE__ )
-#define new DEBUG_NEW
-#undef THIS_FILE
-static char THIS_FILE[] = __FILE__;
-#endif
-#endif
+
 
 CUserLogTrial::CUserLogTrial(const string& strCurrentTrialFilename)
 {
@@ -736,7 +728,7 @@ string CUserLogTrial::GetStatsXML(const string& strPrefix, const string& strText
 
   // We want the number of symbols which might differ
   // from the actual length of the text history.
-  int iNumChars = m_vHistory.size();
+  int iNumChars = static_cast<int>(m_vHistory.size());
   sprintf(m_szTempBuffer, "%d", iNumChars);
   strResult += m_szTempBuffer;
   strResult += "</Chars>\n";

@@ -1,6 +1,7 @@
 // SocketInputBase.cpp
 //
 // (C) Copyright Seb Wills 2005
+#ifndef _WIN32
 
 #include "../Common/Common.h"
 
@@ -318,3 +319,4 @@ bool CSocketInputBase::GetSettings(SModuleSettings **pSettings, int *iCount) {
 
   return true;
 }
+#endif

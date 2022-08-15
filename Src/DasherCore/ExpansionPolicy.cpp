@@ -138,7 +138,7 @@ void AmortizedPolicy::trim() {
 #ifdef DEBUG_TRIM
   vector<pair<double,CDasherNode *> > backup = sExpand; //yep, copy the lot
 #endif
-  unsigned int start = 0, stop = sExpand.size()-1;
+  unsigned int start = 0, stop = static_cast<unsigned int>(sExpand.size())-1;
   while (true) {
     //at this point, we assume we know only that elements [start - stop] need examining....
     unsigned int low = start, high = stop;

@@ -144,10 +144,10 @@ void CTwoPushDynamicFilter::updateBitrate(double dBitrate) {
   
   //the boundaries of the guide areas (around the outer markers) are
   // then computed from the number of bits _since_ the inner marker:
-  m_aaiGuideAreas[0][0] = 2048 - up*exp(m_dMaxShortTwoPushTime);
-  m_aaiGuideAreas[0][1] = 2048 - up*exp(m_dMinShortTwoPushTime);
-  m_aaiGuideAreas[1][0] = 2048 + down*exp(m_dMinLongTwoPushTime);
-  m_aaiGuideAreas[1][1] = 2048 + down*exp(m_dMaxLongTwoPushTime);
+  m_aaiGuideAreas[0][0] = 2048 - static_cast<int>(up*exp(m_dMaxShortTwoPushTime));
+  m_aaiGuideAreas[0][1] = 2048 - static_cast<int>(up*exp(m_dMinShortTwoPushTime));
+  m_aaiGuideAreas[1][0] = 2048 + static_cast<int>(down*exp(m_dMinLongTwoPushTime));
+  m_aaiGuideAreas[1][1] = 2048 + static_cast<int>(down*exp(m_dMaxLongTwoPushTime));
 //cout << "Short " << m_aaiGuideAreas[0][0] << " to " << m_aaiGuideAreas[0][1] << ", Long " << m_aaiGuideAreas[1][0] << " to " << m_aaiGuideAreas[1][1];
 }
 
@@ -226,10 +226,10 @@ void CTwoPushDynamicFilter::TimerImpl(unsigned long iTime, CDasherView *m_pDashe
     double dDownDist = exp( dDownBits ) * dDown;
     // (note it's actually slightly more complicated even than that, we have to add in m_dLagBits too!)
     
-    m_aiTarget[0] = dUpDist * exp(m_dLagBits);
-    m_aiTarget[1] = -dDownDist * exp(m_dLagBits);
-    m_bDecorationChanged |= doSet(m_aiMarker[0], 2048 - exp(m_dLagBits + dLogGrowth) * dUp);
-    m_bDecorationChanged |= doSet(m_aiMarker[1], 2048 + exp(m_dLagBits + dLogGrowth) * dDown);
+    m_aiTarget[0] = static_cast<int>(dUpDist * exp(m_dLagBits));
+    m_aiTarget[1] = static_cast<int>(-dDownDist * exp(m_dLagBits));
+    m_bDecorationChanged |= doSet(m_aiMarker[0], static_cast<const int>(2048 - exp(m_dLagBits + dLogGrowth) * dUp));
+    m_bDecorationChanged |= doSet(m_aiMarker[1], static_cast<const int>(2048 + exp(m_dLagBits + dLogGrowth) * dDown));
     if (dLogGrowth > m_dMaxLongTwoPushTime) {
 //cout << " growth " << dLogGrowth << " - reversing" << std::endl;
       //button pushed, but then waited too long.

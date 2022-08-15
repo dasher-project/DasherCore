@@ -26,15 +26,7 @@
 
 using namespace Dasher;
 using namespace std;
-// Track memory leaks on Windows to the line that new'd the memory
-#ifdef _WIN32
-#ifdef _DEBUG_MEMLEAKS
-#define DEBUG_NEW new( _NORMAL_BLOCK, THIS_FILE, __LINE__ )
-#define new DEBUG_NEW
-#undef THIS_FILE
-static char THIS_FILE[] = __FILE__;
-#endif
-#endif
+
 
 CControlBase::CControlBase(CSettingsUser *pCreateFrom, CDasherInterfaceBase *pInterface, CNodeCreationManager *pNCManager)
   : CSettingsUser(pCreateFrom), m_pInterface(pInterface), m_pNCManager(pNCManager), m_pScreen(NULL), m_pRoot(NULL) {
@@ -106,7 +98,7 @@ void CControlBase::CContNode::PopulateChildren() {
 
   CDasherNode *pNewNode;
 
-  const unsigned int iNChildren( m_pTemplate->successors.size() );
+  const unsigned int iNChildren(static_cast<unsigned int>(m_pTemplate->successors.size()) );
   unsigned int iLbnd(0), iIdx(0);
       int newOffset = m_pTemplate->calculateNewOffset(this, offset());
 
@@ -129,7 +121,7 @@ void CControlBase::CContNode::PopulateChildren() {
 }
 
 int CControlBase::CContNode::ExpectedNumChildren() {
-  return m_pTemplate->successors.size();
+  return static_cast<int>(m_pTemplate->successors.size());
 }
 
 void CControlBase::CContNode::Output() {

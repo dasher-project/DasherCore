@@ -183,7 +183,7 @@ void CGameModule::DecorateView(unsigned long lTime, CDasherView *pView, CDasherM
     m_pInterface->GetActiveInputMethod()->pause();
     m_ulTotalTime += (lTime - m_ulSentenceStartTime);
     m_dTotalNats += (pModel->GetNats() - m_dSentenceStartNats);
-    m_uiTotalSyms += m_vTargetSymbols.size();
+    m_uiTotalSyms += static_cast<unsigned int>(m_vTargetSymbols.size());
     if (!GenerateChunk()) {
       m_pInterface->Message("Game mode sentence file finished!",true);
       //note this deletes the 'this' pointer...
@@ -265,7 +265,7 @@ myint CGameModule::ComputeBrachCenter() {
   
   // It comes from the pythagorean relation: iCrossX^2 + (iCenterY - iCrossY)^2 = r^2
   // where r is the radius of the circle, r = abs(iTargetY-iCenterY)
-  return 0.5*(double(iCrossX*iCrossX)/double(iCrossY-m_iTargetY)+iCrossY+m_iTargetY);
+  return static_cast<myint>(0.5*(double(iCrossX*iCrossX)/double(iCrossY-m_iTargetY)+iCrossY+m_iTargetY));
 }
 
 bool CGameModule::GenerateChunk() {

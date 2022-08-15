@@ -2,23 +2,10 @@
 #include "../Common/Common.h"
 
 #include <cstring>
+#include <chrono>
+#include <ctime>
 #include "TimeSpan.h"
 
-#ifdef _WIN32
-#include <sys/timeb.h>
-#else
-#include <sys/time.h>
-#endif
-
-#ifdef _WIN32
-// In order to track leaks to line number, we need this at the top of every file
-#include "MemoryLeak.h"
-#ifdef _DEBUG
-#define new DEBUG_NEW
-#undef THIS_FILE
-static char THIS_FILE[] = __FILE__;
-#endif
-#endif
 
 CTimeSpan::CTimeSpan(const string& strName, bool bAddDate)
 {
@@ -50,10 +37,10 @@ CTimeSpan::~CTimeSpan()
 // elapsed time.
 string CTimeSpan::GetXML(const string& strPrefix, bool bSinglePointInTime)
 {
-  string strResult = "";
+  string strResult;
 
   // Only stop if we haven't called Stop() explicitly
-  if (m_strEndTime.size() == 0)
+  if (m_strEndTime.empty())
     Stop();
 
   strResult += strPrefix;
@@ -109,43 +96,14 @@ string CTimeSpan::GetXML(const string& strPrefix, bool bSinglePointInTime)
 
 string CTimeSpan::GetTimeStamp()
 {
-  string strTimeStamp = "";
-#ifdef _WIN32
-    struct timeb sTimeBuffer;
-#else
-    struct timeval sTimeBuffer;
-    struct timezone sTimezoneBuffer;
-    time_t t;
-#endif
-    char* szTimeLine = NULL;
-
-#ifdef _WIN32
-    ftime(&sTimeBuffer);
-    szTimeLine = ctime(&(sTimeBuffer.time));
-#else
-    gettimeofday(&sTimeBuffer, &sTimezoneBuffer);
-    t = sTimeBuffer.tv_sec;
-    szTimeLine = ctime(&t);
-#endif
-  
-  if ((szTimeLine != NULL) && (strlen(szTimeLine) > 18))
-  {
-    for (int i = 11; i < 19; i++)
-      strTimeStamp += szTimeLine[i];
-    strTimeStamp += ".";
-    char szMs[16];
-#ifdef _WIN32
-    sprintf(szMs, "%d", sTimeBuffer.millitm);
-#else
-    sprintf(szMs, "%d", static_cast<int>(sTimeBuffer.tv_usec / 1000));
-#endif
-    if (strlen(szMs) == 1)
-      strTimeStamp += "00";
-    else if (strlen(szMs) == 2)
-      strTimeStamp += "0";
-    strTimeStamp += szMs;
-  }
-
+  auto now = std::chrono::system_clock::now();
+  auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch()) % 1000;
+  auto time_t = std::chrono::system_clock::to_time_t(now);
+  std::tm time_tm = *std::localtime(&time_t);
+  char buf[80];
+  std::strftime(buf, sizeof(buf), "%H:%M:%S", &time_tm);
+  std:: string strTimeStamp = (std::string(buf) += ".") += ms.count();
+	
   return strTimeStamp;
 }
 

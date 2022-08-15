@@ -28,6 +28,7 @@
 #include "FileLogger.h"
 #include <string>
 #include <vector>
+#include <chrono>
 #include "SimpleTimer.h"
 #include "TimeSpan.h"
 #include "UserLogTrial.h"
@@ -109,21 +110,21 @@ public:
   VECTOR_VECTOR_DENSITY_GRIDS GetMouseDensity(int iGridSize);
 
 protected:
-  CTimeSpan*                  m_pApplicationSpan;         // How long the application has been up
-  string                      m_strFilename;              // Name we output our XML file to
-  VECTOR_USER_LOG_TRIAL_PTR   m_vpTrials;                 // Holds object for each trial in this session
-  VECTOR_USER_LOG_PARAM_PTR   m_vParams;                  // Stores general parameters we want in the XML
-  double                      m_dLastMouseUpdate;         // When the last mouse update was pushed
-  bool                        m_bSimple;                  // Are we outputting the simple running log file?
-  bool                        m_bDetailed;                // Are we outputting per session detailed logs?
-  CFileLogger*                m_pSimpleLogger;            // Used to log the simple running log file
-  bool                        m_bIsWriting;               // Has StartWriting() been called but not StopWriting()?
-  bool                        m_bInitIsDone;              // Set to true once the initialization of default values is done
-  WindowSize                  m_sCanvasCoordinates;       // The size of our canvas from the last call to AddCanvasSize()
-  WindowSize                  m_sWindowCoordinates;       // Records the window coordinates at the start of navigation
-  bool                        m_bNeedToWriteCanvas;       // Do we need to write new canvas coordinates on the next navigation?
-  int                         m_iLevelMask;               // What log level mask we were created with.
-  string                      m_strCurrentTrialFilename;  // Where info about the current subject's trial is stored
+  CTimeSpan*								            m_pApplicationSpan;         // How long the application has been up
+  string									              m_strFilename;              // Name we output our XML file to
+  VECTOR_USER_LOG_TRIAL_PTR					    m_vpTrials;                 // Holds object for each trial in this session
+  VECTOR_USER_LOG_PARAM_PTR					    m_vParams;                  // Stores general parameters we want in the XML
+  std::chrono::steady_clock::time_point	m_dLastMouseUpdate;         // When the last mouse update was pushed
+  bool										              m_bSimple;                  // Are we outputting the simple running log file?
+  bool										              m_bDetailed;                // Are we outputting per session detailed logs?
+  CFileLogger*								          m_pSimpleLogger;            // Used to log the simple running log file
+  bool										              m_bIsWriting;               // Has StartWriting() been called but not StopWriting()?
+  bool										              m_bInitIsDone;              // Set to true once the initialization of default values is done
+  WindowSize								            m_sCanvasCoordinates;       // The size of our canvas from the last call to AddCanvasSize()
+  WindowSize								            m_sWindowCoordinates;       // Records the window coordinates at the start of navigation
+  bool										              m_bNeedToWriteCanvas;       // Do we need to write new canvas coordinates on the next navigation?
+  int										                m_iLevelMask;               // What log level mask we were created with.
+  string									              m_strCurrentTrialFilename;  // Where info about the current subject's trial is stored
 
   // Used whenever we need a temporary char* buffer
   static const int            TEMP_BUFFER_SIZE = 4096;

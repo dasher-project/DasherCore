@@ -3,6 +3,8 @@
 // (C) Copyright Seb Wills 2005
 //
 // Abstract base class for socket input: parent of non-abstract classes in each implementation (Windows, Linux, ...),
+#ifndef _WIN32
+
 
 #ifndef __socketinputbase_h__
 #define __socketinputbase_h__
@@ -133,4 +135,4 @@ protected:
 #endif
 
 
-
+#endif

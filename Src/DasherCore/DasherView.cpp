@@ -26,15 +26,7 @@
 using namespace Dasher;
 using std::vector;
 
-// Track memory leaks on Windows to the line that new'd the memory
-#ifdef _WIN32
-#ifdef _DEBUG_MEMLEAKS
-#define DEBUG_NEW new( _NORMAL_BLOCK, THIS_FILE, __LINE__ )
-#define new DEBUG_NEW
-#undef THIS_FILE
-static char THIS_FILE[] = __FILE__;
-#endif
-#endif
+
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -58,8 +50,8 @@ void CDasherView::DasherSpaceLine(myint x1, myint y1, myint x2, myint y2, int iW
   vPoints.push_back(p);
   DasherLine2Screen(x1,y1,x2,y2,vPoints);
   CDasherScreen::point *pts = new CDasherScreen::point[vPoints.size()];
-  for (int i = vPoints.size(); i-->0; ) pts[i] = vPoints[i];
-  Screen()->Polyline(pts, vPoints.size(), iWidth, iColor);
+  for (int i = static_cast<int>(vPoints.size()); i-->0; ) pts[i] = vPoints[i];
+  Screen()->Polyline(pts, static_cast<int>(vPoints.size()), iWidth, iColor);
 }
 
 bool CDasherView::ClipLineToVisible(myint &x1, myint &y1, myint &x2, myint &y2) {

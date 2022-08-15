@@ -49,6 +49,10 @@ namespace Dasher {
 /// so can create/manipulate instances.)
 class Dasher::CAlphIO : public AbstractXMLParser {
 public:
+	//Adding definitions of functions implemented in the .cpp 
+	CAlphIO(CMessageDisplay* pMsgs);
+	std::string CAlphIO::GetDefault();
+	CAlphIO::~CAlphIO();
 	// This structure completely describes the characters used in alphabet
 	struct AlphInfo
 	{
@@ -85,7 +89,7 @@ public:
 	
 	CAlphIO(std::string SystemLocation, std::string UserLocation, std::vector<std::string> Filenames);
 	void GetAlphabets(std::vector< std::string >* AlphabetList) const;
-	const AlphInfo& GetInfo(const std::string& AlphID);
+	const CAlphInfo *GetInfo(const std::string& AlphID) const;
 	void SetInfo(const AlphInfo& NewInfo);
 	void Delete(const std::string& AlphID);
 private:

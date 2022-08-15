@@ -29,16 +29,6 @@
 
 using namespace Dasher;
 
-// Track memory leaks on Windows to the line that new'd the memory
-#ifdef _WIN32
-#ifdef _DEBUG_MEMLEAKS
-#define DEBUG_NEW new( _NORMAL_BLOCK, THIS_FILE, __LINE__ )
-#define new DEBUG_NEW
-#undef THIS_FILE
-static char THIS_FILE[] = __FILE__;
-#endif
-#endif
-
 
 CCTWLanguageModel::CCTWLanguageModel(int iNumSyms) : CLanguageModel(iNumSyms) {
 
@@ -48,7 +38,7 @@ CCTWLanguageModel::CCTWLanguageModel(int iNumSyms) : CLanguageModel(iNumSyms) {
 	alpha = 14;		// 2: KT-estimator, 1: Laplace estimator, 14 = found by P.A.J. Volf to be 'good' for text
 	MaxNrNodes = 4194304; // Max number of CCTWNodes in the table, trade-off between compression and memory usage. 2^22 = 4M
     TotalNodes = 0; // to keep track of how many nodes are created in the table.
-	MaxFill = 0.9;  // Threshold to decide when to freeze the tree
+	MaxFill = 0.9f;  // Threshold to decide when to freeze the tree
 	Failed = 0;		// keep track of how many nodes couldn't be found or created //debug
 	Frozen = false; // to indicate if there is still room in the array of CCTWNodes
 	MaxCount = 255; // Maximum value for the counts for count-halving
@@ -171,8 +161,8 @@ void CCTWLanguageModel::UpdatePath(int bit, int Update, int ValidDepth, int* & i
 				else
 					CountZero++;
 			}
-			Tree[DeepestIndex].a = CountZero;
-			Tree[DeepestIndex].b = CountOne;
+			Tree[DeepestIndex].a = static_cast<unsigned char>(CountZero);
+			Tree[DeepestIndex].b = static_cast<unsigned char>(CountOne);
 		}	// end if update
 	} // end if/else, deepest index done
 	// now all the internal nodes, including the rootnode
@@ -209,8 +199,8 @@ void CCTWLanguageModel::UpdatePath(int bit, int Update, int ValidDepth, int* & i
 					CountOne++;
 
 				Scale(PeBlockOne, PwCBlockOne);
-				Tree[index[i]].Pe = PeBlockOne; // conversion after scaling, no problem
-				Tree[index[i]].PwChild = PwCBlockOne;
+				Tree[index[i]].Pe = static_cast<unsigned short>(PeBlockOne); // conversion after scaling, no problem
+				Tree[index[i]].PwChild = static_cast<unsigned short>(PwCBlockOne);
 			}
 			else // bit = 0
 			{
@@ -223,15 +213,15 @@ void CCTWLanguageModel::UpdatePath(int bit, int Update, int ValidDepth, int* & i
 					CountZero++;
 
 				Scale(PeBlockZero, PwCBlockZero);
-				Tree[index[i]].Pe = PeBlockZero;
-				Tree[index[i]].PwChild = PwCBlockZero;
+				Tree[index[i]].Pe = static_cast<unsigned short>(PeBlockZero);
+				Tree[index[i]].PwChild = static_cast<unsigned short>(PwCBlockZero);
 			}
-			Tree[index[i]].a = CountZero;
-			Tree[index[i]].b = CountOne;
+			Tree[index[i]].a = static_cast<unsigned char>(CountZero);
+			Tree[index[i]].b = static_cast<unsigned char>(CountOne);
 		} // end if update
 	}
-	P0 = GammaZero; // Gammas are already scaled back to 16 bits
-	P1 = GammaOne;
+	P0 = static_cast<unsigned short>(GammaZero); // Gammas are already scaled back to 16 bits
+	P1 = static_cast<unsigned short>(GammaOne);
 }
 
 int CCTWLanguageModel::FindPath(CCTWContext & context, char NewChar, int phase, int create, int* & index)
@@ -294,7 +284,7 @@ int CCTWLanguageModel::FindPath(CCTWContext & context, char NewChar, int phase, 
 		return i+1;				// indicate node could not be found/created for this phase
       } //if !found
     } // for i contextsize
-return context.Context.size(); // all nodes on the path found/created
+return static_cast<int>(context.Context.size()); // all nodes on the path found/created
 } // end findpath
 
 
@@ -402,14 +392,14 @@ void CCTWLanguageModel::GetProbs(Context context, std::vector<unsigned int> &Pro
 				IntervalO = IntervalO + (MinInterval-IntervalO);
 			}
 
-			Interval[(1<<(phase+1))+ 2*steps - 1] = IntervalZ;
-			Interval[(1<<(phase+1))+ 2*steps] = IntervalO;
+			Interval[(1<<(phase+1))+ 2*steps - 1] = static_cast<unsigned short int>(IntervalZ);
+			Interval[(1<<(phase+1))+ 2*steps] = static_cast<unsigned short int>(IntervalO);
 		} // for steps
 	} // for phase
 	delete [] Index;
 
 	// Copy the intervals associated with the actual symbols to the vector Probs.
-	Probs.assign((Interval.end()-(1<<NrPhases)), (Interval.end()-(1<<NrPhases)+iNumSymbols));
+	Probs.assign((Interval.end()-(1ULL<NrPhases)), (Interval.end()-(1ULL<<NrPhases)+iNumSymbols));
 	pLeft +=Probs[0]; //symbol 0 is a special dummy symbol, should get prob. 0
 	Probs[0] = 0;
 
@@ -444,7 +434,7 @@ bool CCTWLanguageModel::WriteToFile(std::string strFilename, std::string Alphabe
 	GenericHeader.iLMID = 5; // ID of the language model, 5 for CTW
 	GenericHeader.iLMMinVersion = 1; //Minimum backwards compatible version for the language model
 	GenericHeader.iLMVersion = 1; // Version number of the language model, version 1 is the stored hashtable, april 2007
-	GenericHeader.iHeaderSize = sizeof(SLMFileHeader) + AlphabetName.length(); // Total size of header (including variable length alphabet name)
+	GenericHeader.iHeaderSize = sizeof(SLMFileHeader) + static_cast<unsigned short>(AlphabetName.length()); // Total size of header (including variable length alphabet name)
 
 	FILE *OutputFile;
 	OutputFile = fopen(strFilename.c_str(), "wb");

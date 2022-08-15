@@ -1,10 +1,12 @@
 #include "XmlSettingsStore.h"
 #include "DasherInterfaceBase.h"
+#include "FileUtils.h"
 
 #include <iostream>
 #include <fstream>
 #include <string.h>
 #include <algorithm>
+
 
 
 namespace Dasher {
@@ -23,12 +25,11 @@ bool Read(const std::map<std::string, T> values, const std::string& key,
 
 }  // namespace
 
-XmlSettingsStore::XmlSettingsStore(const std::string& filename, CFileUtils* fileUtils,
-                                   CMessageDisplay* pDisplay)
-    : AbstractXMLParser(pDisplay), filename_(filename),fileutils_(fileUtils) {}
+XmlSettingsStore::XmlSettingsStore(const std::string& filename, CMessageDisplay* pDisplay)
+    : AbstractXMLParser(pDisplay), filename_(filename) {}
 
 void XmlSettingsStore::Load() {
-  fileutils_->ScanFiles(this, filename_);
+  Dasher::FileUtils::ScanFiles(this, filename_);
   // Load all the settings or create defaults for the ones that don't exist.
   // The superclass 'ParseFile' saves default settings if not found.
   mode_ = EXPLICIT_SAVE;
@@ -97,7 +98,7 @@ bool XmlSettingsStore::Save() {
           << "\"/>\n";
     }
     out << "</settings>\n";
-    return fileutils_->WriteUserDataFile(filename_, out.str(),false);
+    return Dasher::FileUtils::WriteUserDataFile(filename_, out.str(),false);
 
 }
 

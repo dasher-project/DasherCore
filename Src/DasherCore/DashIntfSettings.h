@@ -37,7 +37,7 @@ namespace Dasher {
 class CDashIntfSettings : public CDasherInterfaceBase {
 public:
 
-	CDashIntfSettings(CSettingsStore *pSettingsStore, CFileUtils* fileUtils);
+	CDashIntfSettings(CSettingsStore *pSettingsStore);
 
   CSettingsUser* GetSettingsUser() { return this; }
   bool GetBoolParameter(int iParameter) const;

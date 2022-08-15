@@ -22,15 +22,7 @@
 using namespace Dasher;
 using namespace std;
 
-// Track memory leaks on Windows to the line that new'd the memory
-#ifdef _WIN32
-#ifdef _DEBUG
-#define DEBUG_NEW new( _NORMAL_BLOCK, THIS_FILE, __LINE__ )
-#define new DEBUG_NEW
-#undef THIS_FILE
-static char THIS_FILE[] = __FILE__;
-#endif
-#endif
+
 
 #define UNKNOWN_SYMBOL 0
 
@@ -87,7 +79,7 @@ void CAlphabetMap::SymbolStream::readMore() {
     DASHER_ASSERT(in.gcount() == 1024-len);
     len = 1024;
   } else {
-    len+=in.gcount();
+    len+= static_cast<off_t>(in.gcount());
     DASHER_ASSERT(len<1024);
     //next attempt to read more will fail.
   }
