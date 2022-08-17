@@ -51,8 +51,8 @@ class Dasher::CAlphIO : public AbstractXMLParser {
 public:
 	//Adding definitions of functions implemented in the .cpp 
 	CAlphIO(CMessageDisplay* pMsgs);
-	std::string CAlphIO::GetDefault();
-	CAlphIO::~CAlphIO();
+	std::string GetDefault();
+	~CAlphIO();
 	// This structure completely describes the characters used in alphabet
 	struct AlphInfo
 	{
