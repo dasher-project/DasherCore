@@ -44,10 +44,24 @@ using namespace Opts;
 // we can always override if necessary.
 
 /////////////////////////////////////////////////////////////////////////////
+// Functions reimplemented from description
 
-/////////////////////////////////////////////////////////////////////////////
+//CDasherViewSquare::HandleEvent(int)
+//- Check, if the parameter is either LP_MARGIN_WIDTH, BP_NONLINEAR_Y, LP_NONLINEAR_X or LP_GEOMETRY
+//- if so, invalidate the VisibleRegionand set the scale factor
+//- For all other events do nothing
 
-/////////////////////////////////////////////////////////////////////////////
+
+void CDasherViewSquare::HandleEvent(int iParameter) {
+    if(iParameter == LP_MARGIN_WIDTH ||
+       iParameter == BP_NONLINEAR_Y ||
+       iParameter == LP_NONLINEAR_X ||
+       iParameter == LP_GEOMETRY) {
+        m_bVisibleRegionValid = false;
+        SetScaleFactor();
+    }
+}
+
 
 /////////////////////////////////////////////////////////////////////////////
 

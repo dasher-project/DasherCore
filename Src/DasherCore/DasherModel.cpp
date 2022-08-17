@@ -77,6 +77,15 @@ CDasherModel::~CDasherModel() {
   }
 }
 
+//Function reimplemented from description:
+//CDasherModel::ClearScheduledSteps(void)
+//- Clears the GotoQueue
+
+void CDasherModel::ClearScheduledSteps() {
+    m_deGotoQueue.clear();
+}
+
+
 void CDasherModel::Make_root(CDasherNode *pNewRoot) {
   //  std::cout << "Make root" << std::endl;
 
