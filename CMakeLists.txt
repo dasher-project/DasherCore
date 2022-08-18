@@ -4,7 +4,7 @@ project("DasherCore")
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-add_compile_definitions(HAVE_ROUND XML_STATIC _CRT_SECURE_NO_WARNINGS)
+add_compile_definitions(HAVE_ROUND XML_STATIC _CRT_SECURE_NO_WARNINGS HAVE_OWN_FILEUTILS)
 set(CMAKE_SUPPRESS_REGENERATION true)
 
 ###############################

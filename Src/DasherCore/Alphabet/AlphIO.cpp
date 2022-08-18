@@ -306,6 +306,48 @@ void CAlphIO::XmlStartHandler(const XML_Char* name, const XML_Char** atts) {
         ReadCharAtts(atts, *(InputInfo->StartConvertCharacter));
         return;
     }
+
+    //Reimplemented according to description:
+    //[...]
+    //<convert d = "" t = "" b = "" / >
+    //    initializes the InputInfo->StartConvertCharacter and parses it as a normal character
+    //    <protect d = "" t = "" b = "" / >
+    //    initializes the InputInfo->EndConvertCharacter and parses it as a normal character
+    //    <context default = "" / >
+    //    sets the InputInfo->m_strDefaultContext to the passed attribute
+    //    <s d = "" t = "" f = "" b = "" / >
+    //    Is either a free floating character or part of a group
+    //    Thus it is always counted to either the global iNumChildNodes or the iNumChildNodes of the last seen group, if any available
+    //    A new entry in the Characters list is addedand filled ia ReadCharAtts()
+    //    * /
+
+    //assumed to be analogous to "convert"
+    if (strcmp(name, "protect") == 0) { 
+        if (!InputInfo->StartConvertCharacter) InputInfo->EndConvertCharacter = new CAlphInfo::character();
+        ReadCharAtts(atts, *(InputInfo->EndConvertCharacter));
+        return;
+    }
+
+    //
+    if (strcmp(name, "context") == 0) {
+        while (*atts != 0) {
+            InputInfo->m_strDefaultContext = *(atts + 1);
+            atts += 2;
+        }
+    }
+    if (strcmp(name, "s") == 0) {
+        //Groups are stored in m_vGroups:
+        if (m_vGroups.empty()) {
+            InputInfo->iNumChildNodes++;
+        }
+        else {
+            m_vGroups.back()->iNumChildNodes++;
+        }
+
+        auto ch = new CAlphInfo::character();
+        InputInfo->m_vCharacters.push_back(*ch);
+        ReadCharAtts(atts, (InputInfo->m_vCharacters.back()));
+    }
 }
 
 
@@ -390,6 +432,7 @@ void CAlphIO::XmlEndHandler(const XML_Char *name) {
       //child groups were added (to linked list) in reverse order. Put them in (iStart/iEnd) order...
       Reverse(finished->pChild);
     }
+
     return;
   }
 }
