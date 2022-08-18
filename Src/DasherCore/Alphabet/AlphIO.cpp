@@ -323,7 +323,7 @@ void CAlphIO::XmlStartHandler(const XML_Char* name, const XML_Char** atts) {
 
     //assumed to be analogous to "convert"
     if (strcmp(name, "protect") == 0) { 
-        if (!InputInfo->StartConvertCharacter) InputInfo->EndConvertCharacter = new CAlphInfo::character();
+        if (!InputInfo->EndConvertCharacter) InputInfo->EndConvertCharacter = new CAlphInfo::character();
         ReadCharAtts(atts, *(InputInfo->EndConvertCharacter));
         return;
     }

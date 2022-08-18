@@ -4,8 +4,19 @@ project("DasherCore")
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-add_compile_definitions(HAVE_ROUND XML_STATIC _CRT_SECURE_NO_WARNINGS HAVE_OWN_FILEUTILS)
+add_compile_definitions(HAVE_ROUND XML_STATIC _CRT_SECURE_NO_WARNINGS)
 set(CMAKE_SUPPRESS_REGENERATION true)
+
+option(DASHER_HAVE_OWN_FILEUTILS "Set to true if you provide your own FileUtils implementation" OFF)
+if(${DASHER_HAVE_OWN_FILEUTILS})
+	add_compile_definitions(HAVE_OWN_FILEUTILS)
+else()
+	if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+		link_libraries(c++fs) #needed for std::filesystem with clang
+	elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+		link_libraries(stdc++fs) #needed for std::filesystem with gcc
+	endif()
+endif()
 
 ###############################
 # Building Expat Library
