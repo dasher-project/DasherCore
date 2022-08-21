@@ -130,8 +130,10 @@ bool CAlphIO::ParseFile(const std::string &strPath, bool bUser)
 
 	for (pugi::xml_node alphabet : alphabets)
     {
+		if(std::strcmp(alphabet.name(), "alphabet") != 0) continue; // a non <alphabet ...> node
+
 	    CAlphInfo* CurrentAlphabet = new CAlphInfo();
-        CurrentAlphabet->Mutable = isUser();
+        CurrentAlphabet->Mutable = bUser;
 		CurrentAlphabet->LanguageCode = language_code;
 		CurrentAlphabet->AlphID = alphabet.attribute("name").as_string();
 		CurrentAlphabet->m_strCtxChar = alphabet.attribute("escape").as_string();

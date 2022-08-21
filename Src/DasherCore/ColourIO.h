@@ -6,8 +6,7 @@
 //
 /////////////////////////////////////////////////////////////////////////////
 
-#ifndef __ColourIO_h__
-#define __ColourIO_h__
+#pragma once
 
 #include "DasherTypes.h"
 
@@ -21,50 +20,41 @@ namespace Dasher {
   class CColourIO;
 }
 
-
-/// \defgroup Colours Colour scheme information
-/// @{
-/// Class for reading in colour-scheme definitions, and storing all read schemes
-/// in a list.
+// Class for reading in color-scheme definitions, and storing all read schemes in a list.
 class Dasher::CColourIO : public AbstractXMLParser {
 public:
-  virtual ~CColourIO() = default;
-    // This structure completely describes the characters used in alphabet
-  struct ColourInfo {
-    // Basic information
-    std::string ColourID;
-    bool Mutable;               // If from user we may play. If from system defaults this is immutable. User should take a copy.
+	///Construct a new ColourIO. It will have only a 'default' colour scheme;
+	/// further schemes may be loaded in by calling the Parse... methods inherited
+	/// from Abstract[XML]Parser.
+	CColourIO(CMessageDisplay *pMsgs);
+	virtual ~CColourIO() = default;
 
-    // TODO: It would make a lot more sense if this was a vector of triples rather than three vectors
-    // Complete description of the alphabet:
-    std::vector < int >Reds;
-    std::vector < int >Greens;
-    std::vector < int >Blues;
-  };
+	struct ColourInfo {
+		struct PaletteColor
+		{
+			int Red = 0;
+			int Green = 0;
+			int Blue = 0;
+			PaletteColor(int Red, int Blue, int Green) : Red(Red), Green(Green), Blue(Blue){};
+		};
+
+		std::string ColourID;
+		bool Mutable = false; // If from user we may play. If from system defaults this is immutable. User should take a copy.
+		std::vector<PaletteColor> Colors; //Contains RGB values
+	};
   
-  ///Construct a new ColourIO. It will have only a 'default' colour scheme;
-  /// further schemes may be loaded in by calling the Parse... methods inherited
-  /// from Abstract[XML]Parser.
-  CColourIO(CMessageDisplay *pMsgs);
-  void GetColours(std::vector < std::string > *ColourList) const;
-  const ColourInfo & GetInfo(const std::string & ColourID);
+	void GetColours(std::vector<std::string> *ColourList) const;
+	const ColourInfo & GetInfo(const std::string & ColourID);
+
+	bool ParseFile(const std::string &strPath, bool bUser) override;
+
+public:
+	// Just due to legacy code compatability
+	void XmlStartHandler(const XML_Char * name, const XML_Char ** atts){}
+	void XmlEndHandler(const XML_Char * name){}
+
 private:
-  ColourInfo BlankInfo;
-  std::map < std::string, ColourInfo > Colours; // map short names (file names) to descriptions
+	std::map < std::string, ColourInfo > KnownPaletts; // map short names (file names) to descriptions
 
-  void CreateDefault();         // Give the user a default colour scheme rather than nothing if anything goes horribly wrong.
-
-  // XML handling:
-  /////////////////////////
-
-  // Data gathered
-  std::string CData;            // Text gathered from when an elemnt starts to when it ends
-  ColourInfo InputInfo;
-
-  void XmlStartHandler(const XML_Char * name, const XML_Char ** atts);
-  void XmlEndHandler(const XML_Char * name);
-  void XmlCData(const XML_Char * s, int len);
+	void CreateDefault();         // Give the user a default colour scheme rather than nothing if anything goes horribly wrong.
 };
-/// @}
-
-#endif /* #ifndef __ColourIO_h__ */

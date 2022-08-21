@@ -6,826 +6,319 @@
 
 #include "ColourIO.h"
 #include <cstring>
+#include <pugixml.hpp>
 
 using namespace Dasher;
-using namespace std;
-//using namespace expat;
-
-
 
 // TODO: Share information with AlphIO class?
-
-CColourIO::CColourIO(CMessageDisplay *pMsgs) : AbstractXMLParser(pMsgs), BlankInfo() {
-  CreateDefault();
+CColourIO::CColourIO(CMessageDisplay *pMsgs) : AbstractXMLParser(pMsgs) {
+	CreateDefault();
 }
 
-void CColourIO::GetColours(std::vector <std::string >*ColourList) const {
-  ColourList->clear();
+void CColourIO::GetColours(std::vector<std::string>* ColourList) const {
+	ColourList->clear();
 
-  typedef std::map < std::string, ColourInfo >::const_iterator CI;
-  CI End = Colours.end();
-
-  for(CI Cur = Colours.begin(); Cur != End; Cur++)
-    ColourList->push_back((*Cur).second.ColourID);
+	for(auto [ID, Palette] : KnownPaletts){
+		ColourList->push_back(Palette.ColourID);
+	}
 }
 
 const CColourIO::ColourInfo & CColourIO::GetInfo(const std::string &ColourID) {
-  if(ColourID == "")            // return Default if no colour scheme is specified
-    return Colours["Default"];
-  else {
-    if(Colours.count(ColourID) != 0) {
-      Colours[ColourID].ColourID = ColourID;    // Ensure consistency
-      return Colours[ColourID];
-    }
-    else {
-      // if we don't have the colour scheme they asked for, return default
-      return Colours["Default"];
-    }
-  }
+	if(ColourID.empty()){ // return Default if no colour scheme is specified
+		return KnownPaletts["Default"];
+	}
+	
+	if(KnownPaletts.count(ColourID) != 0) {
+		KnownPaletts[ColourID].ColourID = ColourID; // Ensure consistency
+		return KnownPaletts[ColourID];
+	}
+
+	// if we don't have the colour scheme they asked for, return default
+	return KnownPaletts["Default"];
+}
+
+bool CColourIO::ParseFile(const std::string& strPath, bool bUser)
+{
+	pugi::xml_document doc;
+    pugi::xml_parse_result result = doc.load_file(strPath.c_str());
+
+	if (!result) return false;
+	pugi::xml_node outer = doc.child("colours");
+	for (pugi::xml_node palette : outer)
+    {
+		if(std::strcmp(palette.name(), "palette") != 0) continue; // a non <palette ...> node
+
+		ColourInfo NewPalette;
+		NewPalette.Mutable = bUser;
+		NewPalette.ColourID = palette.attribute("name").as_string();
+
+		for (pugi::xml_node color : palette)
+		{
+			if(std::strcmp(color.name(), "colour") != 0) continue; // a non <colour ...> node
+
+			NewPalette.Colors.push_back({
+				color.attribute("r").as_int(),
+				color.attribute("g").as_int(),
+				color.attribute("b").as_int()
+			});
+		}
+
+		KnownPaletts[NewPalette.ColourID] = NewPalette;
+	}
+
+	return AbstractXMLParser::ParseFile(strPath, bUser);
 }
 
 void CColourIO::CreateDefault() {
-  // TODO: Urgh - replace with a table
+	ColourInfo DefaultPalette;
+	DefaultPalette.ColourID = "Default";
+	DefaultPalette.Mutable = false;
 
-  ColourInfo & Default = Colours["Default"];
-  Default.ColourID = "Default";
-  Default.Mutable = false;
-  Default.Reds.push_back(255);
-  Default.Greens.push_back(255);
-  Default.Blues.push_back(255);
-  Default.Reds.push_back(255);
-  Default.Greens.push_back(0);
-  Default.Blues.push_back(0);
-  Default.Reds.push_back(0);
-  Default.Greens.push_back(0);
-  Default.Blues.push_back(0);
-  Default.Reds.push_back(218);
-  Default.Greens.push_back(218);
-  Default.Blues.push_back(218);
-  Default.Reds.push_back(0);
-  Default.Greens.push_back(0);
-  Default.Blues.push_back(0);
-  Default.Reds.push_back(0);
-  Default.Greens.push_back(0);
-  Default.Blues.push_back(0);
-  Default.Reds.push_back(0);
-  Default.Greens.push_back(0);
-  Default.Blues.push_back(0);
-  Default.Reds.push_back(180);
-  Default.Greens.push_back(238);
-  Default.Blues.push_back(180);
-  Default.Reds.push_back(80);
-  Default.Greens.push_back(80);
-  Default.Blues.push_back(80);
-  Default.Reds.push_back(235);
-  Default.Greens.push_back(235);
-  Default.Blues.push_back(235);
-  Default.Reds.push_back(0);
-  Default.Greens.push_back(255);
-  Default.Blues.push_back(255);
-  Default.Reds.push_back(180);
-  Default.Greens.push_back(238);
-  Default.Blues.push_back(180);
-  Default.Reds.push_back(155);
-  Default.Greens.push_back(205);
-  Default.Blues.push_back(155);
-  Default.Reds.push_back(0);
-  Default.Greens.push_back(255);
-  Default.Blues.push_back(255);
-  Default.Reds.push_back(180);
-  Default.Greens.push_back(238);
-  Default.Blues.push_back(180);
-  Default.Reds.push_back(155);
-  Default.Greens.push_back(205);
-  Default.Blues.push_back(155);
-  Default.Reds.push_back(0);
-  Default.Greens.push_back(255);
-  Default.Blues.push_back(255);
-  Default.Reds.push_back(180);
-  Default.Greens.push_back(238);
-  Default.Blues.push_back(180);
-  Default.Reds.push_back(155);
-  Default.Greens.push_back(205);
-  Default.Blues.push_back(155);
-  Default.Reds.push_back(0);
-  Default.Greens.push_back(255);
-  Default.Blues.push_back(255);
-  Default.Reds.push_back(180);
-  Default.Greens.push_back(238);
-  Default.Blues.push_back(180);
-  Default.Reds.push_back(155);
-  Default.Greens.push_back(205);
-  Default.Blues.push_back(155);
-  Default.Reds.push_back(0);
-  Default.Greens.push_back(255);
-  Default.Blues.push_back(255);
-  Default.Reds.push_back(180);
-  Default.Greens.push_back(238);
-  Default.Blues.push_back(180);
-  Default.Reds.push_back(155);
-  Default.Greens.push_back(205);
-  Default.Blues.push_back(155);
-  Default.Reds.push_back(0);
-  Default.Greens.push_back(255);
-  Default.Blues.push_back(255);
-  Default.Reds.push_back(180);
-  Default.Greens.push_back(238);
-  Default.Blues.push_back(180);
-  Default.Reds.push_back(155);
-  Default.Greens.push_back(205);
-  Default.Blues.push_back(155);
-  Default.Reds.push_back(0);
-  Default.Greens.push_back(255);
-  Default.Blues.push_back(255);
-  Default.Reds.push_back(180);
-  Default.Greens.push_back(238);
-  Default.Blues.push_back(180);
-  Default.Reds.push_back(155);
-  Default.Greens.push_back(205);
-  Default.Blues.push_back(155);
-  Default.Reds.push_back(0);
-  Default.Greens.push_back(255);
-  Default.Blues.push_back(255);
-  Default.Reds.push_back(180);
-  Default.Greens.push_back(238);
-  Default.Blues.push_back(180);
-  Default.Reds.push_back(155);
-  Default.Greens.push_back(205);
-  Default.Blues.push_back(155);
-  Default.Reds.push_back(0);
-  Default.Greens.push_back(255);
-  Default.Blues.push_back(255);
-  Default.Reds.push_back(180);
-  Default.Greens.push_back(238);
-  Default.Blues.push_back(180);
-  Default.Reds.push_back(155);
-  Default.Greens.push_back(205);
-  Default.Blues.push_back(155);
-  Default.Reds.push_back(0);
-  Default.Greens.push_back(255);
-  Default.Blues.push_back(255);
-  Default.Reds.push_back(180);
-  Default.Greens.push_back(238);
-  Default.Blues.push_back(180);
-  Default.Reds.push_back(155);
-  Default.Greens.push_back(205);
-  Default.Blues.push_back(155);
-  Default.Reds.push_back(0);
-  Default.Greens.push_back(255);
-  Default.Blues.push_back(255);
-  Default.Reds.push_back(180);
-  Default.Greens.push_back(238);
-  Default.Blues.push_back(180);
-  Default.Reds.push_back(155);
-  Default.Greens.push_back(205);
-  Default.Blues.push_back(155);
-  Default.Reds.push_back(0);
-  Default.Greens.push_back(255);
-  Default.Blues.push_back(255);
-  Default.Reds.push_back(180);
-  Default.Greens.push_back(238);
-  Default.Blues.push_back(180);
-  Default.Reds.push_back(155);
-  Default.Greens.push_back(205);
-  Default.Blues.push_back(155);
-  Default.Reds.push_back(0);
-  Default.Greens.push_back(255);
-  Default.Blues.push_back(255);
-  Default.Reds.push_back(180);
-  Default.Greens.push_back(238);
-  Default.Blues.push_back(180);
-  Default.Reds.push_back(155);
-  Default.Greens.push_back(205);
-  Default.Blues.push_back(155);
-  Default.Reds.push_back(0);
-  Default.Greens.push_back(255);
-  Default.Blues.push_back(255);
-  Default.Reds.push_back(180);
-  Default.Greens.push_back(238);
-  Default.Blues.push_back(180);
-  Default.Reds.push_back(155);
-  Default.Greens.push_back(205);
-  Default.Blues.push_back(155);
-  Default.Reds.push_back(0);
-  Default.Greens.push_back(255);
-  Default.Blues.push_back(255);
-  Default.Reds.push_back(180);
-  Default.Greens.push_back(238);
-  Default.Blues.push_back(180);
-  Default.Reds.push_back(155);
-  Default.Greens.push_back(205);
-  Default.Blues.push_back(155);
-  Default.Reds.push_back(0);
-  Default.Greens.push_back(255);
-  Default.Blues.push_back(255);
-  Default.Reds.push_back(180);
-  Default.Greens.push_back(238);
-  Default.Blues.push_back(180);
-  Default.Reds.push_back(155);
-  Default.Greens.push_back(205);
-  Default.Blues.push_back(155);
-  Default.Reds.push_back(0);
-  Default.Greens.push_back(255);
-  Default.Blues.push_back(255);
-  Default.Reds.push_back(180);
-  Default.Greens.push_back(238);
-  Default.Blues.push_back(180);
-  Default.Reds.push_back(155);
-  Default.Greens.push_back(205);
-  Default.Blues.push_back(155);
-  Default.Reds.push_back(0);
-  Default.Greens.push_back(255);
-  Default.Blues.push_back(255);
-  Default.Reds.push_back(180);
-  Default.Greens.push_back(238);
-  Default.Blues.push_back(180);
-  Default.Reds.push_back(155);
-  Default.Greens.push_back(205);
-  Default.Blues.push_back(155);
-  Default.Reds.push_back(0);
-  Default.Greens.push_back(255);
-  Default.Blues.push_back(255);
-  Default.Reds.push_back(180);
-  Default.Greens.push_back(238);
-  Default.Blues.push_back(180);
-  Default.Reds.push_back(155);
-  Default.Greens.push_back(205);
-  Default.Blues.push_back(155);
-  Default.Reds.push_back(0);
-  Default.Greens.push_back(255);
-  Default.Blues.push_back(255);
-  Default.Reds.push_back(180);
-  Default.Greens.push_back(238);
-  Default.Blues.push_back(180);
-  Default.Reds.push_back(155);
-  Default.Greens.push_back(205);
-  Default.Blues.push_back(155);
-  Default.Reds.push_back(0);
-  Default.Greens.push_back(255);
-  Default.Blues.push_back(255);
-  Default.Reds.push_back(180);
-  Default.Greens.push_back(238);
-  Default.Blues.push_back(180);
-  Default.Reds.push_back(155);
-  Default.Greens.push_back(205);
-  Default.Blues.push_back(155);
-  Default.Reds.push_back(0);
-  Default.Greens.push_back(255);
-  Default.Blues.push_back(255);
-  Default.Reds.push_back(180);
-  Default.Greens.push_back(238);
-  Default.Blues.push_back(180);
-  Default.Reds.push_back(155);
-  Default.Greens.push_back(205);
-  Default.Blues.push_back(155);
-  Default.Reds.push_back(0);
-  Default.Greens.push_back(255);
-  Default.Blues.push_back(255);
-  Default.Reds.push_back(180);
-  Default.Greens.push_back(238);
-  Default.Blues.push_back(180);
-  Default.Reds.push_back(155);
-  Default.Greens.push_back(205);
-  Default.Blues.push_back(155);
-  Default.Reds.push_back(0);
-  Default.Greens.push_back(255);
-  Default.Blues.push_back(255);
-  Default.Reds.push_back(180);
-  Default.Greens.push_back(238);
-  Default.Blues.push_back(180);
-  Default.Reds.push_back(155);
-  Default.Greens.push_back(205);
-  Default.Blues.push_back(155);
-  Default.Reds.push_back(0);
-  Default.Greens.push_back(255);
-  Default.Blues.push_back(255);
-  Default.Reds.push_back(180);
-  Default.Greens.push_back(238);
-  Default.Blues.push_back(180);
-  Default.Reds.push_back(155);
-  Default.Greens.push_back(205);
-  Default.Blues.push_back(155);
-  Default.Reds.push_back(0);
-  Default.Greens.push_back(255);
-  Default.Blues.push_back(255);
-  Default.Reds.push_back(180);
-  Default.Greens.push_back(238);
-  Default.Blues.push_back(180);
-  Default.Reds.push_back(155);
-  Default.Greens.push_back(205);
-  Default.Blues.push_back(155);
-  Default.Reds.push_back(0);
-  Default.Greens.push_back(255);
-  Default.Blues.push_back(255);
-  Default.Reds.push_back(180);
-  Default.Greens.push_back(238);
-  Default.Blues.push_back(180);
-  Default.Reds.push_back(155);
-  Default.Greens.push_back(205);
-  Default.Blues.push_back(155);
-  Default.Reds.push_back(0);
-  Default.Greens.push_back(255);
-  Default.Blues.push_back(255);
-  Default.Reds.push_back(180);
-  Default.Greens.push_back(238);
-  Default.Blues.push_back(180);
-  Default.Reds.push_back(155);
-  Default.Greens.push_back(205);
-  Default.Blues.push_back(155);
-  Default.Reds.push_back(0);
-  Default.Greens.push_back(255);
-  Default.Blues.push_back(255);
-  Default.Reds.push_back(180);
-  Default.Greens.push_back(238);
-  Default.Blues.push_back(180);
-  Default.Reds.push_back(155);
-  Default.Greens.push_back(205);
-  Default.Blues.push_back(155);
-  Default.Reds.push_back(0);
-  Default.Greens.push_back(255);
-  Default.Blues.push_back(255);
-  Default.Reds.push_back(180);
-  Default.Greens.push_back(238);
-  Default.Blues.push_back(180);
-  Default.Reds.push_back(155);
-  Default.Greens.push_back(205);
-  Default.Blues.push_back(155);
-  Default.Reds.push_back(0);
-  Default.Greens.push_back(255);
-  Default.Blues.push_back(255);
-  Default.Reds.push_back(180);
-  Default.Greens.push_back(238);
-  Default.Blues.push_back(180);
-  Default.Reds.push_back(155);
-  Default.Greens.push_back(205);
-  Default.Blues.push_back(155);
-  Default.Reds.push_back(0);
-  Default.Greens.push_back(255);
-  Default.Blues.push_back(255);
-  Default.Reds.push_back(180);
-  Default.Greens.push_back(238);
-  Default.Blues.push_back(180);
-  Default.Reds.push_back(155);
-  Default.Greens.push_back(205);
-  Default.Blues.push_back(155);
-  Default.Reds.push_back(0);
-  Default.Greens.push_back(255);
-  Default.Blues.push_back(255);
-  Default.Reds.push_back(180);
-  Default.Greens.push_back(238);
-  Default.Blues.push_back(180);
-  Default.Reds.push_back(155);
-  Default.Greens.push_back(205);
-  Default.Blues.push_back(155);
-  Default.Reds.push_back(0);
-  Default.Greens.push_back(255);
-  Default.Blues.push_back(255);
-  Default.Reds.push_back(255);
-  Default.Greens.push_back(0);
-  Default.Blues.push_back(0);
-  Default.Reds.push_back(255);
-  Default.Greens.push_back(255);
-  Default.Blues.push_back(0);
-  Default.Reds.push_back(0);
-  Default.Greens.push_back(200);
-  Default.Blues.push_back(0);
-  Default.Reds.push_back(255);
-  Default.Greens.push_back(0);
-  Default.Blues.push_back(0);
-  Default.Reds.push_back(255);
-  Default.Greens.push_back(255);
-  Default.Blues.push_back(0);
-  Default.Reds.push_back(0);
-  Default.Greens.push_back(200);
-  Default.Blues.push_back(0);
-  Default.Reds.push_back(255);
-  Default.Greens.push_back(0);
-  Default.Blues.push_back(0);
-  Default.Reds.push_back(255);
-  Default.Greens.push_back(255);
-  Default.Blues.push_back(0);
-  Default.Reds.push_back(0);
-  Default.Greens.push_back(200);
-  Default.Blues.push_back(0);
-  Default.Reds.push_back(255);
-  Default.Greens.push_back(0);
-  Default.Blues.push_back(0);
-  Default.Reds.push_back(255);
-  Default.Greens.push_back(255);
-  Default.Blues.push_back(0);
-  Default.Reds.push_back(0);
-  Default.Greens.push_back(200);
-  Default.Blues.push_back(0);
-  Default.Reds.push_back(255);
-  Default.Greens.push_back(0);
-  Default.Blues.push_back(0);
-  Default.Reds.push_back(255);
-  Default.Greens.push_back(255);
-  Default.Blues.push_back(0);
-  Default.Reds.push_back(0);
-  Default.Greens.push_back(200);
-  Default.Blues.push_back(0);
-  Default.Reds.push_back(255);
-  Default.Greens.push_back(0);
-  Default.Blues.push_back(0);
-  Default.Reds.push_back(255);
-  Default.Greens.push_back(255);
-  Default.Blues.push_back(0);
-  Default.Reds.push_back(0);
-  Default.Greens.push_back(200);
-  Default.Blues.push_back(0);
-  Default.Reds.push_back(255);
-  Default.Greens.push_back(0);
-  Default.Blues.push_back(0);
-  Default.Reds.push_back(255);
-  Default.Greens.push_back(255);
-  Default.Blues.push_back(0);
-  Default.Reds.push_back(0);
-  Default.Greens.push_back(0);
-  Default.Blues.push_back(0);
-  Default.Reds.push_back(0);
-  Default.Greens.push_back(0);
-  Default.Blues.push_back(0);
-  Default.Reds.push_back(0);
-  Default.Greens.push_back(0);
-  Default.Blues.push_back(0);
-  Default.Reds.push_back(0);
-  Default.Greens.push_back(0);
-  Default.Blues.push_back(0);
-  Default.Reds.push_back(0);
-  Default.Greens.push_back(0);
-  Default.Blues.push_back(0);
-  Default.Reds.push_back(0);
-  Default.Greens.push_back(0);
-  Default.Blues.push_back(0);
-  Default.Reds.push_back(0);
-  Default.Greens.push_back(0);
-  Default.Blues.push_back(0);
-  Default.Reds.push_back(0);
-  Default.Greens.push_back(0);
-  Default.Blues.push_back(0);
-  Default.Reds.push_back(80);
-  Default.Greens.push_back(80);
-  Default.Blues.push_back(80);
-  Default.Reds.push_back(255);
-  Default.Greens.push_back(255);
-  Default.Blues.push_back(255);
-  Default.Reds.push_back(135);
-  Default.Greens.push_back(206);
-  Default.Blues.push_back(255);
-  Default.Reds.push_back(255);
-  Default.Greens.push_back(174);
-  Default.Blues.push_back(185);
-  Default.Reds.push_back(255);
-  Default.Greens.push_back(187);
-  Default.Blues.push_back(255);
-  Default.Reds.push_back(135);
-  Default.Greens.push_back(206);
-  Default.Blues.push_back(255);
-  Default.Reds.push_back(255);
-  Default.Greens.push_back(174);
-  Default.Blues.push_back(185);
-  Default.Reds.push_back(255);
-  Default.Greens.push_back(187);
-  Default.Blues.push_back(255);
-  Default.Reds.push_back(135);
-  Default.Greens.push_back(206);
-  Default.Blues.push_back(255);
-  Default.Reds.push_back(255);
-  Default.Greens.push_back(174);
-  Default.Blues.push_back(185);
-  Default.Reds.push_back(255);
-  Default.Greens.push_back(187);
-  Default.Blues.push_back(255);
-  Default.Reds.push_back(135);
-  Default.Greens.push_back(206);
-  Default.Blues.push_back(255);
-  Default.Reds.push_back(255);
-  Default.Greens.push_back(174);
-  Default.Blues.push_back(185);
-  Default.Reds.push_back(255);
-  Default.Greens.push_back(187);
-  Default.Blues.push_back(255);
-  Default.Reds.push_back(135);
-  Default.Greens.push_back(206);
-  Default.Blues.push_back(255);
-  Default.Reds.push_back(255);
-  Default.Greens.push_back(174);
-  Default.Blues.push_back(185);
-  Default.Reds.push_back(255);
-  Default.Greens.push_back(187);
-  Default.Blues.push_back(255);
-  Default.Reds.push_back(135);
-  Default.Greens.push_back(206);
-  Default.Blues.push_back(255);
-  Default.Reds.push_back(255);
-  Default.Greens.push_back(174);
-  Default.Blues.push_back(185);
-  Default.Reds.push_back(255);
-  Default.Greens.push_back(187);
-  Default.Blues.push_back(255);
-  Default.Reds.push_back(135);
-  Default.Greens.push_back(206);
-  Default.Blues.push_back(255);
-  Default.Reds.push_back(255);
-  Default.Greens.push_back(174);
-  Default.Blues.push_back(185);
-  Default.Reds.push_back(255);
-  Default.Greens.push_back(187);
-  Default.Blues.push_back(255);
-  Default.Reds.push_back(135);
-  Default.Greens.push_back(206);
-  Default.Blues.push_back(255);
-  Default.Reds.push_back(255);
-  Default.Greens.push_back(174);
-  Default.Blues.push_back(185);
-  Default.Reds.push_back(255);
-  Default.Greens.push_back(187);
-  Default.Blues.push_back(255);
-  Default.Reds.push_back(135);
-  Default.Greens.push_back(206);
-  Default.Blues.push_back(255);
-  Default.Reds.push_back(255);
-  Default.Greens.push_back(174);
-  Default.Blues.push_back(185);
-  Default.Reds.push_back(255);
-  Default.Greens.push_back(187);
-  Default.Blues.push_back(255);
-  Default.Reds.push_back(135);
-  Default.Greens.push_back(206);
-  Default.Blues.push_back(255);
-  Default.Reds.push_back(255);
-  Default.Greens.push_back(174);
-  Default.Blues.push_back(185);
-  Default.Reds.push_back(255);
-  Default.Greens.push_back(187);
-  Default.Blues.push_back(255);
-  Default.Reds.push_back(135);
-  Default.Greens.push_back(206);
-  Default.Blues.push_back(255);
-  Default.Reds.push_back(255);
-  Default.Greens.push_back(174);
-  Default.Blues.push_back(185);
-  Default.Reds.push_back(255);
-  Default.Greens.push_back(187);
-  Default.Blues.push_back(255);
-  Default.Reds.push_back(135);
-  Default.Greens.push_back(206);
-  Default.Blues.push_back(255);
-  Default.Reds.push_back(255);
-  Default.Greens.push_back(174);
-  Default.Blues.push_back(185);
-  Default.Reds.push_back(255);
-  Default.Greens.push_back(187);
-  Default.Blues.push_back(255);
-  Default.Reds.push_back(135);
-  Default.Greens.push_back(206);
-  Default.Blues.push_back(255);
-  Default.Reds.push_back(255);
-  Default.Greens.push_back(174);
-  Default.Blues.push_back(185);
-  Default.Reds.push_back(255);
-  Default.Greens.push_back(187);
-  Default.Blues.push_back(255);
-  Default.Reds.push_back(135);
-  Default.Greens.push_back(206);
-  Default.Blues.push_back(255);
-  Default.Reds.push_back(255);
-  Default.Greens.push_back(174);
-  Default.Blues.push_back(185);
-  Default.Reds.push_back(255);
-  Default.Greens.push_back(187);
-  Default.Blues.push_back(255);
-  Default.Reds.push_back(135);
-  Default.Greens.push_back(206);
-  Default.Blues.push_back(255);
-  Default.Reds.push_back(255);
-  Default.Greens.push_back(174);
-  Default.Blues.push_back(185);
-  Default.Reds.push_back(255);
-  Default.Greens.push_back(187);
-  Default.Blues.push_back(255);
-  Default.Reds.push_back(135);
-  Default.Greens.push_back(206);
-  Default.Blues.push_back(255);
-  Default.Reds.push_back(255);
-  Default.Greens.push_back(174);
-  Default.Blues.push_back(185);
-  Default.Reds.push_back(255);
-  Default.Greens.push_back(187);
-  Default.Blues.push_back(255);
-  Default.Reds.push_back(135);
-  Default.Greens.push_back(206);
-  Default.Blues.push_back(255);
-  Default.Reds.push_back(255);
-  Default.Greens.push_back(174);
-  Default.Blues.push_back(185);
-  Default.Reds.push_back(255);
-  Default.Greens.push_back(187);
-  Default.Blues.push_back(255);
-  Default.Reds.push_back(135);
-  Default.Greens.push_back(206);
-  Default.Blues.push_back(255);
-  Default.Reds.push_back(255);
-  Default.Greens.push_back(174);
-  Default.Blues.push_back(185);
-  Default.Reds.push_back(255);
-  Default.Greens.push_back(187);
-  Default.Blues.push_back(255);
-  Default.Reds.push_back(135);
-  Default.Greens.push_back(206);
-  Default.Blues.push_back(255);
-  Default.Reds.push_back(255);
-  Default.Greens.push_back(174);
-  Default.Blues.push_back(185);
-  Default.Reds.push_back(255);
-  Default.Greens.push_back(187);
-  Default.Blues.push_back(255);
-  Default.Reds.push_back(135);
-  Default.Greens.push_back(206);
-  Default.Blues.push_back(255);
-  Default.Reds.push_back(255);
-  Default.Greens.push_back(174);
-  Default.Blues.push_back(185);
-  Default.Reds.push_back(255);
-  Default.Greens.push_back(187);
-  Default.Blues.push_back(255);
-  Default.Reds.push_back(135);
-  Default.Greens.push_back(206);
-  Default.Blues.push_back(255);
-  Default.Reds.push_back(255);
-  Default.Greens.push_back(174);
-  Default.Blues.push_back(185);
-  Default.Reds.push_back(255);
-  Default.Greens.push_back(187);
-  Default.Blues.push_back(255);
-  Default.Reds.push_back(135);
-  Default.Greens.push_back(206);
-  Default.Blues.push_back(255);
-  Default.Reds.push_back(255);
-  Default.Greens.push_back(174);
-  Default.Blues.push_back(185);
-  Default.Reds.push_back(255);
-  Default.Greens.push_back(187);
-  Default.Blues.push_back(255);
-  Default.Reds.push_back(135);
-  Default.Greens.push_back(206);
-  Default.Blues.push_back(255);
-  Default.Reds.push_back(255);
-  Default.Greens.push_back(174);
-  Default.Blues.push_back(185);
-  Default.Reds.push_back(255);
-  Default.Greens.push_back(187);
-  Default.Blues.push_back(255);
-  Default.Reds.push_back(135);
-  Default.Greens.push_back(206);
-  Default.Blues.push_back(255);
-  Default.Reds.push_back(255);
-  Default.Greens.push_back(174);
-  Default.Blues.push_back(185);
-  Default.Reds.push_back(255);
-  Default.Greens.push_back(187);
-  Default.Blues.push_back(255);
-  Default.Reds.push_back(135);
-  Default.Greens.push_back(206);
-  Default.Blues.push_back(255);
-  Default.Reds.push_back(255);
-  Default.Greens.push_back(174);
-  Default.Blues.push_back(185);
-  Default.Reds.push_back(255);
-  Default.Greens.push_back(187);
-  Default.Blues.push_back(255);
-  Default.Reds.push_back(135);
-  Default.Greens.push_back(206);
-  Default.Blues.push_back(255);
-  Default.Reds.push_back(255);
-  Default.Greens.push_back(174);
-  Default.Blues.push_back(185);
-  Default.Reds.push_back(255);
-  Default.Greens.push_back(187);
-  Default.Blues.push_back(255);
-  Default.Reds.push_back(135);
-  Default.Greens.push_back(206);
-  Default.Blues.push_back(255);
-  Default.Reds.push_back(255);
-  Default.Greens.push_back(174);
-  Default.Blues.push_back(185);
-  Default.Reds.push_back(255);
-  Default.Greens.push_back(187);
-  Default.Blues.push_back(255);
-  Default.Reds.push_back(135);
-  Default.Greens.push_back(206);
-  Default.Blues.push_back(255);
-  Default.Reds.push_back(255);
-  Default.Greens.push_back(174);
-  Default.Blues.push_back(185);
-  Default.Reds.push_back(255);
-  Default.Greens.push_back(187);
-  Default.Blues.push_back(255);
-  Default.Reds.push_back(135);
-  Default.Greens.push_back(206);
-  Default.Blues.push_back(255);
-  Default.Reds.push_back(255);
-  Default.Greens.push_back(174);
-  Default.Blues.push_back(185);
-  Default.Reds.push_back(255);
-  Default.Greens.push_back(187);
-  Default.Blues.push_back(255);
-  Default.Reds.push_back(135);
-  Default.Greens.push_back(206);
-  Default.Blues.push_back(255);
-  Default.Reds.push_back(255);
-  Default.Greens.push_back(174);
-  Default.Blues.push_back(185);
-  Default.Reds.push_back(255);
-  Default.Greens.push_back(187);
-  Default.Blues.push_back(255);
-  Default.Reds.push_back(135);
-  Default.Greens.push_back(206);
-  Default.Blues.push_back(255);
-  Default.Reds.push_back(255);
-  Default.Greens.push_back(174);
-  Default.Blues.push_back(185);
-  Default.Reds.push_back(255);
-  Default.Greens.push_back(187);
-  Default.Blues.push_back(255);
-  Default.Reds.push_back(135);
-  Default.Greens.push_back(206);
-  Default.Blues.push_back(255);
-  Default.Reds.push_back(255);
-  Default.Greens.push_back(174);
-  Default.Blues.push_back(185);
-  Default.Reds.push_back(255);
-  Default.Greens.push_back(187);
-  Default.Blues.push_back(255);
-  Default.Reds.push_back(135);
-  Default.Greens.push_back(206);
-  Default.Blues.push_back(255);
-  Default.Reds.push_back(255);
-  Default.Greens.push_back(174);
-  Default.Blues.push_back(185);
-  Default.Reds.push_back(255);
-  Default.Greens.push_back(187);
-  Default.Blues.push_back(255);
-  Default.Reds.push_back(135);
-  Default.Greens.push_back(206);
-  Default.Blues.push_back(255);
-  Default.Reds.push_back(0);
-  Default.Greens.push_back(255);
-  Default.Blues.push_back(0);
-  Default.Reds.push_back(240);
-  Default.Greens.push_back(240);
-  Default.Blues.push_back(0);
-  Default.Reds.push_back(255);
-  Default.Greens.push_back(0);
-  Default.Blues.push_back(0);
+	DefaultPalette.Colors = {
+		{255,255,255},
+		{255,0,0},
+		{0,0,0},
+		{218,218,218},
+		{0,0,0},
+		{0,0,0},
+		{0,0,0},
+		{180,238,180},
+		{80,80,80},
+		{235,235,235},
+		{0,255,255},
+		{180,238,180},
+		{155,205,155},
+		{0,255,255},
+		{180,238,180},
+		{155,205,155},
+		{0,255,255},
+		{180,238,180},
+		{155,205,155},
+		{0,255,255},
+		{180,238,180},
+		{155,205,155},
+		{0,255,255},
+		{180,238,180},
+		{155,205,155},
+		{0,255,255},
+		{180,238,180},
+		{155,205,155},
+		{0,255,255},
+		{180,238,180},
+		{155,205,155},
+		{0,255,255},
+		{180,238,180},
+		{155,205,155},
+		{0,255,255},
+		{180,238,180},
+		{155,205,155},
+		{0,255,255},
+		{180,238,180},
+		{155,205,155},
+		{0,255,255},
+		{180,238,180},
+		{155,205,155},
+		{0,255,255},
+		{180,238,180},
+		{155,205,155},
+		{0,255,255},
+		{180,238,180},
+		{155,205,155},
+		{0,255,255},
+		{180,238,180},
+		{155,205,155},
+		{0,255,255},
+		{180,238,180},
+		{155,205,155},
+		{0,255,255},
+		{180,238,180},
+		{155,205,155},
+		{0,255,255},
+		{180,238,180},
+		{155,205,155},
+		{0,255,255},
+		{180,238,180},
+		{155,205,155},
+		{0,255,255},
+		{180,238,180},
+		{155,205,155},
+		{0,255,255},
+		{180,238,180},
+		{155,205,155},
+		{0,255,255},
+		{180,238,180},
+		{155,205,155},
+		{0,255,255},
+		{180,238,180},
+		{155,205,155},
+		{0,255,255},
+		{180,238,180},
+		{155,205,155},
+		{0,255,255},
+		{180,238,180},
+		{155,205,155},
+		{0,255,255},
+		{180,238,180},
+		{155,205,155},
+		{0,255,255},
+		{180,238,180},
+		{155,205,155},
+		{0,255,255},
+		{180,238,180},
+		{155,205,155},
+		{0,255,255},
+		{180,238,180},
+		{155,205,155},
+		{0,255,255},
+		{180,238,180},
+		{155,205,155},
+		{0,255,255},
+		{180,238,180},
+		{155,205,155},
+		{0,255,255},
+		{180,238,180},
+		{155,205,155},
+		{0,255,255},
+		{180,238,180},
+		{155,205,155},
+		{0,255,255},
+		{180,238,180},
+		{155,205,155},
+		{0,255,255},
+		{255,0,0},
+		{255,255,0},
+		{0,200,0},
+		{255,0,0},
+		{255,255,0},
+		{0,200,0},
+		{255,0,0},
+		{255,255,0},
+		{0,200,0},
+		{255,0,0},
+		{255,255,0},
+		{0,200,0},
+		{255,0,0},
+		{255,255,0},
+		{0,200,0},
+		{255,0,0},
+		{255,255,0},
+		{0,200,0},
+		{255,0,0},
+		{255,255,0},
+		{0,0,0},
+		{0,0,0},
+		{0,0,0},
+		{0,0,0},
+		{0,0,0},
+		{0,0,0},
+		{0,0,0},
+		{0,0,0},
+		{80,80,80},
+		{255,255,255},
+		{135,206,255},
+		{255,174,185},
+		{255,187,255},
+		{135,206,255},
+		{255,174,185},
+		{255,187,255},
+		{135,206,255},
+		{255,174,185},
+		{255,187,255},
+		{135,206,255},
+		{255,174,185},
+		{255,187,255},
+		{135,206,255},
+		{255,174,185},
+		{255,187,255},
+		{135,206,255},
+		{255,174,185},
+		{255,187,255},
+		{135,206,255},
+		{255,174,185},
+		{255,187,255},
+		{135,206,255},
+		{255,174,185},
+		{255,187,255},
+		{135,206,255},
+		{255,174,185},
+		{255,187,255},
+		{135,206,255},
+		{255,174,185},
+		{255,187,255},
+		{135,206,255},
+		{255,174,185},
+		{255,187,255},
+		{135,206,255},
+		{255,174,185},
+		{255,187,255},
+		{135,206,255},
+		{255,174,185},
+		{255,187,255},
+		{135,206,255},
+		{255,174,185},
+		{255,187,255},
+		{135,206,255},
+		{255,174,185},
+		{255,187,255},
+		{135,206,255},
+		{255,174,185},
+		{255,187,255},
+		{135,206,255},
+		{255,174,185},
+		{255,187,255},
+		{135,206,255},
+		{255,174,185},
+		{255,187,255},
+		{135,206,255},
+		{255,174,185},
+		{255,187,255},
+		{135,206,255},
+		{255,174,185},
+		{255,187,255},
+		{135,206,255},
+		{255,174,185},
+		{255,187,255},
+		{135,206,255},
+		{255,174,185},
+		{255,187,255},
+		{135,206,255},
+		{255,174,185},
+		{255,187,255},
+		{135,206,255},
+		{255,174,185},
+		{255,187,255},
+		{135,206,255},
+		{255,174,185},
+		{255,187,255},
+		{135,206,255},
+		{255,174,185},
+		{255,187,255},
+		{135,206,255},
+		{255,174,185},
+		{255,187,255},
+		{135,206,255},
+		{255,174,185},
+		{255,187,255},
+		{135,206,255},
+		{255,174,185},
+		{255,187,255},
+		{135,206,255},
+		{255,174,185},
+		{255,187,255},
+		{135,206,255},
+		{255,174,185},
+		{255,187,255},
+		{135,206,255},
+		{255,174,185},
+		{255,187,255},
+		{135,206,255},
+		{255,174,185},
+		{255,187,255},
+		{135,206,255},
+		{0,255,0},
+		{240,240,0},
+		{255,0,0},
+	};
 
-}
-
-// Below here handlers for the Expat XML input library
-////////////////////////////////////////////////////////////////////////////////////
-
-void CColourIO::XmlStartHandler(const XML_Char *name, const XML_Char **atts) {
-
-  CData = "";
-
-  if(strcmp(name, "palette") == 0) {
-    ColourInfo NewInfo;
-    InputInfo = NewInfo;
-    InputInfo.Mutable = isUser();
-    while(*atts != 0) {
-      if(strcmp(*atts, "name") == 0) {
-        InputInfo.ColourID = *(atts+1);
-      }
-      atts += 2;
-    }
-    return;
-  }
-  if(strcmp(name, "colour") == 0) {
-    while(*atts != 0) {
-      if(strcmp(*atts, "r") == 0) {
-        InputInfo.Reds.push_back(atoi(*(atts+1)));
-      }
-      if(strcmp(*atts, "g") == 0) {
-        InputInfo.Greens.push_back(atoi(*(atts+1)));
-      }
-      if(strcmp(*atts, "b") == 0) {
-        InputInfo.Blues.push_back(atoi(*(atts+1)));
-      }
-      atts += 2;
-    }
-    return;
-  }
-}
-void CColourIO::XmlEndHandler(const XML_Char *name) {
-  
-  if(strcmp(name, "palette") == 0) {
-    Colours[InputInfo.ColourID] = InputInfo;
-    return;
-  }
-}
-
-void CColourIO::XmlCData(const XML_Char *s, int len) {
-  // CAREFUL: s points to a string which is NOT null-terminated.
-  CData.append(s, len);
+	KnownPaletts["Default"] = DefaultPalette;
 }
