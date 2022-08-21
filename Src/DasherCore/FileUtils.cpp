@@ -3,7 +3,18 @@
 #include <regex>
 #include <filesystem>
 
-namespace fs = std::filesystem;
+/* Taken from https://stackoverflow.com/a/69950065 */
+static bool IsFileWriteable(const std::filesystem::path &file_path)
+{
+    FILE* file_handle;
+    if (fopen_s(&file_handle, file_path.string().c_str(), "a") != 0)
+    {
+        return false;
+    }
+
+    fclose(file_handle);
+    return true;
+}
 
 /* Taken from https://stackoverflow.com/a/24315631 */
 static std::string StringReplaceAll(std::string str, const std::string& from, const std::string& to) {
@@ -17,7 +28,7 @@ static std::string StringReplaceAll(std::string str, const std::string& from, co
 
 int Dasher::FileUtils::GetFileSize(const std::string& strFileName)
 {
-	return static_cast<int>(fs::file_size(strFileName));
+	return static_cast<int>(std::filesystem::file_size(strFileName));
 }
 
 void Dasher::FileUtils::ScanFiles(AbstractParser* parser, const std::string& strPattern)
@@ -26,11 +37,11 @@ void Dasher::FileUtils::ScanFiles(AbstractParser* parser, const std::string& str
 	std::string alteredPattern = StringReplaceAll(strPattern, "*", ".*");
 
 	const std::regex Pattern = std::regex(alteredPattern);
-	for (const auto & entry : fs::directory_iterator(fs::current_path()))
+	for (const auto & entry : std::filesystem::directory_iterator(std::filesystem::current_path()))
 	{
 		if (entry.is_regular_file() && std::regex_search(entry.path().filename().string(), Pattern))
 		{
-			parser->ParseFile(entry.path().string(), true);
+			parser->ParseFile(entry.path().string(), IsFileWriteable(entry.path()));
 		}
 	}
 }
