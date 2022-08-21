@@ -20,76 +20,238 @@
 
 #include "AlphIO.h"
 
-#include <iostream>
-#include <cstring>
+#include <string>
+#include <algorithm>
 
 using namespace Dasher;
-using namespace std;
-
-
 
 CAlphIO::CAlphIO(CMessageDisplay *pMsgs) : AbstractXMLParser(pMsgs) {
-  Alphabets["Default"]=CreateDefault();
+	Alphabets["Default"] = CreateDefault();
 
-  typedef pair < Opts::AlphabetTypes, std::string > AT;
-  vector < AT > Types;
-  Types.push_back(AT(Opts::MyNone, "None"));
-  Types.push_back(AT(Opts::Arabic, "Arabic"));
-  Types.push_back(AT(Opts::Baltic, "Baltic"));
-  Types.push_back(AT(Opts::CentralEurope, "CentralEurope"));
-  Types.push_back(AT(Opts::ChineseSimplified, "ChineseSimplified"));
-  Types.push_back(AT(Opts::ChineseTraditional, "ChineseTraditional"));
-  Types.push_back(AT(Opts::Cyrillic, "Cyrillic"));
-  Types.push_back(AT(Opts::Greek, "Greek"));
-  Types.push_back(AT(Opts::Hebrew, "Hebrew"));
-  Types.push_back(AT(Opts::Japanese, "Japanese"));
-  Types.push_back(AT(Opts::Korean, "Korean"));
-  Types.push_back(AT(Opts::Thai, "Thai"));
-  Types.push_back(AT(Opts::Turkish, "Turkish"));
-  Types.push_back(AT(Opts::VietNam, "VietNam"));
-  Types.push_back(AT(Opts::Western, "Western"));
-  for(unsigned int i = 0; i < Types.size(); i++) {
-    StoT[Types[i].second] = Types[i].first;
-    TtoS[Types[i].first] = Types[i].second;
-  }
+	AlphabetStringToType = {
+		{"None", Opts::MyNone},
+		{"Arabic", Opts::Arabic},
+		{"Baltic", Opts::Baltic},
+		{"CentralEurope", Opts::CentralEurope},
+		{"ChineseSimplified", Opts::ChineseSimplified},
+		{"ChineseTraditional", Opts::ChineseTraditional},
+		{"Cyrillic", Opts::Cyrillic},
+		{"Greek", Opts::Greek},
+		{"Hebrew", Opts::Hebrew},
+		{"Japanese", Opts::Japanese},
+		{"Korean", Opts::Korean},
+		{"Thai", Opts::Thai},
+		{"Turkish", Opts::Turkish},
+		{"VietNam", Opts::VietNam},
+		{"Western", Opts::Western}
+	};
+}
 
+SGroupInfo* CAlphIO::ParseGroupRecursive(pugi::xml_node& group_node, CAlphInfo* CurrentAlphabet, SGroupInfo* previous_sibling, std::vector<SGroupInfo*> ancestors)
+{
+	SGroupInfo* pNewGroup = new SGroupInfo();
+    pNewGroup->iNumChildNodes = 0;
+	pNewGroup->strName = group_node.attribute("name").as_string();
+	pNewGroup->strLabel = group_node.attribute("label").as_string();
+    pNewGroup->iColour = group_node.attribute("b").as_int(-1); //-1 marker for "none specified"; if so, will compute later
+
+	pNewGroup->bVisible = ancestors.empty(); //by default, the first group in the alphabet is invisible
+	const std::string visibility = group_node.attribute("name").as_string();
+	if(visibility == "yes" || visibility == "on")
+	{
+		pNewGroup->bVisible = true;
+	}
+	else if(visibility == "no" || visibility == "off")
+	{
+		pNewGroup->bVisible = false;
+	}
+
+    if (pNewGroup->iColour == -1 && pNewGroup->bVisible) {
+
+		std::vector available_colors = {110,111,112};
+		if(ancestors.size() >= 1) available_colors.erase(std::remove(available_colors.begin(), available_colors.end(), ancestors[ancestors.size() - 1]->iColour), available_colors.end());
+		if(ancestors.size() >= 2) available_colors.erase(std::remove(available_colors.begin(), available_colors.end(), ancestors[ancestors.size() - 2]->iColour), available_colors.end());
+
+		pNewGroup->iColour = available_colors[0];
+	}
+
+	pNewGroup->pNext = previous_sibling;
+    pNewGroup->pChild = nullptr;
+
+	// symbols and groups
+	pNewGroup->iStart = static_cast<int>(CurrentAlphabet->m_vCharacters.size()) + 1;
+	std::vector<SGroupInfo*> new_ancestors(ancestors);
+	new_ancestors.push_back(pNewGroup);
+	SGroupInfo* previous_subgroup_sibling = nullptr;
+	for(auto node : group_node.children())
+	{
+		// symbol
+		if(std::strcmp(node.name(),"s") == 0)
+		{
+			CurrentAlphabet->m_vCharacters.resize(CurrentAlphabet->m_vCharacters.size() + 1); //new char
+			ReadCharAttributes(node, &CurrentAlphabet->m_vCharacters.back());
+			pNewGroup->iNumChildNodes++;
+		}
+
+		// group
+		if(std::strcmp(node.name(),"group") == 0)
+		{
+			SGroupInfo* newChildGroup = ParseGroupRecursive(node, CurrentAlphabet, previous_subgroup_sibling, new_ancestors);
+			pNewGroup->iNumChildNodes++;
+			if(pNewGroup->pChild == nullptr) pNewGroup->pChild = newChildGroup;
+			previous_subgroup_sibling = newChildGroup;
+		}
+	}
+
+	pNewGroup->iEnd = static_cast<int>(CurrentAlphabet->m_vCharacters.size()) + 1;
+    if (pNewGroup->iEnd == pNewGroup->iStart) {
+		//empty group. Delete it now, and remove from sibling chain
+		SGroupInfo* parent = (ancestors.empty() ? CurrentAlphabet : ancestors.back());
+		parent->pChild = pNewGroup->pNext; //the actually previous node
+		delete pNewGroup;
+    } else {
+		//child groups were added (to linked list) in reverse order. Put them in (iStart/iEnd) order...
+		ReverseChildList(pNewGroup->pChild);
+    }
+
+	return pNewGroup;
+}
+
+bool CAlphIO::ParseFile(const std::string &strPath, bool bUser)
+{
+	pugi::xml_document doc;
+    pugi::xml_parse_result result = doc.load_file(strPath.c_str());
+
+	if (!result) return false;
+
+	pugi::xml_node alphabets = doc.child("alphabets");
+
+	const std::string language_code = alphabets.attribute("langcode").as_string();
+
+	for (pugi::xml_node alphabet : alphabets)
+    {
+	    CAlphInfo* CurrentAlphabet = new CAlphInfo();
+        CurrentAlphabet->Mutable = isUser();
+		CurrentAlphabet->LanguageCode = language_code;
+		CurrentAlphabet->AlphID = alphabet.attribute("name").as_string();
+		CurrentAlphabet->m_strCtxChar = alphabet.attribute("escape").as_string();
+		CurrentAlphabet->TrainingFile = alphabet.child("train").value();
+		CurrentAlphabet->GameModeFile = alphabet.child("gamemode").value();
+		CurrentAlphabet->PreferredColours = alphabet.child("palette").value();
+
+		// orientation
+		const std::string orientation_type = alphabet.child("orientation").attribute("type").as_string();
+        if (orientation_type == "RL") {
+            CurrentAlphabet->Orientation = Opts::RightToLeft;
+        }
+        else if (orientation_type == "TB") {
+            CurrentAlphabet->Orientation = Opts::TopToBottom;
+        }
+        else if (orientation_type == "BT") {
+            CurrentAlphabet->Orientation = Opts::BottomToTop;
+        }
+        else{
+            CurrentAlphabet->Orientation = Opts::LeftToRight;
+		}
+
+		// Control character
+		CurrentAlphabet->ControlCharacter = new CAlphInfo::character();
+		ReadCharAttributes(alphabet.child("control"), CurrentAlphabet->ControlCharacter);
+
+		// Convert character
+		CurrentAlphabet->StartConvertCharacter = new CAlphInfo::character();
+		ReadCharAttributes(alphabet.child("convert"), CurrentAlphabet->StartConvertCharacter);
+
+		// protect (end convert) character
+		CurrentAlphabet->EndConvertCharacter = new CAlphInfo::character();
+		ReadCharAttributes(alphabet.child("protect"), CurrentAlphabet->EndConvertCharacter);
+
+		// encoding
+		const std::string encodingType = alphabet.child("encoding").attribute("type").as_string();
+		CurrentAlphabet->Type = AlphabetStringToType[encodingType];
+
+		// context
+		CurrentAlphabet->m_strDefaultContext = alphabet.child("context").last_attribute().as_string(); //weird implementation but consistent with the original one
+
+		// conversion mode
+		const auto conversion_mode = alphabet.child("conversionmode");
+		CurrentAlphabet->m_iConversionID = conversion_mode.attribute("id").as_int();
+		CurrentAlphabet->m_strConversionTrainStart = conversion_mode.attribute("start").as_string();
+		CurrentAlphabet->m_strConversionTrainStop = conversion_mode.attribute("stop").as_string();
+
+		// groups
+		SGroupInfo* previous_sibling = nullptr;
+		for(pugi::xml_node& child : alphabet.children())
+		{
+			if(std::strcmp(child.name(),"group") == 0){
+				SGroupInfo* newGroup = ParseGroupRecursive(child, CurrentAlphabet, previous_sibling, {});
+				CurrentAlphabet->iNumChildNodes++;
+				CurrentAlphabet->pChild = newGroup; //always the last parsed child, as later reverse operation puts it as the first one
+				previous_sibling = newGroup;
+			}
+		}
+
+		// Paragraph character
+		CurrentAlphabet->m_vCharacters.resize(CurrentAlphabet->m_vCharacters.size() + 1);
+		CurrentAlphabet->iParagraphCharacter = static_cast<Dasher::symbol>(CurrentAlphabet->m_vCharacters.size());
+		CurrentAlphabet->iNumChildNodes++;
+		ReadCharAttributes(alphabet.child("paragraph"), &CurrentAlphabet->m_vCharacters.back());
+		CurrentAlphabet->m_vCharacters.back().Text = "\n"; //This should be platform independent now.
+
+		// Space character
+		CurrentAlphabet->m_vCharacters.resize(CurrentAlphabet->m_vCharacters.size() + 1);
+		CurrentAlphabet->iSpaceCharacter = static_cast<Dasher::symbol>(CurrentAlphabet->m_vCharacters.size());
+		CurrentAlphabet->iNumChildNodes++;
+		ReadCharAttributes(alphabet.child("space"), &CurrentAlphabet->m_vCharacters.back());
+		if (CurrentAlphabet->m_vCharacters.back().Colour == -1) CurrentAlphabet->m_vCharacters.back().Colour = 9;
+
+
+		CurrentAlphabet->iEnd = static_cast<int>(CurrentAlphabet->m_vCharacters.size()) + 1;
+		//child groups were added (to linked list) in reverse order. Put them in (iStart/iEnd) order...
+		ReverseChildList(CurrentAlphabet->pChild);
+
+		Alphabets[CurrentAlphabet->AlphID] = CurrentAlphabet;
+	}
+
+	return true;
 }
 
 void CAlphIO::GetAlphabets(std::vector <std::string >*AlphabetList) const {
-  AlphabetList->clear();
+	AlphabetList->clear();
 
-  for (auto alphabet : Alphabets)
-    AlphabetList->push_back(alphabet.second->AlphID);
+	for (auto [AlphabetID, Alphabet] : Alphabets){
+		AlphabetList->push_back(Alphabet->AlphID);
+	}
 }
 
-std::string CAlphIO::GetDefault() {
-  if(Alphabets.count("English with limited punctuation") != 0) {
-    return "English with limited punctuation";
-  }
-  else {
-    return "Default";
-  }
+std::string CAlphIO::GetDefault() const {
+	std::string DefaultExternalAlphabet = "English with limited punctuation";
+	if(Alphabets.count(DefaultExternalAlphabet) != 0) {
+		return DefaultExternalAlphabet;
+	}
+
+	return "Default";
 }
 
-const CAlphInfo *CAlphIO::GetInfo(const std::string &AlphID) const {
-  auto it = Alphabets.find(AlphID);
-  if (it == Alphabets.end()) //if we don't have the alphabet they ask for,
-    it = Alphabets.find("Default"); //give them default - it's better than nothing
-  return it->second;
+const CAlphInfo *CAlphIO::GetInfo(const std::string &AlphabetID) const {
+	auto it = Alphabets.find(AlphabetID);
+	if (it == Alphabets.end()) //if we don't have the alphabet they ask for,
+		it = Alphabets.find(GetDefault()); //give them default - it's better than nothing
+	return it->second;
 }
 
 CAlphInfo *CAlphIO::CreateDefault() {
-  // TODO I appreciate these strings should probably be in a resource file.
-  // Not urgent though as this is not intended to be used. It's just a
-  // last ditch effort in case file I/O totally fails.
-  CAlphInfo &Default(*(new CAlphInfo()));
-  Default.AlphID = "Default";
-  Default.Type = Opts::Western;
-  Default.Mutable = false;
-  Default.TrainingFile = "training_english_GB.txt";
-  Default.GameModeFile = "gamemode_english_GB.txt";
-  Default.PreferredColours = "Default";
-  std::string Chars = "abcdefghijklmnopqrstuvwxyz";
+	// TODO I appreciate these strings should probably be in a resource file.
+	// Not urgent though as this is not intended to be used. It's just a
+	// last ditch effort in case file I/O totally fails.
+	CAlphInfo &Default(*(new CAlphInfo()));
+	Default.AlphID = "Default";
+	Default.Type = Opts::Western;
+	Default.Mutable = false;
+	Default.TrainingFile = "training_english_GB.txt";
+	Default.GameModeFile = "gamemode_english_GB.txt";
+	Default.PreferredColours = "Default";
+	std::string Chars = "abcdefghijklmnopqrstuvwxyz";
 
 //   // Obsolete
 //   Default.Groups.resize(1);
@@ -102,348 +264,68 @@ CAlphInfo *CAlphIO::CreateDefault() {
 //     Default.Groups[0].Characters[i].Display = Chars[i];
 //     Default.Groups[0].Characters[i].Colour = i + 10;
 //   }
-  // ---
-  Default.pChild = 0;
-  Default.Orientation = Opts::LeftToRight;
+	// ---
+	Default.pChild = 0;
+	Default.Orientation = Opts::LeftToRight;
 
-  //The following creates Chars.size()+2 actual character structs in the vector,
-  // all initially blank. The extra 2 are for paragraph and space.
-  Default.m_vCharacters.resize(Chars.size()+2);
-  //fill in structs for characters in Chars...
-  for(unsigned int i(0); i < Chars.size(); i++) {
-    Default.m_vCharacters[i].Text = Chars[i];
-    Default.m_vCharacters[i].Display = Chars[i];
-    Default.m_vCharacters[i].Colour = i + 10;
-  }
+	//The following creates Chars.size()+2 actual character structs in the vector,
+	// all initially blank. The extra 2 are for paragraph and space.
+	Default.m_vCharacters.resize(Chars.size()+2);
+	//fill in structs for characters in Chars...
+	for(unsigned int i(0); i < Chars.size(); i++) {
+		Default.m_vCharacters[i].Text = Chars[i];
+		Default.m_vCharacters[i].Display = Chars[i];
+		Default.m_vCharacters[i].Colour = i + 10;
+	}
 
-  //note iSpaceCharacter/iParagraphCharacter, as all symbol numbers, are one _more_
-  // than their index into m_vCharacters... (as "unknown symbol" 0 does not appear in vector)
-  Default.iParagraphCharacter = static_cast<Dasher::symbol>(Chars.size()+1);
-  Default.m_vCharacters[Chars.size()].Display = "¶";
-  Default.m_vCharacters[Chars.size()].Text = "\n"; //This should be platform independent now.
-  Default.m_vCharacters[Chars.size()].Colour = 9;
+	//note iSpaceCharacter/iParagraphCharacter, as all symbol numbers, are one _more_
+	// than their index into m_vCharacters... (as "unknown symbol" 0 does not appear in vector)
+	Default.iParagraphCharacter = static_cast<Dasher::symbol>(Chars.size()+1);
+	Default.m_vCharacters[Chars.size()].Display = "¶";
+	Default.m_vCharacters[Chars.size()].Text = "\n"; //This should be platform independent now.
+	Default.m_vCharacters[Chars.size()].Colour = 9;
 
-  Default.iSpaceCharacter = static_cast<Dasher::symbol>(Chars.size()+2);
-  Default.m_vCharacters[Chars.size()+1].Display = "_";
-  Default.m_vCharacters[Chars.size()+1].Text = " ";
-  Default.m_vCharacters[Chars.size()+1].Colour = 9;
+	Default.iSpaceCharacter = static_cast<Dasher::symbol>(Chars.size()+2);
+	Default.m_vCharacters[Chars.size()+1].Display = "_";
+	Default.m_vCharacters[Chars.size()+1].Text = " ";
+	Default.m_vCharacters[Chars.size()+1].Colour = 9;
 
-  Default.ControlCharacter = new CAlphInfo::character();
-  Default.ControlCharacter->Display = "Control";
-  Default.ControlCharacter->Text = "";
-  Default.ControlCharacter->Colour = 8;
+	Default.ControlCharacter = new CAlphInfo::character();
+	Default.ControlCharacter->Display = "Control";
+	Default.ControlCharacter->Text = "";
+	Default.ControlCharacter->Colour = 8;
 
-  Default.iStart=1; Default.iEnd= static_cast<int>(Default.m_vCharacters.size())+1;
-  Default.iNumChildNodes = static_cast<int>(Default.m_vCharacters.size());
-  Default.pNext=Default.pChild=NULL;
-  
-  return &Default;
+	Default.iStart=1; Default.iEnd= static_cast<int>(Default.m_vCharacters.size())+1;
+	Default.iNumChildNodes = static_cast<int>(Default.m_vCharacters.size());
+	Default.pNext=Default.pChild=NULL;
+
+	return &Default;
 }
 
-// Below here handlers for the Expat XML input library
-////////////////////////////////////////////////////////////////////////////////////
+void CAlphIO::ReadCharAttributes(pugi::xml_node xml_node, CAlphInfo::character* alphabet_character) {
 
-void CAlphIO::XmlStartHandler(const XML_Char* name, const XML_Char** atts) {
-
-    CData = "";
-
-    if (strcmp(name, "alphabets") == 0) {
-        while (*atts != 0) {
-            if (strcmp(*atts, "langcode") == 0) {
-                LanguageCode = *(atts + 1);
-            }
-            atts += 2;
-        }
-    }
-
-    if (strcmp(name, "alphabet") == 0) {
-        InputInfo = new CAlphInfo();
-        InputInfo->Mutable = isUser();
-        ParagraphCharacter = NULL;
-        SpaceCharacter = NULL;
-        iGroupIdx = 0;
-        while (*atts != 0) {
-            if (strcmp(*atts, "name") == 0) {
-                InputInfo->AlphID = *(atts + 1);
-            }
-            else if (strcmp(*atts, "escape") == 0) {
-                InputInfo->m_strCtxChar = *(atts + 1);
-            }
-            atts += 2;
-        }
-        m_vGroups.clear();
-        return;
-    }
-
-    if (strcmp(name, "orientation") == 0) {
-        while (*atts != 0) {
-            if (!strcmp(*atts, "type")) {
-                if (!strcmp(*(atts + 1), "RL")) {
-                    InputInfo->Orientation = Opts::RightToLeft;
-                }
-                else if (!strcmp(*(atts + 1), "TB")) {
-                    InputInfo->Orientation = Opts::TopToBottom;
-                }
-                else if (!strcmp(*(atts + 1), "BT")) {
-                    InputInfo->Orientation = Opts::BottomToTop;
-                }
-                else
-                    InputInfo->Orientation = Opts::LeftToRight;
-            }
-            atts += 2;
-        }
-        return;
-    }
-
-    if (strcmp(name, "encoding") == 0) {
-        while (*atts != 0) {
-            if (strcmp(*atts, "type") == 0) {
-                InputInfo->Type = StoT[*(atts + 1)];
-            }
-            atts += 2;
-        }
-        return;
-    }
-
-    if (strcmp(name, "space") == 0) {
-        if (!SpaceCharacter) SpaceCharacter = new CAlphInfo::character();
-        ReadCharAtts(atts, *SpaceCharacter);
-        if (SpaceCharacter->Colour == -1) SpaceCharacter->Colour = 9;
-        return;
-    }
-    if (strcmp(name, "paragraph") == 0) {
-        if (!ParagraphCharacter) ParagraphCharacter = new CAlphInfo::character();
-        ReadCharAtts(atts, *ParagraphCharacter);
-        ParagraphCharacter->Text = "\n"; //This should be platform independent now.
-        return;
-    }
-    if (strcmp(name, "control") == 0) {
-        if (!InputInfo->ControlCharacter) InputInfo->ControlCharacter = new CAlphInfo::character();
-        ReadCharAtts(atts, *(InputInfo->ControlCharacter));
-        return;
-    }
-
-    if (strcmp(name, "group") == 0) {
-        SGroupInfo* pNewGroup(new SGroupInfo);
-        pNewGroup->iNumChildNodes = 0;
-        pNewGroup->iColour = -1; //marker for "none specified"; if so, will compute later
-        if (m_vGroups.empty()) InputInfo->iNumChildNodes++; else m_vGroups.back()->iNumChildNodes++;
-
-        //by default, the first group in the alphabet is invisible
-        pNewGroup->bVisible = (InputInfo->pChild != NULL);
-
-        while (*atts != 0) {
-            if (strcmp(*atts, "name") == 0)
-                pNewGroup->strName = *(atts + 1);
-            else if (strcmp(*atts, "b") == 0) {
-                pNewGroup->iColour = atoi(*(atts + 1));
-            }
-            else if (strcmp(*atts, "visible") == 0) {
-                atts++;
-                if (!strcmp(*atts, "yes") || !strcmp(*atts, "on"))
-                    pNewGroup->bVisible = true;
-                else if (!strcmp(*atts, "no") || !strcmp(*atts, "off"))
-                    pNewGroup->bVisible = false;
-                atts--;
-            }
-            else if (strcmp(*atts, "label") == 0) {
-                pNewGroup->strLabel = *(atts + 1);
-            }
-            atts += 2;
-        }
-
-        SGroupInfo*& prevSibling = (m_vGroups.empty() ? InputInfo->pChild : m_vGroups.back()->pChild);
-
-        if (pNewGroup->iColour == -1 && pNewGroup->bVisible) {
-            //no colour specified. Try to colour cycle, but make sure we choose
-            // a different colour from both its parent and any previous sibling
-            SGroupInfo* parent = NULL;
-            for (vector<SGroupInfo*>::reverse_iterator it = m_vGroups.rbegin(); it != m_vGroups.rend(); it++)
-                if ((*it)->bVisible) { parent = *it; break; }
-            for (;;) {
-                pNewGroup->iColour = (iGroupIdx++ % 3) + 110;
-                if (parent && parent->iColour == pNewGroup->iColour)
-                    continue; //same colour as parent -> try again
-                if (prevSibling && prevSibling->iColour == pNewGroup->iColour)
-                    continue; //same colour as previous sibling -> try again
-                break; //different from parent and previous sibling (if any!), so ok
-            }
-        }
-
-        pNewGroup->iStart = static_cast<int>(InputInfo->m_vCharacters.size()) + 1;
-
-        pNewGroup->pChild = NULL;
-
-        pNewGroup->pNext = prevSibling;
-        prevSibling = pNewGroup;
-
-        m_vGroups.push_back(pNewGroup);
-
-        return;
-    }
-
-    if (!strcmp(name, "conversionmode")) {
-        while (*atts != 0) {
-            if (strcmp(*atts, "id") == 0) {
-                InputInfo->m_iConversionID = atoi(*(atts + 1));
-            }
-            else if (strcmp(*atts, "start") == 0) {
-                //TODO, should check this is only a single unicode character;
-                // no training will occur, if not...
-                InputInfo->m_strConversionTrainStart = *(atts + 1);
-            }
-            else if (strcmp(*atts, "stop") == 0) //similarly
-                InputInfo->m_strConversionTrainStop = *(atts + 1);
-            atts += 2;
-        }
-
-        return;
-    }
-
-    // Special characters for character composition
-    if (strcmp(name, "convert") == 0) {
-        if (!InputInfo->StartConvertCharacter) InputInfo->StartConvertCharacter = new CAlphInfo::character();
-        ReadCharAtts(atts, *(InputInfo->StartConvertCharacter));
-        return;
-    }
-
-    //Reimplemented according to description:
-    //[...]
-    //<convert d = "" t = "" b = "" / >
-    //    initializes the InputInfo->StartConvertCharacter and parses it as a normal character
-    //    <protect d = "" t = "" b = "" / >
-    //    initializes the InputInfo->EndConvertCharacter and parses it as a normal character
-    //    <context default = "" / >
-    //    sets the InputInfo->m_strDefaultContext to the passed attribute
-    //    <s d = "" t = "" f = "" b = "" / >
-    //    Is either a free floating character or part of a group
-    //    Thus it is always counted to either the global iNumChildNodes or the iNumChildNodes of the last seen group, if any available
-    //    A new entry in the Characters list is addedand filled ia ReadCharAtts()
-    //    * /
-
-    //assumed to be analogous to "convert"
-    if (strcmp(name, "protect") == 0) { 
-        if (!InputInfo->EndConvertCharacter) InputInfo->EndConvertCharacter = new CAlphInfo::character();
-        ReadCharAtts(atts, *(InputInfo->EndConvertCharacter));
-        return;
-    }
-
-    //
-    if (strcmp(name, "context") == 0) {
-        while (*atts != 0) {
-            InputInfo->m_strDefaultContext = *(atts + 1);
-            atts += 2;
-        }
-    }
-    if (strcmp(name, "s") == 0) {
-        //Groups are stored in m_vGroups:
-        if (m_vGroups.empty()) {
-            InputInfo->iNumChildNodes++;
-        }
-        else {
-            m_vGroups.back()->iNumChildNodes++;
-        }
-
-        auto ch = new CAlphInfo::character();
-        InputInfo->m_vCharacters.push_back(*ch);
-        ReadCharAtts(atts, (InputInfo->m_vCharacters.back()));
-    }
+	alphabet_character->Text = xml_node.attribute("t").as_string();
+	alphabet_character->Display = xml_node.attribute("d").as_string();
+	alphabet_character->Colour = xml_node.attribute("b").as_int();
 }
 
-
-void CAlphIO::ReadCharAtts(const XML_Char **atts, CAlphInfo::character &ch) {
-  while(*atts != 0) {
-    if(strcmp(*atts, "t") == 0) ch.Text = *(atts+1);
-    else if(strcmp(*atts, "d") == 0) ch.Display = *(atts+1);
-    else if(strcmp(*atts, "b") == 0) ch.Colour = atoi(*(atts+1));
-    atts += 2;
-  }
-}
-
-void Reverse(SGroupInfo *&pList) {
-  SGroupInfo *pFirst = pList;
-  SGroupInfo *pPrev = NULL;
-  while (pFirst) {
-    SGroupInfo *pNext = pFirst->pNext;
-    pFirst->pNext = pPrev;
-    pPrev = pFirst;
-    pFirst = pNext;
-  }
-  pList=pPrev;
-}
-
-void CAlphIO::XmlEndHandler(const XML_Char *name) {
-
-  if (strcmp(name, "alphabets") == 0) {
-    LanguageCode = "";
-  }
-
-  if(strcmp(name, "alphabet") == 0) {
-    Reverse(InputInfo->pChild);
-
-    if (ParagraphCharacter) {
-      InputInfo->iParagraphCharacter = static_cast<Dasher::symbol>(InputInfo->m_vCharacters.size()+1);
-      InputInfo->m_vCharacters.push_back(*ParagraphCharacter);
-      InputInfo->iNumChildNodes++;
-      delete ParagraphCharacter;
-    }
-    if (SpaceCharacter) {
-      InputInfo->iSpaceCharacter = static_cast<Dasher::symbol>(InputInfo->m_vCharacters.size()+1);
-      InputInfo->m_vCharacters.push_back(*SpaceCharacter);
-      InputInfo->iNumChildNodes++;
-      delete SpaceCharacter;
-    }
-
-    InputInfo->LanguageCode = LanguageCode;
-
-    InputInfo->iEnd = static_cast<int>(InputInfo->m_vCharacters.size())+1;
-
-    //if (InputInfo->StartConvertCharacter.Text != "") InputInfo->iNumChildNodes++;
-    //if (InputInfo->EndConvertCharacter.Text != "") InputInfo->iNumChildNodes++;
-    Alphabets[InputInfo->AlphID] = InputInfo;
-    return;
-  }
-
-  if(strcmp(name, "train") == 0) {
-    InputInfo->TrainingFile = CData;
-    return;
-  }
-  if(strcmp(name, "gamemode") == 0) {
-    InputInfo->GameModeFile = CData;
-    return;
-  }
-
-  if(strcmp(name, "palette") == 0) {
-    InputInfo->PreferredColours = CData;
-    return;
-  }
-
-  if(!strcmp(name, "group")) {
-    SGroupInfo *finished = m_vGroups.back();
-    m_vGroups.pop_back();
-    finished->iEnd = static_cast<int>(InputInfo->m_vCharacters.size())+1;
-    if (finished->iEnd == finished->iStart) {
-      //empty group. Delete it now, and elide from sibling chain
-      SGroupInfo *&ptr=(m_vGroups.empty() ? InputInfo : m_vGroups.back())->pChild;
-      DASHER_ASSERT(ptr == finished);
-      ptr = finished->pNext;
-      delete finished;
-    } else {
-      //child groups were added (to linked list) in reverse order. Put them in (iStart/iEnd) order...
-      Reverse(finished->pChild);
-    }
-
-    return;
-  }
-}
-
-void CAlphIO::XmlCData(const XML_Char *s, int len) {
-  // CAREFUL: s points to a string which is NOT null-terminated.
-  CData.append(s, len);
+// Reverses the internal linked list for the given SGroupInfo
+// input given GroupInfo eg. pointer to G_1 with [G_1->G_2->G_3->G_4->Null]
+// result [G_4->G_3->G_2->G_1->Null]
+void CAlphIO::ReverseChildList(SGroupInfo *&pList) {
+	SGroupInfo *pFirst = pList;
+	SGroupInfo *pPrev = NULL;
+	while (pFirst) {
+		SGroupInfo *pNext = pFirst->pNext;
+		pFirst->pNext = pPrev;
+		pPrev = pFirst;
+		pFirst = pNext;
+	}
+	pList=pPrev;
 }
 
 CAlphIO::~CAlphIO() {
-  for (auto it : Alphabets) {
-    delete it.second;
-  }
+	for (auto [AlphabetID, Alphabet] : Alphabets) {
+		delete Alphabet;
+	}
 }

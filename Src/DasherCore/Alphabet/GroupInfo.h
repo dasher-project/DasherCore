@@ -2,11 +2,12 @@
 #define __GROUP_INFO_H__
 
 #include <string>
-/// \ingroup Alphabet
-/// \{
+
+// Data Structure to store character groups inside alphabets
+// Tree always starts with empty group
 struct SGroupInfo {
-  SGroupInfo *pChild;
-  SGroupInfo *pNext;
+  SGroupInfo *pChild; //Pointer to first child group
+  SGroupInfo *pNext; //Pointer to next child of same parent
   std::string strLabel;
   ///lowest index of symbol that is in group
   int iStart;
@@ -29,6 +30,6 @@ struct SGroupInfo {
     }
   }
 };
-/// \}
+
 
 #endif

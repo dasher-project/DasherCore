@@ -18,22 +18,18 @@
 // along with Dasher; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
-#ifndef __AlphIO_h__
-#define __AlphIO_h__
+#pragma once
 
 #include "../../Common/Common.h"
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
-
 #include "../AbstractXMLParser.h"
 
 #include "../DasherTypes.h"
 #include "AlphInfo.h"
 
 #include <map>
+#include <pugixml.hpp>
 #include <vector>
-#include <utility>              // for std::pair
+#include <utility>
 
 namespace Dasher {
   class CAlphIO;
@@ -49,73 +45,28 @@ namespace Dasher {
 /// so can create/manipulate instances.)
 class Dasher::CAlphIO : public AbstractXMLParser {
 public:
-	//Adding definitions of functions implemented in the .cpp 
 	CAlphIO(CMessageDisplay* pMsgs);
-	std::string GetDefault();
 	~CAlphIO();
-	// This structure completely describes the characters used in alphabet
-	struct AlphInfo
-	{
-		// Basic information
-		std::string AlphID;
-		bool Mutable; // If from user we may play. If from system defaults this is immutable. User should take a copy.
-		
-		// Complete description of the alphabet:
-		std::string TrainingFile;
-        std::string GameModeFile;
-	    std::string PreferredColours;
-		Opts::AlphabetTypes Encoding;
-		Opts::AlphabetTypes Type;
-		Opts::ScreenOrientations Orientation;
-		struct character
-		{
-			std::string Display;
-			std::string Text;
-		        int Colour;
-		        std::string Foreground;
-		};
-		struct group
-		{
-			std::string Description;
-			std::vector< character > Characters;
-			int Colour;
-			std::string Label;
-		};
-		std::vector< group > Groups;
-	    character ParagraphCharacter; // display and edit text of paragraph character. Use ("", "") if no paragraph character.
-		character SpaceCharacter; // display and edit text of Space character. Typically (" ", "_"). Use ("", "") if no space character.
-		character ControlCharacter; // display and edit text of Control character. Typically ("", "Control"). Use ("", "") if no control character.
-	};
-	
-	CAlphIO(std::string SystemLocation, std::string UserLocation, std::vector<std::string> Filenames);
+
+	bool ParseFile(const std::string &strPath, bool bUser) override;
+
 	void GetAlphabets(std::vector< std::string >* AlphabetList) const;
 	const CAlphInfo *GetInfo(const std::string& AlphID) const;
-	void SetInfo(const AlphInfo& NewInfo);
-	void Delete(const std::string& AlphID);
+	std::string GetDefault() const;
+
+public:
+	// Just due to legacy code compatability
+	virtual void XmlStartHandler(const XML_Char *name, const XML_Char **atts){};
+	virtual void XmlEndHandler(const XML_Char *name){};
+
 private:
-  CAlphInfo::character *SpaceCharacter, *ParagraphCharacter;
-  std::vector<SGroupInfo *> m_vGroups;
-  std::map < std::string, const CAlphInfo* > Alphabets; // map AlphabetID to AlphabetInfo. 
-  CAlphInfo *CreateDefault();         // Give the user an English alphabet rather than nothing if anything goes horribly wrong.
+	std::map < std::string, const CAlphInfo* > Alphabets; // map AlphabetID to AlphabetInfo. 
+	static CAlphInfo *CreateDefault();         // Give the user an English alphabet rather than nothing if anything goes horribly wrong.
 
-  // XML handling:
-  /////////////////////////
-
-  void ReadCharAtts(const XML_Char **atts, CAlphInfo::character &ch);
-  // Alphabet types:
-  std::map < std::string, Opts::AlphabetTypes > StoT;
-  std::map < Opts::AlphabetTypes, std::string > TtoS;
-
-  // Data gathered
-  std::string CData;            // Text gathered from when an elemnt starts to when it ends
-  CAlphInfo *InputInfo;
-  int iGroupIdx;
-  std::string LanguageCode;
-
-  void XmlStartHandler(const XML_Char * name, const XML_Char ** atts);
-  void XmlEndHandler(const XML_Char * name);
-  void XmlCData(const XML_Char * s, int len);
+	void ReadCharAttributes(pugi::xml_node xml_node, CAlphInfo::character* alphabet_character);
+	SGroupInfo* ParseGroupRecursive(pugi::xml_node& group_node, CAlphInfo* CurrentAlphabet, SGroupInfo* previous_sibling, std::vector<SGroupInfo*> ancestors);
+    void ReverseChildList(SGroupInfo*& pList);
+	// Alphabet types:
+	std::map<std::string, Opts::AlphabetTypes> AlphabetStringToType;
 };
 /// @}
-
-#endif /* #ifndef __AlphIO_h__ */

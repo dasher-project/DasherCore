@@ -19,6 +19,14 @@ else()
 endif()
 
 ###############################
+# Building pugixml Library
+###############################
+
+set(PUGIXML_STATIC_CRT ON CACHE BOOL "" FORCE)
+set(PUGIXML_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/Thirdparty/pugixml")
+
+###############################
 # Building Expat Library
 ###############################
 
@@ -129,7 +137,7 @@ target_include_directories(DasherCore PUBLIC ${CMAKE_CURRENT_LIST_DIR}/Src/Commo
 target_include_directories(DasherCore PUBLIC ${CMAKE_CURRENT_LIST_DIR}/Src/Common/Types/)
 target_include_directories(DasherCore PUBLIC ${CMAKE_CURRENT_LIST_DIR}/Src/Common/Unicode/)
 
-add_dependencies(DasherCore expat)
-target_link_libraries(DasherCore expat)
+add_dependencies(DasherCore expat pugixml)
+target_link_libraries(DasherCore expat pugixml)
 
 set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT DasherCore)

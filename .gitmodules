@@ -1,3 +1,6 @@
 [submodule "Thirdparty/libexpat"]
 	path = Thirdparty/libexpat
 	url = https://github.com/libexpat/libexpat.git
+[submodule "Thirdparty/pugixml"]
+	path = Thirdparty/pugixml
+	url = https://github.com/zeux/pugixml.git
