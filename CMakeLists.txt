@@ -4,7 +4,7 @@ project("DasherCore")
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-add_compile_definitions(HAVE_ROUND XML_STATIC _CRT_SECURE_NO_WARNINGS)
+add_compile_definitions(HAVE_ROUND _CRT_SECURE_NO_WARNINGS)
 set(CMAKE_SUPPRESS_REGENERATION true)
 
 option(DASHER_HAVE_OWN_FILEUTILS "Set to true if you provide your own FileUtils implementation" OFF)
@@ -25,18 +25,6 @@ endif()
 set(PUGIXML_STATIC_CRT ON CACHE BOOL "" FORCE)
 set(PUGIXML_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/Thirdparty/pugixml")
-
-###############################
-# Building Expat Library
-###############################
-
-set(EXPAT_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
-set(EXPAT_BUILD_TESTS OFF CACHE BOOL "" FORCE)
-set(EXPAT_BUILD_TOOLS OFF CACHE BOOL "" FORCE)
-set(EXPAT_ENABLE_INSTALL OFF CACHE BOOL "" FORCE)
-set(EXPAT_SHARED_LIBS OFF CACHE BOOL "" FORCE)
-
-add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/Thirdparty/libexpat/expat")
 
 ###############################
 # Building Core Dasher Library
@@ -137,7 +125,7 @@ target_include_directories(DasherCore PUBLIC ${CMAKE_CURRENT_LIST_DIR}/Src/Commo
 target_include_directories(DasherCore PUBLIC ${CMAKE_CURRENT_LIST_DIR}/Src/Common/Types/)
 target_include_directories(DasherCore PUBLIC ${CMAKE_CURRENT_LIST_DIR}/Src/Common/Unicode/)
 
-add_dependencies(DasherCore expat pugixml)
-target_link_libraries(DasherCore expat pugixml)
+add_dependencies(DasherCore pugixml)
+target_link_libraries(DasherCore pugixml)
 
 set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT DasherCore)

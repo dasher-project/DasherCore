@@ -33,8 +33,6 @@
 #include <iostream>
 #include <string>
 
-#include <expat.h>
-
 using namespace std;
 
 class CNodeCreationManager;
