@@ -10,180 +10,146 @@
 
 
 namespace Dasher {
-namespace {
 
 template <typename T>
-bool Read(const std::map<std::string, T> values, const std::string& key,
-          T* value) {
-  auto i = values.find(key);
-  if (i == values.end()) {
-    return false;
-  }
-  *value = i->second;
-  return true;
+static bool Read(const std::map<std::string, T> values, const std::string& key,
+                 T* value)
+{
+	auto i = values.find(key);
+	if (i == values.end())
+	{
+		return false;
+	}
+	*value = i->second;
+	return true;
 }
-
-}  // namespace
 
 XmlSettingsStore::XmlSettingsStore(const std::string& filename, CMessageDisplay* pDisplay)
-    : AbstractXMLParser(pDisplay), filename_(filename) {}
-
-void XmlSettingsStore::Load() {
-  Dasher::FileUtils::ScanFiles(this, filename_);
-  // Load all the settings or create defaults for the ones that don't exist.
-  // The superclass 'ParseFile' saves default settings if not found.
-  mode_ = EXPLICIT_SAVE;
-  LoadPersistent();
-  mode_ = SAVE_IMMEDIATELY;
+	: AbstractXMLParser(pDisplay), filename_(filename)
+{
 }
 
-bool XmlSettingsStore::LoadSetting(const std::string& key, bool* value) {
-  return Read(boolean_settings_, key, value);
+void XmlSettingsStore::Load()
+{
+	Dasher::FileUtils::ScanFiles(this, filename_);
+	// Load all the settings or create defaults for the ones that don't exist.
+	// The superclass 'ParseFile' saves default settings if not found.
+	mode_ = EXPLICIT_SAVE;
+	LoadPersistent();
+	mode_ = SAVE_IMMEDIATELY;
 }
 
-bool XmlSettingsStore::LoadSetting(const std::string& key, long* value) {
-  return Read(long_settings_, key, value);
+bool XmlSettingsStore::LoadSetting(const std::string& key, bool* value)
+{
+	return Read(boolean_settings_, key, value);
 }
 
-bool XmlSettingsStore::LoadSetting(const std::string& key, std::string* value) {
-  return Read(string_settings_, key, value);
+bool XmlSettingsStore::LoadSetting(const std::string& key, long* value)
+{
+	return Read(long_settings_, key, value);
 }
 
-void XmlSettingsStore::SaveSetting(const std::string& key, bool value) {
-  boolean_settings_[key] = value;
-  SaveIfNeeded();
+bool XmlSettingsStore::LoadSetting(const std::string& key, std::string* value)
+{
+	return Read(string_settings_, key, value);
 }
 
-void XmlSettingsStore::SaveSetting(const std::string& key, long value) {
-  long_settings_[key] = value;
-  SaveIfNeeded();
+void XmlSettingsStore::SaveSetting(const std::string& key, bool value)
+{
+	boolean_settings_[key] = value;
+	SaveIfNeeded();
+}
+
+void XmlSettingsStore::SaveSetting(const std::string& key, long value)
+{
+	long_settings_[key] = value;
+	SaveIfNeeded();
 }
 
 void XmlSettingsStore::SaveSetting(const std::string& key,
-                                   const std::string& value) {
-  string_settings_[key] = value;
-  SaveIfNeeded();
+                                   const std::string& value)
+{
+	string_settings_[key] = value;
+	SaveIfNeeded();
 }
 
-void XmlSettingsStore::SaveIfNeeded() {
-  modified_ = true;
-  if (mode_ == SAVE_IMMEDIATELY) {
-    Save();
-  }
+void XmlSettingsStore::SaveIfNeeded()
+{
+	modified_ = true;
+	if (mode_ == SAVE_IMMEDIATELY)
+	{
+		Save();
+	}
 }
 
 bool XmlSettingsStore::Save() {
-  if (!modified_) {
-    return true;
-  }
+	if (!modified_) {
+		return true;
+	}
   
     modified_ = false;
-    std::stringstream out;
-    out << "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n";
-    out << "<!DOCTYPE settings SYSTEM \"settings.dtd\">\n";
 
-    out << "<settings>\n";
-    for (const auto& p : long_settings_) {
-      out << "<long name=\"" << p.first << "\" value=\"" << p.second
-          << "\"/>\n";
-    }
-    for (const auto& p : boolean_settings_) {
-      std::string value = p.second ? "True" : "False";
-      out << "<bool name=\"" << p.first << "\" value=\"" << value << "\"/>\n";
-    }
-    for (const auto& p : string_settings_) {
-      std::string attribute = p.second;
-      XML_Escape(attribute, true /* attribute */);
-      out << "<string name=\"" << p.first << "\" value=\"" << attribute
-          << "\"/>\n";
-    }
-    out << "</settings>\n";
-    return Dasher::FileUtils::WriteUserDataFile(filename_, out.str(),false);
+	pugi::xml_document doc;
+	pugi::xml_node declaration_node = doc.append_child(pugi::node_declaration);
+	declaration_node.append_attribute("version") = "1.0";
+	declaration_node.append_attribute("encoding") = "UTF-8";
+	declaration_node.append_attribute("standalone") = "no";
 
+	pugi::xml_node doctype_node = doc.append_child(pugi::node_doctype);
+	doctype_node.set_value("settings SYSTEM \"settings.dtd\"");
+
+	pugi::xml_node settings = doc.append_child("settings");
+
+    for (auto [name, value] : long_settings_) {
+		pugi::xml_node long_node = settings.append_child("long");
+		long_node.append_attribute("name") = name.c_str();
+		long_node.append_attribute("value") = value;
+    }
+
+	for (auto [name, value] : boolean_settings_) {
+		pugi::xml_node bool_node = settings.append_child("bool");
+		bool_node.append_attribute("name") = name.c_str();
+		bool_node.append_attribute("value") = value;
+    }
+
+	for (auto [name, value] : string_settings_) {
+		pugi::xml_node string_node = settings.append_child("string");
+		string_node.append_attribute("name") = name.c_str();
+		string_node.append_attribute("value") = value.c_str();
+    }
+
+	return doc.save_file(filename_.c_str(), "\t", pugi::format_default, pugi::encoding_utf8);
 }
 
-bool XmlSettingsStore::GetNameAndValue(const XML_Char** attributes,
-                                       std::string* name, std::string* value) {
-  bool found_name = false, found_value = false;
-  for (; *attributes != nullptr; attributes += 2) {
-    if (strcmp(attributes[0], "value") == 0) {
-      if (found_value) {
-        m_pMsgs->Message(
-            "XML configuration: the 'value' attribute can only be present "
-            "once in a tag",
-            true /* interrupt */);
-        return false;
-      }
-      *value = attributes[1];
-      found_value = true;
-    } else if (strcmp(attributes[0], "name") == 0) {
-      if (found_name) {
-        m_pMsgs->Message(
-            "XML configuration: the 'name' attribute can only be present "
-            "once in a tag",
-            true /* interrupt */);
-        return false;
-      }
-      *name = attributes[1];
-      if (name->empty()) {
-        m_pMsgs->Message(
-            "XML configuration: the 'name' attribute can not be empty.",
-            true /* interrupt */);
-        return false;
-      }
-      found_name = true;
-    } else {
-      m_pMsgs->FormatMessageWithString(
-          "XML configuration: invalid attribute: %s", *attributes);
-      return false;
-    }
-  }
-  if (!found_name || !found_value) {
-    m_pMsgs->Message("XML configuration: missing name or value in a tag.",
-                     true /* interrupt */);
-    return false;
-  }
-  return true;
+bool XmlSettingsStore::ParseFile(const std::string& strPath, bool bUser)
+{
+	pugi::xml_document doc;
+    pugi::xml_parse_result result = doc.load_file(strPath.c_str());
+
+	if (!result) return false;
+
+	pugi::xml_node outer = doc.child("settings");
+	for (pugi::xml_node bool_setting : outer.children("bool"))
+    {
+		std::string name = bool_setting.attribute("name").as_string();
+		bool value = bool_setting.attribute("value").as_bool();
+		if(!name.empty()) boolean_settings_[name] = value;
+	}
+
+	for (pugi::xml_node string_setting : outer.children("string"))
+    {
+		std::string name = string_setting.attribute("name").as_string();
+		std::string value = string_setting.attribute("value").as_string();
+		if(!name.empty()) string_settings_[name] = value;
+	}
+
+	for (pugi::xml_node long_setting : outer.children("long"))
+    {
+		std::string name = long_setting.attribute("name").as_string();
+		long value = static_cast<long>(long_setting.attribute("value").as_llong());
+		if(!name.empty()) long_settings_[name] = value;
+	}
+
+	return true;
 }
-
-void XmlSettingsStore::XmlStartHandler(const XML_Char* element_name,
-                                       const XML_Char** attributes) {
-  std::string element = element_name;
-  if (element == "settings") {
-    return;
-  }
-  std::string name, value;
-  if (!GetNameAndValue(attributes, &name, &value)) {
-    return;
-  }
-  if (element == "string") {
-    string_settings_[name] = value;
-  } else if (element == "long") {
-    errno = 0;
-    long v = std::strtol(value.c_str(), nullptr, 0 /* base */);
-    if (errno != 0) {
-      m_pMsgs->FormatMessageWith2Strings(
-          "XML configuration: invalid numeric value '%s' for '%s'",
-          value.c_str(), name.c_str());
-    }
-    long_settings_[name] = v;
-  } else if (element == "bool") {
-
-    if (strcmp(value.c_str(), "True") == 0) {
-      boolean_settings_[name] = true;
-    } else if (strcmp(value.c_str(), "False") == 0) {
-      boolean_settings_[name] = false;
-    } else {
-      m_pMsgs->FormatMessageWith2Strings(
-          "XML configuration: boolean value should be 'True' or 'False' found "
-          "%s = '%s'",
-          name.c_str(), value.c_str());
-    }
-  } else {
-    m_pMsgs->FormatMessageWithString("XML configuration: unknown tag '%s'",
-                                     element.c_str());
-  }
-}
-
-void XmlSettingsStore::XmlEndHandler(const XML_Char* ) {}
 }  // namespace Dasher
