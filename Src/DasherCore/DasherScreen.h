@@ -7,6 +7,7 @@
 
 #include "DasherTypes.h"
 #include "../DasherCore/ColourIO.h"
+#include "myassert.h"
 #include <set>
 
 // DJW20050505 - renamed DrawText to DrawString - windows defines DrawText as a macro and it's 

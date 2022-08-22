@@ -121,14 +121,9 @@ bool XmlSettingsStore::Save() {
 	return doc.save_file(filename_.c_str(), "\t", pugi::format_default, pugi::encoding_utf8);
 }
 
-bool XmlSettingsStore::ParseFile(const std::string& strPath, bool bUser)
+bool XmlSettingsStore::Parse(pugi::xml_document& document, bool bUser)
 {
-	pugi::xml_document doc;
-    pugi::xml_parse_result result = doc.load_file(strPath.c_str());
-
-	if (!result) return false;
-
-	pugi::xml_node outer = doc.child("settings");
+	pugi::xml_node outer = document.child("settings");
 	for (pugi::xml_node bool_setting : outer.children("bool"))
     {
 		std::string name = bool_setting.attribute("name").as_string();

@@ -20,12 +20,7 @@ class XmlSettingsStore : public Dasher::CSettingsStore, public AbstractXMLParser
 	// Saves the XML file, returns true on success.
 	bool Save();
 
-	bool ParseFile(const std::string &strPath, bool bUser) override;
-
-public:
-	// Just due to legacy code compatibility
-	void XmlStartHandler(const XML_Char * name, const XML_Char ** atts){}
-	void XmlEndHandler(const XML_Char * name){}
+	bool Parse(pugi::xml_document& document, bool bUser) override;
 
  private:
 	bool LoadSetting(const std::string& Key, bool* Value) override;

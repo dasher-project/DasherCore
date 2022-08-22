@@ -35,7 +35,7 @@ public:
 			int Red = 0;
 			int Green = 0;
 			int Blue = 0;
-			PaletteColor(int Red, int Blue, int Green) : Red(Red), Green(Green), Blue(Blue){};
+			PaletteColor(int Red, int Green, int Blue) : Red(Red), Green(Green), Blue(Blue){};
 		};
 
 		std::string ColourID;
@@ -46,12 +46,7 @@ public:
 	void GetColours(std::vector<std::string> *ColourList) const;
 	const ColourInfo & GetInfo(const std::string & ColourID);
 
-	bool ParseFile(const std::string &strPath, bool bUser) override;
-
-public:
-	// Just due to legacy code compatibility
-	void XmlStartHandler(const XML_Char * name, const XML_Char ** atts){}
-	void XmlEndHandler(const XML_Char * name){}
+	bool Parse(pugi::xml_document& document, bool bUser) override;
 
 private:
 	std::map < std::string, ColourInfo > KnownPaletts; // map short names (file names) to descriptions

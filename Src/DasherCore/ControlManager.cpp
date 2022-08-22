@@ -231,7 +231,8 @@ void CControlParser::ParseNodeRecursive(pugi::xml_node node, std::list<CControlB
 	}
 }
 
-bool CControlParser::ParseFile(const string& strFileName, bool bUser)
+
+bool CControlParser::Parse(pugi::xml_document& document, bool bUser)
 {
 	if (m_bUser)
 	{
@@ -248,12 +249,7 @@ bool CControlParser::ParseFile(const string& strFileName, bool bUser)
 	namedNodes.clear();
 	unresolvedRefs.clear();
 
-	pugi::xml_document doc;
-    pugi::xml_parse_result result = doc.load_file(strFileName.c_str());
-
-	if (!result) return false;
-
-	for(pugi::xml_node sub_node : 	doc.children())
+	for(pugi::xml_node sub_node : document.children())
 	{
 		std::string tag_name = sub_node.name();
 		if(tag_name == "node")
@@ -573,24 +569,20 @@ CControlManager* CControlBoxIO::CreateControlManager(
 	return mgr;
 }
 
+
 void CControlBoxIO::GetControlBoxes(std::vector<std::string>* pList) const
 {
 	for (auto id_filename : m_controlFiles)
 		pList->push_back(id_filename.first);
 }
 
-bool CControlBoxIO::ParseFile(const std::string& strPath, bool bUser)
+bool CControlBoxIO::Parse(pugi::xml_document& document, bool bUser)
 {
-	pugi::xml_document doc;
-	pugi::xml_parse_result result = doc.load_file(strPath.c_str());
-
-	if (!result) return false;
-
-	std::string name = doc.child("control").attribute("name").as_string();
+	std::string name = document.child("control").attribute("name").as_string();
 
 	if (!bUser && m_controlFiles.count(name)) return true; // Ignore system files if that name already taken
 
-	m_controlFiles[name] = strPath;
+	m_controlFiles[name] = GetDesc();
 
 	return true;
 }

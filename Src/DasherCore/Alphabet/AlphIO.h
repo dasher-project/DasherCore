@@ -48,16 +48,11 @@ public:
 	CAlphIO(CMessageDisplay* pMsgs);
 	~CAlphIO();
 
-	bool ParseFile(const std::string &strPath, bool bUser) override;
+	virtual bool Parse(pugi::xml_document& document, bool bUser) override;
 
 	void GetAlphabets(std::vector< std::string >* AlphabetList) const;
 	const CAlphInfo *GetInfo(const std::string& AlphID) const;
 	std::string GetDefault() const;
-
-public:
-	// Just due to legacy code compatibility
-	virtual void XmlStartHandler(const XML_Char *name, const XML_Char **atts){};
-	virtual void XmlEndHandler(const XML_Char *name){};
 
 private:
 	std::map < std::string, const CAlphInfo* > Alphabets; // map AlphabetID to AlphabetInfo. 

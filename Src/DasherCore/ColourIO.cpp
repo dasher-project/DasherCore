@@ -37,13 +37,9 @@ const CColourIO::ColourInfo & CColourIO::GetInfo(const std::string &ColourID) {
 	return KnownPaletts["Default"];
 }
 
-bool CColourIO::ParseFile(const std::string& strPath, bool bUser)
+bool CColourIO::Parse(pugi::xml_document& document, bool bUser)
 {
-	pugi::xml_document doc;
-    pugi::xml_parse_result result = doc.load_file(strPath.c_str());
-
-	if (!result) return false;
-	pugi::xml_node outer = doc.child("colours");
+	pugi::xml_node outer = document.child("colours");
 	for (pugi::xml_node palette : outer)
     {
 		if(std::strcmp(palette.name(), "palette") != 0) continue; // a non <palette ...> node

@@ -55,7 +55,7 @@ SGroupInfo* CAlphIO::ParseGroupRecursive(pugi::xml_node& group_node, CAlphInfo* 
 	pNewGroup->strLabel = group_node.attribute("label").as_string();
     pNewGroup->iColour = group_node.attribute("b").as_int(-1); //-1 marker for "none specified"; if so, will compute later
 
-	pNewGroup->bVisible = ancestors.empty(); //by default, the first group in the alphabet is invisible
+	pNewGroup->bVisible = !(ancestors.empty() && previous_sibling == nullptr); //by default, the first group in the alphabet is invisible
 	const std::string visibility = group_node.attribute("name").as_string();
 	if(visibility == "yes" || visibility == "on")
 	{
@@ -69,8 +69,18 @@ SGroupInfo* CAlphIO::ParseGroupRecursive(pugi::xml_node& group_node, CAlphInfo* 
     if (pNewGroup->iColour == -1 && pNewGroup->bVisible) {
 
 		std::vector available_colors = {110,111,112};
-		if(ancestors.size() >= 1) available_colors.erase(std::remove(available_colors.begin(), available_colors.end(), ancestors[ancestors.size() - 1]->iColour), available_colors.end());
-		if(ancestors.size() >= 2) available_colors.erase(std::remove(available_colors.begin(), available_colors.end(), ancestors[ancestors.size() - 2]->iColour), available_colors.end());
+
+		// Avoid same color as parent
+		for(auto it = ancestors.rbegin(); it != ancestors.rend(); ++it)
+		{
+			if ((*it)->bVisible)
+			{
+				available_colors.erase(std::remove(available_colors.begin(), available_colors.end(), (*it)->iColour), available_colors.end());
+				break;
+			}
+		}
+		// Avoid same color as previous_sibling
+		if(ancestors.size() >= 2) available_colors.erase(std::remove(available_colors.begin(), available_colors.end(), previous_sibling->iColour), available_colors.end());
 
 		pNewGroup->iColour = available_colors[0];
 	}
@@ -117,14 +127,9 @@ SGroupInfo* CAlphIO::ParseGroupRecursive(pugi::xml_node& group_node, CAlphInfo* 
 	return pNewGroup;
 }
 
-bool CAlphIO::ParseFile(const std::string &strPath, bool bUser)
+bool Dasher::CAlphIO::Parse(pugi::xml_document & document, bool bUser)
 {
-	pugi::xml_document doc;
-    pugi::xml_parse_result result = doc.load_file(strPath.c_str());
-
-	if (!result) return false;
-
-	pugi::xml_node alphabets = doc.child("alphabets");
+	pugi::xml_node alphabets = document.child("alphabets");
 
 	const std::string language_code = alphabets.attribute("langcode").as_string();
 
@@ -308,7 +313,7 @@ void CAlphIO::ReadCharAttributes(pugi::xml_node xml_node, CAlphInfo::character* 
 
 	alphabet_character->Text = xml_node.attribute("t").as_string();
 	alphabet_character->Display = xml_node.attribute("d").as_string();
-	alphabet_character->Colour = xml_node.attribute("b").as_int();
+	alphabet_character->Colour = xml_node.attribute("b").as_int(-1);
 }
 
 // Reverses the internal linked list for the given SGroupInfo

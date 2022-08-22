@@ -134,16 +134,15 @@ class CControlParser : public AbstractXMLParser
 {
 public:
 	CControlParser(CMessageDisplay* pMsgs);
+private:
 	void ParseNodeRecursive(pugi::xml_node node, std::list<CControlBase::NodeTemplate*>& parent);
+public:
 	///Loads all node definitions from the specified filename. Note that
 	/// system files will not be loaded if user files are (and user files will
 	/// clear out any nodes from system ones). However, multiple system or multiple
 	/// user files, will be concatenated. (However, files are processed separately:
 	/// e.g. names defined in one file will not be seen from another)
-	/// \param strFilename name+full-path of xml file to load
-	/// \param bUser true if from user-specific location (takes priority over system)
-	/// \return true if the file was opened successfully; false if not.
-	bool ParseFile(const std::string& strFilename, bool bUser) override;
+	bool Parse(pugi::xml_document& document, bool bUser) override;
 protected:
 	/// \return all node definitions that have been loaded by this CControlParser.
 	const list<CControlBase::NodeTemplate*>& parsedNodes();
@@ -162,10 +161,6 @@ protected:
 	{
 		return nullptr;
 	};
-public:
-	// Just due to legacy code compatibility
-	void XmlStartHandler(const XML_Char* name, const XML_Char** atts){};
-	void XmlEndHandler(const XML_Char* szName){};
 private:
 	///all top-level parsed nodes
 	std::list<CControlBase::NodeTemplate*> m_vParsed;
@@ -219,12 +214,7 @@ public:
 
 	void GetControlBoxes(std::vector<std::string>* pList) const;
 	CControlManager* CreateControlManager(const std::string& id, CSettingsUser* pCreateFrom, CNodeCreationManager* pNCManager, CDasherInterfaceBase* pInterface) const;
-	bool ParseFile(const std::string& strPath, bool bUser) override;
-
-public:
-	// Just due to legacy code compatibility
-	void XmlStartHandler(const XML_Char* name, const XML_Char** atts) override {};
-	void XmlEndHandler(const XML_Char* szName) override {};
+	bool Parse(pugi::xml_document& document, bool bUser) override;
 private:
 	std::map<std::string, std::string> m_controlFiles;
 	std::string m_filename;
