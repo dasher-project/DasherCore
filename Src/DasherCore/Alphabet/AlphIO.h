@@ -55,7 +55,7 @@ public:
 	std::string GetDefault() const;
 
 public:
-	// Just due to legacy code compatability
+	// Just due to legacy code compatibility
 	virtual void XmlStartHandler(const XML_Char *name, const XML_Char **atts){};
 	virtual void XmlEndHandler(const XML_Char *name){};
 

@@ -49,7 +49,7 @@ public:
 	bool ParseFile(const std::string &strPath, bool bUser) override;
 
 public:
-	// Just due to legacy code compatability
+	// Just due to legacy code compatibility
 	void XmlStartHandler(const XML_Char * name, const XML_Char ** atts){}
 	void XmlEndHandler(const XML_Char * name){}
 
