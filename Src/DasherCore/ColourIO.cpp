@@ -66,7 +66,7 @@ bool CColourIO::ParseFile(const std::string& strPath, bool bUser)
 		KnownPaletts[NewPalette.ColourID] = NewPalette;
 	}
 
-	return AbstractXMLParser::ParseFile(strPath, bUser);
+	return true;
 }
 
 void CColourIO::CreateDefault() {

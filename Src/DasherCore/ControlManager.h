@@ -125,52 +125,57 @@ namespace Dasher {
     NodeTemplate *m_pRoot;
   };
 
-  ///Class reads node tree definitions from an XML file, linking together the NodeTemplates
-  /// according to defined names, nesting of <node/>s, and  <ref/>s. Also handles the
-  /// <alph/> tag, meaning one child of the node is to escape back to the alphabet. Subclasses
-  /// may override parseAction to provide actions for the nodes to perform, also parseOther
-  /// to link with NodeTemplates from other sources.
-  class CControlParser : public AbstractXMLParser {
-  public:
-    CControlParser(CMessageDisplay *pMsgs);
-    ///Loads all node definitions from the specified filename. Note that
-    /// system files will not be loaded if user files are (and user files will
-    /// clear out any nodes from system ones). However, multiple system or multiple
-    /// user files, will be concatenated. (However, files are processed separately:
-    /// e.g. names defined in one file will not be seen from another)
-    /// \param strFilename name+full-path of xml file to load
-    /// \param bUser true if from user-specific location (takes priority over system)
-    /// \return true if the file was opened successfully; false if not.
-    bool ParseFile(const std::string &strFilename, bool bUser);
-  protected:
-    /// \return all node definitions that have been loaded by this CControlParser.
-    const list<CControlBase::NodeTemplate*> &parsedNodes();
-    ///Subclasses may override to parse other nodes (besides "node", "ref" and "alph").
-    ///The default implementation always returns NULL.
-    /// \return A node template, if the name was recognised; NULL if not recognised.
-    virtual CControlBase::NodeTemplate *parseOther(const XML_Char *name, const XML_Char **atts) {
-      return NULL;
-    }
-    ///Subclasses may override to parse actions within nodes.
-    ///The default implementation always returns NULL.
-    /// \return A (new) action pointer, if the name+attributes were successfully parsed; NULL if not recognised.
-    virtual CControlBase::Action *parseAction(const XML_Char *name, const XML_Char **atts) {
-      return NULL;
-    };
-    //TODO cleanup/deletion
-    void XmlStartHandler(const XML_Char *name, const XML_Char **atts);
-    void XmlEndHandler(const XML_Char *szName);
-  private:
-    ///all top-level parsed nodes
-    std::list<CControlBase::NodeTemplate *> m_vParsed;
-    ///whether parsed nodes were from user file or not
-    bool m_bUser;
+///Class reads node tree definitions from an XML file, linking together the NodeTemplates
+/// according to defined names, nesting of <node/>s, and  <ref/>s. Also handles the
+/// <alph/> tag, meaning one child of the node is to escape back to the alphabet. Subclasses
+/// may override parseAction to provide actions for the nodes to perform, also parseOther
+/// to link with NodeTemplates from other sources.
+class CControlParser : public AbstractXMLParser
+{
+public:
+	CControlParser(CMessageDisplay* pMsgs);
+	void ParseNodeRecursive(pugi::xml_node node, std::list<CControlBase::NodeTemplate*>& parent);
+	///Loads all node definitions from the specified filename. Note that
+	/// system files will not be loaded if user files are (and user files will
+	/// clear out any nodes from system ones). However, multiple system or multiple
+	/// user files, will be concatenated. (However, files are processed separately:
+	/// e.g. names defined in one file will not be seen from another)
+	/// \param strFilename name+full-path of xml file to load
+	/// \param bUser true if from user-specific location (takes priority over system)
+	/// \return true if the file was opened successfully; false if not.
+	bool ParseFile(const std::string& strFilename, bool bUser) override;
+protected:
+	/// \return all node definitions that have been loaded by this CControlParser.
+	const list<CControlBase::NodeTemplate*>& parsedNodes();
+	///Subclasses may override to parse other nodes (besides "node", "ref" and "alph").
+	///The default implementation always returns NULL.
+	/// \return A node template, if the name was recognised; NULL if not recognised.
+	virtual CControlBase::NodeTemplate* parseOther(pugi::xml_node node)
+	{
+		return nullptr;
+	}
 
-    ///Following only used as temporary variables during parsing...
-    map<string,CControlBase::NodeTemplate*> namedNodes;
-    list<pair<CControlBase::NodeTemplate**,string> > unresolvedRefs;
-    list<CControlBase::NodeTemplate*> nodeStack;
-  };
+	///Subclasses may override to parse actions within nodes.
+	///The default implementation always returns NULL.
+	/// \return A (new) action pointer, if the name+attributes were successfully parsed; NULL if not recognised.
+	virtual CControlBase::Action* parseAction(pugi::xml_node node)
+	{
+		return nullptr;
+	};
+public:
+	// Just due to legacy code compatibility
+	void XmlStartHandler(const XML_Char* name, const XML_Char** atts){};
+	void XmlEndHandler(const XML_Char* szName){};
+private:
+	///all top-level parsed nodes
+	std::list<CControlBase::NodeTemplate*> m_vParsed;
+	///whether parsed nodes were from user file or not
+	bool m_bUser;
+
+	///Following only used as temporary variables during parsing...
+	map<string, CControlBase::NodeTemplate*> namedNodes;
+	list<pair<CControlBase::NodeTemplate**, string>> unresolvedRefs;
+};
 
   ///subclass which we actually construct! Parses editing node definitions from a file,
   /// then adds Pause and/or Stop, Speak, and Copy (to clipboard), all as children
@@ -195,9 +200,9 @@ namespace Dasher {
 
   protected:
     ///Override to allow a <root/> tag to include a fresh control root
-    NodeTemplate *parseOther(const XML_Char *name, const XML_Char **atts);
+    NodeTemplate *parseOther(pugi::xml_node node) override;
     ///Override to recognise <move/> and <delete/> tags as actions.
-    Action *parseAction(const XML_Char *name, const XML_Char **atts);
+    Action *parseAction(pugi::xml_node node) override;
 
   private:
     map<string, CControlBase::Action*> m_actions;
@@ -207,19 +212,24 @@ namespace Dasher {
   };
   /// @}
 
-  class CControlBoxIO : public AbstractXMLParser {
-  public:
-    CControlBoxIO(CMessageDisplay *pMsgs);
-    void GetControlBoxes(std::vector < std::string > *pList) const;
-    CControlManager* CreateControlManager(const std::string& id, CSettingsUser *pCreateFrom, CNodeCreationManager *pNCManager, CDasherInterfaceBase *pInterface) const;
-    bool ParseFile(const std::string &strFilename, bool bUser) override;
-    void XmlStartHandler(const XML_Char *name, const XML_Char **atts) override;
-    void XmlEndHandler(const XML_Char *szName) override {};
-  private:
-    std::map<std::string, std::string> m_controlFiles;
-    std::string m_filename;
-  };
-}
+class CControlBoxIO : public AbstractXMLParser
+{
+public:
+	CControlBoxIO(CMessageDisplay* pMsgs);
 
+	void GetControlBoxes(std::vector<std::string>* pList) const;
+	CControlManager* CreateControlManager(const std::string& id, CSettingsUser* pCreateFrom, CNodeCreationManager* pNCManager, CDasherInterfaceBase* pInterface) const;
+	bool ParseFile(const std::string& strPath, bool bUser) override;
+
+public:
+	// Just due to legacy code compatibility
+	void XmlStartHandler(const XML_Char* name, const XML_Char** atts) override {};
+	void XmlEndHandler(const XML_Char* szName) override {};
+private:
+	std::map<std::string, std::string> m_controlFiles;
+	std::string m_filename;
+};
+
+}
 
 #endif
