@@ -24,7 +24,7 @@ endif()
 
 set(PUGIXML_STATIC_CRT ON CACHE BOOL "" FORCE)
 set(PUGIXML_BUILD_TESTS OFF CACHE BOOL "" FORCE)
-add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/Thirdparty/pugixml")
+add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/Thirdparty/pugixml" EXCLUDE_FROM_ALL)
 
 ###############################
 # Building Core Dasher Library
