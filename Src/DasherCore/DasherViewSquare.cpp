@@ -152,13 +152,13 @@ CDasherViewSquare::CTextString *CDasherViewSquare::DasherDrawText(myint iDasherM
   Dasher2Screen(iDasherMaxX, iDasherMidY, x, y);
 
   //compute font size...
-  int iSize = GetLongParameter(LP_DASHER_FONTSIZE);
+  myint iSize = GetLongParameter(LP_DASHER_FONTSIZE);
   {
     const myint iMaxY(CDasherModel::MAX_Y);
     if (Screen()->MultiSizeFonts() && iSize>4) {
       //font size maxes out at ((iMaxY*3)/2)+iMaxY)/iMaxY = 3/2*smallest
       // which is reached when iDasherMaxX == iMaxY/2, i.e. the crosshair
-      iSize = ((std::min(iDasherMaxX*3, (iMaxY*3)/2) + iMaxY) * iSize) / iMaxY;
+      iSize = (std::min(iDasherMaxX*3, (iMaxY*3)/2) + iMaxY) * iSize / iMaxY;
     } else {
       //old style fonts; ignore iSize passed-in.
       myint iLeftTimesFontSize = (iMaxY - iDasherMaxX )*iSize;
