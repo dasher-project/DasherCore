@@ -182,9 +182,11 @@ bool Dasher::CAlphIO::Parse(pugi::xml_document & document, bool bUser)
 
 		// conversion mode
 		const auto conversion_mode = alphabet.child("conversionmode");
-		CurrentAlphabet->m_iConversionID = conversion_mode.attribute("id").as_int();
-		CurrentAlphabet->m_strConversionTrainStart = conversion_mode.attribute("start").as_string();
-		CurrentAlphabet->m_strConversionTrainStop = conversion_mode.attribute("stop").as_string();
+		if(conversion_mode.type() != pugi::node_null){
+			CurrentAlphabet->m_iConversionID = conversion_mode.attribute("id").as_int();
+			CurrentAlphabet->m_strConversionTrainStart = conversion_mode.attribute("start").as_string();
+			CurrentAlphabet->m_strConversionTrainStop = conversion_mode.attribute("stop").as_string();
+		}
 
 		// groups
 		SGroupInfo* previous_sibling = nullptr;
@@ -199,19 +201,22 @@ bool Dasher::CAlphIO::Parse(pugi::xml_document & document, bool bUser)
 		}
 
 		// Paragraph character
-		CurrentAlphabet->m_vCharacters.resize(CurrentAlphabet->m_vCharacters.size() + 1);
-		CurrentAlphabet->iParagraphCharacter = static_cast<Dasher::symbol>(CurrentAlphabet->m_vCharacters.size());
-		CurrentAlphabet->iNumChildNodes++;
-		ReadCharAttributes(alphabet.child("paragraph"), &CurrentAlphabet->m_vCharacters.back());
-		CurrentAlphabet->m_vCharacters.back().Text = "\n"; //This should be platform independent now.
+		if(alphabet.child("paragraph").type() != pugi::node_null){
+			CurrentAlphabet->m_vCharacters.resize(CurrentAlphabet->m_vCharacters.size() + 1);
+			CurrentAlphabet->iParagraphCharacter = static_cast<Dasher::symbol>(CurrentAlphabet->m_vCharacters.size());
+			CurrentAlphabet->iNumChildNodes++;
+			ReadCharAttributes(alphabet.child("paragraph"), &CurrentAlphabet->m_vCharacters.back());
+			CurrentAlphabet->m_vCharacters.back().Text = "\n"; //This should be platform independent now.
+		}
 
 		// Space character
-		CurrentAlphabet->m_vCharacters.resize(CurrentAlphabet->m_vCharacters.size() + 1);
-		CurrentAlphabet->iSpaceCharacter = static_cast<Dasher::symbol>(CurrentAlphabet->m_vCharacters.size());
-		CurrentAlphabet->iNumChildNodes++;
-		ReadCharAttributes(alphabet.child("space"), &CurrentAlphabet->m_vCharacters.back());
-		if (CurrentAlphabet->m_vCharacters.back().Colour == -1) CurrentAlphabet->m_vCharacters.back().Colour = 9;
-
+		if(alphabet.child("space").type() != pugi::node_null){
+			CurrentAlphabet->m_vCharacters.resize(CurrentAlphabet->m_vCharacters.size() + 1);
+			CurrentAlphabet->iSpaceCharacter = static_cast<Dasher::symbol>(CurrentAlphabet->m_vCharacters.size());
+			CurrentAlphabet->iNumChildNodes++;
+			ReadCharAttributes(alphabet.child("space"), &CurrentAlphabet->m_vCharacters.back());
+			if (CurrentAlphabet->m_vCharacters.back().Colour == -1) CurrentAlphabet->m_vCharacters.back().Colour = 9;
+		}
 
 		CurrentAlphabet->iEnd = static_cast<int>(CurrentAlphabet->m_vCharacters.size()) + 1;
 		//child groups were added (to linked list) in reverse order. Put them in (iStart/iEnd) order...
@@ -310,6 +315,8 @@ CAlphInfo *CAlphIO::CreateDefault() {
 }
 
 void CAlphIO::ReadCharAttributes(pugi::xml_node xml_node, CAlphInfo::character* alphabet_character) {
+
+	if(xml_node.type() == pugi::node_null) return;
 
 	alphabet_character->Text = xml_node.attribute("t").as_string();
 	alphabet_character->Display = xml_node.attribute("d").as_string();
