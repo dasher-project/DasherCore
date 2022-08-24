@@ -171,7 +171,7 @@ CDasherViewSquare::CTextString *CDasherViewSquare::DasherDrawText(myint iDasherM
     }
   }
 
-  CTextString *pRet = new CTextString(pLabel, x, y, iSize, iColor);
+  CTextString *pRet = new CTextString(pLabel, x, y, static_cast<int>(iSize), iColor);
   vector<CTextString *> &dest(pParent ? pParent->m_children : m_DelayedTexts);
   dest.push_back(pRet);
   return pRet;
