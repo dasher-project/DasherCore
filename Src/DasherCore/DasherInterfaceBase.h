@@ -394,10 +394,8 @@ public:
   // @{
 
   ///
-  /// Obtain the size in bytes of a file - the way to do this is
-  /// dependent on the OS (TODO: Check this - any posix on Windows?)
+  /// Obtain the size in bytes of a file
   ///
-  // TODO JAN : IS THIS POINTLESS?
   int GetFileSize(const std::string& strFileName);
 
 	
@@ -407,7 +405,6 @@ public:
   /// \param pattern string matching just filename (not path), potentially
   /// including '*'s (as per glob)
   ///
-  // TODO JAN : IS THIS POINTLESSS?
   void ScanFiles(AbstractParser* parser, const std::string& strPattern);
   
   // @}

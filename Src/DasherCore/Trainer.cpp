@@ -11,13 +11,11 @@
 #include <iostream>
 
 using namespace Dasher;
-using namespace std;
-
 
 
 CTrainer::CTrainer(CMessageDisplay *pMsgs, CLanguageModel *pLanguageModel, const CAlphInfo *pInfo, const CAlphabetMap *pAlphabet)
   : AbstractParser(pMsgs), m_pAlphabet(pAlphabet), m_pLanguageModel(pLanguageModel), m_pInfo(pInfo), m_pProg(NULL) {
-    vector<symbol> syms;
+    std::vector<symbol> syms;
     pAlphabet->GetSymbols(syms,pInfo->GetContextEscapeChar());
     if (syms.size()==1)
       m_iCtxEsc = syms[0];
@@ -54,7 +52,7 @@ bool CTrainer::readEscape(CLanguageModel::Context &sContext, symbol sym, CAlphab
   
   //Yes, found escape character....
   
-  string delim=syms.peekAhead(); syms.next(m_pAlphabet); //peekAhead doesn't read
+  std::string delim=syms.peekAhead(); syms.next(m_pAlphabet); //peekAhead doesn't read
 
   //A double escape character means an actual occurrence of the character is wanted...
   if (delim == m_pInfo->GetContextEscapeChar()) {
@@ -64,9 +62,9 @@ bool CTrainer::readEscape(CLanguageModel::Context &sContext, symbol sym, CAlphab
   m_pLanguageModel->ReleaseContext(sContext);
   sContext = m_pLanguageModel->CreateEmptyContext();
   //enter the alphabet default context first...
-  vector<symbol> defCtx;
+  std::vector<symbol> defCtx;
   m_pAlphabet->GetSymbols(defCtx, m_pInfo->GetDefaultContext());
-  for (vector<symbol>::iterator it=defCtx.begin(); it!=defCtx.end(); it++) m_pLanguageModel->EnterSymbol(sContext, *it);
+  for (std::vector<symbol>::iterator it=defCtx.begin(); it!=defCtx.end(); it++) m_pLanguageModel->EnterSymbol(sContext, *it);
   //and read the first delimiter; everything until the second occurrence of this, is _context_ only.
   for (symbol sym; (sym=syms.next(m_pAlphabet))!=-1; ) {
     if (syms.peekBack()==delim) break;
@@ -87,14 +85,13 @@ private:
   CTrainer::ProgressIndicator *m_pProg;
 };
 
-bool 
-Dasher::CTrainer::Parse(const string &strDesc, istream &in, bool bUser) {
+bool Dasher::CTrainer::Parse(const std::string &strDesc, std::istream &in, bool bUser) {
   if (in.fail()) {
     m_pMsgs->FormatMessageWithString(_("Unable to open file \"%s\" for reading"),strDesc.c_str());
     return false;
   }
   ///easy enough to be re-entrant, so might as well
-  string oldDesc=m_strDesc;
+  std::string oldDesc=m_strDesc;
   m_strDesc = strDesc;
   ProgressStream syms(in,m_pProg,m_pMsgs);
   Train(syms);
