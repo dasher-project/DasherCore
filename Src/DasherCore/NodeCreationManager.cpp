@@ -77,7 +77,7 @@ CNodeCreationManager::CNodeCreationManager(
 	const Dasher::CAlphIO* pAlphIO,
 	const Dasher::CControlBoxIO* pControlBoxIO
 ) : CSettingsUserObserver(pCreateFrom),
-    m_pInterface(pInterface), m_pControlManager(NULL), m_pScreen(NULL)
+    m_pInterface(pInterface), m_pControlManager(nullptr), m_pScreen(nullptr)
 {
 	const Dasher::CAlphInfo* pAlphInfo(pAlphIO->GetInfo(GetStringParameter(SP_ALPHABET_ID)));
 
