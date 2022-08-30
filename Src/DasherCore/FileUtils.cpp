@@ -33,15 +33,27 @@ int Dasher::FileUtils::GetFileSize(const std::string& strFileName)
 
 void Dasher::FileUtils::ScanFiles(AbstractParser* parser, const std::string& strPattern)
 {
+	// Full real path given -> parse only that file
+	std::error_code error_code; // just used for not throwing errors
+	if(std::filesystem::exists(strPattern, error_code) && std::filesystem::is_regular_file(strPattern, error_code))
+	{
+		parser->ParseFile(strPattern, IsFileWriteable(strPattern));
+		return;
+	}
+
 	// Replace * with .* for actual regex matching
 	std::string alteredPattern = StringReplaceAll(strPattern, "*", ".*");
+	const std::regex pattern = std::regex(alteredPattern);
 
-	const std::regex Pattern = std::regex(alteredPattern);
-	for (const auto & entry : std::filesystem::directory_iterator(std::filesystem::current_path()))
+	// Search in predefined directories for the files. Currently it is searched in {".", "./Data"} (relative to the working directory)
+	for(const std::filesystem::path& current_path : {std::filesystem::current_path(), std::filesystem::current_path() / "Data"})
 	{
-		if (entry.is_regular_file() && std::regex_search(entry.path().filename().string(), Pattern))
+		for (const auto & entry : std::filesystem::directory_iterator(current_path))
 		{
-			parser->ParseFile(entry.path().string(), IsFileWriteable(entry.path()));
+			if (entry.is_regular_file() && std::regex_search(entry.path().filename().string(), pattern))
+			{
+				parser->ParseFile(entry.path().string(), IsFileWriteable(entry.path()));
+			}
 		}
 	}
 }
