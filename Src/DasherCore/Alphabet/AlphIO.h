@@ -46,7 +46,7 @@ namespace Dasher {
 class Dasher::CAlphIO : public AbstractXMLParser {
 public:
 	CAlphIO(CMessageDisplay* pMsgs);
-	~CAlphIO();
+	virtual ~CAlphIO();
 
 	virtual bool Parse(pugi::xml_document& document, bool bUser) override;
 
