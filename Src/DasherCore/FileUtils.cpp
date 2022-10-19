@@ -70,4 +70,12 @@ bool Dasher::FileUtils::WriteUserDataFile(const std::string& filename, const std
 	}
 	return false;
 }
+
+std::string Dasher::FileUtils::GetFullFilenamePath(const std::string strFilename)
+{
+	//We get a weak canonical path in case the path does not exist
+	std::filesystem::path path = std::filesystem::weakly_canonical(strFilename);
+
+	return path.u8string(); //u8string to handle unicode characters.
+}
 #endif

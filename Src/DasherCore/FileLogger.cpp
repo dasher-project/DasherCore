@@ -1,104 +1,102 @@
 #ifndef HAVE_OWN_FILELOGGER
+#include "FileUtils.h"
 #include "../Common/Common.h"
 
-#include <cstring>
+#include <string>
 #include <filesystem>
 #include <chrono>
 #include "FileLogger.h"
 
-using namespace std::chrono;
-namespace fs = std::filesystem;
-
-
-CFileLogger::CFileLogger(const std::string& strFilenamePath, eLogLevel iLogLevel, int iOptionsMask)
+CFileLogger::CFileLogger(const std::string& strFilenamePath, eLogLevel iLogLevel, int iOptionsMask) : m_iLogLevel(iLogLevel)
 {
-  m_strFilenamePath       = "";
-  m_iLogLevel             = iLogLevel;
-  m_iFunctionIndentLevel  = 0;
+	// See what options are set in our bit mask options parameter
+	if (iOptionsMask & logFunctionEntryExit)
+		m_bFunctionLogging = true;
+	if (iOptionsMask & logTimeStamp)
+		m_bTimeStamp = true;
+	if (iOptionsMask & logDateStamp)
+		m_bDateStamp = true;
+	if (iOptionsMask & logDeleteOldFile)
+		m_bDeleteOldFile = true;
+	if (iOptionsMask & logFunctionTiming)
+		m_bFunctionTiming = true;
+	if (iOptionsMask & logOutputScreen)
+		m_bOutputScreen = true;
 
-  m_bFunctionLogging      = false;
-  m_bTimeStamp            = false;
-  m_bDateStamp            = false;
-  m_bDeleteOldFile        = false;
-  m_bFunctionTiming       = false;
-  m_bOutputScreen         = false;
+	// On windows anyway if somebody can open up a file with CreateFile() in a different 
+	// directory and cause the working directory to change.  We don't want our log file
+	// moving around, so we'll find a absolute path when we are created and stick to
+	// that for the remainder of our life.
+	m_strFilenamePath = Dasher::FileUtils::GetFullFilenamePath(strFilenamePath);
 
-  // See what options are set in our bit mask options parameter
-  if (iOptionsMask & logFunctionEntryExit)
-    m_bFunctionLogging = true;
-  if (iOptionsMask & logTimeStamp)
-    m_bTimeStamp = true;
-  if (iOptionsMask & logDateStamp)
-    m_bDateStamp = true;
-  if (iOptionsMask & logDeleteOldFile)
-    m_bDeleteOldFile = true;
-  if (iOptionsMask & logFunctionTiming)
-    m_bFunctionTiming = true;
-  if (iOptionsMask & logOutputScreen)
-    m_bOutputScreen = true;
-
-  // On windows anyway if somebody can open up a file with CreateFile() in a different 
-  // directory and cause the working directory to change.  We don't want our log file
-  // moving around, so we'll find a absolute path when we are created and stick to
-  // that for the remainder of our life.
-  m_strFilenamePath = GetFullFilenamePath(strFilenamePath);
-
-  // See if we should get rid of any existing filename with our given name.  This prevents having
-  // to remember to delete the file before every new debugging run.
-  if (m_bDeleteOldFile)  
-  {
-	  //old implementation didn't care if a file was actually deleted, so we keep the behaviour
-    fs::remove(strFilenamePath);
-  }
-  
-
+	// See if we should get rid of any existing filename with our given name.  This prevents having
+	// to remember to delete the file before every new debugging run.
+	if (m_bDeleteOldFile)  
+	{
+		Dasher::FileUtils::WriteUserDataFile(strFilenamePath, "", false); //Delete file contents. Consistent with old behavior.
+	}
 }
 
 CFileLogger::~CFileLogger()
 {
 
-  if (m_bFunctionTiming)
-  {
-    // Dump the results of our function timing logging
+	if (!m_bFunctionTiming) return;
 
-    MAP_STRING_DOUBLE::iterator map_iter;
+	// Dump the results of our function timing logging
+	Log("%-60s%20s%10s", logNORMAL, "Function","Ticks", "Percent");
+	Log("%-60s%20s%10s", logNORMAL, "--------","-----", "-------");
 
-    Log("%-60s%20s%10s", logNORMAL, "Function","Ticks", "Percent");
-    Log("%-60s%20s%10s", logNORMAL, "--------","-----", "-------");
+	// First pass to count the max ticks 
+	// We assume that there was a function logger on the outer most (main) program.
+	// This allows the percent reflect the relative time spent inside embedded calls.
 
-    double max_duration = 0;
+	double max_duration = 0;
+	for(const auto &[function_name, duration] : m_mapFunctionDuration)
+	{
+	    if(duration > max_duration) max_duration = duration;
+	}
 
-    // First pass to count the max ticks 
-    // We assume that there was a function logger on the outer most (main) program.
-    // This allows the percent reflect the relative time spent inside embedded calls.
-
-    for (map_iter = m_mapFunctionDuration.begin(); map_iter != m_mapFunctionDuration.end(); ++map_iter)
-    {
-      if (map_iter->second > max_duration)
-          max_duration = map_iter->second;
-    }
-
-    for (map_iter = m_mapFunctionDuration.begin(); map_iter != m_mapFunctionDuration.end(); ++map_iter)
-    {
-      std::string name = map_iter->first;
-      const double duration = map_iter->second;
-      Log("%-60s%20I64Ld%10.2f", logNORMAL, name.c_str(), duration, static_cast<double>(duration) / max_duration  * 100.0);
-    }
-  }
+	for(const auto &[function_name, duration] : m_mapFunctionDuration)
+	{
+		Log("%-60s%20I64Ld%10.2f", logNORMAL, function_name.c_str(), duration, static_cast<double>(duration) / max_duration  * 100.0);
+	}
 }
 
 // Changes the filename of this logging object
 void CFileLogger::SetFilename(const std::string& strFilename)
 {
-  m_strFilenamePath = strFilename;
+	m_strFilenamePath = strFilename;
 
-  // See if we should get rid of any existing filename with our given name.  This prevents having
-  // to remember to delete the file before every new debugging run.
-  if (m_bDeleteOldFile)
-  {
-	  //old implementation didn't care if a file was actually deleted, so we keep the behaviour
-    fs::remove(strFilename);
-  }
+	// See if we should get rid of any existing filename with our given name.  This prevents having
+	// to remember to delete the file before every new debugging run.
+	if (m_bDeleteOldFile)
+	{
+		Dasher::FileUtils::WriteUserDataFile(strFilename, "", false); //Delete file contents. Consistent with old behavior.
+	}
+}
+
+void CFileLogger::Log(const char* szText, ...)
+{
+	va_list args;  
+
+	if (m_strFilenamePath.length() <= 0 && szText == nullptr) return;
+
+	std::string strIndented = GetTimeDateStamp() + GetIndentedString(szText) + "\n";
+
+    std::string logLine;
+    va_start(args, szText);
+		int length = snprintf(nullptr, 0, strIndented.c_str(), args);
+		logLine.reserve(length + 1);
+		snprintf(&logLine[0], length, strIndented.c_str(), args);
+    va_end(args);
+
+    Dasher::FileUtils::WriteUserDataFile(m_strFilenamePath, logLine, true);
+
+	// Optionally we can output message to stdout
+	if (m_bOutputScreen)
+	{
+		std::cout << logLine;
+    }
 }
 
 // Logs a string to our file.  eLogLevel specifies the importance of this message, we
@@ -108,327 +106,180 @@ void CFileLogger::SetFilename(const std::string& strFilename)
 // NOTE: Currently not thread safe!
 void CFileLogger::Log(const char* szText, eLogLevel iLogLevel, ...)
 {
-  va_list       args;  
+	if(m_iLogLevel > iLogLevel) return;
 
-  if ((m_strFilenamePath.length() > 0) && 
-      (m_iLogLevel <= iLogLevel) && 
-      (szText != nullptr))
-  {
-    FILE* fp = nullptr;
-    fp = fopen(m_strFilenamePath.c_str(), "a");
+    va_list args;  
 
-    std::string strTimeStamp = GetTimeDateStamp();
-
-    if (fp != nullptr)
-    {
-      std::string strIndented = strTimeStamp + GetIndentedString(szText) + "\n";
-
-      va_start(args, iLogLevel);
-      vfprintf(fp, strIndented.c_str(), args);
-      va_end(args);
-
-      // Optionally we can output message to stdout
-      if (m_bOutputScreen)
-      {
-        va_start(args, iLogLevel);
-        vprintf(strIndented.c_str(), args);
-        va_end(args);
-      }
-
-      fclose(fp);
-      fp = nullptr;
-    }
-  }
+	va_start(args, szText);
+		Log(szText, args);
+	va_end(args);
 }
 
-// Overloaded version that takes a STL::string
+// Overloaded version that takes a STD::string
 void CFileLogger::Log(const std::string strText, eLogLevel iLogLevel, ...)
 {
-  va_list       args;  
+	va_list args;  
 
-  if ((m_strFilenamePath.length() > 0) && 
-      (m_iLogLevel <= iLogLevel))
-  {
-    FILE* fp = nullptr;
-    fp = fopen(m_strFilenamePath.c_str(), "a");
-
-    std::string strTimeStamp = GetTimeDateStamp();
-
-    if (fp != nullptr)
-    {
-      std::string strIndented = strTimeStamp + GetIndentedString(strText) + "\n";
-
-      va_start(args, iLogLevel);
-      vfprintf(fp, strIndented.c_str(), args);
-      va_end(args);
-
-      // Optionally we can output message to stdout
-      if (m_bOutputScreen)
-      {
-        va_start(args, iLogLevel);
-        vprintf(strIndented.c_str(), args);
-        va_end(args);
-      }
-
-      fclose(fp);
-      fp = nullptr;
-    }
-  }
+	va_start(args, iLogLevel);
+		Log(strText.c_str(), iLogLevel, args);
+	va_end(args);
 }
 
 // Version that assume log level is logDEBUG
 void CFileLogger::LogDebug(const char* szText, ...)
 {
-  // Note: it would be nice not to duplicate code, but the variable
-  // parameter list makes this problematic.
-  va_list       args;  
+	if(m_iLogLevel > logDEBUG) return;
 
-  if ((m_strFilenamePath.length() > 0) && 
-      (m_iLogLevel == logDEBUG) &&
-      (szText != nullptr))
-  {
-    FILE* fp = nullptr;
-    fp = fopen(m_strFilenamePath.c_str(), "a");
+    va_list args;  
 
-    std::string strTimeStamp = GetTimeDateStamp();
-
-    if (fp != nullptr)
-    {
-      std::string strIndented = strTimeStamp + GetIndentedString(szText) + "\n";
-
-      va_start(args, szText);
-      vfprintf(fp, strIndented.c_str(), args);
-      va_end(args);
-
-      // Optionally we can output message to stdout
-      if (m_bOutputScreen)
-      {
-        va_start(args, szText);
-        vprintf(strIndented.c_str(), args);
-        va_end(args);
-      }
-
-      fclose(fp);
-      fp = nullptr;
-    }
-  }
+	va_start(args, szText);
+		Log(szText, logDEBUG, args);
+	va_end(args);
 }
 
 // Version that assume log level is logNormal
 void CFileLogger::LogNormal(const char* szText, ...)
 {
-  // Note: it would be nice not to duplicate code, but the variable
-  // parameter list makes this problematic.
-  va_list       args;  
+    if(m_iLogLevel > logNORMAL) return;
 
-  if ((m_strFilenamePath.length() > 0) && 
-      (m_iLogLevel <= logNORMAL) &&
-      (szText != nullptr))
-  {
-    FILE* fp = nullptr;
-    fp = fopen(m_strFilenamePath.c_str(), "a");
+    va_list args;  
 
-    std::string strTimeStamp = GetTimeDateStamp();
-
-    if (fp != nullptr)
-    {
-      std::string strIndented = strTimeStamp + GetIndentedString(szText) + "\n";
-
-      va_start(args, szText);
-      vfprintf(fp, strIndented.c_str(), args);
-      va_end(args);
-
-      // Optionally we can output message to stdout
-      if (m_bOutputScreen)
-      {
-        va_start(args, szText);
-        vprintf(strIndented.c_str(), args);
-        va_end(args);
-      }
-
-      fclose(fp);
-      fp = nullptr;
-    }
-  }
+	va_start(args, szText);
+		Log(szText, logDEBUG, args);
+	va_end(args);
 }
 
 // Version that assume log level is logCRITICAL
 void CFileLogger::LogCritical(const char* szText, ...)
 {
-  // Note: it would be nice not to duplicate code, but the variable
-  // parameter list makes this problematic.
-  va_list       args;  
+    va_list args;  
 
-  // Always log critical messages
-  if ((m_strFilenamePath.length() > 0) &&
-      (szText != nullptr))
-  {
-    FILE* fp = nullptr;
-    fp = fopen(m_strFilenamePath.c_str(), "a");
-
-    std::string strTimeStamp = GetTimeDateStamp();
-
-    if (fp != nullptr)
-    {
-      std::string strIndented = strTimeStamp + GetIndentedString(szText) + "\n";
-
-      va_start(args, szText);
-      vfprintf(fp, strIndented.c_str(), args);
-      va_end(args);
-
-      // Optionally we can output message to stdout
-      if (m_bOutputScreen)
-      {
-        va_start(args, szText);
-        vprintf(strIndented.c_str(), args);
-        va_end(args);
-      }
-
-      fclose(fp);
-      fp = nullptr;
-    }
-  }
+	va_start(args, szText);
+		Log(szText, logDEBUG, args);
+	va_end(args);
 }
 
 // Logs entry into a particular function
 void CFileLogger::LogFunctionEntry(const std::string& strFunctionName)
 {
-  if (m_bFunctionLogging)
-  {
-    std::string strStart = "start: ";
-    strStart += strFunctionName;
-    Log(strStart.c_str());
-    m_iFunctionIndentLevel++;
-  }
+	if (m_bFunctionLogging)
+	{
+		Log("start: " + strFunctionName);
+		m_iFunctionIndentLevel++;
+	}
 }
 
 // Logs exit into a particular function
 void CFileLogger::LogFunctionExit(const std::string& strFunctionName)
 {
-  if (m_bFunctionLogging)
-  {
-    m_iFunctionIndentLevel--;
-    std::string strEnd = "end: ";
-    strEnd += strFunctionName;
-    Log(strEnd.c_str());
-  }
+	if (m_bFunctionLogging)
+	{
+		m_iFunctionIndentLevel--;
+		Log("end: " + strFunctionName);
+	}
 }
 
 
 void CFileLogger::LogFunctionTicks(const std::string& strFunctionName, double duration)
 {
-  const double duration_old = m_mapFunctionDuration[strFunctionName];
-  duration = duration_old + duration;
-
-  m_mapFunctionDuration[strFunctionName] = duration;
+	m_mapFunctionDuration[strFunctionName] += duration;
 }
 
 // Gets an indented version of the function name 
 std::string CFileLogger::GetIndentedString(const std::string& strText)
 {
-  std::string strIndented = "";
-  for (int i = 0; i < m_iFunctionIndentLevel; i++)
-    strIndented += " ";
-  strIndented += strText;
-
-  return strIndented;
+	std::string indentation(m_iFunctionIndentLevel, ' ');
+	return indentation + strText;
 }
 
 bool CFileLogger::GetFunctionTiming()
 {
-  return m_bFunctionTiming;
+	return m_bFunctionTiming;
 }
 
-// Utility method that converts a filename into a fully qualified
-// path and filename on Windows.  This can be used to make sure
-// a relative filename stays pointed at the same location despite
-// changes in the working directory.
-// UPDATED: Replaced windows only method with portable code using the standard library.
-std::string CFileLogger::GetFullFilenamePath(std::string strFilename)
-{
-  auto path = fs::path(strFilename);
-  //We get a weak canonical path in case the path does not exist
-  if (fs::exists(path)){
-    strFilename  = fs::weakly_canonical(path).u8string();  //u8string to handle unicode characters.
-  }
-  
-	
-  return strFilename;
-}
-
-/////////////////////////////////////// CFunctionLogger /////////////////////////////////////////////////////////////
-
-CFunctionLogger::CFunctionLogger(const std::string& strFunctionName, CFileLogger* pLogger) 
-{
-  m_pLogger = pLogger;
-
-  if ((m_pLogger != nullptr) && (strFunctionName.length() > 0))
-  {
-    m_strFunctionName = strFunctionName;
-
-    if (!m_pLogger->GetFunctionTiming())
-      m_pLogger->LogFunctionEntry(m_strFunctionName);
-    else {
-        m_startTime = steady_clock::now();
-    }
-  }
-
-}
-
-CFunctionLogger::~CFunctionLogger()
-{
-  if ((m_pLogger != nullptr) && (m_strFunctionName.length() > 0))
-  {
-    if (!m_pLogger->GetFunctionTiming())
-      m_pLogger->LogFunctionExit(m_strFunctionName);
-    else
-    {
-    const auto current_time = steady_clock::now();
-    const auto span = duration_cast<duration<double>>(current_time - m_startTime);
-      // Add our total ticks to the tracking map object in the logger object
-	  m_pLogger->LogFunctionTicks(m_strFunctionName, span.count());
-
-    }
-  }
-}
 
 // Update what log level this object is using
 void CFileLogger::SetLogLevel(const eLogLevel iNewLevel)
 {
-  m_iLogLevel = iNewLevel;
+	m_iLogLevel = iNewLevel;
 }
 
 // Update whether function entry/exit is logged
 void CFileLogger::SetFunctionLogging(bool bFunctionLogging)
 {
-  m_bFunctionLogging = bFunctionLogging;
+	m_bFunctionLogging = bFunctionLogging;
 }
 
 
 // Gets the time and/or date stamp as specified
 // by our construction options.
+
+// Format is:
+// Oct 19 2022 18:35:12.862
 std::string CFileLogger::GetTimeDateStamp()
 {
-  std::string strTimeStamp;
-  auto format = "";
-  if(m_bTimeStamp)
-  {
-      format = "%T";
-  }
-  if(m_bDateStamp)
-  {
-      format = "%b %m %Y"; //format as specified by dasher " abbreviated month name, month, year"
-  }
+	std::string strTimeStamp;
+	std::string format;
+	if(m_bDateStamp)
+	{
+		format = "%b %d %Y";
+	}
+	if(m_bTimeStamp)
+	{
+		if(m_bDateStamp) format += " ";
+		format += "%H:%M:%S";
+	}
 	
+	std::cout << format << std::endl;
 
-  if ((m_bTimeStamp) || (m_bDateStamp))
-  {  	
-      char buf[80];
-      const auto timestamp = std::chrono::system_clock::now();
-      auto timestamp_t = std::chrono::system_clock::to_time_t(timestamp);
-      strftime(buf, sizeof(buf), format, std::localtime(&timestamp_t));
-  }
+	if (m_bTimeStamp || m_bDateStamp)
+	{
+		std::chrono::time_point<chrono::system_clock> timepoint = std::chrono::system_clock::now();
+	    std::time_t now = std::chrono::system_clock::to_time_t(timepoint);
+	    int milliseconds = static_cast<int>(std::chrono::time_point_cast<std::chrono::milliseconds>(timepoint).time_since_epoch().count() % 1000);
 
-  return strTimeStamp;
+		std::string Buffer(21, '\0'); //max 21 characters without the millis
+		std::strftime(&Buffer[0], Buffer.size(), format.c_str(), std::localtime(&now)); //Not thread safe!
+		if(m_bTimeStamp) Buffer += "." + std::to_string(milliseconds);
+		return Buffer;
+	}
+
+	return strTimeStamp;
 }
+
+/////////////////////////////////////// CFunctionLogger /////////////////////////////////////////////////////////////
+
+CFunctionLogger::CFunctionLogger(const std::string& strFunctionName, CFileLogger* pLogger) : m_pLogger(pLogger)
+{
+	if (m_pLogger == nullptr && strFunctionName.length() <= 0) return;
+
+	m_strFunctionName = strFunctionName;
+
+	if (!m_pLogger->GetFunctionTiming())
+	{
+		m_pLogger->LogFunctionEntry(m_strFunctionName);
+	}
+	else
+	{
+	    m_startTime = chrono::steady_clock::now();
+	}
+}
+
+CFunctionLogger::~CFunctionLogger()
+{
+	if (m_pLogger == nullptr && m_strFunctionName.length() <= 0) return;
+
+    if (!m_pLogger->GetFunctionTiming())
+    {
+	    m_pLogger->LogFunctionExit(m_strFunctionName);
+    }
+    else
+    {
+	    const auto current_time = chrono::steady_clock::now();
+	    const auto span = std::chrono::duration_cast<chrono::duration<double>>(current_time - m_startTime);
+		// Add our total ticks to the tracking map object in the logger object
+		m_pLogger->LogFunctionTicks(m_strFunctionName, span.count());
+    }
+}
+
 #endif

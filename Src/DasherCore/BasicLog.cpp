@@ -60,7 +60,7 @@ void CBasicLog::EndTrial() {
   if(!m_bStarted)
     return;
 
-  std::string strFileName(CFileLogger::GetFullFilenamePath("dasher_basic.log"));
+  std::string strFileName(FileUtils::GetFullFilenamePath("dasher_basic.log"));
 
   std::ofstream oFile;
   oFile.open(strFileName.c_str(), ios::out | ios::app);

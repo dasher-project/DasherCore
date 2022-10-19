@@ -16,6 +16,9 @@ public:
 
 	//Writes into the user file 
 	static bool WriteUserDataFile(const std::string& filename, const std::string& strNewText, bool append);
+
+	//Convert relative to full paths
+	static std::string GetFullFilenamePath(const std::string strFilename);
 };
 
 

@@ -64,9 +64,6 @@
     g_pLogger->LogCritical s ;
 
 
-typedef std::map<std::string, double> MAP_STRING_DOUBLE;
-
-
 enum eLogLevel
 {
     logDEBUG = 0,
@@ -98,7 +95,7 @@ public:
     void LogNormal(const char* szText, ...);                                    // Logs normal level messages    
     void LogCritical(const char* szText, ...);                                  // Logs critical level messages
 
-    // Versions that exists so we can pass in STL strings
+    // Versions that exists so we can pass in STD strings
     void Log(const std::string strText, eLogLevel iLogLevel = logNORMAL, ...);        // Logs a string to our file if it meets or exceeds our logging level
     
     void SetFilename(const std::string& strFilename);
@@ -109,25 +106,25 @@ public:
     void LogFunctionExit(const std::string& strFunctionName);                   // Used by FunctionLogger to log exit from a function
     void LogFunctionTicks(const std::string& strFunctionName, double duration); // Used by FunctionLogger to log how long was spent in a function
     bool GetFunctionTiming();
-    
-    static std::string GetFullFilenamePath(std::string strFilename);
 
 private:
-    std::string     m_strFilenamePath;          // Filename and path of our output file	
+    void Log(const char* szText, ...);
+
+    std::string     m_strFilenamePath = "";          // Filename and path of our output file	
     eLogLevel       m_iLogLevel;                // What level of logging this object should write
-    bool            m_bFunctionLogging;         // Whether we will log function entry/exit 
-    bool            m_bTimeStamp;               // Whether we log the time
-    bool            m_bDateStamp;               // Whether we log the date
-    bool            m_bFunctionTiming;          // Whether our FunctionLogger objects should do performance timing
-    bool            m_bDeleteOldFile;           // Should we delete a previous instance of the log file
-    bool            m_bOutputScreen;            // Should we output to stdout as well as the file
-    int             m_iFunctionIndentLevel;     // How many nested calls to FunctionLogger we have
+    bool            m_bFunctionLogging = false;         // Whether we will log function entry/exit 
+    bool            m_bTimeStamp = false;               // Whether we log the time
+    bool            m_bDateStamp = false;               // Whether we log the date
+    bool            m_bFunctionTiming = false;          // Whether our FunctionLogger objects should do performance timing
+    bool            m_bDeleteOldFile = false;           // Should we delete a previous instance of the log file
+    bool            m_bOutputScreen = false;            // Should we output to stdout as well as the file
+    int             m_iFunctionIndentLevel = 0;     // How many nested calls to FunctionLogger we have
 
     std::string     GetIndentedString(const std::string& strText);
     std::string     GetTimeDateStamp();
 
 
-    MAP_STRING_DOUBLE    m_mapFunctionDuration;     // Keeps track of how many ticks spent in each of our functions (who create a CFunctionLogger object)
+    std::map<std::string, double> m_mapFunctionDuration;     // Keeps track of how many ticks spent in each of our functions (who create a CFunctionLogger object)
 
 
 };
