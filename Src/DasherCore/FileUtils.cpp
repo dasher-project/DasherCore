@@ -48,6 +48,7 @@ void Dasher::FileUtils::ScanFiles(AbstractParser* parser, const std::string& str
 	// Search in predefined directories for the files. Currently it is searched in {".", "./Data"} (relative to the working directory)
 	for(const std::filesystem::path& current_path : {std::filesystem::current_path(), std::filesystem::current_path() / "Data"})
 	{
+		if(!std::filesystem::exists(current_path)) continue;
 		for (const auto & entry : std::filesystem::directory_iterator(current_path))
 		{
 			if (entry.is_regular_file() && std::regex_search(entry.path().filename().string(), pattern))

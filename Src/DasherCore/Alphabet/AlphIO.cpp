@@ -56,7 +56,7 @@ SGroupInfo* CAlphIO::ParseGroupRecursive(pugi::xml_node& group_node, CAlphInfo* 
     pNewGroup->iColour = group_node.attribute("b").as_int(-1); //-1 marker for "none specified"; if so, will compute later
 
 	pNewGroup->bVisible = !(ancestors.empty() && previous_sibling == nullptr); //by default, the first group in the alphabet is invisible
-	const std::string visibility = group_node.attribute("name").as_string();
+	const std::string visibility = group_node.attribute("visible").as_string();
 	if(visibility == "yes" || visibility == "on")
 	{
 		pNewGroup->bVisible = true;
@@ -80,7 +80,7 @@ SGroupInfo* CAlphIO::ParseGroupRecursive(pugi::xml_node& group_node, CAlphInfo* 
 			}
 		}
 		// Avoid same color as previous_sibling
-		if(ancestors.size() >= 2) available_colors.erase(std::remove(available_colors.begin(), available_colors.end(), previous_sibling->iColour), available_colors.end());
+		if(ancestors.size() >= 2 && previous_sibling != nullptr) available_colors.erase(std::remove(available_colors.begin(), available_colors.end(), previous_sibling->iColour), available_colors.end());
 
 		pNewGroup->iColour = available_colors[0];
 	}
@@ -107,6 +107,7 @@ SGroupInfo* CAlphIO::ParseGroupRecursive(pugi::xml_node& group_node, CAlphInfo* 
 		if(std::strcmp(node.name(),"group") == 0)
 		{
 			SGroupInfo* newChildGroup = ParseGroupRecursive(node, CurrentAlphabet, previous_subgroup_sibling, new_ancestors);
+			if(newChildGroup == nullptr) continue;
 			pNewGroup->iNumChildNodes++;
 			if(pNewGroup->pChild == nullptr) pNewGroup->pChild = newChildGroup;
 			previous_subgroup_sibling = newChildGroup;
@@ -119,6 +120,7 @@ SGroupInfo* CAlphIO::ParseGroupRecursive(pugi::xml_node& group_node, CAlphInfo* 
 		SGroupInfo* parent = (ancestors.empty() ? CurrentAlphabet : ancestors.back());
 		parent->pChild = pNewGroup->pNext; //the actually previous node
 		delete pNewGroup;
+		return nullptr;
     } else {
 		//child groups were added (to linked list) in reverse order. Put them in (iStart/iEnd) order...
 		ReverseChildList(pNewGroup->pChild);

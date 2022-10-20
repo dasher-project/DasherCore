@@ -169,6 +169,10 @@ void CDasherInterfaceBase::Realize(unsigned long ulTime) {
 }
 
 CDasherInterfaceBase::~CDasherInterfaceBase() {
+  //Deregistering here allows for reusing a settings instance
+  m_pSettingsStore->Unregister(this);
+  m_pSettingsStore->PreSetObservable().Unregister(&m_preSetObserver);
+
   //WriteTrainFileFull();???
   delete m_pDasherModel;        // The order of some of these deletions matters
   delete m_pDasherView;
