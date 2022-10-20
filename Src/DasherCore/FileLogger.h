@@ -108,7 +108,7 @@ public:
     bool GetFunctionTiming();
 
 private:
-    void Log(const char* szText, ...);
+    void Log(const char* szText, va_list args);
 
     std::string     m_strFilenamePath = "";          // Filename and path of our output file	
     eLogLevel       m_iLogLevel;                // What level of logging this object should write

@@ -75,21 +75,18 @@ void CFileLogger::SetFilename(const std::string& strFilename)
 	}
 }
 
-void CFileLogger::Log(const char* szText, ...)
+void CFileLogger::Log(const char* szText, va_list args)
 {
-	va_list args;  
-
 	if (m_strFilenamePath.length() <= 0 && szText == nullptr) return;
 
-	std::string strIndented = GetTimeDateStamp() + GetIndentedString(szText) + "\n";
+	std::string strIndented = GetTimeDateStamp() + " " + GetIndentedString(szText) + "\n";
 
     std::string logLine;
-    va_start(args, szText);
-		int length = snprintf(nullptr, 0, strIndented.c_str(), args);
-		logLine.reserve(length + 1);
-		snprintf(&logLine[0], length, strIndented.c_str(), args);
-    va_end(args);
 
+	int length = vsnprintf(nullptr, 0, strIndented.c_str(), args);
+	logLine.resize(length);
+	vsnprintf(&logLine[0], length + 1, strIndented.c_str(), args);
+	
     Dasher::FileUtils::WriteUserDataFile(m_strFilenamePath, logLine, true);
 
 	// Optionally we can output message to stdout
@@ -110,7 +107,7 @@ void CFileLogger::Log(const char* szText, eLogLevel iLogLevel, ...)
 
     va_list args;  
 
-	va_start(args, szText);
+	va_start(args, iLogLevel);
 		Log(szText, args);
 	va_end(args);
 }
@@ -118,10 +115,12 @@ void CFileLogger::Log(const char* szText, eLogLevel iLogLevel, ...)
 // Overloaded version that takes a STD::string
 void CFileLogger::Log(const std::string strText, eLogLevel iLogLevel, ...)
 {
+	if(m_iLogLevel > iLogLevel) return;
+
 	va_list args;  
 
 	va_start(args, iLogLevel);
-		Log(strText.c_str(), iLogLevel, args);
+		Log(strText.c_str(), args);
 	va_end(args);
 }
 
@@ -133,7 +132,7 @@ void CFileLogger::LogDebug(const char* szText, ...)
     va_list args;  
 
 	va_start(args, szText);
-		Log(szText, logDEBUG, args);
+		Log(szText, args);
 	va_end(args);
 }
 
@@ -145,7 +144,7 @@ void CFileLogger::LogNormal(const char* szText, ...)
     va_list args;  
 
 	va_start(args, szText);
-		Log(szText, logDEBUG, args);
+		Log(szText, args);
 	va_end(args);
 }
 
@@ -155,7 +154,7 @@ void CFileLogger::LogCritical(const char* szText, ...)
     va_list args;  
 
 	va_start(args, szText);
-		Log(szText, logDEBUG, args);
+		Log(szText, args);
 	va_end(args);
 }
 
@@ -230,17 +229,18 @@ std::string CFileLogger::GetTimeDateStamp()
 		format += "%H:%M:%S";
 	}
 	
-	std::cout << format << std::endl;
-
 	if (m_bTimeStamp || m_bDateStamp)
 	{
 		std::chrono::time_point<chrono::system_clock> timepoint = std::chrono::system_clock::now();
 	    std::time_t now = std::chrono::system_clock::to_time_t(timepoint);
 	    int milliseconds = static_cast<int>(std::chrono::time_point_cast<std::chrono::milliseconds>(timepoint).time_since_epoch().count() % 1000);
+		std::string strMillis(3,'0');
+		sprintf(&strMillis[0], "%03d", milliseconds);
 
-		std::string Buffer(21, '\0'); //max 21 characters without the millis
-		std::strftime(&Buffer[0], Buffer.size(), format.c_str(), std::localtime(&now)); //Not thread safe!
-		if(m_bTimeStamp) Buffer += "." + std::to_string(milliseconds);
+		std::string Buffer(30, '\0'); //never longer than 30 chars
+		size_t length = std::strftime(&Buffer[0], Buffer.size(), format.c_str(), std::localtime(&now)); //Not thread safe!
+		Buffer.resize(length); //Resize to strip \0 characters depending on format
+		if(m_bTimeStamp) Buffer += "." + strMillis;
 		return Buffer;
 	}
 
