@@ -109,7 +109,7 @@ SGroupInfo* CAlphIO::ParseGroupRecursive(pugi::xml_node& group_node, CAlphInfo* 
 			SGroupInfo* newChildGroup = ParseGroupRecursive(node, CurrentAlphabet, previous_subgroup_sibling, new_ancestors);
 			if(newChildGroup == nullptr) continue;
 			pNewGroup->iNumChildNodes++;
-			if(pNewGroup->pChild == nullptr) pNewGroup->pChild = newChildGroup;
+			pNewGroup->pChild = newChildGroup;
 			previous_subgroup_sibling = newChildGroup;
 		}
 	}
@@ -144,9 +144,9 @@ bool Dasher::CAlphIO::Parse(pugi::xml_document & document, bool bUser)
 		CurrentAlphabet->LanguageCode = language_code;
 		CurrentAlphabet->AlphID = alphabet.attribute("name").as_string();
 		CurrentAlphabet->m_strCtxChar = alphabet.attribute("escape").as_string();
-		CurrentAlphabet->TrainingFile = alphabet.child("train").value();
-		CurrentAlphabet->GameModeFile = alphabet.child("gamemode").value();
-		CurrentAlphabet->PreferredColours = alphabet.child("palette").value();
+		CurrentAlphabet->TrainingFile = alphabet.child("train").child_value();
+		CurrentAlphabet->GameModeFile = alphabet.child("gamemode").child_value();
+		CurrentAlphabet->PreferredColours = alphabet.child("palette").child_value();
 
 		// orientation
 		const std::string orientation_type = alphabet.child("orientation").attribute("type").as_string();
@@ -230,7 +230,7 @@ bool Dasher::CAlphIO::Parse(pugi::xml_document & document, bool bUser)
 	return true;
 }
 
-void CAlphIO::GetAlphabets(std::vector <std::string >*AlphabetList) const {
+void CAlphIO::GetAlphabets(std::vector<std::string>* AlphabetList) const {
 	AlphabetList->clear();
 
 	for (auto [AlphabetID, Alphabet] : Alphabets){

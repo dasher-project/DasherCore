@@ -123,7 +123,7 @@ int XMLUtil::GetElementInt(const string& strTag, const string& strXML, bool* pFo
   }
 }
 
-int64 XMLUtil::GetElementLongLong(const string& strTag, const string& strXML, bool* pFound)
+long long XMLUtil::GetElementLongLong(const string& strTag, const string& strXML, bool* pFound)
 {
   string strElement = GetElementString(strTag, strXML);
 

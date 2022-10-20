@@ -1,24 +1,15 @@
 // FileLogger
 //
 // A very simple class that does logging to a file.
-// Currently not thread safe and uses CRT file I/O that will melt down 
-// on Windows if too many files are open.
 //
 // Copyright 2004 by Keith Vertanen
 //
 
-#ifndef __FileLogger_h__
-#define __FileLogger_h__
+#pragma once
 
-#include <stdio.h>
 #include <string>
-#include <stdarg.h>
-#include <time.h>
 #include <map>
 #include <chrono>
-#include "DasherTypes.h"
-// Probably better to enable in project settings since FileLogger.h is included from several physical locations.
-// #define DEBUG_ONLY_LOGGING   // Enabled debug logging that has been ifdef'd to prevent performance problems in release build
 
 // Macro that lets us wrap log statements that we want compiled out of the code in non-debug builds
 #ifdef DEBUG_ONLY_LOGGING
@@ -144,5 +135,3 @@ private:
     
 
 };
-/// @}
-#endif

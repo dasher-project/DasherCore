@@ -1,4 +1,3 @@
-#ifndef HAVE_OWN_FILELOGGER
 #include "FileUtils.h"
 #include "../Common/Common.h"
 
@@ -281,5 +280,3 @@ CFunctionLogger::~CFunctionLogger()
 		m_pLogger->LogFunctionTicks(m_strFunctionName, span.count());
     }
 }
-
-#endif
