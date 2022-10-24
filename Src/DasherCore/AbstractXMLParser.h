@@ -24,6 +24,7 @@ public:
 	AbstractParser(CMessageDisplay* pMsgs) : m_pMsgs(pMsgs)
 	{
 	}
+	virtual ~AbstractParser() = default;
 
 	///Utility method: constructs an ifstream to read from the specified file,
 	/// then calls Parse(string&,istream&,bool) with the description 'file://strPath'
