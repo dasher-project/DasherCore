@@ -26,7 +26,7 @@
 #include "LanguageModelling/LanguageModel.h"
 //Includes needed for used classes
 #include "NodeManager.h"
-#include "ALphabet/AlphabetMap.h"
+#include "Alphabet/AlphabetMap.h"
 #include "DasherScreen.h"
 
 // CDasherNode represents a rectangle and character 
