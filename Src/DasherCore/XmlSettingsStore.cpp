@@ -118,7 +118,10 @@ bool XmlSettingsStore::Save() {
 		string_node.append_attribute("value") = value.c_str();
     }
 
-	return doc.save_file(filename_.c_str(), "\t", pugi::format_default, pugi::encoding_utf8);
+	std::ostringstream outputstream;
+	doc.save(outputstream, "\t", pugi::format_default, pugi::encoding_utf8);
+
+	return FileUtils::WriteUserDataFile(filename_, outputstream.str(), false);
 }
 
 bool XmlSettingsStore::Parse(pugi::xml_document& document, bool bUser)
