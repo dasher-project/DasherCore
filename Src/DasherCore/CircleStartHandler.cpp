@@ -108,8 +108,8 @@ void CCircleStartHandler::Timer(unsigned long iTime, dasherint mouseX, dasherint
   }
 }
 
-void CCircleStartHandler::HandleEvent(int iParameter) {
-  if (iParameter==LP_CIRCLE_PERCENT)
+void CCircleStartHandler::HandleEvent(Parameter parameter) {
+  if (parameter==LP_CIRCLE_PERCENT)
       m_iScreenRadius = -1; //recompute geometry.
 }
 

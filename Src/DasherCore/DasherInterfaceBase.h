@@ -77,7 +77,7 @@ class CNodeCreationManager;
 /// the UI to use. Note: CMessageDisplay unimplemented; platforms should
 /// provide their own methods using appropriate GUI components, or subclass
 /// CDashIntfScreenMsgs instead.
-class Dasher::CDasherInterfaceBase : public CMessageDisplay, public Observable<const CEditEvent *>, protected Observer<int>, protected CSettingsUser, private NoClones {
+class Dasher::CDasherInterfaceBase : public CMessageDisplay, public Observable<const CEditEvent *>, protected Observer<Parameter>, protected CSettingsUser, private NoClones {
 public:
   ///Create a new interface by providing the only-and-only settings store that will be used throughout.
   CDasherInterfaceBase(CSettingsStore *pSettingsStore);
@@ -104,14 +104,14 @@ public:
   /// Reset a parameter to the default value
   ///
 
-  void ResetParameter(int iParmater);
+  void ResetParameter(Parameter parameter);
 
   ///
   /// Obtain the permitted values for a string parameter - used to
   /// geneate preferences dialogues etc.
   ///
 
-  void GetPermittedValues(int iParameter, std::vector<std::string> &vList);
+  void GetPermittedValues(Parameter parameter, std::vector<std::string> &vList);
 
   ///
   /// Get a list of settings which apply to a particular module
@@ -129,7 +129,7 @@ public:
   /// \param iParameter The parameter that's just changed.
   /// \todo Should be protected (??)
 
-  virtual void HandleEvent(int iParameter);
+  void HandleEvent(Parameter parameter) override;
   
   ///Locks/unlocks Dasher. The default here stores the lock message and percentage
   /// in m_strLockMessage, such that NewFrame renders this instead of the canvas

@@ -182,8 +182,8 @@ void CDefaultFilter::stop() {
   m_pInterface->Done();
 }
 
-void CDefaultFilter::HandleEvent(int iParameter) {
-  switch (iParameter) {
+void CDefaultFilter::HandleEvent(Parameter parameter) {
+  switch (parameter) {
   case BP_CIRCLE_START:
   case BP_MOUSEPOS_MODE:
     CreateStartHandler();

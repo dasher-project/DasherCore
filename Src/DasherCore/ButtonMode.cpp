@@ -195,8 +195,8 @@ void CButtonMode::DirectKeyDown(unsigned long iTime, int iId, CDasherView *pView
  if (iId!=100) m_iLastTime = iTime;
 }
 
-void CButtonMode::HandleEvent(int iParameter) {
-  switch (iParameter) {
+void CButtonMode::HandleEvent(Parameter parameter) {
+  switch (parameter) {
   case LP_B:
   case LP_R:
     // Delibarate fallthrough

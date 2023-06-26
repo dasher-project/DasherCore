@@ -516,9 +516,9 @@ CControlManager::~CControlManager()
 {
 }
 
-void CControlManager::HandleEvent(int iParameter)
+void CControlManager::HandleEvent(Parameter parameter)
 {
-	switch (iParameter)
+	switch (parameter)
 	{
 	case BP_COPY_ALL_ON_STOP:
 	case BP_SPEAK_ALL_ON_STOP:

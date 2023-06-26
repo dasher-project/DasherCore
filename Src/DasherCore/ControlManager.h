@@ -176,7 +176,7 @@ private:
   class CControlManager : public CSettingsObserver, public CControlBase, public CControlParser {
   public:
     CControlManager(CSettingsUser *pCreateFrom, CNodeCreationManager *pNCManager, CDasherInterfaceBase *pInterface);
-    void HandleEvent(int iParameter);
+    void HandleEvent(Parameter parameter);
 
     typedef enum {
       EDIT_CHAR, EDIT_WORD, EDIT_SENTENCE, EDIT_PARAGRAPH, EDIT_FILE, EDIT_LINE, EDIT_PAGE, EDIT_SELECTION,

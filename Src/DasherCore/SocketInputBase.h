@@ -32,7 +32,7 @@ public:
 
   virtual ~CSocketInputBase();
 
-  virtual void HandleEvent(int iParameter);
+  virtual void HandleEvent(Parameter parameter);
 
   virtual void SetDebug(bool _debug);
 

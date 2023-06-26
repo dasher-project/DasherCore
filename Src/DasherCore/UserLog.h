@@ -102,7 +102,7 @@ public:
   void                        SetOuputFilename(const string& strFilename = "");
   int                         GetLogLevelMask();
   void KeyDown(int iId, int iType, int iEffect);
-  void                        HandleEvent(int iParameter);
+  void                        HandleEvent(Dasher::Parameter parameter);
 
   // Methods used by utility that can post-process the log files:
   CUserLog(string strXMLFilename);
@@ -141,7 +141,7 @@ protected:
   string                      GetVersionInfo();
   void                        InitMemberVars();
   void                        AddInitialParam();
-  void                        UpdateParam(int iParameter, int iOptionMask);
+  void                        UpdateParam(Dasher::Parameter parameter, int iOptionMask);
 
   // Things that support simple stats of a single Start/Stop cycle:
   Dasher::VECTOR_SYMBOL_PROB  m_vCycleHistory;          // Tracks just the most recent Start/Stop cycle, used for simple logging

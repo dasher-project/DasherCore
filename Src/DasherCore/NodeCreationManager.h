@@ -39,7 +39,7 @@ class CNodeCreationManager : public Dasher::CSettingsUserObserver {
   /// BP_CONTROL_MODE and game mode status)
   void CreateControlBox(const Dasher::CControlBoxIO* pControlIO);
 
-  void HandleEvent(int iParameter) {}
+  void HandleEvent(Dasher::Parameter parameter) {}
   ///
   /// Get a root node of a particular type
   ///

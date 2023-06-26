@@ -39,7 +39,7 @@ class CTwoButtonDynamicFilter : public CButtonMultiPress, public CSettingsObserv
 
   virtual bool GetMinWidth(int &iMinWidth);
 
-  virtual void HandleEvent(int iParameter);
+  virtual void HandleEvent(Parameter parameter);
   
  protected:
   //override to inspect x,y coords of mouse clicks/taps

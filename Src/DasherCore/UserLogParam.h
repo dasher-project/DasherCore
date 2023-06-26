@@ -28,7 +28,7 @@ enum eUserLogParam
 // We need to have a lookup table that maps parameters we want to track in 
 // the UserLog object and what their behavior is.
 struct UserLogParamMask {
-  int key;
+  Dasher::Parameter key;
   int mask;
 };
 

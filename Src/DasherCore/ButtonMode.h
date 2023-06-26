@@ -23,7 +23,7 @@ class CButtonMode : public CDasherButtons, protected CSettingsObserver
  public:
   CButtonMode(CSettingsUser *pCreator, CDasherInterfaceBase *pInterface, bool bMenu, int iID, const char *szName);
 
-  virtual void HandleEvent(int iParameter);
+  virtual void HandleEvent(Parameter parameter);
   void Timer(unsigned long Time, CDasherView *pView, CDasherInput *pInput, CDasherModel *pModel, CExpansionPolicy **pol);
   bool DecorateView(CDasherView *pView, CDasherInput *pInput);
 

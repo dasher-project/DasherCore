@@ -29,8 +29,7 @@ static UserLogParamMask s_UserLogParamMaskTable [] = {
   {LP_LM_ALPHA,             userLogParamOutputToSimple},
   {LP_LM_BETA,              userLogParamOutputToSimple},
   {LP_LM_MIXTURE,           userLogParamOutputToSimple},
-  {LP_LM_WORD_ALPHA,        userLogParamOutputToSimple},
-  {-1, -1}  // Flag value that should always be at the end
+  {LP_LM_WORD_ALPHA,        userLogParamOutputToSimple}
 };
 
 CUserLog::CUserLog(CSettingsUser *pCreateFrom,
@@ -659,26 +658,19 @@ void CUserLog::KeyDown(int iId, int iType, int iEffect) {
 }
   
 // This gets called whenever parameters get changed that we are tracking
-void CUserLog::HandleEvent(int iParameter)
+void CUserLog::HandleEvent(Parameter parameter)
 {  
-  int i = 0;
-
   // Go through each of the parameters in our lookup table from UserLogParam.h.
   // If the key matches the notification event, then we want to push the
   // parameter change to the logging object.
-  while (s_UserLogParamMaskTable[i].key != -1)
+  for(auto [key, mask] : s_UserLogParamMaskTable)
   {
-    if (s_UserLogParamMaskTable[i].key == iParameter)
-    {
-      int iOptionMask = s_UserLogParamMaskTable[i].mask;
-
-      UpdateParam(iParameter, iOptionMask);
-      return;
-    }
-
-    i++;
-
-  } // end while (s_UserLogParamMaskTable[i].key != -1)
+	if (key == parameter)
+	{
+		UpdateParam(parameter, mask);
+		return;
+	}
+  }
 }
 
 ////////////////////////////////////////// private methods ////////////////////////////////////////////////
@@ -1042,29 +1034,27 @@ string CUserLog::GetVersionInfo()
 // object is first starting up.
 void CUserLog::AddInitialParam()
 {
-  int i = 0;
-  while (s_UserLogParamMaskTable[i].key != -1)
-  {
-    UpdateParam(s_UserLogParamMaskTable[i].key, s_UserLogParamMaskTable[i].mask);
-    i++;
-  }
+	for(auto [key, mask] : s_UserLogParamMaskTable)
+	{
+        UpdateParam(key, mask);
+    }
 }
 
 // Helper method that takes a parameter ID a la Parameters.h and
 // looks up its type, name and value and pushes into our object
 // using the specified options mask.
-void CUserLog::UpdateParam(int iParameter, int iOptionMask)
+void CUserLog::UpdateParam(Parameter parameter, int iOptionMask)
 {
-  string  strParamName  = GetParameterName(iParameter);
+  string  strParamName  = GetParameterName(parameter);
 
   // What method we call depends on the type of the parameter
-  switch (GetParameterType(iParameter))
+  switch (GetParameterType(parameter))
   {
   case (ParamBool):
     {
       // Convert bool to a integer
       int iValue = 0;
-      if (GetBoolParameter(iParameter))
+      if (GetBoolParameter(parameter))
         iValue = 1;
       AddParam(strParamName, iValue, iOptionMask);
       return;
@@ -1072,19 +1062,19 @@ void CUserLog::UpdateParam(int iParameter, int iOptionMask)
     }
   case (ParamLong):
     {
-      AddParam(strParamName, (int) GetLongParameter(iParameter), iOptionMask);
+      AddParam(strParamName, (int) GetLongParameter(parameter), iOptionMask);
       return;
       break;
     }
   case (ParamString):
     {
-      AddParam(strParamName, GetStringParameter(iParameter), iOptionMask);
+      AddParam(strParamName, GetStringParameter(parameter), iOptionMask);
       return;
       break;
     }       
   default:
     {
-      g_pLogger->Log("CUserLog::UpdateParam, matched parameter %d but unknown type %d", logNORMAL, iParameter, GetParameterType(iParameter));
+      g_pLogger->Log("CUserLog::UpdateParam, matched parameter %d but unknown type %d", logNORMAL, parameter, GetParameterType(parameter));
       break;
     }
   };

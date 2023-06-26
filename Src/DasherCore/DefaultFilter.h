@@ -14,7 +14,7 @@ class CDefaultFilter : public CDynamicFilter, public CSettingsObserver {
   ~CDefaultFilter();
 
   /// Responds to changes in BP_START_MOUSE / BP_MOUSEPOS_MODE to create StartHandler
-  virtual void HandleEvent(int iParameter);
+  virtual void HandleEvent(Parameter parameter);
 
   virtual bool DecorateView(CDasherView *pView, CDasherInput *pInput);
   virtual void Timer(unsigned long Time, CDasherView *pView, CDasherInput *pInput, CDasherModel *pModel, CExpansionPolicy **pol);

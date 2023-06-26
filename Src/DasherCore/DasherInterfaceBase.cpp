@@ -201,7 +201,7 @@ CDasherInterfaceBase::~CDasherInterfaceBase() {
 void CDasherInterfaceBase::CPreSetObserver::HandleEvent(CParameterChange d) {
   switch(d.iParameter) {
   case SP_ALPHABET_ID:
-    string value = d.string_value;
+    string value = std::get<std::string>(d.value);
     // Cycle the alphabet history
     vector<string> newHistory;
     newHistory.push_back(m_settingsStore.GetStringParameter(SP_ALPHABET_ID));
@@ -227,8 +227,8 @@ void CDasherInterfaceBase::CPreSetObserver::HandleEvent(CParameterChange d) {
   }
 }
 
-void CDasherInterfaceBase::HandleEvent(int iParameter) {
-  switch (iParameter) {
+void CDasherInterfaceBase::HandleEvent(Parameter parameter) {
+  switch (parameter) {
 
   case LP_OUTLINE_WIDTH:
     ScheduleRedraw();
@@ -705,8 +705,8 @@ void CDasherInterfaceBase::ClearAllContext() {
   SetBuffer(0);
 }
 
-void CDasherInterfaceBase::ResetParameter(int iParameter) {
-  m_pSettingsStore->ResetParameter(iParameter);
+void CDasherInterfaceBase::ResetParameter(Parameter parameter) {
+  m_pSettingsStore->ResetParameter(parameter);
 }
 
 // We need to be able to get at the UserLog object from outside the interface
@@ -795,9 +795,9 @@ void CDasherInterfaceBase::CreateModules() {
   //WIP Temporary as too many segfaults! //RegisterModule(new CDemoFilter(this, this, m_pFramerate));
 }
 
-void CDasherInterfaceBase::GetPermittedValues(int iParameter, std::vector<std::string> &vList) {
+void CDasherInterfaceBase::GetPermittedValues(Parameter parameter, std::vector<std::string> &vList) {
   // TODO: Deprecate direct calls to these functions
-  switch (iParameter) {
+  switch (parameter) {
   case SP_ALPHABET_ID:
     DASHER_ASSERT(m_AlphIO != NULL);
     m_AlphIO->GetAlphabets(&vList);

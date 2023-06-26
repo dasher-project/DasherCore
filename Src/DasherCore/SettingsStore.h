@@ -11,6 +11,7 @@
 
 #include <string>
 #include <unordered_map>
+#include <variant>
 
 #include "Observable.h"
 #include "Parameters.h"
@@ -36,7 +37,7 @@ namespace Dasher {
 /// The public interface uses UTF-8 strings. All Keys should be
 /// in American English and encodable in ASCII. However,
 /// string Values may contain special characters where appropriate.
-class CSettingsStore : public Observable<int> {
+class CSettingsStore : public Observable<Parameter> {
 public:
 
   CSettingsStore();
@@ -45,22 +46,22 @@ public:
 
   // New functions for event driven interface
 
-  void SetBoolParameter(int iParameter, bool bValue);
-  void SetLongParameter(int iParameter, long lValue);
-  void SetStringParameter(int iParameter, const std::string sValue);
+    template<typename T> void SetParameter(Parameter parameter, T value);
+  void SetBoolParameter(Parameter parameter, bool bValue);
+  void SetLongParameter(Parameter parameter, long lValue);
+  void SetStringParameter(Parameter parameter, const std::string sValue);
 
-  bool GetBoolParameter(int iParameter) const;
-  long GetLongParameter(int iParameter) const;
-  const std::string &GetStringParameter(int iParameter) const;
+    template<typename T> const T& GetParameter(Parameter parameter) const;
+  bool GetBoolParameter(Parameter parameter) const;
+  long GetLongParameter(Parameter parameter) const;
+  const std::string &GetStringParameter(Parameter parameter) const;
 
-  void ResetParameter(int iParameter);
+  void ResetParameter(Parameter parameter);
 
   const char *ClSet(const std::string &strKey, const std::string &strValue);
 
   // TODO: just load the application parameters by default?
-  void AddParameters(const Settings::bp_table* table, size_t count);
-  void AddParameters(const Settings::lp_table* table, size_t count);
-  void AddParameters(const Settings::sp_table* table, size_t count);
+  void AddParameters(const std::unordered_map<Parameter, const Settings::Parameter_Value> table);
   Observable<CParameterChange>& PreSetObservable() { return pre_set_observable_; }
     
   virtual bool IsParameterSaved(const std::string & Key) { return false; }; // avoid undef sub-classes error
@@ -114,22 +115,11 @@ private:
   //! \param Value Value of the setting, UTF8 encoded
   virtual void SaveSetting(const std::string & Key, const std::string & Value);
 
-  struct Parameter {
-    const char* name;  // Doesn't own the string.
-    Settings::ParameterType type = Settings::ParamInvalid;
-    Persistence persistence = Persistence::PERSISTENT;
-    bool bool_value;
-    bool bool_default;
-    long long_value;
-    long long_default;
-    std::string string_value;
-    const char* string_default;  // Doesn't own the string.
-  };
-
-  std::unordered_map<int, Parameter> parameters_;
+  std::unordered_map<Parameter, Settings::Parameter_Value> parameters_;
   Observable<CParameterChange> pre_set_observable_;
 };
-  /// Superclass for anything that wants to use/access/store persistent settings.
+
+/// Superclass for anything that wants to use/access/store persistent settings.
   /// (The nearest thing remaining to the old CDasherComponent,
   /// but more of a mixin rather than a universal superclass.)
   /// At the moment, _all_ clients share a single SettingsStore (static),
@@ -151,21 +141,21 @@ private:
   protected:
     ///Create a new SettingsUser, inheriting+sharing settings from the creator.
     CSettingsUser(CSettingsUser *pCreateFrom);
-    bool GetBoolParameter(int iParameter) const;
-    long GetLongParameter(int iParameter) const;
-    const std::string &GetStringParameter(int iParameter) const;
-    void SetBoolParameter(int iParameter, bool bValue);
-    void SetLongParameter(int iParameter, long lValue);
-    void SetStringParameter(int iParameter, const std::string &strValue);
+    bool GetBoolParameter(Parameter parameter) const;
+    long GetLongParameter(Parameter parameter) const;
+    const std::string &GetStringParameter(Parameter parameter) const;
+    void SetBoolParameter(Parameter parameter, bool bValue);
+    void SetLongParameter(Parameter parameter, long lValue);
+    void SetStringParameter(Parameter parameter, const std::string &strValue);
   };
   ///Superclass for anything that wants to be notified when settings change.
-  /// (Note inherited pure virtual HandleEvent(int) method, called when any pref changes).
+  /// (Note inherited pure virtual HandleEvent(Parameter) method, called when any pref changes).
   ///Exists as a distinct class from CSettingsUserObserver (below) to get round C++'s
   /// multiple inheritance problems, i.e. for indirect subclasses of CSettingsUser
   /// wanting to introduce settings-listener capabilities.
   ///Note we don't inherit from TransientObserver as it saves storing the SettingsStore ptr
   /// in every instance; if we move to multiple settings stores, we could so inherit.
-  class CSettingsObserver : public Observer<int> {
+  class CSettingsObserver : public Observer<Parameter> {
   public:
     ///Create a CSettingsObserver listening to changes to the settings values
     /// used by a particular CSettingsUser.

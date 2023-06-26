@@ -113,8 +113,8 @@ void CDemoFilter::KeyDown(unsigned long iTime, int iId, CDasherView *pDasherView
   }
 }
 
-void CDemoFilter::HandleEvent(int iParameter) {
-    switch (iParameter) {
+void CDemoFilter::HandleEvent(Parameter parameter) {
+    switch (parameter) {
       case LP_DEMO_SPRING:
       case LP_DEMO_NOISE_MEM:
       case LP_MAX_BITRATE:

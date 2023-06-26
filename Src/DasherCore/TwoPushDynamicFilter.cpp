@@ -104,8 +104,8 @@ bool CTwoPushDynamicFilter::DecorateView(CDasherView *pView, CDasherInput *pInpu
   return bRV;
 }
 
-void CTwoPushDynamicFilter::HandleEvent(int iParameter) {
-  switch (iParameter) {
+void CTwoPushDynamicFilter::HandleEvent(Parameter parameter) {
+  switch (parameter) {
   case LP_TWO_PUSH_OUTER: //fallthrough
   case LP_TWO_PUSH_LONG: //fallthrough
   case LP_TWO_PUSH_SHORT: {

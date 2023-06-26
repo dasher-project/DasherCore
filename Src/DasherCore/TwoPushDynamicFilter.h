@@ -52,7 +52,7 @@ namespace Dasher {
   virtual void TimerImpl(unsigned long Time, CDasherView *m_pDasherView, CDasherModel *m_pDasherModel, CExpansionPolicy **pol);
   virtual void ActionButton(unsigned long iTime, int iButton, int iType, CDasherModel *pModel);
 
-  virtual void HandleEvent(int iParameter);
+  virtual void HandleEvent(Parameter parameter);
 
   virtual void run(unsigned long iTime);
 

@@ -171,9 +171,9 @@ bool CTwoButtonDynamicFilter::GetMinWidth(int &iMinWidth) {
   return true;
 }
 
-void CTwoButtonDynamicFilter::HandleEvent(int iParameter)
+void CTwoButtonDynamicFilter::HandleEvent(Parameter parameter)
 {
-  switch (iParameter) {
+  switch (parameter) {
   case LP_MAX_BITRATE:// Deliberate fallthrough
   case LP_DYNAMIC_BUTTON_LAG:
       m_dLagBits = GetLongParameter(LP_MAX_BITRATE)/100.0 * GetLongParameter(LP_DYNAMIC_BUTTON_LAG)/1000.0;

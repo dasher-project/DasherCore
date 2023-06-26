@@ -47,7 +47,7 @@ public:
   /// Event handler
   ///
 
-  virtual void HandleEvent(int iParameter);
+  virtual void HandleEvent(Parameter parameter);
 
   //Override to additionally reset scale factors etc.
   void SetOrientation(Opts::ScreenOrientations newOrient);

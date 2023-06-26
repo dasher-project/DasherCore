@@ -23,7 +23,7 @@ class CCompassMode : public CDasherButtons
  public:
   CCompassMode(CSettingsUser *pCreator, CDasherInterfaceBase *pInterface);
 
-  virtual void HandleEvent(int iParameter);
+  virtual void HandleEvent(Parameter parameter);
 
   bool DecorateView(CDasherView *pView, CDasherInput *pInput);
 

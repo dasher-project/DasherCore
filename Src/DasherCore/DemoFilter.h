@@ -11,7 +11,7 @@ class CDemoFilter : public CDynamicFilter {
   CDemoFilter(CSettingsUser *pCreator, CDasherInterfaceBase *pInterface, CFrameRate *pFramerate);
   ~CDemoFilter();
 
-  virtual void HandleEvent(int iParameter);
+  virtual void HandleEvent(Parameter parameter);
 
   virtual bool DecorateView(CDasherView *pView, CDasherInput *pInput);
   virtual void Timer(unsigned long Time, CDasherView *m_pDasherView, CDasherInput *pInput, CDasherModel *m_pDasherModel, CExpansionPolicy **pol);

@@ -7,27 +7,27 @@ CDashIntfSettings::CDashIntfSettings(CSettingsStore *pSettingsStore)
 	: CDasherInterfaceBase(pSettingsStore) {
 }
 
-bool CDashIntfSettings::GetBoolParameter(int iParameter) const {
+bool CDashIntfSettings::GetBoolParameter(Parameter iParameter) const {
   return CDasherInterfaceBase::GetBoolParameter(iParameter);
 }
 
-long CDashIntfSettings::GetLongParameter(int iParameter) const {
+long CDashIntfSettings::GetLongParameter(Parameter iParameter) const {
   return CDasherInterfaceBase::GetLongParameter(iParameter);
 }
 
-const string &CDashIntfSettings::GetStringParameter(int iParameter) const {
+const string &CDashIntfSettings::GetStringParameter(Parameter iParameter) const {
   return CDasherInterfaceBase::GetStringParameter(iParameter);
 }
 
-void CDashIntfSettings::SetBoolParameter(int iParameter, bool bValue) {
+void CDashIntfSettings::SetBoolParameter(Parameter iParameter, bool bValue) {
   CDasherInterfaceBase::SetBoolParameter(iParameter, bValue);
 }
 
-void CDashIntfSettings::SetLongParameter(int iParameter, long lValue) {
+void CDashIntfSettings::SetLongParameter(Parameter iParameter, long lValue) {
   CDasherInterfaceBase::SetLongParameter(iParameter, lValue);
 }
 
-void CDashIntfSettings::SetStringParameter(int iParameter, const string &strValue) {
+void CDashIntfSettings::SetStringParameter(Parameter iParameter, const string &strValue) {
   CDasherInterfaceBase::SetStringParameter(iParameter, strValue);
 }
 

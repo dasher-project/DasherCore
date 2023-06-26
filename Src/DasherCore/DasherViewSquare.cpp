@@ -52,11 +52,11 @@ using namespace Opts;
 //- For all other events do nothing
 
 
-void CDasherViewSquare::HandleEvent(int iParameter) {
-    if(iParameter == LP_MARGIN_WIDTH ||
-       iParameter == BP_NONLINEAR_Y ||
-       iParameter == LP_NONLINEAR_X ||
-       iParameter == LP_GEOMETRY) {
+void CDasherViewSquare::HandleEvent(Parameter parameter) {
+    if(parameter == LP_MARGIN_WIDTH ||
+       parameter == BP_NONLINEAR_Y ||
+       parameter == LP_NONLINEAR_X ||
+       parameter == LP_GEOMETRY) {
         m_bVisibleRegionValid = false;
         SetScaleFactor();
     }
