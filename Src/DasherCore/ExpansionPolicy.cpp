@@ -66,7 +66,7 @@ bool BudgettingPolicy::apply() {
   
   //first, make sure we are within our budget (probably only in case the budget's changed)
   while (!sCollapse.empty()
-         && currentNumNodeObjects() > m_iNodeBudget)
+         && static_cast<unsigned int>(currentNumNodeObjects()) > m_iNodeBudget)
   {
     std::pair<double,CDasherNode *> node = sCollapse.back();
     DASHER_ASSERT(node.first >= collapseCost);
@@ -80,7 +80,7 @@ bool BudgettingPolicy::apply() {
   // to make room to expand other more important (high-benefit) nodes.  
   while (!sExpand.empty() && sExpand.back().first > collapseCost)
   {
-    if (currentNumNodeObjects()+sExpand.back().second->ExpectedNumChildren() < m_iNodeBudget)
+    if (static_cast<unsigned int>(currentNumNodeObjects()+sExpand.back().second->ExpectedNumChildren()) < m_iNodeBudget)
     {
       ExpandNode(sExpand.back().second);
       sExpand.pop_back();
