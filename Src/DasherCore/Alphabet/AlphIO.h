@@ -62,6 +62,6 @@ private:
 	SGroupInfo* ParseGroupRecursive(pugi::xml_node& group_node, CAlphInfo* CurrentAlphabet, SGroupInfo* previous_sibling, std::vector<SGroupInfo*> ancestors);
     void ReverseChildList(SGroupInfo*& pList);
 	// Alphabet types:
-	std::map<std::string, Opts::AlphabetTypes> AlphabetStringToType;
+	std::map<std::string, Options::AlphabetTypes> AlphabetStringToType;
 };
 /// @}

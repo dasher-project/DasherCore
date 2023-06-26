@@ -316,8 +316,8 @@ CAlphabetManager::CAlphNode *CAlphabetManager::GetRoot(CDasherNode *pParent, boo
     // so either we're rebuilding, or else creating a new root from existing text (in edit box)
     DASHER_ASSERT(!pParent);
     pNewNode = CreateSymbolRoot(iNewOffset, p.second, p.first);
-    pNewNode->SetFlag(NF_SEEN, true);
-    pNewNode->CDasherNode::SetFlag(NF_COMMITTED, true); //do NOT commit!
+    pNewNode->SetFlag(CDasherNode::NF_SEEN, true);
+    pNewNode->CDasherNode::SetFlag(CDasherNode::NF_COMMITTED, true); //do NOT commit!
   }
   pNewNode->iContext = p.second;
   return pNewNode;
@@ -579,7 +579,7 @@ void CAlphabetManager::IterateChildGroups(CAlphNode *pParent, const SGroupInfo *
   }
 
   if (pParentGroup == m_pBaseGroup) m_pNCManager->AddExtras(pParent);
-  pParent->SetFlag(NF_ALLCHILDREN, true);
+  pParent->SetFlag(CDasherNode::NF_ALLCHILDREN, true);
 }
 
 CAlphabetManager::CAlphNode::~CAlphNode() {

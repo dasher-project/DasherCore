@@ -1050,7 +1050,7 @@ void CUserLog::UpdateParam(Parameter parameter, int iOptionMask)
   // What method we call depends on the type of the parameter
   switch (GetParameterType(parameter))
   {
-  case (ParamBool):
+  case (PARAM_BOOL):
     {
       // Convert bool to a integer
       int iValue = 0;
@@ -1060,13 +1060,13 @@ void CUserLog::UpdateParam(Parameter parameter, int iOptionMask)
       return;
       break;
     }
-  case (ParamLong):
+  case (PARAM_LONG):
     {
       AddParam(strParamName, (int) GetLongParameter(parameter), iOptionMask);
       return;
       break;
     }
-  case (ParamString):
+  case (PARAM_STRING):
     {
       AddParam(strParamName, GetStringParameter(parameter), iOptionMask);
       return;

@@ -604,14 +604,14 @@ void CDasherInterfaceBase::ChangeAlphabet() {
   //}
 }
 
-Opts::ScreenOrientations CDasherInterfaceBase::ComputeOrientation() {
-  Opts::ScreenOrientations pref(Opts::ScreenOrientations(GetLongParameter(LP_ORIENTATION)));
-  if (pref!=Opts::AlphabetDefault) return pref;
+Options::ScreenOrientations CDasherInterfaceBase::ComputeOrientation() {
+  Options::ScreenOrientations pref(Options::ScreenOrientations(GetLongParameter(LP_ORIENTATION)));
+  if (pref!=Options::AlphabetDefault) return pref;
   if (m_pNCManager) return m_pNCManager->GetAlphabet()->GetOrientation();
   //haven't created the NCManager yet, so not yet reached Realize, but must
   // have been given Screen (to make View). Use default LR for now, as when
   // we ChangeAlphabet, we'll update the view.
-  return Opts::LeftToRight;
+  return Options::LeftToRight;
 }
 
 void CDasherInterfaceBase::ChangeColours() {
@@ -825,7 +825,7 @@ void CDasherInterfaceBase::SetOffset(int iOffset, bool bForce) {
   if (iOffset == m_pDasherModel->GetOffset() && !bForce) return;
 
   CDasherNode *pNode = m_pNCManager->GetAlphabetManager()->GetRoot(NULL, iOffset!=0, iOffset);
-  if (GetGameModule()) pNode->SetFlag(NF_GAME, true);
+  if (GetGameModule()) pNode->SetFlag(CDasherNode::NF_GAME, true);
   m_pDasherModel->SetNode(pNode);
   
   //ACL TODO note that CTL_MOVE, etc., do not come here (that would probably

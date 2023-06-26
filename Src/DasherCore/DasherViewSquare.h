@@ -4,6 +4,7 @@
 
 #ifndef __DasherViewSquare_h__
 #define __DasherViewSquare_h__
+#include "DasherModel.h"
 #include "DasherView.h"
 #include "DasherScreen.h"
 #include "SettingsStore.h"
@@ -12,7 +13,6 @@
 namespace Dasher {
   class CDasherViewSquare;
   class CDasherView;
-  class CDasherModel;
   class CDasherNode;
 }
 
@@ -37,7 +37,7 @@ public:
   /// passed as parameter to the drawing functions, and data structure
   /// can be extracted from the model and passed too.
 
-  CDasherViewSquare(CSettingsUser *pCreateFrom, CDasherScreen *DasherScreen, Opts::ScreenOrientations orient);
+  CDasherViewSquare(CSettingsUser *pCreateFrom, CDasherScreen *DasherScreen, Options::ScreenOrientations orient);
   ~CDasherViewSquare();
 
   ///
@@ -47,7 +47,7 @@ public:
   virtual void HandleEvent(Parameter parameter);
 
   //Override to additionally reset scale factors etc.
-  void SetOrientation(Opts::ScreenOrientations newOrient);
+  void SetOrientation(Options::ScreenOrientations newOrient);
 
   /// Resets scale factors etc. that depend on the screen size, to be recomputed when next needed.
   void ScreenResized(CDasherScreen * NewScreen);
@@ -166,7 +166,9 @@ private:
   inline myint ixmap(myint x) const;
 
   ///Parameters for y non-linearity. (TODO Make into preprocessor defines?)
-  const myint m_Y1, m_Y2, m_Y3;
+  const myint m_Y1 = 4;
+  const myint m_Y2 = static_cast<const myint>(0.95 * CDasherModel::MAX_Y);
+  const myint m_Y3 = static_cast<const myint>(0.05 * CDasherModel::MAX_Y);
 
   inline void Crosshair();
   bool CoversCrosshair(myint Range,myint y1,myint y2);
@@ -176,7 +178,7 @@ private:
 
   void DasherLine2Screen(myint x1, myint y1, myint x2, myint y2, std::vector<CDasherScreen::point> &vPoints);
 
-  bool m_bVisibleRegionValid;
+  bool m_bVisibleRegionValid = false;
 
   // Called on screen size or orientation changes
   void SetScaleFactor();

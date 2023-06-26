@@ -54,13 +54,13 @@ public:
   /// Constructor
   /// 
   /// \param DasherScreen Pointer to the CDasherScreen object used to do rendering
-  CDasherView(CDasherScreen * DasherScreen, Opts::ScreenOrientations orient);
+  CDasherView(CDasherScreen * DasherScreen, Options::ScreenOrientations orient);
 
   virtual ~CDasherView() {
   }
 
-  virtual void SetOrientation(Opts::ScreenOrientations newOrient) {m_Orientation=newOrient;}
-  Opts::ScreenOrientations GetOrientation() {return m_Orientation;}
+  virtual void SetOrientation(Options::ScreenOrientations newOrient) {m_Orientation=newOrient;}
+  Options::ScreenOrientations GetOrientation() {return m_Orientation;}
 
   /// 
   /// @name Coordinate system conversion
@@ -196,7 +196,7 @@ protected:
   int m_iRenderCount;
 
 private:
-  Opts::ScreenOrientations m_Orientation;
+  Options::ScreenOrientations m_Orientation;
   CDasherScreen *m_pScreen;    // provides the graphics (text, lines, rectangles):
 };
 /// @}

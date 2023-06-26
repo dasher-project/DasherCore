@@ -75,16 +75,16 @@ namespace Dasher
 
   	// Types that are parameters can be
     enum ParameterType {
-      ParamBool,
-      ParamLong,
-      ParamString,
-      ParamInvalid
+      PARAM_BOOL,
+      PARAM_LONG,
+      PARAM_STRING,
+      PARAM_INVALID
     };
 
     // Values
     struct Parameter_Value {
 		std::string name;
-		Settings::ParameterType type = Settings::ParamInvalid;
+		Settings::ParameterType type = Settings::PARAM_INVALID;
 		Persistence persistence = Persistence::PERSISTENT;
 		std::variant<bool, long, std::string> value;
         std::string human_readable;
@@ -94,8 +94,8 @@ namespace Dasher
     
     ///Get the type of a parameter by its key.
     /// \param iParameter one of the BP_*, LP_* or SP_* enum constants
-    /// \return ParamBool, ParamLong or ParamString, respectively; or
-    /// ParamInvalid if iParameter is not known (present in the parameter_defaults map
+    /// \return PARAM_BOOL, PARAM_LONG or PARAM_STRING, respectively; or
+    /// PARAM_INVALID if iParameter is not known (present in the parameter_defaults map
     ParameterType GetParameterType(Parameter iParameter);
     
     ///Gets the regName member of the struct for a parameter (of any of the 3 types).

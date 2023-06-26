@@ -71,9 +71,9 @@ public:
   
   const std::string &GetID() const {return AlphID;}
 
-  Opts::ScreenOrientations GetOrientation() const {return Orientation;}
+  Options::ScreenOrientations GetOrientation() const {return Orientation;}
 
-  Opts::AlphabetTypes GetType() const {return Type;}
+  Options::AlphabetTypes GetType() const {return Type;}
 
   const std::string & GetTrainingFile() const {return TrainingFile;}
 
@@ -139,8 +139,8 @@ private:
   std::string TrainingFile;
   std::string GameModeFile;
   std::string PreferredColours;
-  Opts::AlphabetTypes Type;
-  Opts::ScreenOrientations Orientation;
+  Options::AlphabetTypes Type;
+  Options::ScreenOrientations Orientation;
 
   std::string m_strDefaultContext;
   std::string m_strCtxChar;

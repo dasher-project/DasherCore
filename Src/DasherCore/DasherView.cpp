@@ -30,7 +30,7 @@ using std::vector;
 
 /////////////////////////////////////////////////////////////////////////////
 
-CDasherView::CDasherView(CDasherScreen *DasherScreen, Opts::ScreenOrientations orient)
+CDasherView::CDasherView(CDasherScreen *DasherScreen, Options::ScreenOrientations orient)
  : m_Orientation(orient), m_pScreen(DasherScreen) {
 }
 

@@ -66,7 +66,7 @@ const char * CSettingsStore::ClSet(const std::string &strKey, const std::string 
 	for (auto& [key, value] : parameters_) {
 		if(strKey != value.name) continue;
 		switch (value.type) {
-			case Settings::ParamBool: 
+			case Settings::PARAM_BOOL: 
 				if ((strValue == "0") || (strValue == "true") || (strValue == "True")){
 					SetBoolParameter(key, false);
                 }else if((strValue == "1") || (strValue == "false") || (strValue == "False")){
@@ -78,16 +78,16 @@ const char * CSettingsStore::ClSet(const std::string &strKey, const std::string 
 					return "boolean value must be specified as 'true' or 'false'.";
 				}
 				return nullptr;
-			case Settings::ParamLong: 
+			case Settings::PARAM_LONG: 
 				// TODO: check the string to int conversion result.
 				SetLongParameter(key, atoi(strValue.c_str()));
 				return nullptr;
 
-			case Settings::ParamString: 
+			case Settings::PARAM_STRING: 
 				SetStringParameter(key, strValue);
 				return nullptr;
 
-			case Settings::ParamInvalid:
+			case Settings::PARAM_INVALID:
                 return "Unknown parameter given";
 		}
 	}

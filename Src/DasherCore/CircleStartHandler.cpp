@@ -46,9 +46,9 @@ CDasherScreen::point CCircleStartHandler::CircleCenter(CDasherView *pView) {
   screenint iEdgeX, iEdgeY;
   m_pView->Dasher2Screen(CDasherModel::ORIGIN_X, CDasherModel::ORIGIN_Y + (CDasherModel::MAX_Y*GetLongParameter(LP_CIRCLE_PERCENT))/100, iEdgeX, iEdgeY);
 
-  const Opts::ScreenOrientations iDirection(m_pView->GetOrientation());
+  const Options::ScreenOrientations iDirection(m_pView->GetOrientation());
 
-  if((iDirection == Opts::TopToBottom) || (iDirection == Opts::BottomToTop)) {
+  if((iDirection == Options::TopToBottom) || (iDirection == Options::BottomToTop)) {
     m_iScreenRadius = iEdgeX - m_screenCircleCenter.x;
   }
   else {
