@@ -2,12 +2,6 @@
 #include "DasherInterfaceBase.h"
 #include "FileUtils.h"
 
-#include <iostream>
-#include <fstream>
-#include <string.h>
-#include <algorithm>
-
-
 
 namespace Dasher {
 

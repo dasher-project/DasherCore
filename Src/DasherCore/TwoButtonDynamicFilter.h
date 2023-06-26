@@ -23,8 +23,6 @@
 
 #include "ButtonMultiPress.h"
 
-#include <deque>
-
 namespace Dasher {
 /// \ingroup InputFilter
 /// @{

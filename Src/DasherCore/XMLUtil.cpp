@@ -1,13 +1,7 @@
-
-#include "../Common/Common.h"
-
 #include <cstring>
 
 #include "XMLUtil.h"
 #include <fstream>
-
-#include <sys/types.h>
-#include <sys/stat.h>
 
 
 bool XMLUtil::IsWhiteSpace(char cLetter)

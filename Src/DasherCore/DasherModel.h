@@ -25,9 +25,7 @@
 #include <config.h>
 #endif
 
-#include <climits>
 #include <deque>
-#include <cmath>
 #include <vector>
 
 #include "../Common/NoClones.h"
@@ -35,7 +33,6 @@
 #include "DasherTypes.h"
 #include "ExpansionPolicy.h"
 #include "SettingsStore.h"
-#include "AlphabetManager.h"
 
 namespace Dasher {
   class CDasherModel;

@@ -1,8 +1,9 @@
-#include "../Common/Common.h"
-
 #include <cstring>
 #include "UserLogTrial.h"
 
+#include <algorithm>
+#include <fstream>
+#include <ios>
 
 
 CUserLogTrial::CUserLogTrial(const std::string& strCurrentTrialFilename)

@@ -20,8 +20,6 @@
 
 #include "DasherModule.h"
 
-#include <iostream>
-
 // Types:
 // 0 = Input method
 // 1 = Input filter

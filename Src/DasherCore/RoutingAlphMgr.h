@@ -9,8 +9,6 @@
 #ifndef __RoutingAlphMgr_h__
 #define __RoutingAlphMgr_h__
 
-#include "../Common/Common.h"
-
 #include "AlphabetManager.h"
 #include "LanguageModelling/RoutingPPMLanguageModel.h"
 

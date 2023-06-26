@@ -27,7 +27,6 @@
 #include "Observable.h"
 
 #include <algorithm>
-#include <iostream>
 #include <limits>
 
 using namespace Dasher;
@@ -88,7 +87,7 @@ void CDasherViewSquare::SetOrientation(Options::ScreenOrientations newOrient)
 
 
 CDasherNode* CDasherViewSquare::Render(CDasherNode* pRoot, myint iRootMin, myint iRootMax,
-                                       CExpansionPolicy& policy)
+	CExpansionPolicy& policy)
 {
 	DASHER_ASSERT(pRoot != 0);
 	myint iDasherMinX;
@@ -198,69 +197,69 @@ void CDasherViewSquare::DoDelayedText(CTextString* pText)
 	switch (GetOrientation())
 	{
 	case Options::LeftToRight:
+	{
+		screenint iRight = x + textDims.first;
+		if (iRight < Screen()->GetWidth())
 		{
-			screenint iRight = x + textDims.first;
-			if (iRight < Screen()->GetWidth())
+			Screen()->DrawString(pText->m_pLabel, x, y - textDims.second / 2, pText->m_iSize, pText->m_iColor);
+			for (auto it = pText->m_children.begin(); it != pText->m_children.end(); ++it)
 			{
-				Screen()->DrawString(pText->m_pLabel, x, y - textDims.second / 2, pText->m_iSize, pText->m_iColor);
-				for (auto it = pText->m_children.begin(); it != pText->m_children.end(); ++it)
-				{
-					CTextString* pChild = *it;
-					pChild->m_ix = std::max(pChild->m_ix, iRight);
-					DoDelayedText(pChild);
-				}
-				pText->m_children.clear();
+				CTextString* pChild = *it;
+				pChild->m_ix = std::max(pChild->m_ix, iRight);
+				DoDelayedText(pChild);
 			}
-			break;
+			pText->m_children.clear();
 		}
+		break;
+	}
 	case Options::RightToLeft:
+	{
+		screenint iLeft = x - textDims.first;
+		if (iLeft >= 0)
 		{
-			screenint iLeft = x - textDims.first;
-			if (iLeft >= 0)
+			Screen()->DrawString(pText->m_pLabel, iLeft, y - textDims.second / 2, pText->m_iSize, pText->m_iColor);
+			for (auto it = pText->m_children.begin(); it != pText->m_children.end(); ++it)
 			{
-				Screen()->DrawString(pText->m_pLabel, iLeft, y - textDims.second / 2, pText->m_iSize, pText->m_iColor);
-				for (auto it = pText->m_children.begin(); it != pText->m_children.end(); ++it)
-				{
-					CTextString* pChild = *it;
-					pChild->m_ix = std::min(pChild->m_ix, iLeft);
-					DoDelayedText(*it);
-				}
-				pText->m_children.clear();
+				CTextString* pChild = *it;
+				pChild->m_ix = std::min(pChild->m_ix, iLeft);
+				DoDelayedText(*it);
 			}
-			break;
+			pText->m_children.clear();
 		}
+		break;
+	}
 	case Options::TopToBottom:
+	{
+		screenint iBottom = y + textDims.second;
+		if (iBottom < Screen()->GetHeight())
 		{
-			screenint iBottom = y + textDims.second;
-			if (iBottom < Screen()->GetHeight())
+			Screen()->DrawString(pText->m_pLabel, x - textDims.first / 2, y, pText->m_iSize, pText->m_iColor);
+			for (auto it = pText->m_children.begin(); it != pText->m_children.end(); ++it)
 			{
-				Screen()->DrawString(pText->m_pLabel, x - textDims.first / 2, y, pText->m_iSize, pText->m_iColor);
-				for (auto it = pText->m_children.begin(); it != pText->m_children.end(); ++it)
-				{
-					CTextString* pChild = *it;
-					pChild->m_iy = std::max(pChild->m_iy, iBottom);
-					DoDelayedText(*it);
-				}
-				pText->m_children.clear();
+				CTextString* pChild = *it;
+				pChild->m_iy = std::max(pChild->m_iy, iBottom);
+				DoDelayedText(*it);
 			}
-			break;
+			pText->m_children.clear();
 		}
+		break;
+	}
 	case Options::BottomToTop:
+	{
+		screenint iTop = y - textDims.second;
+		if (y >= 0)
 		{
-			screenint iTop = y - textDims.second;
-			if (y >= 0)
+			Screen()->DrawString(pText->m_pLabel, x - textDims.first / 2, iTop, pText->m_iSize, pText->m_iColor);
+			for (auto it = pText->m_children.begin(); it != pText->m_children.end(); ++it)
 			{
-				Screen()->DrawString(pText->m_pLabel, x - textDims.first / 2, iTop, pText->m_iSize, pText->m_iColor);
-				for (auto it = pText->m_children.begin(); it != pText->m_children.end(); ++it)
-				{
-					CTextString* pChild = *it;
-					pChild->m_iy = std::min(pChild->m_iy, iTop);
-					DoDelayedText(*it);
-				}
-				pText->m_children.clear();
+				CTextString* pChild = *it;
+				pChild->m_iy = std::min(pChild->m_iy, iTop);
+				DoDelayedText(*it);
 			}
-			break;
+			pText->m_children.clear();
 		}
+		break;
+	}
 	default:
 		break;
 	}
@@ -270,12 +269,12 @@ void CDasherViewSquare::DoDelayedText(CTextString* pText)
 CDasherViewSquare::CTextString::~CTextString()
 {
 	for (auto it = m_children.begin(); it != m_children.end(); ++it)
-		delete *it;
+		delete* it;
 }
 
 void CDasherViewSquare::TruncateTri(myint x, myint y1, myint y2, myint midy1, myint midy2, int fillColor, int outlineColor, int lineWidth)
 {
-	DASHER_ASSERT(y1<=midy1 && midy1<=midy2 && midy2<=y2);
+	DASHER_ASSERT(y1 <= midy1 && midy1 <= midy2 && midy2 <= y2);
 	myint iVisibleMinX, iVisibleMaxX, iVisibleMinY, iVisibleMaxY;
 	VisibleRegion(iVisibleMinX, iVisibleMinY, iVisibleMaxX, iVisibleMaxY);
 
@@ -310,7 +309,7 @@ void CDasherViewSquare::TruncateTri(myint x, myint y1, myint y2, myint midy1, my
 		{
 			//(0,y1) - (x1,midy1) hit max-y edge of screen
 			//(0,y2) - (x2,midy2) entirely offscreen
-			DASHER_ASSERT(midy1==iVisibleMaxY && y2 == midy2);
+			DASHER_ASSERT(midy1 == iVisibleMaxY && y2 == midy2);
 			x2 = x1;
 		}
 		else
@@ -382,7 +381,7 @@ void CDasherViewSquare::Circle(myint Range, myint y1, myint y2, int fCol, int oC
 		Dasher2Screen(0, iDasherMinY, p.x, p.y);
 		pts.push_back(p);
 		//intersect with bottom edge
-		x1 = std::min(iDasherMaxX, static_cast<myint>(sqrt(double(r * r - sq(cy-iDasherMinY)))));
+		x1 = std::min(iDasherMaxX, static_cast<myint>(sqrt(static_cast<double>(r * r - sq(cy - iDasherMinY)))));
 		y1 = iDasherMinY;
 	}
 	else
@@ -396,13 +395,13 @@ void CDasherViewSquare::Circle(myint Range, myint y1, myint y2, int fCol, int oC
 	if (y2 > iDasherMaxY)
 	{
 		//intersect...
-		x2 = std::min(iDasherMaxX, static_cast<myint>(sqrt(double(r * r - sq(iDasherMaxY-cy)))));
+		x2 = std::min(iDasherMaxX, static_cast<myint>(sqrt(static_cast<double>(r * r - sq(iDasherMaxY - cy)))));
 		Dasher2Screen(x2, y2 = iDasherMaxY, p.x, p.y);
 		//that's target point for end of curved section.
 		if (x2 == iDasherMaxX && x1 == iDasherMaxX)
 		{
 			//circle entirely covers screen
-			DASHER_ASSERT(y1==iDasherMinY);
+			DASHER_ASSERT(y1 == iDasherMinY);
 			DasherDrawRectangle(iDasherMaxX, iDasherMinY, 0, iDasherMaxY, fCol, oCol, lWidth);
 			return;
 		}
@@ -427,7 +426,7 @@ void CDasherViewSquare::Circle(myint Range, myint y1, myint y2, int fCol, int oC
 void CDasherViewSquare::CircleTo(myint cy, myint r, myint y1, myint x1, myint y3, myint x3, CDasherScreen::point dest, std::vector<CDasherScreen::point>& pts, double dXMul)
 {
 	myint y2((y1 + y3) / 2);
-	myint x2(static_cast<myint>(sqrt((sq(r) - sq(cy-y2)) * dXMul)));
+	myint x2(static_cast<myint>(sqrt((sq(r) - sq(cy - y2)) * dXMul)));
 	CDasherScreen::point mid; //where midpoint of circle/arc should be
 	Dasher2Screen(x2, y2, mid.x, mid.y); //(except "midpoint" measured along y axis)
 	int lmx = (pts.back().x + dest.x) / 2, lmy = (pts.back().y + dest.y) / 2; //midpoint of straight line
@@ -508,7 +507,7 @@ bool CDasherViewSquare::IsSpaceAroundNode(myint y1, myint y2)
 		return true; //space around sq => space around anything smaller!
 
 	//in theory, even if the crosshair is off-screen (!), anything spanning y1-y2 should cover it...
-	DASHER_ASSERT(CoversCrosshair(y2-y1, y1, y2));
+	DASHER_ASSERT(CoversCrosshair(y2 - y1, y1, y2));
 
 	switch (GetLongParameter(LP_SHAPE_TYPE))
 	{
@@ -516,17 +515,17 @@ bool CDasherViewSquare::IsSpaceAroundNode(myint y1, myint y2)
 	case Options::OVERLAPPING_RECTANGLE:
 		return false;
 	case Options::TRIANGLE:
-		{
-			const myint iMidY((y1 + y2) / 2);
-			return (iMidY < iVisibleMaxY && (y2 - iVisibleMaxY) * maxX < iVisibleMaxX * (y2 - iMidY))
-				|| (iMidY > iVisibleMinY && (iVisibleMinY - y1) * maxX < iVisibleMaxX * (iMidY - y1));
-		}
+	{
+		const myint iMidY((y1 + y2) / 2);
+		return (iMidY < iVisibleMaxY && (y2 - iVisibleMaxY)* maxX < iVisibleMaxX* (y2 - iMidY))
+			|| (iMidY > iVisibleMinY && (iVisibleMinY - y1) * maxX < iVisibleMaxX* (iMidY - y1));
+	}
 	case Options::TRUNCATED_TRIANGLE:
-		{
-			const myint y113((y1 + y1 + y2) / 3), y123((y1 + y2 + y2) / 3);
-			return (y123 < iVisibleMaxY && (y2 - iVisibleMaxY) * maxX < iVisibleMaxX * (y2 - y123))
-				|| (y113 > iVisibleMinY && (iVisibleMinY - y1) * maxX < iVisibleMaxX * (y123 - y1));
-		}
+	{
+		const myint y113((y1 + y1 + y2) / 3), y123((y1 + y2 + y2) / 3);
+		return (y123 < iVisibleMaxY && (y2 - iVisibleMaxY)* maxX < iVisibleMaxX* (y2 - y123))
+			|| (y113 > iVisibleMinY && (iVisibleMinY - y1) * maxX < iVisibleMaxX* (y123 - y1));
+	}
 	case Options::QUADRIC: //quadric.
 	//erm. seems hard. fall-through to circle, as it isn't far out -
 	// unfortunately it's not a conservative approximation, the circle
@@ -534,20 +533,20 @@ bool CDasherViewSquare::IsSpaceAroundNode(myint y1, myint y2)
 	// circle covers the screen when the quadric doesn't :-(. However
 	// atm circles seem better generally so fixing quadrics is a low priority!
 	case Options::CIRCLE:
-		{
-			//circle - or rather ellipse, x diameter is twice y diam, hence the *2 to normalize
-			const myint iMidY((y1 + y2) / 2); //centerX=0, radius = maxX
-			const myint maxYDiff(std::max(iVisibleMaxY - iMidY, iMidY - iVisibleMinY) * 2);
-			return maxYDiff * maxYDiff + iVisibleMaxX * iVisibleMaxX > maxX * maxX;
-		}
+	{
+		//circle - or rather ellipse, x diameter is twice y diam, hence the *2 to normalize
+		const myint iMidY((y1 + y2) / 2); //centerX=0, radius = maxX
+		const myint maxYDiff(std::max(iVisibleMaxY - iMidY, iMidY - iVisibleMinY) * 2);
+		return maxYDiff * maxYDiff + iVisibleMaxX * iVisibleMaxX > maxX * maxX;
+	}
 	}
 	/* NOTREACHED */
 	return false;
 }
 
 void CDasherViewSquare::DisjointRender(CDasherNode* pRender, myint y1, myint y2,
-                                       CTextString* pPrevText, CExpansionPolicy& policy, double dMaxCost,
-                                       CDasherNode*& pOutput)
+	CTextString* pPrevText, CExpansionPolicy& policy, double dMaxCost,
+	CDasherNode*& pOutput)
 {
 	DASHER_ASSERT_VALIDPTR_RW(pRender);
 
@@ -569,7 +568,7 @@ void CDasherViewSquare::DisjointRender(CDasherNode* pRender, myint y1, myint y2,
 	{
 		const int textColor = GetLongParameter(LP_OUTLINE_WIDTH) < 0 ? myColor : 4;
 		myint ny1 = std::min(iDasherMaxY, std::max(iDasherMinY, y1)),
-		      ny2 = std::min(iDasherMaxY, std::max(iDasherMinY, y2));
+			ny2 = std::min(iDasherMaxY, std::max(iDasherMinY, y2));
 		CTextString* pText = DasherDrawText(y2 - y1, (ny1 + ny2) / 2, pRender->getLabel(), pPrevText, textColor);
 		if (pRender->bShove()) pPrevText = pText;
 	}
@@ -624,7 +623,7 @@ void CDasherViewSquare::DisjointRender(CDasherNode* pRender, myint y1, myint y2,
 				if (newy2 - newy1 < iDasherMaxX) //fill in to it's left...
 					DasherDrawRectangle(std::min(Range, iDasherMaxX), std::max(y1, iDasherMinY), newy2 - newy1, std::min(y2, iDasherMaxY), myColor, -1, 0);
 				DisjointRender(pChild, newy1, newy2, pPrevText,
-				               policy, dMaxCost, pOutput);
+					policy, dMaxCost, pOutput);
 				//leave pRender->onlyChildRendered set, so remaining children are skipped
 			}
 			else
@@ -636,7 +635,7 @@ void CDasherViewSquare::DisjointRender(CDasherNode* pRender, myint y1, myint y2,
 			//render all children...
 			myint lasty = y1;
 			for (auto i = pRender->GetChildren().begin();
-			     i != pRender->GetChildren().end(); ++i)
+				i != pRender->GetChildren().end(); ++i)
 			{
 				id++;
 				CDasherNode* pChild = *i;
@@ -711,42 +710,42 @@ bool CDasherViewSquare::CoversCrosshair(myint Range, myint y1, myint y2)
 		case Options::OVERLAPPING_RECTANGLE: //Rectangles
 			return true;
 		case Options::TRIANGLE:
-			{
-				//Triangles
-				myint iMidY((y1 + y2) / 2);
-				return (iMidY > CDasherModel::ORIGIN_Y)
-					       ? ((CDasherModel::ORIGIN_Y - y1) * Range) > (iMidY - y1) * CDasherModel::ORIGIN_X
-					       : ((y2 - CDasherModel::ORIGIN_Y) * Range) > (y2 - iMidY) * CDasherModel::ORIGIN_X;
-			}
+		{
+			//Triangles
+			myint iMidY((y1 + y2) / 2);
+			return (iMidY > CDasherModel::ORIGIN_Y)
+				? ((CDasherModel::ORIGIN_Y - y1) * Range) > (iMidY - y1) * CDasherModel::ORIGIN_X
+				: ((y2 - CDasherModel::ORIGIN_Y) * Range) > (y2 - iMidY) * CDasherModel::ORIGIN_X;
+		}
 		case Options::TRUNCATED_TRIANGLE:
-			{
-				//Truncated tris
-				myint midy1((y1 + y1 + y2) / 3), midy2((y1 + y2 + y2) / 3);
-				if (midy1 > CDasherModel::ORIGIN_Y) //(0,y1) - (Range,midy1)
-					return (CDasherModel::ORIGIN_Y - y1) * Range > (midy1 - y1) * CDasherModel::ORIGIN_X;
-				if (midy2 > CDasherModel::ORIGIN_Y) // (Range,midy1) - (Range,midy2)
-					return true;
-				return (y2 - CDasherModel::ORIGIN_Y) * Range > (y2 - midy2) * CDasherModel::ORIGIN_X;
-				break;
-			}
+		{
+			//Truncated tris
+			myint midy1((y1 + y1 + y2) / 3), midy2((y1 + y2 + y2) / 3);
+			if (midy1 > CDasherModel::ORIGIN_Y) //(0,y1) - (Range,midy1)
+				return (CDasherModel::ORIGIN_Y - y1) * Range > (midy1 - y1) * CDasherModel::ORIGIN_X;
+			if (midy2 > CDasherModel::ORIGIN_Y) // (Range,midy1) - (Range,midy2)
+				return true;
+			return (y2 - CDasherModel::ORIGIN_Y) * Range > (y2 - midy2) * CDasherModel::ORIGIN_X;
+			break;
+		}
 		case Options::QUADRIC: //quadrics. We'll approximate with circles, as they're easier...
 		// however, note that the circle is bigger, so this'll output things
 		// too soon/aggressively :-(.
 		// (hence, fallthrough to:)
 		case Options::CIRCLE:
-			{
-				//circles - actually ellipses, as x diameter is twice y diameter, hence the *4
-				const myint y_dist(CDasherModel::ORIGIN_Y - (y1 + y2) / 2);
-				return CDasherModel::ORIGIN_X * CDasherModel::ORIGIN_X + y_dist * y_dist * 4 < Range * Range;
-			}
+		{
+			//circles - actually ellipses, as x diameter is twice y diameter, hence the *4
+			const myint y_dist(CDasherModel::ORIGIN_Y - (y1 + y2) / 2);
+			return CDasherModel::ORIGIN_X * CDasherModel::ORIGIN_X + y_dist * y_dist * 4 < Range * Range;
+		}
 		}
 	}
 	return false;
 }
 
 void CDasherViewSquare::NewRender(CDasherNode* pRender, myint y1, myint y2,
-                                  CTextString* pPrevText, CExpansionPolicy& policy, double dMaxCost,
-                                  CDasherNode*& pOutput)
+	CTextString* pPrevText, CExpansionPolicy& policy, double dMaxCost,
+	CDasherNode*& pOutput)
 {
 	//when we have only one child node to render, which'll be the last thing we
 	// do before returning, we make a tail call by jumping here, rather than
@@ -771,7 +770,7 @@ void CDasherViewSquare::NewRender(CDasherNode* pRender, myint y1, myint y2,
 	{
 		const int textColor = GetLongParameter(LP_OUTLINE_WIDTH) < 0 ? myColor : 4;
 		myint ny1 = std::min(iDasherMaxY, std::max(iDasherMinY, y1)),
-		      ny2 = std::min(iDasherMaxY, std::max(iDasherMinY, y2));
+			ny2 = std::min(iDasherMaxY, std::max(iDasherMinY, y2));
 		CTextString* pText = DasherDrawText(y2 - y1, (ny1 + ny2) / 2, pRender->getLabel(), pPrevText, textColor);
 		if (pRender->bShove()) pPrevText = pText;
 	}
@@ -964,29 +963,29 @@ void CDasherViewSquare::SetScaleFactor(void)
 	switch (GetLongParameter(LP_GEOMETRY))
 	{
 	case Options::ScreenGeometry::old_style:
+	{
+		//old style
+		if (dScaleFactorX < dScaleFactorY)
 		{
-			//old style
-			if (dScaleFactorX < dScaleFactorY)
-			{
-				//fewer (pixels per dasher coord) in X direction - i.e., X is more compressed.
-				//So, use X scale for Y too...except first, we'll _try_ to reduce the difference
-				// by changing the relative scaling of X and Y (by at most 20%):
-				double dMul = std::max(0.8, dScaleFactorX / dScaleFactorY);
-				dScaleFactorY = std::max(dScaleFactorX / dMul, dScaleFactorY / 4.0);
-				dScaleFactorX *= 0.9;
-				iMarginWidth = static_cast<myint>((CDasherModel::MAX_Y / 20.0 + iMarginWidth * 0.95) / 0.9);
-			}
-			else
-			{
-				//X has more room; use Y scale for both -> will get lots history
-				// however, "compensate" by relaxing the default "relative scaling" of X
-				// (normally only 90% of Y) towards 1...
-				double dXmpc = std::min(1.0, 0.9 * dScaleFactorX / dScaleFactorY);
-				dScaleFactorX = std::max(dScaleFactorY, dScaleFactorX / 4.0) * dXmpc;
-				iMarginWidth = static_cast<myint>((iMarginWidth + dPixelsX / dScaleFactorX - CDasherModel::MAX_Y) / 2);
-			}
-			break;
+			//fewer (pixels per dasher coord) in X direction - i.e., X is more compressed.
+			//So, use X scale for Y too...except first, we'll _try_ to reduce the difference
+			// by changing the relative scaling of X and Y (by at most 20%):
+			double dMul = std::max(0.8, dScaleFactorX / dScaleFactorY);
+			dScaleFactorY = std::max(dScaleFactorX / dMul, dScaleFactorY / 4.0);
+			dScaleFactorX *= 0.9;
+			iMarginWidth = static_cast<myint>((CDasherModel::MAX_Y / 20.0 + iMarginWidth * 0.95) / 0.9);
 		}
+		else
+		{
+			//X has more room; use Y scale for both -> will get lots history
+			// however, "compensate" by relaxing the default "relative scaling" of X
+			// (normally only 90% of Y) towards 1...
+			double dXmpc = std::min(1.0, 0.9 * dScaleFactorX / dScaleFactorY);
+			dScaleFactorX = std::max(dScaleFactorY, dScaleFactorX / 4.0) * dXmpc;
+			iMarginWidth = static_cast<myint>((iMarginWidth + dPixelsX / dScaleFactorX - CDasherModel::MAX_Y) / 2);
+		}
+		break;
+	}
 	//all new styles fix the y axis the way we want it (i.e. leave as above),
 	// and just do different things with x...
 	case Options::ScreenGeometry::square_no_xhair:
@@ -999,8 +998,8 @@ void CDasherViewSquare::SetScaleFactor(void)
 		const double dDesiredXPerPixel((CDasherModel::MAX_Y + iMarginWidth) / dPixelsX), dMinXPerPixel((CDasherModel::ORIGIN_X + iMarginWidth) / dPixelsX);
 		const double dAspect(1.0 / dScaleFactorY / dDesiredXPerPixel);
 		double dDasherXPerPixel((dAspect < 1.0)
-			                        ? (dMinXPerPixel + pow(dAspect, 3.0) * (dDesiredXPerPixel - dMinXPerPixel)) //tall+thin
-			                        : (1.0 / dScaleFactorY)); //square or wide+low
+			? (dMinXPerPixel + pow(dAspect, 3.0) * (dDesiredXPerPixel - dMinXPerPixel)) //tall+thin
+			: (1.0 / dScaleFactorY)); //square or wide+low
 		iMarginWidth = static_cast<myint>(iMarginWidth / 0.9); //this comes from the old scaling by m_dXmpc=0.9. Drop in new scheme?
 		if (GetLongParameter(LP_GEOMETRY) == Options::ScreenGeometry::squish_and_log)
 		{
@@ -1139,12 +1138,12 @@ void CDasherViewSquare::DasherLine2Screen(myint x1, myint y1, myint x2, myint y2
 				//the midpoint along the DasherY axis of both lines should be the same.
 				if (GetOrientation() == Options::LeftToRight || GetOrientation() == Options::RightToLeft)
 				{
-					DASHER_ASSERT(abs(pDasherMid.y - pScreenMid.y)<=1); //allow for rounding error
+					DASHER_ASSERT(abs(pDasherMid.y - pScreenMid.y) <= 1); //allow for rounding error
 					if (abs(pDasherMid.x - pScreenMid.x) <= 1) break; //call a straight line accurate enough
 				}
 				else
 				{
-					DASHER_ASSERT(abs(pDasherMid.x - pScreenMid.x)<=1);
+					DASHER_ASSERT(abs(pDasherMid.x - pScreenMid.x) <= 1);
 					if (abs(pDasherMid.y - pScreenMid.y) <= 1) break;
 				}
 				//line should appear bent. Subdivide!

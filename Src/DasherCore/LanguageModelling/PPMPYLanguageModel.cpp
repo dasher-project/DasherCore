@@ -13,7 +13,6 @@
 #include "../../Common/Common.h"
 #include "PPMPYLanguageModel.h"
 #include "LanguageModel.h"
-#include <math.h>
 #include <stack>
 #include <sstream>
 #include <iostream>

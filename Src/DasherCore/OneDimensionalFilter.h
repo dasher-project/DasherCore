@@ -1,6 +1,8 @@
 #ifndef __ONE_DIMENSIONAL_FILTER_H__
 #define __ONE_DIMENSIONAL_FILTER_H__
 
+#include <I18n.h>
+
 #include "DefaultFilter.h"
 
 /// \ingroup InputFilter

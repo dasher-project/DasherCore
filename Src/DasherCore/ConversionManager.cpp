@@ -24,12 +24,10 @@
 
 #include "ConversionManager.h"
 #include "Event.h"
-#include "Observable.h"
 #include "NodeCreationManager.h"
 #include "DasherModel.h"
 #include "DasherInterfaceBase.h"
 
-#include <iostream>
 #include <cstring>
 #include <string>
 #include <vector>

@@ -11,7 +11,6 @@
 #include "../Alphabet/AlphabetMap.h"
 
 #include <climits>
-#include <cmath>
 #include <stack>
 #include <iostream>
 #include <fstream>

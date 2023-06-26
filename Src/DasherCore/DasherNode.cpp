@@ -18,8 +18,6 @@
 // along with Dasher; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
-#include "../Common/Common.h"
-
 // #include "AlphabetManager.h" - doesnt seem to be required - pconlon
 
 #include "DasherInterfaceBase.h"

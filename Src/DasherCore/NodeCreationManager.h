@@ -1,18 +1,12 @@
 #ifndef __NodeCreationManager_h__
 #define __NodeCreationManager_h__
 
-#include "Alphabet/AlphabetMap.h"
-#include "Alphabet/AlphIO.h"
 #include "AlphabetManager.h"
 #include "ConversionManager.h"
-#include "ControlManager.h"
-#include "LanguageModelling/LanguageModel.h"
 #include "Trainer.h"
-#include "Event.h"
 #include "SettingsStore.h"
 
 #include <string>
-#include <vector>
 
 namespace Dasher {
   class CDasherNode;

@@ -3,9 +3,7 @@
 #include "NodeCreationManager.h"
 #include "MandarinAlphMgr.h"
 #include "RoutingAlphMgr.h"
-#include "ConvertingAlphMgr.h"
 #include "ControlManager.h"
-#include "Observable.h"
 
 #include <string>
 

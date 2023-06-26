@@ -2,7 +2,6 @@
 #include "../Common/Common.h"
 
 #include "OneButtonFilter.h"
-#include "Event.h"
 #include "DasherScreen.h"
 #include "DasherModel.h"
 

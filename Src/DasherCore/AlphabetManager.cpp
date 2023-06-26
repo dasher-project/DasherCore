@@ -24,21 +24,15 @@
 #include "ConversionManager.h"
 #include "DasherInterfaceBase.h"
 #include "DasherNode.h"
-#include "Event.h"
-#include "Observable.h"
 #include "NodeCreationManager.h"
 #include "LanguageModelling/PPMLanguageModel.h"
 #include "LanguageModelling/WordLanguageModel.h"
-#include "LanguageModelling/DictLanguageModel.h"
 #include "LanguageModelling/MixtureLanguageModel.h"
-#include "LanguageModelling/PPMPYLanguageModel.h"
 #include "LanguageModelling/CTWLanguageModel.h"
 #include "FileWordGenerator.h"
 
 #include <vector>
 #include <sstream>
-#include <iostream>
-#include "string.h"
 
 using namespace Dasher;
 

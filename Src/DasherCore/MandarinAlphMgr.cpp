@@ -24,15 +24,12 @@
 #include "LanguageModelling/PPMPYLanguageModel.h"
 #include "DasherInterfaceBase.h"
 #include "DasherNode.h"
-#include "Event.h"
-#include "Observable.h"
 #include "NodeCreationManager.h"
 
 #include <string.h>
 
 #include <vector>
 #include <sstream>
-#include <iostream>
 
 using namespace Dasher;
 

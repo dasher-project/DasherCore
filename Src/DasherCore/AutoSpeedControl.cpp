@@ -2,13 +2,9 @@
 #include <config.h>
 #endif
 
-#include "../Common/Common.h"
-
 #include "AutoSpeedControl.h"
 
 #include <cmath>
-#include <cfloat>
-#include <cstring>
 
 using namespace Dasher;
 

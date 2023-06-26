@@ -34,7 +34,6 @@
 #include "UserLog.h"
 #include "BasicLog.h"
 #include "GameModule.h"
-#include "FileWordGenerator.h"
 
 // Input filters
 #include "AlternatingDirectMode.h"
@@ -42,7 +41,6 @@
 #include "ClickFilter.h"
 #include "CompassMode.h"
 #include "DefaultFilter.h"
-#include "DemoFilter.h"
 #include "OneButtonFilter.h"
 #include "OneButtonDynamicFilter.h"
 #include "OneDimensionalFilter.h"
@@ -51,12 +49,10 @@
 #include "TwoPushDynamicFilter.h"
 
 // STL headers
-#include <cstdio>
-#include <iostream>
-#include <memory>
 #include <sstream>
 
 // Declare our global file logging object
+#include "FileUtils.h"
 #include "../DasherCore/FileLogger.h"
 #ifdef _DEBUG
 const eLogLevel g_iLogLevel   = logDEBUG;

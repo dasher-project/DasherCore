@@ -9,7 +9,6 @@
 #include "../Common/Common.h"
 
 #include "SettingsStore.h"
-#include "Event.h"
 #include "Observable.h"
 
 #include <cstdlib>

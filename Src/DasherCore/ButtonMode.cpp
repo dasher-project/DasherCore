@@ -8,7 +8,6 @@
 #include "DasherScreen.h"
 #include "DasherInterfaceBase.h"
 #include <valarray>
-#include <iostream>
 
 
 using namespace Dasher;

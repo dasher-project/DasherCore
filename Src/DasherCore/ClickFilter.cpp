@@ -1,7 +1,6 @@
 #include "../Common/Common.h"
 #include "ClickFilter.h"
 #include "DasherInterfaceBase.h"
-#include "Event.h"
 
 using namespace Dasher;
 

@@ -8,16 +8,13 @@
 #define __USER_LOG_TRIAL_H__
 
 #include "FileLogger.h"
-#include <fstream>
 #include <string>
 #include <vector>
-#include "SimpleTimer.h"
 #include "TimeSpan.h"
 #include "UserButton.h"
 #include "UserLocation.h"
 #include "DasherTypes.h"
 #include "UserLogParam.h"
-#include <algorithm>
 #include "XMLUtil.h"
 
 // Types used to return two dimensional grid of double values

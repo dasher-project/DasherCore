@@ -2,11 +2,8 @@
 //
 // Copyright (c) 2002 Iain Murray
 
-#include "../Common/Common.h"
-
 #include "ColourIO.h"
 #include <cstring>
-#include <pugixml.hpp>
 
 using namespace Dasher;
 

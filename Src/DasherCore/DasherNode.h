@@ -21,7 +21,6 @@
 #ifndef __DasherNode_h__
 #define __DasherNode_h__
 
-#include "../Common/Common.h"
 #include "../Common/NoClones.h"
 #include "LanguageModelling/LanguageModel.h"
 //Includes needed for used classes

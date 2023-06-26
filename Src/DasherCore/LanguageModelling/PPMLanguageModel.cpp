@@ -9,8 +9,6 @@
 #include "../../Common/Common.h"
 #include "PPMLanguageModel.h"
 
-#include <math.h>
-#include <string.h>
 #include <stack>
 #include <sstream>
 #include <iostream>

@@ -41,10 +41,7 @@
 #include "ModuleManager.h"
 #include "ControlManager.h"
 #include "FrameRate.h"
-#include "FileUtils.h"
 #include <set>
-#include <algorithm>
-#include <FileUtils.h>
 
 namespace Dasher {
   class CDasherScreen;

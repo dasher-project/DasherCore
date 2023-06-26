@@ -11,9 +11,6 @@
 #define __ExpansionPolicy_h__
 
 #include <vector>
-#include <queue>
-#include <limits>
-#include <algorithm>
 #include "DasherNode.h"
 
 class CNodeCreationManager;

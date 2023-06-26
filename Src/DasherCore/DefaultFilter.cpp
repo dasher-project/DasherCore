@@ -1,12 +1,9 @@
 #include "../Common/Common.h"
 #include "DefaultFilter.h"
 #include "DasherInterfaceBase.h"
-#include "Event.h"
 
 #include "CircleStartHandler.h"
 #include "TwoBoxStartHandler.h"
-
-#include <iostream>
 
 using namespace Dasher;
 

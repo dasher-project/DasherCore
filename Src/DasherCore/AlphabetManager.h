@@ -27,7 +27,6 @@
 #include "Trainer.h"
 #include "Alphabet/AlphInfo.h"
 #include "SettingsStore.h"
-#include "Observable.h"
 #include "WordGeneratorBase.h"
 
 class CNodeCreationManager;

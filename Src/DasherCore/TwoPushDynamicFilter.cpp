@@ -22,7 +22,6 @@
 
 #include "TwoPushDynamicFilter.h"
 #include "DasherInterfaceBase.h"
-#include "Event.h"
 
 using namespace Dasher;
 

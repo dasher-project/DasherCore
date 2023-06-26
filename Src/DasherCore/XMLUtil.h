@@ -12,7 +12,6 @@
 #include <cstdlib>
 #include <string>
 #include <vector>
-#include <stdio.h>
 #include "FileLogger.h"
 
 extern CFileLogger* gLogger;

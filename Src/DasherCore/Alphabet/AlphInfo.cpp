@@ -21,7 +21,6 @@
 #include "AlphInfo.h"
 
 #include <iostream>
-#include <cstring>
 
 using namespace Dasher;
 

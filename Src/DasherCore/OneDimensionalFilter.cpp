@@ -1,4 +1,3 @@
-#include "../Common/Common.h"
 #include "OneDimensionalFilter.h"
 #include "CircleStartHandler.h"
 

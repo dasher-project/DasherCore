@@ -8,6 +8,8 @@
 #include <ctime>
 #include <iostream>
 
+#include "FileUtils.h"
+
 
 using namespace Dasher;
 

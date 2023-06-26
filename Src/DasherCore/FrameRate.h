@@ -10,7 +10,6 @@
 #define __FrameRate_h__
 
 #include <cmath>
-#include "../Common/Common.h"
 #include "SettingsStore.h"
 #include "DasherModel.h"
 

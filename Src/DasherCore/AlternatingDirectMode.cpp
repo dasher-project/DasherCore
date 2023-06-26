@@ -6,11 +6,8 @@
 #include "../Common/Common.h"
 
 #include "AlternatingDirectMode.h"
-#include "DasherScreen.h"
 #include "DasherInterfaceBase.h"
 #include <valarray>
-#include <iostream>
-
 
 
 using namespace Dasher;
