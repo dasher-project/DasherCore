@@ -22,18 +22,13 @@
 #define __controlmanager_h__
 
 #include "DasherNode.h"
-#include "Event.h"
 #include "NodeManager.h"
 #include "NodeCreationManager.h"
 
 #include <list>
 #include <vector>
 #include <map>
-#include <fstream>
-#include <iostream>
 #include <string>
-
-using namespace std;
 
 class CNodeCreationManager;
 
@@ -143,7 +138,7 @@ public:
 	bool Parse(pugi::xml_document& document, bool bUser) override;
 protected:
 	/// \return all node definitions that have been loaded by this CControlParser.
-	const list<CControlBase::NodeTemplate*>& parsedNodes();
+	const std::list<CControlBase::NodeTemplate*>& parsedNodes();
 	///Subclasses may override to parse other nodes (besides "node", "ref" and "alph").
 	///The default implementation always returns NULL.
 	/// \return A node template, if the name was recognised; NULL if not recognised.
@@ -166,8 +161,8 @@ private:
 	bool m_bUser;
 
 	///Following only used as temporary variables during parsing...
-	map<string, CControlBase::NodeTemplate*> namedNodes;
-	list<pair<CControlBase::NodeTemplate**, string>> unresolvedRefs;
+	std::map<std::string, CControlBase::NodeTemplate*> namedNodes;
+	std::list<std::pair<CControlBase::NodeTemplate**, std::string>> unresolvedRefs;
 };
 
   ///subclass which we actually construct! Parses editing node definitions from a file,
@@ -198,7 +193,7 @@ private:
     Action *parseAction(pugi::xml_node node) override;
 
   private:
-    map<string, CControlBase::Action*> m_actions;
+    std::map<std::string, CControlBase::Action*> m_actions;
     ///group of statefull actions (all/new/repeat/...)
     SpeechHeader *m_pSpeech;
     CopyHeader *m_pCopy;

@@ -80,7 +80,7 @@ namespace Dasher {
     private:
       CMandarinAlphMgr * const m_pMgr;
       int m_iStartSym;
-      symbol getPYsym(bool bHavePy, const string &strPy, symbol symCh);
+      symbol getPYsym(bool bHavePy, const std::string &strPy, symbol symCh);
     };
     
   public:

@@ -30,7 +30,7 @@ bool CGameModule::GetSettings(SModuleSettings **sets, int *count) {
 CGameModule::~CGameModule()  {
   if (m_ulTotalTime) {
     //TODO make this a running commentary?
-    ostringstream summary;
+    std::ostringstream summary;
     summary << "Total time " << m_ulTotalTime; 
     summary << " nats " << m_dTotalNats << "=" << (m_dTotalNats*1000.0/m_ulTotalTime) << "/sec";
     summary << " chars " << m_uiTotalSyms << "=" << (m_uiTotalSyms/m_ulTotalTime) << "/sec";
@@ -109,13 +109,13 @@ void CGameModule::SetWordGenerator(const CAlphInfo *pAlph, CWordGeneratorBase *p
 void CGameModule::StartWriting(unsigned long lTime) {
   if (!m_ulSentenceStartTime) {
     m_ulSentenceStartTime = lTime;
-    m_dSentenceStartNats = numeric_limits<double>::max();
+    m_dSentenceStartNats = std::numeric_limits<double>::max();
   }
 }
 
 void CGameModule::DecorateView(unsigned long lTime, CDasherView *pView, CDasherModel *pModel) {
 
-  if (m_dSentenceStartNats == numeric_limits<double>::max())
+  if (m_dSentenceStartNats == std::numeric_limits<double>::max())
     m_dSentenceStartNats = pModel->GetNats();
   
   const myint iNewTarget((m_y1+m_y2)/2);

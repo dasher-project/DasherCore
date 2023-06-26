@@ -30,9 +30,9 @@ bool XMLUtil::IsDigit(char cLetter)
 }
 
 // Strip the leading and trailing white space off a string.
-string XMLUtil::StripWhiteSpace(const string& strText)
+std::string XMLUtil::StripWhiteSpace(const std::string& strText)
 {
-  string strResult = "";
+  std::string strResult = "";
 
   strResult.reserve(strText.length());
 
@@ -50,10 +50,10 @@ string XMLUtil::StripWhiteSpace(const string& strText)
 }
 
 // Return a string containing the contents of a file
-string XMLUtil::LoadFile(const string& strFilename, unsigned int iSizeHint)
+std::string XMLUtil::LoadFile(const std::string& strFilename, unsigned int iSizeHint)
 {
   std::ifstream ifs(strFilename);
-  string strResult((std::istreambuf_iterator<char>(ifs)), std::istreambuf_iterator<char>());
+  std::string strResult((std::istreambuf_iterator<char>(ifs)), std::istreambuf_iterator<char>());
 	
 
   return strResult;
@@ -62,11 +62,11 @@ string XMLUtil::LoadFile(const string& strFilename, unsigned int iSizeHint)
 
 // Returns what is between the given tag in the passed XML.  We only return the first matching
 // tag if there are multiple in the XML.  Tags are case sensitive.
-string XMLUtil::GetElementString(const string& strTag, const string& strXML, bool bStripWhiteSpace)
+std::string XMLUtil::GetElementString(const std::string& strTag, const std::string& strXML, bool bStripWhiteSpace)
 {
-  string strResult = "";
-  string strStart = "";
-  string strEnd = "";
+  std::string strResult = "";
+  std::string strStart = "";
+  std::string strEnd = "";
 
   strStart += "<";
   strStart += strTag;
@@ -91,9 +91,9 @@ string XMLUtil::GetElementString(const string& strTag, const string& strXML, boo
 }
 
 // Return the integer representing an element
-int XMLUtil::GetElementInt(const string& strTag, const string& strXML, bool* pFound)
+int XMLUtil::GetElementInt(const std::string& strTag, const std::string& strXML, bool* pFound)
 {
-  string strElement = GetElementString(strTag, strXML);
+  std::string strElement = GetElementString(strTag, strXML);
 
   unsigned int i = 0;
   for (i = 0; i < strElement.size(); i++)
@@ -123,9 +123,9 @@ int XMLUtil::GetElementInt(const string& strTag, const string& strXML, bool* pFo
   }
 }
 
-long long XMLUtil::GetElementLongLong(const string& strTag, const string& strXML, bool* pFound)
+long long XMLUtil::GetElementLongLong(const std::string& strTag, const std::string& strXML, bool* pFound)
 {
-  string strElement = GetElementString(strTag, strXML);
+  std::string strElement = GetElementString(strTag, strXML);
 
   unsigned int i = 0;
   for (i = 0; i < strElement.size(); i++)
@@ -157,9 +157,9 @@ long long XMLUtil::GetElementLongLong(const string& strTag, const string& strXML
 }
 
 // Optionally can pass back a bool that tell us if the tag was found
-float XMLUtil::GetElementFloat(const string& strTag, const string& strXML, bool* pFound)
+float XMLUtil::GetElementFloat(const std::string& strTag, const std::string& strXML, bool* pFound)
 {
-  string strElement = GetElementString(strTag, strXML);
+  std::string strElement = GetElementString(strTag, strXML);
 
   bool bFoundDot = false;
 
@@ -199,14 +199,14 @@ float XMLUtil::GetElementFloat(const string& strTag, const string& strXML, bool*
 }
 
 // Return a vector containing all the text inside all tags matching the passed one
-VECTOR_STRING XMLUtil::GetElementStrings(const string& strTag, const string& strXML, bool bStripWhiteSpace)
+VECTOR_STRING XMLUtil::GetElementStrings(const std::string& strTag, const std::string& strXML, bool bStripWhiteSpace)
 {
   VECTOR_STRING vResult;
   vResult.reserve(XML_UTIL_DEFAULT_VECTOR_SIZE);
 
-  string strStart = "";
-  string strEnd = "";
-  string strResult = "";
+  std::string strStart = "";
+  std::string strEnd = "";
+  std::string strResult = "";
 
   strStart += "<";
   strStart += strTag;
@@ -219,7 +219,7 @@ VECTOR_STRING XMLUtil::GetElementStrings(const string& strTag, const string& str
   size_t iPosStart        = strXML.find(strStart);
   size_t iPosEnd          = strXML.find(strEnd);
 
-  while ((iPosStart != string::npos) && (iPosEnd != string::npos))
+  while ((iPosStart != std::string::npos) && (iPosEnd != std::string::npos))
   {
     // We want to be able to handle having the same tag emedded in itself.
     // So between the start tag and the first instance of the end tag,
@@ -228,10 +228,10 @@ VECTOR_STRING XMLUtil::GetElementStrings(const string& strTag, const string& str
     // close tags.
     size_t iCurrentStart    = iPosStart + strStart.length();
     size_t iEmbedCount      = 0;
-    while ((iCurrentStart != string::npos) && (iCurrentStart < iPosEnd))
+    while ((iCurrentStart != std::string::npos) && (iCurrentStart < iPosEnd))
     {
       iCurrentStart = strXML.find(strStart, iCurrentStart);
-      if ((iCurrentStart != string::npos) && (iCurrentStart < iPosEnd))
+      if ((iCurrentStart != std::string::npos) && (iCurrentStart < iPosEnd))
       {
         iEmbedCount++;
         iCurrentStart += strStart.length();
@@ -243,7 +243,7 @@ VECTOR_STRING XMLUtil::GetElementStrings(const string& strTag, const string& str
       iPosEnd = strXML.find(strEnd, iPosEnd  + strEnd.length());
 
       // Check to make sure we're still matching tags
-      if (iPosEnd == string::npos)
+      if (iPosEnd == std::string::npos)
         break;
     }
 
@@ -254,7 +254,7 @@ VECTOR_STRING XMLUtil::GetElementStrings(const string& strTag, const string& str
 
     iPosStart = strXML.find(strStart, iPosEnd + strEnd.length());
 
-    if (iPosStart != string::npos)
+    if (iPosStart != std::string::npos)
       iPosEnd = strXML.find(strEnd, iPosStart);
 
     vResult.push_back(strResult);
@@ -263,14 +263,14 @@ VECTOR_STRING XMLUtil::GetElementStrings(const string& strTag, const string& str
   return vResult;
 }
 
-VECTOR_NAME_VALUE_PAIR XMLUtil::GetNameValuePairs(const string& strXML, bool bStripWhiteSpace)
+VECTOR_NAME_VALUE_PAIR XMLUtil::GetNameValuePairs(const std::string& strXML, bool bStripWhiteSpace)
 {
   VECTOR_NAME_VALUE_PAIR vResult;
   vResult.reserve(XML_UTIL_DEFAULT_VECTOR_SIZE);
 
   bool    bInStartTag = false;
-  string  strName     = "";
-  string  strValue    = "";
+  std::string  strName     = "";
+  std::string  strValue    = "";
 
   size_t i = 0;
   while (i < strXML.length())
@@ -287,14 +287,14 @@ VECTOR_NAME_VALUE_PAIR XMLUtil::GetNameValuePairs(const string& strXML, bool bSt
         // Hit the end of the start tag, get everything
         // until we find the end tag.
 
-        string strFind = "</";
+        std::string strFind = "</";
         strFind += strName;
         strFind += ">";
 
-        size_t iPos = string::npos;
+        size_t iPos = std::string::npos;
         iPos = strXML.find(strFind, i);
 
-        if (iPos != string::npos)
+        if (iPos != std::string::npos)
         {
           strValue = strXML.substr(i + 1, iPos - i - 1);
 

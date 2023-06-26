@@ -3,7 +3,7 @@
 // (C) Copyright Seb Wills 2005
 //
 // Abstract base class for socket input: parent of non-abstract classes in each implementation (Windows, Linux, ...),
-#ifndef _WIN32
+#ifndef _WIN32 
 
 
 #ifndef __socketinputbase_h__
@@ -20,8 +20,7 @@
 
 namespace Dasher {
   class CSocketInputBase;
-
-using namespace std;
+  
 /// \ingroup Input
 /// \{
 class CSocketInputBase : public CScreenCoordInput, public CSettingsUserObserver {

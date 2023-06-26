@@ -230,7 +230,7 @@ std::string CFileLogger::GetTimeDateStamp()
 	
 	if (m_bTimeStamp || m_bDateStamp)
 	{
-		std::chrono::time_point<chrono::system_clock> timepoint = std::chrono::system_clock::now();
+		std::chrono::time_point<std::chrono::system_clock> timepoint = std::chrono::system_clock::now();
 	    std::time_t now = std::chrono::system_clock::to_time_t(timepoint);
 	    int milliseconds = static_cast<int>(std::chrono::time_point_cast<std::chrono::milliseconds>(timepoint).time_since_epoch().count() % 1000);
 		std::string strMillis(3,'0');
@@ -260,7 +260,7 @@ CFunctionLogger::CFunctionLogger(const std::string& strFunctionName, CFileLogger
 	}
 	else
 	{
-	    m_startTime = chrono::steady_clock::now();
+	    m_startTime = std::chrono::steady_clock::now();
 	}
 }
 
@@ -274,8 +274,8 @@ CFunctionLogger::~CFunctionLogger()
     }
     else
     {
-	    const auto current_time = chrono::steady_clock::now();
-	    const auto span = std::chrono::duration_cast<chrono::duration<double>>(current_time - m_startTime);
+	    const auto current_time = std::chrono::steady_clock::now();
+	    const auto span = std::chrono::duration_cast<std::chrono::duration<double>>(current_time - m_startTime);
 		// Add our total ticks to the tracking map object in the logger object
 		m_pLogger->LogFunctionTicks(m_strFunctionName, span.count());
     }

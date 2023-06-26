@@ -6,11 +6,8 @@
 #define __DasherViewSquare_h__
 #include "DasherView.h"
 #include "DasherScreen.h"
-#include <deque>
-#include "Alphabet/GroupInfo.h"
 #include "SettingsStore.h"
 
-using namespace std;
 
 namespace Dasher {
   class CDasherViewSquare;
@@ -110,7 +107,7 @@ private:
   /// dest - point (x2,y2) in screen coords
   /// pts - vector into which to store points; on entry, last element should already be screen-coords of (x1,y1)
   /// dXMul - multiply x coords (in dasher space) by this (i.e. aspect ratio), for ovals
-  void CircleTo(myint cy, myint r, myint y1, myint x1, myint y3, myint x3, CDasherScreen::point dest, vector<CDasherScreen::point> &pts, double dXMul);
+  void CircleTo(myint cy, myint r, myint y1, myint x1, myint y3, myint x3, CDasherScreen::point dest, std::vector<CDasherScreen::point> &pts, double dXMul);
   void Circle(myint Range, myint lowY, myint highY, int fCol, int oCol, int lWidth);
   void Quadric(myint Range, myint lowY, myint highY, int fillColor, int outlineColour, int lineWidth);
   ///draw isoceles triangle, with baseline from y1-y2 along y axis (x=0), and other point at (x,(y1+y2)/2)
@@ -128,7 +125,7 @@ private:
     ~CTextString();
     CDasherScreen::Label *m_pLabel;
     screenint m_ix,m_iy;
-    vector<CTextString *> m_children;
+    std::vector<CTextString *> m_children;
     int m_iSize;
     int m_iColor;
   };
@@ -177,7 +174,7 @@ private:
   //Divides by SCALE_FACTOR, rounding away from 0
   inline myint CustomIDivScaleFactor(myint iNumerator);
 
-  void DasherLine2Screen(myint x1, myint y1, myint x2, myint y2, vector<CDasherScreen::point> &vPoints);
+  void DasherLine2Screen(myint x1, myint y1, myint x2, myint y2, std::vector<CDasherScreen::point> &vPoints);
 
   bool m_bVisibleRegionValid;
 

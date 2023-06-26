@@ -11,9 +11,9 @@ class CBasicLog : public CUserLogBase, public Dasher::CSettingsUser {
   CBasicLog(Dasher::CSettingsUser *pCreateFrom, Dasher::CDasherInterfaceBase *pIntf);
   ~CBasicLog();
 
-  virtual void AddParam(const string& strName, const string& strValue, int iOptionMask = 0) {};
-  virtual void AddParam(const string& strName, double dValue, int iOptionMask = 0) {};
-  virtual void AddParam(const string& strName, int iValue, int iOptionMask = 0) {};
+  virtual void AddParam(const std::string& strName, const std::string& strValue, int iOptionMask = 0) {};
+  virtual void AddParam(const std::string& strName, double dValue, int iOptionMask = 0) {};
+  virtual void AddParam(const std::string& strName, int iValue, int iOptionMask = 0) {};
   virtual void StartWriting();
   virtual void StopWriting(float dNats);
   virtual void StopWriting() {};
@@ -26,7 +26,7 @@ class CBasicLog : public CUserLogBase, public Dasher::CSettingsUser {
   virtual void AddMouseLocationNormalized(int iX, int iY, bool bStoreIntegerRep, float dNats) {};
   virtual void OutputFile() {};
   virtual void InitIsDone() {};
-  virtual void SetOuputFilename(const string& strFilename = "") {};
+  virtual void SetOuputFilename(const std::string& strFilename = "") {};
   virtual int  GetLogLevelMask() {return 0;};
   virtual void KeyDown(int iId, int iType, int iEffect);
 

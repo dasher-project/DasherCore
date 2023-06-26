@@ -10,24 +10,18 @@
 #ifndef __USER_LOCATION_H__
 #define __USER_LOCATION_H__
 
-#include <cstdlib>
 #include "FileLogger.h"
 #include <string>
-#include <time.h>
-#include "TimeSpan.h"
-#include <math.h>
 #include "XMLUtil.h"
-
-using namespace std;
 
 extern CFileLogger* g_pLogger;
 
 class CUserLocation;
 
-typedef vector<CUserLocation>               VECTOR_USER_LOCATION;
-typedef vector<CUserLocation>::iterator     VECTOR_USER_LOCATION_ITER;
-typedef vector<CUserLocation*>              VECTOR_USER_LOCATION_PTR;
-typedef vector<CUserLocation*>::iterator    VECTOR_USER_LOCATION_PTR_ITER;
+typedef std::vector<CUserLocation>               VECTOR_USER_LOCATION;
+typedef std::vector<CUserLocation>::iterator     VECTOR_USER_LOCATION_ITER;
+typedef std::vector<CUserLocation*>              VECTOR_USER_LOCATION_PTR;
+typedef std::vector<CUserLocation*>::iterator    VECTOR_USER_LOCATION_PTR_ITER;
 
 /// \ingroup Logging
 /// @{
@@ -40,17 +34,17 @@ public:
   CUserLocation(int iX, int iY, int iTop, int iLeft, int iBottom, int iRight, bool bStoreIntegerRep, float dNats);
   ~CUserLocation();
 
-  string              GetXML(const string& strPrefix = "");
+  std::string              GetXML(const std::string& strPrefix = "");
   static double       ComputeNormalizedX(int iX, int iLeft, int iRight);
   static double       ComputeNormalizedY(int iY, int iTop, int iBottom);
 
   // Used when we want to post-process a XML log file:
-  CUserLocation(const string& strXML);
-  string              GetTabMouseXY(bool bReturnNormalized);
+  CUserLocation(const std::string& strXML);
+  std::string              GetTabMouseXY(bool bReturnNormalized);
   void                GetMouseGridLocation(int iGridSize, int* pRow, int* pCol);
 
 private:
-  string              m_strTime;
+  std::string              m_strTime;
   int                 m_iLocationX;
   int                 m_iLocationY;
   float               m_dNormalizedLocationX;

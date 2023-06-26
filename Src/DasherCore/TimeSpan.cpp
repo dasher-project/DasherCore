@@ -6,8 +6,10 @@
 #include <ctime>
 #include "TimeSpan.h"
 
+#include "XMLUtil.h"
 
-CTimeSpan::CTimeSpan(const string& strName, bool bAddDate)
+
+CTimeSpan::CTimeSpan(const std::string& strName, bool bAddDate)
 {
   InitMemberVars();
 
@@ -35,9 +37,9 @@ CTimeSpan::~CTimeSpan()
 // Get the XML for this TimeSpan object.  If bSinglePointInTime is true, then 
 // this is just a single point in time and we don't need the end time or 
 // elapsed time.
-string CTimeSpan::GetXML(const string& strPrefix, bool bSinglePointInTime)
+std::string CTimeSpan::GetXML(const std::string& strPrefix, bool bSinglePointInTime)
 {
-  string strResult;
+  std::string strResult;
 
   // Only stop if we haven't called Stop() explicitly
   if (m_strEndTime.empty())
@@ -94,7 +96,7 @@ string CTimeSpan::GetXML(const string& strPrefix, bool bSinglePointInTime)
   return strResult;
 }
 
-string CTimeSpan::GetTimeStamp()
+std::string CTimeSpan::GetTimeStamp()
 {
   auto now = std::chrono::system_clock::now();
   auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch()) % 1000;
@@ -139,7 +141,7 @@ double CTimeSpan::GetElapsed()
   return m_dElapsed;
 }
 
-string CTimeSpan::GetDateStamp()
+std::string CTimeSpan::GetDateStamp()
 {
   std::string strDateStamp = "";
   char* szTimeLine = NULL;
@@ -177,7 +179,7 @@ void CTimeSpan::InitMemberVars()
 //		<Date>Jul 04 2005</Date>
 //		<Start>15:48:52.625</Start>
 //		<End>15:49:04.687</End>
-CTimeSpan::CTimeSpan(const string& strName, const string& strXML)
+CTimeSpan::CTimeSpan(const std::string& strName, const std::string& strXML)
 {
   InitMemberVars();
 

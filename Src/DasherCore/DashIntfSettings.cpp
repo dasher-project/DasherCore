@@ -1,7 +1,6 @@
 #include "DashIntfSettings.h"
 
 using namespace Dasher;
-using std::string;
 
 CDashIntfSettings::CDashIntfSettings(CSettingsStore *pSettingsStore)
 	: CDasherInterfaceBase(pSettingsStore) {
@@ -15,7 +14,7 @@ long CDashIntfSettings::GetLongParameter(Parameter iParameter) const {
   return CDasherInterfaceBase::GetLongParameter(iParameter);
 }
 
-const string &CDashIntfSettings::GetStringParameter(Parameter iParameter) const {
+const std::string &CDashIntfSettings::GetStringParameter(Parameter iParameter) const {
   return CDasherInterfaceBase::GetStringParameter(iParameter);
 }
 
@@ -27,7 +26,7 @@ void CDashIntfSettings::SetLongParameter(Parameter iParameter, long lValue) {
   CDasherInterfaceBase::SetLongParameter(iParameter, lValue);
 }
 
-void CDashIntfSettings::SetStringParameter(Parameter iParameter, const string &strValue) {
+void CDashIntfSettings::SetStringParameter(Parameter iParameter, const std::string &strValue) {
   CDasherInterfaceBase::SetStringParameter(iParameter, strValue);
 }
 

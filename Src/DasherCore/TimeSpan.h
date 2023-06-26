@@ -13,46 +13,43 @@
 #include "FileLogger.h"
 #include <string>
 #include "SimpleTimer.h"
-#include <time.h>
 #include <vector>
-#include "XMLUtil.h"
 
-using namespace std;
 
 extern CFileLogger* g_pLogger;
 
 class CTimeSpan;
 
-typedef vector<CTimeSpan>    VECTOR_TIME_SPAN;
-typedef vector<CTimeSpan*>   VECTOR_TIME_SPAN_PTR;
+typedef std::vector<CTimeSpan>    VECTOR_TIME_SPAN;
+typedef std::vector<CTimeSpan*>   VECTOR_TIME_SPAN_PTR;
 
 /// \ingroup Logging
 /// @{
 class CTimeSpan
 {
 public:
-  CTimeSpan(const string& strName, bool bAddDate);
-  CTimeSpan(const string& strName, const string& strXML);
+  CTimeSpan(const std::string& strName, bool bAddDate);
+  CTimeSpan(const std::string& strName, const std::string& strXML);
 
   ~CTimeSpan();
 
   void                Stop();
-  string              GetXML(const string& strPrefix = "", bool bSinglePointInTime = false);
+  std::string              GetXML(const std::string& strPrefix = "", bool bSinglePointInTime = false);
 
   void                Continue();
   bool                IsStopped();
   double              GetElapsed();
 
-  static string       GetTimeStamp();
-  static string       GetDateStamp();
+  static std::string       GetTimeStamp();
+  static std::string       GetDateStamp();
 
 private:
-  string              m_strName;
-  string              m_strStartTime;
-  string              m_strEndTime;
+  std::string              m_strName;
+  std::string              m_strStartTime;
+  std::string              m_strEndTime;
   double              m_dElapsed;
   CSimpleTimer*       m_pTimer;
-  string              m_strStartDate;
+  std::string              m_strStartDate;
 
   void                InitMemberVars();
 

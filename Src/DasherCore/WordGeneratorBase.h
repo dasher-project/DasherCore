@@ -6,8 +6,6 @@
 #include "Alphabet/AlphabetMap.h"
 #include "Alphabet/AlphIO.h"
 
-using namespace std;
-
 namespace Dasher {
 /**
  * The base class for all word generators. Word generators encapsulate

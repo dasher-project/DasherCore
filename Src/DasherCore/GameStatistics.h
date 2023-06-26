@@ -31,7 +31,7 @@ std::string ComputeStats(const std::vector<T> &v)
   double skew = m3/(m2*dev); // Skewness
   double kurt = m4 / (m2*m2) - 3.0; // Excess Kurtosis
 
-  ostringstream m_Statsbreakdown("");  
+  std::ostringstream m_Statsbreakdown("");  
 #define SEP " "
   m_Statsbreakdown << "Samples: " << v.size() << SEP
     << "Mean: " << m1 << SEP

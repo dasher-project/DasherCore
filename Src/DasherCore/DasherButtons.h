@@ -5,16 +5,9 @@
 #ifndef __DASHER_BUTTONS_H__
 #define __DASHER_BUTTONS_H__
 
-#include <string>
-#include <vector>
-#include <iostream>
-#include <fstream>
-#include <algorithm>
 #include "Event.h"
 #include "InputFilter.h"
 
-
-using namespace std;
 namespace Dasher {
 /// \ingroup Input
 /// @{

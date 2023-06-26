@@ -118,7 +118,7 @@ void CTwoPushDynamicFilter::HandleEvent(Parameter parameter) {
   case LP_TWO_PUSH_TOLERANCE: //fallthrough
   case LP_DYNAMIC_BUTTON_LAG:
     //recompute rest in Timer
-    m_dLastBitRate=-numeric_limits<double>::infinity();
+    m_dLastBitRate=-std::numeric_limits<double>::infinity();
   }
 }
 
@@ -166,7 +166,7 @@ void CTwoPushDynamicFilter::KeyUp(unsigned long Time, int iId, CDasherView *pVie
     iId=2;
   if (GetBoolParameter(BP_TWO_PUSH_RELEASE_TIME)
       && isRunning() && iId==m_iHeldId
-      && m_dNatsSinceFirstPush!=-numeric_limits<double>::infinity())
+      && m_dNatsSinceFirstPush!=-std::numeric_limits<double>::infinity())
     ActionButton(Time, iId, 0, pModel);
   //just records that the key has been released
   CDynamicButtons::KeyUp(Time, iId, pView, pInput, pModel);

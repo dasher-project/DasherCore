@@ -66,7 +66,7 @@ bool CDefaultFilter::DecorateView(CDasherView *pView, CDasherInput *pInput) {
 
     //If the user's finger/mouse is in the margin, draw the line to the closest
     // point we'll actually head to.
-    x[1] = max(myint(1),m_iLastX);
+    x[1] = std::max(myint(1),m_iLastX);
     y[1] = m_iLastY;
 
     // Actually plot the line
@@ -225,7 +225,7 @@ double xmax(double y) {
 
   static const int a = 1, b = 1;
   static const double c = 100;
-  return min(c,a * (exp(b * y * y) - 1));
+  return std::min(c,a * (exp(b * y * y) - 1));
   //cout << "xmax = " << xmax << endl;
 }
 
@@ -253,7 +253,7 @@ void CDefaultFilter::ApplyTransform(myint &iDasherX, myint &iDasherY, CDasherVie
     iDasherY = myint(dasherOY * (1.0 + double_y + (double_y*double_y*double_y * repulsionparameter )));
 
     // X co-ordinate...
-    iDasherX = max(iDasherX,myint(CDasherModel::ORIGIN_X * xmax(double_y)));
+    iDasherX = std::max(iDasherX,myint(CDasherModel::ORIGIN_X * xmax(double_y)));
   }
 }
 

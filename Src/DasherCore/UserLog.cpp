@@ -304,7 +304,7 @@ void CUserLog::DeleteSymbols(int iNumToDelete, eUserLogEventType iEvent)
 
     // Be careful not to pop more things than we have (this will hork the
     // memory up on linux but not windows).
-    int iActualNumToDelete = min((int) m_vCycleHistory.size(), iNumToDelete);
+    int iActualNumToDelete = std::min((int) m_vCycleHistory.size(), iNumToDelete);
     for (int i = 0; i < iActualNumToDelete; i++)
       m_vCycleHistory.pop_back();
   }   
@@ -360,14 +360,14 @@ void CUserLog::NewTrial()
 }
 
 // Overloaded version that converts a double to a string
-void CUserLog::AddParam(const string& strName, double dValue, int iOptionMask)
+void CUserLog::AddParam(const std::string& strName, double dValue, int iOptionMask)
 {
   sprintf(m_szTempBuffer, "%0.4f", dValue);
   AddParam(strName, m_szTempBuffer, iOptionMask);
 }
 
 // Overloaded version that converts a int to a string
-void CUserLog::AddParam(const string& strName, int iValue, int iOptionMask)
+void CUserLog::AddParam(const std::string& strName, int iValue, int iOptionMask)
 {
   sprintf(m_szTempBuffer, "%d", iValue);
   AddParam(strName, m_szTempBuffer, iOptionMask);
@@ -377,7 +377,7 @@ void CUserLog::AddParam(const string& strName, int iValue, int iOptionMask)
 // record what they are set at.  Optionally can be set to track multiple
 // values for the same parameter or to always output a line to the simple
 // log file when the parameter is set.
-void CUserLog::AddParam(const string& strName, const string& strValue, int iOptionMask)
+void CUserLog::AddParam(const std::string& strName, const std::string& strValue, int iOptionMask)
 {
   //CFunctionLogger f1("CUserLog::AddParam", g_pLogger);
 
@@ -606,7 +606,7 @@ void CUserLog::InitIsDone()
 
 // Sets our output filename based on the current date and time.
 // Or if a parameter is passed in, use that as the output name.
-void CUserLog::SetOuputFilename(const string& strFilename)
+void CUserLog::SetOuputFilename(const std::string& strFilename)
 {
   //CFunctionLogger f1("CUserLog::SetOuputFilename", g_pLogger);
 
@@ -717,7 +717,7 @@ void CUserLog::InitMemberVars()
 // Write this objects XML out  
 bool CUserLog::WriteXML()
 {
-	fstream fout(m_strFilename.c_str(), ios::trunc | ios::out);
+	std::fstream fout(m_strFilename.c_str(), std::ios::trunc | std::ios::out);
 	fout << GetXML();
 	fout.close();
 
@@ -725,11 +725,11 @@ bool CUserLog::WriteXML()
 }
 
 // Serializes our data to XML
-string CUserLog::GetXML()
+std::string CUserLog::GetXML()
 {
   //CFunctionLogger f1("CUserLog::GetXML", g_pLogger);
 
-  string strResult = "";
+  std::string strResult = "";
   strResult.reserve(USER_LOG_DEFAULT_SIZE_TRIAL_XML * (m_vpTrials.size() + 1));
 
   strResult += "<?xml version=\"1.0\"?>\n";
@@ -820,11 +820,11 @@ double CUserLog::GetCycleBits()
 
 // For lightweight logging, we want a string that represents the critical
 // stats for what happened between start and stop
-string CUserLog::GetStartStopCycleStats()
+std::string CUserLog::GetStartStopCycleStats()
 {
   //CFunctionLogger f1("CUserLog::GetStartStopCycleStats", g_pLogger);
 
-  string strResult = "";
+  std::string strResult = "";
 
   double dNormX = 0.0;
   double dNormY = 0.0;
@@ -902,11 +902,11 @@ void CUserLog::ResetCycle()
 }
 
 // Gets the XML that goes in the <Params> tag, but not the tags themselves.
-string CUserLog::GetParamsXML()
+std::string CUserLog::GetParamsXML()
 {
   //CFunctionLogger f1("CUserLog::GetParamsXML", g_pLogger);
 
-  string strResult = "";
+  std::string strResult = "";
 
   // Make parameters with the same name appear near each other in the results
   sort(m_vParams.begin(), m_vParams.end(), CUserLogParam::ComparePtr);
@@ -975,11 +975,11 @@ void CUserLog::PrepareNewTrial()
 // Parameters can be marked to always end them at the cycle stats in short logging.
 // We'll look through our parameters and return a tab delimited list of their
 // values.
-string CUserLog::GetCycleParamStats()
+std::string CUserLog::GetCycleParamStats()
 {
   //CFunctionLogger f1("CUserLog::GetCycleParamStats", g_pLogger);
 
-  string strResult = "";
+  std::string strResult = "";
   VECTOR_STRING vFound;
 
   if (m_vParams.size() <= 0)
@@ -1013,11 +1013,11 @@ string CUserLog::GetCycleParamStats()
 }
 
 // Return a string with the operating system and product version
-string CUserLog::GetVersionInfo()
+std::string CUserLog::GetVersionInfo()
 {
   //CFunctionLogger f1("CUserLog::GetVersionInfo", g_pLogger);
 
-  string strResult = "";
+  std::string strResult = "";
 #ifdef _WIN32
   strResult += "win ";
 
@@ -1045,7 +1045,7 @@ void CUserLog::AddInitialParam()
 // using the specified options mask.
 void CUserLog::UpdateParam(Parameter parameter, int iOptionMask)
 {
-  string  strParamName  = GetParameterName(parameter);
+  std::string  strParamName  = GetParameterName(parameter);
 
   // What method we call depends on the type of the parameter
   switch (GetParameterType(parameter))
@@ -1087,7 +1087,7 @@ void CUserLog::UpdateParam(Parameter parameter, int iOptionMask)
 // TODO these are broken by settings rewrite. Fix???
 
 // Load the object from an XML file
-CUserLog::CUserLog(string strXMLFilename)
+CUserLog::CUserLog(std::string strXMLFilename)
 : CUserLogBase(NULL), CSettingsUserObserver(NULL) {
   //CFunctionLogger f1("CUserLog::CUserLog(XML)", g_pLogger);
 
@@ -1099,10 +1099,10 @@ CUserLog::CUserLog(string strXMLFilename)
   VECTOR_STRING vectorTrials;
 
   // First split up various parts of the XML
-  string strXML           = XMLUtil::LoadFile(strXMLFilename);        
-  string strApp           = XMLUtil::GetElementString("Application", strXML, true);    
-  string strParams        = XMLUtil::GetElementString("Params", strXML, true);           
-  string strTrials        = XMLUtil::GetElementString("Trials", strXML, true);
+  std::string strXML           = XMLUtil::LoadFile(strXMLFilename);        
+  std::string strApp           = XMLUtil::GetElementString("Application", strXML, true);    
+  std::string strParams        = XMLUtil::GetElementString("Params", strXML, true);           
+  std::string strTrials        = XMLUtil::GetElementString("Trials", strXML, true);
   vectorTrials            = XMLUtil::GetElementStrings("Trial", strTrials, true);
 
   m_pApplicationSpan      = new CTimeSpan("Application", strApp);

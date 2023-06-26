@@ -73,7 +73,7 @@ namespace Dasher {
     ///Subclass to override trainText
     class CRoutedSym : public CSymbolNode {
     public:
-      string trainText();
+      std::string trainText();
       CRoutedSym(int iOffset, CDasherScreen::Label *pLabel, CRoutingAlphMgr *pMgr, symbol iSymbol);
     protected:
       CRoutingAlphMgr *mgr() const {return static_cast<CRoutingAlphMgr*>(m_pMgr);}
@@ -107,7 +107,7 @@ namespace Dasher {
       CRoutingAlphMgr * const m_pMgr;
       ///Symbol # of the start-of-annotation, or 0 if out-of-alphabet
       int m_iStartSym;
-      symbol getRoute(bool bHaveRoute, const string &strRoute, symbol baseSym);
+      symbol getRoute(bool bHaveRoute, const std::string &strRoute, symbol baseSym);
     };
   };
   /// @}

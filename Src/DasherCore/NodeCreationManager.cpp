@@ -32,14 +32,14 @@ public:
 		}
 	}
 
-	bool ParseFile(const string& strFilename, bool bUser)
+	bool ParseFile(const std::string& strFilename, bool bUser)
 	{
 		m_file_length = m_pInterface->GetFileSize(strFilename);
 		if (m_file_length == 0) return false;
 		return AbstractParser::ParseFile(strFilename, bUser);
 	}
 
-	bool Parse(const string& strUrl, istream& in, bool bUser)
+	bool Parse(const std::string& strUrl, std::istream& in, bool bUser)
 	{
 		m_strDisplay = bUser ? "Training on User Text" : "Training on System Text";
 		m_iPercent = 0;

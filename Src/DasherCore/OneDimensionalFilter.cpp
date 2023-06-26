@@ -22,7 +22,7 @@ void COneDimensionalFilter::ApplyTransform(myint &iDasherX, myint &iDasherY, CDa
   // The distance between the Y coordinate and the centreline in pixels
   disty= static_cast<double>(CDasherModel::ORIGIN_Y-iDasherY);
   
-  circlesize=    forwardmax*(1.0-max(0.0,min(1.0,(double)iDasherX/iDasherMaxX)));
+  circlesize=    forwardmax*(1.0-std::max(0.0,std::min(1.0,(double)iDasherX/iDasherMaxX)));
   yforwardrange= CDasherModel::MAX_Y/3.2; // Was 1.6
   yfullrange=    yforwardrange*1.6;
   ybackrange=    yfullrange-yforwardrange;

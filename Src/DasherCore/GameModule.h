@@ -4,9 +4,6 @@
 #define __GameModule_h__
 
 #include <string>
-#include <cstring>
-
-using namespace std;
 
 #include "DasherScreen.h"
 #include "DasherModel.h"
@@ -98,7 +95,7 @@ protected:
   
   ///Any text wrongly entered since the last on-target character
   std::string m_strWrong;
-  const vector<symbol> &targetSyms() {return m_vTargetSymbols;}
+  const std::vector<symbol> &targetSyms() {return m_vTargetSymbols;}
   int lastCorrectSym() {return m_iLastSym;}
   const CAlphInfo *m_pAlph;
   CDasherInterfaceBase * const m_pInterface;
@@ -121,7 +118,7 @@ private:
   /**
    * The target string the user must type.
    */ 
-  vector<symbol> m_vTargetSymbols;
+  std::vector<symbol> m_vTargetSymbols;
 
   /**
    * The last correct symbol we have seen
@@ -134,7 +131,7 @@ private:
   myint m_y1, m_y2;
 
   ///Best-known Location of target sentence in each frame
-  vector<myint> m_vTargetY;
+  std::vector<myint> m_vTargetY;
   ///Last element of above, i.e. current location of target sentence
   myint m_iTargetY;
   ///Time at which we first needed help, or numeric_limits<unsigned long>::max()
