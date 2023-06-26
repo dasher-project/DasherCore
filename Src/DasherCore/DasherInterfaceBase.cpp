@@ -69,8 +69,6 @@ const int       g_iLogOptions = logTimeStamp | logDateStamp;
 CFileLogger* g_pLogger = NULL;
 
 using namespace Dasher;
-using namespace std;
-
 
 CDasherInterfaceBase::CDasherInterfaceBase(CSettingsStore *pSettingsStore) 
   : CSettingsUser(pSettingsStore), 
@@ -201,11 +199,11 @@ CDasherInterfaceBase::~CDasherInterfaceBase() {
 void CDasherInterfaceBase::CPreSetObserver::HandleEvent(CParameterChange d) {
   switch(d.iParameter) {
   case SP_ALPHABET_ID:
-    string value = std::get<std::string>(d.value);
+    std::string value = std::get<std::string>(d.value);
     // Cycle the alphabet history
-    vector<string> newHistory;
+    std::vector<std::string> newHistory;
     newHistory.push_back(m_settingsStore.GetStringParameter(SP_ALPHABET_ID));
-    string v;
+    std::string v;
     if ((v = m_settingsStore.GetStringParameter(SP_ALPHABET_1)) != value)
       newHistory.push_back(v);
     if ((v = m_settingsStore.GetStringParameter(SP_ALPHABET_2)) != value)
@@ -338,14 +336,14 @@ void CDasherInterfaceBase::WordSpeaker::HandleEvent(const CEditEvent *pEditEvent
     }
   }
   else if(pEditEvent->m_iEditType == 2) {
-    m_strCurrentWord = m_strCurrentWord.substr(0, max(static_cast<string::size_type>(0), m_strCurrentWord.size()-pEditEvent->m_sText.size()));
+    m_strCurrentWord = m_strCurrentWord.substr(0, std::max(static_cast<std::string::size_type>(0), m_strCurrentWord.size()-pEditEvent->m_sText.size()));
   }
 }
 
-void CDasherInterfaceBase::SetLockStatus(const string &strText, int iPercent) {
-  string newMessage; //empty - what we want if iPercent==-1 (unlock)
+void CDasherInterfaceBase::SetLockStatus(const std::string &strText, int iPercent) {
+  std::string newMessage; //empty - what we want if iPercent==-1 (unlock)
   if (iPercent!=-1) {
-    ostringstream os;
+    std::ostringstream os;
     os << (strText.empty() ? "Training Dasher" : strText);
     if (iPercent) os << " " << iPercent << "%";
     newMessage = os.str();
@@ -433,7 +431,7 @@ void CDasherInterfaceBase::TextAction::executeLast() {
 }
 
 void CDasherInterfaceBase::TextAction::NotifyOffset(int iOffset) {
-  m_iStartOffset = min(m_pIntf->GetAllContextLenght(), m_iStartOffset);
+  m_iStartOffset = std::min(m_pIntf->GetAllContextLenght(), m_iStartOffset);
 }
 
 
@@ -498,7 +496,7 @@ void CDasherInterfaceBase::NewFrame(unsigned long iTime, bool bForceRedraw) {
       m_DasherScreen->DrawRectangle(0,0,iSW,iSH,0,0,0); //fill in colour 0 = white
       unsigned int iSize(GetLongParameter(LP_MESSAGE_FONTSIZE));
       if (!m_pLockLabel) m_pLockLabel = m_DasherScreen->MakeLabel(m_strLockMessage, iSize);
-      pair<screenint,screenint> dims = m_DasherScreen->TextSize(m_pLockLabel, iSize);
+      std::pair<screenint,screenint> dims = m_DasherScreen->TextSize(m_pLockLabel, iSize);
       m_DasherScreen->DrawString(m_pLockLabel, (iSW-dims.first)/2, (iSH-dims.second)/2, iSize, 4);
       m_DasherScreen->SendMarker(1); //decorations - don't draw any
       bBlit = true;
@@ -835,7 +833,7 @@ void CDasherInterfaceBase::SetOffset(int iOffset, bool bForce) {
   // still want to notifyOffset all text actions, so the "New" suboption sees
   // all the editing the user's done...
 
-  for (set<TextAction *>::iterator it = m_vTextActions.begin(); it!=m_vTextActions.end(); it++) {
+  for (std::set<TextAction *>::iterator it = m_vTextActions.begin(); it!=m_vTextActions.end(); it++) {
     (*it)->NotifyOffset(iOffset);
   }
   

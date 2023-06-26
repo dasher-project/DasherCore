@@ -39,7 +39,6 @@
 //Need to reconcile (a small project)
 
 using namespace Dasher;
-using namespace std;
 
 CConversionManager::CConversionManager(CSettingsUser *pCreateFrom, CDasherInterfaceBase *pInterface, CNodeCreationManager *pNCManager, const CAlphInfo *pAlphabet, CLanguageModel *pLanguageModel)
 : CSettingsUser(pCreateFrom), m_pInterface(pInterface), m_pNCManager(pNCManager), m_pAlphabet(pAlphabet), m_pLanguageModel(pLanguageModel) {
@@ -68,14 +67,14 @@ CConversionManager::CConvNode *CConversionManager::makeNode(int iOffset, int iCo
 
 void CConversionManager::ChangeScreen(CDasherScreen *pScreen) {
   if (m_pScreen==pScreen) return;
-  for (map<string, CDasherScreen::Label *>::iterator it=m_vLabels.begin(); it!=m_vLabels.end(); it++)
+  for (std::map<std::string, CDasherScreen::Label *>::iterator it=m_vLabels.begin(); it!=m_vLabels.end(); it++)
     delete it->second;
   m_vLabels.clear();
   m_pScreen=pScreen;
 }
 
 CDasherScreen::Label *CConversionManager::GetLabel(const char *pszConversion) {
-  string strConv(pszConversion);
+  std::string strConv(pszConversion);
   if (m_vLabels[strConv])
     return m_vLabels[strConv];
   return m_vLabels[strConv] = m_pScreen->MakeLabel(strConv);
@@ -105,7 +104,7 @@ CConversionManager::CConvNode::~CConvNode() {
   m_pMgr->m_pLanguageModel->ReleaseContext(iContext);
 }
 
-void CConversionManager::RecursiveDumpTree(ostream &out, SCENode *pCurrent, unsigned int iDepth) {
+void CConversionManager::RecursiveDumpTree(std::ostream &out, SCENode *pCurrent, unsigned int iDepth) {
   const std::vector<SCENode *> &children = pCurrent->GetChildren();
   for (std::vector<SCENode *>::const_iterator it = children.begin(); it!=children.end(); it++) {
     SCENode *pCurrent(*it);

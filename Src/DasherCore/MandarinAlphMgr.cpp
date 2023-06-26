@@ -34,10 +34,7 @@
 #include <sstream>
 #include <iostream>
 
-using namespace std;
 using namespace Dasher;
-
-
 
 CMandarinAlphMgr::CMandarinAlphMgr(CSettingsUser *pCreator, CDasherInterfaceBase *pInterface, CNodeCreationManager *pNCManager, const CAlphInfo *pAlphabet)
   : CAlphabetManager(pCreator, pInterface, pNCManager, pAlphabet) {
@@ -68,7 +65,7 @@ void CMandarinAlphMgr::InitMap() {
     int hashed = m_map.Get(m_pAlphabet->GetText(copy[i]));
     DASHER_ASSERT(hashed);
     m_vGroupsByConversion[hashed].insert(static_cast<int>(m_vConversionsByGroup.size())); //identifies the new PY sound
-    m_vConversionsByGroup.push_back(vector<symbol>(1,hashed));
+    m_vConversionsByGroup.push_back(std::vector<symbol>(1,hashed));
     m_pPYgroups->iEnd++; m_pPYgroups->iNumChildNodes++;
   }
 }
@@ -84,7 +81,7 @@ SGroupInfo *CMandarinAlphMgr::makePYgroup(const SGroupInfo *in) {
   for (int i=in->iStart; i<in->iEnd; ) {
     if (!oldCh || i<oldCh->iStart) {
       //found symbol...first, rehash:
-      const string &text(m_pAlphabet->GetText(i));
+      const std::string &text(m_pAlphabet->GetText(i));
       int hashed=m_map.Get(text);
       if (!hashed) {
         //unicode char not seen already, allocate new symbol number
@@ -96,7 +93,7 @@ SGroupInfo *CMandarinAlphMgr::makePYgroup(const SGroupInfo *in) {
           m_map.AddParagraphSymbol(m_iCHpara=hashed);
         else
           m_map.Add(text,hashed);
-        m_vGroupsByConversion.push_back(set<symbol>());
+        m_vGroupsByConversion.push_back(std::set<symbol>());
       }
       //now, put in PY-group...
       if (i!=m_pAlphabet->GetSpaceSymbol() && i!=m_pAlphabet->GetParagraphSymbol()) {
@@ -104,7 +101,7 @@ SGroupInfo *CMandarinAlphMgr::makePYgroup(const SGroupInfo *in) {
           //First symbol that is directly child of group. Allocate index...
           ret->iNumChildNodes++;
           m_vGroupNames.push_back(in->strName);
-          m_vConversionsByGroup.push_back(vector<symbol>());
+          m_vConversionsByGroup.push_back(std::vector<symbol>());
         }
         DASHER_ASSERT(m_vGroupNames.size() > ret->iStart);
         DASHER_ASSERT(m_vConversionsByGroup.size() > ret->iStart);
@@ -138,13 +135,13 @@ void CMandarinAlphMgr::MakeLabels(CDasherScreen *pScreen) {
 SGroupInfo *CMandarinAlphMgr::copyGroups(const SGroupInfo *in, CDasherScreen *pScreen) {
   return CAlphabetManager::copyGroups(in==m_pAlphabet ? m_pPYgroups : in, pScreen);
 }
-const string &CMandarinAlphMgr::GetLabelText(symbol i) const {
-  static string n="";
+const std::string &CMandarinAlphMgr::GetLabelText(symbol i) const {
+  static std::string n="";
   return n;
 }
 
 CMandarinAlphMgr::~CMandarinAlphMgr() {
-  for (vector<CDasherScreen::Label *>::iterator it=m_vCHLabels.begin(); it!=m_vCHLabels.end(); it++)
+  for (std::vector<CDasherScreen::Label *>::iterator it=m_vCHLabels.begin(); it!=m_vCHLabels.end(); it++)
     delete *it;
   m_pPYgroups->RecursiveDelete();
 }
@@ -160,7 +157,7 @@ CMandarinAlphMgr::CMandarinTrainer::CMandarinTrainer(CMessageDisplay *pMsgs, CMa
   //We pass in the alphabet to define the context-switch escape character, and the default context.
 
   m_iStartSym=0;  
-  vector<symbol> trainStartSyms;
+  std::vector<symbol> trainStartSyms;
   m_pAlphabet->GetSymbols(trainStartSyms, m_pInfo->m_strConversionTrainStart);
   if (trainStartSyms.size()==1)
     m_iStartSym = trainStartSyms[0];
@@ -169,8 +166,8 @@ CMandarinAlphMgr::CMandarinTrainer::CMandarinTrainer(CMessageDisplay *pMsgs, CMa
                                      m_pInfo->m_strConversionTrainStart.c_str());
 }
 
-symbol CMandarinAlphMgr::CMandarinTrainer::getPYsym(bool bHavePy, const string &strPy, symbol symCh) {
-  const set<symbol> &posPY(m_pMgr->m_vGroupsByConversion[symCh]);
+symbol CMandarinAlphMgr::CMandarinTrainer::getPYsym(bool bHavePy, const std::string &strPy, symbol symCh) {
+  const std::set<symbol> &posPY(m_pMgr->m_vGroupsByConversion[symCh]);
   if (posPY.size()==1) {
     //only one possibility; so we'll use it, but maybe flag.
     symbol pySym = *(posPY.begin());
@@ -180,9 +177,9 @@ symbol CMandarinAlphMgr::CMandarinTrainer::getPYsym(bool bHavePy, const string &
                                          strPy.c_str());
     return pySym;
   }
-  set<symbol> withName;
+  std::set<symbol> withName;
   if (bHavePy) {
-    for (set<symbol>::iterator it = posPY.begin(); it!=posPY.end(); it++)
+    for (std::set<symbol>::iterator it = posPY.begin(); it!=posPY.end(); it++)
       if (m_pMgr->m_vGroupNames[*it] == strPy)
         withName.insert(*it);  
     if (withName.size()==1) return *(withName.begin());
@@ -203,8 +200,8 @@ void CMandarinAlphMgr::CMandarinTrainer::Train(CAlphabetMap::SymbolStream &syms)
   // that you get if you use an unannotated training file - this is suboptimal,
   // so we want to warn the user, but we don't want to make Dasher unusable by
   // flooding them with error messages.
-  set<symbol> unannotated;
-  string strPy; bool bHavePy(false);
+  std::set<symbol> unannotated;
+  std::string strPy; bool bHavePy(false);
   for (symbol sym; (sym=syms.next(m_pAlphabet))!=-1;) {
     if (sym == m_iStartSym) {
       if (sym!=0 || syms.peekBack()==m_pInfo->m_strConversionTrainStart) {
@@ -212,7 +209,7 @@ void CMandarinAlphMgr::CMandarinTrainer::Train(CAlphabetMap::SymbolStream &syms)
           m_pMsgs->FormatMessageWithString(_("Warning: in training file, annotation '<%s>' is followed by another annotation and will be ignored"),
                                            strPy.c_str());
         strPy.clear(); bHavePy=true;
-        for (string s; (s=syms.peekAhead()).length(); strPy+=s) {
+        for (std::string s; (s=syms.peekAhead()).length(); strPy+=s) {
           syms.next(m_pAlphabet);
           if (s==m_pInfo->m_strConversionTrainStop) break;
         }
@@ -244,9 +241,9 @@ void CMandarinAlphMgr::CMandarinTrainer::Train(CAlphabetMap::SymbolStream &syms)
 #endif
     char *buf(new char[strlen(msg) + GetDesc().length() + 10]);
     sprintf(buf, msg, GetDesc().c_str(), unannotated.size());
-    ostringstream withChars;
+    std::ostringstream withChars;
     withChars << msg;
-    for (set<symbol>::iterator it = unannotated.begin(); it!=unannotated.end(); it++)
+    for (std::set<symbol>::iterator it = unannotated.begin(); it!=unannotated.end(); it++)
       withChars << " " << m_pInfo->GetDisplayText(*it);
     m_pMsgs->Message(withChars.str(), true);
   }
@@ -290,7 +287,7 @@ CDasherNode *CMandarinAlphMgr::CreateSymbolNode(CAlphNode *pParent, symbol iSymb
   // in cases where the CConvRoot provides a place to put some part of the group
   // label (specific to that symbol, so kinda redundant, but we want to keep it
   // for consistency of display).
-  vector<symbol> &convs(m_vConversionsByGroup[iSymbol]);
+  std::vector<symbol> &convs(m_vConversionsByGroup[iSymbol]);
   
   if (convs.size()>1 || m_vLabels[iSymbol])
     return CreateConvRoot(pParent, iSymbol);
@@ -334,7 +331,7 @@ void CMandarinAlphMgr::CConvRoot::PopulateChildrenWithExisting(CMandSym *existin
   int iCum(0);
   
   // Finally loop through and create the children
-  for (vector<pair<symbol, unsigned int> >::const_iterator it = m_vChInfo.begin(); it!=m_vChInfo.end(); it++) {
+  for (std::vector<std::pair<symbol, unsigned int> >::const_iterator it = m_vChInfo.begin(); it!=m_vChInfo.end(); it++) {
     //      std::cout << "Current scec: " << pCurrentSCEChild << std::endl;
     const unsigned int iLbnd(iCum), iHbnd(iCum + it->second);
     
@@ -376,13 +373,13 @@ void CMandarinAlphMgr::CConvRoot::SetFlag(int iFlag, bool bValue) {
 
 // For sorting pair<symbol, probability>s into descending order
 // (most probable first, hence sense of >)
-bool CompSecond(const pair<symbol,unsigned int> &a, const pair<symbol,unsigned int> &b) {
+bool CompSecond(const std::pair<symbol,unsigned int> &a, const std::pair<symbol,unsigned int> &b) {
   return a.second>b.second;
 }
 
-void CMandarinAlphMgr::GetConversions(std::vector<pair<symbol,unsigned int> > &vChildren, symbol pySym, Dasher::CLanguageModel::Context context) {
+void CMandarinAlphMgr::GetConversions(std::vector<std::pair<symbol,unsigned int> > &vChildren, symbol pySym, Dasher::CLanguageModel::Context context) {
 
-  const vector<symbol> &convs(m_vConversionsByGroup[pySym]);
+  const std::vector<symbol> &convs(m_vConversionsByGroup[pySym]);
 
   //Symbols which we are including with the probabilities predicted by the LM.
   // We do this for the most probable symbols first, up to at least BY_PY_PROB_SORT_THRES
@@ -391,7 +388,7 @@ void CMandarinAlphMgr::GetConversions(std::vector<pair<symbol,unsigned int> > &v
   // more probable ones).
   //Two degenerate cases: PROB_SORT_THRES=0 => all (legal) ch symbols predicted uniformly
   // PROB_SORT_THRES=100 => all symbols put into probability order
-  set<symbol> haveProbs;
+  std::set<symbol> haveProbs;
   uint64 iRemaining(CDasherModel::NORMALIZATION);
   
   if (long percent=GetLongParameter(LP_PY_PROB_SORT_THRES)) {
@@ -399,7 +396,7 @@ void CMandarinAlphMgr::GetConversions(std::vector<pair<symbol,unsigned int> > &v
     const unsigned int uniform(static_cast<unsigned int>((GetLongParameter(LP_UNIFORM)*iNorm)/1000));
     
     //Set up list of symbols with blank probability entries...
-    for(vector<symbol>::const_iterator it = convs.begin(); it != convs.end(); ++it) {
+    for(std::vector<symbol>::const_iterator it = convs.begin(); it != convs.end(); ++it) {
       vChildren.push_back(std::pair<symbol, unsigned int>(*it,0));
     }
     
@@ -410,7 +407,7 @@ void CMandarinAlphMgr::GetConversions(std::vector<pair<symbol,unsigned int> > &v
     //std::cout<<"after get probs "<<std::endl;
   
     uint64 sumProb=0;  
-    for (std::vector<pair<symbol,unsigned int> >::const_iterator it = vChildren.begin(); it!=vChildren.end(); it++) {
+    for (std::vector<std::pair<symbol,unsigned int> >::const_iterator it = vChildren.begin(); it!=vChildren.end(); it++) {
       sumProb += it->second;
     }
     DASHER_ASSERT(sumProb==iNorm);
@@ -420,10 +417,10 @@ void CMandarinAlphMgr::GetConversions(std::vector<pair<symbol,unsigned int> > &v
     if (percent>=100) return; //and that's what's required.
     
     //ok, some symbols as predicted by LM, others not...
-    vector<pair<symbol,unsigned int> > probOrder;
+    std::vector<std::pair<symbol,unsigned int> > probOrder;
     swap(vChildren, probOrder);
     const unsigned int stop(static_cast<unsigned int>(iNorm - (iNorm*percent)/100));//intermediate values are uint64
-    for (vector<pair<symbol, unsigned int> >::iterator it=probOrder.begin(); iRemaining>stop; it++) {
+    for (std::vector<std::pair<symbol, unsigned int> >::iterator it=probOrder.begin(); iRemaining>stop; it++) {
       //assert: the remaining probability mass, divided by the remaining symbols,
       // (i.e. the probability mass each symbol would receive if we uniformed the rest)
       // must be less than the probability predicted by the LM (as we're processing
@@ -438,16 +435,16 @@ void CMandarinAlphMgr::GetConversions(std::vector<pair<symbol,unsigned int> > &v
   // keeping them in alphabet order
   if (iRemaining) {
     unsigned int iEach(static_cast<unsigned int>(iRemaining) / (static_cast<unsigned int>(convs.size()) - static_cast<unsigned int>(haveProbs.size())));
-    for (vector<symbol>::const_iterator it=convs.begin(); it!=convs.end(); it++) {
+    for (std::vector<symbol>::const_iterator it=convs.begin(); it!=convs.end(); it++) {
       if (haveProbs.count(*it)==0)
-        vChildren.push_back(pair<symbol,unsigned int>(*it,iEach));
+        vChildren.push_back(std::pair<symbol,unsigned int>(*it,iEach));
     }
     
     //account for rounding error by topping up
     DASHER_ASSERT(vChildren.size() == convs.size());
     iRemaining -= iEach * (convs.size() - haveProbs.size());
     unsigned int iLeft = static_cast<unsigned int>(vChildren.size());
-    for (vector<pair<symbol, unsigned int> >::iterator it=vChildren.end(); iRemaining && it-- != vChildren.begin();) {
+    for (std::vector<std::pair<symbol, unsigned int> >::iterator it=vChildren.end(); iRemaining && it-- != vChildren.begin();) {
       const unsigned int p(static_cast<unsigned int>(iRemaining / iLeft));
       it->second+=p; iRemaining-=p; iLeft--;
     }
@@ -497,20 +494,20 @@ CMandarinAlphMgr::CMandSym *CMandarinAlphMgr::CMandSym::RebuildCHSymbol(CConvRoo
 
 void CMandarinAlphMgr::CMandSym::RebuildForwardsFromAncestor(CAlphNode *pNewNode) {
   if (m_pyParent==0) {
-    set<symbol> &possiblePinyin(mgr()->m_vGroupsByConversion[iSymbol]);
+    std::set<symbol> &possiblePinyin(mgr()->m_vGroupsByConversion[iSymbol]);
     if (possiblePinyin.size() > 1) {
       //need to compare pinyin symbols; so compute probability of this (chinese) sym, for each:
       // i.e. P(pinyin) * P(this chinese | pinyin)
-      const vector<unsigned int> &vPinyinProbs(*(pNewNode->GetProbInfo()));
+      const std::vector<unsigned int> &vPinyinProbs(*(pNewNode->GetProbInfo()));
       long bestProb=0; //of this chinese, over NORMALIZATION _squared_
-      for (set<symbol>::iterator p_it = possiblePinyin.begin(); p_it!=possiblePinyin.end(); p_it++) {
+      for (std::set<symbol>::iterator p_it = possiblePinyin.begin(); p_it!=possiblePinyin.end(); p_it++) {
         //compute probability of each chinese symbol for that pinyin (=by filtering)
         // context is the same as the ancestor = previous chinese, as pinyin not part of context
-        vector<pair<symbol, unsigned int> > vChineseProbs;
+        std::vector<std::pair<symbol, unsigned int> > vChineseProbs;
         mgr()->GetConversions(vChineseProbs, *p_it, pNewNode->iContext);
         //now find us in that list
         long thisProb; //i.e. P(this pinyin) * P(this chinese | this pinyin)
-        for (vector<pair<symbol,unsigned int> >::iterator c_it = vChineseProbs.begin(); ;) {
+        for (std::vector<std::pair<symbol,unsigned int> >::iterator c_it = vChineseProbs.begin(); ;) {
           if (c_it->first == iSymbol) {
             //found P(this chinese sym | pinyin). Compute overall...
             thisProb = c_it->second * vPinyinProbs[*p_it];
@@ -530,7 +527,7 @@ void CMandarinAlphMgr::CMandSym::RebuildForwardsFromAncestor(CAlphNode *pNewNode
   CSymbolNode::RebuildForwardsFromAncestor(pNewNode);
 }
 
-const string &CMandarinAlphMgr::CMandSym::outputText() const {
+const std::string &CMandarinAlphMgr::CMandSym::outputText() const {
   //Note this largely duplicates CAlphabetManager::CSymbolNode:outputText:
   if (iSymbol==mgr()->m_iCHpara && GetFlag(NF_SEEN)) {
     //Regardless of the platform's definition of a newline,
@@ -543,7 +540,7 @@ const string &CMandarinAlphMgr::CMandSym::outputText() const {
   return mgr()->m_vCHtext[iSymbol];
 }
 
-string CMandarinAlphMgr::CMandSym::trainText() {
+std::string CMandarinAlphMgr::CMandSym::trainText() {
   //NF_COMMITTED should be in process of being set...
   DASHER_ASSERT(!GetFlag(NF_COMMITTED));
   //in which case, we should have a parent (if not, we would have to
@@ -554,8 +551,8 @@ string CMandarinAlphMgr::CMandSym::trainText() {
   DASHER_ASSERT(m_pyParent);
   //if there is only one possible PY that might have lead to this CH sym, no need
   // to record that in the training text
-  set<symbol> &py(mgr()->m_vGroupsByConversion[iSymbol]);
-  string s = CSymbolNode::trainText();
+  std::set<symbol> &py(mgr()->m_vGroupsByConversion[iSymbol]);
+  std::string s = CSymbolNode::trainText();
   if (py.size()==1)
     return s;
   //otherwise, ambiguous, record name

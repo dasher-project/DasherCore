@@ -12,14 +12,13 @@
 #include <algorithm>
 
 using namespace Dasher;
-using namespace std;
 
 void CExpansionPolicy::ExpandNode(CDasherNode *pNode) {
   m_pModel->ExpandNode(pNode);
 }
 
-bool Less(pair<double,CDasherNode *> x, pair<double, CDasherNode *> y) {return x.first < y.first;}
-bool More(pair<double,CDasherNode *> x, pair<double, CDasherNode *> y) {return x.first > y.first;}
+bool Less(std::pair<double,CDasherNode *> x, std::pair<double, CDasherNode *> y) {return x.first < y.first;}
+bool More(std::pair<double,CDasherNode *> x, std::pair<double, CDasherNode *> y) {return x.first > y.first;}
   
 BudgettingPolicy::BudgettingPolicy(CDasherModel *pModel, unsigned int iNodeBudget) : CExpansionPolicy(pModel), m_iNodeBudget(iNodeBudget) {}
 
@@ -28,8 +27,8 @@ double BudgettingPolicy::pushNode(CDasherNode *pNode, int iMin, int iMax, bool b
   if (dRes<dParentCost) {
     //obvious case: node is less important/costly than parent; will be collapsed first
     // (or expanded but only if parent is not collapsed) 
-    vector<pair<double, CDasherNode*> > &target = (bExpand) ? sExpand : sCollapse;
-    target.push_back(pair<double, CDasherNode *>(dRes,pNode));
+    std::vector<std::pair<double, CDasherNode*> > &target = (bExpand) ? sExpand : sCollapse;
+    target.push_back(std::pair<double, CDasherNode *>(dRes,pNode));
   } else {
     //node has same or greater cost than parent. Take care of latter case...
     dRes = dParentCost;
@@ -38,7 +37,7 @@ double BudgettingPolicy::pushNode(CDasherNode *pNode, int iMin, int iMax, bool b
     // thus, avoid enqueuing child node to collapse also: if costs are accurate
     // (i.e. in terms of the benefit/detriment of what's onscreen), then collapsing
     // parent will free up more nodes (by recursively collapsing child)
-    if (bExpand) sExpand.push_back(pair<double,CDasherNode *>(dRes, pNode));
+    if (bExpand) sExpand.push_back(std::pair<double,CDasherNode *>(dRes, pNode));
     
     //Of course, that also removes the possibility of collapsing the parent first,
     // then trying to collapse the child afterwards (=>freed pointer), if they get
@@ -69,7 +68,7 @@ bool BudgettingPolicy::apply() {
   while (!sCollapse.empty()
          && currentNumNodeObjects() > m_iNodeBudget)
   {
-    pair<double,CDasherNode *> node = sCollapse.back();
+    std::pair<double,CDasherNode *> node = sCollapse.back();
     DASHER_ASSERT(node.first >= collapseCost);
     collapseCost = node.first;
     node.second->Delete_children();    
@@ -92,7 +91,7 @@ bool BudgettingPolicy::apply() {
              && sCollapse.back().first < sExpand.back().first)
     {
       //could be a beneficial trade - make room by performing collapse...
-      pair<double,CDasherNode *> node = sCollapse.back();
+      std::pair<double,CDasherNode *> node = sCollapse.back();
       DASHER_ASSERT(node.first >= collapseCost);
       collapseCost = node.first;
       node.second->Delete_children();
@@ -108,7 +107,7 @@ bool BudgettingPolicy::apply() {
 
 int BudgettingPolicy::getRange(int y1, int y2, int iMin, int iMax) {
   if (y1>iMax || y2 < iMin) return 0;
-  return min(y2, iMax) - max(y1, iMin);
+  return std::min(y2, iMax) - std::max(y1, iMin);
 }
 
 double BudgettingPolicy::getCost(CDasherNode *pNode, int iDasherMinY, int iDasherMaxY) {
@@ -142,7 +141,7 @@ void AmortizedPolicy::trim() {
   while (true) {
     //at this point, we assume we know only that elements [start - stop] need examining....
     unsigned int low = start, high = stop;
-    pair<double,CDasherNode *> &pivot = sExpand[low++];
+    std::pair<double,CDasherNode *> &pivot = sExpand[low++];
     while (true) {
       while (low <= high && !Less(sExpand[low],pivot)) low++;
       //all elements (start-low) can stay on left of pivot.
@@ -151,7 +150,7 @@ void AmortizedPolicy::trim() {
         while (high >= low && !More(sExpand[high],pivot)) high--;
         if (high >= low) {
           //element <high> needs to be on L of pivot
-          pair<double,CDasherNode *> temp = sExpand[low];
+          std::pair<double,CDasherNode *> temp = sExpand[low];
           sExpand[low++] = sExpand[high];
           sExpand[high--]=temp;
           continue;
@@ -162,7 +161,7 @@ void AmortizedPolicy::trim() {
     //place pivot at index (low-1) - if that's not where it is already!
     low--;
     if (start!=low) {
-      pair<double,CDasherNode *> temp = sExpand[start];
+      std::pair<double,CDasherNode *> temp = sExpand[start];
       sExpand[start]=sExpand[low];
       sExpand[low] = temp;
     }

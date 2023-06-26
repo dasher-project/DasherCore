@@ -33,9 +33,6 @@
 #include "AlphabetManager.h"
 
 using namespace Dasher;
-using namespace std;
-
-
 
 
 //If preprocessor variable DEBUG_DYNAMICS is defined, will display the difference
@@ -113,7 +110,7 @@ void CDasherModel::Make_root(CDasherNode *pNewRoot) {
   m_Rootmax = m_Rootmin + (range * m_Root->Hbnd()) / NORMALIZATION;
   m_Rootmin = m_Rootmin + (range * m_Root->Lbnd()) / NORMALIZATION;
 
-  for(std::deque<pair<myint,myint> >::iterator it(m_deGotoQueue.begin()); it != m_deGotoQueue.end(); ++it) {
+  for(std::deque<std::pair<myint,myint> >::iterator it(m_deGotoQueue.begin()); it != m_deGotoQueue.end(); ++it) {
     //Some of these co-ordinate pairs can be bigger than m_Rootmin_min - m_Rootmax_max,
     // hence using unsigned type...
     const uint64 r = it->second - it->first;
@@ -175,7 +172,7 @@ bool CDasherModel::Reparent_root() {
   m_Rootmax = m_Rootmax + ((NORMALIZATION - upper) * iRootWidth) / iRange;
   m_Rootmin = m_Rootmin - (lower * iRootWidth) / iRange;
 
-  for(std::deque<pair<myint,myint> >::iterator it(m_deGotoQueue.begin()); it != m_deGotoQueue.end(); ++it) {
+  for(std::deque<std::pair<myint,myint> >::iterator it(m_deGotoQueue.begin()); it != m_deGotoQueue.end(); ++it) {
     iRootWidth = it->second - it->first;
     it->second += (myint(NORMALIZATION - upper) * iRootWidth / iRange);
     it->first -= (myint(lower) * iRootWidth / iRange);
@@ -270,7 +267,7 @@ bool CDasherModel::NextScheduledStep()
         //we need to update the target coords (newRootmin,newRootmax)
         // to reflect the new coordinate system based upon pChild as root.
         //Make_root automatically updates any such pairs stored in m_deGotoQueue, so:
-        m_deGotoQueue.push_back(pair<myint,myint>(newRootmin,newRootmax));
+        m_deGotoQueue.push_back(std::pair<myint,myint>(newRootmin,newRootmax));
         //...when we make pChild the root...
         Make_root(pChild);
         //...we can retrieve new, equivalent, coordinates for it
@@ -287,8 +284,8 @@ bool CDasherModel::NextScheduledStep()
   // Check that we haven't drifted too far. The rule is that we're not
   // allowed to let the root max and min cross the midpoint of the
   // screen.
-  newRootmin = min(newRootmin, ORIGIN_Y - 1 - m_iDisplayOffset);
-  newRootmax = max(newRootmax, ORIGIN_Y + 1 - m_iDisplayOffset);
+  newRootmin = std::min(newRootmin, ORIGIN_Y - 1 - m_iDisplayOffset);
+  newRootmax = std::max(newRootmax, ORIGIN_Y + 1 - m_iDisplayOffset);
 
   // Only allow the update if it won't make the
   // root too small. We should have re-generated a deeper root
@@ -382,7 +379,7 @@ void CDasherModel::ScheduleOneStep(dasherint y1, dasherint y2, int nSteps, int l
     // = (MAX_Y-(2*limX)) / (2*limX) * targetRange / (MAX_Y-targetRange)
     {
       const dasherint n=targetRange*(MAX_Y-2*limX), d=(MAX_Y-targetRange)*2*limX;
-      bool bOver=max(abs(m1),abs(m2))>std::numeric_limits<dasherint>::max()/n;
+      bool bOver=std::max(abs(m1),abs(m2))>std::numeric_limits<dasherint>::max()/n;
       if (bOver) {
         //std::cout << "Overflow in max-speed-limit " << m1 << "," << m2 << " =wd> " << ((m1*n)/d) << "," << ((m2*n)/d);
         //so do it a harder way, but which uses smaller intermediates:
@@ -444,7 +441,7 @@ void CDasherModel::ScheduleOneStep(dasherint y1, dasherint y2, int nSteps, int l
 #endif
   } //end block A (regardless of #ifdef)
   
-  m_deGotoQueue.push_back(pair<myint,myint>(R1+m1, R2+m2));
+  m_deGotoQueue.push_back(std::pair<myint,myint>(R1+m1, R2+m2));
 }
 
 void CDasherModel::OutputTo(CDasherNode *pNewNode) {
@@ -566,10 +563,10 @@ void CDasherModel::ScheduleZoom(dasherint y1, dasherint y2, int nsteps) {
       dFrac = (h-oh)/(nh-oh);
     }
     //and use that fraction to interpolate from R to r
-    m_deGotoQueue.push_back(pair<myint,myint>(R1+static_cast<myint>(dFrac*static_cast<double>(r1-R1)), R2+static_cast<myint>(dFrac*static_cast<double>(r2-R2))));
+    m_deGotoQueue.push_back(std::pair<myint,myint>(R1+static_cast<myint>(dFrac*static_cast<double>(r1-R1)), R2+static_cast<myint>(dFrac*static_cast<double>(r2-R2))));
   }
   //final point, done accurately/simply:
-  m_deGotoQueue.push_back(pair<myint,myint>(r1,r2));
+  m_deGotoQueue.push_back(std::pair<myint,myint>(r1,r2));
 }
 
 

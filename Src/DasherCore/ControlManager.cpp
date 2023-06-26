@@ -25,8 +25,6 @@
 #include <cstring>
 
 using namespace Dasher;
-using namespace std;
-
 
 CControlBase::CControlBase(CSettingsUser* pCreateFrom, CDasherInterfaceBase* pInterface, CNodeCreationManager* pNCManager)
 	: CSettingsUser(pCreateFrom), m_pInterface(pInterface), m_pNCManager(pNCManager), m_pScreen(NULL), m_pRoot(NULL)
@@ -68,8 +66,8 @@ void CControlBase::ChangeScreen(CDasherScreen* pScreen)
 {
 	if (m_pScreen == pScreen) return;
 	m_pScreen = pScreen;
-	deque<NodeTemplate*> templateQueue(1, m_pRoot);
-	set<NodeTemplate*> allTemplates(templateQueue.begin(), templateQueue.end());
+	std::deque<NodeTemplate*> templateQueue(1, m_pRoot);
+	std::set<NodeTemplate*> allTemplates(templateQueue.begin(), templateQueue.end());
 	while (!templateQueue.empty())
 	{
 		NodeTemplate* head = templateQueue.front();
@@ -88,7 +86,7 @@ void CControlBase::ChangeScreen(CDasherScreen* pScreen)
 	}
 }
 
-CControlBase::NodeTemplate::NodeTemplate(const string& strLabel, int iColour)
+CControlBase::NodeTemplate::NodeTemplate(const std::string& strLabel, int iColour)
 	: m_strLabel(strLabel), m_iColour(iColour), m_pLabel(NULL)
 {
 }
@@ -146,7 +144,7 @@ void CControlBase::CContNode::Output()
 	m_pTemplate->happen(this);
 }
 
-const list<CControlBase::NodeTemplate*>& CControlParser::parsedNodes()
+const std::list<CControlBase::NodeTemplate*>& CControlParser::parsedNodes()
 {
 	return m_vParsed;
 }
@@ -156,7 +154,7 @@ const list<CControlBase::NodeTemplate*>& CControlParser::parsedNodes()
 class XMLNodeTemplate : public CControlBase::NodeTemplate
 {
 public:
-	XMLNodeTemplate(const string& label, int color) : NodeTemplate(label, color)
+	XMLNodeTemplate(const std::string& label, int color) : NodeTemplate(label, color)
 	{
 	}
 
@@ -180,7 +178,7 @@ public:
 			delete pAction;
 	}
 
-	vector<CControlBase::Action*> actions;
+	std::vector<CControlBase::Action*> actions;
 };
 
 CControlParser::CControlParser(CMessageDisplay* pMsgs) : AbstractXMLParser(pMsgs), m_bUser(false)

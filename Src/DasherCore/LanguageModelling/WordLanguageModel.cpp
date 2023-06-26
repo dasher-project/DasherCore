@@ -19,7 +19,6 @@
 #include <stack>
 
 using namespace Dasher;
-using namespace std;
 
 // static TCHAR debug[256];
 typedef unsigned long ulong;
