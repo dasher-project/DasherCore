@@ -117,13 +117,9 @@ void CDefaultFilter::Timer(unsigned long Time, CDasherView *pView, CDasherInput 
   if (!isPaused())
   {
     if(GetBoolParameter(BP_STOP_OUTSIDE)) {
-      myint iDasherMinX;
-      myint iDasherMinY;
-      myint iDasherMaxX;
-      myint iDasherMaxY;
-      pView->VisibleRegion(iDasherMinX, iDasherMinY, iDasherMaxX, iDasherMaxY);
+      const CDasherView::ScreenRegion visibleRegion = pView->VisibleRegion();
 
-      if((m_iLastX > iDasherMaxX) || (m_iLastX < iDasherMinX) || (m_iLastY > iDasherMaxY) || (m_iLastY < iDasherMinY)) {
+      if((m_iLastX > visibleRegion.maxX) || (m_iLastX < visibleRegion.minX) || (m_iLastY > visibleRegion.maxY) || (m_iLastY < visibleRegion.minY)) {
         stop();
         return;
       }
@@ -231,13 +227,12 @@ void CDefaultFilter::ApplyTransform(myint &iDasherX, myint &iDasherY, CDasherVie
   if (GetLongParameter(LP_GEOMETRY)==1) {
     //crosshair may be offscreen; so do something to allow us to navigate
     // up/down and reverse
-    myint iDasherMaxX,temp;
-    pView->VisibleRegion(temp, temp, iDasherMaxX, temp);
-    const myint xd(iDasherX - iDasherMaxX),yd(iDasherY-CDasherModel::ORIGIN_Y);
+    const CDasherView::ScreenRegion visibleRegion = pView->VisibleRegion();
+    const myint xd(iDasherX - visibleRegion.maxX),yd(iDasherY-CDasherModel::ORIGIN_Y);
     const myint dist(xd*xd + yd*yd); //squared distance from closest point onscreen to crosshair
-    if (iDasherMaxX < CDasherModel::ORIGIN_X) {
+    if (visibleRegion.maxX < CDasherModel::ORIGIN_X) {
       //crosshair actually offscreen; rescale so left edge of screen = translate
-      iDasherX = (iDasherX * CDasherModel::ORIGIN_X)/iDasherMaxX;
+      iDasherX = (iDasherX * CDasherModel::ORIGIN_X)/visibleRegion.maxX;
     }
     //boost reversing if near centerpoint of LHS (even if xhair onscreen)
     iDasherX += (2*CDasherModel::ORIGIN_Y*CDasherModel::ORIGIN_Y)/(dist+50); //and close to centerpoint = reverse

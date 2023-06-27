@@ -563,7 +563,7 @@ void CAlphabetManager::IterateChildGroups(CAlphNode *pParent, const SGroupInfo *
       i++; //make one symbol at a time - move onto next symbol in next iteration of (outer) loop
     } else {
       DASHER_ASSERT(pCurrentNode->iNumChildNodes > 1);
-      pNewChild= (buildAround) ? buildAround->RebuildGroup(pParent, pParent->getColour(), pCurrentNode) : CreateGroupNode(pParent, pParent->getColour(), pCurrentNode);
+      pNewChild= (buildAround) ? buildAround->RebuildGroup(pParent, pParent->getColor(), pCurrentNode) : CreateGroupNode(pParent, pParent->getColor(), pCurrentNode);
       i = pCurrentNode->iEnd; //make one group at a time - so move past entire group...
       pCurrentNode = pCurrentNode->pNext; //next sibling of _original_ pCurrentNode (above)
       // (maybe not of pCurrentNode now, which might be a subgroup filling the original)

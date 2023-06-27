@@ -148,14 +148,13 @@ void CGameModule::DecorateView(unsigned long lTime, CDasherView *pView, CDasherM
     x[0] = x[1] = -100;
   
     const int lineWidth(GetLongParameter(LP_LINE_WIDTH));
-    myint minX,minY,maxX,maxY;
-    pView->VisibleRegion( minX, minY, maxX, maxY);
+    const CDasherView::ScreenRegion visibleRegion = pView->VisibleRegion();
 
-    if (m_y1 > maxY) {
+    if (m_y1 > visibleRegion.maxY) {
       //off the top! make arrow point straight up...
       y[1] = CDasherModel::MAX_Y;
       y[0] = y[1] - 400;
-    } else if (m_y2 < minY) {
+    } else if (m_y2 < visibleRegion.minY) {
       //off the bottom! make arrow point straight down...
       y[1] = 0;
       y[0] = 400;

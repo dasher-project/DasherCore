@@ -82,7 +82,7 @@ public:
 	///
 	/// Get the bounding box of the visible region.
 	///
-	void VisibleRegion(myint& iDasherMinX, myint& iDasherMinY, myint& iDasherMaxX, myint& iDasherMaxY) override;
+	ScreenRegion VisibleRegion() override;
 
 	///
 	/// Render all nodes, inc. blanking around the root (supplied)
@@ -109,7 +109,7 @@ private:
 	/// dXMul - multiply x coords (in dasher space) by this (i.e. aspect ratio), for ovals
 	void CircleTo(myint cy, myint r, myint y1, myint x1, myint y3, myint x3, CDasherScreen::point dest, std::vector<CDasherScreen::point>& pts, double dXMul);
 	void Circle(myint Range, myint lowY, myint highY, int fCol, int oCol, int lWidth);
-	void Quadric(myint Range, myint lowY, myint highY, int fillColor, int outlineColour, int lineWidth);
+	void Quadric(myint Range, myint lowY, myint highY, int fillColor, int outlineColor, int lineWidth);
 	///draw isoceles triangle, with baseline from y1-y2 along y axis (x=0), and other point at (x,(y1+y2)/2)
 	/// (all in Dasher coords).
 	void Triangle(myint x, myint y1, myint y2, int fillColor, int outlineColor, int lineWidth);
@@ -140,7 +140,7 @@ private:
 	/// Draw text specified in Dasher co-ordinates
 	///
 
-	CTextString* DasherDrawText(myint iMaxX, myint iMidY, CDasherScreen::Label* pLabel, CTextString* pParent, int iColor);
+	CTextString* DasherDrawText(myint iDasherMaxX, myint iDasherMidY, CDasherScreen::Label* pLabel, CTextString* pParent, int iColor);
 
 	///
 	/// (Recursively) render a node and all contained subnodes, in disjoint rects.
@@ -150,8 +150,7 @@ private:
 	void DisjointRender(CDasherNode* Render, myint y1, myint y2, CTextString* prevText, CExpansionPolicy& policy, double dMaxCost, CDasherNode*& pOutput);
 
 	/// (Recursively) render a node and all contained subnodes, in overlapping shapes
-	/// (according to LP_SHAPE_TYPE: 1=rects, 2=triangles, 3=truncated triangles,
-	/// 4=quadrics, 5=semicircles)
+	/// (according to LP_SHAPE_TYPE)
 	/// Each call responsible for rendering exactly the area contained within the node.
 	/// @param pOutput The innermost node covering the crosshair (if any)
 	void NewRender(CDasherNode* Render, myint y1, myint y2, CTextString* prevText, CExpansionPolicy& policy, double dMaxCost, CDasherNode*& pOutput);

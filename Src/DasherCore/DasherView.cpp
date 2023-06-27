@@ -22,9 +22,6 @@
 #include "DasherView.h"
 
 using namespace Dasher;
-using std::vector;
-
-
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -42,7 +39,7 @@ void CDasherView::ChangeScreen(CDasherScreen *NewScreen) {
 
 void CDasherView::DasherSpaceLine(myint x1, myint y1, myint x2, myint y2, int iWidth, int iColor) {
   if (!ClipLineToVisible(x1, y1, x2, y2)) return;
-  vector<CDasherScreen::point> vPoints;
+  std::vector<CDasherScreen::point> vPoints;
   CDasherScreen::point p;
   Dasher2Screen(x1, y1, p.x, p.y);
   vPoints.push_back(p);
@@ -55,35 +52,34 @@ void CDasherView::DasherSpaceLine(myint x1, myint y1, myint x2, myint y2, int iW
 bool CDasherView::ClipLineToVisible(myint &x1, myint &y1, myint &x2, myint &y2) {
   if (x1 > x2) return ClipLineToVisible(x2,y2,x1,y1);
   //ok. have x1 <= x2...
-  myint iDasherMinX, iDasherMinY, iDasherMaxX, iDasherMaxY;
-  VisibleRegion(iDasherMinX, iDasherMinY, iDasherMaxX, iDasherMaxY);
-  if (x1 > iDasherMaxX) {
-    DASHER_ASSERT(x2>iDasherMaxX);
+  const CDasherView::ScreenRegion vr = VisibleRegion();
+  if (x1 > vr.maxX) {
+    DASHER_ASSERT(x2>visibleRegion.maxX);
     return false; //entirely offscreen!
   }
-  if (x2 < iDasherMinX) {
-    DASHER_ASSERT(x1<iDasherMinX);
+  if (x2 < vr.minX) {
+    DASHER_ASSERT(x1<visibleRegion.minX);
     return false;
   }
-  if (x1 < iDasherMinX) {
-    y1 = y2+((y1-y2)*(iDasherMinX-x2)/(x1 - x2));
-    x1 = iDasherMinX;
+  if (x1 < vr.minX) {
+    y1 = y2+((y1-y2)*(vr.minX-x2)/(x1 - x2));
+    x1 = vr.minX;
   }
-  if (x2 > iDasherMaxX) {
-    y2 = y1 + (y2-y1)*(iDasherMaxX-x1)/(x2-x1);
-    x2 = iDasherMaxX;
+  if (x2 > vr.maxX) {
+    y2 = y1 + (y2-y1)*(vr.maxX-x1)/(x2-x1);
+    x2 = vr.maxX;
   }
-  if (y1 < iDasherMinY && y2 < iDasherMinY) return false;
-  if (y1 > iDasherMaxY && y2 > iDasherMaxY) return false;
+  if (y1 < vr.minY && y2 < vr.minY) return false;
+  if (y1 > vr.maxY && y2 > vr.maxY) return false;
   for (int i=0; i<2; i++) {
     myint &y(i ? y2 : y1), &oy(i ? y1 : y2);
     myint &x(i ? x2 : x1), &ox(i ? x1 : x2);
-    if (y<iDasherMinY) {
-      x = ox- (ox-x)*(oy-iDasherMinY)/(oy-y);
-      y = iDasherMinY;
-    } else if (y>iDasherMaxY) {
-      x = ox-(ox-x)*(oy-iDasherMaxY)/(oy-y);
-      y = iDasherMaxY;
+    if (y<vr.minY) {
+      x = ox- (ox-x)*(oy-vr.minY)/(oy-y);
+      y = vr.minY;
+    } else if (y>vr.maxY) {
+      x = ox-(ox-x)*(oy-vr.maxY)/(oy-y);
+      y = vr.maxY;
     }
   }
   return true;

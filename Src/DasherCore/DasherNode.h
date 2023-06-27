@@ -92,7 +92,7 @@ class Dasher::CDasherNode:private NoClones {
   /// Display attributes of this node, used for rendering.
   /// Colour; note invisible nodes just have the same colour as their parent.
   /// (so we know what colour to use when their parents are deleted)
-  inline int getColour() {return m_iColour;}
+  inline int getColor() {return m_iColor;}
   virtual CDasherScreen::Label *getLabel() { return m_pLabel; }
   ///Whether labels on child nodes should be displaced to the right of this node's label.
   /// (Default implementation returns true, subclasses should override if appropriate)
@@ -295,7 +295,7 @@ class Dasher::CDasherNode:private NoClones {
   int m_iOffset;
 
  protected:
-  const int m_iColour;
+  const int m_iColor;
   CDasherScreen::Label * m_pLabel;
 };
 /// @}

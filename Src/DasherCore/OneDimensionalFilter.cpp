@@ -13,15 +13,15 @@ COneDimensionalFilter::COneDimensionalFilter(CSettingsUser *pCreator, CDasherInt
 
 void COneDimensionalFilter::ApplyTransform(myint &iDasherX, myint &iDasherY, CDasherView *pView) {
 
-  myint iDasherMaxX,temp;
-  pView->VisibleRegion(temp, temp, iDasherMaxX, temp);
+  
+  const CDasherView::ScreenRegion visibleRegion = pView->VisibleRegion();
 
   double disty,circlesize,yfullrange,yforwardrange,angle,ellipse_eccentricity,ybackrange,yb,x;	
   
   // The distance between the Y coordinate and the centreline in pixels
   disty= static_cast<double>(CDasherModel::ORIGIN_Y-iDasherY);
   
-  circlesize=    forwardmax*(1.0-std::max(0.0,std::min(1.0,(double)iDasherX/iDasherMaxX)));
+  circlesize=    forwardmax*(1.0-std::max(0.0,std::min(1.0,(double)iDasherX/visibleRegion.maxX)));
   yforwardrange= CDasherModel::MAX_Y/3.2; // Was 1.6
   yfullrange=    yforwardrange*1.6;
   ybackrange=    yfullrange-yforwardrange;
