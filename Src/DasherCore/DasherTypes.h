@@ -58,7 +58,7 @@ namespace Dasher {
     enum AlphabetTypes { MyNone = 0, Arabic = 1256, Baltic = 1257, CentralEurope = 1250, ChineseSimplified = 936, ChineseTraditional = 950, Cyrillic = 1251, Greek = 1253, Hebrew = 1255, Japanese = 932, Korean = 949, Thai = 874, Turkish = 1254, VietNam = 1258, Western = 1252 };
     enum ScreenOrientations { AlphabetDefault = -2, LeftToRight = 0, RightToLeft = 1, TopToBottom = 2, BottomToTop = 3 };
     enum FontSize { Normal = 1, Big = 2, VBig = 4 };
-    enum RenderingShapeTypes {DISJOINT_RECTANGLE = 0, OVERLAPPING_RECTANGLE = 1, TRIANGLE = 2, TRUNCATED_TRIANGLE = 3, QUADRIC = 4, CIRCLE = 5};
+    enum RenderingShapeTypes {DISJOINT_RECTANGLE = 0, OVERLAPPING_RECTANGLE = 1, TRIANGLE = 2, TRUNCATED_TRIANGLE = 3, QUADRIC = 4, CIRCLE = 5, CUBE = 6};
     enum ScreenGeometry {old_style = 0, square_no_xhair = 1, squish = 2, squish_and_log = 3};
   }
 

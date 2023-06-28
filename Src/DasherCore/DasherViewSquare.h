@@ -134,13 +134,28 @@ private:
 	};
 
 	std::vector<CTextString*> m_DelayedTexts;
+	//ExtrusionLevel is used for 3DRendering
+	void DoDelayedText(CTextString* pText, myint extrusionLevel = 0);
 
-	void DoDelayedText(CTextString* pText);
+	struct geometry_cube
+	{
+		screenint sizeX;
+		screenint sizeY;
+		screenint posX;
+		screenint posY;
+		myint extrusionLevel;
+		int Colour;
+		int iOutlineColour;
+		int iThickness;
+	};
+	std::vector<geometry_cube> m_DelayedCubes;
+	std::vector<std::pair<CTextString*, myint>> m_Delayed3DTexts;
+	myint m_CrosshairCubeLevel = -1;
+
 	///
 	/// Draw text specified in Dasher co-ordinates
 	///
-
-	CTextString* DasherDrawText(myint iDasherMaxX, myint iDasherMidY, CDasherScreen::Label* pLabel, CTextString* pParent, int iColor);
+	CTextString* DasherDrawText(myint iDasherMaxX, myint iDasherMidY, CDasherScreen::Label* pLabel, int iColor);
 
 	///
 	/// (Recursively) render a node and all contained subnodes, in disjoint rects.
@@ -149,11 +164,12 @@ private:
 	/// @param pOutput The innermost node covering the crosshair (if any)
 	void DisjointRender(CDasherNode* Render, myint y1, myint y2, CTextString* prevText, CExpansionPolicy& policy, double dMaxCost, CDasherNode*& pOutput);
 
+	void DasherDrawCube(myint iDasherMaxX, myint iDasherMinY, myint iDasherMinX, myint iDasherMaxY, myint extrusionLevel, const int Color, int iOutlineColour, int iThickness);
 	/// (Recursively) render a node and all contained subnodes, in overlapping shapes
 	/// (according to LP_SHAPE_TYPE)
 	/// Each call responsible for rendering exactly the area contained within the node.
-	/// @param pOutput The innermost node covering the crosshair (if any)
-	void NewRender(CDasherNode* Render, myint y1, myint y2, CTextString* prevText, CExpansionPolicy& policy, double dMaxCost, CDasherNode*& pOutput);
+	/// @param pCurrentTopCenterNode The innermost node covering the crosshair (if any)
+	void NewRender(CDasherNode* pCurrentNode, myint y1, myint y2, CTextString* pPrevText, CExpansionPolicy& policy, double dMaxCost, CDasherNode*& pCurrentTopCenterNode, myint recusionDepth);
 
 	/// @name Nonlinearity
 	/// Implements the non-linear part of the coordinate space mapping
@@ -180,8 +196,6 @@ private:
 
 	void DasherLine2Screen(myint x1, myint y1, myint x2, myint y2, std::vector<CDasherScreen::point>& vPoints) override;
 
-	bool m_bVisibleRegionValid = false;
-
 	// Called on screen size or orientation changes
 	void SetScaleFactor();
 
@@ -198,11 +212,8 @@ private:
 	myint iScaleFactorX, iScaleFactorY;
 	static const myint SCALE_FACTOR = 1 << 26; //was 100,000,000; change to power of 2 => easier to multiply/divide
 
-	/// Cached extents of visible region
-	myint m_iDasherMinX;
-	myint m_iDasherMaxX;
-	myint m_iDasherMinY;
-	myint m_iDasherMaxY;
+	bool m_bVisibleRegionValid = false;
+	ScreenRegion m_visible_region;
 };
 
 /// @}

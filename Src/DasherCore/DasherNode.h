@@ -215,7 +215,7 @@ class Dasher::CDasherNode:private NoClones {
   /// @brief Delete the children of this node
   ///
   ///
-  void Delete_children();
+  void DeleteChildren();
   /// @}
 
   ///

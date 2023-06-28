@@ -471,7 +471,7 @@ void CDasherModel::ExpandNode(CDasherNode *pNode) {
   }
 
   // TODO: Do we really need to delete all of the children at this point?
-  pNode->Delete_children(); // trial commented out - pconlon
+  pNode->DeleteChildren(); // trial commented out - pconlon
 
 #ifdef DEBUG
   unsigned int iExpect = pNode->ExpectedNumChildren();
