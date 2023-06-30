@@ -52,6 +52,7 @@
 #include <sstream>
 
 // Declare our global file logging object
+#include "PressFilter.h"
 #include "FileUtils.h"
 #include "../DasherCore/FileLogger.h"
 #ifdef _DEBUG
@@ -773,6 +774,7 @@ void CDasherInterfaceBase::CreateModules() {
   CInputFilter *defFil = new CDefaultFilter(this, this, m_pFramerate, 3, _("Normal Control"));
   RegisterModule(defFil);
   SetDefaultInputMethod(defFil);
+  RegisterModule(new CPressFilter(this, this, m_pFramerate));
   RegisterModule(new COneDimensionalFilter(this, this, m_pFramerate));
   RegisterModule(new CClickFilter(this, this));
   RegisterModule(new COneButtonFilter(this, this));
