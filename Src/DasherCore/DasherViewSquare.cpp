@@ -828,6 +828,7 @@ void CDasherViewSquare::NewRender(CDasherNode* pRender, myint y1, myint y2,
 			//covers entire y-axis!
 			//render just that child; nothing more to do for this node => tail call to beginning
 			NewRender(pChild, newy1, newy2, pPrevText, policy, dMaxCost, pOutput);
+			return;
 		}
 		pRender->onlyChildRendered = nullptr;
 	}
