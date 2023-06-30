@@ -43,6 +43,7 @@ private:
   myint m_iSum;
   CStartHandler *m_pStartHandler;
   int m_iCounter;
+protected:
   bool m_bTurbo;
 };
 }
