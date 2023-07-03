@@ -39,6 +39,7 @@
 #include "AlternatingDirectMode.h"
 #include "ButtonMode.h"
 #include "ClickFilter.h"
+#include "PressFilter.h"
 #include "CompassMode.h"
 #include "DefaultFilter.h"
 #include "OneButtonFilter.h"
@@ -52,7 +53,7 @@
 #include <sstream>
 
 // Declare our global file logging object
-#include "PressFilter.h"
+
 #include "FileUtils.h"
 #include "../DasherCore/FileLogger.h"
 #ifdef _DEBUG

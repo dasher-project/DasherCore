@@ -35,6 +35,7 @@ file(GLOB HEADERS
 )
 
 ADD_library(DasherCore STATIC
+	${CMAKE_CURRENT_LIST_DIR}/Src/DasherCore/PressFilter.cpp
 	${CMAKE_CURRENT_LIST_DIR}/Src/DasherCore/Parameters.cpp 
 	${CMAKE_CURRENT_LIST_DIR}/Src/DasherCore/SettingsStore.cpp 
 	${CMAKE_CURRENT_LIST_DIR}/Src/DasherCore/XmlSettingsStore.h
@@ -68,7 +69,6 @@ ADD_library(DasherCore STATIC
 	${CMAKE_CURRENT_LIST_DIR}/Src/DasherCore/DasherNode.cpp
 	${CMAKE_CURRENT_LIST_DIR}/Src/DasherCore/DasherView.cpp
 	${CMAKE_CURRENT_LIST_DIR}/Src/DasherCore/DasherViewSquare.cpp
-	${CMAKE_CURRENT_LIST_DIR}/Src/DasherCore/DasherViewSquare.inl
 	${CMAKE_CURRENT_LIST_DIR}/Src/DasherCore/DefaultFilter.cpp
 	${CMAKE_CURRENT_LIST_DIR}/Src/DasherCore/DemoFilter.cpp
 	${CMAKE_CURRENT_LIST_DIR}/Src/DasherCore/DynamicButtons.cpp
