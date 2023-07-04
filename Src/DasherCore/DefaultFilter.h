@@ -18,8 +18,8 @@ class CDefaultFilter : public CDynamicFilter, public CSettingsObserver {
 
   virtual bool DecorateView(CDasherView *pView, CDasherInput *pInput);
   virtual void Timer(unsigned long Time, CDasherView *pView, CDasherInput *pInput, CDasherModel *pModel, CExpansionPolicy **pol);
-  virtual void KeyDown(unsigned long iTime, int iId, CDasherView *pDasherView, CDasherInput *pInput, CDasherModel *pModel);
-  virtual void KeyUp(unsigned long iTime, int iId, CDasherView *pView, CDasherInput *pInput, CDasherModel *pModel);
+  virtual void KeyDown(unsigned long iTime, Keys::VirtualKey Key, CDasherView *pDasherView, CDasherInput *pInput, CDasherModel *pModel);
+  virtual void KeyUp(unsigned long iTime, Keys::VirtualKey Key, CDasherView *pView, CDasherInput *pInput, CDasherModel *pModel);
   virtual void Activate();
   virtual void Deactivate();
   bool GetSettings(SModuleSettings **, int *);

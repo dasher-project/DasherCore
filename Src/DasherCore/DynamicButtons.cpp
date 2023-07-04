@@ -45,26 +45,26 @@ void CDynamicButtons::Timer(unsigned long iTime, CDasherView *pDasherView, CDash
   }
 }
 
-void CDynamicButtons::KeyDown(unsigned long iTime, int iId, CDasherView *pView, CDasherInput *pInput, CDasherModel *pModel) {
+void CDynamicButtons::KeyDown(unsigned long iTime, Keys::VirtualKey Key, CDasherView *pView, CDasherInput *pInput, CDasherModel *pModel) {
 
-  if(((iId == 0) || (iId == 1) || (iId == 100)) && !GetBoolParameter(BP_BACKOFF_BUTTON))
+  if(((Key == Keys::Big_Start_Stop_Key) || (Key == Keys::Button_1) || (Key == Keys::Primary_Input)) && !GetBoolParameter(BP_BACKOFF_BUTTON))
     return;
 
   if(m_bKeyDown)
     return;
 
   // Pass the basic key down event to the handler
-  ButtonEvent(iTime, iId, 0, pModel);
+  ButtonEvent(iTime, Key, 0, pModel);
 
-  m_iHeldId = iId;
+  m_iHeldId = Key;
   m_bKeyDown = true;
 }
 
-void CDynamicButtons::KeyUp(unsigned long iTime, int iId, CDasherView *pView, CDasherInput *pInput, CDasherModel *pModel) {
-  if (iId == m_iHeldId) m_bKeyDown = false;
+void CDynamicButtons::KeyUp(unsigned long iTime, Keys::VirtualKey Key, CDasherView *pView, CDasherInput *pInput, CDasherModel *pModel) {
+  if (Key == m_iHeldId) m_bKeyDown = false;
 }
 
-void CDynamicButtons::ButtonEvent(unsigned long iTime, int iButton, int iType, CDasherModel *pModel) {
+void CDynamicButtons::ButtonEvent(unsigned long iTime, Keys::VirtualKey Key, int iType, CDasherModel *pModel) {
   
   // TODO: Check that state diagram implemented here is what we
   // decided upon
@@ -73,36 +73,36 @@ void CDynamicButtons::ButtonEvent(unsigned long iTime, int iButton, int iType, C
   if (isPaused()) {
     //Any button causes a restart
     if(CUserLogBase *pUserLog=m_pInterface->GetUserLogPtr())
-      pUserLog->KeyDown(iButton, iType, 1);
+      pUserLog->KeyDown(Key, iType, 1);
     run(iTime);
   } else if (isReversing()) {
     //Any button pauses
     if(CUserLogBase *pUserLog=m_pInterface->GetUserLogPtr())
-      pUserLog->KeyDown(iButton, iType, 2);
+      pUserLog->KeyDown(Key, iType, 2);
     m_pInterface->Done();
     pause();
   } else {
     //running; examine event/button-press type
     switch(iType) {
     case 0: //single press
-      if((iButton == 0) || (iButton == 100)) {
+      if((Key == Keys::Big_Start_Stop_Key) || (Key == Keys::Primary_Input)) {
         //dedicated pause button
         if(CUserLogBase *pUserLog=m_pInterface->GetUserLogPtr())
-          pUserLog->KeyDown(iButton, iType, 2);
+          pUserLog->KeyDown(Key, iType, 2);
         m_pInterface->Done();
         pause();
         break;
       }
-      else if(iButton == 1) {
+      else if(Key == 1) {
         //dedicated reverse button
         if(CUserLogBase *pUserLog=m_pInterface->GetUserLogPtr())
-          pUserLog->KeyDown(iButton, iType, 6);
+          pUserLog->KeyDown(Key, iType, 6);
         reverse(iTime);
         break;
       }
       //else - any non-special button - fall through
     default: //or, Any special kind of event - long, double, triple, ... 
-      ActionButton(iTime, iButton, iType, pModel);
+      ActionButton(iTime, Key, iType, pModel);
     }
   }
 }

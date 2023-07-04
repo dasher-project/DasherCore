@@ -45,12 +45,12 @@ namespace Dasher {
   virtual bool GetSettings(SModuleSettings **pSettings, int *iCount);
 
   //override to get mouse clicks / taps back again if BACKOFF_BUTTON off...
-  virtual void KeyDown(unsigned long Time, int iId, CDasherView *pDasherView, CDasherInput *pInput, CDasherModel *pModel);
-  virtual void KeyUp(unsigned long Time, int iId, CDasherView *pDasherView, CDasherInput *pInput, CDasherModel *pModel);
+  virtual void KeyDown(unsigned long Time, Keys::VirtualKey Key, CDasherView *pDasherView, CDasherInput *pInput, CDasherModel *pModel);
+  virtual void KeyUp(unsigned long Time, Keys::VirtualKey Key, CDasherView *pDasherView, CDasherInput *pInput, CDasherModel *pModel);
 
  protected:
   virtual void TimerImpl(unsigned long Time, CDasherView *m_pDasherView, CDasherModel *m_pDasherModel, CExpansionPolicy **pol);
-  virtual void ActionButton(unsigned long iTime, int iButton, int iType, CDasherModel *pModel);
+  virtual void ActionButton(unsigned long iTime, Keys::VirtualKey Key, int iType, CDasherModel* pModel);
 
   virtual void HandleEvent(Parameter parameter);
 

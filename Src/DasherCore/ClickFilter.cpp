@@ -71,9 +71,9 @@ void CZoomAdjuster::AdjustZoomX(myint &iDasherX, CDasherView *pView, myint safet
   iDasherX = std::max(std::max(myint(2),CDasherModel::ORIGIN_X/maxZoom),iNewDasherX);  
 }
 
-void CClickFilter::KeyDown(unsigned long iTime, int iId, CDasherView *pView, CDasherInput *pInput, CDasherModel *pModel) {
-  switch(iId) {
-  case 100: // Mouse clicks
+void CClickFilter::KeyDown(unsigned long iTime, Keys::VirtualKey Key, CDasherView *pView, CDasherInput *pInput, CDasherModel *pModel) {
+  switch(Key) {
+  case Keys::Primary_Input: // Mouse clicks
     {
       myint iDasherX;
       myint iDasherY;

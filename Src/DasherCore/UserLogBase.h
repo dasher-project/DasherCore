@@ -38,7 +38,7 @@ class CUserLogBase : protected TransientObserver<const Dasher::CEditEvent *> {
   virtual void InitIsDone() = 0;
   virtual void SetOuputFilename(const std::string& strFilename = "") = 0;
   virtual int GetLogLevelMask() = 0;
-  virtual void KeyDown(int iId, int iType, int iEffect) = 0;
+  virtual void KeyDown(Dasher::Keys::VirtualKey Key, int iType, int iEffect) = 0;
   ///Watches output events to record symbols added/deleted
   virtual void HandleEvent(const Dasher::CEditEvent *pEvent);
   ///Passes record of symbols added/deleted to AddSymbols/DeleteSymbols

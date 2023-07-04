@@ -91,42 +91,42 @@ bool COneButtonDynamicFilter::DecorateView(CDasherView *pView, CDasherInput *pIn
   return bRV;
 }
 
-void COneButtonDynamicFilter::KeyDown(unsigned long Time, int iId, CDasherView *pDasherView, CDasherInput *pInput, CDasherModel *pModel) {
-  if (iId == 100 && !GetBoolParameter(BP_BACKOFF_BUTTON))
+void COneButtonDynamicFilter::KeyDown(unsigned long Time, Keys::VirtualKey Key, CDasherView *pDasherView, CDasherInput *pInput, CDasherModel *pModel) {
+  if (Key == Keys::Primary_Input && !GetBoolParameter(BP_BACKOFF_BUTTON))
     //mouse click - will be ignored by superclass method.
     //simulate press of button 2...
-    iId=2;
-  CButtonMultiPress::KeyDown(Time, iId, pDasherView, pInput, pModel);
+    Key= Keys::Button_2;
+  CButtonMultiPress::KeyDown(Time, Key, pDasherView, pInput, pModel);
 }
 
-void COneButtonDynamicFilter::KeyUp(unsigned long Time, int iId, CDasherView *pDasherView, CDasherInput *pInput, CDasherModel *pModel) {
-  if (iId == 100 && !GetBoolParameter(BP_BACKOFF_BUTTON))
+void COneButtonDynamicFilter::KeyUp(unsigned long Time, Keys::VirtualKey Key, CDasherView *pDasherView, CDasherInput *pInput, CDasherModel *pModel) {
+  if (Key == Keys::Primary_Input && !GetBoolParameter(BP_BACKOFF_BUTTON))
     //mouse click - will be ignored by superclass method.
     //simulate press of button 2...
-    iId=2;
-  CButtonMultiPress::KeyUp(Time, iId, pDasherView, pInput, pModel);
+    Key= Keys::Button_2;
+  CButtonMultiPress::KeyUp(Time, Key, pDasherView, pInput, pModel);
 }
 
 void COneButtonDynamicFilter::TimerImpl(unsigned long Time, CDasherView *m_pDasherView, CDasherModel *m_pDasherModel, CExpansionPolicy **pol) {
   OneStepTowards(m_pDasherModel, m_iTargetX[m_iTarget], m_iTargetY[m_iTarget], Time, FrameSpeedMul(m_pDasherModel, Time));
 }
 
-void COneButtonDynamicFilter::ActionButton(unsigned long iTime, int iButton, int iType, CDasherModel *pModel) {
+void COneButtonDynamicFilter::ActionButton(unsigned long iTime, Keys::VirtualKey Key, int iType, CDasherModel *pModel) {
   if (iType != 0) {
     //double/long push
     reverse(iTime);
     return;
   }
     
-  if((iButton == 2) || (iButton == 3) || (iButton == 4)) {
+  if((Key == Keys::Button_2) || (Key == Keys::Button_3) || (Key == Keys::Button_4)) {
     if(CUserLogBase *pUserLog=m_pInterface->GetUserLogPtr())
-      pUserLog->KeyDown(iButton, iType, 5);
+      pUserLog->KeyDown(Key, iType, 5);
     m_iTarget = 1 - m_iTarget;
     m_bDecorationChanged = true;
   }
   else {
     if(CUserLogBase *pUserLog=m_pInterface->GetUserLogPtr())
-      pUserLog->KeyDown(iButton, iType, 0);
+      pUserLog->KeyDown(Key, iType, 0);
   }
 }
 

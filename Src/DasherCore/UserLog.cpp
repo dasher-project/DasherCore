@@ -650,11 +650,11 @@ int CUserLog::GetLogLevelMask()
   return m_iLevelMask;
 }
 
-void CUserLog::KeyDown(int iId, int iType, int iEffect) {
+void CUserLog::KeyDown(Dasher::Keys::VirtualKey Key, int iType, int iEffect) {
   CUserLogTrial* pTrial = GetCurrentTrial();
   
   if(pTrial)
-    pTrial->AddKeyDown(iId, iType, iEffect);
+    pTrial->AddKeyDown(Key, iType, iEffect);
 }
   
 // This gets called whenever parameters get changed that we are tracking

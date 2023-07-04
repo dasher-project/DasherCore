@@ -316,19 +316,19 @@ public:
   /// @{
   /// Called from outside to indicate a key or mouse button has just been pushed down
   /// \param iTime time at which button pressed
-  /// \param iId integer identifying button. TODO we need a better system here.
+  /// \param Key enum identifying button. TODO we need a better system here.
   /// At present 1-4 are keys on the keyboard (or external), after mapping from e.g.
   /// qwerty layout, such that for a user who can press 2 buttons, 1 is the primary, 2
   /// secondary (maybe harder for them), etc. Direct mode can use an arbitrary number.
   /// 100 is left mouse button, 101 right, 102 middle (if there is one), and so on.
   /// (Note we do not specify the location at which mouse presses occur: the current
   /// pointer location can be obtained from the input device if necessary)
-  void KeyDown(unsigned long iTime, int iId);
+  void KeyDown(unsigned long iTime, Keys::VirtualKey Key);
 
   /// Called from outside to indicate a key or mouse button has just been released
   /// \param iTime time at which button released
-  /// \param iId integer identifying button. See comments for KeyDown.
-  void KeyUp(unsigned long iTime, int iId);
+  /// \param Key enum identifying button. See comments for KeyDown.
+  void KeyUp(unsigned long iTime, Keys::VirtualKey Key);
 
   /// @}
 

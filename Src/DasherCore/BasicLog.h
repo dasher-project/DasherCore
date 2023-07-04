@@ -28,7 +28,7 @@ class CBasicLog : public CUserLogBase, public Dasher::CSettingsUser {
   virtual void InitIsDone() {};
   virtual void SetOuputFilename(const std::string& strFilename = "") {};
   virtual int  GetLogLevelMask() {return 0;};
-  virtual void KeyDown(int iId, int iType, int iEffect);
+  virtual void KeyDown(Dasher::Keys::VirtualKey Key, int iType, int iEffect);
 
  private:
   void StartTrial();

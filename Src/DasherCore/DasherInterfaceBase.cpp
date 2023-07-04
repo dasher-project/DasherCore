@@ -710,29 +710,29 @@ CUserLogBase* CDasherInterfaceBase::GetUserLogPtr() {
   return m_pUserLog;
 }
 
-void CDasherInterfaceBase::KeyDown(unsigned long iTime, int iId) {
+void CDasherInterfaceBase::KeyDown(unsigned long iTime, Keys::VirtualKey Key) {
   if(isLocked())
     return;
 
   if(m_pInputFilter) {
-    m_pInputFilter->KeyDown(iTime, iId, m_pDasherView, m_pInput, m_pDasherModel);
+    m_pInputFilter->KeyDown(iTime, Key, m_pDasherView, m_pInput, m_pDasherModel);
   }
 
   if(m_pInput) {
-    m_pInput->KeyDown(iTime, iId);
+    m_pInput->KeyDown(iTime, Key);
   }
 }
 
-void CDasherInterfaceBase::KeyUp(unsigned long iTime, int iId) {
+void CDasherInterfaceBase::KeyUp(unsigned long iTime, Keys::VirtualKey Key) {
   if(isLocked())
     return;
 
   if(m_pInputFilter) {
-    m_pInputFilter->KeyUp(iTime, iId, m_pDasherView, m_pInput, m_pDasherModel);
+    m_pInputFilter->KeyUp(iTime, Key, m_pDasherView, m_pInput, m_pDasherModel);
   }
 
   if(m_pInput) {
-    m_pInput->KeyUp(iTime, iId);
+    m_pInput->KeyUp(iTime, Key);
   }
 }
 

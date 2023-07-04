@@ -99,7 +99,7 @@ public:
   void                        AddCanvasSize(int iTop, int iLeft, int iBottom, int iRight);
   void                        AddMouseLocation(int iX, int iY, float dNats);
   void                        AddMouseLocationNormalized(int iX, int iY, bool bStoreIntegerRep, float dNats);
-  void AddKeyDown(int iId, int iType, int iEffect);
+  void AddKeyDown(Dasher::Keys::VirtualKey Key, int iType, int iEffect);
   bool                        IsWriting();
   void                        AddParam(const std::string& strName, const std::string& strValue, int iOptionMask = 0);
   static std::string               GetParamXML(CUserLogParam* pParam, const std::string& strPrefix = "");

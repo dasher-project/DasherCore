@@ -46,7 +46,7 @@ void CBasicLog::NewTrial() {
   EndTrial();
 }
 
-void CBasicLog::KeyDown(int iId, int iType, int iEffect) {
+void CBasicLog::KeyDown(Dasher::Keys::VirtualKey Key, int iType, int iEffect) {
   ++m_iKeyCount;
 }
 

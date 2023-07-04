@@ -98,10 +98,10 @@ void CDemoFilter::Timer(unsigned long Time, CDasherView *m_pDasherView, CDasherI
   OneStepTowards(m_pDasherModel, m_iDemoX, m_iDemoY, Time, 1.0);
 }
 
-void CDemoFilter::KeyDown(unsigned long iTime, int iId, CDasherView *pDasherView, CDasherInput *pInput, CDasherModel *pModel) {
+void CDemoFilter::KeyDown(unsigned long iTime, Keys::VirtualKey Key, CDasherView *pDasherView, CDasherInput *pInput, CDasherModel *pModel) {
   
-  if ((iId==0 && GetBoolParameter(BP_START_SPACE))
-      || (iId==100 && GetBoolParameter(BP_START_MOUSE))) {
+  if ((Key==Keys::Big_Start_Stop_Key && GetBoolParameter(BP_START_SPACE))
+      || (Key==Keys::Primary_Input && GetBoolParameter(BP_START_MOUSE))) {
     if(isPaused())
       run(iTime);
     else

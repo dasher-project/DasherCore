@@ -98,7 +98,7 @@ public:
   void                        InitIsDone();
   void                        SetOuputFilename(const std::string& strFilename = "");
   int                         GetLogLevelMask();
-  void KeyDown(int iId, int iType, int iEffect);
+  void KeyDown(Dasher::Keys::VirtualKey Key, int iType, int iEffect);
   void                        HandleEvent(Dasher::Parameter parameter);
 
   // Methods used by utility that can post-process the log files:
@@ -154,7 +154,6 @@ protected:
   void                        ComputeSimpleMousePos(int iX, int iY);
   void                        ResetCycle();
   void                        InitUsingMask(int iLogLevelMask);
-
 };
 /// @}
 

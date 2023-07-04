@@ -8,8 +8,8 @@ namespace Dasher {
 class CPressFilter : public CDefaultFilter {
 public:
 	CPressFilter(CSettingsUser* pCreator, CDasherInterfaceBase* pInterface, CFrameRate* pFramerate);
-	void KeyDown(unsigned long iTime, int iId, CDasherView* pDasherView, CDasherInput* pInput, CDasherModel* pModel) override;
-	void KeyUp(unsigned long iTime, int iId, CDasherView* pView, CDasherInput* pInput, CDasherModel* pModel) override;
+	void KeyDown(unsigned long iTime, Keys::VirtualKey Key, CDasherView* pDasherView, CDasherInput* pInput, CDasherModel* pModel) override;
+	void KeyUp(unsigned long iTime, Keys::VirtualKey Key, CDasherView* pView, CDasherInput* pInput, CDasherModel* pModel) override;
 };
 /// @}
 }
