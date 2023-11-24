@@ -35,12 +35,12 @@ void CButtonMultiPress::Timer(unsigned long iTime, CDasherView *pView, CDasherIn
   CDynamicButtons::Timer(iTime,pView,pInput,pModel,pol);
 }
 
-void CButtonMultiPress::KeyDown(unsigned long iTime, int iId, CDasherView *pView, CDasherInput *pInput, CDasherModel *pModel) {
+void CButtonMultiPress::KeyDown(unsigned long iTime, Keys::VirtualKey Key, CDasherView *pView, CDasherInput *pInput, CDasherModel *pModel) {
 
   if (m_bKeyDown) return;
 
   // Check for multiple clicks
-  if(iId == m_iQueueId && m_deQueueTimes.size()) {
+  if(Key == m_iQueueId && !m_deQueueTimes.empty()) {
     if ( (iTime - m_deQueueTimes.back()) > GetLongParameter(LP_MULTIPRESS_TIME) )
       m_deQueueTimes.clear(); //and fall through to record+process normally, below
     else
@@ -48,7 +48,7 @@ void CButtonMultiPress::KeyDown(unsigned long iTime, int iId, CDasherView *pView
       //previous presses should not be treated as such....
       RevertPresses(static_cast<int>(m_deQueueTimes.size()));
       //...but should be combined with this one into a new event (type = #presses)
-      ButtonEvent(iTime, iId, static_cast<int>(m_deQueueTimes.size())+1, pModel);
+      ButtonEvent(iTime, Key, static_cast<int>(m_deQueueTimes.size())+1, pModel);
       if (m_deQueueTimes.size() >= maxClickCount() - 1)
 	m_deQueueTimes.clear(); //final press
       else //may still be more presses to come
@@ -57,13 +57,13 @@ void CButtonMultiPress::KeyDown(unsigned long iTime, int iId, CDasherView *pView
     }
   } else {
     m_deQueueTimes.clear(); //clear record of previous, different, button
-    m_iQueueId = iId;
+    m_iQueueId = Key;
   }
 
   // Record press...
   m_deQueueTimes.push_back(iTime);
   // ... and process normally; if it changes the state, pause()/reverse()'ll clear the queue
-  CDynamicButtons::KeyDown(iTime, iId, pView, pInput, pModel);
+  CDynamicButtons::KeyDown(iTime, Key, pView, pInput, pModel);
   
   // Store the key down time so that long presses can be determined
   // TODO: This is going to cause problems if multiple buttons are

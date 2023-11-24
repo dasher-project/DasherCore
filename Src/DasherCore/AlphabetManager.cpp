@@ -24,21 +24,15 @@
 #include "ConversionManager.h"
 #include "DasherInterfaceBase.h"
 #include "DasherNode.h"
-#include "Event.h"
-#include "Observable.h"
 #include "NodeCreationManager.h"
 #include "LanguageModelling/PPMLanguageModel.h"
 #include "LanguageModelling/WordLanguageModel.h"
-#include "LanguageModelling/DictLanguageModel.h"
 #include "LanguageModelling/MixtureLanguageModel.h"
-#include "LanguageModelling/PPMPYLanguageModel.h"
 #include "LanguageModelling/CTWLanguageModel.h"
 #include "FileWordGenerator.h"
 
 #include <vector>
 #include <sstream>
-#include <iostream>
-#include "string.h"
 
 using namespace Dasher;
 
@@ -316,8 +310,8 @@ CAlphabetManager::CAlphNode *CAlphabetManager::GetRoot(CDasherNode *pParent, boo
     // so either we're rebuilding, or else creating a new root from existing text (in edit box)
     DASHER_ASSERT(!pParent);
     pNewNode = CreateSymbolRoot(iNewOffset, p.second, p.first);
-    pNewNode->SetFlag(NF_SEEN, true);
-    pNewNode->CDasherNode::SetFlag(NF_COMMITTED, true); //do NOT commit!
+    pNewNode->SetFlag(CDasherNode::NF_SEEN, true);
+    pNewNode->CDasherNode::SetFlag(CDasherNode::NF_COMMITTED, true); //do NOT commit!
   }
   pNewNode->iContext = p.second;
   return pNewNode;
@@ -569,7 +563,7 @@ void CAlphabetManager::IterateChildGroups(CAlphNode *pParent, const SGroupInfo *
       i++; //make one symbol at a time - move onto next symbol in next iteration of (outer) loop
     } else {
       DASHER_ASSERT(pCurrentNode->iNumChildNodes > 1);
-      pNewChild= (buildAround) ? buildAround->RebuildGroup(pParent, pParent->getColour(), pCurrentNode) : CreateGroupNode(pParent, pParent->getColour(), pCurrentNode);
+      pNewChild= (buildAround) ? buildAround->RebuildGroup(pParent, pParent->getColor(), pCurrentNode) : CreateGroupNode(pParent, pParent->getColor(), pCurrentNode);
       i = pCurrentNode->iEnd; //make one group at a time - so move past entire group...
       pCurrentNode = pCurrentNode->pNext; //next sibling of _original_ pCurrentNode (above)
       // (maybe not of pCurrentNode now, which might be a subgroup filling the original)
@@ -579,7 +573,7 @@ void CAlphabetManager::IterateChildGroups(CAlphNode *pParent, const SGroupInfo *
   }
 
   if (pParentGroup == m_pBaseGroup) m_pNCManager->AddExtras(pParent);
-  pParent->SetFlag(NF_ALLCHILDREN, true);
+  pParent->SetFlag(CDasherNode::NF_ALLCHILDREN, true);
 }
 
 CAlphabetManager::CAlphNode::~CAlphNode() {

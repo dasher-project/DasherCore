@@ -10,7 +10,6 @@
 #define __FrameRate_h__
 
 #include <cmath>
-#include "../Common/Common.h"
 #include "SettingsStore.h"
 #include "DasherModel.h"
 
@@ -27,7 +26,7 @@ public:
 
   //Responds to a change to LP_FRAMERATE or LP_MAX_BITRATE
   // by recomputing the Steps() parameter.
-  virtual void HandleEvent(int iParameter);
+  virtual void HandleEvent(Parameter parameter);
 
   ///The number of frames, in which we will attempt to bring
   /// the target location (under the cursor, or in dynamic button

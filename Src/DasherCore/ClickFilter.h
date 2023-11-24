@@ -23,7 +23,7 @@ class CClickFilter : public CStaticFilter, private CZoomAdjuster {
     : CStaticFilter(pCreator, pInterface, 7, _("Click Mode")) { };
 
   virtual bool DecorateView(CDasherView *pView, CDasherInput *pInput);
-  virtual void KeyDown(unsigned long iTime, int iId, CDasherView *pView, CDasherInput *pInput, CDasherModel *pModel);
+  virtual void KeyDown(unsigned long iTime, Keys::VirtualKey Key, CDasherView *pView, CDasherInput *pInput, CDasherModel *pModel);
   virtual bool GetSettings(SModuleSettings **pSettings, int *iCount);
   
  private:

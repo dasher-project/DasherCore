@@ -9,8 +9,6 @@
 #include "DasherScreen.h"
 #include "DasherInterfaceBase.h"
 #include <valarray>
-#include <iostream>
-
 
 
 using namespace Dasher;
@@ -99,8 +97,8 @@ bool CCompassMode::DecorateView(CDasherView *pView, CDasherInput *pInput) {
   return bRV;
 }
 
-void CCompassMode::HandleEvent(int iParameter) {
-  if (iParameter == LP_RIGHTZOOM) {
+void CCompassMode::HandleEvent(Parameter parameter) {
+  if (parameter == LP_RIGHTZOOM) {
     delete[] m_pBoxes;
     SetupBoxes();
   }

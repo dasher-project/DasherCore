@@ -5,16 +5,9 @@
 #ifndef __COMPASS_MODE_H__
 #define __COMPASS_MODE_H__
 
-#include <string>
-#include <vector>
-#include <iostream>
-#include <fstream>
-#include <algorithm>
 #include "Event.h"
 #include "DasherButtons.h"
 
-
-using namespace std;
 namespace Dasher {
 /// \ingroup Input
 /// @{
@@ -23,7 +16,7 @@ class CCompassMode : public CDasherButtons
  public:
   CCompassMode(CSettingsUser *pCreator, CDasherInterfaceBase *pInterface);
 
-  virtual void HandleEvent(int iParameter);
+  virtual void HandleEvent(Parameter parameter);
 
   bool DecorateView(CDasherView *pView, CDasherInput *pInput);
 

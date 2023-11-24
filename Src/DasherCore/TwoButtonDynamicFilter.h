@@ -23,8 +23,6 @@
 
 #include "ButtonMultiPress.h"
 
-#include <deque>
-
 namespace Dasher {
 /// \ingroup InputFilter
 /// @{
@@ -39,21 +37,21 @@ class CTwoButtonDynamicFilter : public CButtonMultiPress, public CSettingsObserv
 
   virtual bool GetMinWidth(int &iMinWidth);
 
-  virtual void HandleEvent(int iParameter);
+  virtual void HandleEvent(Parameter parameter);
   
  protected:
   //override to inspect x,y coords of mouse clicks/taps
-  virtual void KeyDown(unsigned long Time, int iId, CDasherView *pDasherView, CDasherInput *pInput, CDasherModel *pModel);
-  virtual void KeyUp(unsigned long Time, int iId, CDasherView *pDasherView, CDasherInput *pInput, CDasherModel *pModel);
+  virtual void KeyDown(unsigned long Time, Keys::VirtualKey Key, CDasherView *pDasherView, CDasherInput *pInput, CDasherModel *pModel);
+  virtual void KeyUp(unsigned long Time, Keys::VirtualKey Key, CDasherView *pDasherView, CDasherInput *pInput, CDasherModel *pModel);
 	
  private:
   unsigned int maxClickCount() {return GetBoolParameter(BP_2B_INVERT_DOUBLE) ? 3 : 2;}
   virtual void TimerImpl(unsigned long Time, CDasherView *m_pDasherView, CDasherModel *m_pDasherModel, CExpansionPolicy **pol);
-  virtual void ActionButton(unsigned long iTime, int iButton, int iType, CDasherModel *pModel);
+  virtual void ActionButton(unsigned long iTime, Keys::VirtualKey Key, int iType, CDasherModel* pModel);
   double m_dLagBits;
   ///id of physical key, whose pressing we have emulated, in response
   /// to a mouse down event on one or other half of the canvas...
-  int m_iMouseButton;
+  Keys::VirtualKey m_iMouseButton;
 };
 }
 /// @}

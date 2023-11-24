@@ -6,7 +6,7 @@ CFileWordGenerator::CFileWordGenerator(CMessageDisplay *pMsgs, const CAlphInfo *
   : CWordGeneratorBase(pAlph,pAlphMap), AbstractParser(pMsgs) {
 }
 
-bool CFileWordGenerator::Parse(const std::string &strDesc, istream &in, bool bUser) {
+bool CFileWordGenerator::Parse(const std::string &strDesc, std::istream &in, bool bUser) {
   //non-file streams not supported (yet)
   DASHER_ASSERT(false);
   return false;
@@ -42,7 +42,7 @@ bool CFileWordGenerator::ParseFile(const std::string &sPath, bool bUser) {
   */
   //The easy way - TODO will this work with Windows line endings?
   for (std::string buf; m_sFileHandle.good();) {
-    streampos pos = m_sFileHandle.tellg();
+    std::streampos pos = m_sFileHandle.tellg();
     std::getline(m_sFileHandle, buf);
     if (!buf.empty()) m_vLineIndices.push_back(pos);
   }
@@ -60,7 +60,7 @@ std::string CFileWordGenerator::GetLine() {
   m_vLineIndices.erase(m_vLineIndices.begin()+i);
   //TODO: call DashIntf::Message, and return "", instead?
   if (!m_sFileHandle.good()) throw std::runtime_error("File I/O error reading "+m_sPath);
-  string sRes;
+  std::string sRes;
   std::getline(m_sFileHandle, sRes);
   DASHER_ASSERT(!sRes.empty()); //shouldn't have stored index of empty string
   return sRes;

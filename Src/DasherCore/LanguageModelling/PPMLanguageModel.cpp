@@ -9,16 +9,11 @@
 #include "../../Common/Common.h"
 #include "PPMLanguageModel.h"
 
-#include <math.h>
-#include <string.h>
 #include <stack>
 #include <sstream>
 #include <iostream>
 
 using namespace Dasher;
-using namespace std;
-
-
 
 /////////////////////////////////////////////////////////////////////
 
@@ -548,12 +543,12 @@ bool CPPMLanguageModel::ReadFromFile(std::string strFilename) {
       parentMap.erase(it);
       //add mapping for the _next_ sibling; since siblings will be read in the order
       // they were written out, when the next sibling is read it will find the mapping.
-      if (sBR.m_iNext) parentMap.insert(pair<int,CPPMnode *>(sBR.m_iNext,parent));
+      if (sBR.m_iNext) parentMap.insert(std::pair<int,CPPMnode *>(sBR.m_iNext,parent));
     }
     
     //if the node has children, record for the benefit of the first child
     // this node's address...(said child will be the first one read)
-    if (sBR.m_iChild) parentMap.insert(pair<int,CPPMnode *>(sBR.m_iChild, pCurrent));
+    if (sBR.m_iChild) parentMap.insert(std::pair<int,CPPMnode *>(sBR.m_iChild, pCurrent));
     
     if(!bStarted) {
       m_pRoot = pCurrent;

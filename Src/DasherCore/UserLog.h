@@ -32,24 +32,21 @@
 #include "SimpleTimer.h"
 #include "TimeSpan.h"
 #include "UserLogTrial.h"
-#include <algorithm>
 #include "UserLogParam.h"
 #include "UserLogBase.h"
 #include "Event.h"
 #include "XMLUtil.h"
 #include "SettingsStore.h"
 
-using namespace std;
-
 extern CFileLogger* g_pLogger;
 
 const int USER_LOG_DEFAULT_SIZE_TRIAL_XML   = 65536;    // How big we think the XML string representing a single trial will be
 const int LOG_MOUSE_EVERY_MS                = 200;      // How often to log the mouse position (-1 for never), the frequency is also depends on how often the WM_TIMER event fires in dasher
 
-static const string    USER_LOG_SIMPLE_FILENAME         = "dasher_usage.log";      // Filename of the short text log file
-static const string    USER_LOG_DETAILED_PREFIX         = "dasher_";               // Prefix of the detailed XML log files
+static const std::string    USER_LOG_SIMPLE_FILENAME         = "dasher_usage.log";      // Filename of the short text log file
+static const std::string    USER_LOG_DETAILED_PREFIX         = "dasher_";               // Prefix of the detailed XML log files
 static const bool      USER_LOG_DUMP_AFTER_TRIAL        = true;                    // Do we want to dump the XML after each trial is complete?
-static const string    USER_LOG_CURRENT_TRIAL_FILENAME  = "CurrentTrial.xml";      // Filename we look for information on what the subject is doing
+static const std::string    USER_LOG_CURRENT_TRIAL_FILENAME  = "CurrentTrial.xml";      // Filename we look for information on what the subject is doing
 
 enum eUserLogLevel
 {
@@ -58,16 +55,16 @@ enum eUserLogLevel
 };
 
 #ifndef VECTOR_STRING
-typedef vector<string>                      VECTOR_STRING;
+typedef std::vector<std::string>                      VECTOR_STRING;
 #endif
 #ifndef VECTOR_STRING_ITER
-typedef vector<string>::iterator            VECTOR_STRING_ITER;
+typedef std::vector<std::string>::iterator            VECTOR_STRING_ITER;
 #endif
 #ifndef VECTOR_VECTOR_STRING
-typedef vector<VECTOR_STRING>               VECTOR_VECTOR_STRING;
+typedef std::vector<VECTOR_STRING>               VECTOR_VECTOR_STRING;
 #endif
 #ifndef VECTOR_VECTOR_STRING_ITER
-typedef vector<VECTOR_STRING>::iterator     VECTOR_VECTOR_STRING_ITER;
+typedef std::vector<VECTOR_STRING>::iterator     VECTOR_VECTOR_STRING_ITER;
 #endif
 
 /// \ingroup Logging
@@ -83,9 +80,9 @@ public:
 
   // Methods called whenever our user interface gets a relevant event, this
   // object will decide how to put it into its representation.
-  void                        AddParam(const string& strName, const string& strValue, int iOptionMask = 0);
-  void                        AddParam(const string& strName, double dValue, int iOptionMask = 0);
-  void                        AddParam(const string& strName, int iValue, int iOptionMask = 0);
+  void                        AddParam(const std::string& strName, const std::string& strValue, int iOptionMask = 0);
+  void                        AddParam(const std::string& strName, double dValue, int iOptionMask = 0);
+  void                        AddParam(const std::string& strName, int iValue, int iOptionMask = 0);
   void                        StartWriting();
   void                        StopWriting(float dNats);
   void                        StopWriting();
@@ -99,19 +96,19 @@ public:
   void                        AddMouseLocationNormalized(int iX, int iY, bool bStoreIntegerRep, float dNats);
   void                        OutputFile();
   void                        InitIsDone();
-  void                        SetOuputFilename(const string& strFilename = "");
+  void                        SetOuputFilename(const std::string& strFilename = "");
   int                         GetLogLevelMask();
-  void KeyDown(int iId, int iType, int iEffect);
-  void                        HandleEvent(int iParameter);
+  void KeyDown(Dasher::Keys::VirtualKey Key, int iType, int iEffect);
+  void                        HandleEvent(Dasher::Parameter parameter);
 
   // Methods used by utility that can post-process the log files:
-  CUserLog(string strXMLFilename);
+  CUserLog(std::string strXMLFilename);
   VECTOR_VECTOR_STRING        GetTabMouseXY(bool bReturnNormalized);
   VECTOR_VECTOR_DENSITY_GRIDS GetMouseDensity(int iGridSize);
 
 protected:
   CTimeSpan*								            m_pApplicationSpan;         // How long the application has been up
-  string									              m_strFilename;              // Name we output our XML file to
+  std::string									              m_strFilename;              // Name we output our XML file to
   VECTOR_USER_LOG_TRIAL_PTR					    m_vpTrials;                 // Holds object for each trial in this session
   VECTOR_USER_LOG_PARAM_PTR					    m_vParams;                  // Stores general parameters we want in the XML
   std::chrono::steady_clock::time_point	m_dLastMouseUpdate;         // When the last mouse update was pushed
@@ -124,7 +121,7 @@ protected:
   WindowSize								            m_sWindowCoordinates;       // Records the window coordinates at the start of navigation
   bool										              m_bNeedToWriteCanvas;       // Do we need to write new canvas coordinates on the next navigation?
   int										                m_iLevelMask;               // What log level mask we were created with.
-  string									              m_strCurrentTrialFilename;  // Where info about the current subject's trial is stored
+  std::string									              m_strCurrentTrialFilename;  // Where info about the current subject's trial is stored
 
   // Used whenever we need a temporary char* buffer
   static const int            TEMP_BUFFER_SIZE = 4096;
@@ -132,16 +129,16 @@ protected:
 
   CUserLogTrial*              AddTrial();
   CUserLogTrial*              GetCurrentTrial();
-  string                      GetXML();
+  std::string                      GetXML();
   bool                        WriteXML();
   bool                        UpdateMouseLocation();
-  string                      GetParamsXML();
+  std::string                      GetParamsXML();
   void                        PrepareNewTrial();
-  string                      GetCycleParamStats();
-  string                      GetVersionInfo();
+  std::string                      GetCycleParamStats();
+  std::string                      GetVersionInfo();
   void                        InitMemberVars();
   void                        AddInitialParam();
-  void                        UpdateParam(int iParameter, int iOptionMask);
+  void                        UpdateParam(Dasher::Parameter parameter, int iOptionMask);
 
   // Things that support simple stats of a single Start/Stop cycle:
   Dasher::VECTOR_SYMBOL_PROB  m_vCycleHistory;          // Tracks just the most recent Start/Stop cycle, used for simple logging
@@ -152,12 +149,11 @@ protected:
   unsigned long               m_iCycleMouseCount;       // How many mouse updates have been stores
   double                      m_dCycleNats;             // The last nats value we got from a mouse event
 
-  string                      GetStartStopCycleStats();
+  std::string                      GetStartStopCycleStats();
   double                      GetCycleBits();
   void                        ComputeSimpleMousePos(int iX, int iY);
   void                        ResetCycle();
   void                        InitUsingMask(int iLogLevelMask);
-
 };
 /// @}
 

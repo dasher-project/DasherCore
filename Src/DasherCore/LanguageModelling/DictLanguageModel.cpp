@@ -11,12 +11,10 @@
 #include "../Alphabet/AlphabetMap.h"
 
 #include <climits>
-#include <cmath>
 #include <stack>
 #include <iostream>
 #include <fstream>
 using namespace Dasher;
-using namespace std;
 
 // static TCHAR debug[256];
 typedef unsigned long ulong;

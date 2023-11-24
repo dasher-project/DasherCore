@@ -8,13 +8,10 @@
 
 #pragma once
 
-#include "DasherTypes.h"
-
 #include "AbstractXMLParser.h"
 
 #include <map>
 #include <vector>
-#include <utility>              // for std::pair
 
 namespace Dasher {
   class CColourIO;

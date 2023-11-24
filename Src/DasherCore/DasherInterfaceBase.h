@@ -41,10 +41,7 @@
 #include "ModuleManager.h"
 #include "ControlManager.h"
 #include "FrameRate.h"
-#include "FileUtils.h"
 #include <set>
-#include <algorithm>
-#include <FileUtils.h>
 
 namespace Dasher {
   class CDasherScreen;
@@ -77,7 +74,7 @@ class CNodeCreationManager;
 /// the UI to use. Note: CMessageDisplay unimplemented; platforms should
 /// provide their own methods using appropriate GUI components, or subclass
 /// CDashIntfScreenMsgs instead.
-class Dasher::CDasherInterfaceBase : public CMessageDisplay, public Observable<const CEditEvent *>, protected Observer<int>, protected CSettingsUser, private NoClones {
+class Dasher::CDasherInterfaceBase : public CMessageDisplay, public Observable<const CEditEvent *>, protected Observer<Parameter>, protected CSettingsUser, private NoClones {
 public:
   ///Create a new interface by providing the only-and-only settings store that will be used throughout.
   CDasherInterfaceBase(CSettingsStore *pSettingsStore);
@@ -104,14 +101,14 @@ public:
   /// Reset a parameter to the default value
   ///
 
-  void ResetParameter(int iParmater);
+  void ResetParameter(Parameter parameter);
 
   ///
   /// Obtain the permitted values for a string parameter - used to
   /// geneate preferences dialogues etc.
   ///
 
-  void GetPermittedValues(int iParameter, std::vector<std::string> &vList);
+  void GetPermittedValues(Parameter parameter, std::vector<std::string> &vList);
 
   ///
   /// Get a list of settings which apply to a particular module
@@ -129,7 +126,7 @@ public:
   /// \param iParameter The parameter that's just changed.
   /// \todo Should be protected (??)
 
-  virtual void HandleEvent(int iParameter);
+  void HandleEvent(Parameter parameter) override;
   
   ///Locks/unlocks Dasher. The default here stores the lock message and percentage
   /// in m_strLockMessage, such that NewFrame renders this instead of the canvas
@@ -319,19 +316,19 @@ public:
   /// @{
   /// Called from outside to indicate a key or mouse button has just been pushed down
   /// \param iTime time at which button pressed
-  /// \param iId integer identifying button. TODO we need a better system here.
+  /// \param Key enum identifying button. TODO we need a better system here.
   /// At present 1-4 are keys on the keyboard (or external), after mapping from e.g.
   /// qwerty layout, such that for a user who can press 2 buttons, 1 is the primary, 2
   /// secondary (maybe harder for them), etc. Direct mode can use an arbitrary number.
   /// 100 is left mouse button, 101 right, 102 middle (if there is one), and so on.
   /// (Note we do not specify the location at which mouse presses occur: the current
   /// pointer location can be obtained from the input device if necessary)
-  void KeyDown(unsigned long iTime, int iId);
+  void KeyDown(unsigned long iTime, Keys::VirtualKey Key);
 
   /// Called from outside to indicate a key or mouse button has just been released
   /// \param iTime time at which button released
-  /// \param iId integer identifying button. See comments for KeyDown.
-  void KeyUp(unsigned long iTime, int iId);
+  /// \param Key enum identifying button. See comments for KeyDown.
+  void KeyUp(unsigned long iTime, Keys::VirtualKey Key);
 
   /// @}
 
@@ -534,7 +531,7 @@ protected:
 
   //Compute the screen orientation to use - i.e. combining the user's
   // preference with the alphabet.
-  Opts::ScreenOrientations ComputeOrientation();
+  Options::ScreenOrientations ComputeOrientation();
 
   class WordSpeaker : public TransientObserver<const CEditEvent *> {
   public:

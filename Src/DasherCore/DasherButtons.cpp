@@ -3,14 +3,10 @@
 
 // Idea - should back off button always just undo the previous 'forwards' button?
 
-#include "../Common/Common.h"
-
 #include "DasherButtons.h"
 #include "DasherScreen.h"
 #include "DasherInterfaceBase.h"
 #include <valarray>
-#include <iostream>
-
 
 
 using namespace Dasher;
@@ -31,20 +27,20 @@ void CDasherButtons::Activate() {
   m_iScanTime = std::numeric_limits<unsigned long>::min();
 }
 
-void CDasherButtons::KeyDown(unsigned long iTime, int iId, CDasherView *pView, CDasherInput *pInput, CDasherModel *pModel) {
+void CDasherButtons::KeyDown(unsigned long iTime, Keys::VirtualKey Key, CDasherView *pView, CDasherInput *pInput, CDasherModel *pModel) {
 
   if(m_bMenu) {
-    switch(iId) {
-    case 1:
-    case 4:
+    switch(Key) {
+    case Keys::Button_1:
+    case Keys::Button_4:
       m_bDecorationChanged = true;
       ++iActiveBox;
       if(iActiveBox == m_iNumBoxes)
         iActiveBox = 0;
        break;
-    case 2:
-    case 3:
-    case 100:
+    case Keys::Button_2:
+    case Keys::Button_3:
+    case Keys::Primary_Input:
       m_bDecorationChanged = true;
       ScheduleZoom(pModel, m_pBoxes[iActiveBox].iTop, m_pBoxes[iActiveBox].iBottom);
       if(iActiveBox != m_iNumBoxes-1)
@@ -53,18 +49,18 @@ void CDasherButtons::KeyDown(unsigned long iTime, int iId, CDasherView *pView, C
     }
   }
   else {
-    DirectKeyDown(iTime, iId, pView, pModel);
+    DirectKeyDown(iTime, Key, pView, pModel);
   }
 
 }
 
-void CDasherButtons::DirectKeyDown(unsigned long iTime, int iId, CDasherView *pView, CDasherModel *pModel) {
-  if(iId == 100) // Ignore mouse events
+void CDasherButtons::DirectKeyDown(unsigned long iTime, Keys::VirtualKey Key, CDasherView *pView, CDasherModel *pModel) {
+  if(Key == Keys::Primary_Input) // Ignore mouse events
   return;
-  if(iId == 1)
+  if(Key == Keys::Button_1)
   iActiveBox = m_iNumBoxes - 1;
-  else if(iId <= m_iNumBoxes) 
-  iActiveBox = iId-2;
+  else if(Key <= m_iNumBoxes) 
+  iActiveBox = Key-2;
   else
   iActiveBox = m_iNumBoxes-2;
 

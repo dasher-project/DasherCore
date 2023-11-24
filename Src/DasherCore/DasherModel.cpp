@@ -18,24 +18,13 @@
 // along with Dasher; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
-#include "../Common/Common.h"
-
-#include <sstream>
-
-#include <iostream>
-#include <cstring>
 #include "DasherModel.h"
 #include "DasherView.h"
 #include "Parameters.h"
 
-#include "Event.h"
 #include "NodeCreationManager.h"
-#include "AlphabetManager.h"
 
 using namespace Dasher;
-using namespace std;
-
-
 
 
 //If preprocessor variable DEBUG_DYNAMICS is defined, will display the difference
@@ -93,14 +82,14 @@ void CDasherModel::Make_root(CDasherNode *pNewRoot) {
   DASHER_ASSERT(pNewRoot->Parent() == m_Root);
 
   m_Root->DeleteNephews(pNewRoot);
-  m_Root->SetFlag(NF_COMMITTED, true);
+  m_Root->SetFlag(CDasherNode::NF_COMMITTED, true);
 
   // TODO: Is the stack necessary at all? We may as well just keep the
   // existing data structure?
   oldroots.push_back(m_Root);
 
   // TODO: tidy up conditional
-  while((oldroots.size() > 10) && (!m_bRequireConversion || (oldroots[0]->GetFlag(NF_CONVERTED)))) {
+  while((oldroots.size() > 10) && (!m_bRequireConversion || (oldroots[0]->GetFlag(CDasherNode::NF_CONVERTED)))) {
     oldroots[0]->OrphanChild(oldroots[1]);
     delete oldroots[0];
     oldroots.pop_front();
@@ -113,7 +102,7 @@ void CDasherModel::Make_root(CDasherNode *pNewRoot) {
   m_Rootmax = m_Rootmin + (range * m_Root->Hbnd()) / NORMALIZATION;
   m_Rootmin = m_Rootmin + (range * m_Root->Lbnd()) / NORMALIZATION;
 
-  for(std::deque<pair<myint,myint> >::iterator it(m_deGotoQueue.begin()); it != m_deGotoQueue.end(); ++it) {
+  for(std::deque<std::pair<myint,myint> >::iterator it(m_deGotoQueue.begin()); it != m_deGotoQueue.end(); ++it) {
     //Some of these co-ordinate pairs can be bigger than m_Rootmin_min - m_Rootmax_max,
     // hence using unsigned type...
     const uint64 r = it->second - it->first;
@@ -135,9 +124,9 @@ bool CDasherModel::Reparent_root() {
     // Fail if there's no existing parent and no way of recreating one
     if(pNewRoot == NULL) return false;
     //better propagate gameness backwards, the original nodes must have been NF_GAME too
-    if (m_Root->GetFlag(NF_GAME))
+    if (m_Root->GetFlag(CDasherNode::NF_GAME))
       for (CDasherNode *pTemp=pNewRoot; pTemp; pTemp=pTemp->Parent())
-        pTemp->SetFlag(NF_GAME, true);
+        pTemp->SetFlag(CDasherNode::NF_GAME, true);
     //RebuildParent() can create multiple generations of parents at once;
     // make sure our cache has all such that were created, so we delete them
     // if we ever delete all our other nodes.
@@ -175,7 +164,7 @@ bool CDasherModel::Reparent_root() {
   m_Rootmax = m_Rootmax + ((NORMALIZATION - upper) * iRootWidth) / iRange;
   m_Rootmin = m_Rootmin - (lower * iRootWidth) / iRange;
 
-  for(std::deque<pair<myint,myint> >::iterator it(m_deGotoQueue.begin()); it != m_deGotoQueue.end(); ++it) {
+  for(std::deque<std::pair<myint,myint> >::iterator it(m_deGotoQueue.begin()); it != m_deGotoQueue.end(); ++it) {
     iRootWidth = it->second - it->first;
     it->second += (myint(NORMALIZATION - upper) * iRootWidth / iRange);
     it->first -= (myint(lower) * iRootWidth / iRange);
@@ -209,7 +198,7 @@ void CDasherModel::SetNode(CDasherNode *pNewRoot) {
 
   // Set the root coordinates so that the root node is an appropriate
   // size and we're not in any of the children
-  m_Root->SetFlag(NF_SEEN, true); //(but we are in the node itself)
+  m_Root->SetFlag(CDasherNode::NF_SEEN, true); //(but we are in the node itself)
   m_pLastOutput = m_Root;
 
   double dFraction( 1 - (1 - m_Root->MostProbableChild() / static_cast<double>(NORMALIZATION)) / 2.0 );
@@ -255,7 +244,7 @@ bool CDasherModel::NextScheduledStep()
       DASHER_ASSERT(m_Rootmin + ((pChild->Lbnd() * iWidth) / NORMALIZATION) <= ORIGIN_Y);
       if (m_Rootmin + ((pChild->Hbnd() * iWidth) / NORMALIZATION) > ORIGIN_Y) {
         //found child to make root. proceed only if new root is on the game path....
-        if (m_Root->GetFlag(NF_GAME) && !pChild->GetFlag(NF_GAME)) {
+        if (m_Root->GetFlag(CDasherNode::NF_GAME) && !pChild->GetFlag(CDasherNode::NF_GAME)) {
           //If the user's strayed that far off the game path,
           // having Dasher stop seems reasonable!
           return false;
@@ -263,14 +252,14 @@ bool CDasherModel::NextScheduledStep()
 
         //make pChild the root node...
         //first we're gonna have to force it to be output, as a non-output root won't work...
-        if (!pChild->GetFlag(NF_SEEN)) {
+        if (!pChild->GetFlag(CDasherNode::NF_SEEN)) {
           DASHER_ASSERT(m_pLastOutput == m_Root);
           OutputTo(pChild);
         }
         //we need to update the target coords (newRootmin,newRootmax)
         // to reflect the new coordinate system based upon pChild as root.
         //Make_root automatically updates any such pairs stored in m_deGotoQueue, so:
-        m_deGotoQueue.push_back(pair<myint,myint>(newRootmin,newRootmax));
+        m_deGotoQueue.push_back(std::pair<myint,myint>(newRootmin,newRootmax));
         //...when we make pChild the root...
         Make_root(pChild);
         //...we can retrieve new, equivalent, coordinates for it
@@ -287,8 +276,8 @@ bool CDasherModel::NextScheduledStep()
   // Check that we haven't drifted too far. The rule is that we're not
   // allowed to let the root max and min cross the midpoint of the
   // screen.
-  newRootmin = min(newRootmin, ORIGIN_Y - 1 - m_iDisplayOffset);
-  newRootmax = max(newRootmax, ORIGIN_Y + 1 - m_iDisplayOffset);
+  newRootmin = std::min(newRootmin, ORIGIN_Y - 1 - m_iDisplayOffset);
+  newRootmax = std::max(newRootmax, ORIGIN_Y + 1 - m_iDisplayOffset);
 
   // Only allow the update if it won't make the
   // root too small. We should have re-generated a deeper root
@@ -382,7 +371,7 @@ void CDasherModel::ScheduleOneStep(dasherint y1, dasherint y2, int nSteps, int l
     // = (MAX_Y-(2*limX)) / (2*limX) * targetRange / (MAX_Y-targetRange)
     {
       const dasherint n=targetRange*(MAX_Y-2*limX), d=(MAX_Y-targetRange)*2*limX;
-      bool bOver=max(abs(m1),abs(m2))>std::numeric_limits<dasherint>::max()/n;
+      bool bOver=std::max(abs(m1),abs(m2))>std::numeric_limits<dasherint>::max()/n;
       if (bOver) {
         //std::cout << "Overflow in max-speed-limit " << m1 << "," << m2 << " =wd> " << ((m1*n)/d) << "," << ((m2*n)/d);
         //so do it a harder way, but which uses smaller intermediates:
@@ -444,26 +433,26 @@ void CDasherModel::ScheduleOneStep(dasherint y1, dasherint y2, int nSteps, int l
 #endif
   } //end block A (regardless of #ifdef)
   
-  m_deGotoQueue.push_back(pair<myint,myint>(R1+m1, R2+m2));
+  m_deGotoQueue.push_back(std::pair<myint,myint>(R1+m1, R2+m2));
 }
 
 void CDasherModel::OutputTo(CDasherNode *pNewNode) {
   //first, recurse back up to last seen node (must be processed ancestor-first)
-  if (pNewNode && !pNewNode->GetFlag(NF_SEEN)) {
+  if (pNewNode && !pNewNode->GetFlag(CDasherNode::NF_SEEN)) {
     OutputTo(pNewNode->Parent());
 
     m_pLastOutput = pNewNode;
     pNewNode->Output();
-    pNewNode->SetFlag(NF_SEEN, true); //becomes NF_SEEN after output.
+    pNewNode->SetFlag(CDasherNode::NF_SEEN, true); //becomes NF_SEEN after output.
 
   } else {
     //either pNewNode is null, or else it's been seen. So delete back to that...
     while (m_pLastOutput != pNewNode) {
       // if pNewNode is null, m_pLastOutput is not; else, pNewNode has been seen,
       // so we should encounter it on the way back out to the root, _before_ null
-      m_pLastOutput->SetFlag(NF_COMMITTED, false);
+      m_pLastOutput->SetFlag(CDasherNode::NF_COMMITTED, false);
       m_pLastOutput->Undo();
-      m_pLastOutput->SetFlag(NF_SEEN, false);
+      m_pLastOutput->SetFlag(CDasherNode::NF_SEEN, false);
 
       m_pLastOutput = m_pLastOutput->Parent();
       DASHER_ASSERT(m_pLastOutput || !pNewNode); //if m_pLastOutput null, then pNewNode is too.
@@ -476,7 +465,7 @@ void CDasherModel::ExpandNode(CDasherNode *pNode) {
 
   // TODO: Is NF_ALLCHILDREN any more useful/efficient than reading the map size?
 
-  if(pNode->GetFlag(NF_ALLCHILDREN)) {
+  if(pNode->GetFlag(CDasherNode::NF_ALLCHILDREN)) {
     DASHER_ASSERT(pNode->GetChildren().size() > 0);
     return;
   }
@@ -494,7 +483,7 @@ void CDasherModel::ExpandNode(CDasherNode *pNode) {
   }
 #endif
 
-  pNode->SetFlag(NF_ALLCHILDREN, true);
+  pNode->SetFlag(CDasherNode::NF_ALLCHILDREN, true);
 
   DispatchEvent(pNode);
 }
@@ -524,9 +513,9 @@ void CDasherModel::RenderToView(CDasherView *pView, CExpansionPolicy &policy) {
       DASHER_ASSERT(*it == pNewRoot || !(*it)->GetFlag(NF_SUPER));
     }
 #endif
-    if (pNewRoot->GetFlag(NF_SUPER) &&
+    if (pNewRoot->GetFlag(CDasherNode::NF_SUPER) &&
         // Stay on the game path, if there is one (!)
-        (!m_Root->GetFlag(NF_GAME) || pNewRoot->GetFlag(NF_GAME))) {
+        (!m_Root->GetFlag(CDasherNode::NF_GAME) || pNewRoot->GetFlag(CDasherNode::NF_GAME))) {
       Make_root(pNewRoot);
     } else
       break;
@@ -566,10 +555,10 @@ void CDasherModel::ScheduleZoom(dasherint y1, dasherint y2, int nsteps) {
       dFrac = (h-oh)/(nh-oh);
     }
     //and use that fraction to interpolate from R to r
-    m_deGotoQueue.push_back(pair<myint,myint>(R1+static_cast<myint>(dFrac*static_cast<double>(r1-R1)), R2+static_cast<myint>(dFrac*static_cast<double>(r2-R2))));
+    m_deGotoQueue.push_back(std::pair<myint,myint>(R1+static_cast<myint>(dFrac*static_cast<double>(r1-R1)), R2+static_cast<myint>(dFrac*static_cast<double>(r2-R2))));
   }
   //final point, done accurately/simply:
-  m_deGotoQueue.push_back(pair<myint,myint>(r1,r2));
+  m_deGotoQueue.push_back(std::pair<myint,myint>(r1,r2));
 }
 
 

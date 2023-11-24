@@ -61,7 +61,7 @@ void Dasher::FileUtils::ScanFiles(AbstractParser* parser, const std::string& str
 
 bool Dasher::FileUtils::WriteUserDataFile(const std::string& filename, const std::string& strNewText, bool append)
 {
-	ofstream File(filename, (append) ? std::ios_base::app : ios_base::out);
+	std::ofstream File(filename, (append) ? std::ios_base::app : std::ios_base::out);
 
 	if(File.is_open())
 	{

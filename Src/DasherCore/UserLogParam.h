@@ -13,8 +13,6 @@
 #include <vector>
 #include "Parameters.h"
 
-using namespace std;
-
 // Bit mask options that are sent in when logging parameters
 enum eUserLogParam
 {
@@ -28,24 +26,24 @@ enum eUserLogParam
 // We need to have a lookup table that maps parameters we want to track in 
 // the UserLog object and what their behavior is.
 struct UserLogParamMask {
-  int key;
+  Dasher::Parameter key;
   int mask;
 };
 
 class CUserLogParam;
 
-typedef vector<CUserLogParam*>                      VECTOR_USER_LOG_PARAM_PTR;
-typedef vector<CUserLogParam*>::iterator            VECTOR_USER_LOG_PARAM_PTR_ITER;
-typedef vector<CUserLogParam*>::reverse_iterator    VECTOR_USER_LOG_PARAM_PTR_REV_ITER;
+typedef std::vector<CUserLogParam*>                      VECTOR_USER_LOG_PARAM_PTR;
+typedef std::vector<CUserLogParam*>::iterator            VECTOR_USER_LOG_PARAM_PTR_ITER;
+typedef std::vector<CUserLogParam*>::reverse_iterator    VECTOR_USER_LOG_PARAM_PTR_REV_ITER;
 
 /// \ingroup Logging
 /// @{
 class CUserLogParam
 {
 public:
-  string          strName;                // Name of the parameter
-  string          strValue;               // String version of the value
-  string          strTimeStamp;           // Optional timestamp if we want to know when a parameter was changed
+  std::string          strName;                // Name of the parameter
+  std::string          strValue;               // String version of the value
+  std::string          strTimeStamp;           // Optional timestamp if we want to know when a parameter was changed
   int             options;                // The options that were used on the parameter
 
   static bool     ComparePtr(CUserLogParam* pA, CUserLogParam* pB);

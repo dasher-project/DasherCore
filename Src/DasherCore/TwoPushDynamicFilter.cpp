@@ -22,7 +22,6 @@
 
 #include "TwoPushDynamicFilter.h"
 #include "DasherInterfaceBase.h"
-#include "Event.h"
 
 using namespace Dasher;
 
@@ -104,8 +103,8 @@ bool CTwoPushDynamicFilter::DecorateView(CDasherView *pView, CDasherInput *pInpu
   return bRV;
 }
 
-void CTwoPushDynamicFilter::HandleEvent(int iParameter) {
-  switch (iParameter) {
+void CTwoPushDynamicFilter::HandleEvent(Parameter parameter) {
+  switch (parameter) {
   case LP_TWO_PUSH_OUTER: //fallthrough
   case LP_TWO_PUSH_LONG: //fallthrough
   case LP_TWO_PUSH_SHORT: {
@@ -118,7 +117,7 @@ void CTwoPushDynamicFilter::HandleEvent(int iParameter) {
   case LP_TWO_PUSH_TOLERANCE: //fallthrough
   case LP_DYNAMIC_BUTTON_LAG:
     //recompute rest in Timer
-    m_dLastBitRate=-numeric_limits<double>::infinity();
+    m_dLastBitRate=-std::numeric_limits<double>::infinity();
   }
 }
 
@@ -151,28 +150,28 @@ void CTwoPushDynamicFilter::updateBitrate(double dBitrate) {
 //cout << "Short " << m_aaiGuideAreas[0][0] << " to " << m_aaiGuideAreas[0][1] << ", Long " << m_aaiGuideAreas[1][0] << " to " << m_aaiGuideAreas[1][1];
 }
 
-void CTwoPushDynamicFilter::KeyDown(unsigned long Time, int iId, CDasherView *pView, CDasherInput *pInput, CDasherModel *pModel) {
-  if (iId == 100 && !GetBoolParameter(BP_BACKOFF_BUTTON))
+void CTwoPushDynamicFilter::KeyDown(unsigned long Time, Keys::VirtualKey Key, CDasherView *pView, CDasherInput *pInput, CDasherModel *pModel) {
+  if (Key == Keys::Primary_Input && !GetBoolParameter(BP_BACKOFF_BUTTON))
     //mouse click - will be ignored by superclass method.
     //simulate press of button 2...
-    iId=2;
-  CDynamicButtons::KeyDown(Time, iId, pView, pInput, pModel);
+    Key= Keys::Button_2;
+  CDynamicButtons::KeyDown(Time, Key, pView, pInput, pModel);
 }
 
-void CTwoPushDynamicFilter::KeyUp(unsigned long Time, int iId, CDasherView *pView, CDasherInput *pInput, CDasherModel *pModel) {
-  if (iId == 100 && !GetBoolParameter(BP_BACKOFF_BUTTON))
+void CTwoPushDynamicFilter::KeyUp(unsigned long Time, Keys::VirtualKey Key, CDasherView *pView, CDasherInput *pInput, CDasherModel *pModel) {
+  if (Key == Keys::Primary_Input && !GetBoolParameter(BP_BACKOFF_BUTTON))
     //mouse click - will be ignored by superclass method.
     //simulate press of button 2...
-    iId=2;
+    Key= Keys::Button_2;
   if (GetBoolParameter(BP_TWO_PUSH_RELEASE_TIME)
-      && isRunning() && iId==m_iHeldId
-      && m_dNatsSinceFirstPush!=-numeric_limits<double>::infinity())
-    ActionButton(Time, iId, 0, pModel);
+      && isRunning() && Key==m_iHeldId
+      && m_dNatsSinceFirstPush!=-std::numeric_limits<double>::infinity())
+    ActionButton(Time, Key, 0, pModel);
   //just records that the key has been released
-  CDynamicButtons::KeyUp(Time, iId, pView, pInput, pModel);
+  CDynamicButtons::KeyUp(Time, Key, pView, pInput, pModel);
 }
 
-void CTwoPushDynamicFilter::ActionButton(unsigned long iTime, int iButton, int iType, CDasherModel *pModel) {
+void CTwoPushDynamicFilter::ActionButton(unsigned long iTime, Keys::VirtualKey Key, int iType, CDasherModel* pModel) {
   // Types:
   // 0 = ordinary click
   // 1 = long click

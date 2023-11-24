@@ -13,15 +13,11 @@
 #include "../../Common/Common.h"
 #include "PPMPYLanguageModel.h"
 #include "LanguageModel.h"
-#include <math.h>
 #include <stack>
 #include <sstream>
 #include <iostream>
 
 using namespace Dasher;
-using namespace std;
-
-
 
 /////////////////////////////////////////////////////////////////////
 
@@ -155,7 +151,7 @@ CPPMPYLanguageModel::CPPMPYLanguageModel(CSettingsUser *pCreator, int iNumCHsyms
   DASHER_ASSERT(iToSpend == 0);
 }*/
 
-void CPPMPYLanguageModel::GetPartProbs(Context context, std::vector<pair<symbol, unsigned int> > &vChildren, int norm, int iUniform){
+void CPPMPYLanguageModel::GetPartProbs(Context context, std::vector<std::pair<symbol, unsigned int> > &vChildren, int norm, int iUniform){
   DASHER_ASSERT(!vChildren.empty());
   
   if(vChildren.size() == 1){
@@ -183,7 +179,7 @@ void CPPMPYLanguageModel::GetPartProbs(Context context, std::vector<pair<symbol,
   //ACL following loop distributes the part of the probability mass assigned the uniform distribution.
   // In Will's code, it assigned 0 to the first entry, then split evenly among the rest...seems wrong?!
   int i=0;
-  for (std::vector<pair<symbol, unsigned int> >::iterator it = vChildren.begin(); it!=vChildren.end(); it++) {
+  for (std::vector<std::pair<symbol, unsigned int> >::iterator it = vChildren.begin(); it!=vChildren.end(); it++) {
     DASHER_ASSERT(it->first > 0 && it->first < GetSize()); //i.e., is valid CH symbol
     it->second = static_cast<unsigned int>(iUniformLeft / (vChildren.size() - i));
       //  std::cout<<"iUniformLeft: "<<iUniformLeft<<std::endl;
@@ -202,7 +198,7 @@ void CPPMPYLanguageModel::GetPartProbs(Context context, std::vector<pair<symbol,
   //new code
   for (CPPMnode *pTemp = ppmcontext->head; pTemp; pTemp=pTemp->vine) {
     int iTotal=0, i=0;
-    for (std::vector<pair<symbol, unsigned int> >::const_iterator it = vChildren.begin(); it!=vChildren.end(); it++,i++) {
+    for (std::vector<std::pair<symbol, unsigned int> >::const_iterator it = vChildren.begin(); it!=vChildren.end(); it++,i++) {
       if (CPPMnode *pFound = pTemp->find_symbol(it->first)) {
         iTotal += vCounts[i] = pFound->count; //double assignment
       } else
@@ -215,7 +211,7 @@ void CPPMPYLanguageModel::GetPartProbs(Context context, std::vector<pair<symbol,
       unsigned int size_of_slice = iToSpend;
       
       int i=0;
-      for (vector<pair<symbol, unsigned int> >::iterator it = vChildren.begin(); it!=vChildren.end(); it++,i++) {
+      for (std::vector<std::pair<symbol, unsigned int> >::iterator it = vChildren.begin(); it!=vChildren.end(); it++,i++) {
         if(vCounts[i]) {
           unsigned int p = static_cast < myint > (size_of_slice) * (100 * vCounts[i] - beta) / (100 * iTotal + alpha);
           it->second += p;
@@ -246,7 +242,7 @@ void CPPMPYLanguageModel::GetPartProbs(Context context, std::vector<pair<symbol,
   //  with other LM code where the first element of the probability array was a dummy,
   // storing 0 probability mass assigned to the 'root symbol' - not the case here!)
   unsigned int p = iToSpend / static_cast<unsigned int>(vChildren.size());
-  for (std::vector<pair<symbol, unsigned int> >::iterator it = vChildren.begin(); it!=vChildren.end(); it++) {
+  for (std::vector<std::pair<symbol, unsigned int> >::iterator it = vChildren.begin(); it!=vChildren.end(); it++) {
     it->second += p;
     iToSpend -= p;
   }
@@ -255,7 +251,7 @@ void CPPMPYLanguageModel::GetPartProbs(Context context, std::vector<pair<symbol,
 
   //  std::cout<<"iNumsyjbols "<<vChildren.size()<<std::endl;
 
-  for (std::vector<pair<symbol, unsigned int> >::iterator it = vChildren.begin()+1; it!=vChildren.end(); it++) {
+  for (std::vector<std::pair<symbol, unsigned int> >::iterator it = vChildren.begin()+1; it!=vChildren.end(); it++) {
 
     //     std::cout<<"iLeft "<<iLeft<<std::endl;
     //  std::cout<<"iToSpend "<<iToSpend<<std::endl;
@@ -320,9 +316,9 @@ void CPPMPYLanguageModel::GetProbs(Context context, std::vector<unsigned int> &p
 
   for (CPPMnode *pTemp = ppmcontext->head; pTemp; pTemp = pTemp->vine) {
     int iTotal = 0;
-    const map<symbol, unsigned short int> &pychild( static_cast<CPPMPYnode *>(pTemp)->pychild);
+    const std::map<symbol, unsigned short int> &pychild( static_cast<CPPMPYnode *>(pTemp)->pychild);
 
-    for (map<symbol, unsigned short int>::const_iterator it=pychild.begin(); it!=pychild.end(); it++) {
+    for (std::map<symbol, unsigned short int>::const_iterator it=pychild.begin(); it!=pychild.end(); it++) {
       if(!(exclusions[it->first] && doExclusion))
         iTotal += it->second;
     }
@@ -330,7 +326,7 @@ void CPPMPYLanguageModel::GetProbs(Context context, std::vector<unsigned int> &p
     if(iTotal) {
       unsigned int size_of_slice = iToSpend;
       
-      for (map<symbol, unsigned short int>::const_iterator it = pychild.begin(); it!=pychild.end(); it++) {
+      for (std::map<symbol, unsigned short int>::const_iterator it = pychild.begin(); it!=pychild.end(); it++) {
         if(!(exclusions[it->first] && doExclusion)) {
           exclusions[it->first] = 1;
 	    

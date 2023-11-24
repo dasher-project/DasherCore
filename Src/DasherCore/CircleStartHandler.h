@@ -14,7 +14,7 @@ public:
   ~CCircleStartHandler();
   virtual bool DecorateView(CDasherView *pView);
   virtual void Timer(unsigned long iTime, dasherint iX, dasherint iY, CDasherView *pView);
-  virtual void HandleEvent(int iParameter);
+  virtual void HandleEvent(Parameter parameter);
   virtual void HandleEvent(CDasherView *pView);
   void onPause();
   void onRun(unsigned long iTime);

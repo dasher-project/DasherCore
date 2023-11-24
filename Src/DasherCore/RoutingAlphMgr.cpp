@@ -8,9 +8,7 @@
 
 #include "RoutingAlphMgr.h"
 #include "DasherInterfaceBase.h"
-using namespace std;
 using namespace Dasher;
-
 
 
 CRoutingAlphMgr::CRoutingAlphMgr(CSettingsUser *pCreator, CDasherInterfaceBase *pInterface, CNodeCreationManager *pNCManager, const CAlphInfo *pAlphabet)
@@ -21,19 +19,19 @@ CRoutingAlphMgr::CRoutingAlphMgr(CSettingsUser *pCreator, CDasherInterfaceBase *
 
 void CRoutingAlphMgr::InitMap() {
   m_vBaseSyms.reserve(m_pAlphabet->iEnd); m_vBaseSyms.push_back(0); //base for unknown route = unknown!
-  m_vRoutes.push_back(set<symbol>()); //unknown base symbol has no routes
+  m_vRoutes.push_back(std::set<symbol>()); //unknown base symbol has no routes
   for (int i=1; i<m_pAlphabet->iEnd; i++) {
     symbol s = m_map.Get(m_pAlphabet->GetText(i));
     if (s==0) {
       s=static_cast<Dasher::symbol>(m_vRoutes.size());
-      m_vRoutes.push_back(set<symbol>());
+      m_vRoutes.push_back(std::set<symbol>());
       m_map.Add(m_pAlphabet->GetText(i),s);
     }
     m_vBaseSyms.push_back(s);
     m_vRoutes[s].insert(i);
   }
   m_vGroupsByRoute.resize(m_vBaseSyms.size());
-  vector<const SGroupInfo *> vGroups;
+  std::vector<const SGroupInfo *> vGroups;
   DASHER_ASSERT(!m_pAlphabet->pNext);
   vGroups.push_back(m_pAlphabet->pChild);
   while (!vGroups.empty()) {
@@ -49,10 +47,10 @@ void CRoutingAlphMgr::CreateLanguageModel() {
   m_pLanguageModel = new CRoutingPPMLanguageModel(this, &m_vBaseSyms, &m_vRoutes, m_pAlphabet->m_iConversionID==4);
 }
 
-string CRoutingAlphMgr::CRoutedSym::trainText() {
-  const set<symbol> &routes(mgr()->m_vRoutes[mgr()->m_vBaseSyms[iSymbol]]);
+std::string CRoutingAlphMgr::CRoutedSym::trainText() {
+  const std::set<symbol> &routes(mgr()->m_vRoutes[mgr()->m_vBaseSyms[iSymbol]]);
   DASHER_ASSERT(routes.count(iSymbol));
-  string t=CSymbolNode::trainText();
+  std::string t=CSymbolNode::trainText();
   if (routes.size()!=1)
     if (const SGroupInfo *g = mgr()->m_vGroupsByRoute[iSymbol])
       return mgr()->m_pAlphabet->m_strConversionTrainStart + g->strName + mgr()->m_pAlphabet->m_strConversionTrainStop + t;
@@ -112,7 +110,7 @@ CRoutingAlphMgr::CRoutingTrainer::CRoutingTrainer(CMessageDisplay *pMsgs, CRouti
 : CTrainer(pMsgs, pMgr->m_pLanguageModel, pMgr->m_pAlphabet, &pMgr->m_map), m_pMgr(pMgr) {
   
   m_iStartSym=0;  
-  vector<symbol> trainStartSyms;
+  std::vector<symbol> trainStartSyms;
   m_pAlphabet->GetSymbols(trainStartSyms, m_pInfo->m_strConversionTrainStart);
   if (trainStartSyms.size()==1)
     m_iStartSym = trainStartSyms[0];
@@ -121,10 +119,10 @@ CRoutingAlphMgr::CRoutingTrainer::CRoutingTrainer(CMessageDisplay *pMsgs, CRouti
                                      m_pInfo->m_strConversionTrainStart.c_str());
 }
 
-symbol CRoutingAlphMgr::CRoutingTrainer::getRoute(bool bHaveRoute, const string &strRoute, symbol baseSym) {  
-  const set<symbol> &candidates(m_pMgr->m_vRoutes.at(baseSym));
-  set<symbol> named;
-  for (set<symbol>::iterator it=candidates.begin(); it!=candidates.end(); it++)
+symbol CRoutingAlphMgr::CRoutingTrainer::getRoute(bool bHaveRoute, const std::string &strRoute, symbol baseSym) {  
+  const std::set<symbol> &candidates(m_pMgr->m_vRoutes.at(baseSym));
+  std::set<symbol> named;
+  for (std::set<symbol>::iterator it=candidates.begin(); it!=candidates.end(); it++)
     if (const SGroupInfo *g=m_pMgr->m_vGroupsByRoute[*it])
       if (g->strName == strRoute)
         named.insert(*it);
@@ -148,7 +146,7 @@ symbol CRoutingAlphMgr::CRoutingTrainer::getRoute(bool bHaveRoute, const string 
 void CRoutingAlphMgr::CRoutingTrainer::Train(CAlphabetMap::SymbolStream &syms) {
   CLanguageModel::Context trainContext = m_pLanguageModel->CreateEmptyContext();
   
-  string strRoute; bool bHaveRoute(false);
+  std::string strRoute; bool bHaveRoute(false);
   for (symbol sym; (sym=syms.next(m_pAlphabet))!=-1;) {
     if (sym == m_iStartSym) {
       if (sym!=0 || syms.peekBack()==m_pInfo->m_strConversionTrainStart) {
@@ -156,7 +154,7 @@ void CRoutingAlphMgr::CRoutingTrainer::Train(CAlphabetMap::SymbolStream &syms) {
           m_pMsgs->FormatMessageWithString(_("Warning: in training file, annotation '<%s>' is followed by another annotation and will be ignored"),
                                            strRoute.c_str());
         strRoute.clear(); bHaveRoute=true;
-        for (string s; (s=syms.peekAhead()).length(); strRoute+=s) {
+        for (std::string s; (s=syms.peekAhead()).length(); strRoute+=s) {
           syms.next(m_pAlphabet);
           if (s==m_pInfo->m_strConversionTrainStop) break;
         }

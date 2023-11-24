@@ -30,7 +30,7 @@ bool CGameModule::GetSettings(SModuleSettings **sets, int *count) {
 CGameModule::~CGameModule()  {
   if (m_ulTotalTime) {
     //TODO make this a running commentary?
-    ostringstream summary;
+    std::ostringstream summary;
     summary << "Total time " << m_ulTotalTime; 
     summary << " nats " << m_dTotalNats << "=" << (m_dTotalNats*1000.0/m_ulTotalTime) << "/sec";
     summary << " chars " << m_uiTotalSyms << "=" << (m_uiTotalSyms/m_ulTotalTime) << "/sec";
@@ -41,7 +41,7 @@ CGameModule::~CGameModule()  {
 
 //Node populated...
 void CGameModule::HandleEvent(CDasherNode *pNode) {
-  if (pNode->GetFlag(NF_GAME) //if on game path, look for next/child node on path...
+  if (pNode->GetFlag(CDasherNode::NF_GAME) //if on game path, look for next/child node on path...
       && pNode->offset()+1 < m_vTargetSymbols.size())
     pNode->GameSearchChildren(m_vTargetSymbols[pNode->offset()+1]);
 }
@@ -109,13 +109,13 @@ void CGameModule::SetWordGenerator(const CAlphInfo *pAlph, CWordGeneratorBase *p
 void CGameModule::StartWriting(unsigned long lTime) {
   if (!m_ulSentenceStartTime) {
     m_ulSentenceStartTime = lTime;
-    m_dSentenceStartNats = numeric_limits<double>::max();
+    m_dSentenceStartNats = std::numeric_limits<double>::max();
   }
 }
 
 void CGameModule::DecorateView(unsigned long lTime, CDasherView *pView, CDasherModel *pModel) {
 
-  if (m_dSentenceStartNats == numeric_limits<double>::max())
+  if (m_dSentenceStartNats == std::numeric_limits<double>::max())
     m_dSentenceStartNats = pModel->GetNats();
   
   const myint iNewTarget((m_y1+m_y2)/2);
@@ -148,14 +148,13 @@ void CGameModule::DecorateView(unsigned long lTime, CDasherView *pView, CDasherM
     x[0] = x[1] = -100;
   
     const int lineWidth(GetLongParameter(LP_LINE_WIDTH));
-    myint minX,minY,maxX,maxY;
-    pView->VisibleRegion( minX, minY, maxX, maxY);
+    const CDasherView::ScreenRegion visibleRegion = pView->VisibleRegion();
 
-    if (m_y1 > maxY) {
+    if (m_y1 > visibleRegion.maxY) {
       //off the top! make arrow point straight up...
       y[1] = CDasherModel::MAX_Y;
       y[0] = y[1] - 400;
-    } else if (m_y2 < minY) {
+    } else if (m_y2 < visibleRegion.minY) {
       //off the bottom! make arrow point straight down...
       y[1] = 0;
       y[0] = 400;

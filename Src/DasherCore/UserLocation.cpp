@@ -1,9 +1,8 @@
-
-#include "../Common/Common.h"
-
 #include "UserLocation.h"
 
 #include <sys/timeb.h>
+
+#include "TimeSpan.h"
 
 
 // Construct a new location at the current point in time and at the specified coordinates.
@@ -88,11 +87,11 @@ CUserLocation::~CUserLocation()
   //CFunctionLogger f1("CUserLocation::~CUserLocation", gLogger);
 }
 
-string CUserLocation::GetXML(const string& strPrefix)
+std::string CUserLocation::GetXML(const std::string& strPrefix)
 {
   //CFunctionLogger f1("CUserLocation::GetXML", gLogger);
 
-  string strResult = "";
+  std::string strResult = "";
 
   strResult += strPrefix;
   strResult += "<Pos>\n";
@@ -183,7 +182,7 @@ void CUserLocation::InitMemeberVars()
 //  	<YNorm>0.1853</YNorm>
 //  	<Bits>0.555</Bits>
 //  </Pos>
-CUserLocation::CUserLocation(const string& strXML)
+CUserLocation::CUserLocation(const std::string& strXML)
 {
   //CFunctionLogger f1("CUserLocation::CUserLocation(XML)", gLogger);
 
@@ -227,11 +226,11 @@ CUserLocation::CUserLocation(const string& strXML)
 }
 
 // Returns a tab delimited version of this location's X & Y coordinate
-string CUserLocation::GetTabMouseXY(bool bReturnNormalized)
+std::string CUserLocation::GetTabMouseXY(bool bReturnNormalized)
 {
   //CFunctionLogger f1("CUserLocation::GetTabMouseXY", gLogger);
 
-  string strResult = "";
+  std::string strResult = "";
   char szNum[256];
 
   if (bReturnNormalized)

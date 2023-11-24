@@ -14,12 +14,12 @@ class CDefaultFilter : public CDynamicFilter, public CSettingsObserver {
   ~CDefaultFilter();
 
   /// Responds to changes in BP_START_MOUSE / BP_MOUSEPOS_MODE to create StartHandler
-  virtual void HandleEvent(int iParameter);
+  virtual void HandleEvent(Parameter parameter);
 
   virtual bool DecorateView(CDasherView *pView, CDasherInput *pInput);
   virtual void Timer(unsigned long Time, CDasherView *pView, CDasherInput *pInput, CDasherModel *pModel, CExpansionPolicy **pol);
-  virtual void KeyDown(unsigned long iTime, int iId, CDasherView *pDasherView, CDasherInput *pInput, CDasherModel *pModel);
-  virtual void KeyUp(unsigned long iTime, int iId, CDasherView *pView, CDasherInput *pInput, CDasherModel *pModel);
+  virtual void KeyDown(unsigned long iTime, Keys::VirtualKey Key, CDasherView *pDasherView, CDasherInput *pInput, CDasherModel *pModel);
+  virtual void KeyUp(unsigned long iTime, Keys::VirtualKey Key, CDasherView *pView, CDasherInput *pInput, CDasherModel *pModel);
   virtual void Activate();
   virtual void Deactivate();
   bool GetSettings(SModuleSettings **, int *);
@@ -43,6 +43,7 @@ private:
   myint m_iSum;
   CStartHandler *m_pStartHandler;
   int m_iCounter;
+protected:
   bool m_bTurbo;
 };
 }

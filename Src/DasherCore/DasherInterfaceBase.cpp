@@ -34,15 +34,14 @@
 #include "UserLog.h"
 #include "BasicLog.h"
 #include "GameModule.h"
-#include "FileWordGenerator.h"
 
 // Input filters
 #include "AlternatingDirectMode.h"
 #include "ButtonMode.h"
 #include "ClickFilter.h"
+#include "PressFilter.h"
 #include "CompassMode.h"
 #include "DefaultFilter.h"
-#include "DemoFilter.h"
 #include "OneButtonFilter.h"
 #include "OneButtonDynamicFilter.h"
 #include "OneDimensionalFilter.h"
@@ -51,12 +50,11 @@
 #include "TwoPushDynamicFilter.h"
 
 // STL headers
-#include <cstdio>
-#include <iostream>
-#include <memory>
 #include <sstream>
 
 // Declare our global file logging object
+
+#include "FileUtils.h"
 #include "../DasherCore/FileLogger.h"
 #ifdef _DEBUG
 const eLogLevel g_iLogLevel   = logDEBUG;
@@ -69,8 +67,6 @@ const int       g_iLogOptions = logTimeStamp | logDateStamp;
 CFileLogger* g_pLogger = NULL;
 
 using namespace Dasher;
-using namespace std;
-
 
 CDasherInterfaceBase::CDasherInterfaceBase(CSettingsStore *pSettingsStore) 
   : CSettingsUser(pSettingsStore), 
@@ -201,11 +197,11 @@ CDasherInterfaceBase::~CDasherInterfaceBase() {
 void CDasherInterfaceBase::CPreSetObserver::HandleEvent(CParameterChange d) {
   switch(d.iParameter) {
   case SP_ALPHABET_ID:
-    string value = d.string_value;
+    std::string value = std::get<std::string>(d.value);
     // Cycle the alphabet history
-    vector<string> newHistory;
+    std::vector<std::string> newHistory;
     newHistory.push_back(m_settingsStore.GetStringParameter(SP_ALPHABET_ID));
-    string v;
+    std::string v;
     if ((v = m_settingsStore.GetStringParameter(SP_ALPHABET_1)) != value)
       newHistory.push_back(v);
     if ((v = m_settingsStore.GetStringParameter(SP_ALPHABET_2)) != value)
@@ -227,8 +223,8 @@ void CDasherInterfaceBase::CPreSetObserver::HandleEvent(CParameterChange d) {
   }
 }
 
-void CDasherInterfaceBase::HandleEvent(int iParameter) {
-  switch (iParameter) {
+void CDasherInterfaceBase::HandleEvent(Parameter parameter) {
+  switch (parameter) {
 
   case LP_OUTLINE_WIDTH:
     ScheduleRedraw();
@@ -338,14 +334,14 @@ void CDasherInterfaceBase::WordSpeaker::HandleEvent(const CEditEvent *pEditEvent
     }
   }
   else if(pEditEvent->m_iEditType == 2) {
-    m_strCurrentWord = m_strCurrentWord.substr(0, max(static_cast<string::size_type>(0), m_strCurrentWord.size()-pEditEvent->m_sText.size()));
+    m_strCurrentWord = m_strCurrentWord.substr(0, std::max(static_cast<std::string::size_type>(0), m_strCurrentWord.size()-pEditEvent->m_sText.size()));
   }
 }
 
-void CDasherInterfaceBase::SetLockStatus(const string &strText, int iPercent) {
-  string newMessage; //empty - what we want if iPercent==-1 (unlock)
+void CDasherInterfaceBase::SetLockStatus(const std::string &strText, int iPercent) {
+  std::string newMessage; //empty - what we want if iPercent==-1 (unlock)
   if (iPercent!=-1) {
-    ostringstream os;
+    std::ostringstream os;
     os << (strText.empty() ? "Training Dasher" : strText);
     if (iPercent) os << " " << iPercent << "%";
     newMessage = os.str();
@@ -433,7 +429,7 @@ void CDasherInterfaceBase::TextAction::executeLast() {
 }
 
 void CDasherInterfaceBase::TextAction::NotifyOffset(int iOffset) {
-  m_iStartOffset = min(m_pIntf->GetAllContextLenght(), m_iStartOffset);
+  m_iStartOffset = std::min(m_pIntf->GetAllContextLenght(), m_iStartOffset);
 }
 
 
@@ -498,7 +494,7 @@ void CDasherInterfaceBase::NewFrame(unsigned long iTime, bool bForceRedraw) {
       m_DasherScreen->DrawRectangle(0,0,iSW,iSH,0,0,0); //fill in colour 0 = white
       unsigned int iSize(GetLongParameter(LP_MESSAGE_FONTSIZE));
       if (!m_pLockLabel) m_pLockLabel = m_DasherScreen->MakeLabel(m_strLockMessage, iSize);
-      pair<screenint,screenint> dims = m_DasherScreen->TextSize(m_pLockLabel, iSize);
+      std::pair<screenint,screenint> dims = m_DasherScreen->TextSize(m_pLockLabel, iSize);
       m_DasherScreen->DrawString(m_pLockLabel, (iSW-dims.first)/2, (iSH-dims.second)/2, iSize, 4);
       m_DasherScreen->SendMarker(1); //decorations - don't draw any
       bBlit = true;
@@ -606,14 +602,14 @@ void CDasherInterfaceBase::ChangeAlphabet() {
   //}
 }
 
-Opts::ScreenOrientations CDasherInterfaceBase::ComputeOrientation() {
-  Opts::ScreenOrientations pref(Opts::ScreenOrientations(GetLongParameter(LP_ORIENTATION)));
-  if (pref!=Opts::AlphabetDefault) return pref;
+Options::ScreenOrientations CDasherInterfaceBase::ComputeOrientation() {
+  Options::ScreenOrientations pref(Options::ScreenOrientations(GetLongParameter(LP_ORIENTATION)));
+  if (pref!=Options::AlphabetDefault) return pref;
   if (m_pNCManager) return m_pNCManager->GetAlphabet()->GetOrientation();
   //haven't created the NCManager yet, so not yet reached Realize, but must
   // have been given Screen (to make View). Use default LR for now, as when
   // we ChangeAlphabet, we'll update the view.
-  return Opts::LeftToRight;
+  return Options::LeftToRight;
 }
 
 void CDasherInterfaceBase::ChangeColours() {
@@ -705,8 +701,8 @@ void CDasherInterfaceBase::ClearAllContext() {
   SetBuffer(0);
 }
 
-void CDasherInterfaceBase::ResetParameter(int iParameter) {
-  m_pSettingsStore->ResetParameter(iParameter);
+void CDasherInterfaceBase::ResetParameter(Parameter parameter) {
+  m_pSettingsStore->ResetParameter(parameter);
 }
 
 // We need to be able to get at the UserLog object from outside the interface
@@ -714,29 +710,29 @@ CUserLogBase* CDasherInterfaceBase::GetUserLogPtr() {
   return m_pUserLog;
 }
 
-void CDasherInterfaceBase::KeyDown(unsigned long iTime, int iId) {
+void CDasherInterfaceBase::KeyDown(unsigned long iTime, Keys::VirtualKey Key) {
   if(isLocked())
     return;
 
   if(m_pInputFilter) {
-    m_pInputFilter->KeyDown(iTime, iId, m_pDasherView, m_pInput, m_pDasherModel);
+    m_pInputFilter->KeyDown(iTime, Key, m_pDasherView, m_pInput, m_pDasherModel);
   }
 
   if(m_pInput) {
-    m_pInput->KeyDown(iTime, iId);
+    m_pInput->KeyDown(iTime, Key);
   }
 }
 
-void CDasherInterfaceBase::KeyUp(unsigned long iTime, int iId) {
+void CDasherInterfaceBase::KeyUp(unsigned long iTime, Keys::VirtualKey Key) {
   if(isLocked())
     return;
 
   if(m_pInputFilter) {
-    m_pInputFilter->KeyUp(iTime, iId, m_pDasherView, m_pInput, m_pDasherModel);
+    m_pInputFilter->KeyUp(iTime, Key, m_pDasherView, m_pInput, m_pDasherModel);
   }
 
   if(m_pInput) {
-    m_pInput->KeyUp(iTime, iId);
+    m_pInput->KeyUp(iTime, Key);
   }
 }
 
@@ -779,6 +775,7 @@ void CDasherInterfaceBase::CreateModules() {
   CInputFilter *defFil = new CDefaultFilter(this, this, m_pFramerate, 3, _("Normal Control"));
   RegisterModule(defFil);
   SetDefaultInputMethod(defFil);
+  RegisterModule(new CPressFilter(this, this, m_pFramerate));
   RegisterModule(new COneDimensionalFilter(this, this, m_pFramerate));
   RegisterModule(new CClickFilter(this, this));
   RegisterModule(new COneButtonFilter(this, this));
@@ -795,9 +792,9 @@ void CDasherInterfaceBase::CreateModules() {
   //WIP Temporary as too many segfaults! //RegisterModule(new CDemoFilter(this, this, m_pFramerate));
 }
 
-void CDasherInterfaceBase::GetPermittedValues(int iParameter, std::vector<std::string> &vList) {
+void CDasherInterfaceBase::GetPermittedValues(Parameter parameter, std::vector<std::string> &vList) {
   // TODO: Deprecate direct calls to these functions
-  switch (iParameter) {
+  switch (parameter) {
   case SP_ALPHABET_ID:
     DASHER_ASSERT(m_AlphIO != NULL);
     m_AlphIO->GetAlphabets(&vList);
@@ -827,7 +824,7 @@ void CDasherInterfaceBase::SetOffset(int iOffset, bool bForce) {
   if (iOffset == m_pDasherModel->GetOffset() && !bForce) return;
 
   CDasherNode *pNode = m_pNCManager->GetAlphabetManager()->GetRoot(NULL, iOffset!=0, iOffset);
-  if (GetGameModule()) pNode->SetFlag(NF_GAME, true);
+  if (GetGameModule()) pNode->SetFlag(CDasherNode::NF_GAME, true);
   m_pDasherModel->SetNode(pNode);
   
   //ACL TODO note that CTL_MOVE, etc., do not come here (that would probably
@@ -835,7 +832,7 @@ void CDasherInterfaceBase::SetOffset(int iOffset, bool bForce) {
   // still want to notifyOffset all text actions, so the "New" suboption sees
   // all the editing the user's done...
 
-  for (set<TextAction *>::iterator it = m_vTextActions.begin(); it!=m_vTextActions.end(); it++) {
+  for (std::set<TextAction *>::iterator it = m_vTextActions.begin(); it!=m_vTextActions.end(); it++) {
     (*it)->NotifyOffset(iOffset);
   }
   

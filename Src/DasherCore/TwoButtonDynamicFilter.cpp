@@ -22,7 +22,6 @@
 
 #include "TwoButtonDynamicFilter.h"
 #include "DasherInterfaceBase.h"
-#include "Event.h"
 
 using namespace Dasher;
 
@@ -49,7 +48,7 @@ static SModuleSettings sSettings[] = {
 };
 
 CTwoButtonDynamicFilter::CTwoButtonDynamicFilter(CSettingsUser *pCreator, CDasherInterfaceBase *pInterface, CFrameRate *pFramerate)
-  : CButtonMultiPress(pCreator, pInterface, pFramerate, 14, _("Two Button Dynamic Mode")), CSettingsObserver(pCreator), m_iMouseButton(-1)
+  : CButtonMultiPress(pCreator, pInterface, pFramerate, 14, _("Two Button Dynamic Mode")), CSettingsObserver(pCreator), m_iMouseButton(Keys::Invalid_Key)
 {
   //ensure that m_dLagBits is properly initialised
   HandleEvent(LP_DYNAMIC_BUTTON_LAG);
@@ -92,41 +91,41 @@ bool CTwoButtonDynamicFilter::DecorateView(CDasherView *pView, CDasherInput *pIn
   return bRV;
 }
 
-void CTwoButtonDynamicFilter::KeyDown(unsigned long Time, int iId, CDasherView *pView, CDasherInput *pInput, CDasherModel *pModel) {
-	if (iId == 100 && !GetBoolParameter(BP_BACKOFF_BUTTON)) {
+void CTwoButtonDynamicFilter::KeyDown(unsigned long Time, Keys::VirtualKey Key, CDasherView *pView, CDasherInput *pInput, CDasherModel *pModel) {
+	if (Key == Keys::Primary_Input && !GetBoolParameter(BP_BACKOFF_BUTTON)) {
     //mouse click - will be ignored by superclass method.
 		//simulate press of button 2/3 according to whether click in top/bottom half
     myint iDasherX, iDasherY;
     m_pInterface->GetActiveInputDevice()->GetDasherCoords(iDasherX, iDasherY, pView);
-    m_iMouseButton = iId = (iDasherY < CDasherModel::ORIGIN_Y) ? 2 : 3;
+    m_iMouseButton = Key = (iDasherY < CDasherModel::ORIGIN_Y) ? Keys::Button_2 : Keys::Button_3;
   }
-  CButtonMultiPress::KeyDown(Time, iId, pView, pInput, pModel);
+  CButtonMultiPress::KeyDown(Time, Key, pView, pInput, pModel);
 }
 
-void CTwoButtonDynamicFilter::KeyUp(unsigned long Time, int iId, CDasherView *pView, CDasherInput *pInput, CDasherModel *pModel) {
-	if (iId == 100 && !GetBoolParameter(BP_BACKOFF_BUTTON)) {
+void CTwoButtonDynamicFilter::KeyUp(unsigned long Time, Keys::VirtualKey Key, CDasherView *pView, CDasherInput *pInput, CDasherModel *pModel) {
+	if (Key == Keys::Primary_Input && !GetBoolParameter(BP_BACKOFF_BUTTON)) {
     //mouse click - will be ignored by superclass method.
     //Although we could check current mouse coordinates,
     // since we don't generally do anything in response to KeyUp, seems more consistent just to
     // simulate release of whichever button we depressed in response to mousedown...
-    if (m_iMouseButton!=-1) {//paranoia about e.g. pause/resume inbetween press/release?
-      iId = m_iMouseButton;
-      m_iMouseButton=-1;
+    if (m_iMouseButton!= Keys::Invalid_Key) {//paranoia about e.g. pause/resume inbetween press/release?
+      Key = m_iMouseButton;
+      m_iMouseButton= Keys::Invalid_Key;
     }
   }
-  CButtonMultiPress::KeyUp(Time, iId, pView, pInput,pModel);
+  CButtonMultiPress::KeyUp(Time, Key, pView, pInput,pModel);
 }
 
 void CTwoButtonDynamicFilter::TimerImpl(unsigned long Time, CDasherView *m_pDasherView, CDasherModel *m_pDasherModel, CExpansionPolicy **pol) {
   OneStepTowards(m_pDasherModel, 100,2048, Time, FrameSpeedMul(m_pDasherModel, Time));
 }
 
-void CTwoButtonDynamicFilter::ActionButton(unsigned long iTime, int iButton, int iType, CDasherModel *pModel) {
+void CTwoButtonDynamicFilter::ActionButton(unsigned long iTime, Keys::VirtualKey Key, int iType, CDasherModel* pModel) {
   
   double dFactor(GetBoolParameter(BP_TWOBUTTON_REVERSE) ? -1.0 : 1.0);
   int iEffect; //for user log
 
-  if (GetBoolParameter(BP_2B_INVERT_DOUBLE) && iType == 2 && iButton>=2 && iButton<=4)
+  if (GetBoolParameter(BP_2B_INVERT_DOUBLE) && iType == 2 && Key >= Keys::Button_2 && Key <= Keys::Button_4)
   { //double-press - go BACK in opposite direction,
     //far enough to invert previous jump (from first press of double-)
     //and then AGAIN.
@@ -137,18 +136,18 @@ void CTwoButtonDynamicFilter::ActionButton(unsigned long iTime, int iButton, int
     return;
   }
   
-  if(iButton == 2) {
+  if(Key == Keys::Button_2) {
     iEffect = 3;
     //fall through to apply offset.
   }
-  else if((iButton == 3) || (iButton == 4)) {
+  else if((Key == Keys::Button_3) || (Key == Keys::Button_4)) {
     dFactor = -dFactor;
     iEffect = 4;
     //fall through to apply offset
   }
   else {
     if(CUserLogBase *pUserLog=m_pInterface->GetUserLogPtr())
-      pUserLog->KeyDown(iButton, iType, 0);
+      pUserLog->KeyDown(Key, iType, 0);
     return;
   }
   //fell through to apply offset
@@ -156,7 +155,7 @@ void CTwoButtonDynamicFilter::ActionButton(unsigned long iTime, int iButton, int
   pModel->ResetNats();
   
   if(CUserLogBase *pUserLog=m_pInterface->GetUserLogPtr())
-    pUserLog->KeyDown(iButton, iType, iEffect);  
+    pUserLog->KeyDown(Key, iType, iEffect);  
 }
 
 bool CTwoButtonDynamicFilter::GetSettings(SModuleSettings **pSettings, int *iCount) {
@@ -171,9 +170,9 @@ bool CTwoButtonDynamicFilter::GetMinWidth(int &iMinWidth) {
   return true;
 }
 
-void CTwoButtonDynamicFilter::HandleEvent(int iParameter)
+void CTwoButtonDynamicFilter::HandleEvent(Parameter parameter)
 {
-  switch (iParameter) {
+  switch (parameter) {
   case LP_MAX_BITRATE:// Deliberate fallthrough
   case LP_DYNAMIC_BUTTON_LAG:
       m_dLagBits = GetLongParameter(LP_MAX_BITRATE)/100.0 * GetLongParameter(LP_DYNAMIC_BUTTON_LAG)/1000.0;

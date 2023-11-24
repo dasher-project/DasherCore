@@ -7,9 +7,9 @@ CWordGeneratorBase::CWordGeneratorBase(const CAlphInfo *pAlph, const CAlphabetMa
 
 void CWordGeneratorBase::GetSymbols(std::vector<symbol> &into) {
   for (;;) {
-    string s(GetLine());
+    std::string s(GetLine());
     if (s.empty()) break; //no more lines, so no more symbols...
-    stringstream line(s);
+    std::stringstream line(s);
     CAlphabetMap::SymbolStream ss(line);
     for (int sym; (sym=ss.next(m_pAlphMap))!=-1; ) {
       if (!into.empty()) {

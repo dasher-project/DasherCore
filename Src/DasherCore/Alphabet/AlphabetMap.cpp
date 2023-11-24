@@ -20,9 +20,6 @@
 #include <cstring>
 
 using namespace Dasher;
-using namespace std;
-
-
 
 #define UNKNOWN_SYMBOL 0
 
@@ -126,12 +123,12 @@ inline int CAlphabetMap::SymbolStream::findNext() {
   }
 }
 
-string CAlphabetMap::SymbolStream::peekAhead() {
+std::string CAlphabetMap::SymbolStream::peekAhead() {
   int numChars=findNext();
-  return string(&buf[pos],numChars);
+  return std::string(&buf[pos],numChars);
 }
 
-string CAlphabetMap::SymbolStream::peekBack() {
+std::string CAlphabetMap::SymbolStream::peekBack() {
   bool bSeenHighBit=false;
   for(int i=pos-1; i>=0; i--) {
     if (buf[i] & 0x80) {
@@ -146,13 +143,13 @@ string CAlphabetMap::SymbolStream::peekBack() {
           return "";
         }
         DASHER_ASSERT(i+numChars==pos);
-        return string(&buf[i],numChars);
+        return std::string(&buf[i],numChars);
       }
       //in middle of multibyte, keep going back...
     } else {
       //high bit not set -> single-byte char
       if (bSeenHighBit) return ""; //followed by a "continuation of multibyte char" without a "first byte of multibyte char" before it. (Malformed!)
-      return string(&buf[i],1);
+      return std::string(&buf[i],1);
     }
   }
   //fail...relatively gracefully ;-)
@@ -173,7 +170,7 @@ symbol CAlphabetMap::SymbolStream::next(const CAlphabetMap *map)
     }
     return map->GetSingleChar(buf[pos++]);
   }
-  int sym=map->Get(string(&buf[pos], numChars));
+  int sym=map->Get(std::string(&buf[pos], numChars));
   pos+=numChars;
   return sym;
 }
@@ -191,7 +188,7 @@ CAlphabetMap::CAlphabetMap(unsigned int InitialTableSize)
 :HashTable(InitialTableSize <<1), m_ParagraphSymbol(UNKNOWN_SYMBOL) {
   Entries.reserve(InitialTableSize);
   // TODO: fix the code so it works if char is signed.
-  const int numChars = numeric_limits<char>::max() + 1;
+  const int numChars = std::numeric_limits<char>::max() + 1;
   m_pSingleChars = new symbol[numChars];
   for (int i = 0; i<numChars; i++) m_pSingleChars[i] = UNKNOWN_SYMBOL;
 }

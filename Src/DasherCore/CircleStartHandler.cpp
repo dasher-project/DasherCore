@@ -18,13 +18,9 @@
 // along with Dasher; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
-#include "../Common/Common.h"
-
 #include "CircleStartHandler.h"
 #include "DefaultFilter.h"
 #include "DasherInterfaceBase.h"
-#include "Event.h"
-#include "DasherInput.h"
 
 using namespace Dasher;
 
@@ -46,9 +42,9 @@ CDasherScreen::point CCircleStartHandler::CircleCenter(CDasherView *pView) {
   screenint iEdgeX, iEdgeY;
   m_pView->Dasher2Screen(CDasherModel::ORIGIN_X, CDasherModel::ORIGIN_Y + (CDasherModel::MAX_Y*GetLongParameter(LP_CIRCLE_PERCENT))/100, iEdgeX, iEdgeY);
 
-  const Opts::ScreenOrientations iDirection(m_pView->GetOrientation());
+  const Options::ScreenOrientations iDirection(m_pView->GetOrientation());
 
-  if((iDirection == Opts::TopToBottom) || (iDirection == Opts::BottomToTop)) {
+  if((iDirection == Options::TopToBottom) || (iDirection == Options::BottomToTop)) {
     m_iScreenRadius = iEdgeX - m_screenCircleCenter.x;
   }
   else {
@@ -108,8 +104,8 @@ void CCircleStartHandler::Timer(unsigned long iTime, dasherint mouseX, dasherint
   }
 }
 
-void CCircleStartHandler::HandleEvent(int iParameter) {
-  if (iParameter==LP_CIRCLE_PERCENT)
+void CCircleStartHandler::HandleEvent(Parameter parameter) {
+  if (parameter==LP_CIRCLE_PERCENT)
       m_iScreenRadius = -1; //recompute geometry.
 }
 

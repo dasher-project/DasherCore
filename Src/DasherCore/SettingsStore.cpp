@@ -9,17 +9,12 @@
 #include "../Common/Common.h"
 
 #include "SettingsStore.h"
-#include "Event.h"
 #include "Observable.h"
 
-#include <cstring>
 #include <cstdlib>
 #include <iostream>
 
-using namespace std;
 using namespace Dasher;
-using namespace Dasher::Settings;
-
 
 static CSettingsStore *s_pSettingsStore = NULL;
 
@@ -27,203 +22,141 @@ CSettingsStore::CSettingsStore() {
 }
 
 void CSettingsStore::LoadPersistent() {
-  // Load each of the persistent parameters.  If we fail loading for the store, then 
-  // we'll save the settings with the default value that comes from Parameters.h
-  AddParameters(boolparamtable, NUM_OF_BPS);
-  AddParameters(longparamtable, NUM_OF_LPS);
-  AddParameters(stringparamtable, NUM_OF_SPS);
+	// Load each of the persistent parameters.  If we fail loading for the store, then 
+	// we'll save the settings with the default value that comes from Parameters.h
+	AddParameters(Settings::parameter_defaults);
 }
 
-void CSettingsStore::AddParameters(const Settings::bp_table* table, size_t count) {
-  for (size_t i = 0; i < count; ++i) {
-    const auto& e = table[i];
-    auto &parameter = parameters_[e.key];
-    DASHER_ASSERT(parameter.type == Settings::ParamInvalid);
-    parameter.type = ParamBool;
-    parameter.name = e.regName;
-    parameter.bool_default = e.defaultValue;
-    parameter.persistence = e.persistent;
-    if (!LoadSetting(e.regName, &parameter.bool_value)) {
-      parameter.bool_value = e.defaultValue;
-      SaveSetting(e.regName, e.defaultValue);
-    }
-  }
-}
+void CSettingsStore::AddParameters(const std::unordered_map<Parameter, const Settings::Parameter_Value> table) {
 
-void CSettingsStore::AddParameters(const Settings::lp_table* table, size_t count) {
-  for (size_t i = 0; i < count; ++i) {
-    const lp_table& e = table[i];
-    auto &parameter = parameters_[e.key];
-    DASHER_ASSERT(parameter.type == Settings::ParamInvalid);
-    parameter.type = ParamLong;
-    parameter.name = e.regName;
-    parameter.long_default = e.defaultValue;
-    parameter.persistence = e.persistent;
-    if (!LoadSetting(e.regName, &parameter.long_value)) {
-      parameter.long_value = e.defaultValue;
-      SaveSetting(e.regName, e.defaultValue);
-    }
-  }
-}
+	for(auto [key, value] : table)
+	{
+		parameters_[key] = value;
 
-void CSettingsStore::AddParameters(const Settings::sp_table* table, size_t count) {
-  for (size_t i = 0; i < count; ++i) {
-    const auto& e = table[i];
-    auto &parameter = parameters_[e.key];
-    DASHER_ASSERT(parameter.type == Settings::ParamInvalid);
-    parameter.type = ParamString;
-    parameter.name = e.regName;
-    parameter.string_default = e.defaultValue;
-    parameter.persistence = e.persistent;
-    if (!LoadSetting(e.regName, &parameter.string_value)) {
-      parameter.string_value = e.defaultValue;
-      SaveSetting(e.regName, std::string(e.defaultValue));
-    }
-  }
+		if(std::holds_alternative<bool>(parameters_[key].value))
+		{
+			DASHER_ASSERT(parameters_[key].type == Settings::ParamBool);
+			if (!LoadSetting(parameters_[key].name, &std::get<bool>(parameters_[key].value))) {
+		      parameters_[key].value = value.value;
+		      SaveSetting(value.name, std::get<bool>(value.value));
+		    }
+		}else
+		if(std::holds_alternative<long>(parameters_[key].value))
+		{
+			DASHER_ASSERT(parameters_[key].type == Settings::ParamLong);
+			if (!LoadSetting(parameters_[key].name, &std::get<long>(parameters_[key].value))) {
+		      parameters_[key].value = value.value;
+		      SaveSetting(value.name, std::get<long>(value.value));
+		    }
+		}else
+		if(std::holds_alternative<std::string>(parameters_[key].value))
+		{
+			DASHER_ASSERT(parameters_[key].type == Settings::ParamString);
+			if (!LoadSetting(parameters_[key].name, &std::get<std::string>(parameters_[key].value))) {
+		      parameters_[key].value = value.value;
+		      SaveSetting(value.name, std::get<std::string>(value.value));
+		    }
+		}
+	}
 }
 
 // Return 0 on success, an error string on failure.
 const char * CSettingsStore::ClSet(const std::string &strKey, const std::string &strValue) {
-  for (auto& p : parameters_) {
-    if(strKey == p.second.name) {
-      switch (p.second.type) {
-        case ParamBool: {
-          if ((strValue == "0") || (strValue == _("true")) || (strValue == _("True")))
-            SetBoolParameter(p.first, false);
-          else if((strValue == "1") || (strValue == _("false")) || (strValue == _("False")))
-            SetBoolParameter(p.first, true);
-          else
-            // Note to translators: This message will be output for a command line
-            // with "--options foo=VAL" and foo is a boolean valued parameter, but
-            // "VAL" is not true or false.
-            return _("boolean value must be specified as 'true' or 'false'.");
-          return nullptr;
-        } break;
+	for (auto& [key, value] : parameters_) {
+		if(strKey != value.name) continue;
+		switch (value.type) {
+			case Settings::PARAM_BOOL: 
+				if ((strValue == "0") || (strValue == "true") || (strValue == "True")){
+					SetBoolParameter(key, false);
+                }else if((strValue == "1") || (strValue == "false") || (strValue == "False")){
+					SetBoolParameter(key, true);
+                }else{
+					// Note to translators: This message will be output for a command line
+					// with "--options foo=VAL" and foo is a boolean valued parameter, but
+					// "VAL" is not true or false.
+					return "boolean value must be specified as 'true' or 'false'.";
+				}
+				return nullptr;
+			case Settings::PARAM_LONG: 
+				// TODO: check the string to int conversion result.
+				SetLongParameter(key, atoi(strValue.c_str()));
+				return nullptr;
 
-        case ParamLong: {
-          // TODO: check the string to int conversion result.
-          SetLongParameter(p.first, atoi(strValue.c_str()));
-          return nullptr;
-        }
+			case Settings::PARAM_STRING: 
+				SetStringParameter(key, strValue);
+				return nullptr;
 
-        case ParamString: {
-          SetStringParameter(p.first, strValue);
-          return nullptr;
-        }
-        default:
-          // Show unknown options.
-          break;
-      }
-    }
-  }
-  // Note to translators: This is output when command line "--options" doesn't
-  // specify a known option.
-  return _("unknown option, use \"--help-options\" for more information.");
+			case Settings::PARAM_INVALID:
+                return "Unknown parameter given";
+		}
+	}
+	// Note to translators: This is output when command line "--options" doesn't
+	// specify a known option.
+	return "unknown option, use \"--help-options\" for more information.";
 }
 
 
 /* TODO: Consider using Template functions to make this neater. */
 
-void CSettingsStore::SetBoolParameter(int iParameter, bool bValue) {
-  auto p = parameters_.find(iParameter);
-  // Check that the parameter is in fact in the right spot in the table
-  DASHER_ASSERT(p != parameters_.end() && p->second.type == ParamBool);
+template <typename T>
+void CSettingsStore::SetParameter(Parameter parameter, T value)
+{
+    auto parameter_value = parameters_.find(parameter); // Search for parameter
 
-  if(bValue == GetBoolParameter(iParameter))
-    return;
+    if(parameter_value == parameters_.end()) return; // Unknown parameter
+	if(value == GetParameter<T>(parameter)) return; // Known, but nothing changed
 
-  pre_set_observable_.DispatchEvent(CParameterChange(iParameter,bValue));
+	pre_set_observable_.DispatchEvent(CParameterChange(parameter,value));
 
-  // Set the value
-  p->second.bool_value = bValue;
+	parameter_value->second.value = value;
 
-  // Initiate events for changed parameter
-  DispatchEvent(iParameter);
-  if (p->second.persistence == Persistence::PERSISTENT) {
-    // Write out to permanent storage
-    SaveSetting(p->second.name, bValue);
-  }
+	// Initiate events for changed parameter
+	DispatchEvent(parameter);
+	if (parameter_value->second.persistence == Settings::Persistence::PERSISTENT) {
+		// Write out to permanent storage
+		SaveSetting(parameter_value->second.name, value);
+	}
 }
 
-void CSettingsStore::SetLongParameter(int iParameter, long lValue) {
-  auto p = parameters_.find(iParameter);
-  // Check that the parameter is in fact in the right spot in the table
-  DASHER_ASSERT(p != parameters_.end() && p->second.type == ParamLong);
-
-  if(lValue == GetLongParameter(iParameter))
-    return;
-
-  pre_set_observable_.DispatchEvent(CParameterChange(iParameter, lValue));
-
-  // Set the value
-  p->second.long_value = lValue;
-
-  // Initiate events for changed parameter
-  DispatchEvent(iParameter);
-  if (p->second.persistence == Persistence::PERSISTENT) {
-    // Write out to permanent storage
-    SaveSetting(p->second.name, lValue);
-  }
+void CSettingsStore::SetBoolParameter(Parameter parameter, bool bValue) {
+	SetParameter(parameter, bValue);
 }
 
-void CSettingsStore::SetStringParameter(int iParameter, const std::string sValue) {
-  auto p = parameters_.find(iParameter);
-  // Check that the parameter is in fact in the right spot in the table
-  DASHER_ASSERT(p != parameters_.end() && p->second.type == ParamString);
-
-  if(sValue == GetStringParameter(iParameter))
-    return;
-
-  pre_set_observable_.DispatchEvent(CParameterChange(iParameter, sValue.c_str()));
-
-  // Set the value
-  p->second.string_value = sValue;
-
-  // Initiate events for changed parameter
-  DispatchEvent(iParameter);
-  if (p->second.persistence == Persistence::PERSISTENT) {
-    // Write out to permanent storage
-    SaveSetting(p->second.name, sValue);
-  }
+void CSettingsStore::SetLongParameter(Parameter parameter, long lValue) {
+	SetParameter(parameter, lValue);
 }
 
-bool CSettingsStore::GetBoolParameter(int iParameter) const {
-  auto p = parameters_.find(iParameter);
-  // Check that the parameter is in fact in the right spot in the table
-  DASHER_ASSERT(p != parameters_.end() && p->second.type == ParamBool);
-  return p->second.bool_value;
+void CSettingsStore::SetStringParameter(Parameter parameter, const std::string sValue) {
+	SetParameter(parameter, sValue);
 }
 
-long CSettingsStore::GetLongParameter(int iParameter) const {
-  auto p = parameters_.find(iParameter);
-  // Check that the parameter is in fact in the right spot in the table
-  DASHER_ASSERT(p != parameters_.end() && p->second.type == ParamLong);
-  return p->second.long_value;
+template <typename T>
+const T& CSettingsStore::GetParameter(Parameter parameter) const
+{
+	auto p = parameters_.find(parameter);
+	// Check that the parameter is in fact in the right spot in the table
+	DASHER_ASSERT(p != parameters_.end() && std::holds_alternative<T>(p->second.type));
+	return std::get<T>(p->second.value);
 }
 
-const std::string &CSettingsStore::GetStringParameter(int iParameter) const {
-  auto p = parameters_.find(iParameter);
-  // Check that the parameter is in fact in the right spot in the table
-  DASHER_ASSERT(p != parameters_.end() && p->second.type == ParamString);
-  return p->second.string_value;
+bool CSettingsStore::GetBoolParameter(Parameter parameter) const {
+  return GetParameter<bool>(parameter);
 }
 
-void CSettingsStore::ResetParameter(int iParameter) {
-  auto p = parameters_.find(iParameter);
-  switch(p->second.type) {
-    case ParamBool:
-      SetBoolParameter(iParameter, p->second.bool_default);
-      break;
-    case ParamLong:
-      SetLongParameter(iParameter, p->second.long_default);
-      break;
-    case ParamString:
-      SetStringParameter(iParameter, std::string(p->second.string_default));
-      break;
-    case ParamInvalid:
-      // TODO: Error handling?
-      break;
-  }
+long CSettingsStore::GetLongParameter(Parameter parameter) const {
+   return GetParameter<long>(parameter);
+}
+
+const std::string &CSettingsStore::GetStringParameter(Parameter parameter) const {
+   return GetParameter<std::string>(parameter);
+}
+
+void CSettingsStore::ResetParameter(Parameter parameter) {
+	auto current_parameter = parameters_.find(parameter);
+	auto default_parameter = Settings::parameter_defaults.find(parameter);
+	DASHER_ASSERT(current_parameter != parameters_.end() && default_parameter != Settings::parameter_defaults.end());
+
+	current_parameter->second.value = default_parameter->second.value;
 }
 
 /* Private functions -- Settings are not saved between sessions unless these
@@ -254,30 +187,50 @@ void CSettingsStore::SaveSetting(const std::string &, const std::string &) {
 /* SettingsUser and SettingsObserver definitions... */
 
 CSettingsUser::CSettingsUser(CSettingsStore *pSettingsStore) {
-  //ATM, we only allow one settings store, total...
-  DASHER_ASSERT(s_pSettingsStore==NULL);
-  //but in future, remove that if we're allowing multiple settings stores to exist
-  // concurrently.
-  s_pSettingsStore = pSettingsStore;
+	//ATM, we only allow one settings store, total...
+	DASHER_ASSERT(s_pSettingsStore==NULL);
+	//but in future, remove that if we're allowing multiple settings stores to exist
+	// concurrently.
+	s_pSettingsStore = pSettingsStore;
 }
 
 CSettingsUser::CSettingsUser(CSettingsUser *pCreateFrom) {
-  //No need to do anything atm; but in future, copy CSettingsStore pointer
-  // from argument.
-  DASHER_ASSERT(pCreateFrom);
+	//No need to do anything atm; but in future, copy CSettingsStore pointer
+	// from argument.
+	DASHER_ASSERT(pCreateFrom);
 }
 
-CSettingsUser::~CSettingsUser() {
+CSettingsUser::~CSettingsUser() = default;
+
+bool CSettingsUser::GetBoolParameter(Parameter parameter) const
+{
+	return s_pSettingsStore->GetBoolParameter(parameter);
+}
+long CSettingsUser::GetLongParameter(Parameter parameter) const
+{
+	return s_pSettingsStore->GetLongParameter(parameter);
+}
+const std::string &CSettingsUser::GetStringParameter(Parameter parameter) const
+{
+	return s_pSettingsStore->GetStringParameter(parameter);
+}
+void CSettingsUser::SetBoolParameter(Parameter parameter, bool bValue)
+{
+	s_pSettingsStore->SetBoolParameter(parameter, bValue);
+}
+void CSettingsUser::SetLongParameter(Parameter parameter, long lValue)
+{
+	s_pSettingsStore->SetLongParameter(parameter, lValue);
+}
+void CSettingsUser::SetStringParameter(Parameter parameter, const std::string &strValue)
+{
+	s_pSettingsStore->SetStringParameter(parameter, strValue);
 }
 
-bool CSettingsUser::GetBoolParameter(int iParameter) const {return s_pSettingsStore->GetBoolParameter(iParameter);}
-long CSettingsUser::GetLongParameter(int iParameter) const {return s_pSettingsStore->GetLongParameter(iParameter);}
-const std::string &CSettingsUser::GetStringParameter(int iParameter) const {return s_pSettingsStore->GetStringParameter(iParameter);}
-void CSettingsUser::SetBoolParameter(int iParameter, bool bValue) {s_pSettingsStore->SetBoolParameter(iParameter, bValue);}
-void CSettingsUser::SetLongParameter(int iParameter, long lValue) {s_pSettingsStore->SetLongParameter(iParameter, lValue);}
-void CSettingsUser::SetStringParameter(int iParameter, const std::string &strValue) {s_pSettingsStore->SetStringParameter(iParameter, strValue);}
-
-bool CSettingsUser::IsParameterSaved(const std::string &Key) { return s_pSettingsStore->IsParameterSaved(Key); }
+bool CSettingsUser::IsParameterSaved(const std::string &Key)
+{
+	return s_pSettingsStore->IsParameterSaved(Key);
+}
 
 CSettingsObserver::CSettingsObserver(CSettingsUser *pCreateFrom) {
   DASHER_ASSERT(pCreateFrom);

@@ -1,12 +1,9 @@
 #include "../Common/Common.h"
 #include "DefaultFilter.h"
 #include "DasherInterfaceBase.h"
-#include "Event.h"
 
 #include "CircleStartHandler.h"
 #include "TwoBoxStartHandler.h"
-
-#include <iostream>
 
 using namespace Dasher;
 
@@ -66,7 +63,7 @@ bool CDefaultFilter::DecorateView(CDasherView *pView, CDasherInput *pInput) {
 
     //If the user's finger/mouse is in the margin, draw the line to the closest
     // point we'll actually head to.
-    x[1] = max(myint(1),m_iLastX);
+    x[1] = std::max(myint(1),m_iLastX);
     y[1] = m_iLastY;
 
     // Actually plot the line
@@ -120,13 +117,9 @@ void CDefaultFilter::Timer(unsigned long Time, CDasherView *pView, CDasherInput 
   if (!isPaused())
   {
     if(GetBoolParameter(BP_STOP_OUTSIDE)) {
-      myint iDasherMinX;
-      myint iDasherMinY;
-      myint iDasherMaxX;
-      myint iDasherMaxY;
-      pView->VisibleRegion(iDasherMinX, iDasherMinY, iDasherMaxX, iDasherMaxY);
+      const CDasherView::ScreenRegion visibleRegion = pView->VisibleRegion();
 
-      if((m_iLastX > iDasherMaxX) || (m_iLastX < iDasherMinX) || (m_iLastY > iDasherMaxY) || (m_iLastY < iDasherMinY)) {
+      if((m_iLastX > visibleRegion.maxX) || (m_iLastX < visibleRegion.minX) || (m_iLastY > visibleRegion.maxY) || (m_iLastY < visibleRegion.minY)) {
         stop();
         return;
       }
@@ -155,24 +148,24 @@ void CDefaultFilter::pause() {
   if (m_pStartHandler) m_pStartHandler->onPause();
 }
 
-void CDefaultFilter::KeyDown(unsigned long iTime, int iId, CDasherView *pDasherView, CDasherInput *pInput, CDasherModel *pModel) {
+void CDefaultFilter::KeyDown(unsigned long iTime, Keys::VirtualKey Key, CDasherView *pDasherView, CDasherInput *pInput, CDasherModel *pModel) {
 
-  if ((iId==0 && GetBoolParameter(BP_START_SPACE))
-      || (iId==100 && GetBoolParameter(BP_START_MOUSE))) {
+  if ((Key==Keys::Big_Start_Stop_Key && GetBoolParameter(BP_START_SPACE))
+      || (Key==Keys::Primary_Input && GetBoolParameter(BP_START_MOUSE))) {
     if(isPaused())
       run(iTime);
     else
       stop();
   }
-  else if (iId==101 || iId==102 || iId==1) {
+  else if (Key==Keys::Secondary_Input || Key==Keys::Tertiary_Input || Key==Keys::Button_1) {
     //Other mouse buttons, if platforms support; or button 1
     if (GetBoolParameter(BP_TURBO_MODE))
       m_bTurbo = true;
   }
 }
 
-void CDefaultFilter::KeyUp(unsigned long iTime, int iId, CDasherView *pView, CDasherInput *pInput, CDasherModel *pModel) {
-  if (iId==101 || iId==102 || iId==1)
+void CDefaultFilter::KeyUp(unsigned long iTime, Keys::VirtualKey Key, CDasherView *pView, CDasherInput *pInput, CDasherModel *pModel) {
+  if (Key==Keys::Secondary_Input || Key==Keys::Tertiary_Input || Key==Keys::Button_1)
     m_bTurbo=false;
 }
 
@@ -182,8 +175,8 @@ void CDefaultFilter::stop() {
   m_pInterface->Done();
 }
 
-void CDefaultFilter::HandleEvent(int iParameter) {
-  switch (iParameter) {
+void CDefaultFilter::HandleEvent(Parameter parameter) {
+  switch (parameter) {
   case BP_CIRCLE_START:
   case BP_MOUSEPOS_MODE:
     CreateStartHandler();
@@ -225,7 +218,7 @@ double xmax(double y) {
 
   static const int a = 1, b = 1;
   static const double c = 100;
-  return min(c,a * (exp(b * y * y) - 1));
+  return std::min(c,a * (exp(b * y * y) - 1));
   //cout << "xmax = " << xmax << endl;
 }
 
@@ -234,13 +227,12 @@ void CDefaultFilter::ApplyTransform(myint &iDasherX, myint &iDasherY, CDasherVie
   if (GetLongParameter(LP_GEOMETRY)==1) {
     //crosshair may be offscreen; so do something to allow us to navigate
     // up/down and reverse
-    myint iDasherMaxX,temp;
-    pView->VisibleRegion(temp, temp, iDasherMaxX, temp);
-    const myint xd(iDasherX - iDasherMaxX),yd(iDasherY-CDasherModel::ORIGIN_Y);
+    const CDasherView::ScreenRegion visibleRegion = pView->VisibleRegion();
+    const myint xd(iDasherX - visibleRegion.maxX),yd(iDasherY-CDasherModel::ORIGIN_Y);
     const myint dist(xd*xd + yd*yd); //squared distance from closest point onscreen to crosshair
-    if (iDasherMaxX < CDasherModel::ORIGIN_X) {
+    if (visibleRegion.maxX < CDasherModel::ORIGIN_X) {
       //crosshair actually offscreen; rescale so left edge of screen = translate
-      iDasherX = (iDasherX * CDasherModel::ORIGIN_X)/iDasherMaxX;
+      iDasherX = (iDasherX * CDasherModel::ORIGIN_X)/visibleRegion.maxX;
     }
     //boost reversing if near centerpoint of LHS (even if xhair onscreen)
     iDasherX += (2*CDasherModel::ORIGIN_Y*CDasherModel::ORIGIN_Y)/(dist+50); //and close to centerpoint = reverse
@@ -253,7 +245,7 @@ void CDefaultFilter::ApplyTransform(myint &iDasherX, myint &iDasherY, CDasherVie
     iDasherY = myint(dasherOY * (1.0 + double_y + (double_y*double_y*double_y * repulsionparameter )));
 
     // X co-ordinate...
-    iDasherX = max(iDasherX,myint(CDasherModel::ORIGIN_X * xmax(double_y)));
+    iDasherX = std::max(iDasherX,myint(CDasherModel::ORIGIN_X * xmax(double_y)));
   }
 }
 

@@ -18,15 +18,11 @@
 // along with Dasher; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
-#include "../Common/Common.h"
-
 // #include "AlphabetManager.h" - doesnt seem to be required - pconlon
 
 #include "DasherInterfaceBase.h"
 
 using namespace Dasher;
-using namespace Opts;
-using namespace std;
 
 static int iNumNodes = 0;
 
@@ -34,7 +30,7 @@ int Dasher::currentNumNodeObjects() {return iNumNodes;}
 
 //TODO this used to be inline - should we make it so again?
 CDasherNode::CDasherNode(int iOffset, int iColour, CDasherScreen::Label *pLabel)
-: onlyChildRendered(NULL),  m_iLbnd(0), m_iHbnd(CDasherModel::NORMALIZATION), m_pParent(NULL), m_iFlags(DEFAULT_FLAGS), m_iOffset(iOffset), m_iColour(iColour), m_pLabel(pLabel) {
+: onlyChildRendered(NULL),  m_iLbnd(0), m_iHbnd(CDasherModel::NORMALIZATION), m_pParent(NULL), m_iFlags(DEFAULT_FLAGS), m_iOffset(iOffset), m_iColor(iColour), m_pLabel(pLabel) {
   iNumNodes++;
 }
 

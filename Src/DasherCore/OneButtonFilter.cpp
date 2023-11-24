@@ -2,7 +2,6 @@
 #include "../Common/Common.h"
 
 #include "OneButtonFilter.h"
-#include "Event.h"
 #include "DasherScreen.h"
 #include "DasherModel.h"
 
@@ -66,9 +65,9 @@ void COneButtonFilter::Timer(unsigned long Time, CDasherView *pView, CDasherInpu
   }
 }
 
-void COneButtonFilter::KeyDown(unsigned long iTime, int iId, CDasherView *pView, CDasherInput *pInput, CDasherModel *pModel) {
+void COneButtonFilter::KeyDown(unsigned long iTime, Keys::VirtualKey Key, CDasherView *pView, CDasherInput *pInput, CDasherModel *pModel) {
   if (bStarted) {
-    iLocation = max(iTime - iStartTime - GetLongParameter(LP_DYNAMIC_BUTTON_LAG),0ul) * 4096 / GetLongParameter(LP_STATIC1B_TIME);
+    iLocation = std::max(iTime - iStartTime - GetLongParameter(LP_DYNAMIC_BUTTON_LAG),0ul) * 4096 / GetLongParameter(LP_STATIC1B_TIME);
     if (iLocation>8192) {
       //back up by one zoom step.
       const myint x(GetLongParameter(LP_STATIC1B_ZOOM)*2048);

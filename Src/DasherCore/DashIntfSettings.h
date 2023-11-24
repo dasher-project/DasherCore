@@ -40,12 +40,12 @@ public:
 	CDashIntfSettings(CSettingsStore *pSettingsStore);
 
   CSettingsUser* GetSettingsUser() { return this; }
-  bool GetBoolParameter(int iParameter) const;
-  long GetLongParameter(int iParameter) const;
-  const std::string &GetStringParameter(int iParameter) const;
-  void SetBoolParameter(int iParameter, bool bValue);
-  void SetLongParameter(int iParameter, long lValue);
-  void SetStringParameter(int iParameter, const string &sValue);
+  bool GetBoolParameter(Parameter iParameter) const;
+  long GetLongParameter(Parameter iParameter) const;
+  const std::string &GetStringParameter(Parameter iParameter) const;
+  void SetBoolParameter(Parameter iParameter, bool bValue);
+  void SetLongParameter(Parameter iParameter, long lValue);
+  void SetStringParameter(Parameter iParameter, const std::string& strValue);
   bool IsParameterSaved(std::string & Key);
 };
 

@@ -18,8 +18,8 @@ class CStylusFilter : public CDefaultFilter, protected CZoomAdjuster {
   // and will ignore any zoom scheduled by a click.
   
   void pause();
-  virtual void KeyDown(unsigned long iTime, int iId, CDasherView *pView, CDasherInput *pInput, CDasherModel *pModel);
-  virtual void KeyUp(unsigned long iTime, int iId, CDasherView *pView, CDasherInput *pInput, CDasherModel *pModel);
+  virtual void KeyDown(unsigned long iTime, Keys::VirtualKey Key, CDasherView *pView, CDasherInput *pInput, CDasherModel *pModel);
+  virtual void KeyUp(unsigned long iTime, Keys::VirtualKey Key, CDasherView *pView, CDasherInput *pInput, CDasherModel *pModel);
  protected:
   ///Transform coordinates of a click, to get location to zoom into.
   /// Default is to call the same CZoomAdjuster::AdjustZoomCoords as CClickFilter

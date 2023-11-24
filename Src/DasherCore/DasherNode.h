@@ -21,7 +21,6 @@
 #ifndef __DasherNode_h__
 #define __DasherNode_h__
 
-#include "../Common/Common.h"
 #include "../Common/NoClones.h"
 #include "LanguageModelling/LanguageModel.h"
 //Includes needed for used classes
@@ -38,38 +37,6 @@ namespace Dasher {
 #include <deque>
 #include <iostream>
 #include <vector>
-
-// Node flag constants
-/// NF_COMMITTED: The node is 'above' the root, i.e. all onscreen parts of it
-/// are covered by the root; this is when we train the language model etc
-#define NF_COMMITTED 1
-
-/// NF_SEEN - Node is under the crosshair and has (already) been output
-#define NF_SEEN 2
-
-/// NF_CONVERTED - Node has been converted (eg Japanese mode)
-#define NF_CONVERTED 4
-
-/// NF_GAME - Node is on the path in game mode
-#define NF_GAME 8
-
-/// NF_ALLCHILDREN - Node has all children. TODO Since nodes only
-/// ever have all their children, or none of them, can we not
-/// just check it has children, and get rid of this flag?
-#define NF_ALLCHILDREN 16
-
-/// NF_SUPER - Node covers entire visible area (and so is eligible
-/// to be made the new root)
-#define NF_SUPER 32
-
-/// NF_VISIBLE - an invisible node is one which lets its parent's
-/// colour show through, and has no outline drawn round it (it may
-/// still have a label). Note that this flag is set (i.e. the node
-/// is drawn and outlined) by default in the constructor.
-#define NF_VISIBLE 64
-
-///Flags to assign to a newly created node:
-#define DEFAULT_FLAGS NF_VISIBLE
 
 /// \ingroup Model
 /// @{
@@ -88,10 +55,44 @@ namespace Dasher {
 class Dasher::CDasherNode:private NoClones {
  public:
 
+     enum Flags {
+		// Node flag constants
+		/// NF_COMMITTED: The node is 'above' the root, i.e. all onscreen parts of it
+		/// are covered by the root; this is when we train the language model etc
+		NF_COMMITTED = 1,
+
+		/// NF_SEEN - Node is under the crosshair and has (already) been output
+		NF_SEEN = 2,
+
+		/// NF_CONVERTED - Node has been converted (eg Japanese mode)
+		NF_CONVERTED = 4,
+
+		/// NF_GAME - Node is on the path in game mode
+		NF_GAME = 8,
+
+		/// NF_ALLCHILDREN - Node has all children. TODO Since nodes only
+		/// ever have all their children, or none of them, can we not
+		/// just check it has children, and get rid of this flag?
+		NF_ALLCHILDREN = 16,
+
+		/// NF_SUPER - Node covers entire visible area (and so is eligible
+		/// to be made the new root)
+		NF_SUPER = 32,
+
+		/// NF_VISIBLE - an invisible node is one which lets its parent's
+		/// colour show through, and has no outline drawn round it (it may
+		/// still have a label). Note that this flag is set (i.e. the node
+		/// is drawn and outlined) by default in the constructor.
+		NF_VISIBLE = 64,
+
+		///Flags to assign to a newly created node:
+		DEFAULT_FLAGS = NF_VISIBLE
+	};
+
   /// Display attributes of this node, used for rendering.
   /// Colour; note invisible nodes just have the same colour as their parent.
   /// (so we know what colour to use when their parents are deleted)
-  inline int getColour() {return m_iColour;}
+  inline int getColor() {return m_iColor;}
   virtual CDasherScreen::Label *getLabel() { return m_pLabel; }
   ///Whether labels on child nodes should be displaced to the right of this node's label.
   /// (Default implementation returns true, subclasses should override if appropriate)
@@ -294,7 +295,7 @@ class Dasher::CDasherNode:private NoClones {
   int m_iOffset;
 
  protected:
-  const int m_iColour;
+  const int m_iColor;
   CDasherScreen::Label * m_pLabel;
 };
 /// @}

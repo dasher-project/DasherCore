@@ -40,7 +40,7 @@ bool CDynamicFilter::OneStepTowards(CDasherModel *pModel, myint X, myint Y, unsi
   
   // If X is too large we risk overflow errors, so limit it
   // Not rescaling Y in this case: at that X, all Y's are nearly equivalent!
-  X = max(myint(1),min(X, myint(1<<29)/iSteps));
+  X = std::max(myint(1),std::min(X, myint(1<<29)/iSteps));
   
   pModel->ScheduleOneStep(Y-X, Y+X, iSteps, GetLongParameter(LP_X_LIMIT_SPEED), GetBoolParameter(BP_EXACT_DYNAMICS));
   return true;

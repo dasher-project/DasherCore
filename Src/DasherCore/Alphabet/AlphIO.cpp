@@ -29,21 +29,21 @@ CAlphIO::CAlphIO(CMessageDisplay *pMsgs) : AbstractXMLParser(pMsgs) {
 	Alphabets["Default"] = CreateDefault();
 
 	AlphabetStringToType = {
-		{"None", Opts::MyNone},
-		{"Arabic", Opts::Arabic},
-		{"Baltic", Opts::Baltic},
-		{"CentralEurope", Opts::CentralEurope},
-		{"ChineseSimplified", Opts::ChineseSimplified},
-		{"ChineseTraditional", Opts::ChineseTraditional},
-		{"Cyrillic", Opts::Cyrillic},
-		{"Greek", Opts::Greek},
-		{"Hebrew", Opts::Hebrew},
-		{"Japanese", Opts::Japanese},
-		{"Korean", Opts::Korean},
-		{"Thai", Opts::Thai},
-		{"Turkish", Opts::Turkish},
-		{"VietNam", Opts::VietNam},
-		{"Western", Opts::Western}
+		{"None", Options::MyNone},
+		{"Arabic", Options::Arabic},
+		{"Baltic", Options::Baltic},
+		{"CentralEurope", Options::CentralEurope},
+		{"ChineseSimplified", Options::ChineseSimplified},
+		{"ChineseTraditional", Options::ChineseTraditional},
+		{"Cyrillic", Options::Cyrillic},
+		{"Greek", Options::Greek},
+		{"Hebrew", Options::Hebrew},
+		{"Japanese", Options::Japanese},
+		{"Korean", Options::Korean},
+		{"Thai", Options::Thai},
+		{"Turkish", Options::Turkish},
+		{"VietNam", Options::VietNam},
+		{"Western", Options::Western}
 	};
 }
 
@@ -151,16 +151,16 @@ bool Dasher::CAlphIO::Parse(pugi::xml_document & document, bool bUser)
 		// orientation
 		const std::string orientation_type = alphabet.child("orientation").attribute("type").as_string();
         if (orientation_type == "RL") {
-            CurrentAlphabet->Orientation = Opts::RightToLeft;
+            CurrentAlphabet->Orientation = Options::RightToLeft;
         }
         else if (orientation_type == "TB") {
-            CurrentAlphabet->Orientation = Opts::TopToBottom;
+            CurrentAlphabet->Orientation = Options::TopToBottom;
         }
         else if (orientation_type == "BT") {
-            CurrentAlphabet->Orientation = Opts::BottomToTop;
+            CurrentAlphabet->Orientation = Options::BottomToTop;
         }
         else{
-            CurrentAlphabet->Orientation = Opts::LeftToRight;
+            CurrentAlphabet->Orientation = Options::LeftToRight;
 		}
 
 		// Control character
@@ -260,7 +260,7 @@ CAlphInfo *CAlphIO::CreateDefault() {
 	// last ditch effort in case file I/O totally fails.
 	CAlphInfo &Default(*(new CAlphInfo()));
 	Default.AlphID = "Default";
-	Default.Type = Opts::Western;
+	Default.Type = Options::Western;
 	Default.Mutable = false;
 	Default.TrainingFile = "training_english_GB.txt";
 	Default.GameModeFile = "gamemode_english_GB.txt";
@@ -280,7 +280,7 @@ CAlphInfo *CAlphIO::CreateDefault() {
 //   }
 	// ---
 	Default.pChild = 0;
-	Default.Orientation = Opts::LeftToRight;
+	Default.Orientation = Options::LeftToRight;
 
 	//The following creates Chars.size()+2 actual character structs in the vector,
 	// all initially blank. The extra 2 are for paragraph and space.

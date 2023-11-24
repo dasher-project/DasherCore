@@ -21,11 +21,8 @@
 #include "AlphInfo.h"
 
 #include <iostream>
-#include <cstring>
 
 using namespace Dasher;
-using namespace std;
-
 
 CAlphInfo::CAlphInfo() {
   iSpaceCharacter=0;
@@ -42,7 +39,7 @@ CAlphInfo::CAlphInfo() {
   m_strCtxChar = "§";
 }
 
-string CAlphInfo::escape(const string &ch) const {
+std::string CAlphInfo::escape(const std::string &ch) const {
   if ((m_strConversionTrainStart.length() && ch==m_strConversionTrainStart)
       || (m_strCtxChar.length() && ch==m_strCtxChar))
     return ch+ch;

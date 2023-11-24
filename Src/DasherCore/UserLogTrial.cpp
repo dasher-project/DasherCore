@@ -1,11 +1,12 @@
-#include "../Common/Common.h"
-
 #include <cstring>
 #include "UserLogTrial.h"
 
+#include <algorithm>
+#include <fstream>
+#include <ios>
 
 
-CUserLogTrial::CUserLogTrial(const string& strCurrentTrialFilename)
+CUserLogTrial::CUserLogTrial(const std::string& strCurrentTrialFilename)
 {
   //CFunctionLogger f1("CUserLogTrial::CUserLogTrial", g_pLogger);
 
@@ -104,16 +105,16 @@ CUserLogTrial::~CUserLogTrial()
 }
 
 // Returns an XML version of all our information
-string CUserLogTrial::GetXML(const string& strPrefix)
+std::string CUserLogTrial::GetXML(const std::string& strPrefix)
 {
   //CFunctionLogger f1("CUserLogTrial::GetXML", g_pLogger);
 
-  string strResult = "";
+  std::string strResult = "";
 
-  string strPrefixTab = strPrefix;
+  std::string strPrefixTab = strPrefix;
   strPrefixTab += "\t";
 
-  string strPrefixTabTab = strPrefixTab;
+  std::string strPrefixTabTab = strPrefixTab;
   strPrefixTabTab += "\t";
 
   strResult += strPrefix;
@@ -293,7 +294,7 @@ void CUserLogTrial::DeleteSymbols(int iNumToDelete, eUserLogEventType iEvent)
 
   // Be careful not to pop more things than we have (this will hork the
   // memory up on linux but not windows).
-  int iActualNumToDelete = min((int) m_vHistory.size(), iNumToDelete);
+  int iActualNumToDelete = std::min((int) m_vHistory.size(), iNumToDelete);
 
   for (int i = 0; i < iActualNumToDelete; i++)
   {
@@ -406,8 +407,8 @@ void CUserLogTrial::AddMouseLocationNormalized(int iX, int iY, bool bStoreIntege
     g_pLogger->Log("CUserLogTrial::AddLocation, location was NULL!", logNORMAL);    
 }
 
-void CUserLogTrial::AddKeyDown(int iId, int iType, int iEffect) {
-  CUserButton* pButton = new CUserButton(iId, iType, iEffect);
+void CUserLogTrial::AddKeyDown(Dasher::Keys::VirtualKey Key, int iType, int iEffect) {
+  CUserButton* pButton = new CUserButton(Key, iType, iEffect);
 
   if(pButton) {
     NavCycle* pCycle = GetCurrentNavCycle();
@@ -482,7 +483,7 @@ void CUserLogTrial::GetUserTrialInfo()
   if (m_strCurrentTrialFilename.length() > 0)
   {
     // We want ios::nocreate, but not available in .NET 2003, arrgh
-    fstream fin(m_strCurrentTrialFilename.c_str(), ios::in);
+    std::fstream fin(m_strCurrentTrialFilename.c_str(), std::ios::in);
 
     // Make sure we successfully opened before we start reading it
     if (fin.is_open())
@@ -505,11 +506,11 @@ void CUserLogTrial::GetUserTrialInfo()
 // Returns the concatenation of all our symbol history using
 // the display text that the alphabet at the time of the 
 // symbol being added gave us.  
-string CUserLogTrial::GetHistoryDisplay()
+std::string CUserLogTrial::GetHistoryDisplay()
 {
   //CFunctionLogger f1("CUserLogTrial::GetHistoryDisplay", g_pLogger);
 
-  string strResult = "";
+  std::string strResult = "";
 
   for (unsigned int i = 0; i < m_vHistory.size(); i++)
   {
@@ -557,11 +558,11 @@ void CUserLogTrial::StopPreviousTimer()
 }
 
 // Gets XML string for a given NavLocation struct
-string CUserLogTrial::GetLocationXML(NavLocation* pLocation, const string& strPrefix)
+std::string CUserLogTrial::GetLocationXML(NavLocation* pLocation, const std::string& strPrefix)
 {
   //CFunctionLogger f1("CUserLogTrial::GetLocationXML", g_pLogger);
 
-  string strResult = "";
+  std::string strResult = "";
   if (pLocation == NULL)
   {
     g_pLogger->Log("CUserLogTrial::GetLocationXML, location was NULL!", logNORMAL);
@@ -640,7 +641,7 @@ string CUserLogTrial::GetLocationXML(NavLocation* pLocation, const string& strPr
 
   if (pLocation->span != NULL)
   {
-    string strPrefixTabTabTab = strPrefix;
+    std::string strPrefixTabTabTab = strPrefix;
     strPrefixTabTabTab += "\t";
 
     strResult += pLocation->span->GetXML(strPrefixTabTabTab);
@@ -653,17 +654,17 @@ string CUserLogTrial::GetLocationXML(NavLocation* pLocation, const string& strPr
 }
 
 // Output the XML for the summary section of XML
-string CUserLogTrial::GetSummaryXML(const string& strPrefix)
+std::string CUserLogTrial::GetSummaryXML(const std::string& strPrefix)
 {
   //CFunctionLogger f1("CUserLogTrial::GetSummaryXML", g_pLogger);
 
-  string strResult = "";
+  std::string strResult = "";
 
   strResult += strPrefix;
   strResult += "\t<Summary>\n";
 
   // Figure out what the user ended up writing and how fast they did it
-  string strText = "";
+  std::string strText = "";
   double dAvgBits = 0.0;
 
   NavLocation* pLocation = GetCurrentNavLocation();
@@ -685,11 +686,11 @@ string CUserLogTrial::GetSummaryXML(const string& strPrefix)
 }
 
 // Calculates the various summary stats we output
-string CUserLogTrial::GetStatsXML(const string& strPrefix, const string& strText, CTimeSpan* pSpan, double dAvgBits, int iButtonCount, double dTotalBits)
+std::string CUserLogTrial::GetStatsXML(const std::string& strPrefix, const std::string& strText, CTimeSpan* pSpan, double dAvgBits, int iButtonCount, double dTotalBits)
 {
   //CFunctionLogger f1("CUserLogTrial::GetStatsXML", g_pLogger);
 
-  string strResult = "";
+  std::string strResult = "";
 
   if (pSpan == NULL)
   {
@@ -761,7 +762,7 @@ string CUserLogTrial::GetStatsXML(const string& strPrefix, const string& strText
   strResult += m_szTempBuffer;
   strResult += "</CPM>\n";
 
-  string strPrefixTabTab = strPrefix;
+  std::string strPrefixTabTab = strPrefix;
   strPrefixTabTab += "\t\t";
 
   if (m_pSpan != NULL)
@@ -770,11 +771,11 @@ string CUserLogTrial::GetStatsXML(const string& strPrefix, const string& strText
   return strResult;
 }
 
-string CUserLogTrial::GetWindowCanvasXML(const string& strPrefix)
+std::string CUserLogTrial::GetWindowCanvasXML(const std::string& strPrefix)
 {
   //CFunctionLogger f1("CUserLogTrial::GetWindowCanvasXML", g_pLogger);
 
-  string strResult = "";
+  std::string strResult = "";
 
   // Log the window location and size that was last used during this trial
   strResult += strPrefix;
@@ -825,11 +826,11 @@ string CUserLogTrial::GetWindowCanvasXML(const string& strPrefix)
   return strResult;
 }
 
-string CUserLogTrial::GetParamsXML(const string& strPrefix)
+std::string CUserLogTrial::GetParamsXML(const std::string& strPrefix)
 {
   //CFunctionLogger f1("CUserLogTrial::GetParamsXML", g_pLogger);
 
-  string strResult = "";
+  std::string strResult = "";
 
   if (m_vpParams.size() > 0)
   {
@@ -839,7 +840,7 @@ string CUserLogTrial::GetParamsXML(const string& strPrefix)
     strResult += strPrefix;
     strResult += "\t<Params>\n";
 
-    string strPrefixPlusTabTab = strPrefix;
+    std::string strPrefixPlusTabTab = strPrefix;
     strPrefixPlusTabTab += "\t\t";
 
     for (unsigned int i = 0; i < m_vpParams.size(); i++)
@@ -879,7 +880,7 @@ double CUserLogTrial::GetTotalBits() {
 // Parameters can optionally be specified to be added to the Trial objects.
 // This allows us to easily see what a certain parameter value was used
 // in a given trial.  
-void CUserLogTrial::AddParam(const string& strName, const string& strValue, int iOptionMask)
+void CUserLogTrial::AddParam(const std::string& strName, const std::string& strValue, int iOptionMask)
 {
   //CFunctionLogger f1("CUserLogTrial::AddParam", g_pLogger);
 
@@ -928,11 +929,11 @@ void CUserLogTrial::AddParam(const string& strName, const string& strValue, int 
 // Static method that generates the XML representation of a 
 // single param name value set.  Used both to output params
 // for a trial and for the parent UserLog object.
-string CUserLogTrial::GetParamXML(CUserLogParam* pParam, const string& strPrefix)
+std::string CUserLogTrial::GetParamXML(CUserLogParam* pParam, const std::string& strPrefix)
 {
   //CFunctionLogger f1("CUserLogTrial::GetParamXML", g_pLogger);
 
-  string strResult = "";
+  std::string strResult = "";
 
   if (pParam != NULL)
   {
@@ -1023,22 +1024,22 @@ NavCycle* CUserLogTrial::AddNavCycle()
   return pNewCycle;
 }
 
-string CUserLogTrial::GetNavCyclesXML(const string& strPrefix)
+std::string CUserLogTrial::GetNavCyclesXML(const std::string& strPrefix)
 {
   //CFunctionLogger f1("CUserLogTrial::GetNavCyclesXML", g_pLogger);
 
-  string strResult = "";
+  std::string strResult = "";
 
-  string strPrefixTab = strPrefix;
+  std::string strPrefixTab = strPrefix;
   strPrefixTab += "\t";
 
-  string strPrefixTabTab = strPrefixTab;
+  std::string strPrefixTabTab = strPrefixTab;
   strPrefixTabTab += "\t";
 
-  string strPrefixTabTabTab = strPrefixTabTab;
+  std::string strPrefixTabTabTab = strPrefixTabTab;
   strPrefixTabTabTab += "\t";
 
-  string strPrefixTabTabTabTab = strPrefixTabTabTab;
+  std::string strPrefixTabTabTabTab = strPrefixTabTabTab;
   strPrefixTabTabTabTab += "\t";
 
   strResult += strPrefixTab;
@@ -1124,22 +1125,22 @@ string CUserLogTrial::GetNavCyclesXML(const string& strPrefix)
 
 // Construct based on some XML, second parameter is just to make signature
 // different from the normal constructor.
-CUserLogTrial::CUserLogTrial(const string& strXML, int iIgnored)
+CUserLogTrial::CUserLogTrial(const std::string& strXML, int iIgnored)
 {
   //CFunctionLogger f1("CUserLogTrial::CUserLogTrial(XML)", g_pLogger);
 
   InitMemberVars();
   VECTOR_STRING vNavs;
 
-  string strParams        = XMLUtil::GetElementString("Params", strXML, true);           
-  string strWindow        = XMLUtil::GetElementString("WindowCoordinates", strXML, true);           
-  string strCanvas        = XMLUtil::GetElementString("CanvasCoordinates", strXML, true);           
-  string strNavs          = XMLUtil::GetElementString("Navs", strXML, true);           
-  string strSummary       = XMLUtil::GetElementString("Summary", strXML, true);
-  string strSummaryTime   = XMLUtil::GetElementString("Time", strSummary, true);
+  std::string strParams        = XMLUtil::GetElementString("Params", strXML, true);           
+  std::string strWindow        = XMLUtil::GetElementString("WindowCoordinates", strXML, true);           
+  std::string strCanvas        = XMLUtil::GetElementString("CanvasCoordinates", strXML, true);           
+  std::string strNavs          = XMLUtil::GetElementString("Navs", strXML, true);           
+  std::string strSummary       = XMLUtil::GetElementString("Summary", strXML, true);
+  std::string strSummaryTime   = XMLUtil::GetElementString("Time", strSummary, true);
   vNavs                   = XMLUtil::GetElementStrings("Nav", strNavs, true);
 
-  string strCurrentTrial  = XMLUtil::GetElementString("CurrentTrial", strXML, false);
+  std::string strCurrentTrial  = XMLUtil::GetElementString("CurrentTrial", strXML, false);
   if (strCurrentTrial.length() > 0)
   {
     // We copied the XML string directly into the member variable
@@ -1156,9 +1157,9 @@ CUserLogTrial::CUserLogTrial(const string& strXML, int iIgnored)
   m_pSpan                   = new CTimeSpan("Time", strSummaryTime);
 
   // Process each <Nav> tag
-  string strTime              = "";
-  string strLocations         = "";
-  string strMousePositions    = "";
+  std::string strTime              = "";
+  std::string strLocations         = "";
+  std::string strMousePositions    = "";
 
   VECTOR_STRING vLocations;
   VECTOR_STRING vMousePositions;
@@ -1210,7 +1211,7 @@ CUserLogTrial::CUserLogTrial(const string& strXML, int iIgnored)
         pLocation->numDeleted     = XMLUtil::GetElementInt("NumDeleted", *iter2);
 
         pLocation->span           = NULL;
-        string strTime            = XMLUtil::GetElementString("Time", *iter2);
+        std::string strTime            = XMLUtil::GetElementString("Time", *iter2);
         pLocation->span           = new CTimeSpan("Time", strTime);
 
         // Handle the multiple <Add> tags that might exist
@@ -1233,7 +1234,7 @@ CUserLogTrial::CUserLogTrial(const string& strXML, int iIgnored)
         // If this was a deleted event, then we need to erase some stuff from the running history
         // Be careful not to pop more things than we have (this will hork the
         // memory up on linux but not windows).
-        int iActualNumToDelete = min((int) m_vHistory.size(), pLocation->numDeleted);
+        int iActualNumToDelete = std::min((int) m_vHistory.size(), pLocation->numDeleted);
         for (int i = 0; i < iActualNumToDelete; i++)
           m_vHistory.pop_back();
 
@@ -1259,7 +1260,7 @@ CUserLogTrial::CUserLogTrial(const string& strXML, int iIgnored)
 
 // Helper that parses parameters out of the XML block, used by UserLog 
 // and by UserLogTrial to do the same thing.
-VECTOR_USER_LOG_PARAM_PTR CUserLogTrial::ParseParamsXML(const string& strXML)
+VECTOR_USER_LOG_PARAM_PTR CUserLogTrial::ParseParamsXML(const std::string& strXML)
 {
   //CFunctionLogger f1("CUserLogTrial::ParseParamsXML", g_pLogger);
 
@@ -1283,8 +1284,8 @@ VECTOR_USER_LOG_PARAM_PTR CUserLogTrial::ParseParamsXML(const string& strXML)
       pParam->strName      = iter->strName;
 
       // See if we have a type that has a timestamp
-      string strValue     = XMLUtil::GetElementString("Value", iter->strValue, true);
-      string strTime      = XMLUtil::GetElementString("Time", iter->strValue, true);
+      std::string strValue     = XMLUtil::GetElementString("Value", iter->strValue, true);
+      std::string strTime      = XMLUtil::GetElementString("Time", iter->strValue, true);
 
       if ((strValue.length() > 0)  || (strTime.length() > 0))
       {
@@ -1304,7 +1305,7 @@ VECTOR_USER_LOG_PARAM_PTR CUserLogTrial::ParseParamsXML(const string& strXML)
 }
 
 // Parse our window or canvas coorindates from XML
-WindowSize CUserLogTrial::ParseWindowXML(const string& strXML)
+WindowSize CUserLogTrial::ParseWindowXML(const std::string& strXML)
 {
   //CFunctionLogger f1("CUserLogTrial::ParseWindowXML", g_pLogger);
 
@@ -1327,7 +1328,7 @@ VECTOR_STRING CUserLogTrial::GetTabMouseXY(bool bReturnNormalized)
   VECTOR_STRING vResult;
   for (VECTOR_NAV_CYCLE_PTR_ITER iter = m_vpNavCycles.begin(); iter < m_vpNavCycles.end(); iter++)
   {
-    string strResult = "";
+    std::string strResult = "";
 
     if (*iter != NULL)
     {

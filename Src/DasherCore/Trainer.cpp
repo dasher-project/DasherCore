@@ -4,11 +4,8 @@
 #include "Trainer.h"
 #include "LanguageModelling/PPMPYLanguageModel.h"
 #include <vector>
-#include <cstring>
 #include <sstream>
 #include <string>
-
-#include <iostream>
 
 using namespace Dasher;
 

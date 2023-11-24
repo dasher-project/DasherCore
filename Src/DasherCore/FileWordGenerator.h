@@ -2,10 +2,7 @@
 #define __FileWordGenerator_h__
 
 #include <string>
-#include <iostream>
 #include <fstream>
-#include <stdexcept>
-using namespace std;
 
 #include "WordGeneratorBase.h"
 
@@ -66,9 +63,9 @@ private:
   /**
    * The input stream that acts as the handle to the underlying file.
    */
-  ifstream m_sFileHandle;
+  std::ifstream m_sFileHandle;
   
-  std::vector<streampos> m_vLineIndices;
+  std::vector<std::streampos> m_vLineIndices;
   
   bool m_bAcceptUser;
 };

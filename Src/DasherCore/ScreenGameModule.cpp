@@ -29,12 +29,12 @@ void CScreenGameModule::HandleEvent(const CEditEvent *pEvt) {
     delete m_pLabTarget; m_pLabTarget = NULL;
     if (iPrev>lastCorrectSym()) {
       //erased correct sym!
-      const string erased(m_pAlph->GetText(targetSyms()[iPrev]));
+      const std::string erased(m_pAlph->GetText(targetSyms()[iPrev]));
       DASHER_ASSERT(m_strEntered.substr(m_strEntered.length()-erased.length())==erased);
       m_strTarget = erased + m_strTarget;
       m_strEntered = m_strEntered.substr(0, m_strEntered.length()-erased.length());
     } else {
-      const string written(m_pAlph->GetText(targetSyms()[lastCorrectSym()]));
+      const std::string written(m_pAlph->GetText(targetSyms()[lastCorrectSym()]));
       DASHER_ASSERT(m_strTarget.substr(0,written.length())==written);
       m_strTarget = m_strTarget.substr(written.length());
       m_strEntered += written;
@@ -91,18 +91,18 @@ void CScreenGameModule::DrawText(CDasherView *pView) {
   }
   if (!m_strWrong.empty() && !m_pLabWrong) m_pLabWrong = pScreen->MakeLabel(m_strWrong, uFontSize);
   const screenint x(maxX/3); //RHS of entered label
-  const pair<screenint,screenint> entDims(pScreen->TextSize(m_pLabEntered, uFontSize));
+  const std::pair<screenint,screenint> entDims(pScreen->TextSize(m_pLabEntered, uFontSize));
 
   screenint targetStart(x); //x coord at which to render target label
   //total area we will render text over, i.e. need to blank out:
-  pair<screenint,screenint> rectDims(pScreen->TextSize(m_pLabTarget, uFontSize));
+  std::pair<screenint,screenint> rectDims(pScreen->TextSize(m_pLabTarget, uFontSize));
 
-  rectDims.second=max(rectDims.second,entDims.second);
+  rectDims.second=std::max(rectDims.second,entDims.second);
 
   if (m_pLabWrong) {
-    const pair<screenint,screenint> wrongDims(pScreen->TextSize(m_pLabWrong, uFontSize));
+    const std::pair<screenint,screenint> wrongDims(pScreen->TextSize(m_pLabWrong, uFontSize));
     targetStart+=wrongDims.first;
-    rectDims.second=max(rectDims.second, wrongDims.second);
+    rectDims.second=std::max(rectDims.second, wrongDims.second);
   }
   rectDims.first+=targetStart;
 

@@ -26,8 +26,7 @@ namespace Dasher {
 #if GCC_VERSION >= 40100
   void *ThreadLauncherStub(void *_myClass);
 #endif
-
-using namespace std;
+  
 /// \ingroup Input
 /// \{
 class CSocketInput:public CSocketInputBase {
