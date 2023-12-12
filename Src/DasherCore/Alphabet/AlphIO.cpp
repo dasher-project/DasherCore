@@ -21,6 +21,7 @@
 #include "AlphIO.h"
 
 #include <string>
+#include <cstring>
 #include <algorithm>
 
 using namespace Dasher;

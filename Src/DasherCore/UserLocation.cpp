@@ -1,6 +1,7 @@
 #include "UserLocation.h"
 
 #include <sys/timeb.h>
+#include <cmath>
 
 #include "TimeSpan.h"
 

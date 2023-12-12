@@ -26,6 +26,7 @@
 
 #include <algorithm>
 #include <limits>
+#include <cmath>
 
 using namespace Dasher;
 
