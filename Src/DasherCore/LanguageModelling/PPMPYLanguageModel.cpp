@@ -190,8 +190,8 @@ void CPPMPYLanguageModel::GetPartProbs(Context context, std::vector<std::pair<sy
 
   DASHER_ASSERT(iUniformLeft == 0);
 
-  int alpha = GetLongParameter( LP_LM_ALPHA );
-  int beta = GetLongParameter( LP_LM_BETA );
+  int alpha = GetLongParameter(Parameters::LP_LM_ALPHA );
+  int beta = GetLongParameter(Parameters::LP_LM_BETA );
 
   int *vCounts=new int[vChildren.size()]; //num occurrences of symbol at same index in vChildren
 
@@ -311,8 +311,8 @@ void CPPMPYLanguageModel::GetProbs(Context context, std::vector<unsigned int> &p
   //  bool doExclusion = GetLongParameter( LP_LM_ALPHA );
   bool doExclusion = 0; //FIXME
 
-  int alpha = GetLongParameter( LP_LM_ALPHA );
-  int beta = GetLongParameter( LP_LM_BETA );
+  int alpha = GetLongParameter(Parameters::LP_LM_ALPHA );
+  int beta = GetLongParameter(Parameters::LP_LM_BETA );
 
   for (CPPMnode *pTemp = ppmcontext->head; pTemp; pTemp = pTemp->vine) {
     int iTotal = 0;

@@ -53,7 +53,7 @@ CDictLanguageModel::CDictnode * CDictLanguageModel::AddSymbolToNode(CDictnode *p
   CDictnode *pReturn = pNode->find_symbol(sym);
 
   if(pReturn != NULL) {
-    if(GetLongParameter(LP_LM_UPDATE_EXCLUSION)) {
+    if(GetLongParameter(Parameters::LP_LM_UPDATE_EXCLUSION)) {
       if(pReturn->count < USHRT_MAX)    // Truncate counts at storage limit
         pReturn->count++;
       *update = 0;
@@ -176,7 +176,7 @@ void CDictLanguageModel::GetProbs(Context context, std::vector<unsigned int > &p
     exclusions[i] = false;
   }
 
-  bool doExclusion = (GetLongParameter(LP_LM_EXCLUSION) == 1);
+  bool doExclusion = (GetLongParameter(Parameters::LP_LM_EXCLUSION) == 1);
 
   unsigned int iToSpend = norm;
 
@@ -520,7 +520,7 @@ void CDictLanguageModel::AddSymbol(CDictLanguageModel::CDictContext &context, sy
     CollapseContext(context);
   }
 
-while(context.order > GetLongParameter( LP_LM_MAX_ORDER )) {
+while(context.order > GetLongParameter(Parameters::LP_LM_MAX_ORDER )) {
     context.head = context.head->vine;
     context.order--;
   }
@@ -559,7 +559,7 @@ void CDictLanguageModel::EnterSymbol(Context c, int Symbol) {
 
   while(context.head) {
 
-    if(context.order < GetLongParameter( LP_LM_MAX_ORDER )) {
+    if(context.order < GetLongParameter(Parameters::LP_LM_MAX_ORDER )) {
       find = context.head->find_symbol(Symbol);
       if(find) {
         context.order++;

@@ -203,7 +203,7 @@ void CWordLanguageModel::GetProbs(Context context, std::vector<unsigned int> &pr
   for(std::vector < double >::iterator it(dProbs.begin()); it != dProbs.end(); ++it)
     *it = 0.0;
 
-  double alpha = GetLongParameter(LP_LM_WORD_ALPHA) / 100.0;
+  double alpha = GetLongParameter(Parameters::LP_LM_WORD_ALPHA) / 100.0;
   //  double beta = LanguageModelParams()->GetValue( std::string( "LMBeta" ) )/100.0;
 
   // Ignore beta for now - we'll need to know how many different words have been seen, not just the total count.

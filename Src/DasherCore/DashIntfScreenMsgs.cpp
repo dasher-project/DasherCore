@@ -22,7 +22,7 @@ bool CDashIntfScreenMsgs::FinishRender(unsigned long ulTime) {
   bool bMsgsChanged=false;
   //Finally any messages - newest that will fit at bottom, proceeding upwards.
   // Firstly clear any non-modal messages that have been onscreen for long enough
-  while (!m_dqAsyncMessages.empty() && m_dqAsyncMessages.front().second && ulTime-m_dqAsyncMessages.front().second>GetLongParameter(LP_MESSAGE_TIME)) {
+  while (!m_dqAsyncMessages.empty() && m_dqAsyncMessages.front().second && ulTime-m_dqAsyncMessages.front().second>GetLongParameter(Parameters::LP_MESSAGE_TIME)) {
     delete m_dqAsyncMessages.front().first; //the Label
     m_dqAsyncMessages.pop_front(); // => stop displaying it
     bMsgsChanged=true;
@@ -39,7 +39,7 @@ bool CDashIntfScreenMsgs::FinishRender(unsigned long ulTime) {
         it->second = ulTime; //display message for first time
         bMsgsChanged=true;
       } 
-      iY-=pScreen->TextSize(it->first, GetLongParameter(LP_MESSAGE_FONTSIZE)).second;
+      iY-=pScreen->TextSize(it->first, GetLongParameter(Parameters::LP_MESSAGE_FONTSIZE)).second;
     }
     if (!m_dqModalMessages.empty()) {
       bool bDisp(m_dqModalMessages.front().second != 0); //displaying anything atm?
@@ -51,28 +51,28 @@ bool CDashIntfScreenMsgs::FinishRender(unsigned long ulTime) {
           it->second = ulTime;
           bMsgsChanged = true;
         }
-        iY-=pScreen->TextSize(it->first, GetLongParameter(LP_MESSAGE_FONTSIZE)).second;
+        iY-=pScreen->TextSize(it->first, GetLongParameter(Parameters::LP_MESSAGE_FONTSIZE)).second;
       }
     }
     //Now render messages proceeding downwards - non-modal first, then oldest first
     bool bModal(false);
     for (std::deque<std::pair<CDasherScreen::Label*, unsigned long> >::const_iterator it = m_dqAsyncMessages.begin(); it != m_dqAsyncMessages.end(); it++) {
       if (it->second==0) continue;
-      std::pair<screenint,screenint> textDims = pScreen->TextSize(it->first, GetLongParameter(LP_MESSAGE_FONTSIZE));
+      std::pair<screenint,screenint> textDims = pScreen->TextSize(it->first, GetLongParameter(Parameters::LP_MESSAGE_FONTSIZE));
       //black (5) rectangle:
       pScreen->DrawRectangle((iSW - textDims.first)/2, iY, (iSW+textDims.first)/2, iY+textDims.second, 5, -1, -1);
       //white (0) text for non-modal, yellow (111) for modal
-      pScreen->DrawString(it->first, (iSW-textDims.first)/2, iY, GetLongParameter(LP_MESSAGE_FONTSIZE), bModal ? 111 : 0);
+      pScreen->DrawString(it->first, (iSW-textDims.first)/2, iY, GetLongParameter(Parameters::LP_MESSAGE_FONTSIZE), bModal ? 111 : 0);
       iY+=textDims.second;
     }
     bModal=true;
     for (std::deque<std::pair<CDasherScreen::Label*, unsigned long> >::const_iterator it = m_dqModalMessages.begin(); it != m_dqModalMessages.end(); it++) {
       if (it->second==0) continue;
-      std::pair<screenint,screenint> textDims = pScreen->TextSize(it->first, GetLongParameter(LP_MESSAGE_FONTSIZE));
+      std::pair<screenint,screenint> textDims = pScreen->TextSize(it->first, GetLongParameter(Parameters::LP_MESSAGE_FONTSIZE));
       //black (5) rectangle:
       pScreen->DrawRectangle((iSW - textDims.first)/2, iY, (iSW+textDims.first)/2, iY+textDims.second, 5, -1, -1);
       //white (0) text for non-modal, yellow (111) for modal
-      pScreen->DrawString(it->first, (iSW-textDims.first)/2, iY, GetLongParameter(LP_MESSAGE_FONTSIZE), bModal ? 111 : 0);
+      pScreen->DrawString(it->first, (iSW-textDims.first)/2, iY, GetLongParameter(Parameters::LP_MESSAGE_FONTSIZE), bModal ? 111 : 0);
       iY+=textDims.second;
     }
   }

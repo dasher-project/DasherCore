@@ -47,10 +47,10 @@ using namespace Dasher;
 
 void CDasherViewSquare::HandleEvent(Parameter parameter)
 {
-	if (parameter == LP_MARGIN_WIDTH ||
-		parameter == BP_NONLINEAR_Y ||
-		parameter == LP_NONLINEAR_X ||
-		parameter == LP_GEOMETRY)
+	if (parameter == Parameters::LP_MARGIN_WIDTH ||
+		parameter == Parameters::BP_NONLINEAR_Y ||
+		parameter == Parameters::LP_NONLINEAR_X ||
+		parameter == Parameters::LP_GEOMETRY)
 	{
 		m_bVisibleRegionValid = false;
 		SetScaleFactor();
@@ -94,7 +94,7 @@ CDasherNode* CDasherViewSquare::Render(CDasherNode* pRoot, myint iRootMin, myint
 	CDasherNode* pOutput = pRoot->Parent();
 
 	// Blank the region around the root node:
-	if (GetLongParameter(LP_SHAPE_TYPE) == Options::DISJOINT_RECTANGLE)
+	if (GetLongParameter(Parameters::LP_SHAPE_TYPE) == Options::DISJOINT_RECTANGLE)
 	{
 		//disjoint rects, so go round root
 		if (iRootMin > visibleRegion.minY)
@@ -150,7 +150,7 @@ CDasherViewSquare::CTextString* CDasherViewSquare::DasherDrawText(myint iDasherM
 	Dasher2Screen(iDasherMaxX, iDasherMidY, x, y);
 
 	//compute font size...
-	myint iSize = GetLongParameter(LP_DASHER_FONTSIZE);
+	myint iSize = GetLongParameter(Parameters::LP_DASHER_FONTSIZE);
 	{
 		const myint iMaxY(CDasherModel::MAX_Y);
 		if (Screen()->MultiSizeFonts() && iSize > 4)
@@ -495,7 +495,7 @@ bool CDasherViewSquare::IsSpaceAroundNode(myint y1, myint y2)
 	//in theory, even if the crosshair is off-screen (!), anything spanning y1-y2 should cover it...
 	DASHER_ASSERT(CoversCrosshair(y2 - y1, y1, y2));
 
-	switch (GetLongParameter(LP_SHAPE_TYPE))
+	switch (GetLongParameter(Parameters::LP_SHAPE_TYPE))
 	{
 	case Options::DISJOINT_RECTANGLE:
 	case Options::OVERLAPPING_RECTANGLE:
@@ -546,7 +546,7 @@ void CDasherViewSquare::DisjointRender(CDasherNode* pRender, myint y1, myint y2,
 
 	if (pRender->getLabel())
 	{
-		const int textColor = GetLongParameter(LP_OUTLINE_WIDTH) < 0 ? myColor : 4;
+		const int textColor = GetLongParameter(Parameters::LP_OUTLINE_WIDTH) < 0 ? myColor : 4;
 		myint ny1 = std::min(visibleRegion.maxY, std::max(visibleRegion.minY, y1)),
 		      ny2 = std::min(visibleRegion.maxY, std::max(visibleRegion.minY, y2));
 		CTextString* pText = DasherDrawText(y2 - y1, (ny1 + ny2) / 2, pRender->getLabel(), pPrevText, textColor);
@@ -644,7 +644,7 @@ void CDasherViewSquare::DisjointRender(CDasherNode* pRender, myint y1, myint y2,
 						if (!(*i)->GetFlag(CDasherNode::NF_SEEN)) (*i)->Delete_children();
 					break;
 				}
-				if (newy2 - newy1 >= GetLongParameter(LP_MIN_NODE_SIZE) //simple test if big enough
+				if (newy2 - newy1 >= GetLongParameter(Parameters::LP_MIN_NODE_SIZE) //simple test if big enough
 					&& newy1 <= visibleRegion.maxY && newy2 >= visibleRegion.minY) //at least partly on screen
 				{
 					//child should be rendered!
@@ -674,9 +674,9 @@ void CDasherViewSquare::DisjointRender(CDasherNode* pRender, myint y1, myint y2,
 		//end rendering children, fall through to outline
 	}
 	// Lastly, draw the outline
-	if (GetLongParameter(LP_OUTLINE_WIDTH) && pRender->GetFlag(CDasherNode::NF_VISIBLE))
+	if (GetLongParameter(Parameters::LP_OUTLINE_WIDTH) && pRender->GetFlag(CDasherNode::NF_VISIBLE))
 	{
-		DasherDrawRectangle(std::min(Range, visibleRegion.maxX), std::max(y1, visibleRegion.minY), 0, std::min(y2, visibleRegion.maxY), -1, -1, abs(GetLongParameter(LP_OUTLINE_WIDTH)));
+		DasherDrawRectangle(std::min(Range, visibleRegion.maxX), std::max(y1, visibleRegion.minY), 0, std::min(y2, visibleRegion.maxY), -1, -1, abs(GetLongParameter(Parameters::LP_OUTLINE_WIDTH)));
 	}
 }
 
@@ -684,7 +684,7 @@ bool CDasherViewSquare::CoversCrosshair(myint Range, myint y1, myint y2)
 {
 	if (Range > CDasherModel::ORIGIN_X && y1 < CDasherModel::ORIGIN_Y && y2 > CDasherModel::ORIGIN_Y)
 	{
-		switch (GetLongParameter(LP_SHAPE_TYPE))
+		switch (GetLongParameter(Parameters::LP_SHAPE_TYPE))
 		{
 		case Options::DISJOINT_RECTANGLE: //Disjoint rectangles
 		case Options::OVERLAPPING_RECTANGLE: //Rectangles
@@ -739,7 +739,7 @@ void CDasherViewSquare::NewRender(CDasherNode* pRender, myint y1, myint y2,
 
 	if (pRender->getLabel())
 	{
-		const int textColor = GetLongParameter(LP_OUTLINE_WIDTH) < 0 ? myColor : 4;
+		const int textColor = GetLongParameter(Parameters::LP_OUTLINE_WIDTH) < 0 ? myColor : 4;
 		myint ny1 = std::min(visibleRegion.maxY, std::max(visibleRegion.minY, y1)),
 		      ny2 = std::min(visibleRegion.maxY, std::max(visibleRegion.minY, y2));
 		CTextString* pText = DasherDrawText(y2 - y1, (ny1 + ny2) / 2, pRender->getLabel(), pPrevText, textColor);
@@ -761,9 +761,9 @@ void CDasherViewSquare::NewRender(CDasherNode* pRender, myint y1, myint y2,
 	if (pRender->GetFlag(CDasherNode::NF_VISIBLE))
 	{
 		//outline width 0 = fill only; >0 = fill + outline; <0 = outline only
-		const int fill_color = GetLongParameter(LP_OUTLINE_WIDTH) >= 0 ? myColor : -1;
-		const int line_width = abs(GetLongParameter(LP_OUTLINE_WIDTH));
-		switch (GetLongParameter(LP_SHAPE_TYPE))
+		const int fill_color = GetLongParameter(Parameters::LP_OUTLINE_WIDTH) >= 0 ? myColor : -1;
+		const int line_width = abs(GetLongParameter(Parameters::LP_OUTLINE_WIDTH));
+		switch (GetLongParameter(Parameters::LP_SHAPE_TYPE))
 		{
 		case Options::OVERLAPPING_RECTANGLE:
 			DasherDrawRectangle(std::min(Range, visibleRegion.maxX), std::max(y1, visibleRegion.minY), 0, std::min(y2, visibleRegion.maxY), fill_color, -1, line_width);
@@ -850,7 +850,7 @@ void CDasherViewSquare::NewRender(CDasherNode* pRender, myint y1, myint y2,
 		if (newy1 <= visibleRegion.maxY && newy2 >= visibleRegion.minY)
 		{
 			//onscreen
-			if (newy2 - newy1 > GetLongParameter(LP_MIN_NODE_SIZE))
+			if (newy2 - newy1 > GetLongParameter(Parameters::LP_MIN_NODE_SIZE))
 			{
 				//definitely big enough to render.
 				NewRender(pChild, newy1, newy2, pPrevText, policy, dMaxCost, pOutput);
@@ -921,18 +921,18 @@ void CDasherViewSquare::SetScaleFactor(void)
 
 	//set log scaling coefficient (unused if LP_NONLINEAR_X==0)
 	// note previous value = 1/0.2, i.e. a value of LP_NONLINEAR_X =~= 4.8
-	m_dXlogCoeff = exp(GetLongParameter(LP_NONLINEAR_X) / 3.0);
+	m_dXlogCoeff = exp(GetLongParameter(Parameters::LP_NONLINEAR_X) / 3.0);
 
 	const bool bHoriz(GetOrientation() == Options::LeftToRight || GetOrientation() == Options::RightToLeft);
 	const screenint iScreenWidth(Screen()->GetWidth()), iScreenHeight(Screen()->GetHeight());
 	const double dPixelsX(bHoriz ? iScreenWidth : iScreenHeight), dPixelsY(bHoriz ? iScreenHeight : iScreenWidth);
 
 	//Defaults/starting values, will be modified later according to scheme in use...
-	iMarginWidth = GetLongParameter(LP_MARGIN_WIDTH);
+	iMarginWidth = GetLongParameter(Parameters::LP_MARGIN_WIDTH);
 	double dScaleFactorY(dPixelsY / CDasherModel::MAX_Y);
 	double dScaleFactorX(dPixelsX / static_cast<double>(CDasherModel::MAX_Y + iMarginWidth));
 
-	switch (GetLongParameter(LP_GEOMETRY))
+	switch (GetLongParameter(Parameters::LP_GEOMETRY))
 	{
 	case Options::ScreenGeometry::old_style:
 		{
@@ -973,7 +973,7 @@ void CDasherViewSquare::SetScaleFactor(void)
 			                        ? (dMinXPerPixel + pow(dAspect, 3.0) * (dDesiredXPerPixel - dMinXPerPixel)) //tall+thin
 			                        : (1.0 / dScaleFactorY)); //square or wide+low
 		iMarginWidth = static_cast<myint>(iMarginWidth / 0.9); //this comes from the old scaling by m_dXmpc=0.9. Drop in new scheme?
-		if (GetLongParameter(LP_GEOMETRY) == Options::ScreenGeometry::squish_and_log)
+		if (GetLongParameter(Parameters::LP_GEOMETRY) == Options::ScreenGeometry::squish_and_log)
 		{
 			//make whole screen logarithmic (but keep xhair in same place)
 			myint crosshair(xmap(2048)); //should be 2048...
@@ -1071,7 +1071,7 @@ void CDasherViewSquare::DasherLine2Screen(myint x1, myint y1, myint x2, myint y2
 	if (x1 != x2 && y1 != y2)
 	{
 		//only diagonal lines ever get changed...
-		if (GetBoolParameter(BP_NONLINEAR_Y))
+		if (GetBoolParameter(Parameters::BP_NONLINEAR_Y))
 		{
 			if ((y1 < m_Y3 && y2 > m_Y3) || (y2 < m_Y3 && y1 > m_Y3))
 			{
@@ -1090,7 +1090,7 @@ void CDasherViewSquare::DasherLine2Screen(myint x1, myint y1, myint x2, myint y2
 				y1 = m_Y2;
 			}
 		}
-		if (GetLongParameter(LP_NONLINEAR_X) && (x1 > m_iXlogThres || x2 > m_iXlogThres))
+		if (GetLongParameter(Parameters::LP_NONLINEAR_X) && (x1 > m_iXlogThres || x2 > m_iXlogThres))
 		{
 			//into logarithmic section
 			CDasherScreen::point pStart, pScreenMid, pEnd;
@@ -1211,7 +1211,7 @@ inline void CDasherViewSquare::Crosshair()
 inline myint CDasherViewSquare::ixmap(myint x) const
 {
 	x -= iMarginWidth;
-	if (GetLongParameter(LP_NONLINEAR_X) > 0 && x >= m_iXlogThres)
+	if (GetLongParameter(Parameters::LP_NONLINEAR_X) > 0 && x >= m_iXlogThres)
 	{
 		double dx = (x - m_iXlogThres) / static_cast<double>(CDasherModel::MAX_Y);
 		dx = (exp(dx * m_dXlogCoeff) - 1) / m_dXlogCoeff;
@@ -1222,7 +1222,7 @@ inline myint CDasherViewSquare::ixmap(myint x) const
 
 inline myint CDasherViewSquare::xmap(myint x) const
 {
-	if (GetLongParameter(LP_NONLINEAR_X) && x >= m_iXlogThres)
+	if (GetLongParameter(Parameters::LP_NONLINEAR_X) && x >= m_iXlogThres)
 	{
 		double dx = log(1 + (x - m_iXlogThres) * m_dXlogCoeff / CDasherModel::MAX_Y) / m_dXlogCoeff;
 		dx = (dx * CDasherModel::MAX_Y) + m_iXlogThres;
@@ -1233,7 +1233,7 @@ inline myint CDasherViewSquare::xmap(myint x) const
 
 inline myint CDasherViewSquare::ymap(myint y) const
 {
-	if (GetBoolParameter(BP_NONLINEAR_Y))
+	if (GetBoolParameter(Parameters::BP_NONLINEAR_Y))
 	{
 		if (y > m_Y2)
 			return m_Y2 + (y - m_Y2) / m_Y1;
@@ -1245,7 +1245,7 @@ inline myint CDasherViewSquare::ymap(myint y) const
 
 inline myint CDasherViewSquare::iymap(myint ydash) const
 {
-	if (GetBoolParameter(BP_NONLINEAR_Y))
+	if (GetBoolParameter(Parameters::BP_NONLINEAR_Y))
 	{
 		if (ydash > m_Y2)
 			return (ydash - m_Y2) * m_Y1 + m_Y2;

@@ -171,7 +171,7 @@ void CConversionManager::CConvNode::Undo() {
 
 void CConversionManager::AssignChildSizes(const std::vector<SCENode *> &nodes, CLanguageModel::Context context) {
   
-  AssignSizes(nodes, context, CDasherModel::NORMALIZATION, GetLongParameter(LP_UNIFORM));
+  AssignSizes(nodes, context, CDasherModel::NORMALIZATION, GetLongParameter(Parameters::LP_UNIFORM));
   
 }
 

@@ -360,7 +360,7 @@ bool CMandarinAlphMgr::CConvRoot::isInGroup(const SGroupInfo *pGroup) {
 
 void CMandarinAlphMgr::CConvRoot::SetFlag(int iFlag, bool bValue) {
   if (iFlag==NF_COMMITTED && bValue && !GetFlag(NF_COMMITTED)
-      && !GetFlag(NF_GAME) && mgr()->GetBoolParameter(BP_LM_ADAPTIVE)) {
+      && !GetFlag(NF_GAME) && mgr()->GetBoolParameter(Parameters::BP_LM_ADAPTIVE)) {
     //CConvRoot's context is the same as parent's context (no symbol yet!),
     // i.e. is the context in which the pinyin was predicted.
     static_cast<CPPMPYLanguageModel *>(mgr()->m_pLanguageModel)->LearnPYSymbol(iContext, m_pySym);
@@ -388,9 +388,9 @@ void CMandarinAlphMgr::GetConversions(std::vector<std::pair<symbol,unsigned int>
   std::set<symbol> haveProbs;
   uint64 iRemaining(CDasherModel::NORMALIZATION);
   
-  if (long percent=GetLongParameter(LP_PY_PROB_SORT_THRES)) {
+  if (long percent=GetLongParameter(Parameters::LP_PY_PROB_SORT_THRES)) {
     const uint64 iNorm(iRemaining);
-    const unsigned int uniform(static_cast<unsigned int>((GetLongParameter(LP_UNIFORM)*iNorm)/1000));
+    const unsigned int uniform(static_cast<unsigned int>((GetLongParameter(Parameters::LP_UNIFORM)*iNorm)/1000));
     
     //Set up list of symbols with blank probability entries...
     for(std::vector<symbol>::const_iterator it = convs.begin(); it != convs.end(); ++it) {

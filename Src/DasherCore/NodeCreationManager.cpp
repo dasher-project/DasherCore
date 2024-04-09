@@ -77,7 +77,7 @@ CNodeCreationManager::CNodeCreationManager(
 ) : CSettingsUserObserver(pCreateFrom),
     m_pInterface(pInterface), m_pControlManager(nullptr), m_pScreen(nullptr)
 {
-	const Dasher::CAlphInfo* pAlphInfo(pAlphIO->GetInfo(GetStringParameter(SP_ALPHABET_ID)));
+	const Dasher::CAlphInfo* pAlphInfo(pAlphIO->GetInfo(GetStringParameter(Parameters::SP_ALPHABET_ID)));
 
 	switch (pAlphInfo->m_iConversionID)
 	{
@@ -128,7 +128,7 @@ CNodeCreationManager::CNodeCreationManager(
 		pInterface->FormatMessageWithString(_("\"%s\" does not specify training file. Dasher will work but entry will be slower. Check you have the latest version of the alphabet definition."), pAlphInfo->GetID().c_str());
 	}
 
-	HandleEvent(LP_ORIENTATION);
+	HandleEvent(Parameters::LP_ORIENTATION);
 	CreateControlBox(pControlBoxIO);
 }
 
@@ -153,9 +153,9 @@ void CNodeCreationManager::CreateControlBox(const CControlBoxIO* pControlIO)
 	delete m_pControlManager;
 	unsigned long iControlSpace;
 	//don't allow a control manager during Game Mode 
-	if (GetBoolParameter(BP_CONTROL_MODE) && !m_pInterface->GetGameModule())
+	if (GetBoolParameter(Parameters::BP_CONTROL_MODE) && !m_pInterface->GetGameModule())
 	{
-		auto id = GetStringParameter(SP_CONTROL_BOX_ID);
+		auto id = GetStringParameter(Parameters::SP_CONTROL_BOX_ID);
 		m_pControlManager = pControlIO->CreateControlManager(id, this, this, m_pInterface);
 		if (m_pScreen) m_pControlManager->ChangeScreen(m_pScreen);
 		iControlSpace = CDasherModel::NORMALIZATION / 20;

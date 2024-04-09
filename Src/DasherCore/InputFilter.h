@@ -79,7 +79,7 @@ class CInputFilter : public CDasherModule {
     void pause() {if (m_pModel) m_pModel->ClearScheduledSteps();}
   protected:
     void ScheduleZoom(CDasherModel *pModel, myint y1, myint y2) {
-      (m_pModel = pModel)->ScheduleZoom(y1,y2,GetLongParameter(LP_ZOOMSTEPS));
+      (m_pModel = pModel)->ScheduleZoom(y1,y2,GetLongParameter(Parameters::LP_ZOOMSTEPS));
     }
   private:
     CDasherModel *m_pModel;

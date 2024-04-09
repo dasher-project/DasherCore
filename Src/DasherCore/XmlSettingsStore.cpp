@@ -33,37 +33,37 @@ void XmlSettingsStore::Load()
 	mode_ = SAVE_IMMEDIATELY;
 }
 
-bool XmlSettingsStore::LoadSetting(const std::string& key, bool* value)
+bool XmlSettingsStore::LoadSetting(const std::string_view& key, bool* value)
 {
-	return Read(boolean_settings_, key, value);
+	return Read(boolean_settings_, std::string(key), value);
 }
 
-bool XmlSettingsStore::LoadSetting(const std::string& key, long* value)
+bool XmlSettingsStore::LoadSetting(const std::string_view& key, long* value)
 {
-	return Read(long_settings_, key, value);
+	return Read(long_settings_, std::string(key), value);
 }
 
-bool XmlSettingsStore::LoadSetting(const std::string& key, std::string* value)
+bool XmlSettingsStore::LoadSetting(const std::string_view& key, std::string* value)
 {
-	return Read(string_settings_, key, value);
+	return Read(string_settings_, std::string(key), value);
 }
 
-void XmlSettingsStore::SaveSetting(const std::string& key, bool value)
+void XmlSettingsStore::SaveSetting(const std::string_view& key, bool value)
 {
-	boolean_settings_[key] = value;
+	boolean_settings_[std::string(key)] = value;
 	SaveIfNeeded();
 }
 
-void XmlSettingsStore::SaveSetting(const std::string& key, long value)
+void XmlSettingsStore::SaveSetting(const std::string_view& key, long value)
 {
-	long_settings_[key] = value;
+	long_settings_[std::string(key)] = value;
 	SaveIfNeeded();
 }
 
-void XmlSettingsStore::SaveSetting(const std::string& key,
+void XmlSettingsStore::SaveSetting(const std::string_view& key,
                                    const std::string& value)
 {
-	string_settings_[key] = value;
+	string_settings_[std::string(key)] = value;
 	SaveIfNeeded();
 }
 
@@ -94,21 +94,21 @@ bool XmlSettingsStore::Save() {
 
 	pugi::xml_node settings = doc.append_child("settings");
 
-    for (auto [name, value] : long_settings_) {
+    for (auto &[name, value] : long_settings_) {
 		pugi::xml_node long_node = settings.append_child("long");
-		long_node.append_attribute("name") = name.c_str();
+		long_node.append_attribute("name") = name.data();
 		long_node.append_attribute("value") = value;
     }
 
-	for (auto [name, value] : boolean_settings_) {
+	for (auto &[name, value] : boolean_settings_) {
 		pugi::xml_node bool_node = settings.append_child("bool");
-		bool_node.append_attribute("name") = name.c_str();
+		bool_node.append_attribute("name") = name.data();
 		bool_node.append_attribute("value") = value;
     }
 
-	for (auto [name, value] : string_settings_) {
+	for (auto &[name, value] : string_settings_) {
 		pugi::xml_node string_node = settings.append_child("string");
-		string_node.append_attribute("name") = name.c_str();
+		string_node.append_attribute("name") = name.data();
 		string_node.append_attribute("value") = value.c_str();
     }
 

@@ -5,10 +5,10 @@
 using namespace Dasher;
 
 static SModuleSettings gameSets[] = {
-  {SP_GAME_TEXT_FILE, T_STRING, -1, -1, -1, -1, _("Filename of sentences to enter")},
-  {LP_GAME_HELP_DIST, T_LONG, 0, 4096, 2048, 128, _("Distance of sentence from center to decide user needs help")},
-  {LP_GAME_HELP_TIME, T_LONG, 0, 10000, 1000, 100, _("Time for which user must need help before help drawn")},
-  {BP_GAME_HELP_DRAW_PATH, T_BOOL, -1, -1, -1, -1, _("When we give help, show the shortest path to the target sentence?")},
+  {Parameters::SP_GAME_TEXT_FILE, T_STRING, -1, -1, -1, -1, _("Filename of sentences to enter")},
+  {Parameters::LP_GAME_HELP_DIST, T_LONG, 0, 4096, 2048, 128, _("Distance of sentence from center to decide user needs help")},
+  {Parameters::LP_GAME_HELP_TIME, T_LONG, 0, 10000, 1000, 100, _("Time for which user must need help before help drawn")},
+  {Parameters::BP_GAME_HELP_DRAW_PATH, T_BOOL, -1, -1, -1, -1, _("When we give help, show the shortest path to the target sentence?")},
 };
 
 CGameModule::CGameModule(CSettingsUser *pCreateFrom, Dasher::CDasherInterfaceBase *pInterface, CDasherView *pView, CDasherModel *pModel) 
@@ -122,12 +122,12 @@ void CGameModule::DecorateView(unsigned long lTime, CDasherView *pView, CDasherM
   m_vTargetY.push_back(iNewTarget);
   bool bDrawHelper;
   
-  if (abs(iNewTarget - CDasherModel::ORIGIN_Y) >= GetLongParameter(LP_GAME_HELP_DIST)) {
+  if (abs(iNewTarget - CDasherModel::ORIGIN_Y) >= GetLongParameter(Parameters::LP_GAME_HELP_DIST)) {
     //offscreen
     if (abs(iNewTarget - CDasherModel::ORIGIN_Y) >= abs(m_iTargetY - CDasherModel::ORIGIN_Y)) {
       //not decreasing
       if (m_uHelpStart == std::numeric_limits<unsigned long>::max())
-        m_uHelpStart = lTime + GetLongParameter(LP_GAME_HELP_TIME);
+        m_uHelpStart = lTime + GetLongParameter(Parameters::LP_GAME_HELP_TIME);
     } else {
       //they're heading in the right direction
       if (m_uHelpStart >= lTime) //never displayed help, so assume they don't need it
@@ -147,7 +147,7 @@ void CGameModule::DecorateView(unsigned long lTime, CDasherView *pView, CDasherM
     myint x[2], y[2];
     x[0] = x[1] = -100;
   
-    const int lineWidth(GetLongParameter(LP_LINE_WIDTH));
+    const int lineWidth(GetLongParameter(Parameters::LP_LINE_WIDTH));
     const CDasherView::ScreenRegion visibleRegion = pView->VisibleRegion();
 
     if (m_y1 > visibleRegion.maxY) {
@@ -168,7 +168,7 @@ void CGameModule::DecorateView(unsigned long lTime, CDasherView *pView, CDasherM
     }
     pView->DasherPolyarrow(x, y, 2, 3*lineWidth, m_iCrosshairColor, 0.2);
     
-    if (GetBoolParameter(BP_GAME_HELP_DRAW_PATH)) DrawBrachistochrone(pView);
+    if (GetBoolParameter(Parameters::BP_GAME_HELP_DRAW_PATH)) DrawBrachistochrone(pView);
   }
   
   //reset location accumulators ready for next frame
@@ -199,7 +199,7 @@ void CGameModule::DrawBrachistochrone(CDasherView *pView) {
   // Plot a brachistochrone - the optimal path from the crosshair to the target
   // this is a circle, passing through both crosshair and target, centered on the y-axis
   const myint CenterY = ComputeBrachCenter();
-  pView->DasherSpaceArc(CenterY, abs(CenterY - m_iTargetY), CDasherModel::ORIGIN_X, CDasherModel::ORIGIN_Y, 0, m_iTargetY, m_iCrosshairColor, 2*(int)GetLongParameter(LP_LINE_WIDTH));
+  pView->DasherSpaceArc(CenterY, abs(CenterY - m_iTargetY), CDasherModel::ORIGIN_X, CDasherModel::ORIGIN_Y, 0, m_iTargetY, m_iCrosshairColor, 2*(int)GetLongParameter(Parameters::LP_LINE_WIDTH));
 }
 
 void CGameModule::DrawHelperArrow(Dasher::CDasherView* pView)
@@ -253,7 +253,7 @@ void CGameModule::DrawHelperArrow(Dasher::CDasherView* pView)
     iY[n] = (myint) (m_Target.iCenterY + sin(angle)*(iX[n-1]) + cos(angle)*(iY[n-1]-m_Target.iCenterY));
   }
   //...then plot it.
-  pView->DasherPolyarrow(iX, iY, noOfPoints, GetLongParameter(LP_LINE_WIDTH)*4, gameColour, 1.414);
+  pView->DasherPolyarrow(iX, iY, noOfPoints, GetLongParameter(Parameters::LP_LINE_WIDTH)*4, gameColour, 1.414);
   
 }
 

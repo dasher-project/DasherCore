@@ -23,13 +23,13 @@ class XmlSettingsStore : public Dasher::CSettingsStore, public AbstractXMLParser
 	bool Parse(pugi::xml_document& document, bool bUser) override;
 
  private:
-	bool LoadSetting(const std::string& Key, bool* Value) override;
-	bool LoadSetting(const std::string& Key, long* Value) override;
-	bool LoadSetting(const std::string& Key, std::string* Value) override;
+	bool LoadSetting(const std::string_view& Key, bool* Value) override;
+	bool LoadSetting(const std::string_view& Key, long* Value) override;
+	bool LoadSetting(const std::string_view& Key, std::string* Value) override;
 
-	void SaveSetting(const std::string& Key, bool Value) override;
-	void SaveSetting(const std::string& Key, long Value) override;
-	void SaveSetting(const std::string& Key, const std::string& Value) override;
+	void SaveSetting(const std::string_view& Key, bool Value) override;
+	void SaveSetting(const std::string_view& Key, long Value) override;
+	void SaveSetting(const std::string_view& Key, const std::string& Value) override;
 	
 	// Save if the mode is 'SAVE_IMMEDIATELY', otherwise just set 'modified_' to
 	// true.

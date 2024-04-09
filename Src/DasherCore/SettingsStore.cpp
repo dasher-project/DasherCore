@@ -10,6 +10,7 @@
 
 #include "SettingsStore.h"
 #include "Observable.h"
+#include "Parameters.h"
 
 #include <cstdlib>
 #include <iostream>
@@ -24,10 +25,10 @@ CSettingsStore::CSettingsStore() {
 void CSettingsStore::LoadPersistent() {
 	// Load each of the persistent parameters.  If we fail loading for the store, then 
 	// we'll save the settings with the default value that comes from Parameters.h
-	AddParameters(Settings::parameter_defaults);
+	AddParameters(Parameters::parameter_defaults);
 }
 
-void CSettingsStore::AddParameters(const std::unordered_map<Parameter, const Settings::Parameter_Value> table) {
+void CSettingsStore::AddParameters(Parameters::DefaultsParameterMap table) {
 
 	for(auto [key, value] : table)
 	{
@@ -36,25 +37,25 @@ void CSettingsStore::AddParameters(const std::unordered_map<Parameter, const Set
 		if(std::holds_alternative<bool>(parameters_[key].value))
 		{
 			DASHER_ASSERT(parameters_[key].type == Settings::ParamBool);
-			if (!LoadSetting(parameters_[key].name, &std::get<bool>(parameters_[key].value))) {
+			if (!LoadSetting(key, &std::get<bool>(parameters_[key].value))) {
 		      parameters_[key].value = value.value;
-		      SaveSetting(value.name, std::get<bool>(value.value));
+		      SaveSetting(key, std::get<bool>(value.value));
 		    }
 		}else
 		if(std::holds_alternative<long>(parameters_[key].value))
 		{
 			DASHER_ASSERT(parameters_[key].type == Settings::ParamLong);
-			if (!LoadSetting(parameters_[key].name, &std::get<long>(parameters_[key].value))) {
+			if (!LoadSetting(key, &std::get<long>(parameters_[key].value))) {
 		      parameters_[key].value = value.value;
-		      SaveSetting(value.name, std::get<long>(value.value));
+		      SaveSetting(key, std::get<long>(value.value));
 		    }
 		}else
 		if(std::holds_alternative<std::string>(parameters_[key].value))
 		{
 			DASHER_ASSERT(parameters_[key].type == Settings::ParamString);
-			if (!LoadSetting(parameters_[key].name, &std::get<std::string>(parameters_[key].value))) {
+			if (!LoadSetting(key, &std::get<std::string>(parameters_[key].value))) {
 		      parameters_[key].value = value.value;
-		      SaveSetting(value.name, std::get<std::string>(value.value));
+		      SaveSetting(key, std::get<std::string>(value.value));
 		    }
 		}
 	}
@@ -63,9 +64,9 @@ void CSettingsStore::AddParameters(const std::unordered_map<Parameter, const Set
 // Return 0 on success, an error string on failure.
 const char * CSettingsStore::ClSet(const std::string &strKey, const std::string &strValue) {
 	for (auto& [key, value] : parameters_) {
-		if(strKey != value.name) continue;
+		if(strKey != key) continue;
 		switch (value.type) {
-			case Settings::PARAM_BOOL: 
+			case Parameters::PARAM_BOOL: 
 				if ((strValue == "0") || (strValue == "true") || (strValue == "True")){
 					SetBoolParameter(key, false);
                 }else if((strValue == "1") || (strValue == "false") || (strValue == "False")){
@@ -77,16 +78,16 @@ const char * CSettingsStore::ClSet(const std::string &strKey, const std::string 
 					return "boolean value must be specified as 'true' or 'false'.";
 				}
 				return nullptr;
-			case Settings::PARAM_LONG: 
+			case Parameters::PARAM_LONG: 
 				// TODO: check the string to int conversion result.
 				SetLongParameter(key, atoi(strValue.c_str()));
 				return nullptr;
 
-			case Settings::PARAM_STRING: 
+			case Parameters::PARAM_STRING: 
 				SetStringParameter(key, strValue);
 				return nullptr;
 
-			case Settings::PARAM_INVALID:
+			case Parameters::PARAM_INVALID:
                 return "Unknown parameter given";
 		}
 	}
@@ -112,9 +113,9 @@ void CSettingsStore::SetParameter(Parameter parameter, T value)
 
 	// Initiate events for changed parameter
 	DispatchEvent(parameter);
-	if (parameter_value->second.persistence == Settings::Persistence::PERSISTENT) {
+	if (parameter_value->second.persistence == Parameters::Persistence::PERSISTENT) {
 		// Write out to permanent storage
-		SaveSetting(parameter_value->second.name, value);
+		SaveSetting(parameter_value->first, value);
 	}
 }
 
@@ -153,7 +154,7 @@ const std::string &CSettingsStore::GetStringParameter(Parameter parameter) const
 
 void CSettingsStore::ResetParameter(Parameter parameter) {
 	auto current_parameter = parameters_.find(parameter);
-	auto default_parameter = Settings::parameter_defaults.find(parameter);
+	auto default_parameter = Parameters::parameter_defaults.find(parameter);
 	DASHER_ASSERT(current_parameter != parameters_.end() && default_parameter != Settings::parameter_defaults.end());
 
 	current_parameter->second.value = default_parameter->second.value;
@@ -163,25 +164,25 @@ void CSettingsStore::ResetParameter(Parameter parameter) {
 functions are over-ridden.
 --------------------------------------------------------------------------*/
 
-bool CSettingsStore::LoadSetting(const std::string &, bool *) {
+bool CSettingsStore::LoadSetting(const std::string_view &, bool *) {
   return false;
 }
 
-bool CSettingsStore::LoadSetting(const std::string &, long *) {
+bool CSettingsStore::LoadSetting(const std::string_view &, long *) {
   return false;
 }
 
-bool CSettingsStore::LoadSetting(const std::string &, std::string *) {
+bool CSettingsStore::LoadSetting(const std::string_view &, std::string *) {
   return false;
 }
 
-void CSettingsStore::SaveSetting(const std::string &, bool ) {
+void CSettingsStore::SaveSetting(const std::string_view &, bool ) {
 }
 
-void CSettingsStore::SaveSetting(const std::string &, long ) {
+void CSettingsStore::SaveSetting(const std::string_view &, long ) {
 }
 
-void CSettingsStore::SaveSetting(const std::string &, const std::string &) {
+void CSettingsStore::SaveSetting(const std::string_view &, const std::string &) {
 }
 
 /* SettingsUser and SettingsObserver definitions... */

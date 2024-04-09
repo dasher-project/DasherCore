@@ -131,7 +131,7 @@ void CDasherInterfaceBase::Realize(unsigned long ulTime) {
 
   // TODO: Sort out log type selection
 
-  int iUserLogLevel = GetLongParameter(LP_USER_LOG_LEVEL_MASK);
+  int iUserLogLevel = GetLongParameter(Parameters::LP_USER_LOG_LEVEL_MASK);
 
   if(iUserLogLevel == 10)
     m_pUserLog = new CBasicLog(this, this);
@@ -149,10 +149,10 @@ void CDasherInterfaceBase::Realize(unsigned long ulTime) {
   // it to realize there's now an inputfilter (which may provide more actions).
   // So tell it the setting has changed...
   if (CControlManager *pCon = m_pNCManager->GetControlManager())
-    pCon->HandleEvent(SP_INPUT_FILTER);
+    pCon->HandleEvent(Parameters::SP_INPUT_FILTER);
 
-  HandleEvent(LP_NODE_BUDGET);
-  HandleEvent(BP_SPEAK_WORDS);
+  HandleEvent(Parameters::LP_NODE_BUDGET);
+  HandleEvent(Parameters::BP_SPEAK_WORDS);
 
   // FIXME - need to rationalise this sort of thing.
   // InvalidateContext(true);
@@ -195,101 +195,96 @@ CDasherInterfaceBase::~CDasherInterfaceBase() {
 }
 
 void CDasherInterfaceBase::CPreSetObserver::HandleEvent(CParameterChange d) {
-  switch(d.iParameter) {
-  case SP_ALPHABET_ID:
+  if(d.iParameter == Parameters::BP_COPY_ALL_ON_STOP){
     std::string value = std::get<std::string>(d.value);
     // Cycle the alphabet history
     std::vector<std::string> newHistory;
-    newHistory.push_back(m_settingsStore.GetStringParameter(SP_ALPHABET_ID));
+    newHistory.push_back(m_settingsStore.GetStringParameter(Parameters::SP_ALPHABET_ID));
     std::string v;
-    if ((v = m_settingsStore.GetStringParameter(SP_ALPHABET_1)) != value)
+    if ((v = m_settingsStore.GetStringParameter(Parameters::SP_ALPHABET_1)) != value)
       newHistory.push_back(v);
-    if ((v = m_settingsStore.GetStringParameter(SP_ALPHABET_2)) != value)
+    if ((v = m_settingsStore.GetStringParameter(Parameters::SP_ALPHABET_2)) != value)
       newHistory.push_back(v);
-    if ((v = m_settingsStore.GetStringParameter(SP_ALPHABET_3)) != value)
+    if ((v = m_settingsStore.GetStringParameter(Parameters::SP_ALPHABET_3)) != value)
       newHistory.push_back(v);
-    if ((v = m_settingsStore.GetStringParameter(SP_ALPHABET_4)) != value)
+    if ((v = m_settingsStore.GetStringParameter(Parameters::SP_ALPHABET_4)) != value)
       newHistory.push_back(v);
 
     // Fill empty slots. 
     while (newHistory.size() < 4)
       newHistory.push_back("");
 
-    m_settingsStore.SetStringParameter(SP_ALPHABET_1, newHistory[0]);
-    m_settingsStore.SetStringParameter(SP_ALPHABET_2, newHistory[1]);
-    m_settingsStore.SetStringParameter(SP_ALPHABET_3, newHistory[2]);
-    m_settingsStore.SetStringParameter(SP_ALPHABET_4, newHistory[3]);
-    break;
+    m_settingsStore.SetStringParameter(Parameters::SP_ALPHABET_1, newHistory[0]);
+    m_settingsStore.SetStringParameter(Parameters::SP_ALPHABET_2, newHistory[1]);
+    m_settingsStore.SetStringParameter(Parameters::SP_ALPHABET_3, newHistory[2]);
+    m_settingsStore.SetStringParameter(Parameters::SP_ALPHABET_4, newHistory[3]);
   }
 }
 
 void CDasherInterfaceBase::HandleEvent(Parameter parameter) {
-  switch (parameter) {
+    if (parameter == Parameters::LP_ORIENTATION)
+    {
+        m_pDasherView->SetOrientation(ComputeOrientation());
+    }
+    else if (parameter == Parameters::SP_ALPHABET_ID)
+    {
+        ChangeAlphabet();
+    }
+    else if (parameter == Parameters::SP_COLOUR_ID)
+    {
+        ChangeColours();
+    }
+    else if (parameter == Parameters::BP_PALETTE_CHANGE)
+    {
+        if (GetBoolParameter(Parameters::BP_PALETTE_CHANGE)) SetStringParameter(
+            Parameters::SP_COLOUR_ID, m_pNCManager->GetAlphabet()->GetPalette());
+    }
+    else if (parameter == Parameters::LP_LANGUAGE_MODEL_ID)
+    {
+        CreateNCManager();
+    }
+    else if (parameter == Parameters::SP_INPUT_DEVICE)
+    {
+        CreateInput();
+    }
+    else if (parameter == Parameters::SP_INPUT_FILTER)
+    {
+        CreateInputFilter();
+    }
+    else if (parameter == Parameters::LP_NODE_BUDGET)
+    {
+        delete m_defaultPolicy;
+        m_defaultPolicy = new AmortizedPolicy(m_pDasherModel, GetLongParameter(Parameters::LP_NODE_BUDGET));
+    }
+    else if (parameter == Parameters::BP_SPEAK_WORDS)
+    {
+        delete m_pWordSpeaker;
+        m_pWordSpeaker = GetBoolParameter(Parameters::BP_SPEAK_WORDS) ? new WordSpeaker(this) : NULL;
+    }
+    else if (parameter == Parameters::BP_CONTROL_MODE ||
+        parameter == Parameters::SP_CONTROL_BOX_ID)
+    {
+        // force rebuilding every node. If not control box is accessed after delete.
+        CreateNCManager();
+    }
 
-  case LP_OUTLINE_WIDTH:
-    ScheduleRedraw();
-    break;
-  case BP_DRAW_MOUSE:
-    ScheduleRedraw();
-    break;
-  case BP_DRAW_MOUSE_LINE:
-    ScheduleRedraw();
-    break;
-  case LP_ORIENTATION:
-    m_pDasherView->SetOrientation(ComputeOrientation());
-    ScheduleRedraw();
-    break;
-  case SP_ALPHABET_ID:
-    ChangeAlphabet();
-    ScheduleRedraw();
-    break;
-  case SP_COLOUR_ID:
-    ChangeColours();
-    ScheduleRedraw();
-    break;
-  case BP_PALETTE_CHANGE:
-    if(GetBoolParameter(BP_PALETTE_CHANGE))
- SetStringParameter(SP_COLOUR_ID, m_pNCManager->GetAlphabet()->GetPalette());
-    break;
-  case LP_LANGUAGE_MODEL_ID:
-    CreateNCManager();
-    break;
-  case LP_LINE_WIDTH:
-    ScheduleRedraw();
-    break;
-  case LP_DASHER_FONTSIZE:
-    ScheduleRedraw();
-    break;
-  case SP_INPUT_DEVICE:
-    CreateInput();
-    break;
-  case SP_INPUT_FILTER:
-    CreateInputFilter();
-    ScheduleRedraw();
-    break;
-  case LP_MARGIN_WIDTH:
-  case BP_NONLINEAR_Y:
-  case LP_NONLINEAR_X:
-  case LP_GEOMETRY:
-  case LP_SHAPE_TYPE: //for platforms which actually have this as a GUI pref!
-      ScheduleRedraw();
-      break;
-  case LP_NODE_BUDGET:
-    delete m_defaultPolicy;
-    m_defaultPolicy = new AmortizedPolicy(m_pDasherModel,GetLongParameter(LP_NODE_BUDGET));
-    break;
-  case BP_SPEAK_WORDS:
-    delete m_pWordSpeaker;
-    m_pWordSpeaker = GetBoolParameter(BP_SPEAK_WORDS) ? new WordSpeaker(this) : NULL;
-    break;
-  case BP_CONTROL_MODE:
-  case SP_CONTROL_BOX_ID:
-    // force rebuilding every node. If not control box is accessed after delete.
-    CreateNCManager();
-    break;
-  default:
-    break;
-  }
+    if(parameter ==  Parameters::LP_OUTLINE_WIDTH ||
+        parameter ==  Parameters::BP_DRAW_MOUSE ||
+        parameter ==  Parameters::BP_DRAW_MOUSE_LINE ||
+        parameter ==  Parameters::LP_LINE_WIDTH ||
+        parameter ==  Parameters::LP_DASHER_FONTSIZE ||
+        parameter ==  Parameters::LP_MARGIN_WIDTH ||
+        parameter ==  Parameters::BP_NONLINEAR_Y ||
+        parameter ==  Parameters::LP_NONLINEAR_X ||
+        parameter ==  Parameters::LP_GEOMETRY ||
+        parameter ==  Parameters::LP_SHAPE_TYPE ||
+        parameter == Parameters::LP_ORIENTATION ||
+        parameter == Parameters::SP_ALPHABET_ID ||
+        parameter == Parameters::SP_COLOUR_ID ||
+        parameter == Parameters::SP_INPUT_FILTER)
+    {
+        ScheduleRedraw();
+    }
 }
 
 void CDasherInterfaceBase::EnterGameMode(CGameModule *pGameModule) {
@@ -382,7 +377,7 @@ void CDasherInterfaceBase::WriteTrainFileFull() {
 
 void CDasherInterfaceBase::CreateNCManager() {
 
-  if(!m_AlphIO || GetLongParameter(LP_LANGUAGE_MODEL_ID)==-1)
+  if(!m_AlphIO || GetLongParameter(Parameters::LP_LANGUAGE_MODEL_ID)==-1)
     return;
 
   //can't delete the old manager yet until we've deleted all its nodes...
@@ -390,8 +385,8 @@ void CDasherInterfaceBase::CreateNCManager() {
 
   //now create the new manager...
   m_pNCManager = new CNodeCreationManager(this, this, m_AlphIO, m_ControlBoxIO);
-  if (GetBoolParameter(BP_PALETTE_CHANGE))
-    SetStringParameter(SP_COLOUR_ID, m_pNCManager->GetAlphabet()->GetPalette());
+  if (GetBoolParameter(Parameters::BP_PALETTE_CHANGE))
+    SetStringParameter(Parameters::SP_COLOUR_ID, m_pNCManager->GetAlphabet()->GetPalette());
 
   if (m_DasherScreen) {
     m_pNCManager->ChangeScreen(m_DasherScreen);
@@ -434,8 +429,8 @@ void CDasherInterfaceBase::TextAction::NotifyOffset(int iOffset) {
 
 
 bool CDasherInterfaceBase::hasDone() {
-  return (GetBoolParameter(BP_COPY_ALL_ON_STOP) && SupportsClipboard())
-  || (GetBoolParameter(BP_SPEAK_ALL_ON_STOP) && SupportsSpeech());
+  return (GetBoolParameter(Parameters::BP_COPY_ALL_ON_STOP) && SupportsClipboard())
+  || (GetBoolParameter(Parameters::BP_SPEAK_ALL_ON_STOP) && SupportsSpeech());
 }
 
 void CDasherInterfaceBase::Done() {
@@ -444,10 +439,10 @@ void CDasherInterfaceBase::Done() {
   if (m_pUserLog != NULL)
     m_pUserLog->StopWriting((float) GetNats());
 
-  if (GetBoolParameter(BP_COPY_ALL_ON_STOP) && SupportsClipboard()) {
+  if (GetBoolParameter(Parameters::BP_COPY_ALL_ON_STOP) && SupportsClipboard()) {
     CopyToClipboard(GetAllContext());
   }
-  if (GetBoolParameter(BP_SPEAK_ALL_ON_STOP) && SupportsSpeech()) {
+  if (GetBoolParameter(Parameters::BP_SPEAK_ALL_ON_STOP) && SupportsSpeech()) {
     Speak(GetAllContext(), true);
   }
 }
@@ -457,7 +452,7 @@ void CDasherInterfaceBase::CreateInput() {
     m_pInput->Deactivate();
   }
 
-  m_pInput = (CDasherInput *)GetModuleByName(GetStringParameter(SP_INPUT_DEVICE));
+  m_pInput = (CDasherInput *)GetModuleByName(GetStringParameter(Parameters::SP_INPUT_DEVICE));
 
   if (m_pInput == NULL)
     m_pInput = m_oModuleManager.GetDefaultInputDevice();
@@ -492,7 +487,7 @@ void CDasherInterfaceBase::NewFrame(unsigned long iTime, bool bForceRedraw) {
       m_DasherScreen->SendMarker(0); //this replaces the nodes...
       const screenint iSW = m_DasherScreen->GetWidth(), iSH = m_DasherScreen->GetHeight();
       m_DasherScreen->DrawRectangle(0,0,iSW,iSH,0,0,0); //fill in colour 0 = white
-      unsigned int iSize(GetLongParameter(LP_MESSAGE_FONTSIZE));
+      unsigned int iSize(GetLongParameter(Parameters::LP_MESSAGE_FONTSIZE));
       if (!m_pLockLabel) m_pLockLabel = m_DasherScreen->MakeLabel(m_strLockMessage, iSize);
       std::pair<screenint,screenint> dims = m_DasherScreen->TextSize(m_pLockLabel, iSize);
       m_DasherScreen->DrawString(m_pLockLabel, (iSW-dims.first)/2, (iSH-dims.second)/2, iSize, 4);
@@ -582,8 +577,8 @@ bool CDasherInterfaceBase::Redraw(unsigned long ulTime, bool bRedrawNodes, CExpa
 }
 
 void CDasherInterfaceBase::ChangeAlphabet() {
-  if(GetStringParameter(SP_ALPHABET_ID) == "") {
-    SetStringParameter(SP_ALPHABET_ID, m_AlphIO->GetDefault());
+  if(GetStringParameter(Parameters::SP_ALPHABET_ID) == "") {
+    SetStringParameter(Parameters::SP_ALPHABET_ID, m_AlphIO->GetDefault());
     // This will result in ChangeAlphabet() being called again, so
     // exit from the first recursion
     return;
@@ -603,7 +598,7 @@ void CDasherInterfaceBase::ChangeAlphabet() {
 }
 
 Options::ScreenOrientations CDasherInterfaceBase::ComputeOrientation() {
-  Options::ScreenOrientations pref(Options::ScreenOrientations(GetLongParameter(LP_ORIENTATION)));
+  Options::ScreenOrientations pref(Options::ScreenOrientations(GetLongParameter(Parameters::LP_ORIENTATION)));
   if (pref!=Options::AlphabetDefault) return pref;
   if (m_pNCManager) return m_pNCManager->GetAlphabet()->GetOrientation();
   //haven't created the NCManager yet, so not yet reached Realize, but must
@@ -617,7 +612,7 @@ void CDasherInterfaceBase::ChangeColours() {
     return;
 
   // TODO: Make fuction return a pointer directly
-  m_DasherScreen->SetColourScheme(&(m_ColourIO->GetInfo(GetStringParameter(SP_COLOUR_ID))));
+  m_DasherScreen->SetColourScheme(&(m_ColourIO->GetInfo(GetStringParameter(Parameters::SP_COLOUR_ID))));
 }
 
 void CDasherInterfaceBase::ChangeScreen(CDasherScreen *NewScreen) {
@@ -673,7 +668,7 @@ double CDasherInterfaceBase::GetCurFPS() {
 }
 
 const CAlphInfo *CDasherInterfaceBase::GetActiveAlphabet() {
-  return m_AlphIO->GetInfo(GetStringParameter(SP_ALPHABET_ID));
+  return m_AlphIO->GetInfo(GetStringParameter(Parameters::SP_ALPHABET_ID));
 }
 
 // int CDasherInterfaceBase::GetAutoOffset() {
@@ -743,7 +738,7 @@ void CDasherInterfaceBase::CreateInputFilter() {
     m_pInputFilter = NULL;
   }
 
-  m_pInputFilter = (CInputFilter *)GetModuleByName(GetStringParameter(SP_INPUT_FILTER));
+  m_pInputFilter = (CInputFilter *)GetModuleByName(GetStringParameter(Parameters::SP_INPUT_FILTER));
 
   if (m_pInputFilter == NULL)
     m_pInputFilter = m_oModuleManager.GetDefaultInputMethod();
@@ -794,26 +789,26 @@ void CDasherInterfaceBase::CreateModules() {
 
 void CDasherInterfaceBase::GetPermittedValues(Parameter parameter, std::vector<std::string> &vList) {
   // TODO: Deprecate direct calls to these functions
-  switch (parameter) {
-  case SP_ALPHABET_ID:
-    DASHER_ASSERT(m_AlphIO != NULL);
-    m_AlphIO->GetAlphabets(&vList);
-    break;
-  case SP_COLOUR_ID:
-    DASHER_ASSERT(m_ColourIO != NULL);
-    m_ColourIO->GetColours(&vList);
-    break;
-  case SP_CONTROL_BOX_ID:
-    DASHER_ASSERT(m_ControlBoxIO != NULL);
-    m_ControlBoxIO->GetControlBoxes(&vList);
-    break;
-  case SP_INPUT_FILTER:
-    m_oModuleManager.ListModules(1, vList);
-    break;
-  case SP_INPUT_DEVICE:
-    m_oModuleManager.ListModules(0, vList);
-    break;
-  }
+
+    if(parameter == Parameters::SP_ALPHABET_ID)
+    {
+        DASHER_ASSERT(m_AlphIO != NULL);
+        m_AlphIO->GetAlphabets(&vList);
+    } else if(parameter == Parameters::SP_COLOUR_ID)
+    {
+        DASHER_ASSERT(m_ColourIO != NULL);
+        m_ColourIO->GetColours(&vList);
+    } else if(parameter == Parameters::SP_CONTROL_BOX_ID)
+    {
+        DASHER_ASSERT(m_ControlBoxIO != NULL);
+        m_ControlBoxIO->GetControlBoxes(&vList);
+    } else if(parameter == Parameters::SP_INPUT_FILTER)
+    {
+        m_oModuleManager.ListModules(1, vList);
+    } else if(parameter == Parameters::SP_INPUT_DEVICE)
+    {
+        m_oModuleManager.ListModules(0, vList);
+    } 
 }
 
 bool CDasherInterfaceBase::GetModuleSettings(const std::string &strName, SModuleSettings **pSettings, int *iCount) {

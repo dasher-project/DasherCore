@@ -8,9 +8,9 @@
 using namespace Dasher;
 
 static SModuleSettings sSettings[] = {
-  {LP_STATIC1B_TIME, T_LONG, 100, 5000, 1, 100, _("Scan time (each direction), in ms")},
-  {LP_STATIC1B_ZOOM, T_LONG, 1, 16, 1, 1, _("Factor by which to zoom in")},
-  {LP_DYNAMIC_BUTTON_LAG, T_LONG, 0, 1000, 1, 25, _("Lag before user actually pushes button (ms)")},
+  {Parameters::LP_STATIC1B_TIME, T_LONG, 100, 5000, 1, 100, _("Scan time (each direction), in ms")},
+  {Parameters::LP_STATIC1B_ZOOM, T_LONG, 1, 16, 1, 1, _("Factor by which to zoom in")},
+  {Parameters::LP_DYNAMIC_BUTTON_LAG, T_LONG, 0, 1000, 1, 25, _("Lag before user actually pushes button (ms)")},
 };
 
 COneButtonFilter::COneButtonFilter(CSettingsUser *pCreator, CDasherInterfaceBase *pInterface)
@@ -52,7 +52,7 @@ bool COneButtonFilter::DecorateView(CDasherView *pView, CDasherInput *pInput) {
 void COneButtonFilter::Timer(unsigned long Time, CDasherView *pView, CDasherInput *pInput, CDasherModel *m_pDasherModel, CExpansionPolicy **pol) {
 
   if(bStarted) {
-    iLocation = (Time - iStartTime) * 4096 / GetLongParameter(LP_STATIC1B_TIME);
+    iLocation = (Time - iStartTime) * 4096 / GetLongParameter(Parameters::LP_STATIC1B_TIME);
     if (iLocation > 8192) {
       //travelled down and back.
       if (iLocation > 12288) bStarted = false; //wait for a button push then scan again
@@ -67,14 +67,14 @@ void COneButtonFilter::Timer(unsigned long Time, CDasherView *pView, CDasherInpu
 
 void COneButtonFilter::KeyDown(unsigned long iTime, Keys::VirtualKey Key, CDasherView *pView, CDasherInput *pInput, CDasherModel *pModel) {
   if (bStarted) {
-    iLocation = std::max(iTime - iStartTime - GetLongParameter(LP_DYNAMIC_BUTTON_LAG),0ul) * 4096 / GetLongParameter(LP_STATIC1B_TIME);
+    iLocation = std::max(iTime - iStartTime - GetLongParameter(Parameters::LP_DYNAMIC_BUTTON_LAG),0ul) * 4096 / GetLongParameter(Parameters::LP_STATIC1B_TIME);
     if (iLocation>8192) {
       //back up by one zoom step.
-      const myint x(GetLongParameter(LP_STATIC1B_ZOOM)*2048);
+      const myint x(GetLongParameter(Parameters::LP_STATIC1B_ZOOM)*2048);
       ScheduleZoom(pModel, 2048-x, 2048+x);
     } else {
       if (iLocation>4096) iLocation =8192-iLocation; //on way back up
-      const myint x(2048/GetLongParameter(LP_STATIC1B_ZOOM));
+      const myint x(2048/GetLongParameter(Parameters::LP_STATIC1B_ZOOM));
       ScheduleZoom(pModel, iLocation-x, iLocation+x);
     }
     bStarted = false;

@@ -1,5 +1,6 @@
 #ifndef __ModuleSettings_h__
 #define __ModuleSettings_h__
+#include "Parameters.h"
 
 enum setting_t {
   T_BOOL,
@@ -11,7 +12,7 @@ enum setting_t {
 typedef struct _SModuleSettings SModuleSettings;
 
 struct _SModuleSettings {
-  int iParameter;
+  Dasher::Parameter iParameter;
   setting_t iType;
   int iMin;
   int iMax;

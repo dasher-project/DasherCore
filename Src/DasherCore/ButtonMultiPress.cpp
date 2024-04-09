@@ -28,7 +28,7 @@ CButtonMultiPress::CButtonMultiPress(CSettingsUser *pCreator, CDasherInterfaceBa
 }
 
 void CButtonMultiPress::Timer(unsigned long iTime, CDasherView *pView, CDasherInput *pInput, CDasherModel *pModel, CExpansionPolicy **pol) {
-  if(m_bKeyDown && !m_bKeyHandled && ((iTime - m_iKeyDownTime) > GetLongParameter(LP_HOLD_TIME))) {
+  if(m_bKeyDown && !m_bKeyHandled && ((iTime - m_iKeyDownTime) > GetLongParameter(Parameters::LP_HOLD_TIME))) {
     ButtonEvent(iTime, m_iHeldId, 1, pModel);
     m_bKeyHandled = true;
   }
@@ -41,7 +41,7 @@ void CButtonMultiPress::KeyDown(unsigned long iTime, Keys::VirtualKey Key, CDash
 
   // Check for multiple clicks
   if(Key == m_iQueueId && !m_deQueueTimes.empty()) {
-    if ( (iTime - m_deQueueTimes.back()) > GetLongParameter(LP_MULTIPRESS_TIME) )
+    if ( (iTime - m_deQueueTimes.back()) > GetLongParameter(Parameters::LP_MULTIPRESS_TIME) )
       m_deQueueTimes.clear(); //and fall through to record+process normally, below
     else
     {

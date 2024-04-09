@@ -87,7 +87,7 @@ namespace Dasher {
         std::vector < unsigned int >ProbsA(iNumSymbols);
         std::vector < unsigned int >ProbsB(iNumSymbols);
 
-      int iNormA(iNorm * GetLongParameter(LP_LM_MIXTURE) / 100);
+      int iNormA(iNorm * GetLongParameter(Dasher::Parameters::LP_LM_MIXTURE) / 100);
       int iNormB(iNorm - iNormA);
       
       // TODO: Fix uniform here

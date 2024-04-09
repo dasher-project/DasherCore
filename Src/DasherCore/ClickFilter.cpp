@@ -5,25 +5,25 @@
 using namespace Dasher;
 
 static SModuleSettings sSettings[] = {
-  {LP_MAXZOOM, T_LONG, 11, 400, 10, 1, _("Maximum Zoom")},
+  {Parameters::LP_MAXZOOM, T_LONG, 11, 400, 10, 1, _("Maximum Zoom")},
 
 /* TRANSLATORS: In click mode, when you click with the mouse, you select
    a piece of y-axis to be zoomed to, based on the mouse coordinates. The
    "guides" are lines from the mouse position to the edges of the piece of
    y-axis. */
-  {BP_DRAW_MOUSE_LINE, T_BOOL, -1, -1, -1, -1, _("Draw guides on screen to show area into which a click will zoom")},
+  {Parameters::BP_DRAW_MOUSE_LINE, T_BOOL, -1, -1, -1, -1, _("Draw guides on screen to show area into which a click will zoom")},
 /* TRANSLATORS: As dasher's on-screen coordinate space is not flat,
    the straight guide lines should in fact really be curved. This option
    draws the guides as correct, though possibly more confusing, curves. */
-  {BP_CURVE_MOUSE_LINE, T_BOOL, -1, -1, -1, -1, _("Curve lines to follow the non-linearity of the view transform")},
+  {Parameters::BP_CURVE_MOUSE_LINE, T_BOOL, -1, -1, -1, -1, _("Curve lines to follow the non-linearity of the view transform")},
 };
 
 bool CClickFilter::DecorateView(CDasherView *pView, CDasherInput *pInput) {
   bool bChanged(false);
-  if (GetBoolParameter(BP_DRAW_MOUSE_LINE)) {
+  if (GetBoolParameter(Parameters::BP_DRAW_MOUSE_LINE)) {
     myint mouseX, mouseY;
     pInput->GetDasherCoords(mouseX, mouseY, pView);
-    AdjustZoomX(mouseX, pView, GetLongParameter(LP_S), GetLongParameter(LP_MAXZOOM));
+    AdjustZoomX(mouseX, pView, GetLongParameter(Parameters::LP_S), GetLongParameter(Parameters::LP_MAXZOOM));
     if (m_iLastX != mouseX || m_iLastY != mouseY) {
       bChanged = true;
       m_iLastX = mouseX; m_iLastY = mouseY;
@@ -34,9 +34,9 @@ bool CClickFilter::DecorateView(CDasherView *pView, CDasherInput *pInput) {
     y[0] = mouseY - mouseX;
     y[1] = mouseY;
     y[2] = mouseY + mouseX;
-    if (GetBoolParameter(BP_CURVE_MOUSE_LINE)) {
-      pView->DasherSpaceLine(x[0], y[0], x[1], y[1], GetLongParameter(LP_LINE_WIDTH), 1);
-      pView->DasherSpaceLine(x[1], y[1], x[2], y[2], GetLongParameter(LP_LINE_WIDTH), 1);
+    if (GetBoolParameter(Parameters::BP_CURVE_MOUSE_LINE)) {
+      pView->DasherSpaceLine(x[0], y[0], x[1], y[1], GetLongParameter(Parameters::LP_LINE_WIDTH), 1);
+      pView->DasherSpaceLine(x[1], y[1], x[2], y[2], GetLongParameter(Parameters::LP_LINE_WIDTH), 1);
     } else {
       //Note that the nonlinearity at edges of screen causes the lines to wobble close to the top/bottom:
       // we draw lines _straight_ towards their targets on the Y-axis (calculated after applying nonlinearity),
@@ -51,7 +51,7 @@ bool CClickFilter::DecorateView(CDasherView *pView, CDasherInput *pInput) {
         //  x[2] = mouseX - (iDasherMaxY - mouseY);
         //  y[2] = iDasherMaxY;
         //}
-      pView->DasherPolyline(x, y, 3, GetLongParameter(LP_LINE_WIDTH), 1);
+      pView->DasherPolyline(x, y, 3, GetLongParameter(Parameters::LP_LINE_WIDTH), 1);
     }
   }
   return bChanged;
@@ -79,7 +79,7 @@ void CClickFilter::KeyDown(unsigned long iTime, Keys::VirtualKey Key, CDasherVie
       myint iDasherY;
 
       pInput->GetDasherCoords(iDasherX, iDasherY, pView);
-      AdjustZoomX(iDasherX, pView, GetLongParameter(LP_S), GetLongParameter(LP_MAXZOOM));
+      AdjustZoomX(iDasherX, pView, GetLongParameter(Parameters::LP_S), GetLongParameter(Parameters::LP_MAXZOOM));
       ScheduleZoom(pModel, iDasherY-iDasherX, iDasherY+iDasherX);
     }
     break;

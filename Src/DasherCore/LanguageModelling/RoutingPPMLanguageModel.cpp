@@ -15,7 +15,7 @@ using namespace Dasher;
 /////////////////////////////////////////////////////////////////////
 
 CRoutingPPMLanguageModel::CRoutingPPMLanguageModel(CSettingsUser *pCreator, const std::vector<symbol> *pBaseSyms, const std::vector<std::set<symbol> > *pRoutes, bool bRoutesContextSensitive)
-:CAbstractPPM(pCreator, static_cast<int>(pRoutes->size())-1, new CRoutingPPMnode(-1), GetLongParameter(LP_LM_MAX_ORDER)), NodesAllocated(0), m_NodeAlloc(8192), m_pBaseSyms(pBaseSyms), m_pRoutes(pRoutes), m_bRoutesContextSensitive(bRoutesContextSensitive) {
+:CAbstractPPM(pCreator, static_cast<int>(pRoutes->size())-1, new CRoutingPPMnode(-1), GetLongParameter(Parameters::LP_LM_MAX_ORDER)), NodesAllocated(0), m_NodeAlloc(8192), m_pBaseSyms(pBaseSyms), m_pRoutes(pRoutes), m_bRoutesContextSensitive(bRoutesContextSensitive) {
   DASHER_ASSERT(pBaseSyms->size() >= pRoutes->size());
 }
 
@@ -39,8 +39,8 @@ void CRoutingPPMLanguageModel::GetProbs(Context context, std::vector<unsigned in
   
   DASHER_ASSERT(iUniformLeft == 0);
   
-  int alpha = GetLongParameter( LP_LM_ALPHA );
-  int beta = GetLongParameter( LP_LM_BETA );
+  int alpha = GetLongParameter(Parameters::LP_LM_ALPHA );
+  int beta = GetLongParameter(Parameters::LP_LM_BETA );
 
   //first, fill out the probabilities of the base symbols, as per ordinary PPM
   // (TODO, could move CPPMLanguageModel::GetProbs into CAbstractPPM, would do
@@ -125,7 +125,7 @@ symbol CRoutingPPMLanguageModel::GetBestRoute(Context ctx) {
   
   std::map<symbol,unsigned int> probs; //of the routes leading to this base sym
   int iToSpend = 1<<16; //arbitrary, could be anything
-  int alpha = GetLongParameter(LP_LM_ALPHA), beta=GetLongParameter(LP_LM_BETA);
+  int alpha = GetLongParameter(Parameters::LP_LM_ALPHA), beta=GetLongParameter(Parameters::LP_LM_BETA);
   
   for (CPPMnode *pTemp = context->head; pTemp!=m_pRoot; pTemp=pTemp->vine) {
     if (pTemp->vine!=m_pRoot && !m_bRoutesContextSensitive) continue;

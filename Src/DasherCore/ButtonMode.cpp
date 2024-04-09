@@ -14,18 +14,18 @@ using namespace Dasher;
 
 static SModuleSettings sSettings[] = {
   /* TRANSLATORS: The number of time steps over which to perform the zooming motion in button mode. */
-  {LP_ZOOMSTEPS, T_LONG, 1, 63, 1, 1, _("Frames over which to perform zoom")},
-  {LP_BUTTON_SCAN_TIME, T_LONG, 0, 2000, 1, 100, _("Scan time in menu mode (0 to not scan)")},
-  {LP_B, T_LONG, 2, 10, 1, 1, _("Number of forward boxes")},
-  {LP_S, T_LONG, 0, 256, 1, 1, _("Safety margin")},
+  {Parameters::LP_ZOOMSTEPS, T_LONG, 1, 63, 1, 1, _("Frames over which to perform zoom")},
+  {Parameters::LP_BUTTON_SCAN_TIME, T_LONG, 0, 2000, 1, 100, _("Scan time in menu mode (0 to not scan)")},
+  {Parameters::LP_B, T_LONG, 2, 10, 1, 1, _("Number of forward boxes")},
+  {Parameters::LP_S, T_LONG, 0, 256, 1, 1, _("Safety margin")},
   /* TRANSLATORS: The boxes (zoom targets) in button mode can either be the same size, or different sizes - this is the extent to which the sizes are allowed to differ from each other. */
   /* XXX PRLW: 128 log(2) = 89, where 2 is the ratio of adjacent boxes
    * however the code seems to use ratio = (129/127)^-r, instead of
    * ratio = exp(r/128) used in the design document
    */
-  {LP_R, T_LONG, -89, 89, 1, 10, _("Box non-uniformity")},
+  {Parameters::LP_R, T_LONG, -89, 89, 1, 10, _("Box non-uniformity")},
   /* TRANSLATORS: Intercept keyboard events for 'special' keys even when the Dasher window doesn't have keyboard focus.*/
-  {BP_GLOBAL_KEYBOARD, T_BOOL, -1, -1, -1, -1, _("Global keyboard grab")}
+  {Parameters::BP_GLOBAL_KEYBOARD, T_BOOL, -1, -1, -1, -1, _("Global keyboard grab")}
 };
 
 // FIX iStyle == 0
@@ -37,7 +37,7 @@ void CButtonMode::SetupBoxes()
 {
   int iDasherY(CDasherModel::MAX_Y);
 
-  int iForwardBoxes(GetLongParameter(LP_B));
+  int iForwardBoxes(GetLongParameter(Parameters::LP_B));
   m_pBoxes = new SBoxInfo[m_iNumBoxes = iForwardBoxes+1];
 
   // Calculate the sizes of non-uniform boxes using standard
@@ -45,7 +45,7 @@ void CButtonMode::SetupBoxes()
 
   // FIXME - implement this using DJCM's integer method?
   // See ~mackay/dasher/buttons/
-  const double dRatio = pow(129/127.0, -static_cast<double>(GetLongParameter(LP_R)));
+  const double dRatio = pow(129/127.0, -static_cast<double>(GetLongParameter(Parameters::LP_R)));
 
   if(m_bMenu) {
 
@@ -67,8 +67,8 @@ void CButtonMode::SetupBoxes()
       m_pBoxes[i].iDisplayTop = static_cast<int>(dMin);
       m_pBoxes[i].iDisplayBottom = static_cast<int>(dMax);
 
-      m_pBoxes[i].iTop = m_pBoxes[i].iDisplayTop - GetLongParameter(LP_S);
-      m_pBoxes[i].iBottom = m_pBoxes[i].iDisplayBottom + GetLongParameter(LP_S);
+      m_pBoxes[i].iTop = m_pBoxes[i].iDisplayTop - GetLongParameter(Parameters::LP_S);
+      m_pBoxes[i].iBottom = m_pBoxes[i].iDisplayBottom + GetLongParameter(Parameters::LP_S);
 
       dMin = dMax;
     }
@@ -122,8 +122,8 @@ void CButtonMode::SetupBoxes()
   }
 
   for(int i(0); i < m_iNumBoxes - 1; ++i) {
-    m_pBoxes[i].iTop = m_pBoxes[i].iDisplayTop - GetLongParameter(LP_S);
-    m_pBoxes[i].iBottom = m_pBoxes[i].iDisplayBottom + GetLongParameter(LP_S);
+    m_pBoxes[i].iTop = m_pBoxes[i].iDisplayTop - GetLongParameter(Parameters::LP_S);
+    m_pBoxes[i].iBottom = m_pBoxes[i].iDisplayBottom + GetLongParameter(Parameters::LP_S);
   }
 
   m_pBoxes[m_iNumBoxes-1].iDisplayTop = 0;
@@ -160,7 +160,7 @@ void CButtonMode::KeyDown(unsigned long iTime, Keys::VirtualKey Key, CDasherView
     //Mouse!
     if (m_bMenu) {
       bool bScan;
-      if (GetLongParameter(LP_BUTTON_SCAN_TIME))
+      if (GetLongParameter(Parameters::LP_BUTTON_SCAN_TIME))
         bScan = false; //auto-scan, any click selects
       else {
         //top scans, bottom selects
@@ -195,15 +195,12 @@ void CButtonMode::DirectKeyDown(unsigned long iTime, Keys::VirtualKey Key, CDash
 }
 
 void CButtonMode::HandleEvent(Parameter parameter) {
-  switch (parameter) {
-  case LP_B:
-  case LP_R:
-    // Deliberate fallthrough
-    delete[] m_pBoxes;
-    SetupBoxes();
-    m_pInterface->ScheduleRedraw();
-    break;
-  }
+    if(parameter == Parameters::LP_B || parameter == Parameters::LP_R)
+    {
+        delete[] m_pBoxes;
+        SetupBoxes();
+        m_pInterface->ScheduleRedraw();
+    }
 }
 
 bool CButtonMode::GetSettings(SModuleSettings **pSettings, int *iCount) {

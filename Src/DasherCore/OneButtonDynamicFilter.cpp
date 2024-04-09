@@ -27,16 +27,16 @@ using namespace Dasher;
 
 static SModuleSettings sSettings[] = {
   /* TRANSLATORS: The time for which a button must be held before it counts as a 'long' (rather than short) press. */
-  {LP_HOLD_TIME, T_LONG, 100, 10000, 1000, 100, _("Long press time")},
+  {Parameters::LP_HOLD_TIME, T_LONG, 100, 10000, 1000, 100, _("Long press time")},
   /* TRANSLATORS: Double-clicks are special in some situations (they cause us to start reversing). This is the time in which the button must be pressed twice to count.*/
-  {LP_MULTIPRESS_TIME, T_LONG, 100, 10000, 1000, 100, _("Double-press time")},
+  {Parameters::LP_MULTIPRESS_TIME, T_LONG, 100, 10000, 1000, 100, _("Double-press time")},
   /* TRANSLATORS: Backoff = reversing in Dasher to correct mistakes. This allows a single button to be dedicated to activating backoff, rather than using multiple presses of other buttons.*/
-  {BP_BACKOFF_BUTTON,T_BOOL, -1, -1, -1, -1, _("Enable backoff button")},
-  {BP_SLOW_START,T_BOOL, -1, -1, -1, -1, _("Slow startup")},
-  {LP_SLOW_START_TIME, T_LONG, 0, 10000, 1000, 100, _("Startup time")},
-  {LP_DYNAMIC_SPEED_INC, T_LONG, 1, 100, 1, 1, _("Percentage by which to automatically increase speed")},
-  {LP_DYNAMIC_SPEED_FREQ, T_LONG, 1, 1000, 1, 1, _("Time after which to automatically increase speed (secs)")},
-  {LP_DYNAMIC_SPEED_DEC, T_LONG, 1, 99, 1, 1, _("Percentage by which to decrease speed upon reverse")}
+  {Parameters::BP_BACKOFF_BUTTON,T_BOOL, -1, -1, -1, -1, _("Enable backoff button")},
+  {Parameters::BP_SLOW_START,T_BOOL, -1, -1, -1, -1, _("Slow startup")},
+  {Parameters::LP_SLOW_START_TIME, T_LONG, 0, 10000, 1000, 100, _("Startup time")},
+  {Parameters::LP_DYNAMIC_SPEED_INC, T_LONG, 1, 100, 1, 1, _("Percentage by which to automatically increase speed")},
+  {Parameters::LP_DYNAMIC_SPEED_FREQ, T_LONG, 1, 1000, 1, 1, _("Time after which to automatically increase speed (secs)")},
+  {Parameters::LP_DYNAMIC_SPEED_DEC, T_LONG, 1, 99, 1, 1, _("Percentage by which to decrease speed upon reverse")}
 };
 
 COneButtonDynamicFilter::COneButtonDynamicFilter(CSettingsUser *pCreator, CDasherInterfaceBase *pInterface, CFrameRate *pFramerate)
@@ -92,7 +92,7 @@ bool COneButtonDynamicFilter::DecorateView(CDasherView *pView, CDasherInput *pIn
 }
 
 void COneButtonDynamicFilter::KeyDown(unsigned long Time, Keys::VirtualKey Key, CDasherView *pDasherView, CDasherInput *pInput, CDasherModel *pModel) {
-  if (Key == Keys::Primary_Input && !GetBoolParameter(BP_BACKOFF_BUTTON))
+  if (Key == Keys::Primary_Input && !GetBoolParameter(Parameters::BP_BACKOFF_BUTTON))
     //mouse click - will be ignored by superclass method.
     //simulate press of button 2...
     Key= Keys::Button_2;
@@ -100,7 +100,7 @@ void COneButtonDynamicFilter::KeyDown(unsigned long Time, Keys::VirtualKey Key, 
 }
 
 void COneButtonDynamicFilter::KeyUp(unsigned long Time, Keys::VirtualKey Key, CDasherView *pDasherView, CDasherInput *pInput, CDasherModel *pModel) {
-  if (Key == Keys::Primary_Input && !GetBoolParameter(BP_BACKOFF_BUTTON))
+  if (Key == Keys::Primary_Input && !GetBoolParameter(Parameters::BP_BACKOFF_BUTTON))
     //mouse click - will be ignored by superclass method.
     //simulate press of button 2...
     Key= Keys::Button_2;

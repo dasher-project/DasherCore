@@ -101,7 +101,7 @@ CControlBase::CContNode::CContNode(int iOffset, int iColour, NodeTemplate* pTemp
 
 double CControlBase::CContNode::SpeedMul()
 {
-	return m_pMgr->GetBoolParameter(BP_SLOW_CONTROL_BOX) ? 0.5 : 1;
+	return m_pMgr->GetBoolParameter(Parameters::BP_SLOW_CONTROL_BOX) ? 0.5 : 1;
 }
 
 void CControlBase::CContNode::PopulateChildren()
@@ -514,11 +514,8 @@ CControlManager::~CControlManager()
 
 void CControlManager::HandleEvent(Parameter parameter)
 {
-	switch (parameter)
+	if(parameter == Parameters::BP_COPY_ALL_ON_STOP || parameter == Parameters::BP_SPEAK_ALL_ON_STOP || parameter == Parameters::SP_INPUT_FILTER)
 	{
-	case BP_COPY_ALL_ON_STOP:
-	case BP_SPEAK_ALL_ON_STOP:
-	case SP_INPUT_FILTER:
 		updateActions();
 	}
 }

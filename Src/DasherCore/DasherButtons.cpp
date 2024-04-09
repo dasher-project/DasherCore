@@ -68,9 +68,9 @@ void CDasherButtons::DirectKeyDown(unsigned long iTime, Keys::VirtualKey Key, CD
 }
 
 void CDasherButtons::Timer(unsigned long Time, CDasherView *pView, CDasherInput *pInput, CDasherModel *pModel, CExpansionPolicy **pol) {
-  if (m_bMenu && GetLongParameter(LP_BUTTON_SCAN_TIME) &&
+  if (m_bMenu && GetLongParameter(Parameters::LP_BUTTON_SCAN_TIME) &&
       Time > m_iScanTime) {
-    m_iScanTime = Time + GetLongParameter(LP_BUTTON_SCAN_TIME);
+    m_iScanTime = Time + GetLongParameter(Parameters::LP_BUTTON_SCAN_TIME);
     m_bDecorationChanged = true;
     ++iActiveBox;
     if(iActiveBox == m_iNumBoxes)

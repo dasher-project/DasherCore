@@ -11,7 +11,7 @@ CFrameRate::CFrameRate(CSettingsUser *pCreator) :
   m_iTime = 0;
 
   //try and carry on from where we left off at last run
-  HandleEvent(LP_X_LIMIT_SPEED);
+  HandleEvent(Parameters::LP_X_LIMIT_SPEED);
   //Sets m_dBitsAtLimX and m_iSteps
 }
 
@@ -39,7 +39,7 @@ void CFrameRate::RecordFrame(unsigned long Time)
     if(m_iTime2 - m_iTime > 0) {
       double dFrNow = m_iFrames * 1000.0 / (m_iTime2 - m_iTime);
       //LP_FRAMERATE records a decaying average, smoothed 50:50 with previous value
-      SetLongParameter(LP_FRAMERATE, long(GetLongParameter(LP_FRAMERATE) + (dFrNow*100))/2);
+      SetLongParameter(Parameters::LP_FRAMERATE, long(GetLongParameter(Parameters::LP_FRAMERATE) + (dFrNow*100))/2);
       m_iTime = m_iTime2;
       m_iFrames = 0;
 
@@ -51,15 +51,16 @@ void CFrameRate::RecordFrame(unsigned long Time)
 }
 
 void CFrameRate::HandleEvent(Parameter parameter) {
-  switch (parameter) {
-    case LP_X_LIMIT_SPEED:
-      m_dBitsAtLimX = (log(static_cast<double>(CDasherModel::MAX_Y)) - log (2.*GetLongParameter(LP_X_LIMIT_SPEED)))/log(2.);
-      //fallthrough
-    case LP_MAX_BITRATE:
-    case LP_FRAMERATE:
-    //Calculate m_iSteps from the decaying-average framerate, as the number
-    // of steps that, at the X limit, will cause LP_MAX_BITRATE bits to be
-    // entered per second
-    m_iSteps = std::max(1,(int)(GetLongParameter(LP_FRAMERATE)*m_dBitsAtLimX/GetLongParameter(LP_MAX_BITRATE)));
-  }
+    if(parameter == Parameters::LP_X_LIMIT_SPEED){
+      m_dBitsAtLimX = (log(static_cast<double>(CDasherModel::MAX_Y)) - log (2.*GetLongParameter(Parameters::LP_X_LIMIT_SPEED)))/log(2.);
+    }
+
+    if(parameter ==  Parameters::LP_MAX_BITRATE ||
+       parameter ==  Parameters::LP_FRAMERATE ||
+       parameter == Parameters::LP_X_LIMIT_SPEED){
+        //Calculate m_iSteps from the decaying-average framerate, as the number
+        // of steps that, at the X limit, will cause LP_MAX_BITRATE bits to be
+        // entered per second
+        m_iSteps = std::max(1,(int)(GetLongParameter(Parameters::LP_FRAMERATE)*m_dBitsAtLimX/GetLongParameter(Parameters::LP_MAX_BITRATE)));
+    }
 }

@@ -19,7 +19,7 @@ using namespace Dasher;
 /////////////////////////////////////////////////////////////////////
 
 CAbstractPPM::CAbstractPPM(CSettingsUser *pCreator, int iNumSyms, CPPMnode *pRoot, int iMaxOrder)
-: CLanguageModel(iNumSyms), CSettingsUser(pCreator), m_pRoot(pRoot), m_iMaxOrder(iMaxOrder<0 ? GetLongParameter(LP_LM_MAX_ORDER) : iMaxOrder), bUpdateExclusion( GetLongParameter(LP_LM_UPDATE_EXCLUSION)!=0 ), m_ContextAlloc(1024) {
+: CLanguageModel(iNumSyms), CSettingsUser(pCreator), m_pRoot(pRoot), m_iMaxOrder(iMaxOrder<0 ? GetLongParameter(Parameters::LP_LM_MAX_ORDER) : iMaxOrder), bUpdateExclusion( GetLongParameter(Parameters::LP_LM_UPDATE_EXCLUSION)!=0 ), m_ContextAlloc(1024) {
   m_pRootContext = m_ContextAlloc.Alloc();
   m_pRootContext->head = m_pRoot;
   m_pRootContext->order = 0;
@@ -62,8 +62,8 @@ void CPPMLanguageModel::GetProbs(Context context, std::vector<unsigned int> &pro
   //  bool doExclusion = GetLongParameter( LP_LM_ALPHA );
   bool doExclusion = 0; //FIXME
 
-  int alpha = GetLongParameter( LP_LM_ALPHA );
-  int beta = GetLongParameter( LP_LM_BETA );
+  int alpha = GetLongParameter(Parameters::LP_LM_ALPHA );
+  int beta = GetLongParameter(Parameters::LP_LM_BETA );
 
   for (CPPMnode *pTemp = ppmcontext->head; pTemp; pTemp=pTemp->vine) {
     int iTotal = 0;

@@ -8,51 +8,124 @@
 // They are unique across the different types
 namespace Dasher
 {
-	enum Parameter{ 
-		BP_DRAW_MOUSE_LINE, BP_DRAW_MOUSE, BP_CURVE_MOUSE_LINE,
-		BP_START_MOUSE,
-		BP_START_SPACE, BP_CONTROL_MODE, 
-		BP_MOUSEPOS_MODE,
-		BP_PALETTE_CHANGE, BP_TURBO_MODE, BP_EXACT_DYNAMICS,
-		BP_AUTOCALIBRATE, BP_REMAP_XTREME,
-		BP_AUTO_SPEEDCONTROL,
-		BP_LM_ADAPTIVE, BP_SOCKET_DEBUG, 
-		BP_CIRCLE_START, BP_GLOBAL_KEYBOARD, BP_NONLINEAR_Y,
-		BP_STOP_OUTSIDE, BP_BACKOFF_BUTTON,
-		BP_TWOBUTTON_REVERSE, BP_2B_INVERT_DOUBLE, BP_SLOW_START,
-		BP_COPY_ALL_ON_STOP, BP_SPEAK_ALL_ON_STOP, BP_SPEAK_WORDS,
-		BP_GAME_HELP_DRAW_PATH, BP_TWO_PUSH_RELEASE_TIME,
-		BP_SLOW_CONTROL_BOX,
-		END_OF_BPS,
+    typedef const std::string_view Parameter;
+    namespace Parameters
+    {
+        constexpr Parameter BP_DRAW_MOUSE_LINE = "DrawMouseLine";
+        constexpr Parameter BP_DRAW_MOUSE = "DrawMouse";
+        constexpr Parameter BP_CURVE_MOUSE_LINE = "CurveMouseLine";
+        constexpr Parameter BP_START_MOUSE = "StartOnLeft";
+        constexpr Parameter BP_START_SPACE = "StartOnSpace";
+        constexpr Parameter BP_CONTROL_MODE = "ControlMode";
+        constexpr Parameter BP_MOUSEPOS_MODE = "StartOnMousePosition";
+        constexpr Parameter BP_PALETTE_CHANGE = "PaletteChange";
+        constexpr Parameter BP_TURBO_MODE = "TurboMode";
+        constexpr Parameter BP_EXACT_DYNAMICS = "ExactDynamics";
+        constexpr Parameter BP_AUTOCALIBRATE = "Autocalibrate";
+        constexpr Parameter BP_REMAP_XTREME = "RemapXtreme";
+        constexpr Parameter BP_AUTO_SPEEDCONTROL = "AutoSpeedControl";
+        constexpr Parameter BP_LM_ADAPTIVE = "LMAdaptive";
+        constexpr Parameter BP_SOCKET_DEBUG = "SocketInputDebug";
+        constexpr Parameter BP_CIRCLE_START = "CircleStart";
+        constexpr Parameter BP_GLOBAL_KEYBOARD = "GlobalKeyboard";
+        constexpr Parameter BP_NONLINEAR_Y = "NonlinearY";
+        constexpr Parameter BP_STOP_OUTSIDE = "PauseOutside";
+        constexpr Parameter BP_BACKOFF_BUTTON = "BackoffButton";
+        constexpr Parameter BP_TWOBUTTON_REVERSE = "TwoButtonReverse";
+        constexpr Parameter BP_2B_INVERT_DOUBLE = "TwoButtonInvertDouble";
+        constexpr Parameter BP_SLOW_START = "SlowStart";
+        constexpr Parameter BP_COPY_ALL_ON_STOP = "CopyOnStop";
+        constexpr Parameter BP_SPEAK_ALL_ON_STOP = "SpeakOnStop";
+        constexpr Parameter BP_SPEAK_WORDS = "SpeakWords";
+        constexpr Parameter BP_GAME_HELP_DRAW_PATH = "GameDrawPath";
+        constexpr Parameter BP_TWO_PUSH_RELEASE_TIME = "TwoPushReleaseTime";
+        constexpr Parameter BP_SLOW_CONTROL_BOX = "SlowControlBox";
 
-		LP_ORIENTATION, LP_MAX_BITRATE, LP_FRAMERATE,
-		LP_LANGUAGE_MODEL_ID, LP_DASHER_FONTSIZE, LP_MESSAGE_FONTSIZE, LP_SHAPE_TYPE,
-		LP_UNIFORM, LP_YSCALE, LP_MOUSEPOSDIST, LP_PY_PROB_SORT_THRES, LP_MESSAGE_TIME,
-		LP_LM_MAX_ORDER, LP_LM_EXCLUSION,
-		LP_LM_UPDATE_EXCLUSION, LP_LM_ALPHA, LP_LM_BETA,
-		LP_LM_MIXTURE, LP_LINE_WIDTH, LP_GEOMETRY,
-		LP_LM_WORD_ALPHA, LP_USER_LOG_LEVEL_MASK, 
-		LP_ZOOMSTEPS, LP_B, LP_S, LP_BUTTON_SCAN_TIME, LP_R, LP_RIGHTZOOM,
-		LP_NODE_BUDGET, LP_OUTLINE_WIDTH, LP_MIN_NODE_SIZE, LP_NONLINEAR_X,
-		LP_AUTOSPEED_SENSITIVITY, LP_SOCKET_PORT, LP_SOCKET_INPUT_X_MIN, LP_SOCKET_INPUT_X_MAX,
-		LP_SOCKET_INPUT_Y_MIN, LP_SOCKET_INPUT_Y_MAX,
-		LP_CIRCLE_PERCENT, LP_TWO_BUTTON_OFFSET, LP_HOLD_TIME, LP_MULTIPRESS_TIME,
-		LP_SLOW_START_TIME,
-		LP_TWO_PUSH_OUTER, LP_TWO_PUSH_LONG, LP_TWO_PUSH_SHORT, LP_TWO_PUSH_TOLERANCE,
-		LP_DYNAMIC_BUTTON_LAG, LP_STATIC1B_TIME, LP_STATIC1B_ZOOM,
-		LP_DEMO_SPRING, LP_DEMO_NOISE_MEM, LP_DEMO_NOISE_MAG, LP_MAXZOOM, 
-		LP_DYNAMIC_SPEED_INC, LP_DYNAMIC_SPEED_FREQ, LP_DYNAMIC_SPEED_DEC,
-		LP_TAP_TIME, LP_MARGIN_WIDTH, LP_TARGET_OFFSET, LP_X_LIMIT_SPEED,
-		LP_GAME_HELP_DIST, LP_GAME_HELP_TIME,
-		END_OF_LPS,
+        constexpr Parameter LP_ORIENTATION = "ScreenOrientation";
+        constexpr Parameter LP_MAX_BITRATE = "MaxBitRateTimes100";
+        constexpr Parameter LP_FRAMERATE = "FrameRate";
+        constexpr Parameter LP_LANGUAGE_MODEL_ID = "LanguageModelID";
+        constexpr Parameter LP_DASHER_FONTSIZE = "DasherFontSize";
+        constexpr Parameter LP_MESSAGE_FONTSIZE = "MessageFontSize";
+        constexpr Parameter LP_SHAPE_TYPE = "RenderStyle";
+        constexpr Parameter LP_UNIFORM = "UniformTimes1000";
+        constexpr Parameter LP_YSCALE = "YScaling";
+        constexpr Parameter LP_MOUSEPOSDIST = "MousePositionBoxDistance";
+        constexpr Parameter LP_PY_PROB_SORT_THRES = "PYProbabilitySortThreshold";
+        constexpr Parameter LP_MESSAGE_TIME = "MessageTime";
+        constexpr Parameter LP_LM_MAX_ORDER = "LMMaxOrder";
+        constexpr Parameter LP_LM_EXCLUSION = "LMExclusion";
+        constexpr Parameter LP_LM_UPDATE_EXCLUSION = "LMUpdateExclusion";
+        constexpr Parameter LP_LM_ALPHA = "LMAlpha";
+        constexpr Parameter LP_LM_BETA = "LMBeta";
+        constexpr Parameter LP_LM_MIXTURE = "LMMixture";
+        constexpr Parameter LP_LINE_WIDTH = "LineWidth";
+        constexpr Parameter LP_GEOMETRY = "Geometry";
+        constexpr Parameter LP_LM_WORD_ALPHA = "WordAlpha";
+        constexpr Parameter LP_USER_LOG_LEVEL_MASK = "UserLogLevelMask";
+        constexpr Parameter LP_ZOOMSTEPS = "Zoomsteps";
+        constexpr Parameter LP_B = "ButtonMenuBoxes";
+        constexpr Parameter LP_S = "ButtonMenuSafety";
+        constexpr Parameter LP_BUTTON_SCAN_TIME = "ButtonMenuScanTime";
+        constexpr Parameter LP_R = "ButtonModeNonuniformity";
+        constexpr Parameter LP_RIGHTZOOM = "ButtonCompassModeRightZoom";
+        constexpr Parameter LP_NODE_BUDGET = "NodeBudget";
+        constexpr Parameter LP_OUTLINE_WIDTH = "OutlineWidth";
+        constexpr Parameter LP_MIN_NODE_SIZE = "MinNodeSize";
+        constexpr Parameter LP_NONLINEAR_X = "NonLinearX";
+        constexpr Parameter LP_AUTOSPEED_SENSITIVITY = "AutospeedSensitivity";
+        constexpr Parameter LP_SOCKET_PORT = "SocketPort";
+        constexpr Parameter LP_SOCKET_INPUT_X_MIN = "SocketInputXMinTimes1000";
+        constexpr Parameter LP_SOCKET_INPUT_X_MAX = "SocketInputXMaxTimes1000";
+        constexpr Parameter LP_SOCKET_INPUT_Y_MIN = "SocketInputYMinTimes1000";
+        constexpr Parameter LP_SOCKET_INPUT_Y_MAX = "SocketInputYMaxTimes1000";
+        constexpr Parameter LP_CIRCLE_PERCENT = "CirclePercent";
+        constexpr Parameter LP_TWO_BUTTON_OFFSET = "TwoButtonOffset";
+        constexpr Parameter LP_HOLD_TIME = "HoldTime";
+        constexpr Parameter LP_MULTIPRESS_TIME = "MultipressTime";
+        constexpr Parameter LP_SLOW_START_TIME = "SlowStartTime";
+        constexpr Parameter LP_TWO_PUSH_OUTER = "TwoPushOuter";
+        constexpr Parameter LP_TWO_PUSH_LONG = "TwoPushLong";
+        constexpr Parameter LP_TWO_PUSH_SHORT = "TwoPushShort";
+        constexpr Parameter LP_TWO_PUSH_TOLERANCE = "TwoPushTolerance";
+        constexpr Parameter LP_DYNAMIC_BUTTON_LAG = "DynamicButtonLag";
+        constexpr Parameter LP_STATIC1B_TIME = "Static1BTime";
+        constexpr Parameter LP_STATIC1B_ZOOM = "Static1BZoom";
+        constexpr Parameter LP_DEMO_SPRING = "DemoSpring";
+        constexpr Parameter LP_DEMO_NOISE_MEM = "DemoNoiseMem";
+        constexpr Parameter LP_DEMO_NOISE_MAG = "DemoNoiseMag";
+        constexpr Parameter LP_MAXZOOM = "ClickMaxZoom";
+        constexpr Parameter LP_DYNAMIC_SPEED_INC = "DynamicSpeedInc";
+        constexpr Parameter LP_DYNAMIC_SPEED_FREQ = "DynamicSpeedFreq";
+        constexpr Parameter LP_DYNAMIC_SPEED_DEC = "DynamicSpeedDec";
+        constexpr Parameter LP_TAP_TIME = "TapTime";
+        constexpr Parameter LP_MARGIN_WIDTH = "MarginWidth";
+        constexpr Parameter LP_TARGET_OFFSET = "TargetOffset";
+        constexpr Parameter LP_X_LIMIT_SPEED = "XLimitSpeed";
+        constexpr Parameter LP_GAME_HELP_DIST = "GameHelpDistance";
+        constexpr Parameter LP_GAME_HELP_TIME = "GameHelpTime";
 
-
-		SP_ALPHABET_ID, SP_ALPHABET_1, SP_ALPHABET_2, SP_ALPHABET_3, SP_ALPHABET_4, 
-		SP_COLOUR_ID, SP_CONTROL_BOX_ID, SP_DASHER_FONT, SP_GAME_TEXT_FILE,
-		SP_SOCKET_INPUT_X_LABEL, SP_SOCKET_INPUT_Y_LABEL, SP_INPUT_FILTER, SP_INPUT_DEVICE,
-		SP_BUTTON_0, SP_BUTTON_1, SP_BUTTON_2, SP_BUTTON_3, SP_BUTTON_4, SP_BUTTON_10, SP_JOYSTICK_DEVICE,
-		END_OF_SPS
-	};
+        constexpr Parameter SP_ALPHABET_ID = "AlphabetID";
+        constexpr Parameter SP_ALPHABET_1 = "Alphabet1";
+        constexpr Parameter SP_ALPHABET_2 = "Alphabet2";
+        constexpr Parameter SP_ALPHABET_3 = "Alphabet3";
+        constexpr Parameter SP_ALPHABET_4 = "Alphabet4";
+        constexpr Parameter SP_COLOUR_ID = "ColourID";
+        constexpr Parameter SP_CONTROL_BOX_ID = "ControlBoxID";
+        constexpr Parameter SP_DASHER_FONT = "DasherFont";
+        constexpr Parameter SP_GAME_TEXT_FILE = "GameTextFile";
+        constexpr Parameter SP_SOCKET_INPUT_X_LABEL = "SocketInputXLabel";
+        constexpr Parameter SP_SOCKET_INPUT_Y_LABEL = "SocketInputYLabel";
+        constexpr Parameter SP_INPUT_FILTER = "InputFilter";
+        constexpr Parameter SP_INPUT_DEVICE = "InputDevice";
+        constexpr Parameter SP_BUTTON_0 = "Button0";
+        constexpr Parameter SP_BUTTON_1 = "Button1";
+        constexpr Parameter SP_BUTTON_2 = "Button2";
+        constexpr Parameter SP_BUTTON_3 = "Button3";
+        constexpr Parameter SP_BUTTON_4 = "Button4";
+        constexpr Parameter SP_BUTTON_10 = "Button10";
+        constexpr Parameter SP_JOYSTICK_DEVICE = "JoystickDevice";
+    }
 
 	struct CParameterChange {
 	    CParameterChange(Parameter parameter, bool value)
@@ -70,7 +143,7 @@ namespace Dasher
   /// the SettingsStore in use, or platform-specific details.
   /// (Except, some defaults are #ifdef'd according to platform).
   /// This data does NOT change at runtime.
-  namespace Settings {
+  namespace Parameters {
 	enum class Persistence { PERSISTENT, EPHEMERAL };
 
   	// Types that are parameters can be
@@ -83,14 +156,15 @@ namespace Dasher
 
     // Values
     struct Parameter_Value {
-		std::string name;
-		Settings::ParameterType type = Settings::PARAM_INVALID;
+		ParameterType type = PARAM_INVALID;
 		Persistence persistence = Persistence::PERSISTENT;
 		std::variant<bool, long, std::string> value;
         std::string human_readable;
 	};
 
-    extern const std::unordered_map<Parameter, const Parameter_Value> parameter_defaults;
+    typedef std::unordered_map<std::string_view, Parameter_Value> ParameterMap; //Mutable type, used by classes to store and alter parameters internally
+    typedef const std::unordered_map<std::string_view, const Parameter_Value> DefaultsParameterMap; //Immutable Type, used for hardcoded defaults
+    extern DefaultsParameterMap parameter_defaults;
     
     ///Get the type of a parameter by its key.
     /// \param iParameter one of the BP_*, LP_* or SP_* enum constants

@@ -8,14 +8,14 @@
 using namespace Dasher;
 
 static SModuleSettings sSettings[] = {
-  {LP_TARGET_OFFSET, T_LONG, -100, 100, 400, 1, _("Vertical distance from mouse/gaze to target (400=screen height)")},
-  {BP_AUTOCALIBRATE, T_BOOL, -1, -1, -1, -1, _("Learn offset (previous) automatically, e.g. gazetrackers")},
-  {BP_REMAP_XTREME, T_BOOL, -1, -1, -1, -1, _("At top and bottom, scroll more and translate less (makes error-correcting easier)")},
-  {LP_GEOMETRY, T_LONG, 0, 3, 1, 1, _("Screen geometry (mostly for tall thin screens) - 0=old-style, 1=square no-xhair, 2=squish, 3=squish+log")},
-  {LP_SHAPE_TYPE, T_LONG, 0, 5, 1, 1, _("Shape type: 0=disjoint rects, 1=overlapping, 2=triangles, 3=trunc-tris, 4=quadrics, 5=circles")},
-  {LP_X_LIMIT_SPEED, T_LONG, 1, 800, 1536, 1, _("Distance from right-hand-side Y-axis, at which maximum speed is reached. (2048=xhair)")},
-  {BP_TURBO_MODE, T_BOOL, -1, -1, -1, -1, _("Hold right mouse button / key 1 to go 3/4 faster")},
-  {BP_EXACT_DYNAMICS, T_BOOL, -1, -1, -1, -1, _("Use exact computation of per-frame movement (slower)")},
+  {Parameters::LP_TARGET_OFFSET, T_LONG, -100, 100, 400, 1, _("Vertical distance from mouse/gaze to target (400=screen height)")},
+  {Parameters::BP_AUTOCALIBRATE, T_BOOL, -1, -1, -1, -1, _("Learn offset (previous) automatically, e.g. gazetrackers")},
+  {Parameters::BP_REMAP_XTREME, T_BOOL, -1, -1, -1, -1, _("At top and bottom, scroll more and translate less (makes error-correcting easier)")},
+  {Parameters::LP_GEOMETRY, T_LONG, 0, 3, 1, 1, _("Screen geometry (mostly for tall thin screens) - 0=old-style, 1=square no-xhair, 2=squish, 3=squish+log")},
+  {Parameters::LP_SHAPE_TYPE, T_LONG, 0, 5, 1, 1, _("Shape type: 0=disjoint rects, 1=overlapping, 2=triangles, 3=trunc-tris, 4=quadrics, 5=circles")},
+  {Parameters::LP_X_LIMIT_SPEED, T_LONG, 1, 800, 1536, 1, _("Distance from right-hand-side Y-axis, at which maximum speed is reached. (2048=xhair)")},
+  {Parameters::BP_TURBO_MODE, T_BOOL, -1, -1, -1, -1, _("Hold right mouse button / key 1 to go 3/4 faster")},
+  {Parameters::BP_EXACT_DYNAMICS, T_BOOL, -1, -1, -1, -1, _("Use exact computation of per-frame movement (slower)")},
 };
 
 bool CDefaultFilter::GetSettings(SModuleSettings **sets, int *iCount) {
@@ -32,8 +32,8 @@ CDefaultFilter::CDefaultFilter(CSettingsUser *pCreator, CDasherInterfaceBase *pI
   // Initialize autocalibration (i.e. seen nothing yet)
   m_iSum = 0;
   m_iCounter = 0;
-  if (GetBoolParameter(BP_AUTOCALIBRATE)) //eyetracker calibration has likely changed from previous session
-    SetLongParameter(LP_TARGET_OFFSET, 0); //so start over from scratch
+  if (GetBoolParameter(Parameters::BP_AUTOCALIBRATE)) //eyetracker calibration has likely changed from previous session
+    SetLongParameter(Parameters::LP_TARGET_OFFSET, 0); //so start over from scratch
 }
 
 CDefaultFilter::~CDefaultFilter() {
@@ -45,14 +45,14 @@ bool CDefaultFilter::DecorateView(CDasherView *pView, CDasherInput *pInput) {
 
   bool bDidSomething(false);
 
-  if(GetBoolParameter(BP_DRAW_MOUSE)) {
+  if(GetBoolParameter(Parameters::BP_DRAW_MOUSE)) {
     //Draw a small box at the current mouse position
     pView->DasherDrawCentredRectangle(m_iLastX, m_iLastY, 5, 2, false);
 
     bDidSomething = true;
   }
 
-  if(GetBoolParameter(BP_DRAW_MOUSE_LINE)) {
+  if(GetBoolParameter(Parameters::BP_DRAW_MOUSE_LINE)) {
     // Draw a line from the origin to the current mouse position
     myint x[2];
     myint y[2];
@@ -67,10 +67,10 @@ bool CDefaultFilter::DecorateView(CDasherView *pView, CDasherInput *pInput) {
     y[1] = m_iLastY;
 
     // Actually plot the line
-    if (GetBoolParameter(BP_CURVE_MOUSE_LINE))
-      pView->DasherSpaceLine(x[0],y[0],x[1],y[1], GetLongParameter(LP_LINE_WIDTH), 1);
+    if (GetBoolParameter(Parameters::BP_CURVE_MOUSE_LINE))
+      pView->DasherSpaceLine(x[0],y[0],x[1],y[1], GetLongParameter(Parameters::LP_LINE_WIDTH), 1);
     else
-      pView->DasherPolyline(x, y, 2, GetLongParameter(LP_LINE_WIDTH), 1);
+      pView->DasherPolyline(x, y, 2, GetLongParameter(Parameters::LP_LINE_WIDTH), 1);
 
   /*  // Plot a brachistochrone
 
@@ -116,7 +116,7 @@ void CDefaultFilter::Timer(unsigned long Time, CDasherView *pView, CDasherInput 
   ApplyTransform(m_iLastX, m_iLastY, pView);
   if (!isPaused())
   {
-    if(GetBoolParameter(BP_STOP_OUTSIDE)) {
+    if(GetBoolParameter(Parameters::BP_STOP_OUTSIDE)) {
       const CDasherView::ScreenRegion visibleRegion = pView->VisibleRegion();
 
       if((m_iLastX > visibleRegion.maxX) || (m_iLastX < visibleRegion.minX) || (m_iLastY > visibleRegion.maxY) || (m_iLastY < visibleRegion.minY)) {
@@ -150,8 +150,8 @@ void CDefaultFilter::pause() {
 
 void CDefaultFilter::KeyDown(unsigned long iTime, Keys::VirtualKey Key, CDasherView *pDasherView, CDasherInput *pInput, CDasherModel *pModel) {
 
-  if ((Key==Keys::Big_Start_Stop_Key && GetBoolParameter(BP_START_SPACE))
-      || (Key==Keys::Primary_Input && GetBoolParameter(BP_START_MOUSE))) {
+  if ((Key==Keys::Big_Start_Stop_Key && GetBoolParameter(Parameters::BP_START_SPACE))
+      || (Key==Keys::Primary_Input && GetBoolParameter(Parameters::BP_START_MOUSE))) {
     if(isPaused())
       run(iTime);
     else
@@ -159,7 +159,7 @@ void CDefaultFilter::KeyDown(unsigned long iTime, Keys::VirtualKey Key, CDasherV
   }
   else if (Key==Keys::Secondary_Input || Key==Keys::Tertiary_Input || Key==Keys::Button_1) {
     //Other mouse buttons, if platforms support; or button 1
-    if (GetBoolParameter(BP_TURBO_MODE))
+    if (GetBoolParameter(Parameters::BP_TURBO_MODE))
       m_bTurbo = true;
   }
 }
@@ -176,14 +176,13 @@ void CDefaultFilter::stop() {
 }
 
 void CDefaultFilter::HandleEvent(Parameter parameter) {
-  switch (parameter) {
-  case BP_CIRCLE_START:
-  case BP_MOUSEPOS_MODE:
-    CreateStartHandler();
-    break;
-  case BP_TURBO_MODE:
-    m_bTurbo &= GetBoolParameter(BP_TURBO_MODE);
-  }
+    if(parameter == Parameters::BP_CIRCLE_START || parameter == Parameters::BP_MOUSEPOS_MODE)
+    {
+        CreateStartHandler();
+    } else if (parameter == Parameters::BP_TURBO_MODE)
+    {
+         m_bTurbo &= GetBoolParameter(Parameters::BP_TURBO_MODE);
+    }
 }
 
 void CDefaultFilter::CreateStartHandler() {
@@ -202,9 +201,9 @@ void CDefaultFilter::Deactivate() {
 }
 
 CStartHandler *CDefaultFilter::MakeStartHandler() {
-  if(GetBoolParameter(BP_CIRCLE_START))
+  if(GetBoolParameter(Parameters::BP_CIRCLE_START))
     return new CCircleStartHandler(this);
-  if(GetBoolParameter(BP_MOUSEPOS_MODE))
+  if(GetBoolParameter(Parameters::BP_MOUSEPOS_MODE))
     return new CTwoBoxStartHandler(this);
   return NULL;
 }
@@ -224,7 +223,7 @@ double xmax(double y) {
 
 void CDefaultFilter::ApplyTransform(myint &iDasherX, myint &iDasherY, CDasherView *pView) {
   ApplyOffset(iDasherX, iDasherY);
-  if (GetLongParameter(LP_GEOMETRY)==1) {
+  if (GetLongParameter(Parameters::LP_GEOMETRY)==1) {
     //crosshair may be offscreen; so do something to allow us to navigate
     // up/down and reverse
     const CDasherView::ScreenRegion visibleRegion = pView->VisibleRegion();
@@ -237,7 +236,7 @@ void CDefaultFilter::ApplyTransform(myint &iDasherX, myint &iDasherY, CDasherVie
     //boost reversing if near centerpoint of LHS (even if xhair onscreen)
     iDasherX += (2*CDasherModel::ORIGIN_Y*CDasherModel::ORIGIN_Y)/(dist+50); //and close to centerpoint = reverse
   }
-  if (GetBoolParameter(BP_REMAP_XTREME)) {
+  if (GetBoolParameter(Parameters::BP_REMAP_XTREME)) {
     // Y co-ordinate...
     myint dasherOY=CDasherModel::ORIGIN_Y;
     double double_y = ((iDasherY-dasherOY)/(double)(dasherOY) ); // Fraction above the crosshair
@@ -256,9 +255,9 @@ void CDefaultFilter::ApplyOffset(myint &iDasherX, myint &iDasherY) {
   // factor of 10 to get the offset in Dasher coordinates, but it
   // would be a good idea at some point to sort this out properly.
 
-  iDasherY += 10 * GetLongParameter(LP_TARGET_OFFSET);
+  iDasherY += 10 * GetLongParameter(Parameters::LP_TARGET_OFFSET);
 
-  if(GetBoolParameter(BP_AUTOCALIBRATE) && !isPaused()) {
+  if(GetBoolParameter(Parameters::BP_AUTOCALIBRATE) && !isPaused()) {
     // Auto-update the offset
 
     m_iSum += CDasherModel::ORIGIN_Y - iDasherY; // Distance above crosshair
@@ -273,7 +272,7 @@ void CDefaultFilter::ApplyOffset(myint &iDasherX, myint &iDasherY) {
       //int m_iSigBiasPixels(CDasherModel::MAX_Y/2);
 
       if (((m_iSum>0)?m_iSum:-m_iSum) > CDasherModel::MAX_Y/2)
-        SetLongParameter(LP_TARGET_OFFSET, GetLongParameter(LP_TARGET_OFFSET) + ((m_iSum>0) ? -1 : 1));
+        SetLongParameter(Parameters::LP_TARGET_OFFSET, GetLongParameter(Parameters::LP_TARGET_OFFSET) + ((m_iSum>0) ? -1 : 1));
       //TODO, "else return" - check effectiveness with/without?
       // old code exited now if neither above cases applied,
       // but had TODO suggesting maybe we should _always_ reset m_iSum

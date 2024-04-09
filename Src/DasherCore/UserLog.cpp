@@ -9,27 +9,27 @@
 
 using namespace std::chrono;
 using namespace Dasher;
-using namespace Dasher::Settings;
 
 static UserLogParamMask s_UserLogParamMaskTable [] = {
-  {SP_ALPHABET_ID,          userLogParamOutputToSimple},
-  {SP_COLOUR_ID,            userLogParamOutputToSimple},
-  {LP_MAX_BITRATE,          userLogParamOutputToSimple | 
+  {Parameters::SP_ALPHABET_ID,          userLogParamOutputToSimple},
+  {Parameters::SP_COLOUR_ID,            userLogParamOutputToSimple},
+  {
+      Parameters::LP_MAX_BITRATE,          userLogParamOutputToSimple | 
                             userLogParamTrackMultiple | 
                             userLogParamTrackInTrial |
                             userLogParamForceInTrial |
                             userLogParamShortInCycle},
-  {BP_CONTROL_MODE,         userLogParamOutputToSimple},
-  {LP_UNIFORM,              userLogParamOutputToSimple},
-  {LP_YSCALE,               userLogParamOutputToSimple},
-  {LP_LANGUAGE_MODEL_ID,    userLogParamOutputToSimple},
-  {LP_LM_MAX_ORDER,         userLogParamOutputToSimple},
-  {LP_LM_EXCLUSION,         userLogParamOutputToSimple},
-  {LP_LM_UPDATE_EXCLUSION,  userLogParamOutputToSimple},
-  {LP_LM_ALPHA,             userLogParamOutputToSimple},
-  {LP_LM_BETA,              userLogParamOutputToSimple},
-  {LP_LM_MIXTURE,           userLogParamOutputToSimple},
-  {LP_LM_WORD_ALPHA,        userLogParamOutputToSimple}
+  {Parameters::BP_CONTROL_MODE,         userLogParamOutputToSimple},
+  {Parameters::LP_UNIFORM,              userLogParamOutputToSimple},
+  {Parameters::LP_YSCALE,               userLogParamOutputToSimple},
+  {Parameters::LP_LANGUAGE_MODEL_ID,    userLogParamOutputToSimple},
+  {Parameters::LP_LM_MAX_ORDER,         userLogParamOutputToSimple},
+  {Parameters::LP_LM_EXCLUSION,         userLogParamOutputToSimple},
+  {Parameters::LP_LM_UPDATE_EXCLUSION,  userLogParamOutputToSimple},
+  {Parameters::LP_LM_ALPHA,             userLogParamOutputToSimple},
+  {Parameters::LP_LM_BETA,              userLogParamOutputToSimple},
+  {Parameters::LP_LM_MIXTURE,           userLogParamOutputToSimple},
+  {Parameters::LP_LM_WORD_ALPHA,        userLogParamOutputToSimple}
 };
 
 CUserLog::CUserLog(CSettingsUser *pCreateFrom,
@@ -1045,12 +1045,12 @@ void CUserLog::AddInitialParam()
 // using the specified options mask.
 void CUserLog::UpdateParam(Parameter parameter, int iOptionMask)
 {
-  std::string  strParamName  = GetParameterName(parameter);
+  std::string  strParamName  = Parameters::GetParameterName(parameter);
 
   // What method we call depends on the type of the parameter
-  switch (GetParameterType(parameter))
+  switch (Parameters::GetParameterType(parameter))
   {
-  case (PARAM_BOOL):
+  case (Parameters::PARAM_BOOL):
     {
       // Convert bool to a integer
       int iValue = 0;
@@ -1060,13 +1060,13 @@ void CUserLog::UpdateParam(Parameter parameter, int iOptionMask)
       return;
       break;
     }
-  case (PARAM_LONG):
+  case (Parameters::PARAM_LONG):
     {
       AddParam(strParamName, (int) GetLongParameter(parameter), iOptionMask);
       return;
       break;
     }
-  case (PARAM_STRING):
+  case (Parameters::PARAM_STRING):
     {
       AddParam(strParamName, GetStringParameter(parameter), iOptionMask);
       return;
@@ -1074,7 +1074,7 @@ void CUserLog::UpdateParam(Parameter parameter, int iOptionMask)
     }       
   default:
     {
-      g_pLogger->Log("CUserLog::UpdateParam, matched parameter %d but unknown type %d", logNORMAL, parameter, GetParameterType(parameter));
+      g_pLogger->Log("CUserLog::UpdateParam, matched parameter %d but unknown type %d", logNORMAL, parameter, Parameters::GetParameterType(parameter));
       break;
     }
   };

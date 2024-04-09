@@ -18,7 +18,7 @@ CDemoFilter::~CDemoFilter() {
 
 bool CDemoFilter::DecorateView(CDasherView *pView, CDasherInput *pInput) {
 
-  if(GetBoolParameter(BP_DRAW_MOUSE)) {
+  if(GetBoolParameter(Parameters::BP_DRAW_MOUSE)) {
     pView->DasherDrawCentredRectangle(m_iDemoX, m_iDemoY, 5, 2, false);
   }
 
@@ -33,17 +33,17 @@ bool CDemoFilter::DecorateView(CDasherView *pView, CDasherInput *pInput) {
   x[1] = m_iDemoX; y[1] = m_iDemoY;
   
   // Actually plot the line
-  if (GetBoolParameter(BP_CURVE_MOUSE_LINE))
-    pView->DasherSpaceLine(x[0],y[0],x[1],y[1], GetLongParameter(LP_LINE_WIDTH), 1);
+  if (GetBoolParameter(Parameters::BP_CURVE_MOUSE_LINE))
+    pView->DasherSpaceLine(x[0],y[0],x[1],y[1], GetLongParameter(Parameters::LP_LINE_WIDTH), 1);
   else
-    pView->DasherPolyline(x, y, 2, GetLongParameter(LP_LINE_WIDTH), 1);
+    pView->DasherPolyline(x, y, 2, GetLongParameter(Parameters::LP_LINE_WIDTH), 1);
   
   return true;
 }
 
 void CDemoFilter::Activate() {
   m_pInterface->EnterGameMode(NULL);
-  HandleEvent(LP_FRAMERATE); //just to make sure!
+  HandleEvent(Parameters::LP_FRAMERATE); //just to make sure!
 }
 
 void CDemoFilter::Deactivate() {
@@ -83,7 +83,7 @@ void CDemoFilter::Timer(unsigned long Time, CDasherView *m_pDasherView, CDasherI
   
   // ...and springy behaviour...
   //if(!m_bSentenceFinished) {
-    const myint iNoiseMag(GetLongParameter(LP_DEMO_NOISE_MAG));
+    const myint iNoiseMag(GetLongParameter(Parameters::LP_DEMO_NOISE_MAG));
     m_iDemoX = myint((CDasherModel::ORIGIN_X+(1500*iIdealUnitVec[0])+iNoiseMag*m_dNoiseX)*m_dSpring
                      +(1.0-m_dSpring)*m_iDemoX);
     m_iDemoY = myint((CDasherModel::ORIGIN_Y+(1500*iIdealUnitVec[1])+iNoiseMag*m_dNoiseY)*m_dSpring
@@ -100,8 +100,8 @@ void CDemoFilter::Timer(unsigned long Time, CDasherView *m_pDasherView, CDasherI
 
 void CDemoFilter::KeyDown(unsigned long iTime, Keys::VirtualKey Key, CDasherView *pDasherView, CDasherInput *pInput, CDasherModel *pModel) {
   
-  if ((Key==Keys::Big_Start_Stop_Key && GetBoolParameter(BP_START_SPACE))
-      || (Key==Keys::Primary_Input && GetBoolParameter(BP_START_MOUSE))) {
+  if ((Key==Keys::Big_Start_Stop_Key && GetBoolParameter(Parameters::BP_START_SPACE))
+      || (Key==Keys::Primary_Input && GetBoolParameter(Parameters::BP_START_MOUSE))) {
     if(isPaused())
       run(iTime);
     else
@@ -110,18 +110,18 @@ void CDemoFilter::KeyDown(unsigned long iTime, Keys::VirtualKey Key, CDasherView
 }
 
 void CDemoFilter::HandleEvent(Parameter parameter) {
-    switch (parameter) {
-      case LP_DEMO_SPRING:
-      case LP_DEMO_NOISE_MEM:
-      case LP_MAX_BITRATE:
-      case LP_FRAMERATE:
+    if (parameter == Parameters::LP_DEMO_SPRING ||
+        parameter == Parameters::LP_DEMO_NOISE_MEM ||
+        parameter == Parameters::LP_MAX_BITRATE ||
+        parameter == Parameters::LP_FRAMERATE)
+    {
         // Recalculates the parameters used in the demo following a change in framerate or speed.
-        double spring = GetLongParameter(LP_DEMO_SPRING)/100.0;
-        double noisemem = GetLongParameter(LP_DEMO_NOISE_MEM)/100.0;
-        double lambda = 0.7*GetLongParameter(LP_MAX_BITRATE)/(double)GetLongParameter(LP_FRAMERATE);
-        
-        m_dSpring = (1-exp(-spring*lambda));
-        m_dNoiseNew = noisemem*(1-exp(-lambda));
-        m_dNoiseOld = sqrt(1.0-m_dNoiseNew*m_dNoiseNew);
+        double spring = GetLongParameter(Parameters::LP_DEMO_SPRING) / 100.0;
+        double noisemem = GetLongParameter(Parameters::LP_DEMO_NOISE_MEM) / 100.0;
+        double lambda = 0.7 * GetLongParameter(Parameters::LP_MAX_BITRATE) / (double)GetLongParameter(Parameters::LP_FRAMERATE);
+
+        m_dSpring = (1 - exp(-spring * lambda));
+        m_dNoiseNew = noisemem * (1 - exp(-lambda));
+        m_dNoiseOld = sqrt(1.0 - m_dNoiseNew * m_dNoiseNew);
     }
 }

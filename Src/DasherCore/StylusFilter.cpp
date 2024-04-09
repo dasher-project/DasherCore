@@ -6,8 +6,8 @@
 using namespace Dasher;
 
 static SModuleSettings sSettings[] = {
-  {LP_TAP_TIME, T_LONG, 1, 1000, 1, 25, _("Max time for a 'tap' (anything longer is held)")},
-  {LP_ZOOMSTEPS, T_LONG, 1, 63, 1, 1, _("Frames over which to perform zoom")},
+  {Parameters::LP_TAP_TIME, T_LONG, 1, 1000, 1, 25, _("Max time for a 'tap' (anything longer is held)")},
+  {Parameters::LP_ZOOMSTEPS, T_LONG, 1, 63, 1, 1, _("Frames over which to perform zoom")},
 };
 
 CStylusFilter::CStylusFilter(CSettingsUser *pCreator, CDasherInterfaceBase *pInterface, CFrameRate *pFramerate, ModuleID_t iID, const char *szName)
@@ -31,10 +31,10 @@ void CStylusFilter::pause() {
 void CStylusFilter::KeyUp(unsigned long iTime, Keys::VirtualKey Key, CDasherView *pView, CDasherInput *pInput, CDasherModel *pModel) {
   if(Key == Keys::Primary_Input) {
     pause(); //stops superclass from scheduling any more one-step movements
-    if (iTime - m_iKeyDownTime < GetLongParameter(LP_TAP_TIME)) {
+    if (iTime - m_iKeyDownTime < GetLongParameter(Parameters::LP_TAP_TIME)) {
       pInput->GetDasherCoords(m_iLastX, m_iLastY, pView);
       ApplyClickTransform(m_iLastX, m_iLastY, pView);
-      (m_pModel=pModel)->ScheduleZoom(m_iLastY-m_iLastX, m_iLastY+m_iLastX, GetLongParameter(LP_ZOOMSTEPS));
+      (m_pModel=pModel)->ScheduleZoom(m_iLastY-m_iLastX, m_iLastY+m_iLastX, GetLongParameter(Parameters::LP_ZOOMSTEPS));
     } else {
       m_pInterface->Done();
     }
@@ -43,7 +43,7 @@ void CStylusFilter::KeyUp(unsigned long iTime, Keys::VirtualKey Key, CDasherView
 }
 
 void CStylusFilter::ApplyClickTransform(myint &iDasherX, myint &iDasherY, CDasherView *pView) {
-  AdjustZoomX(iDasherX, pView, GetLongParameter(LP_S), GetLongParameter(LP_MAXZOOM));
+  AdjustZoomX(iDasherX, pView, GetLongParameter(Parameters::LP_S), GetLongParameter(Parameters::LP_MAXZOOM));
 }
 
 CStartHandler *CStylusFilter::MakeStartHandler() {

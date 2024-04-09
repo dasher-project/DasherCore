@@ -36,10 +36,10 @@ void CDynamicButtons::Timer(unsigned long iTime, CDasherView *pDasherView, CDash
     OneStepTowards(pModel, 41943,2048, iTime, FrameSpeedMul(pModel, iTime));
   } else {
     //moving forwards. Check auto speed control...
-    if (GetBoolParameter(BP_AUTO_SPEEDCONTROL) && m_uSpeedControlTime < iTime) {
+    if (GetBoolParameter(Parameters::BP_AUTO_SPEEDCONTROL) && m_uSpeedControlTime < iTime) {
         if (m_uSpeedControlTime > 0) //has actually been set?
-          SetLongParameter(LP_MAX_BITRATE, static_cast<long>(GetLongParameter(LP_MAX_BITRATE) * (1.0 + GetLongParameter(LP_DYNAMIC_SPEED_INC)/100.0)));
-        m_uSpeedControlTime = iTime + 1000*GetLongParameter(LP_DYNAMIC_SPEED_FREQ);
+          SetLongParameter(Parameters::LP_MAX_BITRATE, static_cast<long>(GetLongParameter(Parameters::LP_MAX_BITRATE) * (1.0 + GetLongParameter(Parameters::LP_DYNAMIC_SPEED_INC)/100.0)));
+        m_uSpeedControlTime = iTime + 1000*GetLongParameter(Parameters::LP_DYNAMIC_SPEED_FREQ);
     }
     TimerImpl(iTime, pDasherView, pModel, pol);
   }
@@ -47,7 +47,7 @@ void CDynamicButtons::Timer(unsigned long iTime, CDasherView *pDasherView, CDash
 
 void CDynamicButtons::KeyDown(unsigned long iTime, Keys::VirtualKey Key, CDasherView *pView, CDasherInput *pInput, CDasherModel *pModel) {
 
-  if(((Key == Keys::Big_Start_Stop_Key) || (Key == Keys::Button_1) || (Key == Keys::Primary_Input)) && !GetBoolParameter(BP_BACKOFF_BUTTON))
+  if(((Key == Keys::Big_Start_Stop_Key) || (Key == Keys::Button_1) || (Key == Keys::Primary_Input)) && !GetBoolParameter(Parameters::BP_BACKOFF_BUTTON))
     return;
 
   if(m_bKeyDown)
@@ -115,10 +115,10 @@ void CDynamicButtons::pause() {
 void CDynamicButtons::reverse(unsigned long iTime) {
   m_bForwards=false;
   if (isPaused()) CDynamicFilter::run(iTime);
-  if (GetBoolParameter(BP_AUTO_SPEEDCONTROL)) {
+  if (GetBoolParameter(Parameters::BP_AUTO_SPEEDCONTROL)) {
     //treat reversing as a sign of distress --> slow down!
-    SetLongParameter(LP_MAX_BITRATE, static_cast<long>(GetLongParameter(LP_MAX_BITRATE) *
-					 (1.0 - GetLongParameter(LP_DYNAMIC_SPEED_DEC)/100.0)));
+    SetLongParameter(Parameters::LP_MAX_BITRATE, static_cast<long>(GetLongParameter(Parameters::LP_MAX_BITRATE) *
+                         (1.0 - GetLongParameter(Parameters::LP_DYNAMIC_SPEED_DEC)/100.0)));
   }
 }
 

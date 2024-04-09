@@ -86,7 +86,7 @@ void CAlphabetManager::InitMap() {
 
 void CAlphabetManager::CreateLanguageModel() {
   // FIXME - return to using enum here
-  switch (GetLongParameter(LP_LANGUAGE_MODEL_ID)) {
+  switch (GetLongParameter(Parameters::LP_LANGUAGE_MODEL_ID)) {
     default:
       // If there is a bogus value for the language model ID, we'll default
       // to our trusty old PPM language model.
@@ -190,8 +190,8 @@ SGroupInfo *CAlphabetManager::copyGroups(const SGroupInfo *pBase, CDasherScreen 
 CWordGeneratorBase *CAlphabetManager::GetGameWords() {
   CFileWordGenerator *pGen = new CFileWordGenerator(m_pInterface, m_pAlphabet, &m_map);
   pGen->setAcceptUser(true);
-  if (!GetStringParameter(SP_GAME_TEXT_FILE).empty()) {
-    const string &gtf(GetStringParameter(SP_GAME_TEXT_FILE));
+  if (!GetStringParameter(Parameters::SP_GAME_TEXT_FILE).empty()) {
+    const string &gtf(GetStringParameter(Parameters::SP_GAME_TEXT_FILE));
     if (pGen->ParseFile(gtf,true)) return pGen;
     ///TRANSLATORS: the string "GameTextFile" is the name of a setting in gsettings
     /// (or equivalent), and should not be translated. The %s is the value of that
@@ -393,7 +393,7 @@ void CAlphabetManager::CSymbolNode::PopulateChildren() {
 }
 int CAlphabetManager::CAlphNode::ExpectedNumChildren() {
   int i=m_pMgr->m_pBaseGroup->iNumChildNodes;
-  return (m_pMgr->GetBoolParameter(BP_CONTROL_MODE)) ? i+1 : i;
+  return (m_pMgr->GetBoolParameter(Parameters::BP_CONTROL_MODE)) ? i+1 : i;
 }
 
 void CAlphabetManager::GetProbs(vector<unsigned int> *pProbInfo, CLanguageModel::Context context) {
@@ -405,7 +405,7 @@ void CAlphabetManager::GetProbs(vector<unsigned int> *pProbInfo, CLanguageModel:
   const unsigned long iNorm(m_pNCManager->GetAlphNodeNormalization());
   //the case for control mode on, generalizes to handle control mode off also,
   // as then iNorm - control_space == iNorm...
-  const unsigned int iUniformAdd = max(1ul, ((iNorm * GetLongParameter(LP_UNIFORM)) / 1000) / iSymbols);
+  const unsigned int iUniformAdd = max(1ul, ((iNorm * GetLongParameter(Parameters::LP_UNIFORM)) / 1000) / iSymbols);
   const unsigned long iNonUniformNorm = iNorm - iSymbols * iUniformAdd;
   //  m_pLanguageModel->GetProbs(context, Probs, iNorm, ((iNorm * uniform) / 1000));
 
@@ -606,7 +606,7 @@ int CAlphabetManager::CSymbolNode::numChars() {
 }
 
 void CAlphabetManager::CSymbolNode::Output() {
-  if (m_pMgr->GetBoolParameter(BP_LM_ADAPTIVE)) {
+  if (m_pMgr->GetBoolParameter(Parameters::BP_LM_ADAPTIVE)) {
     if (m_pMgr->m_pLastOutput != Parent()) {
       //Context changed. Flush to disk the old context + text written in it...
       m_pMgr->WriteTrainFileFull(m_pMgr->m_pInterface);
@@ -638,7 +638,7 @@ SymbolProb CAlphabetManager::CSymbolNode::GetSymbolProb() const {
 
 void CAlphabetManager::CSymbolNode::Undo() {
   DASHER_ASSERT(GetFlag(NF_SEEN));
-  if (m_pMgr->GetBoolParameter(BP_LM_ADAPTIVE)) {
+  if (m_pMgr->GetBoolParameter(Parameters::BP_LM_ADAPTIVE)) {
     if (m_pMgr->m_pLastOutput == this) {
       //Erase from training buffer, and move lastOutput backwards,
       // iff this node was actually written (i.e. not rebuilt _from_ context!)
@@ -694,7 +694,7 @@ void CAlphabetManager::CAlphBase::RebuildForwardsFromAncestor(CAlphNode *pNewNod
 // For want of a better solution, game mode exemption explicit in this function
 void CAlphabetManager::CSymbolNode::SetFlag(int iFlag, bool bValue) {
   if ((iFlag & NF_COMMITTED) && bValue && !GetFlag(NF_COMMITTED | NF_GAME)
-      && m_pMgr->GetBoolParameter(BP_LM_ADAPTIVE)) {
+      && m_pMgr->GetBoolParameter(Parameters::BP_LM_ADAPTIVE)) {
     //try to commit...if we have parent (else rebuilding (backwards) => don't)
     if (Parent()) {
       if (Parent()->mgr() != mgr()) return; //do not set flag

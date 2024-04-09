@@ -43,12 +43,12 @@ void CScreenGameModule::HandleEvent(const CEditEvent *pEvt) {
 }
 
 void CScreenGameModule::DrawText(CDasherView *pView) {
-  const unsigned int uFontSize(GetLongParameter(LP_MESSAGE_FONTSIZE));
+  const unsigned int uFontSize(GetLongParameter(Parameters::LP_MESSAGE_FONTSIZE));
   //Assume left-to-right orientation...too many issues for other orientations!
   CDasherScreen *pScreen(pView->Screen());
   screenint maxX,tempy; //maxX = target width of game display...
   //i.e. make <margin width> left of y axis (itself <margin width> to left of screen edge)
-  pView->Dasher2Screen(GetLongParameter(LP_MARGIN_WIDTH), 0, maxX, tempy);
+  pView->Dasher2Screen(GetLongParameter(Parameters::LP_MARGIN_WIDTH), 0, maxX, tempy);
 
   if (!m_pLabTarget || !m_pLabEntered) {
     DASHER_ASSERT(!m_pLabTarget && !m_pLabEntered);

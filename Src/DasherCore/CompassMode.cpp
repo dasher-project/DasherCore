@@ -15,11 +15,11 @@ using namespace Dasher;
 
 static SModuleSettings sSettings[] = {
   /* TRANSLATORS: The number of time steps over which to perform the zooming motion in button mode. */
-  {LP_ZOOMSTEPS, T_LONG, 1, 63, 1, 1, _("Frames over which to perform zoom")},
+  {Parameters::LP_ZOOMSTEPS, T_LONG, 1, 63, 1, 1, _("Frames over which to perform zoom")},
   /* TRANSLATORS: The zoom factor per press when moving to the right in compass mode. */
-  {LP_RIGHTZOOM, T_LONG, 1024, 10240, 1024, 1024, _("Right zoom")},
+  {Parameters::LP_RIGHTZOOM, T_LONG, 1024, 10240, 1024, 1024, _("Right zoom")},
   /* TRANSLATORS: Intercept keyboard events for 'special' keys even when the Dasher window doesn't have keyboard focus.*/
-  {BP_GLOBAL_KEYBOARD, T_BOOL, -1, -1, -1, -1, _("Global keyboard grab")}
+  {Parameters::BP_GLOBAL_KEYBOARD, T_BOOL, -1, -1, -1, -1, _("Global keyboard grab")}
 };
 
 // FIX iStyle == 2
@@ -31,7 +31,7 @@ void CCompassMode::SetupBoxes()
 {
   m_pBoxes = new SBoxInfo[m_iNumBoxes = 4];
 
-  iTargetWidth = CDasherModel::MAX_Y * 1024 / GetLongParameter(LP_RIGHTZOOM);
+  iTargetWidth = CDasherModel::MAX_Y * 1024 / GetLongParameter(Parameters::LP_RIGHTZOOM);
 
   // FIXME - need to relate these to cross-hair position as stored in the parameters
 
@@ -98,7 +98,7 @@ bool CCompassMode::DecorateView(CDasherView *pView, CDasherInput *pInput) {
 }
 
 void CCompassMode::HandleEvent(Parameter parameter) {
-  if (parameter == LP_RIGHTZOOM) {
+  if (parameter == Parameters::LP_RIGHTZOOM) {
     delete[] m_pBoxes;
     SetupBoxes();
   }

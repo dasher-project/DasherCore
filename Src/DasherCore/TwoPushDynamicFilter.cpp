@@ -26,25 +26,25 @@
 using namespace Dasher;
 
 static SModuleSettings sSettings[] = {
-  {LP_TWO_PUSH_OUTER, T_LONG, 1024, 2048, 2048, 128, _("Offset for outer (second) button")},
-  {LP_TWO_PUSH_LONG, T_LONG, 128, 1024, 2048/*divisor*/, 128/*step*/, _("Distance between down markers (long gap)")},
-  {LP_TWO_PUSH_SHORT, T_LONG, 10, 90, 100, 1, _("Distance between up markers, as percentage of long gap")},
-  {LP_TWO_PUSH_TOLERANCE, T_LONG, 50, 1000, 1, 10, _("Tolerance for inaccurate timing of button pushes (in ms)")},
-  {BP_TWO_PUSH_RELEASE_TIME, T_BOOL, -1, -1, -1, -1, _("Use push and release times of single press rather than push times of two presses")},
+  {Parameters::LP_TWO_PUSH_OUTER, T_LONG, 1024, 2048, 2048, 128, _("Offset for outer (second) button")},
+  {Parameters::LP_TWO_PUSH_LONG, T_LONG, 128, 1024, 2048/*divisor*/, 128/*step*/, _("Distance between down markers (long gap)")},
+  {Parameters::LP_TWO_PUSH_SHORT, T_LONG, 10, 90, 100, 1, _("Distance between up markers, as percentage of long gap")},
+  {Parameters::LP_TWO_PUSH_TOLERANCE, T_LONG, 50, 1000, 1, 10, _("Tolerance for inaccurate timing of button pushes (in ms)")},
+  {Parameters::BP_TWO_PUSH_RELEASE_TIME, T_BOOL, -1, -1, -1, -1, _("Use push and release times of single press rather than push times of two presses")},
   /* TRANSLATORS: Backoff = reversing in Dasher to correct mistakes. This allows a single button to be dedicated to activating backoff, rather than using multiple presses of other buttons, and another to be dedicated to starting and stopping. 'Button' in this context is a physical hardware device, not a UI element.*/
-  {BP_BACKOFF_BUTTON,T_BOOL, -1, -1, -1, -1, _("Enable backoff and start/stop buttons")},
-  {BP_SLOW_START,T_BOOL, -1, -1, -1, -1, _("Slow startup")},
-  {LP_SLOW_START_TIME, T_LONG, 0, 10000, 1000, 100, _("Slow startup time")},
-  {LP_DYNAMIC_SPEED_INC, T_LONG, 1, 100, 1, 1, _("Percentage by which to automatically increase speed")},
-  {LP_DYNAMIC_SPEED_FREQ, T_LONG, 1, 1000, 1, 1, _("Time after which to automatically increase speed (secs)")},
-  {LP_DYNAMIC_SPEED_DEC, T_LONG, 1, 99, 1, 1, _("Percentage by which to decrease speed upon reverse")},
-  {LP_DYNAMIC_BUTTON_LAG, T_LONG, 0, 1000, 1, 25, _("Lag before user actually pushes button (ms)")}, 
+  {Parameters::BP_BACKOFF_BUTTON,T_BOOL, -1, -1, -1, -1, _("Enable backoff and start/stop buttons")},
+  {Parameters::BP_SLOW_START,T_BOOL, -1, -1, -1, -1, _("Slow startup")},
+  {Parameters::LP_SLOW_START_TIME, T_LONG, 0, 10000, 1000, 100, _("Slow startup time")},
+  {Parameters::LP_DYNAMIC_SPEED_INC, T_LONG, 1, 100, 1, 1, _("Percentage by which to automatically increase speed")},
+  {Parameters::LP_DYNAMIC_SPEED_FREQ, T_LONG, 1, 1000, 1, 1, _("Time after which to automatically increase speed (secs)")},
+  {Parameters::LP_DYNAMIC_SPEED_DEC, T_LONG, 1, 99, 1, 1, _("Percentage by which to decrease speed upon reverse")},
+  {Parameters::LP_DYNAMIC_BUTTON_LAG, T_LONG, 0, 1000, 1, 25, _("Lag before user actually pushes button (ms)")}, 
 };
 
 CTwoPushDynamicFilter::CTwoPushDynamicFilter(CSettingsUser *pCreator, CDasherInterfaceBase *pInterface, CFrameRate *pFramerate)
   : CDynamicButtons(pCreator, pInterface, pFramerate, 14, _("Two-push Dynamic Mode (New One Button)")), CSettingsObserver(pCreator), m_dNatsSinceFirstPush(-std::numeric_limits<double>::infinity()) {
   
-  HandleEvent(LP_TWO_PUSH_OUTER);//and all the others too!
+  HandleEvent(Parameters::LP_TWO_PUSH_OUTER);//and all the others too!
 }
 
 void GuideLine(CDasherView *pView, const myint iDasherY, const int iColour)
@@ -63,11 +63,11 @@ void GuideLine(CDasherView *pView, const myint iDasherY, const int iColour)
 }
 
 long CTwoPushDynamicFilter::downDist() {
-  return GetLongParameter(LP_TWO_PUSH_OUTER) - GetLongParameter(LP_TWO_PUSH_LONG);
+  return GetLongParameter(Parameters::LP_TWO_PUSH_OUTER) - GetLongParameter(Parameters::LP_TWO_PUSH_LONG);
 }
 
 long CTwoPushDynamicFilter::upDist() {
-  return GetLongParameter(LP_TWO_PUSH_OUTER) - (GetLongParameter(LP_TWO_PUSH_LONG) * GetLongParameter(LP_TWO_PUSH_SHORT))/100;
+  return GetLongParameter(Parameters::LP_TWO_PUSH_OUTER) - (GetLongParameter(Parameters::LP_TWO_PUSH_LONG) * GetLongParameter(Parameters::LP_TWO_PUSH_SHORT))/100;
 }
 
 bool CTwoPushDynamicFilter::DecorateView(CDasherView *pView, CDasherInput *pInput) {
@@ -89,8 +89,8 @@ bool CTwoPushDynamicFilter::DecorateView(CDasherView *pView, CDasherInput *pInpu
   GuideLine(pView, 2048 + downDist(), 1);
 
   //outer guides (at center of rects) - red lines
-  GuideLine(pView, 2048 - GetLongParameter(LP_TWO_PUSH_OUTER), 1);
-  GuideLine(pView, 2048 + GetLongParameter(LP_TWO_PUSH_OUTER), 1);
+  GuideLine(pView, 2048 - GetLongParameter(Parameters::LP_TWO_PUSH_OUTER), 1);
+  GuideLine(pView, 2048 + GetLongParameter(Parameters::LP_TWO_PUSH_OUTER), 1);
 
   //moving markers - green if active, else yellow
   if (m_bDecorationChanged && isRunning() && m_dNatsSinceFirstPush > -std::numeric_limits<double>::infinity()) {
@@ -104,28 +104,25 @@ bool CTwoPushDynamicFilter::DecorateView(CDasherView *pView, CDasherInput *pInpu
 }
 
 void CTwoPushDynamicFilter::HandleEvent(Parameter parameter) {
-  switch (parameter) {
-  case LP_TWO_PUSH_OUTER: //fallthrough
-  case LP_TWO_PUSH_LONG: //fallthrough
-  case LP_TWO_PUSH_SHORT: {
-    //TODO, short gap always at the top - allow other way around also?
-    double dOuter = GetLongParameter(LP_TWO_PUSH_OUTER);
-    m_dLogUpMul = log(dOuter / upDist());
-    m_dLogDownMul = log(dOuter / downDist());
-//cout << "bitsUp " << m_dLogUpMul << " bitsDown " << m_dLogDownMul << std::endl;
-  } //and fallthrough
-  case LP_TWO_PUSH_TOLERANCE: //fallthrough
-  case LP_DYNAMIC_BUTTON_LAG:
-    //recompute rest in Timer
-    m_dLastBitRate=-std::numeric_limits<double>::infinity();
-  }
+    if(parameter == Parameters::LP_TWO_PUSH_OUTER || parameter == Parameters::LP_TWO_PUSH_LONG || parameter == Parameters::LP_TWO_PUSH_SHORT)
+    {
+        //TODO, short gap always at the top - allow other way around also?
+        double dOuter = GetLongParameter(Parameters::LP_TWO_PUSH_OUTER);
+        m_dLogUpMul = log(dOuter / upDist());
+        m_dLogDownMul = log(dOuter / downDist());
+        //cout << "bitsUp " << m_dLogUpMul << " bitsDown " << m_dLogDownMul << std::endl;
+        m_dLastBitRate=-std::numeric_limits<double>::infinity(); //recompute rest in Timer
+    } else if (parameter == Parameters::LP_TWO_PUSH_TOLERANCE || parameter == Parameters::LP_DYNAMIC_BUTTON_LAG)
+    {
+        m_dLastBitRate=-std::numeric_limits<double>::infinity(); //recompute rest in Timer
+    }
 }
 
 void CTwoPushDynamicFilter::updateBitrate(double dBitrate) {
   if (dBitrate==m_dLastBitRate) return;
   m_dLastBitRate = dBitrate;
 
-  double dPressBits = dBitrate * (double) GetLongParameter(LP_TWO_PUSH_TOLERANCE) / 1000.0;
+  double dPressBits = dBitrate * (double) GetLongParameter(Parameters::LP_TWO_PUSH_TOLERANCE) / 1000.0;
 //cout << "Max Bitrate changed - now " << dBitrate << " user accuracy " << dPressBits;
   m_dMinShortTwoPushTime = m_dLogUpMul - dPressBits;
   m_dMaxShortTwoPushTime = m_dLogUpMul + dPressBits;
@@ -137,7 +134,7 @@ void CTwoPushDynamicFilter::updateBitrate(double dBitrate) {
 //cout << "bits; minShort " << m_dMinShortTwoPushTime << " maxShort " << m_dMaxShortTwoPushTime << " minLong " << m_dMinLongTwoPushTime << " maxLong " << m_dMaxLongTwoPushTime << std::endl;
   m_bDecorationChanged = true;
 
-  m_dLagBits = dBitrate * GetLongParameter(LP_DYNAMIC_BUTTON_LAG)/1000.0;
+  m_dLagBits = dBitrate * GetLongParameter(Parameters::LP_DYNAMIC_BUTTON_LAG)/1000.0;
 
   const long down(downDist()), up(upDist());
   
@@ -151,7 +148,7 @@ void CTwoPushDynamicFilter::updateBitrate(double dBitrate) {
 }
 
 void CTwoPushDynamicFilter::KeyDown(unsigned long Time, Keys::VirtualKey Key, CDasherView *pView, CDasherInput *pInput, CDasherModel *pModel) {
-  if (Key == Keys::Primary_Input && !GetBoolParameter(BP_BACKOFF_BUTTON))
+  if (Key == Keys::Primary_Input && !GetBoolParameter(Parameters::BP_BACKOFF_BUTTON))
     //mouse click - will be ignored by superclass method.
     //simulate press of button 2...
     Key= Keys::Button_2;
@@ -159,11 +156,11 @@ void CTwoPushDynamicFilter::KeyDown(unsigned long Time, Keys::VirtualKey Key, CD
 }
 
 void CTwoPushDynamicFilter::KeyUp(unsigned long Time, Keys::VirtualKey Key, CDasherView *pView, CDasherInput *pInput, CDasherModel *pModel) {
-  if (Key == Keys::Primary_Input && !GetBoolParameter(BP_BACKOFF_BUTTON))
+  if (Key == Keys::Primary_Input && !GetBoolParameter(Parameters::BP_BACKOFF_BUTTON))
     //mouse click - will be ignored by superclass method.
     //simulate press of button 2...
     Key= Keys::Button_2;
-  if (GetBoolParameter(BP_TWO_PUSH_RELEASE_TIME)
+  if (GetBoolParameter(Parameters::BP_TWO_PUSH_RELEASE_TIME)
       && isRunning() && Key==m_iHeldId
       && m_dNatsSinceFirstPush!=-std::numeric_limits<double>::infinity())
     ActionButton(Time, Key, 0, pModel);
@@ -207,10 +204,10 @@ bool doSet(int &var, const int val) {
 void CTwoPushDynamicFilter::TimerImpl(unsigned long iTime, CDasherView *m_pDasherView, CDasherModel *m_pDasherModel, CExpansionPolicy **pol) {
   DASHER_ASSERT(isRunning());
   const double dSpeedMul(FrameSpeedMul(m_pDasherModel, iTime));
-  updateBitrate(GetLongParameter(LP_MAX_BITRATE)*dSpeedMul/100.0);
+  updateBitrate(GetLongParameter(Parameters::LP_MAX_BITRATE)*dSpeedMul/100.0);
   if (m_dNatsSinceFirstPush > -std::numeric_limits<double>::infinity()) {
     // first button has been pushed
-    double dLogGrowth(m_pDasherModel->GetNats() - m_dNatsSinceFirstPush), dOuter(GetLongParameter(LP_TWO_PUSH_OUTER)),
+    double dLogGrowth(m_pDasherModel->GetNats() - m_dNatsSinceFirstPush), dOuter(GetLongParameter(Parameters::LP_TWO_PUSH_OUTER)),
            dUp(upDist()), dDown(downDist());
     
     //to move to point currently at outer marker: set m_aiTarget to dOuter==exp( log(dOuter/dUp) ) * dUp

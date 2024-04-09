@@ -61,7 +61,7 @@ public:
   const char *ClSet(const std::string &strKey, const std::string &strValue);
 
   // TODO: just load the application parameters by default?
-  void AddParameters(const std::unordered_map<Parameter, const Settings::Parameter_Value> table);
+  void AddParameters(Parameters::DefaultsParameterMap table);
   Observable<CParameterChange>& PreSetObservable() { return pre_set_observable_; }
     
   virtual bool IsParameterSaved(const std::string & Key) { return false; }; // avoid undef sub-classes error
@@ -81,41 +81,41 @@ private:
   //! Load a setting with a boolean value. Return true if successful
   //! \param Key Name of the setting
   //! \param Value Value of the setting
-  virtual bool LoadSetting(const std::string & Key, bool * Value);
+  virtual bool LoadSetting(const std::string_view & Key, bool * Value);
 
   //! Load a setting with a long value
   //
   //! Load a setting with a long value. Return true if successful
   //! \param Key Name of the setting
   //! \param Value Value of the setting
-  virtual bool LoadSetting(const std::string & Key, long *Value);
+  virtual bool LoadSetting(const std::string_view & Key, long *Value);
 
   //! Load a setting with a string value
   //
   //! Load a setting with a string value. Return true if successful
   //! \param Key Name of the setting
   //! \param Value Value of the setting, UTF8 encoded
-  virtual bool LoadSetting(const std::string & Key, std::string * Value);
+  virtual bool LoadSetting(const std::string_view & Key, std::string * Value);
 
   //! Save a setting with a boolean value
   //
   //! \param Key Name of the setting
   //! \param Value Value of the setting
-  virtual void SaveSetting(const std::string & Key, bool Value);
+  virtual void SaveSetting(const std::string_view & Key, bool Value);
 
   //! Save a setting with a long value
   //
   //! \param Key Name of the setting
   //! \param Value Value of the setting
-  virtual void SaveSetting(const std::string & Key, long Value);
+  virtual void SaveSetting(const std::string_view & Key, long Value);
 
   //! Save a setting with a string value
   //
   //! \param Key Name of the setting
   //! \param Value Value of the setting, UTF8 encoded
-  virtual void SaveSetting(const std::string & Key, const std::string & Value);
+  virtual void SaveSetting(const std::string_view & Key, const std::string & Value);
 
-  std::unordered_map<Parameter, Settings::Parameter_Value> parameters_;
+  Parameters::ParameterMap parameters_;
   Observable<CParameterChange> pre_set_observable_;
 };
 

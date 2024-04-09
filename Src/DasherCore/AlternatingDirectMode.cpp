@@ -14,9 +14,9 @@ using namespace Dasher;
 
 static SModuleSettings sSettings[] = {
   /* TRANSLATORS: The number of time steps over which to perform the zooming motion in button mode. */
-  {LP_ZOOMSTEPS, T_LONG, 1, 63, 1, 1, _("Frames over which to perform zoom")},
+  {Parameters::LP_ZOOMSTEPS, T_LONG, 1, 63, 1, 1, _("Frames over which to perform zoom")},
   /* TRANSLATORS: Intercept keyboard events for 'special' keys even when the Dasher window doesn't have keyboard focus.*/
-  {BP_GLOBAL_KEYBOARD, T_BOOL, -1, -1, -1, -1, _("Global keyboard grab")}
+  {Parameters::BP_GLOBAL_KEYBOARD, T_BOOL, -1, -1, -1, -1, _("Global keyboard grab")}
 };
 
 CAlternatingDirectMode::CAlternatingDirectMode(CSettingsUser *pCreator, CDasherInterfaceBase *pInterface)
