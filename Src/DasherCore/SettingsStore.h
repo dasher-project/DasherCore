@@ -135,9 +135,11 @@ private:
     /// used only by the DasherInterface; if/when multiple SettingsStores
     /// are used, could be made public.
     CSettingsUser(CSettingsStore *pSettingsStore);
+    CSettingsStore* s_pSettingsStore;
   public:
     virtual ~CSettingsUser();
     bool IsParameterSaved(const std::string & Key);
+    CSettingsStore* GetSettingsStore(){return s_pSettingsStore;}
   protected:
     ///Create a new SettingsUser, inheriting+sharing settings from the creator.
     CSettingsUser(CSettingsUser *pCreateFrom);
@@ -161,6 +163,8 @@ private:
     /// used by a particular CSettingsUser.
     CSettingsObserver(CSettingsUser *pCreateFrom);
     ~CSettingsObserver() override;
+  private:
+      CSettingsUser* s_pSettingsStore;
   };
   ///Utility class, for (majority of) cases where a class wants to be both
   /// a CSettingsUser and CSettingsObserver.

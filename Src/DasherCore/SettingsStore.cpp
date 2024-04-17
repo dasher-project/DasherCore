@@ -16,8 +16,6 @@
 
 using namespace Dasher;
 
-static CSettingsStore *s_pSettingsStore = NULL;
-
 CSettingsStore::CSettingsStore() {
 }
 
@@ -198,6 +196,7 @@ CSettingsUser::CSettingsUser(CSettingsUser *pCreateFrom) {
 	//No need to do anything atm; but in future, copy CSettingsStore pointer
 	// from argument.
 	DASHER_ASSERT(pCreateFrom);
+	s_pSettingsStore = pCreateFrom->GetSettingsStore();
 }
 
 CSettingsUser::~CSettingsUser() = default;
@@ -234,11 +233,12 @@ bool CSettingsUser::IsParameterSaved(const std::string &Key)
 
 CSettingsObserver::CSettingsObserver(CSettingsUser *pCreateFrom) {
   DASHER_ASSERT(pCreateFrom);
-  s_pSettingsStore->Register(this);
+  s_pSettingsStore = pCreateFrom;
+  s_pSettingsStore->GetSettingsStore()->Register(this);
 }
 
 CSettingsObserver::~CSettingsObserver() {
-  s_pSettingsStore->Unregister(this);
+  s_pSettingsStore->GetSettingsStore()->Unregister(this);
 }
 
 CSettingsUserObserver::CSettingsUserObserver(CSettingsUser *pCreateFrom)
