@@ -60,9 +60,9 @@ bool CDashIntfScreenMsgs::FinishRender(unsigned long ulTime) {
       if (it->second==0) continue;
       std::pair<screenint,screenint> textDims = pScreen->TextSize(it->first, GetLongParameter(LP_MESSAGE_FONTSIZE));
       //black (5) rectangle:
-      pScreen->DrawRectangle((iSW - textDims.first)/2, iY, (iSW+textDims.first)/2, iY+textDims.second, 5, -1, -1);
+      pScreen->DrawRectangle((iSW - textDims.first)/2, iY, (iSW+textDims.first)/2, iY+textDims.second, GetView()->GetColor(5), ColorPalette::noColor, -1);
       //white (0) text for non-modal, yellow (111) for modal
-      pScreen->DrawString(it->first, (iSW-textDims.first)/2, iY, GetLongParameter(LP_MESSAGE_FONTSIZE), bModal ? 111 : 0);
+      pScreen->DrawString(it->first, (iSW-textDims.first)/2, iY, GetLongParameter(LP_MESSAGE_FONTSIZE), GetView()->GetColor(bModal ? 111 : 0));
       iY+=textDims.second;
     }
     bModal=true;
@@ -70,9 +70,9 @@ bool CDashIntfScreenMsgs::FinishRender(unsigned long ulTime) {
       if (it->second==0) continue;
       std::pair<screenint,screenint> textDims = pScreen->TextSize(it->first, GetLongParameter(LP_MESSAGE_FONTSIZE));
       //black (5) rectangle:
-      pScreen->DrawRectangle((iSW - textDims.first)/2, iY, (iSW+textDims.first)/2, iY+textDims.second, 5, -1, -1);
+      pScreen->DrawRectangle((iSW - textDims.first)/2, iY, (iSW+textDims.first)/2, iY+textDims.second, GetView()->GetColor(5), ColorPalette::noColor, -1);
       //white (0) text for non-modal, yellow (111) for modal
-      pScreen->DrawString(it->first, (iSW-textDims.first)/2, iY, GetLongParameter(LP_MESSAGE_FONTSIZE), bModal ? 111 : 0);
+      pScreen->DrawString(it->first, (iSW-textDims.first)/2, iY, GetLongParameter(LP_MESSAGE_FONTSIZE), GetView()->GetColor(bModal ? 111 : 0));
       iY+=textDims.second;
     }
   }

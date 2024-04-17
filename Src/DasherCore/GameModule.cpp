@@ -161,12 +161,12 @@ void CGameModule::DecorateView(unsigned long lTime, CDasherView *pView, CDasherM
     } else {
       //draw line parallel to that region of y-axis
       y[0] = m_y1; y[1] = m_y2;
-      pView->DasherPolyline(x, y, 2, lineWidth, m_iCrosshairColor);
+      pView->DasherPolyline(x, y, 2, lineWidth, pView->GetColor(m_iCrosshairColor));
       //and make arrow horizontal, pointing to the midpoint
       x[0] = -400;
       y[0] = y[1] = m_iTargetY;
     }
-    pView->DasherPolyarrow(x, y, 2, 3*lineWidth, m_iCrosshairColor, 0.2);
+    pView->DasherPolyarrow(x, y, 2, 3*lineWidth, pView->GetColor(m_iCrosshairColor), 0.2);
     
     if (GetBoolParameter(BP_GAME_HELP_DRAW_PATH)) DrawBrachistochrone(pView);
   }
@@ -199,7 +199,7 @@ void CGameModule::DrawBrachistochrone(CDasherView *pView) {
   // Plot a brachistochrone - the optimal path from the crosshair to the target
   // this is a circle, passing through both crosshair and target, centered on the y-axis
   const myint CenterY = ComputeBrachCenter();
-  pView->DasherSpaceArc(CenterY, abs(CenterY - m_iTargetY), CDasherModel::ORIGIN_X, CDasherModel::ORIGIN_Y, 0, m_iTargetY, m_iCrosshairColor, 2*(int)GetLongParameter(LP_LINE_WIDTH));
+  pView->DasherSpaceArc(CenterY, abs(CenterY - m_iTargetY), CDasherModel::ORIGIN_X, CDasherModel::ORIGIN_Y, 0, m_iTargetY, pView->GetColor(m_iCrosshairColor), 2*(int)GetLongParameter(LP_LINE_WIDTH));
 }
 
 void CGameModule::DrawHelperArrow(Dasher::CDasherView* pView)
@@ -207,7 +207,7 @@ void CGameModule::DrawHelperArrow(Dasher::CDasherView* pView)
   // This plots a helpful pointer to the best direction to take to get to the target.
   // Probably too much floating point maths here, sort later.
   // Start of line is the crosshair location
-  const int gameColour = 135; //Neon green. (!)
+  const int gameColor = 135; //Neon green. (!)
   const int noOfPoints = 10; // The curve will be made up of 9 straight segments...
   const myint m_iCrossX(CDasherModel::ORIGIN_X),m_iCrossY(CDasherModel::ORIGIN_Y);
   
@@ -253,7 +253,7 @@ void CGameModule::DrawHelperArrow(Dasher::CDasherView* pView)
     iY[n] = (myint) (m_Target.iCenterY + sin(angle)*(iX[n-1]) + cos(angle)*(iY[n-1]-m_Target.iCenterY));
   }
   //...then plot it.
-  pView->DasherPolyarrow(iX, iY, noOfPoints, GetLongParameter(LP_LINE_WIDTH)*4, gameColour, 1.414);
+  pView->DasherPolyarrow(iX, iY, noOfPoints, GetLongParameter(LP_LINE_WIDTH)*4, pView->GetColor(gameColor), 1.414);
   
 }
 

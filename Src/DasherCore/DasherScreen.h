@@ -122,11 +122,11 @@ public:
 	/// undefined if the Label is not one returned from a call to MakeLabel _on_this_Screen_.
 	/// \param x Coordinate of top left corner (i.e., left hand side)
 	/// \param y Coordinate of top left corner (i.e., top)
-	virtual void DrawString(Label* label, screenint x, screenint y, unsigned int iFontSize, int iColour) = 0;
+	virtual void DrawString(Label* label, screenint x, screenint y, unsigned int iFontSize, const ColorPalette::Color& color) = 0;
 
 	// Cubes and 3D labels that are drawn in Options::CUBE mode, meant for a 3D rendering
-	virtual void Draw3DLabel(Label* label, screenint x, screenint y, myint extrusionLevel, myint groupRecursionDepth, myint levelUnderCrosshair, unsigned int iFontSize, int iColour) {}
-	virtual void DrawCube(screenint posX, screenint posY, screenint sizeX, screenint sizeY, myint extrusionLevel, myint groupRecursionDepth, myint levelUnderCrosshair, int Colour, int iOutlineColour, int iThickness) {}
+	virtual void Draw3DLabel(Label* label, screenint x, screenint y, myint extrusionLevel, myint groupRecursionDepth, myint levelUnderCrosshair, unsigned int iFontSize, const ColorPalette::Color& color) {}
+	virtual void DrawCube(screenint posX, screenint posY, screenint sizeX, screenint sizeY, myint extrusionLevel, myint groupRecursionDepth, myint levelUnderCrosshair, const ColorPalette::Color& color, const ColorPalette::Color& outlineColor, int iThickness) {}
 
 	// Send a marker to indicate 'phases' of drawing. 
 	virtual void SendMarker(int /*iMarker*/)
@@ -140,56 +140,38 @@ public:
 	/// \param y1 top left corner of rectangle (y coordinate)
 	/// \param x2 bottom right of rectangle (x coordinate)
 	/// \param y2 bottom right of rectangle (y coordinate)
-	/// \param Colour the colour to be used (numeric), or -1 for no fill
-	/// \param iOutlineColour The colour for the node outlines; -1 = use default
+	/// \param Color the color to be used (numeric), or -1 for no fill
+	/// \param outlineColor The color for the node outlines; -1 = use default
 	/// \param iThickness Line thickness for outline; <1 for no outline
-	virtual void DrawRectangle(screenint x1, screenint y1, screenint x2, screenint y2, int Colour, int iOutlineColour, int iThickness) = 0;
+	virtual void DrawRectangle(screenint x1, screenint y1, screenint x2, screenint y2, const ColorPalette::Color& color, const ColorPalette::Color& outlineColor, int iThickness) = 0;
 
 	///Draw a circle, potentially filled and/or outlined
-	/// \param iFillColour colour in which to fill; -1 for no fill
-	/// \param iLineColour colour to draw outline; -1 = use default
+	/// \param fillColor color in which to fill; -1 for no fill
+	/// \param lineColor color to draw outline; -1 = use default
 	/// \param iLineWidth line width for outline; <1 for no outline
-	virtual void DrawCircle(screenint iCX, screenint iCY, screenint iR, int iFillColour, int iLineColour, int iLineWidth) = 0;
+	virtual void DrawCircle(screenint iCX, screenint iCY, screenint iR, const ColorPalette::Color& fillColor, const ColorPalette::Color& lineColor, int iLineWidth) = 0;
 
-	/// Draw a line of fixed colour (usually black). Intended for static UI elements such as a cross-hair
-	/// Draw a line between each of the points in the array
-	///
-	/// \param Points an array of points
-	/// \param Number the number of points in the array
-	/// \param iWidth The line width
-	/// \todo This is dumb - why does this need to be a separate function to the coloured version?
-
-	virtual void Polyline(point* Points, int Number, int iWidth)
-	{
-		Polyline(Points, Number, iWidth, 0);
-	};
-
-	// Draw a line of arbitrary colour.
+	// Draw a line of arbitrary color.
 	//! Draw a line between each of the points in the array
 	//!
 	//! \param Points an array of points
 	//! \param Number the number of points in the array
 	//! \param iWidth Width of the line
-	//! \param Colour the colour to be drawn
+	//! \param color the color to be drawn
 
-	virtual void Polyline(point* Points, int Number, int iWidth, int Colour) = 0;
+	virtual void Polyline(point* Points, int Number, int iWidth, const ColorPalette::Color& color = {255,255,255}) = 0;
 
-	/// Draw a polygon - given vertices and colour id
+	/// Draw a polygon - given vertices and color id
 	///
 	/// \param Points Vertices of polygon in clockwise order. (No need to repeat the first point at the end)
 	/// \param Number number of points in the array
-	/// \param fillColour colour to fill polygon (numeric); -1 for don't fill
-	/// \param outlineColour colour to draw polygon outline (right the way around, i.e. repeating first point)
+	/// \param fillColor color to fill polygon (numeric); -1 for don't fill
+	/// \param outlineColor color to draw polygon outline (right the way around, i.e. repeating first point)
 	/// \param lineWidth thickness of outline; 0 or less => don't draw outline.
-	virtual void Polygon(point* Points, int Number, int fillColour, int outlineColour, int lineWidth) = 0;
+	virtual void Polygon(point* Points, int Number, const ColorPalette::Color& fillColor, const ColorPalette::Color& outlineColor, int lineWidth) = 0;
 
 	//! Signal that a frame is finished - the screen should be updated
 	virtual void Display() = 0;
-
-	/// Set a colour scheme
-	///
-	/// \param pColourScheme A colour scheme that should be used
-	virtual void SetColourScheme(const Dasher::CColourIO::ColourInfo* pColourScheme) = 0;
 
 	// Returns true if point on screen is not obscured by another window
 	virtual bool IsPointVisible(screenint x, screenint y) = 0;

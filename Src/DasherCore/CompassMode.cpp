@@ -75,18 +75,18 @@ bool CCompassMode::DecorateView(CDasherView *pView, CDasherInput *pInput) {
     pView->Dasher2Screen(-1000, iPos, p[1].x, p[1].y);
 
     if(bFirst)
-      pScreen->Polyline(p, 2, 1, 1);
+      pScreen->Polyline(p, 2, 1, pView->GetColor(1));
     else
-      pScreen->Polyline(p, 2, 1, 2);
+      pScreen->Polyline(p, 2, 1, pView->GetColor(2));
 
     pView->Dasher2Screen(-100, 4096-iPos, p[0].x, p[0].y);
 
     pView->Dasher2Screen(-1000, 4096-iPos, p[1].x, p[1].y);
 
     if(bFirst)
-      pScreen->Polyline(p, 2, 1, 1);
+      pScreen->Polyline(p, 2, 1, pView->GetColor(1));
     else
-      pScreen->Polyline(p, 2, 1, 2);
+      pScreen->Polyline(p, 2, 1, pView->GetColor(2));
 
     iPos -= iTargetWidth;
     bFirst = false;

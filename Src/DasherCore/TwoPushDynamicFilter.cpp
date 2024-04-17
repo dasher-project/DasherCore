@@ -59,7 +59,7 @@ void GuideLine(CDasherView *pView, const myint iDasherY, const int iColour)
 
   pView->Dasher2Screen(iDasherX, iDasherY, p[1].x, p[1].y);
 
-  pScreen->Polyline(p, 2, 3, iColour);
+  pScreen->Polyline(p, 2, 3, pView->GetColor(iColour));
 }
 
 long CTwoPushDynamicFilter::downDist() {
@@ -80,7 +80,7 @@ bool CTwoPushDynamicFilter::DecorateView(CDasherView *pView, CDasherInput *pInpu
       pView->Dasher2Screen(-100, m_aaiGuideAreas[i][0], x1, y1);
       pView->Dasher2Screen(-1000, m_aaiGuideAreas[i][1], x2, y2);
     
-      pScreen->DrawRectangle(x1, y1, x2, y2, 62/*pale yellow*/, -1, 0);
+      pScreen->DrawRectangle(x1, y1, x2, y2, pView->GetColor(62)/*pale yellow*/, ColorPalette::noColor, 0);
     }
   }
 

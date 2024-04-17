@@ -144,15 +144,15 @@ public:
 	/// @{
 
 	///Draw a straight line in Dasher-space - which may be curved on the screen...
-	void DasherSpaceLine(myint x1, myint y1, myint x2, myint y2, int iWidth, int iColour);
+	void DasherSpaceLine(myint x1, myint y1, myint x2, myint y2, int iWidth, const ColorPalette::Color& color);
 
-	virtual void DasherSpaceArc(myint cy, myint r, myint x1, myint y1, myint x2, myint y2, int iColour, int iLineWidth) =0;
+	virtual void DasherSpaceArc(myint cy, myint r, myint x1, myint y1, myint x2, myint y2, const ColorPalette::Color& color, int iLineWidth) =0;
 
 	///
 	/// Draw a polyline specified in Dasher co-ordinates
 	///
 
-	void DasherPolyline(myint* x, myint* y, int n, int iWidth, int iColour);
+	void DasherPolyline(myint* x, myint* y, int n, int iWidth, const ColorPalette::Color& color);
 
 	/// Draw a polyarrow
 	/// The parameters x and y allow the client to specify points in Dasher space
@@ -166,28 +166,37 @@ public:
 	/// \param y - an array of y coordinates to draw the arrow through
 	/// \param iWidth - the width to make the arrow lines - typically of the form
 	///        GetLongParameter(LP_LINE_WIDTH)*CONSTANT
-	/// \param iColour line colour, as per Polyline (-1 => use "default" 0)
+	/// \param color line color, as per Polyline (-1 => use "default" 0)
 	/// \param dArrowSizeFactor - the factor by which to scale the "hat" on the arrow
 	///
-	void DasherPolyarrow(myint* x, myint* y, int n, int iWidth, int iColour, double dArrowSizeFactor = 0.7071);
+	void DasherPolyarrow(myint* x, myint* y, int n, int iWidth, const ColorPalette::Color& color, double dArrowSizeFactor = 0.7071);
 
 	///
 	/// Draw a rectangle specified in Dasher co-ordinates
-	/// \param Color color in which to fill, -1 => no fill
-	/// \param iOutlineColour color in which to draw outline, -1 => use default
+	/// \param color color in which to fill, -1 => no fill
+	/// \param outlineColor color in which to draw outline, -1 => use default
 	/// \param iThickness line width for outline, < 1 => no outline.
 	///
-	void DasherDrawRectangle(myint iDasherMaxX, myint iDasherMinY, myint iDasherMinX, myint iDasherMaxY, const int Color, int iOutlineColour, int iThickness);
+	void DasherDrawRectangle(myint iDasherMaxX, myint iDasherMinY, myint iDasherMinX, myint iDasherMaxY, const ColorPalette::Color& color, const
+                             ColorPalette::Color& outlineColor, int iThickness);
 
 	///
 	/// Draw a centred rectangle specified in Dasher co-ordinates (used for mouse cursor)
-	/// \param Color fill color for rectangle (-1 => don't fill)
-	/// \param bDrawOutline if true, rectangle will be outlined with width 1 and default line colour (-1 => 3)
+	/// \param color fill color for rectangle (-1 => don't fill)
+	/// \param bDrawOutline if true, rectangle will be outlined with width 1 and default line color (-1 => 3)
 	///
 
-	void DasherDrawCentredRectangle(myint iDasherX, myint iDasherY, screenint iSize, const int Color, bool bDrawOutline);
+	void DasherDrawCentredRectangle(myint iDasherX, myint iDasherY, screenint iSize, const ColorPalette::Color& color, const ColorPalette::Color&
+                                    outlineColor, bool bDrawOutline);
 
-	/// @}
+	/// Set a color scheme
+	///
+	/// \param pColorScheme A color scheme that should be used
+	///
+	virtual void SetColorScheme(const ColorPalette* pColorScheme);
+
+
+	const ColorPalette::Color& GetColor(int c) const;
 
 protected:
 	/// Clips a line (specified in Dasher co-ordinates) to the visible region
@@ -205,6 +214,7 @@ protected:
 	/// will then add exactly one CDasherScreen::point for each line segment required.
 	virtual void DasherLine2Screen(myint x1, myint y1, myint x2, myint y2, std::vector<CDasherScreen::point>& vPoints) =0;
 
+	const ColorPalette* m_pColorPalette = nullptr;
 private:
 	Options::ScreenOrientations m_Orientation;
 	CDasherScreen* m_pScreen; // provides the graphics (text, lines, rectangles):

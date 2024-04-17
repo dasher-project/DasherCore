@@ -67,7 +67,7 @@ bool CCircleStartHandler::DecorateView(CDasherView *pView) {
     lineWidth = bAboutToChange ? 3 : 1;
   }
 
-  pView->Screen()->DrawCircle(ctr.x, ctr.y, m_iScreenRadius, fillColor, lineColor, lineWidth);
+  pView->Screen()->DrawCircle(ctr.x, ctr.y, m_iScreenRadius, pView->GetColor(fillColor), pView->GetColor(lineColor), lineWidth);
 
   return true;
 }

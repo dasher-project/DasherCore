@@ -91,7 +91,7 @@ public:
 
 	/// @}
 
-	void DasherSpaceArc(myint cy, myint r, myint x1, myint y1, myint x2, myint y2, int colour, int iLineWidth) override;
+	void DasherSpaceArc(myint cy, myint r, myint x1, myint y1, myint x2, myint y2, const ColorPalette::Color& color, int iLineWidth) override;
 
 private:
 	///draw a possibly-truncated triangle given dasher-space coords & accounting for non-linearity
@@ -145,8 +145,8 @@ private:
 		screenint posY;
 		myint extrusionLevel;
 		myint groupRecursionDepth;
-		int Colour;
-		int iOutlineColour;
+		ColorPalette::Color Color;
+		ColorPalette::Color outlineColor;
 		int iThickness;
 	};
 	std::vector<geometry_cube> m_DelayedCubes;
@@ -171,7 +171,8 @@ private:
 	/// @param pOutput The innermost node covering the crosshair (if any)
 	void DisjointRender(CDasherNode* Render, myint y1, myint y2, CTextString* prevText, CExpansionPolicy& policy, double dMaxCost, CDasherNode*& pOutput);
 
-	void DasherDrawCube(myint iDasherMaxX, myint iDasherMinY, myint iDasherMinX, myint iDasherMaxY, myint extrusionLevel, myint groupRecursionDepth, const int Color, int iOutlineColour, int iThickness);
+	void DasherDrawCube(myint iDasherMaxX, myint iDasherMinY, myint iDasherMinX, myint iDasherMaxY, myint extrusionLevel, myint
+                        groupRecursionDepth, const ColorPalette::Color& Color, const ColorPalette::Color& outlineColor, int iThickness);
 	/// (Recursively) render a node and all contained subnodes, in overlapping shapes
 	/// (according to LP_SHAPE_TYPE)
 	/// Each call responsible for rendering exactly the area contained within the node.

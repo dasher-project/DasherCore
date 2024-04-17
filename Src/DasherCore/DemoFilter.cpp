@@ -19,7 +19,7 @@ CDemoFilter::~CDemoFilter() {
 bool CDemoFilter::DecorateView(CDasherView *pView, CDasherInput *pInput) {
 
   if(GetBoolParameter(BP_DRAW_MOUSE)) {
-    pView->DasherDrawCentredRectangle(m_iDemoX, m_iDemoY, 5, 2, false);
+    pView->DasherDrawCentredRectangle(m_iDemoX, m_iDemoY, 5, pView->GetColor(2), ColorPalette::noColor, false);
   }
 
   myint x[2];
@@ -34,9 +34,9 @@ bool CDemoFilter::DecorateView(CDasherView *pView, CDasherInput *pInput) {
   
   // Actually plot the line
   if (GetBoolParameter(BP_CURVE_MOUSE_LINE))
-    pView->DasherSpaceLine(x[0],y[0],x[1],y[1], GetLongParameter(LP_LINE_WIDTH), 1);
+    pView->DasherSpaceLine(x[0],y[0],x[1],y[1], GetLongParameter(LP_LINE_WIDTH), pView->GetColor(1));
   else
-    pView->DasherPolyline(x, y, 2, GetLongParameter(LP_LINE_WIDTH), 1);
+    pView->DasherPolyline(x, y, 2, GetLongParameter(LP_LINE_WIDTH), pView->GetColor(1));
   
   return true;
 }

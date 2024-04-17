@@ -106,5 +106,5 @@ void CDasherButtons::NewDrawGoTo(CDasherView *pView, myint iDasherMin, myint iDa
    pView->Dasher2Screen( iHeight, iDasherMax, p[2].x, p[2].y);
    pView->Dasher2Screen( 0, iDasherMax, p[3].x, p[3].y);
 
-   pView->Screen()->Polyline(p, 4, iWidth, iColour);
+   pView->Screen()->Polyline(p, 4, iWidth, pView->GetColor(iColour));
 }

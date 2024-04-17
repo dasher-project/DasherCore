@@ -16,17 +16,17 @@ void CColourIO::GetColours(std::vector<std::string>* ColourList) const {
 	ColourList->clear();
 
 	for(auto [ID, Palette] : KnownPaletts){
-		ColourList->push_back(Palette.ColourID);
+		ColourList->push_back(Palette.ColorID);
 	}
 }
 
-const CColourIO::ColourInfo & CColourIO::GetInfo(const std::string &ColourID) {
+const ColorPalette & CColourIO::GetInfo(const std::string &ColourID) {
 	if(ColourID.empty()){ // return Default if no colour scheme is specified
 		return KnownPaletts["Default"];
 	}
 	
 	if(KnownPaletts.count(ColourID) != 0) {
-		KnownPaletts[ColourID].ColourID = ColourID; // Ensure consistency
+		KnownPaletts[ColourID].ColorID = ColourID; // Ensure consistency
 		return KnownPaletts[ColourID];
 	}
 
@@ -41,9 +41,9 @@ bool CColourIO::Parse(pugi::xml_document& document, bool bUser)
     {
 		if(std::strcmp(palette.name(), "palette") != 0) continue; // a non <palette ...> node
 
-		ColourInfo NewPalette;
+		ColorPalette NewPalette;
 		NewPalette.Mutable = bUser;
-		NewPalette.ColourID = palette.attribute("name").as_string();
+		NewPalette.ColorID = palette.attribute("name").as_string();
 
 		for (pugi::xml_node color : palette)
 		{
@@ -52,19 +52,20 @@ bool CColourIO::Parse(pugi::xml_document& document, bool bUser)
 			NewPalette.Colors.push_back({
 				color.attribute("r").as_int(),
 				color.attribute("g").as_int(),
-				color.attribute("b").as_int()
+				color.attribute("b").as_int(),
+				color.attribute("a").as_int(255)
 			});
 		}
 
-		KnownPaletts[NewPalette.ColourID] = NewPalette;
+		KnownPaletts[NewPalette.ColorID] = NewPalette;
 	}
 
 	return true;
 }
 
 void CColourIO::CreateDefault() {
-	ColourInfo DefaultPalette;
-	DefaultPalette.ColourID = "Default";
+	ColorPalette DefaultPalette;
+	DefaultPalette.ColorID = "Default";
 	DefaultPalette.Mutable = false;
 
 	DefaultPalette.Colors = {
