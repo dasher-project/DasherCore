@@ -135,7 +135,7 @@ private:
 
 	std::vector<CTextString*> m_DelayedTexts;
 	//ExtrusionLevel is used for 3DRendering
-	void DoDelayedText(CTextString* pText, myint extrusionLevel = 0);
+	void DoDelayedText(CTextString* pText, myint extrusionLevel = 0, myint groupRecursionDepth = 0, myint m_CrosshairCubeLevel = 0);
 
 	struct geometry_cube
 	{
@@ -144,12 +144,19 @@ private:
 		screenint posX;
 		screenint posY;
 		myint extrusionLevel;
+		myint groupRecursionDepth;
 		int Colour;
 		int iOutlineColour;
 		int iThickness;
 	};
 	std::vector<geometry_cube> m_DelayedCubes;
-	std::vector<std::pair<CTextString*, myint>> m_Delayed3DTexts;
+	struct geometry_3DText
+	{
+		CTextString* root_node;
+		myint extrusionLevel;
+		myint groupRecursionDepth;
+	};
+	std::vector<geometry_3DText> m_Delayed3DTexts;
 	myint m_CrosshairCubeLevel = -1;
 
 	///
@@ -164,12 +171,12 @@ private:
 	/// @param pOutput The innermost node covering the crosshair (if any)
 	void DisjointRender(CDasherNode* Render, myint y1, myint y2, CTextString* prevText, CExpansionPolicy& policy, double dMaxCost, CDasherNode*& pOutput);
 
-	void DasherDrawCube(myint iDasherMaxX, myint iDasherMinY, myint iDasherMinX, myint iDasherMaxY, myint extrusionLevel, const int Color, int iOutlineColour, int iThickness);
+	void DasherDrawCube(myint iDasherMaxX, myint iDasherMinY, myint iDasherMinX, myint iDasherMaxY, myint extrusionLevel, myint groupRecursionDepth, const int Color, int iOutlineColour, int iThickness);
 	/// (Recursively) render a node and all contained subnodes, in overlapping shapes
 	/// (according to LP_SHAPE_TYPE)
 	/// Each call responsible for rendering exactly the area contained within the node.
 	/// @param pCurrentTopCenterNode The innermost node covering the crosshair (if any)
-	void NewRender(CDasherNode* pCurrentNode, myint y1, myint y2, CTextString* pPrevText, CExpansionPolicy& policy, double dMaxCost, CDasherNode*& pCurrentTopCenterNode, myint recusionDepth);
+	void NewRender(CDasherNode* pCurrentNode, myint y1, myint y2, CTextString* pPrevText, CExpansionPolicy& policy, double dMaxCost, CDasherNode*& pCurrentTopCenterNode, myint recusionDepth, myint groupRecursionDepth);
 
 	/// @name Nonlinearity
 	/// Implements the non-linear part of the coordinate space mapping

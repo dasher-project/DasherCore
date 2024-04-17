@@ -125,8 +125,8 @@ public:
 	virtual void DrawString(Label* label, screenint x, screenint y, unsigned int iFontSize, int iColour) = 0;
 
 	// Cubes and 3D labels that are drawn in Options::CUBE mode, meant for a 3D rendering
-	virtual void Draw3DLabel(Label* label, screenint x, screenint y, myint extrusionLevel, unsigned int iFontSize, int iColour) {}
-	virtual void DrawCube(screenint posX, screenint posY, screenint sizeX, screenint sizeY, myint extrusionLevel, int Colour, int iOutlineColour, int iThickness) {}
+	virtual void Draw3DLabel(Label* label, screenint x, screenint y, myint extrusionLevel, myint groupRecursionDepth, myint levelUnderCrosshair, unsigned int iFontSize, int iColour) {}
+	virtual void DrawCube(screenint posX, screenint posY, screenint sizeX, screenint sizeY, myint extrusionLevel, myint groupRecursionDepth, myint levelUnderCrosshair, int Colour, int iOutlineColour, int iThickness) {}
 
 	// Send a marker to indicate 'phases' of drawing. 
 	virtual void SendMarker(int /*iMarker*/)

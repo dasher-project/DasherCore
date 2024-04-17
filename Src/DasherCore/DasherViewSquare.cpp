@@ -116,20 +116,21 @@ CDasherNode* CDasherViewSquare::Render(CDasherNode* pRoot, myint iRootMin, myint
 	{
 		// No "clearing" needed as geometry is used anyway
 		m_CrosshairCubeLevel = -1;
-		NewRender(pRoot, iRootMin, iRootMax, nullptr, policy, std::numeric_limits<double>::infinity(), currentTopCenterNode, 0);
+		NewRender(pRoot, iRootMin, iRootMax, nullptr, policy, std::numeric_limits<double>::infinity(), currentTopCenterNode, 0,0);
+
+		Crosshair();
 
 		// To shift the extrusion levels in a fashion that the crosshair is always at level 0, the cubes are drawn delayed
-		for(auto& cube : m_DelayedCubes)
+		for(geometry_cube& cube : m_DelayedCubes)
 		{
-			Screen()->DrawCube(cube.posX, cube.posY, cube.sizeX, cube.sizeY, cube.extrusionLevel - m_CrosshairCubeLevel, cube.Colour, cube.iOutlineColour, cube.iThickness);
+			Screen()->DrawCube(cube.posX, cube.posY, cube.sizeX, cube.sizeY, cube.extrusionLevel, cube.groupRecursionDepth, m_CrosshairCubeLevel, cube.Colour, cube.iOutlineColour, cube.iThickness);
 		}
 		m_DelayedCubes.clear();
 
 		// Print 3DText
-		for (auto& [text, extrusionLevel] : m_Delayed3DTexts)
+		for (geometry_3DText& text : m_Delayed3DTexts)
 		{
-			DoDelayedText(text, extrusionLevel - m_CrosshairCubeLevel);
-			
+			DoDelayedText(text.root_node, text.extrusionLevel, text.groupRecursionDepth, m_CrosshairCubeLevel);
 		}
 		m_Delayed3DTexts.clear();
 
@@ -153,7 +154,7 @@ CDasherNode* CDasherViewSquare::Render(CDasherNode* pRoot, myint iRootMin, myint
 		{
 			Screen()->DrawRectangle(0, 0, Screen()->GetWidth(), Screen()->GetHeight(), 0, -1, 0);
 		}
-		NewRender(pRoot, iRootMin, iRootMax, nullptr, policy, std::numeric_limits<double>::infinity(), currentTopCenterNode, 0);
+		NewRender(pRoot, iRootMin, iRootMax, nullptr, policy, std::numeric_limits<double>::infinity(), currentTopCenterNode, 0,0);
 	}
 
 	// Labels are drawn in a second parse to get the overlapping right
@@ -201,7 +202,7 @@ CDasherViewSquare::CTextString* CDasherViewSquare::DasherDrawText(myint iDasherM
 	return new CTextString(pLabel, x, y, static_cast<int>(iSize), iColor);
 }
 
-void CDasherViewSquare::DoDelayedText(CTextString* pText, myint extrusionLevel)
+void CDasherViewSquare::DoDelayedText(CTextString* pText, myint extrusionLevel, myint groupRecursionDepth, myint m_CrosshairCubeLevel)
 {
 	//note that it'd be better to compute old-style font sizes here, or even after shunting
 	// across according to the aiMax array, but this needs Dasher co-ordinates, which were
@@ -219,7 +220,7 @@ void CDasherViewSquare::DoDelayedText(CTextString* pText, myint extrusionLevel)
 			{
 				if(extrudedText)
 				{
-					Screen()->Draw3DLabel(pText->m_pLabel, x, y - textDims.second / 2, extrusionLevel, pText->m_iSize, pText->m_iColor);
+					Screen()->Draw3DLabel(pText->m_pLabel, x, y - textDims.second / 2, extrusionLevel, groupRecursionDepth, m_CrosshairCubeLevel, pText->m_iSize, pText->m_iColor);
 				}
 				else
 				{
@@ -228,7 +229,7 @@ void CDasherViewSquare::DoDelayedText(CTextString* pText, myint extrusionLevel)
 				for (auto& pChild : pText->m_children)
 				{
 					pChild->m_ix = std::max(pChild->m_ix, iRight);
-					DoDelayedText(pChild,extrusionLevel + 1);
+					DoDelayedText(pChild, extrusionLevel + 1, 0, m_CrosshairCubeLevel);
 				}
 				pText->m_children.clear();
 			}
@@ -241,7 +242,7 @@ void CDasherViewSquare::DoDelayedText(CTextString* pText, myint extrusionLevel)
 			{
 				if(extrudedText)
 				{
-					Screen()->Draw3DLabel(pText->m_pLabel, iLeft, y - textDims.second / 2, extrusionLevel, pText->m_iSize, pText->m_iColor);
+					Screen()->Draw3DLabel(pText->m_pLabel, iLeft, y - textDims.second / 2, extrusionLevel, groupRecursionDepth, m_CrosshairCubeLevel, pText->m_iSize, pText->m_iColor);
 				}
 				else
 				{
@@ -250,7 +251,7 @@ void CDasherViewSquare::DoDelayedText(CTextString* pText, myint extrusionLevel)
 				for (auto& pChild : pText->m_children)
 				{
 					pChild->m_ix = std::min(pChild->m_ix, iLeft);
-					DoDelayedText(pChild,extrusionLevel+1);
+					DoDelayedText(pChild, extrusionLevel + 1, 0, m_CrosshairCubeLevel);
 				}
 				pText->m_children.clear();
 			}
@@ -263,7 +264,7 @@ void CDasherViewSquare::DoDelayedText(CTextString* pText, myint extrusionLevel)
 			{
 				if(extrudedText)
 				{
-					Screen()->Draw3DLabel(pText->m_pLabel, x - textDims.first / 2, y, extrusionLevel, pText->m_iSize, pText->m_iColor);
+					Screen()->Draw3DLabel(pText->m_pLabel, x - textDims.first / 2, y, extrusionLevel, groupRecursionDepth, m_CrosshairCubeLevel, pText->m_iSize, pText->m_iColor);
 				}
 				else
 				{
@@ -272,7 +273,7 @@ void CDasherViewSquare::DoDelayedText(CTextString* pText, myint extrusionLevel)
 				for (auto& pChild : pText->m_children)
 				{
 					pChild->m_iy = std::max(pChild->m_iy, iBottom);
-					DoDelayedText(pChild,extrusionLevel+1);
+					DoDelayedText(pChild, extrusionLevel + 1, 0, m_CrosshairCubeLevel);
 				}
 				pText->m_children.clear();
 			}
@@ -285,7 +286,7 @@ void CDasherViewSquare::DoDelayedText(CTextString* pText, myint extrusionLevel)
 			{
 				if(extrudedText)
 				{
-					Screen()->Draw3DLabel(pText->m_pLabel, x - textDims.first / 2, iTop, extrusionLevel, pText->m_iSize, pText->m_iColor);
+					Screen()->Draw3DLabel(pText->m_pLabel, x - textDims.first / 2, iTop, extrusionLevel, groupRecursionDepth, m_CrosshairCubeLevel, pText->m_iSize, pText->m_iColor);
 				}
 				else
 				{
@@ -295,7 +296,7 @@ void CDasherViewSquare::DoDelayedText(CTextString* pText, myint extrusionLevel)
 				for (auto& pChild : pText->m_children)
 				{
 					pChild->m_iy = std::min(pChild->m_iy, iTop);
-					DoDelayedText(pChild,extrusionLevel+1);
+					DoDelayedText(pChild, extrusionLevel + 1, 0, m_CrosshairCubeLevel);
 				}
 				pText->m_children.clear();
 			}
@@ -734,7 +735,7 @@ void CDasherViewSquare::DisjointRender(CDasherNode* pRender, myint y1, myint y2,
 	}
 }
 
-void CDasherViewSquare::DasherDrawCube(myint iDasherMaxX, myint iDasherMinY, myint iDasherMinX, myint iDasherMaxY, myint extrusionLevel, const int Color, int iOutlineColour, int iThickness)
+void CDasherViewSquare::DasherDrawCube(myint iDasherMaxX, myint iDasherMinY, myint iDasherMinX, myint iDasherMaxY, myint extrusionLevel, myint groupRecursionDepth, const int Color, int iOutlineColour, int iThickness)
 {
 	screenint iScreenMaxX, iScreenMinY, iScreenMinX, iScreenMaxY;
 	Dasher2Screen(iDasherMaxX, iDasherMinY, iScreenMaxX, iScreenMinY);
@@ -746,7 +747,7 @@ void CDasherViewSquare::DasherDrawCube(myint iDasherMaxX, myint iDasherMinY, myi
 		sizeX, sizeY,
 		std::min(iScreenMinX,iScreenMaxX) + sizeX / 2,
 		std::min(iScreenMinY,iScreenMaxY) + sizeY / 2,
-		extrusionLevel, Color, iOutlineColour, iThickness
+		extrusionLevel, groupRecursionDepth, Color, iOutlineColour, iThickness
 	});
 }
 
@@ -793,10 +794,10 @@ bool CDasherViewSquare::CoversCrosshair(myint Range, myint y1, myint y2)
 	}
 	return false;
 }
-
+#pragma optimize( "", off )
 void CDasherViewSquare::NewRender(CDasherNode* pCurrentNode, myint y1, myint y2,
                                   CTextString* pPrevText, CExpansionPolicy& policy, double dMaxCost,
-                                  CDasherNode*& pCurrentTopCenterNode, myint recusionDepth)
+                                  CDasherNode*& pCurrentTopCenterNode, myint recusionDepth, myint groupRecursionDepth)
 {
 	DASHER_ASSERT_VALIDPTR_RW(pRender);
 	
@@ -807,6 +808,15 @@ void CDasherViewSquare::NewRender(CDasherNode* pCurrentNode, myint y1, myint y2,
 	pCurrentNode->SetFlag(CDasherNode::NF_SUPER, !IsSpaceAroundNode(y1, y2));
 
 	const int myColor = pCurrentNode->getColor();
+	const bool groupNode = !pCurrentNode->getLabel(); //TODO: Does not seem to be good to use this as indication
+
+	if(groupNode && recusionDepth > 0) recusionDepth--; //Use same level as node before, if we are not at level 0 already
+	if(groupNode){
+		groupRecursionDepth++;
+	} else
+	{
+		groupRecursionDepth = 0;
+	}
 
 	if (pCurrentNode->getLabel())
 	{
@@ -821,7 +831,7 @@ void CDasherViewSquare::NewRender(CDasherNode* pCurrentNode, myint y1, myint y2,
 		} else {
 			if(GetLongParameter(LP_SHAPE_TYPE) == Options::CUBE)
 			{
-				m_Delayed3DTexts.emplace_back(pText,recusionDepth);
+				m_Delayed3DTexts.push_back({pText, recusionDepth, groupRecursionDepth});
 			}
 			else
 			{
@@ -867,7 +877,7 @@ void CDasherViewSquare::NewRender(CDasherNode* pCurrentNode, myint y1, myint y2,
 			Circle(Range, y1, y2, fill_color, -1, line_width);
 			break;
 		case Options::CUBE:
-			DasherDrawCube(std::min(Range, visibleRegion.maxX), std::max(y1, visibleRegion.minY), 0, std::min(y2, visibleRegion.maxY), recusionDepth, fill_color, -1, line_width);
+			DasherDrawCube(std::min(Range, visibleRegion.maxX), std::max(y1, visibleRegion.minY), 0, std::min(y2, visibleRegion.maxY), recusionDepth, groupRecursionDepth, fill_color, -1, line_width);
 		}
 	}
 
@@ -877,7 +887,7 @@ void CDasherViewSquare::NewRender(CDasherNode* pCurrentNode, myint y1, myint y2,
 	if (pCurrentTopCenterNode == pCurrentNode->Parent() && CoversCrosshair(Range, y1, y2))
 	{
 		pCurrentTopCenterNode = pCurrentNode;
-		m_CrosshairCubeLevel = -1; //Current extrusionLevel
+		m_CrosshairCubeLevel = recusionDepth; //Current extrusionLevel
 	}
 
 	if (pCurrentNode->ChildCount() == 0)
@@ -921,7 +931,7 @@ void CDasherViewSquare::NewRender(CDasherNode* pCurrentNode, myint y1, myint y2,
 		{
 			//covers entire y-axis!
 			//render just that child; nothing more to do for this node => tail call to beginning
-			NewRender(pChild, newy1, newy2, pPrevText, policy, dMaxCost, pCurrentTopCenterNode, recusionDepth + 1);
+			NewRender(pChild, newy1, newy2, pPrevText, policy, dMaxCost, pCurrentTopCenterNode, recusionDepth + 1, groupRecursionDepth);
 			return;
 		}
 		pCurrentNode->onlyChildRendered = nullptr;
@@ -946,7 +956,7 @@ void CDasherViewSquare::NewRender(CDasherNode* pCurrentNode, myint y1, myint y2,
 			if (newy2 - newy1 > GetLongParameter(LP_MIN_NODE_SIZE))
 			{
 				//definitely big enough to render.
-				NewRender(pChild, newy1, newy2, pPrevText, policy, dMaxCost, pCurrentTopCenterNode, recusionDepth + 1);
+				NewRender(pChild, newy1, newy2, pPrevText, policy, dMaxCost, pCurrentTopCenterNode, recusionDepth + 1, groupRecursionDepth);
 			}
 			else if (!pChild->GetFlag(CDasherNode::NF_SEEN)) pChild->DeleteChildren();
 			if (newy2 > visibleRegion.maxY && !pCurrentNode->GetFlag(CDasherNode::NF_GAME))
@@ -967,6 +977,7 @@ void CDasherViewSquare::NewRender(CDasherNode* pCurrentNode, myint y1, myint y2,
 	}
 	//all children rendered.
 }
+#pragma optimize( "", on ) 
 
 /// Convert screen co-ordinates to dasher co-ordinates. This doesn't
 /// include the nonlinear mapping for eyetracking mode etc - it is
