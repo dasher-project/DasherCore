@@ -68,7 +68,6 @@ ADD_library(DasherCore STATIC
 	${CMAKE_CURRENT_LIST_DIR}/Src/DasherCore/DasherNode.cpp
 	${CMAKE_CURRENT_LIST_DIR}/Src/DasherCore/DasherView.cpp
 	${CMAKE_CURRENT_LIST_DIR}/Src/DasherCore/DasherViewSquare.cpp
-	${CMAKE_CURRENT_LIST_DIR}/Src/DasherCore/DasherViewSquare.inl
 	${CMAKE_CURRENT_LIST_DIR}/Src/DasherCore/DefaultFilter.cpp
 	${CMAKE_CURRENT_LIST_DIR}/Src/DasherCore/DemoFilter.cpp
 	${CMAKE_CURRENT_LIST_DIR}/Src/DasherCore/DynamicButtons.cpp
@@ -84,6 +83,7 @@ ADD_library(DasherCore STATIC
 	${CMAKE_CURRENT_LIST_DIR}/Src/DasherCore/OneButtonDynamicFilter.cpp
 	${CMAKE_CURRENT_LIST_DIR}/Src/DasherCore/OneButtonFilter.cpp
 	${CMAKE_CURRENT_LIST_DIR}/Src/DasherCore/OneDimensionalFilter.cpp
+	${CMAKE_CURRENT_LIST_DIR}/Src/DasherCore/PressFilter.cpp
 	${CMAKE_CURRENT_LIST_DIR}/Src/DasherCore/RoutingAlphMgr.cpp
 	${CMAKE_CURRENT_LIST_DIR}/Src/DasherCore/SCENode.cpp
 	${CMAKE_CURRENT_LIST_DIR}/Src/DasherCore/ScreenGameModule.cpp
