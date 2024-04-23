@@ -135,7 +135,7 @@ public:
 	/// clear out any nodes from system ones). However, multiple system or multiple
 	/// user files, will be concatenated. (However, files are processed separately:
 	/// e.g. names defined in one file will not be seen from another)
-	bool Parse(pugi::xml_document& document, bool bUser) override;
+	bool Parse(pugi::xml_document& document, const std::string filePath, bool bUser) override;
 protected:
 	/// \return all node definitions that have been loaded by this CControlParser.
 	const std::list<CControlBase::NodeTemplate*>& parsedNodes();
@@ -207,7 +207,7 @@ public:
 
 	void GetControlBoxes(std::vector<std::string>* pList) const;
 	CControlManager* CreateControlManager(const std::string& id, CSettingsUser* pCreateFrom, CNodeCreationManager* pNCManager, CDasherInterfaceBase* pInterface) const;
-	bool Parse(pugi::xml_document& document, bool bUser) override;
+	bool Parse(pugi::xml_document& document, const std::string filePath, bool bUser) override;
 private:
 	std::map<std::string, std::string> m_controlFiles;
 	std::string m_filename;

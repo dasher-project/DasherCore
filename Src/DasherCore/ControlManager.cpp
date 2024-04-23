@@ -228,7 +228,7 @@ void CControlParser::ParseNodeRecursive(pugi::xml_node node, std::list<CControlB
 }
 
 
-bool CControlParser::Parse(pugi::xml_document& document, bool bUser)
+bool CControlParser::Parse(pugi::xml_document& document, const std::string, bool bUser)
 {
 	if (m_bUser)
 	{
@@ -572,7 +572,7 @@ void CControlBoxIO::GetControlBoxes(std::vector<std::string>* pList) const
 		pList->push_back(id_filename.first);
 }
 
-bool CControlBoxIO::Parse(pugi::xml_document& document, bool bUser)
+bool CControlBoxIO::Parse(pugi::xml_document& document, const std::string, bool bUser)
 {
 	std::string name = document.child("control").attribute("name").as_string();
 

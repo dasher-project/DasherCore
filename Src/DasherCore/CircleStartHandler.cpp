@@ -58,16 +58,11 @@ bool CCircleStartHandler::DecorateView(CDasherView *pView) {
   CDasherScreen::point ctr = CircleCenter(pView);
 
   const bool bAboutToChange = m_bInCircle && m_iEnterTime != std::numeric_limits<long>::max();
-  int fillColor, lineColor, lineWidth;
   if (m_pFilter->isPaused()) {
-    lineColor=2; lineWidth=1;
-    fillColor = bAboutToChange ? 241 : 242;
+    pView->Screen()->DrawCircle(ctr.x, ctr.y, m_iScreenRadius, pView->GetColor(bAboutToChange ? 241 : 242), pView->GetColor(ColorPalette::mouseCursor), 1);
   } else {
-    lineColor=240; fillColor=-1; //don't fill
-    lineWidth = bAboutToChange ? 3 : 1;
+	pView->Screen()->DrawCircle(ctr.x, ctr.y, m_iScreenRadius, ColorPalette::noColor, pView->GetColor(240), bAboutToChange ? 3 : 1);
   }
-
-  pView->Screen()->DrawCircle(ctr.x, ctr.y, m_iScreenRadius, pView->GetColor(fillColor), pView->GetColor(lineColor), lineWidth);
 
   return true;
 }

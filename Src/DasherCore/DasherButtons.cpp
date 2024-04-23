@@ -87,18 +87,6 @@ void CDasherButtons::Timer(unsigned long Time, CDasherView *pView, CDasherInput 
 void CDasherButtons::NewDrawGoTo(CDasherView *pView, myint iDasherMin, myint iDasherMax, bool bActive) {
    myint iHeight(iDasherMax - iDasherMin);
 
-   int iColour;
-   int iWidth;
-
-   if(bActive) {
-     iColour = 1;
-     iWidth = 3;
-   }
-   else {
-     iColour = 2;
-     iWidth = 1;
-   }
-
    CDasherScreen::point p[4];
 
    pView->Dasher2Screen( 0, iDasherMin, p[0].x, p[0].y);
@@ -106,5 +94,10 @@ void CDasherButtons::NewDrawGoTo(CDasherView *pView, myint iDasherMin, myint iDa
    pView->Dasher2Screen( iHeight, iDasherMax, p[2].x, p[2].y);
    pView->Dasher2Screen( 0, iDasherMax, p[3].x, p[3].y);
 
-   pView->Screen()->Polyline(p, 4, iWidth, pView->GetColor(iColour));
+   if(bActive) {
+     pView->Screen()->Polyline(p, 4, 3, pView->GetColor(ColorPalette::mouseLine));
+   }
+   else {
+     pView->Screen()->Polyline(p, 4, 1, pView->GetColor(ColorPalette::mouseCursor));
+   }
 }

@@ -98,7 +98,8 @@ private:
 	/// @param x = max dasher-x extent
 	/// @param y1, y2 = dasher-y extent along y-axis
 	/// @param midy1,midy2 = extent along line of max x (midy1==midy2 => triangle, midy1<midy2 => truncated tri)
-	void TruncateTri(myint x, myint y1, myint y2, myint midy1, myint midy2, int fillColor, int outlineColor, int lineWidth);
+	void TruncateTri(myint x, myint y1, myint y2, myint midy1, myint midy2, const ColorPalette::Color& fillColor, const ColorPalette::Color&
+                     outlineColor, int lineWidth);
 
 	/// compute screen coords for a circle, centered on y-axis, between two points
 	/// cy, r - dasher coords of center (on y-axis), radius
@@ -108,8 +109,9 @@ private:
 	/// pts - vector into which to store points; on entry, last element should already be screen-coords of (x1,y1)
 	/// dXMul - multiply x coords (in dasher space) by this (i.e. aspect ratio), for ovals
 	void CircleTo(myint cy, myint r, myint y1, myint x1, myint y3, myint x3, CDasherScreen::point dest, std::vector<CDasherScreen::point>& pts, double dXMul);
-	void Circle(myint Range, myint lowY, myint highY, int fCol, int oCol, int lWidth);
-	void Quadric(myint Range, myint lowY, myint highY, int fillColor, int outlineColor, int lineWidth);
+	void Circle(myint Range, myint y1, myint y2, const ColorPalette::Color& fillColor, const ColorPalette::Color& outlineColor, int lineWidth);
+	void Quadric(myint Range, myint lowY, myint highY, const ColorPalette::Color& fillColor, const ColorPalette::Color& outlineColor, int
+                 lineWidth);
 	///draw isoceles triangle, with baseline from y1-y2 along y axis (x=0), and other point at (x,(y1+y2)/2)
 	/// (all in Dasher coords).
 	void Triangle(myint x, myint y1, myint y2, int fillColor, int outlineColor, int lineWidth);
@@ -135,21 +137,8 @@ private:
 
 	std::vector<CTextString*> m_DelayedTexts;
 	//ExtrusionLevel is used for 3DRendering
-	void DoDelayedText(CTextString* pText, myint extrusionLevel = 0, myint groupRecursionDepth = 0, myint m_CrosshairCubeLevel = 0);
+	void DoDelayedText(CTextString* pText, myint extrusionLevel = 0, myint groupRecursionDepth = 0);
 
-	struct geometry_cube
-	{
-		screenint sizeX;
-		screenint sizeY;
-		screenint posX;
-		screenint posY;
-		myint extrusionLevel;
-		myint groupRecursionDepth;
-		ColorPalette::Color Color;
-		ColorPalette::Color outlineColor;
-		int iThickness;
-	};
-	std::vector<geometry_cube> m_DelayedCubes;
 	struct geometry_3DText
 	{
 		CTextString* root_node;
@@ -198,8 +187,9 @@ private:
 
 	inline void Crosshair();
 	bool CoversCrosshair(myint Range, myint y1, myint y2);
+    ColorPalette::Color SimulateTransparency(CDasherNode* pCurrentNode);
 
-	//Divides by SCALE_FACTOR, rounding away from 0
+    //Divides by SCALE_FACTOR, rounding away from 0
 	inline myint CustomIDivScaleFactor(myint iNumerator);
 
 	void DasherLine2Screen(myint x1, myint y1, myint x2, myint y2, std::vector<CDasherScreen::point>& vPoints) override;

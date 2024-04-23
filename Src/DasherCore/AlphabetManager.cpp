@@ -289,7 +289,7 @@ CAlphabetManager::CSymbolNode::CSymbolNode(int iOffset, int iColour, CDasherScre
 
 CAlphabetManager::CGroupNode::CGroupNode(int iOffset, CDasherScreen::Label *pLabel, int iBkgCol, CAlphabetManager *pMgr, const SGroupInfo *pGroup)
 : CAlphNode(iOffset,
-            pGroup==pMgr->m_pBaseGroup ? ((iOffset&1) ? 7 : 137) //special case for root nodes
+            pGroup==pMgr->m_pBaseGroup ? ((iOffset&1) ? ColorPalette::rootNode : 137) //special case for root nodes; Why 137!? >:(
             : (pGroup->bVisible ? pGroup->iColour : iBkgCol),
             pLabel, pMgr), m_pGroup(pGroup) {
   if (!m_pGroup->bVisible) SetFlag(NF_VISIBLE, false);
@@ -304,7 +304,7 @@ CAlphabetManager::CAlphNode *CAlphabetManager::GetRoot(CDasherNode *pParent, boo
   CAlphNode *pNewNode;
   if(p.first==0 || !bEnteredLast) {
     //couldn't extract last symbol (so probably using default context), or shouldn't
-    pNewNode = new CGroupNode(iNewOffset, NULL, 0, this, m_pBaseGroup); //default background colour
+    pNewNode = new CGroupNode(iNewOffset, NULL, ColorPalette::background, this, m_pBaseGroup); //default background colour
   } else {
     //new node represents a symbol that's already happened - i.e. user has already steered through it;
     // so either we're rebuilding, or else creating a new root from existing text (in edit box)

@@ -48,7 +48,7 @@ public:
 	CAlphIO(CMessageDisplay* pMsgs);
 	virtual ~CAlphIO();
 
-	virtual bool Parse(pugi::xml_document& document, bool bUser) override;
+	virtual bool Parse(pugi::xml_document& document, const std::string filePath, bool bUser) override;
 
 	void GetAlphabets(std::vector< std::string >* AlphabetList) const;
 	const CAlphInfo *GetInfo(const std::string& AlphID) const;

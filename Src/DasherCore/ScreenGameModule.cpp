@@ -107,15 +107,15 @@ void CScreenGameModule::DrawText(CDasherView *pView) {
   rectDims.first+=targetStart;
 
   //ok. that's the layout done
-  pScreen->DrawRectangle(0, 0, rectDims.first, rectDims.second, pView->GetColor(0), pView->GetColor(4), 1);
-  pScreen->DrawString(m_pLabEntered, x-entDims.first, 0, uFontSize, pView->GetColor(7));//root node green...?
+  pScreen->DrawRectangle(0, 0, rectDims.first, rectDims.second, pView->GetColor(ColorPalette::background), pView->GetColor(ColorPalette::text), 1);
+  pScreen->DrawString(m_pLabEntered, x-entDims.first, 0, uFontSize, pView->GetColor(ColorPalette::rootNode));
   if (m_pLabWrong) {
-    pScreen->DrawString(m_pLabWrong, x, 0, uFontSize, pView->GetColor(1)); //mouse-line red
+    pScreen->DrawString(m_pLabWrong, x, 0, uFontSize, pView->GetColor(ColorPalette::mouseLine));
     CDasherScreen::point p[2];
     p[0].x=x; p[1].x=targetStart;
     p[0].y = p[1].y = rectDims.second/2;
-    pScreen->Polyline(p, 2, 2, pView->GetColor(1)); //mouse-line red
+    pScreen->Polyline(p, 2, 2, pView->GetColor(ColorPalette::mouseLine));
   }
-  pScreen->DrawString(m_pLabTarget, targetStart, 0, uFontSize, pView->GetColor(4)); //text black
+  pScreen->DrawString(m_pLabTarget, targetStart, 0, uFontSize, pView->GetColor(ColorPalette::text));
 
 }

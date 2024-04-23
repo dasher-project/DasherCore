@@ -39,6 +39,7 @@ namespace Dasher{
 		{BP_GAME_HELP_DRAW_PATH  , Parameter_Value{"GameDrawPath"         , PARAM_BOOL, Persistence::PERSISTENT, true , "When we give help, show the shortest path to the target sentence"}},
 		{BP_TWO_PUSH_RELEASE_TIME, Parameter_Value{"TwoPushReleaseTime"   , PARAM_BOOL, Persistence::PERSISTENT, false, "Use push and release times of single press rather than push times of two presses"}},
 		{BP_SLOW_CONTROL_BOX     , Parameter_Value{"SlowControlBox"       , PARAM_BOOL, Persistence::PERSISTENT, true , "Slow down when going through control box" }},
+		{BP_SIMULATE_TRANSPARENCY, Parameter_Value{"SimulateTransparency" , PARAM_BOOL, Persistence::PERSISTENT, false, "Enable the internal color mixing and thus the need to support alpha blending in the renderer." }},
 
 		{LP_ORIENTATION          , Parameter_Value{ "ScreenOrientation"         , PARAM_LONG, Persistence::PERSISTENT, -2l  , "Screen Orientation"}},
 		{LP_MAX_BITRATE          , Parameter_Value{ "MaxBitRateTimes100"        , PARAM_LONG, Persistence::PERSISTENT, 80l  , "Max Bit Rate Times 100"}},

@@ -34,7 +34,7 @@ const ColorPalette & CColourIO::GetInfo(const std::string &ColourID) {
 	return KnownPaletts["Default"];
 }
 
-bool CColourIO::Parse(pugi::xml_document& document, bool bUser)
+bool CColourIO::Parse(pugi::xml_document& document, const std::string, bool bUser)
 {
 	pugi::xml_node outer = document.child("colours");
 	for (pugi::xml_node palette : outer)

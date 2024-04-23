@@ -490,11 +490,11 @@ void CDasherInterfaceBase::NewFrame(unsigned long iTime, bool bForceRedraw) {
       // template if/when we ever implement multithreading widely/properly...
       m_DasherScreen->SendMarker(0); //this replaces the nodes...
       const screenint iSW = m_DasherScreen->GetWidth(), iSH = m_DasherScreen->GetHeight();
-      m_DasherScreen->DrawRectangle(0,0,iSW,iSH,m_pDasherView->GetColor(0),ColorPalette::noColor,0); //fill in colour 0 = white
+      m_DasherScreen->DrawRectangle(0,0,iSW,iSH,m_pDasherView->GetColor(ColorPalette::background),ColorPalette::noColor,0); //fill in colour 0 = white
       unsigned int iSize(GetLongParameter(LP_MESSAGE_FONTSIZE));
       if (!m_pLockLabel) m_pLockLabel = m_DasherScreen->MakeLabel(m_strLockMessage, iSize);
       std::pair<screenint,screenint> dims = m_DasherScreen->TextSize(m_pLockLabel, iSize);
-      m_DasherScreen->DrawString(m_pLockLabel, (iSW-dims.first)/2, (iSH-dims.second)/2, iSize, m_pDasherView->GetColor(4));
+      m_DasherScreen->DrawString(m_pLockLabel, (iSW-dims.first)/2, (iSH-dims.second)/2, iSize, m_pDasherView->GetColor(ColorPalette::text));
       m_DasherScreen->SendMarker(1); //decorations - don't draw any
       bBlit = true;
     } else {

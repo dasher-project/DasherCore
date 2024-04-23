@@ -23,6 +23,8 @@
 #include <string>
 #include <algorithm>
 
+#include "../ColourIO.h"
+
 using namespace Dasher;
 
 CAlphIO::CAlphIO(CMessageDisplay *pMsgs) : AbstractXMLParser(pMsgs) {
@@ -129,7 +131,7 @@ SGroupInfo* CAlphIO::ParseGroupRecursive(pugi::xml_node& group_node, CAlphInfo* 
 	return pNewGroup;
 }
 
-bool Dasher::CAlphIO::Parse(pugi::xml_document & document, bool bUser)
+bool Dasher::CAlphIO::Parse(pugi::xml_document & document, const std::string, bool bUser)
 {
 	pugi::xml_node alphabets = document.child("alphabets");
 
@@ -217,7 +219,7 @@ bool Dasher::CAlphIO::Parse(pugi::xml_document & document, bool bUser)
 			CurrentAlphabet->iSpaceCharacter = static_cast<Dasher::symbol>(CurrentAlphabet->m_vCharacters.size());
 			CurrentAlphabet->iNumChildNodes++;
 			ReadCharAttributes(alphabet.child("space"), &CurrentAlphabet->m_vCharacters.back());
-			if (CurrentAlphabet->m_vCharacters.back().Colour == -1) CurrentAlphabet->m_vCharacters.back().Colour = 9;
+			if (CurrentAlphabet->m_vCharacters.back().Colour == -1) CurrentAlphabet->m_vCharacters.back().Colour = ColorPalette::space;
 		}
 
 		CurrentAlphabet->iEnd = static_cast<int>(CurrentAlphabet->m_vCharacters.size()) + 1;
