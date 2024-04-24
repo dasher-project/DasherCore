@@ -218,12 +218,13 @@ void CDasherViewSquare::DoDelayedText(CTextString* pText, myint extrusionLevel, 
 	screenint x(pText->m_ix), y(pText->m_iy);
 	std::pair<screenint, screenint> textDims = Screen()->TextSize(pText->m_pLabel, pText->m_iSize);
 	bool extrudedText = GetLongParameter(LP_SHAPE_TYPE) == Options::CUBE;
+
 	switch (GetOrientation())
 	{
 	case Options::LeftToRight:
 		{
-			screenint iRight = x + textDims.first;
-			if (iRight < Screen()->GetWidth())
+	        const screenint iRight = x + textDims.first;
+			if (x < Screen()->GetWidth() && iRight >= 0)
 			{
 				if(extrudedText)
 				{
@@ -244,8 +245,8 @@ void CDasherViewSquare::DoDelayedText(CTextString* pText, myint extrusionLevel, 
 		}
 	case Options::RightToLeft:
 		{
-			screenint iLeft = x - textDims.first;
-			if (iLeft >= 0)
+			const screenint iLeft = x - textDims.first;
+			if (iLeft < Screen()->GetWidth() && x >= 0)
 			{
 				if(extrudedText)
 				{
@@ -266,8 +267,8 @@ void CDasherViewSquare::DoDelayedText(CTextString* pText, myint extrusionLevel, 
 		}
 	case Options::TopToBottom:
 		{
-			screenint iBottom = y + textDims.second;
-			if (iBottom < Screen()->GetHeight())
+			const screenint iBottom = y + textDims.second;
+			if (y < Screen()->GetHeight() && iBottom >= 0)
 			{
 				if(extrudedText)
 				{
@@ -289,7 +290,7 @@ void CDasherViewSquare::DoDelayedText(CTextString* pText, myint extrusionLevel, 
 	case Options::BottomToTop:
 		{
 			screenint iTop = y - textDims.second;
-			if (y >= 0)
+			if (iTop < Screen()->GetHeight() && y >= 0)
 			{
 				if(extrudedText)
 				{
