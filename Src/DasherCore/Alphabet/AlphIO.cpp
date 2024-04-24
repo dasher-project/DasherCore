@@ -23,7 +23,7 @@
 #include <string>
 #include <algorithm>
 
-#include "../ColourIO.h"
+#include "../ColorIO.h"
 
 using namespace Dasher;
 

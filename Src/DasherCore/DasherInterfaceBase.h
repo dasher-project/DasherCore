@@ -36,7 +36,7 @@
 #include "../Common/ModuleSettings.h"
 #include "Alphabet/AlphIO.h"
 #include "AutoSpeedControl.h"
-#include "ColourIO.h"
+#include "ColorIO.h"
 #include "InputFilter.h"
 #include "ModuleManager.h"
 #include "ControlManager.h"
@@ -551,7 +551,7 @@ protected:
   CInputFilter* m_pInputFilter;
   CModuleManager m_oModuleManager;
   CAlphIO *m_AlphIO;
-  CColourIO *m_ColourIO;
+  CColorIO *m_ColorIO;
   CControlBoxIO *m_ControlBoxIO;
   CNodeCreationManager *m_pNCManager;
   CUserLogBase *m_pUserLog;

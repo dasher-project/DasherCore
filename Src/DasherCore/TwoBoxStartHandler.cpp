@@ -19,9 +19,9 @@ bool CTwoBoxStartHandler::DecorateView(CDasherView *pView) {
   int lineWidth = m_iBoxEntered == std::numeric_limits<long>::max() ? 2 : 4; //out/in box
 
   if (m_bFirstBox) {
-    pView->Screen()->DrawRectangle(8, iHeight / 2 - iMousePosDist + 50, iWidth-16, iHeight / 2 - iMousePosDist - 50, ColorPalette::noColor, pView->GetColor(119), lineWidth);
+    pView->Screen()->DrawRectangle(8, iHeight / 2 - iMousePosDist + 50, iWidth-16, iHeight / 2 - iMousePosDist - 50, ColorPalette::noColor, pView->GetNamedColor(NamedColor::firstStartBox), lineWidth);
   } else {
-    pView->Screen()->DrawRectangle(8, iHeight / 2 + iMousePosDist + 50, iWidth-16, iHeight / 2 + iMousePosDist - 50, ColorPalette::noColor, pView->GetColor(120), lineWidth);
+    pView->Screen()->DrawRectangle(8, iHeight / 2 + iMousePosDist + 50, iWidth-16, iHeight / 2 + iMousePosDist - 50, ColorPalette::noColor, pView->GetNamedColor(NamedColor::secondStartBox), lineWidth);
   }
   return true;
 }

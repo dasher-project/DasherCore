@@ -21,6 +21,7 @@
 #include "DasherInput.h"
 #include "DasherView.h"
 
+
 using namespace Dasher;
 
 /////////////////////////////////////////////////////////////////////////////
@@ -158,8 +159,8 @@ void CDasherView::SetColorScheme(const ColorPalette* pColorScheme)
     m_pColorPalette = pColorScheme;
 }
 
-const ColorPalette::Color& CDasherView::GetColor(int c) const
+const ColorPalette::Color& CDasherView::GetNamedColor(NamedColor::knownColorName color) const
 {
-    if(c < 0 || !m_pColorPalette) return ColorPalette::noColor;
-    return m_pColorPalette->Colors[c];
+    if(color.empty() || !m_pColorPalette) return ColorPalette::noColor;
+    return m_pColorPalette->GetNamedColor(color);
 }

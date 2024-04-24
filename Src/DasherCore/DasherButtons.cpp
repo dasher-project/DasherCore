@@ -95,9 +95,9 @@ void CDasherButtons::NewDrawGoTo(CDasherView *pView, myint iDasherMin, myint iDa
    pView->Dasher2Screen( 0, iDasherMax, p[3].x, p[3].y);
 
    if(bActive) {
-     pView->Screen()->Polyline(p, 4, 3, pView->GetColor(ColorPalette::mouseLine));
+     pView->Screen()->Polyline(p, 4, 3, pView->GetNamedColor(NamedColor::inputLine)); //TODO: Fix Color
    }
    else {
-     pView->Screen()->Polyline(p, 4, 1, pView->GetColor(ColorPalette::mouseCursor));
+     pView->Screen()->Polyline(p, 4, 1, pView->GetNamedColor(NamedColor::inputPosition)); //TODO: Fix Color
    }
 }

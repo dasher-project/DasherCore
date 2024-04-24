@@ -490,11 +490,11 @@ void CDasherInterfaceBase::NewFrame(unsigned long iTime, bool bForceRedraw) {
       // template if/when we ever implement multithreading widely/properly...
       m_DasherScreen->SendMarker(0); //this replaces the nodes...
       const screenint iSW = m_DasherScreen->GetWidth(), iSH = m_DasherScreen->GetHeight();
-      m_DasherScreen->DrawRectangle(0,0,iSW,iSH,m_pDasherView->GetColor(ColorPalette::background),ColorPalette::noColor,0); //fill in colour 0 = white
+      m_DasherScreen->DrawRectangle(0,0,iSW,iSH,m_pDasherView->GetNamedColor(NamedColor::infoTextBackground),ColorPalette::noColor,0); //fill in colour 0 = white
       unsigned int iSize(GetLongParameter(LP_MESSAGE_FONTSIZE));
       if (!m_pLockLabel) m_pLockLabel = m_DasherScreen->MakeLabel(m_strLockMessage, iSize);
       std::pair<screenint,screenint> dims = m_DasherScreen->TextSize(m_pLockLabel, iSize);
-      m_DasherScreen->DrawString(m_pLockLabel, (iSW-dims.first)/2, (iSH-dims.second)/2, iSize, m_pDasherView->GetColor(ColorPalette::text));
+      m_DasherScreen->DrawString(m_pLockLabel, (iSW-dims.first)/2, (iSH-dims.second)/2, iSize, m_pDasherView->GetNamedColor(NamedColor::infoText));
       m_DasherScreen->SendMarker(1); //decorations - don't draw any
       bBlit = true;
     } else {
@@ -612,10 +612,10 @@ Options::ScreenOrientations CDasherInterfaceBase::ComputeOrientation() {
 }
 
 void CDasherInterfaceBase::ChangeColours() {
-  if(!m_ColourIO || !m_pDasherView)
+  if(!m_ColorIO || !m_pDasherView)
     return;
 
-  m_pDasherView->SetColorScheme(&(m_ColourIO->GetInfo(GetStringParameter(SP_COLOUR_ID))));
+  m_pDasherView->SetColorScheme(m_ColorIO->FindPalette(GetStringParameter(SP_COLOUR_ID)));
 }
 
 void CDasherInterfaceBase::ChangeScreen(CDasherScreen *NewScreen) {
@@ -799,7 +799,7 @@ void CDasherInterfaceBase::GetPermittedValues(Parameter parameter, std::vector<s
     break;
   case SP_COLOUR_ID:
     DASHER_ASSERT(m_ColourIO != NULL);
-    m_ColourIO->GetColours(&vList);
+    m_ColorIO->GetKnownPalettes(&vList);
     break;
   case SP_CONTROL_BOX_ID:
     DASHER_ASSERT(m_ControlBoxIO != NULL);

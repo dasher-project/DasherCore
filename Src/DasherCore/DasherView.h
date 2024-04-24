@@ -16,6 +16,7 @@ class CDasherNode;
 #include "DasherScreen.h"
 #include "Observable.h"
 #include "Event.h"
+#include "ColorPalette.h"
 
 /// \defgroup View Visualisation of the model
 /// @{
@@ -196,7 +197,7 @@ public:
 	virtual void SetColorScheme(const ColorPalette* pColorScheme);
 
 
-	const ColorPalette::Color& GetColor(int c) const;
+	const ColorPalette::Color& GetNamedColor(NamedColor::knownColorName color) const;
 
 protected:
 	/// Clips a line (specified in Dasher co-ordinates) to the visible region

@@ -35,8 +35,8 @@ bool CClickFilter::DecorateView(CDasherView *pView, CDasherInput *pInput) {
     y[1] = mouseY;
     y[2] = mouseY + mouseX;
     if (GetBoolParameter(BP_CURVE_MOUSE_LINE)) {
-      pView->DasherSpaceLine(x[0], y[0], x[1], y[1], GetLongParameter(LP_LINE_WIDTH), pView->GetColor(ColorPalette::mouseLine));
-      pView->DasherSpaceLine(x[1], y[1], x[2], y[2], GetLongParameter(LP_LINE_WIDTH), pView->GetColor(ColorPalette::mouseLine));
+      pView->DasherSpaceLine(x[0], y[0], x[1], y[1], GetLongParameter(LP_LINE_WIDTH), pView->GetNamedColor(NamedColor::inputLine));
+      pView->DasherSpaceLine(x[1], y[1], x[2], y[2], GetLongParameter(LP_LINE_WIDTH), pView->GetNamedColor(NamedColor::inputLine));
     } else {
       //Note that the nonlinearity at edges of screen causes the lines to wobble close to the top/bottom:
       // we draw lines _straight_ towards their targets on the Y-axis (calculated after applying nonlinearity),
@@ -51,7 +51,7 @@ bool CClickFilter::DecorateView(CDasherView *pView, CDasherInput *pInput) {
         //  x[2] = mouseX - (iDasherMaxY - mouseY);
         //  y[2] = iDasherMaxY;
         //}
-      pView->DasherPolyline(x, y, 3, GetLongParameter(LP_LINE_WIDTH), pView->GetColor(ColorPalette::mouseLine));
+      pView->DasherPolyline(x, y, 3, GetLongParameter(LP_LINE_WIDTH), pView->GetNamedColor(NamedColor::inputLine));
     }
   }
   return bChanged;

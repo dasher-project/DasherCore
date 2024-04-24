@@ -59,9 +59,9 @@ bool CCircleStartHandler::DecorateView(CDasherView *pView) {
 
   const bool bAboutToChange = m_bInCircle && m_iEnterTime != std::numeric_limits<long>::max();
   if (m_pFilter->isPaused()) {
-    pView->Screen()->DrawCircle(ctr.x, ctr.y, m_iScreenRadius, pView->GetColor(bAboutToChange ? 241 : 242), pView->GetColor(ColorPalette::mouseCursor), 1);
+    pView->Screen()->DrawCircle(ctr.x, ctr.y, m_iScreenRadius, pView->GetNamedColor(bAboutToChange ? NamedColor::circleWaiting : NamedColor::circleStopped), pView->GetNamedColor(NamedColor::circleOutline), 1);
   } else {
-	pView->Screen()->DrawCircle(ctr.x, ctr.y, m_iScreenRadius, ColorPalette::noColor, pView->GetColor(240), bAboutToChange ? 3 : 1);
+	pView->Screen()->DrawCircle(ctr.x, ctr.y, m_iScreenRadius, ColorPalette::noColor, pView->GetNamedColor(NamedColor::circleOutline), bAboutToChange ? 3 : 1);
   }
 
   return true;

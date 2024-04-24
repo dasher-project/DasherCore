@@ -47,7 +47,7 @@ CTwoPushDynamicFilter::CTwoPushDynamicFilter(CSettingsUser *pCreator, CDasherInt
   HandleEvent(LP_TWO_PUSH_OUTER);//and all the others too!
 }
 
-void GuideLine(CDasherView *pView, const myint iDasherY, const int iColour)
+void GuideLine(CDasherView *pView, const myint iDasherY, NamedColor::knownColorName Colour)
 {
   myint iDasherX = -100;
   CDasherScreen::point p[2];
@@ -59,7 +59,7 @@ void GuideLine(CDasherView *pView, const myint iDasherY, const int iColour)
 
   pView->Dasher2Screen(iDasherX, iDasherY, p[1].x, p[1].y);
 
-  pScreen->Polyline(p, 2, 3, pView->GetColor(iColour));
+  pScreen->Polyline(p, 2, 3, pView->GetNamedColor(Colour));
 }
 
 long CTwoPushDynamicFilter::downDist() {
@@ -80,22 +80,22 @@ bool CTwoPushDynamicFilter::DecorateView(CDasherView *pView, CDasherInput *pInpu
       pView->Dasher2Screen(-100, m_aaiGuideAreas[i][0], x1, y1);
       pView->Dasher2Screen(-1000, m_aaiGuideAreas[i][1], x2, y2);
     
-      pScreen->DrawRectangle(x1, y1, x2, y2, pView->GetColor(62)/*pale yellow*/, ColorPalette::noColor, 0);
+      pScreen->DrawRectangle(x1, y1, x2, y2, pView->GetNamedColor(NamedColor::twoPushDynamicOuterGuides), ColorPalette::noColor, 0);
     }
   }
 
   //inner guides (red lines).
-  GuideLine(pView, 2048 - upDist(), ColorPalette::mouseLine);
-  GuideLine(pView, 2048 + downDist(), ColorPalette::mouseLine);
+  GuideLine(pView, 2048 - upDist(), NamedColor::inputLine); //TODO: Fix Color
+  GuideLine(pView, 2048 + downDist(), NamedColor::inputLine); //TODO: Fix Color
 
   //outer guides (at center of rects) - red lines
-  GuideLine(pView, 2048 - GetLongParameter(LP_TWO_PUSH_OUTER), ColorPalette::mouseLine);
-  GuideLine(pView, 2048 + GetLongParameter(LP_TWO_PUSH_OUTER), ColorPalette::mouseLine);
+  GuideLine(pView, 2048 - GetLongParameter(LP_TWO_PUSH_OUTER), NamedColor::inputLine); //TODO: Fix Color
+  GuideLine(pView, 2048 + GetLongParameter(LP_TWO_PUSH_OUTER), NamedColor::inputLine); //TODO: Fix Color
 
   //moving markers - green if active, else yellow
   if (m_bDecorationChanged && isRunning() && m_dNatsSinceFirstPush > -std::numeric_limits<double>::infinity()) {
     for (int i = 0; i < 2; i++) {
-      GuideLine(pView, m_aiMarker[i], (i == m_iActiveMarker) ? 240 : 61/*orange*/);
+      GuideLine(pView, m_aiMarker[i], (i == m_iActiveMarker) ? NamedColor::twoPushDynamicActiveMarker : NamedColor::twoPushDynamicInactiveMarker);
     }
   }
   bool bRV(m_bDecorationChanged);

@@ -153,11 +153,6 @@ private:
  */
 
   /**
-   * The color (in Dasher colors) to make the crosshair.
-   */
-  const int m_iCrosshairColor;
-
-  /**
    * The font size used to draw the target string.
    */
   const int m_iFontSize;
