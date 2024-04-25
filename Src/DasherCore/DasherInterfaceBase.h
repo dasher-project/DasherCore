@@ -526,7 +526,7 @@ protected:
   void CreateNCManager();
 
   void ChangeAlphabet();
-  void ChangeColours();
+  void ChangeColors();
   void ChangeView();
 
   //Compute the screen orientation to use - i.e. combining the user's

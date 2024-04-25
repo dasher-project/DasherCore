@@ -85,7 +85,7 @@ CDasherInterfaceBase::CDasherInterfaceBase(CSettingsStore *pSettingsStore)
   m_pInput = NULL;
   m_pInputFilter = NULL;
   m_AlphIO = NULL;
-  m_ColourIO = NULL;
+  m_ColorIO = NULL;
   m_ControlBoxIO = NULL;
   m_pUserLog = NULL;
   m_pNCManager = NULL;
@@ -113,17 +113,17 @@ void CDasherInterfaceBase::Realize(unsigned long ulTime) {
   srand(ulTime);
  
   m_AlphIO = new CAlphIO(this);
-  ScanFiles(m_AlphIO, "alphabet*.xml");
+  ScanFiles(m_AlphIO, "alph.*.xml");
 
-  m_ColourIO = new CColourIO(this);
-  ScanFiles(m_ColourIO, "colour*.xml");
+  m_ColorIO = new CColorIO(this);
+  ScanFiles(m_ColorIO, "color.*.xml");
 
   m_ControlBoxIO = new CControlBoxIO(this);
-  ScanFiles(m_ControlBoxIO, "control*.xml");
+  ScanFiles(m_ControlBoxIO, "control.*.xml");
 
   ChangeView();
 
-  ChangeColours();
+  ChangeColors();
   // Create the user logging object if we are suppose to.  We wait
   // until now so we have the real value of the parameter and not
   // just the default.
@@ -172,7 +172,7 @@ CDasherInterfaceBase::~CDasherInterfaceBase() {
   delete m_pDasherModel;        // The order of some of these deletions matters
   delete m_pDasherView;
   delete m_ControlBoxIO;
-  delete m_ColourIO;
+  delete m_ColorIO;
   delete m_AlphIO;
   delete m_pNCManager;
   // Do NOT delete Edit box or Screen. This class did not create them.
@@ -243,7 +243,7 @@ void CDasherInterfaceBase::HandleEvent(Parameter parameter) {
     ScheduleRedraw();
     break;
   case SP_COLOUR_ID:
-    ChangeColours();
+    ChangeColors();
     ScheduleRedraw();
     break;
   case BP_PALETTE_CHANGE:
@@ -611,7 +611,7 @@ Options::ScreenOrientations CDasherInterfaceBase::ComputeOrientation() {
   return Options::LeftToRight;
 }
 
-void CDasherInterfaceBase::ChangeColours() {
+void CDasherInterfaceBase::ChangeColors() {
   if(!m_ColorIO || !m_pDasherView)
     return;
 
@@ -655,7 +655,7 @@ void CDasherInterfaceBase::ChangeView() {
     delete m_pDasherView;
 
     m_pDasherView = pNewView;
-    ChangeColours();
+    ChangeColors();
   }
   ScheduleRedraw();
 }

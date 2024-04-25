@@ -72,7 +72,7 @@ bool CTwoButtonDynamicFilter::DecorateView(CDasherView *pView, CDasherInput *pIn
   
   pView->Dasher2Screen(iDasherX, iDasherY, p[1].x, p[1].y);
   
-  pScreen->Polyline(p, 2, 3, pView->GetNamedColor(NamedColor::circleStopped)); //TODO: Fix Color
+  pScreen->Polyline(p, 2, 3, pView->GetNamedColor(NamedColor::selectionHighlight));
 
   iDasherX = -100;
   iDasherY = 2048 + GetLongParameter(LP_TWO_BUTTON_OFFSET);
@@ -84,7 +84,7 @@ bool CTwoButtonDynamicFilter::DecorateView(CDasherView *pView, CDasherInput *pIn
   
   pView->Dasher2Screen(iDasherX, iDasherY, p[1].x, p[1].y);
   
-  pScreen->Polyline(p, 2, 3, pView->GetNamedColor(NamedColor::circleStopped)); //TODO: Fix Color
+  pScreen->Polyline(p, 2, 3, pView->GetNamedColor(NamedColor::selectionHighlight));
 
   bool bRV(m_bDecorationChanged);
   m_bDecorationChanged = false;

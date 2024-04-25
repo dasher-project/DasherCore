@@ -37,13 +37,13 @@ bool COneButtonFilter::DecorateView(CDasherView *pView, CDasherInput *pInput) {
     pView->Dasher2Screen(4096, 0, p[1].x, p[1].y);
     pView->Dasher2Screen(4096, 4096, p[2].x, p[2].y);
     pView->Dasher2Screen(2048, 4096, p[3].x, p[3].y);
-    pScreen->Polyline(p, 4, 1, pView->GetNamedColor(NamedColor::inputLine)); //TODO: Fix Color?
+    pScreen->Polyline(p, 4, 1, pView->GetNamedColor(NamedColor::selectionHighlight));
   } else {
     CDasherScreen::point p[2];
 
     pView->Dasher2Screen(-100, iLocation, p[0].x, p[0].y);
     pView->Dasher2Screen(-1000, iLocation, p[1].x, p[1].y);
-    pScreen->Polyline(p, 2, 1, pView->GetNamedColor(NamedColor::inputLine)); //TODO: Fix Color?
+    pScreen->Polyline(p, 2, 1, pView->GetNamedColor(NamedColor::selectionHighlight));
   }
   m_bNoDecorations = false;
   return true;

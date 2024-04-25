@@ -26,6 +26,7 @@ namespace Dasher {
 		static const knownColorName defaultOutline = "defaultOutlineColor";
 		static const knownColorName defaultLabel = "defaultLabelColor";
 		static const knownColorName selectionHighlight = "selectionHighlightColor";
+		static const knownColorName selectionInactive = "selectionInactiveColor";
 		static const knownColorName circleOutline = "circleOutlineColor";
 		static const knownColorName circleStopped = "circleStoppedColor";
 		static const knownColorName circleWaiting = "circleWaitingColor";

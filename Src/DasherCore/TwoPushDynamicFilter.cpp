@@ -85,12 +85,12 @@ bool CTwoPushDynamicFilter::DecorateView(CDasherView *pView, CDasherInput *pInpu
   }
 
   //inner guides (red lines).
-  GuideLine(pView, 2048 - upDist(), NamedColor::inputLine); //TODO: Fix Color
-  GuideLine(pView, 2048 + downDist(), NamedColor::inputLine); //TODO: Fix Color
+  GuideLine(pView, 2048 - upDist(), NamedColor::selectionHighlight);
+  GuideLine(pView, 2048 + downDist(), NamedColor::selectionHighlight);
 
   //outer guides (at center of rects) - red lines
-  GuideLine(pView, 2048 - GetLongParameter(LP_TWO_PUSH_OUTER), NamedColor::inputLine); //TODO: Fix Color
-  GuideLine(pView, 2048 + GetLongParameter(LP_TWO_PUSH_OUTER), NamedColor::inputLine); //TODO: Fix Color
+  GuideLine(pView, 2048 - GetLongParameter(LP_TWO_PUSH_OUTER), NamedColor::selectionHighlight);
+  GuideLine(pView, 2048 + GetLongParameter(LP_TWO_PUSH_OUTER), NamedColor::selectionHighlight);
 
   //moving markers - green if active, else yellow
   if (m_bDecorationChanged && isRunning() && m_dNatsSinceFirstPush > -std::numeric_limits<double>::infinity()) {

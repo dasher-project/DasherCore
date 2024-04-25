@@ -107,14 +107,14 @@ void CScreenGameModule::DrawText(CDasherView *pView) {
   rectDims.first+=targetStart;
 
   //ok. that's the layout done
-  pScreen->DrawRectangle(0, 0, rectDims.first, rectDims.second, pView->GetNamedColor(NamedColor::infoTextBackground), pView->GetNamedColor(NamedColor::infoText), 1);
-  pScreen->DrawString(m_pLabEntered, x-entDims.first, 0, uFontSize, pView->GetNamedColor(NamedColor::rootNode)); //TODO: Fix Color?
+  pScreen->DrawRectangle(0, 0, rectDims.first, rectDims.second, pView->GetNamedColor((m_pLabWrong) ? NamedColor::warningTextBackground :NamedColor::infoTextBackground), pView->GetNamedColor(NamedColor::infoText), 1);
+  pScreen->DrawString(m_pLabEntered, x-entDims.first, 0, uFontSize, pView->GetNamedColor(NamedColor::infoText));
   if (m_pLabWrong) {
-    pScreen->DrawString(m_pLabWrong, x, 0, uFontSize, pView->GetNamedColor(NamedColor::inputLine)); //TODO: Fix Color?
+    pScreen->DrawString(m_pLabWrong, x, 0, uFontSize, pView->GetNamedColor(NamedColor::warningText));
     CDasherScreen::point p[2];
     p[0].x=x; p[1].x=targetStart;
     p[0].y = p[1].y = rectDims.second/2;
-    pScreen->Polyline(p, 2, 2, pView->GetNamedColor(NamedColor::inputLine)); //TODO: Fix Color?
+    pScreen->Polyline(p, 2, 2, pView->GetNamedColor(NamedColor::gameGuide));
   }
   pScreen->DrawString(m_pLabTarget, targetStart, 0, uFontSize, pView->GetNamedColor(NamedColor::defaultLabel));
 
