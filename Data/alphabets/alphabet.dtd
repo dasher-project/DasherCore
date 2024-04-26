@@ -3,9 +3,9 @@
 <!ELEMENT alphabet (group*)>
 <!ATTLIST alphabet name CDATA #REQUIRED> <!-- unique name that can be referenced in Dasher to choose this alphabet -->
 <!ATTLIST alphabet orientation (LR|RL|TB|BT) #REQUIRED> <!-- orientation in which this alphabet is typed. Example: LR=Left-to-Right -->
+<!ATTLIST alphabet conversionMode (none|mandarin|routingContextInsensitve|routingContextSensitive) "none"> <!-- conversion mode that is used internally to spawn a decoder that can handle phonetic writing -->
 <!ATTLIST alphabet trainingFilename CDATA #IMPLIED> <!-- filename that is referenced for training the language model -->
 <!ATTLIST alphabet colorsName CDATA "Default"> <!-- unique name of the color schema that should be used by default -->
-<!ATTLIST alphabet conversionMode (None|Mandarin|RoutingContextInsensitve|RoutingContextSensitive) "None"> <!-- conversion mode that is used internally to spawn a decoder that can handle phonetic writing -->
 
 <!-- Logical groups of symbols, eg name="lowercase" -->
 <!ELEMENT group (node*|group*)>
@@ -31,7 +31,7 @@
 
 <!-- Text-to-Speech: -->
 <!ELEMENT fixedTTSAction EMPTY>
-<!ATTLIST fixedTTSAction text CDATA #REQUIRED> <!-- Says "Hello" -->
+<!ATTLIST fixedTTSAction text CDATA #REQUIRED> <!-- speaks out the given text -->
 
 <!ELEMENT contextTTSAction EMPTY>
 <!ATTLIST contextTTSAction context (word|sentence|paragraph|all) #REQUIRED> <!-- Reads out the last word/sentence/paragraph/all -->
@@ -42,7 +42,7 @@
 
 <!-- Dasher-internal: -->
 <!ELEMENT pauseDasherAction EMPTY> <!-- Stops any currently ongoing TTS -->
-<!ATTLIST pauseDasherAction time CDATA #REQUIRED> <!-- Pauses Dasher for 10s, or stops forever if time is unspecified -->
+<!ATTLIST pauseDasherAction time CDATA #IMPLIED> <!-- Pauses Dasher for the given time, or stops forever if time is unspecified -->
 
 <!-- System/application control: -->
 
@@ -52,7 +52,7 @@
 <!ATTLIST atspiAction action CDATA #REQUIRED> <!-- Sends the specified AT-SPI action to the currently focused application -->
 
 <!ELEMENT keyboardAction EMPTY>
-<!ATTLIST keyboardAction key CDATA #IMPLIED> <!-- Emulates a keyboard shortcut, possibly with several modifiers (e.g. "Ctrl+Alt+Entf"), performing a press and a release -->
+<!ATTLIST keyboardAction key CDATA #IMPLIED> <!-- Emulates a keyboard shortcut, possibly with several modifiers, given as keyboard scancodes divided by commas (e.g. "1d,38,e053" for Ctrl+Alt+Entf), performing a press and a release -->
 <!ATTLIST keyboardAction press CDATA #IMPLIED> <!-- As above, but only performing the press -->
 <!ATTLIST keyboardAction release CDATA #IMPLIED> <!-- As above, but only performing the release -->
 
