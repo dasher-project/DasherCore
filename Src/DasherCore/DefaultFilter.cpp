@@ -148,24 +148,24 @@ void CDefaultFilter::pause() {
   if (m_pStartHandler) m_pStartHandler->onPause();
 }
 
-void CDefaultFilter::KeyDown(unsigned long iTime, int iId, CDasherView *pDasherView, CDasherInput *pInput, CDasherModel *pModel) {
+void CDefaultFilter::KeyDown(unsigned long iTime, Keys::VirtualKey Key, CDasherView *pDasherView, CDasherInput *pInput, CDasherModel *pModel) {
 
-  if ((iId==0 && GetBoolParameter(BP_START_SPACE))
-      || (iId==100 && GetBoolParameter(BP_START_MOUSE))) {
+  if ((Key==Keys::Big_Start_Stop_Key && GetBoolParameter(BP_START_SPACE))
+      || (Key==Keys::Primary_Input && GetBoolParameter(BP_START_MOUSE))) {
     if(isPaused())
       run(iTime);
     else
       stop();
   }
-  else if (iId==101 || iId==102 || iId==1) {
+  else if (Key==Keys::Secondary_Input || Key==Keys::Tertiary_Input || Key==Keys::Button_1) {
     //Other mouse buttons, if platforms support; or button 1
     if (GetBoolParameter(BP_TURBO_MODE))
       m_bTurbo = true;
   }
 }
 
-void CDefaultFilter::KeyUp(unsigned long iTime, int iId, CDasherView *pView, CDasherInput *pInput, CDasherModel *pModel) {
-  if (iId==101 || iId==102 || iId==1)
+void CDefaultFilter::KeyUp(unsigned long iTime, Keys::VirtualKey Key, CDasherView *pView, CDasherInput *pInput, CDasherModel *pModel) {
+  if (Key==Keys::Secondary_Input || Key==Keys::Tertiary_Input || Key==Keys::Button_1)
     m_bTurbo=false;
 }
 

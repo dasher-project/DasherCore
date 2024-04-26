@@ -21,6 +21,7 @@
 #include "AlphIO.h"
 
 #include <string>
+#include <cstring>
 #include <algorithm>
 
 #include "../ColorIO.h"
@@ -91,8 +92,8 @@ bool Dasher::CAlphIO::Parse(pugi::xml_document & document, const std::string, bo
 
 	CAlphInfo* CurrentAlphabet = new CAlphInfo();
 	CurrentAlphabet->AlphID = alphabet.attribute("name").as_string();
-	CurrentAlphabet->TrainingFile = alphabet.child("trainingFilename").child_value();
-	CurrentAlphabet->PreferredColours = alphabet.child("colorsName").child_value();
+	CurrentAlphabet->TrainingFile = alphabet.attribute("trainingFilename").as_string();
+	CurrentAlphabet->PreferredColors = alphabet.attribute("colorsName").as_string();
 
 	// orientation
 	const std::string orientation_type = alphabet.attribute("orientation").as_string("LR");
@@ -174,29 +175,32 @@ CAlphInfo *CAlphIO::CreateDefault() {
 	// TODO I appreciate these strings should probably be in a resource file.
 	// Not urgent though as this is not intended to be used. It's just a
 	// last ditch effort in case file I/O totally fails.
-	CAlphInfo &Default(*(new CAlphInfo()));
-	Default.AlphID = "Default";
-	Default.TrainingFile = "training_english_GB.txt";
-	Default.PreferredColours = "Default";
-	Default.Orientation = Options::LeftToRight;
-	Default.colorGroup = "lowercase";
+	CAlphInfo* Default = new CAlphInfo();
+	Default->AlphID = "Default";
+	Default->TrainingFile = "training_english_GB.txt";
+	Default->PreferredColors = "Default";
+	Default->Orientation = Options::LeftToRight;
+	Default->colorGroup = "lowercase";
 
-	Default.pChild = nullptr;
+	Default->pChild = nullptr;
 
 	std::string Chars = "abcdefghijklmnopqrstuvwxyz";
-	Default.m_vCharacters.resize(Chars.size());
+	Default->m_vCharacters.resize(Chars.size());
 	//fill in structs for characters in Chars...
-	for(unsigned int i = 0; i < Chars.size(); i++) {
-		Default.m_vCharacters[i].Text = Chars[i];
-		Default.m_vCharacters[i].Display = Chars[i];
-		Default.m_vCharacters[i].ColorGroupOffset = i;
+	for(int i = 0; i < Chars.size(); i++) {
+		Default->m_vCharacters[i].Text = Chars[i];
+		Default->m_vCharacters[i].Display = Chars[i];
+		Default->m_vCharacters[i].ColorGroupOffset = i;
+		Default->m_vCharacters[i].parentGroup = Default;
 	}
 
-	Default.iStart=1; Default.iEnd= static_cast<int>(Default.m_vCharacters.size())+1;
-	Default.iNumChildNodes = static_cast<int>(Default.m_vCharacters.size());
-	Default.pNext=Default.pChild=NULL;
+	Default->iStart=1;
+    Default->iEnd= static_cast<int>(Default->m_vCharacters.size())+1;
+	Default->iNumChildNodes = static_cast<int>(Default->m_vCharacters.size());
+	Default->pNext = nullptr;
+	Default->pChild = nullptr;
 
-	return &Default;
+	return Default;
 }
 
 void CAlphIO::ReadCharAttributes(pugi::xml_node xml_node, CAlphInfo::character* alphabet_character, SGroupInfo* parentGroup) {

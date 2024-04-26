@@ -3,17 +3,10 @@
 #include <regex>
 #include <filesystem>
 
-/* Taken from https://stackoverflow.com/a/69950065 */
 static bool IsFileWriteable(const std::filesystem::path &file_path)
 {
-    FILE* file_handle;
-    if (fopen_s(&file_handle, file_path.string().c_str(), "a") != 0)
-    {
-        return false;
-    }
-
-    fclose(file_handle);
-    return true;
+	std::fstream file(file_path.string(), std::ios_base::app | std::fstream::out);
+	return file.is_open();
 }
 
 /* Taken from https://stackoverflow.com/a/24315631 */

@@ -197,6 +197,11 @@ namespace Dasher {
       const ColorPalette::Color& getOutlineColor(const ColorPalette* colorPalette) override;
       const ColorPalette::Color& getNodeColor(const ColorPalette* colorPalette) override;
 
+      bool UseAltColor() const override
+      {
+          return (offset()&1) == 1;
+      }
+
     protected:
       virtual const std::string &outputText() const;
       ///Text to write to user training file/buffer when this symbol output.

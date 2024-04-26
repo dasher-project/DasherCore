@@ -20,7 +20,7 @@ class CDasherButtons : public CStaticFilter
 
   virtual bool DecorateView(CDasherView *pView, CDasherInput *pInput)=0;
   
-  void KeyDown(unsigned long iTime, int iId, CDasherView *pView, CDasherInput *pInput, CDasherModel *pModel);
+  void KeyDown(unsigned long iTime, Keys::VirtualKey Key, CDasherView *pView, CDasherInput *pInput, CDasherModel *pModel);
   void Timer(unsigned long Time, CDasherView *pView, CDasherInput *pInput, CDasherModel *m_pDasherModel, CExpansionPolicy **pol);
   void Activate();
   
@@ -40,7 +40,7 @@ class CDasherButtons : public CStaticFilter
   int m_iNumBoxes, iActiveBox;
   unsigned long m_iScanTime;
   
-  virtual void DirectKeyDown(unsigned long iTime, int iId, CDasherView *pView, CDasherModel *pModel);
+  virtual void DirectKeyDown(unsigned long iTime, Keys::VirtualKey Key, CDasherView *pView, CDasherModel *pModel);
 };
 }
 /// @}

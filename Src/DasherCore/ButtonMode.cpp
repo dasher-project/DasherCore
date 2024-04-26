@@ -155,8 +155,8 @@ void CButtonMode::Timer(unsigned long Time, CDasherView *pView, CDasherInput *pI
   CDasherButtons::Timer(Time, pView, pInput, pModel, pol);
 }
 
-void CButtonMode::KeyDown(unsigned long iTime, int iId, CDasherView *pView, CDasherInput *pInput, CDasherModel *pModel) {
-  if (iId == 100) {
+void CButtonMode::KeyDown(unsigned long iTime, Keys::VirtualKey Key, CDasherView *pView, CDasherInput *pInput, CDasherModel *pModel) {
+  if (Key == Keys::Primary_Input) {
     //Mouse!
     if (m_bMenu) {
       bool bScan;
@@ -168,7 +168,7 @@ void CButtonMode::KeyDown(unsigned long iTime, int iId, CDasherView *pView, CDas
         pInput->GetScreenCoords(iScreenX, iScreenY, pView);
         bScan = iScreenY < pView->Screen()->GetHeight()/2;
       }
-      CDasherButtons::KeyDown(iTime, bScan ? 1 : 2, pView, pInput, pModel);
+      CDasherButtons::KeyDown(iTime, bScan ? Keys::Button_1 : Keys::Button_2, pView, pInput, pModel);
       return;
     } else {
       myint iDasherX, iDasherY;
@@ -179,26 +179,26 @@ void CButtonMode::KeyDown(unsigned long iTime, int iId, CDasherView *pView, CDas
             iDasherY > m_pBoxes[i].iDisplayTop &&
             iDasherX < (m_pBoxes[i].iDisplayBottom - m_pBoxes[i].iDisplayTop)) {
           //user has clicked in box! Simulate press of appropriate (direct-mode) button...
-          CDasherButtons::KeyDown(iTime, (i==m_iNumBoxes-1) ? 1 : i+2, pView, pInput, pModel);
+          CDasherButtons::KeyDown(iTime, (i==m_iNumBoxes-1) ? Keys::Button_1 : static_cast<Keys::VirtualKey>(i+2), pView, pInput, pModel);
           return;
         }
       }
       //not in any box. Fall through, just to be conservative...
     }
   }
-  CDasherButtons::KeyDown(iTime, iId, pView, pInput, pModel);
+  CDasherButtons::KeyDown(iTime, Key, pView, pInput, pModel);
 }
 
-void CButtonMode::DirectKeyDown(unsigned long iTime, int iId, CDasherView *pView, CDasherModel *pModel) {
-  CDasherButtons::DirectKeyDown(iTime, iId, pView, pModel);
- if (iId!=100) m_iLastTime = iTime;
+void CButtonMode::DirectKeyDown(unsigned long iTime, Keys::VirtualKey Key, CDasherView *pView, CDasherModel *pModel) {
+  CDasherButtons::DirectKeyDown(iTime, Key, pView, pModel);
+ if (Key!=Keys::Primary_Input) m_iLastTime = iTime;
 }
 
 void CButtonMode::HandleEvent(Parameter parameter) {
   switch (parameter) {
   case LP_B:
   case LP_R:
-    // Delibarate fallthrough
+    // Deliberate fallthrough
     delete[] m_pBoxes;
     SetupBoxes();
     m_pInterface->ScheduleRedraw();

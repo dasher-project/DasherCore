@@ -36,8 +36,8 @@ class CDynamicButtons : public CDynamicFilter {
   ///when reversing, backs off; when paused, does nothing; when running, delegates to TimerImpl
   virtual void Timer(unsigned long Time, CDasherView *pView, CDasherInput *pInput, CDasherModel *m_pDasherModel, CExpansionPolicy **pol);
 
-  virtual void KeyDown(unsigned long iTime, int iId, CDasherView *pView, CDasherInput *pInput, CDasherModel *pModel);
-  virtual void KeyUp(unsigned long iTime, int iId, CDasherView *pView, CDasherInput *pInput, CDasherModel *pModel);
+  virtual void KeyDown(unsigned long iTime, Keys::VirtualKey Key, CDasherView *pView, CDasherInput *pInput, CDasherModel *pModel);
+  virtual void KeyUp(unsigned long iTime, Keys::VirtualKey Key, CDasherView *pView, CDasherInput *pInput, CDasherModel *pModel);
 
  protected:
   ///Called when a key event is detected - could be a single press (a la KeyDown/KeyUp),
@@ -47,13 +47,13 @@ class CDynamicButtons : public CDynamicFilter {
   /// of button 0 or 100 act as a dedicated reverse button, and button 1 pauses; any other
   /// press type or button is passed onto ActionButton.
   /// \param iType 0=normal press, 1=long press; see also CButtonMultiPress.
-  virtual void ButtonEvent(unsigned long iTime, int iButton, int iType, CDasherModel *pModel);
+  virtual void ButtonEvent(unsigned long iTime, Keys::VirtualKey Key, int iType, CDasherModel* pModel);
 
   ///Called to handle key events when the Filter is running forwards normally.
   /// Short presses of buttons 0, 100 and 1 have been handled already, but all
   /// other buttons/press-types will be passed here.
   /// \param iType 0=normal press, 1=long press; see also CButtonMultiPress.
-  virtual void ActionButton(unsigned long iTime, int iButton, int iType, CDasherModel *pModel) = 0;
+  virtual void ActionButton(unsigned long iTime, Keys::VirtualKey Key, int iType, CDasherModel* pModel) = 0;
 
   ///Whether a key (any that we might respond to) is held down.
   /// If so, m_iHeldId identifies the key in question. We need this
@@ -64,7 +64,7 @@ class CDynamicButtons : public CDynamicFilter {
 
   ///if m_bKeyDown is true, identifies the key that was first pressed
   /// that is currently still held down.
-  int m_iHeldId;
+  Keys::VirtualKey m_iHeldId;
 
   bool m_bDecorationChanged;
   bool isReversing() {return !isPaused() && !m_bForwards;}

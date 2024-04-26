@@ -25,9 +25,9 @@ class CInputFilter : public CDasherModule {
   /// drawn in the previous frame.
   virtual bool DecorateView(CDasherView *pView, CDasherInput *pInput) { return false; };
 
-  virtual void KeyDown(unsigned long Time, int iId, CDasherView *pDasherView, CDasherInput *pInput, CDasherModel *pModel) {}
+  virtual void KeyDown(unsigned long Time, Keys::VirtualKey Key, CDasherView *pDasherView, CDasherInput *pInput, CDasherModel *pModel) {}
   
-  virtual void KeyUp(unsigned long Time, int iId, CDasherView *pDasherView, CDasherInput *pInput, CDasherModel *pModel) {}
+  virtual void KeyUp(unsigned long Time, Keys::VirtualKey Key, CDasherView *pDasherView, CDasherInput *pInput, CDasherModel *pModel) {}
 
   ///Called for each frame, before rendering. Filter thus has the opportunity
   /// to schedule one or more steps with the model (or cancel scheduled steps!);

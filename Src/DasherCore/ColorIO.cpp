@@ -55,12 +55,13 @@ std::vector<ColorPalette::Color> CColorIO::GetAttributeAsColorList(pugi::xml_att
 	std::string_view::const_iterator lastStart = colorDef.begin();
 	for(std::string_view::const_iterator i = colorDef.begin(); i < colorDef.end(); ++i)
 	{
-	    if(*i == ',' || (i + 1) == colorDef.end())
+	    if(*i == ',')
 	    {
-			result.push_back(ColorPalette::Color(std::string(lastStart, i - 1)));
+			result.push_back(ColorPalette::Color(std::string(lastStart, i)));
 			lastStart = i + 1;
 	    }
 	}
+	result.push_back(ColorPalette::Color(std::string(lastStart, colorDef.end())));
 
 	return result;
 }

@@ -77,7 +77,7 @@ public:
 
   const std::string & GetTrainingFile() const {return TrainingFile;}
 
-  const std::string & GetPalette() const {return PreferredColours;}
+  const std::string & GetPalette() const {return PreferredColors;}
 
   //Determine that this character denotes a word gap
   bool SymbolIsSpaceCharacter(symbol s) const {return std::isspace(m_vCharacters[s-1].Text[0]);}
@@ -141,7 +141,7 @@ private:
 
   // Complete description of the alphabet:
   std::string TrainingFile;
-  std::string PreferredColours;
+  std::string PreferredColors;
   Options::ScreenOrientations Orientation;
 
   std::string m_strDefaultContext;

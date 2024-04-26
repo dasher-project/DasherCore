@@ -23,6 +23,7 @@
 #include "Parameters.h"
 
 #include "NodeCreationManager.h"
+#include <cmath>
 
 using namespace Dasher;
 

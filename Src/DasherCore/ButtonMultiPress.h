@@ -36,7 +36,7 @@ class CButtonMultiPress : public CDynamicButtons {
   CButtonMultiPress(CSettingsUser *pCreator, CDasherInterfaceBase *pInterface, CFrameRate *pFramerate, ModuleID_t iID, const char *szName);
 
   void Timer(unsigned long iTime, CDasherView *pView, CDasherInput *pInput, CDasherModel *pModel, CExpansionPolicy **pol);
-  void KeyDown(unsigned long iTime, int iId, CDasherView *pView, CDasherInput *pInput, CDasherModel *pModel);
+  void KeyDown(unsigned long iTime, Keys::VirtualKey Key, CDasherView *pView, CDasherInput *pInput, CDasherModel *pModel);
 
   void pause();
  protected:
@@ -47,7 +47,7 @@ class CButtonMultiPress : public CDynamicButtons {
  private:
   virtual void RevertPresses(int iCount) {};
 
-  int m_iQueueId;
+  Keys::VirtualKey m_iQueueId;
   std::deque<unsigned long> m_deQueueTimes;
 
   ///Whether a long-press has been handled (in Timer) - as the key

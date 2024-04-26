@@ -26,6 +26,7 @@
 
 #include <algorithm>
 #include <limits>
+#include <cmath>
 
 using namespace Dasher;
 
@@ -234,13 +235,13 @@ void CDasherViewSquare::DoDelayedText(CTextString* pText, myint extrusionLevel, 
 				{
 					Screen()->DrawString(pText->m_pLabel, x, y - textDims.second / 2, pText->m_iSize, pText->m_Color);
 				}
-				for (auto& pChild : pText->m_children)
-				{
-					pChild->m_ix = std::max(pChild->m_ix, iRight);
-					DoDelayedText(pChild, extrusionLevel + 1, 0);
-				}
-				pText->m_children.clear();
 			}
+			for (auto& pChild : pText->m_children)
+			{
+				pChild->m_ix = std::max(pChild->m_ix, iRight);
+				DoDelayedText(pChild, extrusionLevel + 1, 0);
+			}
+			pText->m_children.clear();
 			break;
 		}
 	case Options::RightToLeft:
@@ -256,13 +257,13 @@ void CDasherViewSquare::DoDelayedText(CTextString* pText, myint extrusionLevel, 
 				{
 					Screen()->DrawString(pText->m_pLabel, iLeft, y - textDims.second / 2, pText->m_iSize, pText->m_Color);
 				}
-				for (auto& pChild : pText->m_children)
-				{
-					pChild->m_ix = std::min(pChild->m_ix, iLeft);
-					DoDelayedText(pChild, extrusionLevel + 1, 0);
-				}
-				pText->m_children.clear();
 			}
+			for (auto& pChild : pText->m_children)
+			{
+				pChild->m_ix = std::min(pChild->m_ix, iLeft);
+				DoDelayedText(pChild, extrusionLevel + 1, 0);
+			}
+			pText->m_children.clear();
 			break;
 		}
 	case Options::TopToBottom:
@@ -278,13 +279,13 @@ void CDasherViewSquare::DoDelayedText(CTextString* pText, myint extrusionLevel, 
 				{
 					Screen()->DrawString(pText->m_pLabel, x - textDims.first / 2, y, pText->m_iSize, pText->m_Color);
 				}
-				for (auto& pChild : pText->m_children)
-				{
-					pChild->m_iy = std::max(pChild->m_iy, iBottom);
-					DoDelayedText(pChild, extrusionLevel + 1, 0);
-				}
-				pText->m_children.clear();
 			}
+			for (auto& pChild : pText->m_children)
+			{
+				pChild->m_iy = std::max(pChild->m_iy, iBottom);
+				DoDelayedText(pChild, extrusionLevel + 1, 0);
+			}
+			pText->m_children.clear();
 			break;
 		}
 	case Options::BottomToTop:
@@ -300,14 +301,13 @@ void CDasherViewSquare::DoDelayedText(CTextString* pText, myint extrusionLevel, 
 				{
 					Screen()->DrawString(pText->m_pLabel, x - textDims.first / 2, iTop, pText->m_iSize, pText->m_Color);
 				}
-				
-				for (auto& pChild : pText->m_children)
-				{
-					pChild->m_iy = std::min(pChild->m_iy, iTop);
-					DoDelayedText(pChild, extrusionLevel + 1, 0);
-				}
-				pText->m_children.clear();
 			}
+			for (auto& pChild : pText->m_children)
+			{
+				pChild->m_iy = std::min(pChild->m_iy, iTop);
+				DoDelayedText(pChild, extrusionLevel + 1, 0);
+			}
+			pText->m_children.clear();
 			break;
 		}
 	default:

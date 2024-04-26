@@ -14,13 +14,13 @@ CStylusFilter::CStylusFilter(CSettingsUser *pCreator, CDasherInterfaceBase *pInt
   : CDefaultFilter(pCreator, pInterface, pFramerate, iID, szName), m_pModel(NULL) {
 }
 
-void CStylusFilter::KeyDown(unsigned long iTime, int iId, CDasherView *pView, CDasherInput *pInput, CDasherModel *pModel) {
-  if(iId == 100) {
+void CStylusFilter::KeyDown(unsigned long iTime, Keys::VirtualKey Key, CDasherView *pView, CDasherInput *pInput, CDasherModel *pModel) {
+  if(Key == Keys::Primary_Input) {
     //pModel->ClearScheduledSteps(); //no need - each one step scheduled by superclass, will do this
     run(iTime);
     m_iKeyDownTime = iTime;
   } else
-    CDefaultFilter::KeyDown(iTime, iId, pView, pInput, pModel);
+    CDefaultFilter::KeyDown(iTime, Key, pView, pInput, pModel);
 }
 
 void CStylusFilter::pause() {
@@ -28,8 +28,8 @@ void CStylusFilter::pause() {
   if (m_pModel) m_pModel->ClearScheduledSteps();
 }
 
-void CStylusFilter::KeyUp(unsigned long iTime, int iId, CDasherView *pView, CDasherInput *pInput, CDasherModel *pModel) {
-  if(iId == 100) {
+void CStylusFilter::KeyUp(unsigned long iTime, Keys::VirtualKey Key, CDasherView *pView, CDasherInput *pInput, CDasherModel *pModel) {
+  if(Key == Keys::Primary_Input) {
     pause(); //stops superclass from scheduling any more one-step movements
     if (iTime - m_iKeyDownTime < GetLongParameter(LP_TAP_TIME)) {
       pInput->GetDasherCoords(m_iLastX, m_iLastY, pView);
@@ -39,7 +39,7 @@ void CStylusFilter::KeyUp(unsigned long iTime, int iId, CDasherView *pView, CDas
       m_pInterface->Done();
     }
   } else
-    CDefaultFilter::KeyUp(iTime, iId, pView, pInput, pModel);
+    CDefaultFilter::KeyUp(iTime, Key, pView, pInput, pModel);
 }
 
 void CStylusFilter::ApplyClickTransform(myint &iDasherX, myint &iDasherY, CDasherView *pView) {

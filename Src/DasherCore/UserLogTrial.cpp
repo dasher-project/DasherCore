@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <fstream>
 #include <ios>
+#include <cmath>
 
 
 CUserLogTrial::CUserLogTrial(const std::string& strCurrentTrialFilename)
@@ -407,8 +408,8 @@ void CUserLogTrial::AddMouseLocationNormalized(int iX, int iY, bool bStoreIntege
     g_pLogger->Log("CUserLogTrial::AddLocation, location was NULL!", logNORMAL);    
 }
 
-void CUserLogTrial::AddKeyDown(int iId, int iType, int iEffect) {
-  CUserButton* pButton = new CUserButton(iId, iType, iEffect);
+void CUserLogTrial::AddKeyDown(Dasher::Keys::VirtualKey Key, int iType, int iEffect) {
+  CUserButton* pButton = new CUserButton(Key, iType, iEffect);
 
   if(pButton) {
     NavCycle* pCycle = GetCurrentNavCycle();

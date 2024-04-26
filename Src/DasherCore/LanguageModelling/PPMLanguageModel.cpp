@@ -12,6 +12,7 @@
 #include <stack>
 #include <sstream>
 #include <iostream>
+#include <cstring>
 
 using namespace Dasher;
 

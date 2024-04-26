@@ -150,28 +150,28 @@ void CTwoPushDynamicFilter::updateBitrate(double dBitrate) {
 //cout << "Short " << m_aaiGuideAreas[0][0] << " to " << m_aaiGuideAreas[0][1] << ", Long " << m_aaiGuideAreas[1][0] << " to " << m_aaiGuideAreas[1][1];
 }
 
-void CTwoPushDynamicFilter::KeyDown(unsigned long Time, int iId, CDasherView *pView, CDasherInput *pInput, CDasherModel *pModel) {
-  if (iId == 100 && !GetBoolParameter(BP_BACKOFF_BUTTON))
+void CTwoPushDynamicFilter::KeyDown(unsigned long Time, Keys::VirtualKey Key, CDasherView *pView, CDasherInput *pInput, CDasherModel *pModel) {
+  if (Key == Keys::Primary_Input && !GetBoolParameter(BP_BACKOFF_BUTTON))
     //mouse click - will be ignored by superclass method.
     //simulate press of button 2...
-    iId=2;
-  CDynamicButtons::KeyDown(Time, iId, pView, pInput, pModel);
+    Key= Keys::Button_2;
+  CDynamicButtons::KeyDown(Time, Key, pView, pInput, pModel);
 }
 
-void CTwoPushDynamicFilter::KeyUp(unsigned long Time, int iId, CDasherView *pView, CDasherInput *pInput, CDasherModel *pModel) {
-  if (iId == 100 && !GetBoolParameter(BP_BACKOFF_BUTTON))
+void CTwoPushDynamicFilter::KeyUp(unsigned long Time, Keys::VirtualKey Key, CDasherView *pView, CDasherInput *pInput, CDasherModel *pModel) {
+  if (Key == Keys::Primary_Input && !GetBoolParameter(BP_BACKOFF_BUTTON))
     //mouse click - will be ignored by superclass method.
     //simulate press of button 2...
-    iId=2;
+    Key= Keys::Button_2;
   if (GetBoolParameter(BP_TWO_PUSH_RELEASE_TIME)
-      && isRunning() && iId==m_iHeldId
+      && isRunning() && Key==m_iHeldId
       && m_dNatsSinceFirstPush!=-std::numeric_limits<double>::infinity())
-    ActionButton(Time, iId, 0, pModel);
+    ActionButton(Time, Key, 0, pModel);
   //just records that the key has been released
-  CDynamicButtons::KeyUp(Time, iId, pView, pInput, pModel);
+  CDynamicButtons::KeyUp(Time, Key, pView, pInput, pModel);
 }
 
-void CTwoPushDynamicFilter::ActionButton(unsigned long iTime, int iButton, int iType, CDasherModel *pModel) {
+void CTwoPushDynamicFilter::ActionButton(unsigned long iTime, Keys::VirtualKey Key, int iType, CDasherModel* pModel) {
   // Types:
   // 0 = ordinary click
   // 1 = long click
