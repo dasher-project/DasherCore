@@ -61,7 +61,7 @@ namespace Dasher {
             bool operator!=(const Color& t) const;
             Color operator* (float x) const;
             Color operator+ (const Color& b) const;
-			bool isTransparent() const {return Alpha == 0;}
+			bool isFullyTransparent() const {return Alpha == 0;}
 			bool isFullyOpaque() const {return Alpha == 255;}
 
             //ColorB * (1 - a) + ColorA * a

@@ -734,7 +734,7 @@ void CDasherViewSquare::DisjointRender(CDasherNode* pRender, myint y1, myint y2,
 		//end rendering children, fall through to outline
 	}
 	// Lastly, draw the outline
-	if (GetLongParameter(LP_OUTLINE_WIDTH) && !pRender->getOutlineColor(m_pColorPalette).isTransparent())
+	if (GetLongParameter(LP_OUTLINE_WIDTH) && !pRender->getOutlineColor(m_pColorPalette).isFullyTransparent())
 	{
 		DasherDrawRectangle(std::min(Range, visibleRegion.maxX), std::max(y1, visibleRegion.minY), 0, std::min(y2, visibleRegion.maxY), ColorPalette::noColor, pRender->getOutlineColor(m_pColorPalette), abs(GetLongParameter(LP_OUTLINE_WIDTH)));
 	}
@@ -869,7 +869,7 @@ void CDasherViewSquare::NewRender(CDasherNode* pCurrentNode, myint y1, myint y2,
 	// _supposed_ to be the same color as their parent, will have no outlines...
 	// (thankfully having 2 "phases" means this doesn't happen in standard
 	// color schemes)
-	if (!pCurrentNode->getNodeColor(m_pColorPalette).isTransparent())
+	if (!pCurrentNode->getNodeColor(m_pColorPalette).isFullyTransparent())
 	{
 		//outline width 0 = fill only; >0 = fill + outline; <0 = outline only
 		const int line_width = abs(GetLongParameter(LP_OUTLINE_WIDTH));
