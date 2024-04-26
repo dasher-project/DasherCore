@@ -1,0 +1,331 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE alphabet SYSTEM "alphabet.dtd">
+<alphabet name="English with numerals and lots of punctuation" orientation="LR" trainingFilename="training_english_GB.txt" colorsName="test">
+  <group colorInfoName="lowercase">
+    <node label="a">
+      <textCharAction/>
+    </node>
+    <node label="b">
+      <textCharAction/>
+    </node>
+    <node label="c">
+      <textCharAction/>
+    </node>
+    <node label="d">
+      <textCharAction/>
+    </node>
+    <node label="e">
+      <textCharAction/>
+    </node>
+    <node label="f">
+      <textCharAction/>
+    </node>
+    <node label="g">
+      <textCharAction/>
+    </node>
+    <node label="h">
+      <textCharAction/>
+    </node>
+    <node label="i">
+      <textCharAction/>
+    </node>
+    <node label="j">
+      <textCharAction/>
+    </node>
+    <node label="k">
+      <textCharAction/>
+    </node>
+    <node label="l">
+      <textCharAction/>
+    </node>
+    <node label="m">
+      <textCharAction/>
+    </node>
+    <node label="n">
+      <textCharAction/>
+    </node>
+    <node label="o">
+      <textCharAction/>
+    </node>
+    <node label="p">
+      <textCharAction/>
+    </node>
+    <node label="q">
+      <textCharAction/>
+    </node>
+    <node label="r">
+      <textCharAction/>
+    </node>
+    <node label="s">
+      <textCharAction/>
+    </node>
+    <node label="t">
+      <textCharAction/>
+    </node>
+    <node label="u">
+      <textCharAction/>
+    </node>
+    <node label="v">
+      <textCharAction/>
+    </node>
+    <node label="w">
+      <textCharAction/>
+    </node>
+    <node label="x">
+      <textCharAction/>
+    </node>
+    <node label="y">
+      <textCharAction/>
+    </node>
+    <node label="z">
+      <textCharAction/>
+    </node>
+  </group>
+  <group colorInfoName="uppercase">
+    <node label="A">
+      <textCharAction/>
+    </node>
+    <node label="B">
+      <textCharAction/>
+    </node>
+    <node label="C">
+      <textCharAction/>
+    </node>
+    <node label="D">
+      <textCharAction/>
+    </node>
+    <node label="E">
+      <textCharAction/>
+    </node>
+    <node label="F">
+      <textCharAction/>
+    </node>
+    <node label="G">
+      <textCharAction/>
+    </node>
+    <node label="H">
+      <textCharAction/>
+    </node>
+    <node label="I">
+      <textCharAction/>
+    </node>
+    <node label="J">
+      <textCharAction/>
+    </node>
+    <node label="K">
+      <textCharAction/>
+    </node>
+    <node label="L">
+      <textCharAction/>
+    </node>
+    <node label="M">
+      <textCharAction/>
+    </node>
+    <node label="N">
+      <textCharAction/>
+    </node>
+    <node label="O">
+      <textCharAction/>
+    </node>
+    <node label="P">
+      <textCharAction/>
+    </node>
+    <node label="Q">
+      <textCharAction/>
+    </node>
+    <node label="R">
+      <textCharAction/>
+    </node>
+    <node label="S">
+      <textCharAction/>
+    </node>
+    <node label="T">
+      <textCharAction/>
+    </node>
+    <node label="U">
+      <textCharAction/>
+    </node>
+    <node label="V">
+      <textCharAction/>
+    </node>
+    <node label="W">
+      <textCharAction/>
+    </node>
+    <node label="X">
+      <textCharAction/>
+    </node>
+    <node label="Y">
+      <textCharAction/>
+    </node>
+    <node label="Z">
+      <textCharAction/>
+    </node>
+  </group>
+  <group colorInfoName="digits">
+    <node label="0">
+      <textCharAction/>
+    </node>
+    <node label="1">
+      <textCharAction/>
+    </node>
+    <node label="2">
+      <textCharAction/>
+    </node>
+    <node label="3">
+      <textCharAction/>
+    </node>
+    <node label="4">
+      <textCharAction/>
+    </node>
+    <node label="5">
+      <textCharAction/>
+    </node>
+    <node label="6">
+      <textCharAction/>
+    </node>
+    <node label="7">
+      <textCharAction/>
+    </node>
+    <node label="8">
+      <textCharAction/>
+    </node>
+    <node label="9">
+      <textCharAction/>
+    </node>
+  </group>
+  <group colorInfoName="punctuationAndSymbols">
+    <group colorInfoName="arithmetics">
+      <node label="%">
+        <textCharAction/>
+      </node>
+      <node label="*">
+        <textCharAction/>
+      </node>
+      <node label="+">
+        <textCharAction/>
+      </node>
+      <node label="=">
+        <textCharAction/>
+      </node>
+      <node label="/">
+        <textCharAction/>
+      </node>
+    </group>
+    <group colorInfoName="symbols">
+      <node label="#">
+        <textCharAction/>
+      </node>
+      <node label="&#x20AC;"> <!-- Euro -->
+        <textCharAction/>
+      </node>
+      <node label="&#xA3;"> <!-- Pound -->
+        <textCharAction/>
+      </node>
+      <node label="$">
+        <textCharAction/>
+      </node>
+      <node label="|">
+        <textCharAction/>
+      </node>
+      <node label="\">
+        <textCharAction/>
+      </node>
+      <node label="~">
+        <textCharAction/>
+      </node>
+      <node label="^">
+        <textCharAction/>
+      </node>
+      <node label="_">
+        <textCharAction/>
+      </node>
+      <node label="&amp;">
+        <textCharAction/>
+      </node>
+      <node label="@">
+        <textCharAction/>
+      </node>
+      <node label="&#xA7;"> <!-- Section Sign -->
+        <textCharAction/>
+      </node>
+    </group>
+    <group colorInfoName="parentheses">
+      <node label="[">
+        <textCharAction/>
+      </node>
+      <node label="]">
+        <textCharAction/>
+      </node>
+      <node label="{">
+        <textCharAction/>
+      </node>
+      <node label="}">
+        <textCharAction/>
+      </node>
+      <node label="&lt;">
+        <textCharAction/>
+      </node>
+      <node label="&gt;">
+        <textCharAction/>
+      </node>
+      <node label="(">
+        <textCharAction/>
+      </node>
+      <node label=")">
+        <textCharAction/>
+      </node>
+      <node label="&#xB4;"> <!-- acute -->
+        <textCharAction/>
+      </node>
+      <node label="`">
+        <textCharAction/>
+      </node>
+    </group>
+    <group colorInfoName="quotes">
+      <node label="&quot;">
+        <textCharAction/>
+      </node>
+      <node label="&apos;">
+        <textCharAction/>
+      </node>
+    </group>
+    <group colorInfoName="space">
+      <node label="&#x25CA;"> <!-- Tab (diamond) -->
+        <textCharAction unicode="9"/>
+      </node>
+    </group>
+    <group colorInfoName="punctuation">
+      <node label="-">
+      <textCharAction/>
+      </node>
+      <node label=":">
+        <textCharAction/>
+      </node>
+      <node label=";">
+        <textCharAction/>
+      </node>
+      <node label="?">
+        <textCharAction/>
+      </node>
+      <node label="!">
+        <textCharAction/>
+      </node>
+      <node label=",">
+        <textCharAction/>
+      </node>
+    </group>
+    <group colorInfoName="period">
+      <node label=".">
+        <textCharAction/>
+      </node>
+    </group>
+  </group>
+  <group colorInfoName="space">
+    <node label="&#xB6;"> <!-- Paragraph -->
+      <textCharAction unicode="10"/>
+    </node>
+    <node label="&#x25A1;"> <!-- Space (box) -->
+      <textCharAction unicode="32"/>
+    </node>
+  </group>
+</alphabet>

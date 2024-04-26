@@ -78,7 +78,7 @@ namespace Dasher {
     };
     ///Override to provide different defaults! Otherwise as GetColour,
     /// this uses the character data in the alphabet anyway.
-    int GetColour(symbol CHsym, int iOffset) const;
+    int UseAltColor(int iOffset) const;
   private:
     ///for each (not necessarily unique) symbol in the alphabet, the id of the unique base symbol with that text
     std::vector<symbol> m_vBaseSyms;

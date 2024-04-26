@@ -51,7 +51,7 @@ namespace Dasher {
     class CContNode : public CDasherNode {
     public:
       CControlBase *mgr() const override {return m_pMgr;}
-      CContNode(int iOffset, int iColour, NodeTemplate *pTemplate, CControlBase *pMgr);
+      CContNode(int iOffset, NodeTemplate *pTemplate, CControlBase *pMgr);
       CDasherScreen::Label *getLabel() override { return m_pTemplate->m_pLabel; }
 
       bool bShove() override {return false;}
@@ -64,8 +64,11 @@ namespace Dasher {
       virtual int ExpectedNumChildren() override;
 
       virtual void Output() override;
+      const ColorPalette::Color& getLabelColor(const ColorPalette* colorPalette) override;
+      const ColorPalette::Color& getOutlineColor(const ColorPalette* colorPalette) override;
+      const ColorPalette::Color& getNodeColor(const ColorPalette* colorPalette) override;
 
-    private:
+  private:
       NodeTemplate *m_pTemplate;
       CControlBase *m_pMgr;
     };

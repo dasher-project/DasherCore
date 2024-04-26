@@ -122,8 +122,8 @@ private:
 		///Creates a request that label will be drawn.
 		/// x,y are screen coords of midpoint of leading edge;
 		/// iSize is desired size (already computed from requested position)
-		CTextString(CDasherScreen::Label* pLabel, screenint x, screenint y, int iSize, int iColor)
-			: m_pLabel(pLabel), m_ix(x), m_iy(y), m_iSize(iSize), m_iColor(iColor)
+		CTextString(CDasherScreen::Label* pLabel, screenint x, screenint y, int iSize, const ColorPalette::Color& iColor)
+			: m_pLabel(pLabel), m_ix(x), m_iy(y), m_iSize(iSize), m_Color(iColor)
 		{
 		}
 
@@ -132,7 +132,7 @@ private:
 		screenint m_ix, m_iy;
 		std::vector<CTextString*> m_children;
 		int m_iSize;
-		int m_iColor;
+		const ColorPalette::Color& m_Color;
 	};
 
 	std::vector<CTextString*> m_DelayedTexts;
@@ -151,7 +151,7 @@ private:
 	///
 	/// Draw text specified in Dasher co-ordinates
 	///
-	CTextString* DasherDrawText(myint iDasherMaxX, myint iDasherMidY, CDasherScreen::Label* pLabel, int iColor);
+	CTextString* DasherDrawText(myint iDasherMaxX, myint iDasherMidY, CDasherScreen::Label* pLabel, const ColorPalette::Color& Color);
 
 	///
 	/// (Recursively) render a node and all contained subnodes, in disjoint rects.

@@ -69,7 +69,7 @@ bool CColorIO::Parse(pugi::xml_document& document, const std::string, bool bUser
 {
 	pugi::xml_node outer = document.document_element();
 
-	if(outer.name() != "colors" || outer.attribute("name").empty()) return false; // wrong type of root node or no name specified
+	if(strcmp(outer.name(),"colors") != 0 || outer.attribute("name").empty()) return false; // wrong type of root node or no name specified
 
 
 	std::unordered_map<NamedColor::knownColorName, ColorPalette::Color> NamedColors;
@@ -79,14 +79,14 @@ bool CColorIO::Parse(pugi::xml_document& document, const std::string, bool bUser
 
 	for(pugi::xml_attribute attribute : outer.attributes())
 	{
-		if(attribute.name() == "parentName" || attribute.name() == "name") continue;
+		if(strcmp(attribute.name(),"parentName") == 0 || strcmp(attribute.name(),"name") == 0) continue;
 
 		NamedColors[attribute.name()] = ColorPalette::Color(attribute.as_string());
 	}
 
 	for(pugi::xml_node groupInfo : outer.children())
 	{
-	    if(groupInfo.name() != "groupColorInfo" || groupInfo.attribute("name").empty()) continue; //Ignore all others tags or groups without a name
+	    if(strcmp(groupInfo.name(),"groupColorInfo") != 0 || groupInfo.attribute("name").empty()) continue; //Ignore all others tags or groups without a name
 		
 		ColorPalette::GroupColorInfo group;
 		group.groupColor = {GetAttributeAsColor(groupInfo.attribute("groupColor")), GetAttributeAsColor(groupInfo.attribute("altGroupColor"))};

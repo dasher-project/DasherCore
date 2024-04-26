@@ -32,6 +32,7 @@ add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/Thirdparty/pugixml" EXCLUDE_FROM_ALL
 
 file(GLOB HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/Src/DasherCore/*.h
+    ${CMAKE_CURRENT_LIST_DIR}/Src/DasherCore/Alphabet/*.h
 )
 
 ADD_library(DasherCore STATIC

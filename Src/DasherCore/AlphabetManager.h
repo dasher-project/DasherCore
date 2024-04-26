@@ -130,7 +130,7 @@ namespace Dasher {
       /// but then populates that group (i.e. further descends the hierarchy) _if_ that group
       /// would contain this node (see IsInGroup). Subclasses can override to graft themselves into the hierarchy, if appropriate.
       /// \param pParent parent of the symbol node to create; could be the previous root, or an intervening node (e.g. group)
-      virtual CDasherNode *RebuildGroup(CAlphNode *pParent, int iBkgCol, const SGroupInfo *pInfo);
+      virtual CDasherNode *RebuildGroup(CAlphNode* pParent, const SGroupInfo* pInfo);
       ///Just keep track of the last node output (for training file purposes)
       void Undo();
       ///Just keep track of the last node output (for training file purposes)
@@ -142,8 +142,14 @@ namespace Dasher {
       /// at which point RebuildSymbol/Group should graft it in.
       /// \param pNewNode newly-created root node beneath which this node should fit
       virtual void RebuildForwardsFromAncestor(CAlphNode *pNewNode);
-      CAlphBase(int iOffset, int iColour, CDasherScreen::Label *pLabel, CAlphabetManager *pMgr);
+      CAlphBase(int iOffset, CDasherScreen::Label *pLabel, CAlphabetManager *pMgr);
       CAlphabetManager *m_pMgr;
+
+      ///Called to check if the AltColor should be used to render a node
+      virtual bool UseAltColor() const{
+          return (offset()&1) == 0;
+      }
+
       ///Number of unicode characters entered by this node; i.e., the number
       /// to take off this node's offset, to get the offset of the most-recent
       /// root (e.g. previous symbol). Default is 0.
@@ -155,7 +161,7 @@ namespace Dasher {
     ///Additionally stores LM contexts and probabilities calculated therefrom
     class CAlphNode : public CAlphBase {
     public:
-      CAlphNode(int iOffset, int iColour, CDasherScreen::Label *pLabel, CAlphabetManager *pMgr);
+      CAlphNode(int iOffset, CDasherScreen::Label *pLabel, CAlphabetManager *pMgr);
       CLanguageModel::Context iContext;
       ///
       /// Delete any storage alocated for this node
@@ -187,6 +193,10 @@ namespace Dasher {
       virtual symbol GetAlphSymbol();
       ///Override: if the symbol to create is the same as this node's symbol, return this node instead of creating a new one
       virtual CDasherNode *RebuildSymbol(CAlphNode *pParent, symbol iSymbol);
+      const ColorPalette::Color& getLabelColor(const ColorPalette* colorPalette) override;
+      const ColorPalette::Color& getOutlineColor(const ColorPalette* colorPalette) override;
+      const ColorPalette::Color& getNodeColor(const ColorPalette* colorPalette) override;
+
     protected:
       virtual const std::string &outputText() const;
       ///Text to write to user training file/buffer when this symbol output.
@@ -197,16 +207,16 @@ namespace Dasher {
       /// (i.e. '\r' and '\n'); every other symbol enters only a single
       /// unicode char, even if that might take >1 octet.
       int numChars();
-      ///Compatibility constructor, so that subclasses can specify their own colour & label
-      CSymbolNode(int iOffset, int iColour, CDasherScreen::Label *pLabel, CAlphabetManager *pMgr, symbol _iSymbol);
       ///Override: true iff pGroup encloses this symbol (according to its start/end symbol#)
       bool isInGroup(const SGroupInfo *pGroup);
+
+  protected:
       const symbol iSymbol;
     };
 
     class CGroupNode : public CAlphNode {
     public:
-      CGroupNode(int iOffset, CDasherScreen::Label *pLabel, int iBkgCol, CAlphabetManager *pMgr, const SGroupInfo *pGroup);
+      CGroupNode(int iOffset, CDasherScreen::Label* pLabel, CAlphabetManager* pMgr, const SGroupInfo* pGroup);
 
       ///Override: if m_pGroup==NULL, i.e. whole/root-of alphabet, cannot rebuild.
       virtual CDasherNode *RebuildParent();
@@ -215,15 +225,23 @@ namespace Dasher {
       /// indicated by m_pGroup.
       virtual void PopulateChildren();
       virtual int ExpectedNumChildren();
+                 
       virtual bool GameSearchNode(symbol sym);
       std::vector<unsigned int> *GetProbInfo();
       ///Override: if the group to create is the same as this node's group, return this node instead of creating a new one
-      virtual CDasherNode *RebuildGroup(CAlphNode *pParent, int iBkgCol, const SGroupInfo *pInfo);
+      virtual CDasherNode *RebuildGroup(CAlphNode* pParent, const SGroupInfo* pInfo);
     protected:
       ///Override: true if pGroup encloses this one (by start/end symbol#)
       bool isInGroup(const SGroupInfo *pGroup);
-    private:
-      const SGroupInfo *m_pGroup;
+
+  public:
+      const ColorPalette::Color& getLabelColor(const ColorPalette* colorPalette) override;
+      const ColorPalette::Color& getOutlineColor(const ColorPalette* colorPalette) override;
+      const ColorPalette::Color& getNodeColor(const ColorPalette* colorPalette) override;
+
+  private:
+      bool renderInRootColor = false;
+      const SGroupInfo* m_pGroupInfo;
     };
 
   public:
@@ -254,17 +272,11 @@ namespace Dasher {
     ///Called to create a node for a given symbol (leaf), as a child of a specified parent node
     /// \param iBkgCol colour behind the new node, i.e. that should show through if the (group) node is transparent
     virtual CDasherNode *CreateSymbolNode(CAlphNode *pParent, symbol iSymbol);
-    virtual CGroupNode *CreateGroupNode(CAlphNode *pParent, int iBkgCol, const SGroupInfo *pInfo);
+    virtual CGroupNode *CreateGroupNode(CAlphNode* pParent, const SGroupInfo* pInfo);
     ///Called to create a new symbol root, e.g. for going backwards
     /// \param iOffset index of symbol entered by the node
     /// \param sym symbol number as returned as first element of GetContextSymbols
     virtual CAlphNode *CreateSymbolRoot(int iOffset, CLanguageModel::Context ctx, symbol sym);
-    
-    ///Called to compute colour for a symbol at a specified offset.
-    /// Wraps CAlphabet::GetColour(sym), but (a) implements a default
-    ///  scheme for symbols not specifying a colour, and (b) implements
-    /// colour-cycling by phase (two cycles, using the LSBit of offset)
-    virtual int GetColour(symbol sym, int iOffset) const;
     
     CDasherInterfaceBase * const m_pInterface;
 

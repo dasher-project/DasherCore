@@ -113,11 +113,10 @@ namespace Dasher {
 
     int lookup_word(const std::string & w);
     int lookup_word_const(const std::string & w) const;
-
-    const int m_iSpaceSymbol;
-    
+        
     CWordContext *m_rootcontext;
     CWordnode *m_pRoot;
+    const CAlphInfo* m_pAlphInfo;
 
     std::map < std::string, int >dict;  // Dictionary
     int nextid;

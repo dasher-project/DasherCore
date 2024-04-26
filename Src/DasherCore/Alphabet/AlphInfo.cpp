@@ -25,38 +25,32 @@
 using namespace Dasher;
 
 CAlphInfo::CAlphInfo() {
-  iSpaceCharacter=0;
-  iParagraphCharacter = 0;
-  ControlCharacter=NULL;
-  StartConvertCharacter=NULL;
-  EndConvertCharacter=NULL;
   //Members of SGroupInfo:
-  pChild=pNext=NULL; iStart=iEnd=1; bVisible=true;
-  iNumChildNodes = 0;
-  
-  m_iConversionID = 0; m_strConversionTrainStart="<"; m_strConversionTrainStop=">";
-  m_strDefaultContext = ". ";
-  m_strCtxChar = "§";
+    pChild=nullptr;
+    pNext=nullptr;
+    iStart=1;
+    iEnd=1;
+    iNumChildNodes = 0;
+
+    m_iConversionID = None;
+    m_strConversionTrainStart = "<";
+    m_strConversionTrainStop = ">";
+    m_strDefaultContext = ". ";
+    m_strCtxChar = "§";
 }
 
 std::string CAlphInfo::escape(const std::string &ch) const {
-  if ((m_strConversionTrainStart.length() && ch==m_strConversionTrainStart)
-      || (m_strCtxChar.length() && ch==m_strCtxChar))
-    return ch+ch;
+    if ((m_strConversionTrainStart.length() && ch==m_strConversionTrainStart)
+        || (m_strCtxChar.length() && ch==m_strCtxChar))
+        return ch+ch;
   return ch;
 }
 
 CAlphInfo::~CAlphInfo() {
-  pChild->RecursiveDelete();
-  pNext->RecursiveDelete();
+    pChild->RecursiveDelete();
+    pNext->RecursiveDelete();
 }
 
 void CAlphInfo::copyCharacterFrom(const CAlphInfo *other, int idx) {
-  m_vCharacters.push_back(other->m_vCharacters[idx-1]);
-}
-
-CAlphInfo::character::character() {
-  Display="";
-  Text="";
-  Colour=-1;
+    m_vCharacters.push_back(other->m_vCharacters[idx-1]);
 }

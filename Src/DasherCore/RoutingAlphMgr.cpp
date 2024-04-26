@@ -44,7 +44,7 @@ void CRoutingAlphMgr::InitMap() {
 }
 
 void CRoutingAlphMgr::CreateLanguageModel() {
-  m_pLanguageModel = new CRoutingPPMLanguageModel(this, &m_vBaseSyms, &m_vRoutes, m_pAlphabet->m_iConversionID==4);
+  m_pLanguageModel = new CRoutingPPMLanguageModel(this, &m_vBaseSyms, &m_vRoutes, m_pAlphabet->m_iConversionID == CAlphInfo::RoutingContextSensitive);
 }
 
 std::string CRoutingAlphMgr::CRoutedSym::trainText() {
@@ -69,25 +69,6 @@ CAlphabetManager::CAlphNode *CRoutingAlphMgr::CreateSymbolRoot(int iOffset, CLan
   sym = static_cast<CRoutingPPMLanguageModel*>(m_pLanguageModel)->GetBestRoute(ctx);
   return new CRoutedSym(iOffset, m_vLabels[sym], this, sym);
 }
-
-int CRoutingAlphMgr::GetColour(symbol route, int iOffset) const {
-  int iColour = m_pAlphabet->GetColour(route); //colours were rehashed with CH symbol text
-  if (iColour==-1) {
-    //none specified in alphabet
-    static int colourStore[2][3] = {
-      {66,//light blue
-        64,//very light green
-        62},//light yellow
-      {78,//light purple
-        81,//brownish
-        60},//red
-    };    
-    return colourStore[iOffset&1][route % 3];
-  }
-  if ((iOffset&1)==0 && iColour<130) iColour+=130;
-  return iColour;
-}
-
 
 CDasherNode *CRoutingAlphMgr::CreateSymbolNode(CAlphNode *pParent, symbol iSymbol) {
 

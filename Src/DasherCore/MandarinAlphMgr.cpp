@@ -42,7 +42,6 @@ CMandarinAlphMgr::CMandarinAlphMgr(CSettingsUser *pCreator, CDasherInterfaceBase
 void CMandarinAlphMgr::InitMap() {
   m_vCHtext.resize(1);
   m_vCHdisplayText.resize(1);
-  m_vCHcolours.resize(1);
   m_vGroupsByConversion.resize(1);
   m_vConversionsByGroup.resize(1);
   m_vGroupNames.resize(1);
@@ -51,15 +50,11 @@ void CMandarinAlphMgr::InitMap() {
   m_pPYgroups = makePYgroup(m_pAlphabet);
 
   //add in space and paragraph to end of main PY group...
-  symbol copy[2];
-  copy[0] = m_pAlphabet->GetSpaceSymbol();
-  copy[1] = m_pAlphabet->GetParagraphSymbol();
-  
-  for (int i=0; i<sizeof(copy)/sizeof(copy[0]); i++) {
-    if (!copy[i]) continue;
-    
+  char additonalChars[2] = {' ', '\n'}; //TODO: Paragraph Symbol
+  for (const char i : additonalChars)
+  {
     //add a PY mapping to a single CH-character (already rehashed), i.e. the space/para
-    int hashed = m_map.Get(m_pAlphabet->GetText(copy[i]));
+    int hashed = m_map.GetSingleChar(i);
     DASHER_ASSERT(hashed);
     m_vGroupsByConversion[hashed].insert(static_cast<int>(m_vConversionsByGroup.size())); //identifies the new PY sound
     m_vConversionsByGroup.push_back(std::vector<symbol>(1,hashed));
@@ -85,15 +80,14 @@ SGroupInfo *CMandarinAlphMgr::makePYgroup(const SGroupInfo *in) {
         hashed = static_cast<int>(m_vCHtext.size());
         m_vCHtext.push_back(text);
         m_vCHdisplayText.push_back(m_pAlphabet->GetDisplayText(i));
-        m_vCHcolours.push_back(m_pAlphabet->GetColour(i));
-        if (i==m_pAlphabet->GetParagraphSymbol())
+        if (m_pAlphabet->SymbolPrintsNewLineCharacter(i))
           m_map.AddParagraphSymbol(m_iCHpara=hashed);
         else
           m_map.Add(text,hashed);
         m_vGroupsByConversion.push_back(std::set<symbol>());
       }
       //now, put in PY-group...
-      if (i!=m_pAlphabet->GetSpaceSymbol() && i!=m_pAlphabet->GetParagraphSymbol()) {
+      //if (i!=m_pAlphabet->GetSpaceSymbol() && i!=m_pAlphabet->GetParagraphSymbol()) { // Pretty sure that these characters do not exist in any group, so this should never happen in my understanding
         if (m_vConversionsByGroup.size() == ret->iStart) {
           //First symbol that is directly child of group. Allocate index...
           ret->iNumChildNodes++;
@@ -104,7 +98,7 @@ SGroupInfo *CMandarinAlphMgr::makePYgroup(const SGroupInfo *in) {
         DASHER_ASSERT(m_vConversionsByGroup.size() > ret->iStart);
         m_vConversionsByGroup.back().push_back(hashed);
         m_vGroupsByConversion[hashed].insert(ret->iStart);
-      } //space and para we will put in their own/different groups, later...
+      //} //space and para we will put in their own/different groups, later...
       i++;
     } else {
       //subgroup; skip over
@@ -256,24 +250,6 @@ CAlphabetManager::CAlphNode *CMandarinAlphMgr::CreateSymbolRoot(int iOffset, CLa
   return new CMandSym(iOffset, this, chSym, 0);
 }
 
-int CMandarinAlphMgr::GetColour(symbol CHsym, int iOffset) const {
-  int iColour = m_vCHcolours[CHsym]; //colours were rehashed with CH symbol text
-  if (iColour==-1) {
-    //none specified in alphabet
-    static int colourStore[2][3] = {
-      {66,//light blue
-        64,//very light green
-        62},//light yellow
-      {78,//light purple
-        81,//brownish
-        60},//red
-    };    
-    return colourStore[iOffset&1][CHsym % 3];
-  }
-  if ((iOffset&1)==0 && iColour<130) iColour+=130;
-  return iColour;
-}
-
 CDasherNode *CMandarinAlphMgr::CreateSymbolNode(CAlphNode *pParent, symbol iSymbol) {
   
   //For every PY index (group; = syllable+tone or "punctuation"),
@@ -295,7 +271,7 @@ CDasherNode *CMandarinAlphMgr::CreateSymbolNode(CAlphNode *pParent, symbol iSymb
 CMandarinAlphMgr::CConvRoot *CMandarinAlphMgr::CreateConvRoot(CAlphNode *pParent, symbol iPYsym) {
   
   // the same offset as we've still not entered/selected a symbol (leaf);
-  // Colour is always 9 so ignore iBkgCol
+  // Color is always 9 so ignore iBkgCol
   CConvRoot *pConv = new CConvRoot(pParent->offset(), this, iPYsym);
     
   // and use the same context too (pinyin syll+tone is _not_ used as part of the LM context)
@@ -304,7 +280,7 @@ CMandarinAlphMgr::CConvRoot *CMandarinAlphMgr::CreateConvRoot(CAlphNode *pParent
 }
 
 CMandarinAlphMgr::CConvRoot::CConvRoot(int iOffset, CMandarinAlphMgr *pMgr, symbol pySym)
-: CAlphBase(iOffset, 9, pMgr->m_vLabels[pySym], pMgr), m_pySym(pySym) {
+: CAlphBase(iOffset, pMgr->m_vLabels[pySym], pMgr), m_pySym(pySym) {
   //We do sometimes create CConvRoots with only one child, where we
   // need them to display a label...
   DASHER_ASSERT(pMgr->m_vConversionsByGroup[pySym].size()>1
@@ -356,6 +332,21 @@ CDasherNode *CMandarinAlphMgr::CConvRoot::RebuildSymbol(CAlphNode *pParent, symb
 
 bool CMandarinAlphMgr::CConvRoot::isInGroup(const SGroupInfo *pGroup) {
   return pGroup->iStart <= m_pySym && pGroup->iEnd > m_pySym;
+}
+
+const ColorPalette::Color& CMandarinAlphMgr::CConvRoot::getLabelColor(const ColorPalette* colorPalette)
+{
+    return colorPalette->GetNamedColor(NamedColor::defaultLabel);
+}
+
+const ColorPalette::Color& CMandarinAlphMgr::CConvRoot::getOutlineColor(const ColorPalette* colorPalette)
+{
+     return colorPalette->GetNamedColor(NamedColor::defaultOutline);
+}
+
+const ColorPalette::Color& CMandarinAlphMgr::CConvRoot::getNodeColor(const ColorPalette* colorPalette)
+{
+     return colorPalette->GetNamedColor(NamedColor::conversionNode);
 }
 
 void CMandarinAlphMgr::CConvRoot::SetFlag(int iFlag, bool bValue) {

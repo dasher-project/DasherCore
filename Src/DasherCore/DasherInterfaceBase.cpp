@@ -324,8 +324,7 @@ void CDasherInterfaceBase::WordSpeaker::HandleEvent(const CEditEvent *pEditEvent
   if (pIntf->GetGameModule()) return;
   if(pEditEvent->m_iEditType == 1) {
     if (pIntf->SupportsSpeech()) {
-      const CAlphInfo *pAlphabet = pIntf->m_pNCManager->GetAlphabet();
-      if (pEditEvent->m_sText == pAlphabet->GetText(pAlphabet->GetSpaceSymbol())) {
+      if (!pEditEvent->m_sText.empty() && std::isspace(pEditEvent->m_sText[0])) {
         pIntf->Speak(m_strCurrentWord, false);
         m_strCurrentWord="";
       } else

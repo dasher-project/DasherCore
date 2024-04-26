@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE colors SYSTEM "color.dtd">
+<colors name="test" backgroundColor="#FFFFFFFF" crosshairColor="#000000FF" inputLineColor="#FF0000FF" inputPositionColor="#000000FF" rootNodeColor="#B4EEB4FF"
+	  defaultOutlineColor="#DADADAFF" defaultLabelColor="#000000FF" parentName="Default"> <!-- colors from "European/Asian" -->
+	<groupColorInfo name="lowercase" groupOutlineColor="#00000000" nodeColorSequence="#B4DAA2FF,#BEEEBEFF" altNodeColorSequence="#87CFDDFF,#A1DBEBFF"/>
+	<groupColorInfo name="uppercase" groupColor="#FFFF00FF" nodeColorSequence="#B4DAA2FF,#BEEEBEFF" altNodeColorSequence="#87CFDDFF,#A1DBEBFF"/>
+	<groupColorInfo name="digits" groupColor="#FF0000FF" nodeColorSequence="#FFACACFF,#FF8484FF,#FFC0C0FF,#FF9A9AFF,#FFD2D2FF"/>
+	<groupColorInfo name="punctuationAndSymbols" groupColor="#00C800FF" nodeColorSequence="#EEEEEEFF"/>
+	<groupColorInfo name="arithmetics" groupOutlineColor="#00000000" nodeColorSequence="#FFACACFF,#FF8484FF,#FFC0C0FF,#FF9A9AFF,#FFD2D2FF"/>
+	<groupColorInfo name="symbols" groupOutlineColor="#00000000" nodeColorSequence="#AAAAAAFF,#787878FF,#C3C3C3FF,#919191FF,#DCDCDCFF"/>
+	<groupColorInfo name="parentheses" groupOutlineColor="#00000000" nodeColorSequence="#FF91FFFF,#FF52FFFF,#FFA2FFFF,#FF80FFFF,#FFB6FFFF"/>
+	<groupColorInfo name="quotes" groupOutlineColor="#00000000" nodeColorSequence="#FF52FFFF,#FF91FFFF"/>
+	<groupColorInfo name="punctuation" groupOutlineColor="#00000000" nodeColorSequence="#8EACDEFF,#6E82BCFF,#AAC8E8FF,#729ACCFF,#C8E4F3FF"/>
+	<groupColorInfo name="period" groupOutlineColor="#00000000" nodeColorSequence="#C8E4F3FF"/>
+	<groupColorInfo name="space" groupOutlineColor="#00000000" nodeColorSequence="#FFFFFFFF" altNodeColorSequence="#EBEBEBFF"/>
+</colors>

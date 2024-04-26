@@ -198,9 +198,6 @@ CAlphabetMap::~CAlphabetMap() {
 }
 
 void CAlphabetMap::AddParagraphSymbol(symbol Value) {
-  DASHER_ASSERT (m_ParagraphSymbol==UNKNOWN_SYMBOL);
-  DASHER_ASSERT (m_pSingleChars['\r'] == UNKNOWN_SYMBOL);
-  DASHER_ASSERT (m_pSingleChars['\n'] == UNKNOWN_SYMBOL);
   m_pSingleChars['\n'] = m_ParagraphSymbol = Value;
 }
 
@@ -208,8 +205,6 @@ void CAlphabetMap::Add(const std::string &Key, symbol Value) {
   //Only single unicode-characters should be added...
   DASHER_ASSERT(m_utf8_count_array[Key[0]]==Key.length());
   if (Key.length() == 1) {
-    DASHER_ASSERT(m_pSingleChars[Key[0]]==UNKNOWN_SYMBOL);
-    DASHER_ASSERT(Key[0]!='\r' || m_ParagraphSymbol==UNKNOWN_SYMBOL);
     m_pSingleChars[Key[0]] = Value;
     return;
   }
@@ -246,8 +241,6 @@ void CAlphabetMap::Add(const std::string &Key, symbol Value) {
 }
 
 symbol CAlphabetMap::Get(const std::string &Key) const {
-  if (m_ParagraphSymbol!=UNKNOWN_SYMBOL && Key=="\r\n")
-    return m_ParagraphSymbol;
   DASHER_ASSERT(m_utf8_count_array[Key[0]]==Key.length());
   if (Key.length() == 1) {
 	return GetSingleChar(Key[0]);

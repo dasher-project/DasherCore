@@ -81,7 +81,7 @@ namespace Dasher {
     class CConvNode : public CDasherNode {
     public:
       CConversionManager *mgr() const {return m_pMgr;}
-      CConvNode(int iOffset, int iColour, CDasherScreen::Label *pLabel, CConversionManager *pMgr);
+      CConvNode(int iOffset, CDasherScreen::Label *pLabel, CConversionManager *pMgr);
     ///
     /// Provide children for the supplied node
     ///
@@ -107,8 +107,11 @@ namespace Dasher {
     ///
 
     virtual void Undo();
+      const ColorPalette::Color& getLabelColor(const ColorPalette* colorPalette) override;
+      const ColorPalette::Color& getOutlineColor(const ColorPalette* colorPalette) override;
+      const ColorPalette::Color& getNodeColor(const ColorPalette* colorPalette) override;
 
-    protected:
+  protected:
       CConversionManager *m_pMgr;
     public: //to ConversionManager and subclasses only, of course...
 
@@ -121,7 +124,7 @@ namespace Dasher {
       //int iGameOffset;
     };
 
-    virtual CConvNode *makeNode(int iOffset, int iColour, CDasherScreen::Label *pLabel);
+    virtual CConvNode *makeNode(int iOffset, CDasherScreen::Label* pLabel);
 
     CDasherInterfaceBase *m_pInterface;
 	CNodeCreationManager *m_pNCManager;

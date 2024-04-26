@@ -81,7 +81,7 @@ namespace Dasher {
     };
     
     const CAlphabetMap *m_pAlphMap;
-    const int m_iSpaceSymbol;
+    const CAlphInfo *m_pAlph;
 
     CDictnode *AddSymbolToNode(CDictnode * pNode, symbol sym, int *update);
 

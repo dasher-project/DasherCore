@@ -23,6 +23,7 @@ namespace Dasher {
 		static const knownColorName inputPosition = "inputPositionColor";
 		static const knownColorName crosshair = "crosshairColor";
 		static const knownColorName rootNode = "rootNodeColor";
+		static const knownColorName conversionNode = "conversionNodeColor";
 		static const knownColorName defaultOutline = "defaultOutlineColor";
 		static const knownColorName defaultLabel = "defaultLabelColor";
 		static const knownColorName selectionHighlight = "selectionHighlightColor";
@@ -52,6 +53,7 @@ namespace Dasher {
 			unsigned int Blue = 0;
 			unsigned int Alpha = 255;
 
+			Color(){};
 			Color(unsigned int Red, unsigned int Green, unsigned int Blue, unsigned int Alpha = 255);
             Color(const std::string& HexString);
 
@@ -59,6 +61,8 @@ namespace Dasher {
             bool operator!=(const Color& t) const;
             Color operator* (float x) const;
             Color operator+ (const Color& b) const;
+			bool isTransparent() const {return Alpha == 0;}
+			bool isFullyOpaque() const {return Alpha == 255;}
 
             //ColorB * (1 - a) + ColorA * a
 			static Color lerp(const Color& ColorA, const Color& ColorB, float a);

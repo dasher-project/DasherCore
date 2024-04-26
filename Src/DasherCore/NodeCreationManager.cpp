@@ -81,19 +81,16 @@ CNodeCreationManager::CNodeCreationManager(
 
 	switch (pAlphInfo->m_iConversionID)
 	{
-	default:
-		//TODO: Error reporting here
-		//fall through to
-	case 0: // No conversion required
+	case CAlphInfo::None: // No conversion required
 		m_pAlphabetManager = new CAlphabetManager(this, pInterface, this, pAlphInfo);
 		break;
-	case 2:
+	case CAlphInfo::Mandarin:
 		//Mandarin Dasher!
 		//(ACL) Modify AlphabetManager for Mandarin Dasher
 		m_pAlphabetManager = new CMandarinAlphMgr(this, pInterface, this, pAlphInfo);
 		break;
-	case 3: //these differ only in that conversion id 3 assumes the route by which
-	case 4: //the user writes a symbol, is not dependent on context (e.g. just user preference),
+	case CAlphInfo::RoutingContextInsensitve: //these differ only in that conversion id 3 assumes the route by which
+	case CAlphInfo::RoutingContextSensitive: //the user writes a symbol, is not dependent on context (e.g. just user preference),
 		//whereas 4 assumes it does depend on context (e.g. phonetic chinese)
 		m_pAlphabetManager = new CRoutingAlphMgr(this, pInterface, this, pAlphInfo);
 		break;

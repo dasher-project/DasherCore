@@ -59,8 +59,8 @@ CConversionManager::CConversionManager(CSettingsUser *pCreateFrom, CDasherInterf
 
 }
 
-CConversionManager::CConvNode *CConversionManager::makeNode(int iOffset, int iColour, CDasherScreen::Label *pLabel) {
-  return new CConvNode(iOffset, iColour, pLabel, this);
+CConversionManager::CConvNode *CConversionManager::makeNode(int iOffset, CDasherScreen::Label *pLabel) {
+  return new CConvNode(iOffset, pLabel, this);
 }
 
 void CConversionManager::ChangeScreen(CDasherScreen *pScreen) {
@@ -83,7 +83,7 @@ CConversionManager::CConvNode *CConversionManager::GetRoot(int iOffset, CLanguag
   // TODO: Parameters here are placeholders - need to figure out what's right
 
   //TODO: hard-coded colour, and hard-coded displaytext... (ACL: read from Alphabet -> startConversionSymbol ?)
-  CConvNode *pNewNode = makeNode(iOffset, 9, NULL);
+  CConvNode *pNewNode = makeNode(iOffset, nullptr);
 
   pNewNode->iContext = newCtx;
 
@@ -94,8 +94,8 @@ CConversionManager::CConvNode *CConversionManager::GetRoot(int iOffset, CLanguag
   return pNewNode;
 }
 
-CConversionManager::CConvNode::CConvNode(int iOffset, int iColour, CDasherScreen::Label *pLabel, CConversionManager *pMgr)
- : CDasherNode(iOffset, iColour, pLabel), m_pMgr(pMgr) {
+CConversionManager::CConvNode::CConvNode(int iOffset, CDasherScreen::Label *pLabel, CConversionManager *pMgr)
+ : CDasherNode(iOffset, pLabel), m_pMgr(pMgr) {
 }
 
 CConversionManager::CConvNode::~CConvNode() {
@@ -166,6 +166,24 @@ void CConversionManager::CConvNode::Undo() {
   }
 }
 
+const ColorPalette::Color& CConversionManager::CConvNode::getLabelColor(const ColorPalette* colorPalette)
+{
+    //TODO: I dont know know these work. This needs to be implemented at a later stage
+    return ColorPalette::noColor;
+}
+
+const ColorPalette::Color& CConversionManager::CConvNode::getOutlineColor(const ColorPalette* colorPalette)
+{
+    //TODO: I dont know know these work. This needs to be implemented at a later stage
+    return ColorPalette::noColor;
+}
+
+const ColorPalette::Color& CConversionManager::CConvNode::getNodeColor(const ColorPalette* colorPalette)
+{
+    //TODO: I dont know know these work. This needs to be implemented at a later stage
+    return ColorPalette::noColor;
+}
+
 // TODO: This function needs to be significantly tidied up
 // TODO: get rid of pSizes
 
@@ -196,7 +214,7 @@ void CConversionManager::CConvNode::PopulateChildren() {
     int iIdx(0);
     int iCum(0);
     
-    //    int parentClr = pNode->Colour();
+    //    int parentClr = pNode->Color();
     // TODO: Fixme
     int parentClr = 0;
     
@@ -217,7 +235,7 @@ void CConversionManager::CConvNode::PopulateChildren() {
       
       //  std::cout << "#" << pCurrentSCEChild->pszConversion << "#" << std::endl;
       
-      CConvNode *pNewNode = mgr()->makeNode(offset()+1, mgr()->AssignColour(parentClr, pCurrentSCEChild, iIdx), mgr()->GetLabel(pCurrentSCEChild->pszConversion));
+      CConvNode *pNewNode = mgr()->makeNode(offset()+1, mgr()->GetLabel(pCurrentSCEChild->pszConversion));
 
       // TODO: Reimplement ----
 

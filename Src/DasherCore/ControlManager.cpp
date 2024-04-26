@@ -51,7 +51,7 @@ CDasherNode* CControlBase::GetRoot(CDasherNode* pContext, int iOffset)
 {
 	if (!m_pRoot) return m_pNCManager->GetAlphabetManager()->GetRoot(pContext, false, iOffset);
 
-	CContNode* pNewNode = new CContNode(iOffset, getColour(m_pRoot, pContext), m_pRoot, this);
+	CContNode* pNewNode = new CContNode(iOffset, m_pRoot, this);
 
 	// FIXME - handle context properly
 
@@ -94,8 +94,8 @@ CControlBase::NodeTemplate::~NodeTemplate()
 	delete m_pLabel;
 }
 
-CControlBase::CContNode::CContNode(int iOffset, int iColour, NodeTemplate* pTemplate, CControlBase* pMgr)
-	: CDasherNode(iOffset, iColour, pTemplate->m_pLabel), m_pTemplate(pTemplate), m_pMgr(pMgr)
+CControlBase::CContNode::CContNode(int iOffset, NodeTemplate* pTemplate, CControlBase* pMgr)
+	: CDasherNode(iOffset, pTemplate->m_pLabel), m_pTemplate(pTemplate), m_pMgr(pMgr)
 {
 }
 
@@ -124,7 +124,7 @@ void CControlBase::CContNode::PopulateChildren()
 		}
 		else
 		{
-			pNewNode = new CContNode(newOffset, m_pMgr->getColour(child, this), child, m_pMgr);
+			pNewNode = new CContNode(newOffset, child, m_pMgr);
 		}
 		pNewNode->Reparent(this, iLbnd, iHbnd);
 		iLbnd = iHbnd;
@@ -140,6 +140,25 @@ int CControlBase::CContNode::ExpectedNumChildren()
 void CControlBase::CContNode::Output()
 {
 	m_pTemplate->happen(this);
+}
+
+const ColorPalette::Color& CControlBase::CContNode::getLabelColor(const ColorPalette* colorPalette)
+{
+    //TODO: I dont know know these work. This needs to be implemented at a later stage
+    return ColorPalette::noColor;
+}
+
+const ColorPalette::Color& CControlBase::CContNode::getOutlineColor(const ColorPalette* colorPalette)
+{
+    //TODO: I dont know know these work. This needs to be implemented at a later stage
+    return ColorPalette::noColor;
+}
+
+const ColorPalette::Color& CControlBase::CContNode::getNodeColor(const ColorPalette* colorPalette)
+{
+    //TODO: I dont know know these work. This needs to be implemented at a later stage
+	// Probably depends on getColour(m_pRoot, pContext)
+    return ColorPalette::noColor;
 }
 
 const std::list<CControlBase::NodeTemplate*>& CControlParser::parsedNodes()

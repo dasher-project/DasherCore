@@ -169,9 +169,16 @@ namespace Dasher {
       const symbol m_pySym;
       ///A "symbol" to be rebuilt, is a PY sound, i.e. potentially this
       CDasherNode *RebuildSymbol(CAlphNode *pParent, symbol iSymbol);
+
     protected:
       bool isInGroup(const SGroupInfo *pGroup);
-    private:
+
+  public:
+      const ColorPalette::Color& getLabelColor(const ColorPalette* colorPalette) override;
+      const ColorPalette::Color& getOutlineColor(const ColorPalette* colorPalette) override;
+      const ColorPalette::Color& getNodeColor(const ColorPalette* colorPalette) override;
+
+  private:
       std::vector<std::pair<symbol, unsigned int> > m_vChInfo;
     };
     ///Called to create the node for a pinyin leaf symbol;
@@ -180,7 +187,7 @@ namespace Dasher {
     virtual CDasherNode *CreateSymbolNode(CAlphNode *pParent, symbol iSymbol);
 
     ///Creates a CConvRoot, for a Pinyin symbol with multiple possible chinese symbols.
-    /// Colour is always 9 (opaque), so no need for background colour.
+    /// Color is always 9 (opaque), so no need for background colour.
     /// \param pParent parent node, context will be taken from here
     /// \param iPYsym Symbol (leaf) in pinyin alphabet
     CConvRoot *CreateConvRoot(CAlphNode *pParent, symbol iPYsym);
@@ -204,7 +211,7 @@ namespace Dasher {
     /// Wraps m_vCHcolours getcolour in case anything specified; if not,
     /// supplies defaults (different from GetColour(sym,int)!). Also
     /// implements 2-phase colour cycling by low-bit of offset (as superclass).
-    int GetColour(symbol CHsym, int iOffset) const;
+    int UseAltColor(int iOffset) const;
     
     ///The same structure as the the original alphabet group tree, but for each
     /// group in the original which contained symbols (directly, not in subgroups),
@@ -221,8 +228,6 @@ namespace Dasher {
     std::vector<std::string> m_vCHtext;
     /// Display texts, as per previous
     std::vector<std::string> m_vCHdisplayText;
-    ///colour, as per previous
-    std::vector<int> m_vCHcolours;
     ///Index of paragraph symbol after rehashing
     int m_iCHpara;
     ///Labels for rehashed chinese symbols, as previous

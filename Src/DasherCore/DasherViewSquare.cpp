@@ -153,7 +153,7 @@ CDasherNode* CDasherViewSquare::Render(CDasherNode* pRoot, myint iRootMin, myint
 			//LEFT of Y axis, would be entirely covered by the root node parent (before we render root)
 			// (getColor() gives the right color, even if pOutput is invisible - in that case it gives
 			// the color of its parent)
-			DasherDrawRectangle(visibleRegion.maxX, visibleRegion.minY, 0, visibleRegion.maxY, GetNamedColor(currentTopCenterNode->getColor()), GetNamedColor(NamedColor::defaultOutline), 0);
+			DasherDrawRectangle(visibleRegion.maxX, visibleRegion.minY, 0, visibleRegion.maxY, currentTopCenterNode->getNodeColor(m_pColorPalette), GetNamedColor(NamedColor::defaultOutline), 0);
 			//RIGHT of Y axis, should be white.
 			DasherDrawRectangle(0, visibleRegion.minY, visibleRegion.minX, visibleRegion.maxY, GetNamedColor(NamedColor::background), GetNamedColor(NamedColor::defaultOutline), 0);
 		}
@@ -178,7 +178,7 @@ CDasherNode* CDasherViewSquare::Render(CDasherNode* pRoot, myint iRootMin, myint
 /// specified as two co-ordinates, intended to the be the corners of
 /// the leading edge of the containing box.
 
-CDasherViewSquare::CTextString* CDasherViewSquare::DasherDrawText(myint iDasherMaxX, myint iDasherMidY, CDasherScreen::Label* pLabel, int iColor)
+CDasherViewSquare::CTextString* CDasherViewSquare::DasherDrawText(myint iDasherMaxX, myint iDasherMidY, CDasherScreen::Label* pLabel, const ColorPalette::Color& Color)
 {
 	screenint x, y;
 	Dasher2Screen(iDasherMaxX, iDasherMidY, x, y);
@@ -206,7 +206,7 @@ CDasherViewSquare::CTextString* CDasherViewSquare::DasherDrawText(myint iDasherM
 		}
 	}
 
-	return new CTextString(pLabel, x, y, static_cast<int>(iSize), iColor);
+	return new CTextString(pLabel, x, y, static_cast<int>(iSize), Color);
 }
 
 void CDasherViewSquare::DoDelayedText(CTextString* pText, myint extrusionLevel, myint groupRecursionDepth)
@@ -228,11 +228,11 @@ void CDasherViewSquare::DoDelayedText(CTextString* pText, myint extrusionLevel, 
 			{
 				if(extrudedText)
 				{
-					Screen()->Draw3DLabel(pText->m_pLabel, x, y - textDims.second / 2, extrusionLevel, groupRecursionDepth, pText->m_iSize, GetNamedColor(pText->m_iColor));
+					Screen()->Draw3DLabel(pText->m_pLabel, x, y - textDims.second / 2, extrusionLevel, groupRecursionDepth, pText->m_iSize, pText->m_Color);
 				}
 				else
 				{
-					Screen()->DrawString(pText->m_pLabel, x, y - textDims.second / 2, pText->m_iSize, GetNamedColor(pText->m_iColor));
+					Screen()->DrawString(pText->m_pLabel, x, y - textDims.second / 2, pText->m_iSize, pText->m_Color);
 				}
 				for (auto& pChild : pText->m_children)
 				{
@@ -250,11 +250,11 @@ void CDasherViewSquare::DoDelayedText(CTextString* pText, myint extrusionLevel, 
 			{
 				if(extrudedText)
 				{
-					Screen()->Draw3DLabel(pText->m_pLabel, iLeft, y - textDims.second / 2, extrusionLevel, groupRecursionDepth, pText->m_iSize, GetNamedColor(pText->m_iColor));
+					Screen()->Draw3DLabel(pText->m_pLabel, iLeft, y - textDims.second / 2, extrusionLevel, groupRecursionDepth, pText->m_iSize, pText->m_Color);
 				}
 				else
 				{
-					Screen()->DrawString(pText->m_pLabel, iLeft, y - textDims.second / 2, pText->m_iSize, GetNamedColor(pText->m_iColor));
+					Screen()->DrawString(pText->m_pLabel, iLeft, y - textDims.second / 2, pText->m_iSize, pText->m_Color);
 				}
 				for (auto& pChild : pText->m_children)
 				{
@@ -272,11 +272,11 @@ void CDasherViewSquare::DoDelayedText(CTextString* pText, myint extrusionLevel, 
 			{
 				if(extrudedText)
 				{
-					Screen()->Draw3DLabel(pText->m_pLabel, x - textDims.first / 2, y, extrusionLevel, groupRecursionDepth, pText->m_iSize, GetNamedColor(pText->m_iColor));
+					Screen()->Draw3DLabel(pText->m_pLabel, x - textDims.first / 2, y, extrusionLevel, groupRecursionDepth, pText->m_iSize, pText->m_Color);
 				}
 				else
 				{
-					Screen()->DrawString(pText->m_pLabel, x - textDims.first / 2, y, pText->m_iSize, GetNamedColor(pText->m_iColor));
+					Screen()->DrawString(pText->m_pLabel, x - textDims.first / 2, y, pText->m_iSize, pText->m_Color);
 				}
 				for (auto& pChild : pText->m_children)
 				{
@@ -294,11 +294,11 @@ void CDasherViewSquare::DoDelayedText(CTextString* pText, myint extrusionLevel, 
 			{
 				if(extrudedText)
 				{
-					Screen()->Draw3DLabel(pText->m_pLabel, x - textDims.first / 2, iTop, extrusionLevel, groupRecursionDepth, pText->m_iSize, GetNamedColor(pText->m_iColor));
+					Screen()->Draw3DLabel(pText->m_pLabel, x - textDims.first / 2, iTop, extrusionLevel, groupRecursionDepth, pText->m_iSize, pText->m_Color);
 				}
 				else
 				{
-					Screen()->DrawString(pText->m_pLabel, x - textDims.first / 2, iTop, pText->m_iSize, GetNamedColor(pText->m_iColor));
+					Screen()->DrawString(pText->m_pLabel, x - textDims.first / 2, iTop, pText->m_iSize, pText->m_Color);
 				}
 				
 				for (auto& pChild : pText->m_children)
@@ -603,14 +603,11 @@ void CDasherViewSquare::DisjointRender(CDasherNode* pRender, myint y1, myint y2,
 	const ScreenRegion visibleRegion = VisibleRegion();
 	pRender->SetFlag(CDasherNode::NF_SUPER, (y2 - y1 >= visibleRegion.maxX) && (y1 <= visibleRegion.minY) && (y2 >= visibleRegion.maxY));
 
-	const int myColor = pRender->getColor();
-
 	if (pRender->getLabel())
 	{
-		const int textColor = GetLongParameter(LP_OUTLINE_WIDTH) < 0 ? myColor : 4;
 		myint ny1 = std::min(visibleRegion.maxY, std::max(visibleRegion.minY, y1)),
 		      ny2 = std::min(visibleRegion.maxY, std::max(visibleRegion.minY, y2));
-		CTextString* pText = DasherDrawText(y2 - y1, (ny1 + ny2) / 2, pRender->getLabel(), textColor);
+		CTextString* pText = DasherDrawText(y2 - y1, (ny1 + ny2) / 2, pRender->getLabel(), pRender->getLabelColor(m_pColorPalette));
 		((pPrevText) ? pPrevText->m_children : m_DelayedTexts).push_back(pText); // add text at appropriate queue
 
 		if (pRender->bShove()) pPrevText = pText;
@@ -633,7 +630,7 @@ void CDasherViewSquare::DisjointRender(CDasherNode* pRender, myint y1, myint y2,
 		//allow empty node to be expanded, it's big enough.
 		policy.pushNode(pRender, static_cast<int>(y1), static_cast<int>(y2), true, dMaxCost);
 		//and render whole node in one go
-		DasherDrawRectangle(std::min(Range, visibleRegion.maxX), std::max(y1, visibleRegion.minY), 0, std::min(y2, visibleRegion.maxY), GetNamedColor(myColor), GetNamedColor(NamedColor::boxOutline), 0);
+		DasherDrawRectangle(std::min(Range, visibleRegion.maxX), std::max(y1, visibleRegion.minY), 0, std::min(y2, visibleRegion.maxY), pRender->getNodeColor(m_pColorPalette), pRender->getOutlineColor(m_pColorPalette), 0);
 		//fall through to draw outline
 	}
 	else
@@ -664,7 +661,7 @@ void CDasherViewSquare::DisjointRender(CDasherNode* pRender, myint y1, myint y2,
 				DASHER_ASSERT(dMaxCost == std::numeric_limits<double>::infinity());
 
 				if (newy2 - newy1 < visibleRegion.maxX) //fill in to it's left...
-					DasherDrawRectangle(std::min(Range, visibleRegion.maxX), std::max(y1, visibleRegion.minY), newy2 - newy1, std::min(y2, visibleRegion.maxY), GetNamedColor(myColor), GetNamedColor(NamedColor::boxOutline), 0);
+					DasherDrawRectangle(std::min(Range, visibleRegion.maxX), std::max(y1, visibleRegion.minY), newy2 - newy1, std::min(y2, visibleRegion.maxY), pRender->getNodeColor(m_pColorPalette), pRender->getOutlineColor(m_pColorPalette), 0);
 				DisjointRender(pChild, newy1, newy2, pPrevText,
 				               policy, dMaxCost, pOutput);
 				//leave pRender->onlyChildRendered set, so remaining children are skipped
@@ -698,7 +695,7 @@ void CDasherViewSquare::DisjointRender(CDasherNode* pRender, myint y1, myint y2,
 					DASHER_ASSERT(dMaxCost == std::numeric_limits<double>::infinity());
 					pRender->onlyChildRendered = pChild;
 					if (newy2 - newy1 < visibleRegion.maxX)
-						DasherDrawRectangle(std::min(Range, visibleRegion.maxX), std::max(y1, visibleRegion.minY), newy2 - newy1, std::min(y2, visibleRegion.maxY), GetNamedColor(myColor), GetNamedColor(NamedColor::boxOutline), 0);
+						DasherDrawRectangle(std::min(Range, visibleRegion.maxX), std::max(y1, visibleRegion.minY), newy2 - newy1, std::min(y2, visibleRegion.maxY), pRender->getNodeColor(m_pColorPalette), pRender->getOutlineColor(m_pColorPalette), 0);
 					DisjointRender(pChild, newy1, newy2, pPrevText, policy, dMaxCost, pOutput);
 					//ensure we don't blank over this child in "finishing off" the parent (!)
 					lasty = newy2;
@@ -712,10 +709,10 @@ void CDasherViewSquare::DisjointRender(CDasherNode* pRender, myint y1, myint y2,
 				{
 					//child should be rendered!
 					//fill in to its left
-					DasherDrawRectangle(std::min(y2 - y1, visibleRegion.maxX), std::max(newy1, visibleRegion.minY), std::min(newy2 - newy1, visibleRegion.maxX), std::min(newy2, visibleRegion.maxY), GetNamedColor(myColor), GetNamedColor(NamedColor::boxOutline), 0);
+					DasherDrawRectangle(std::min(y2 - y1, visibleRegion.maxX), std::max(newy1, visibleRegion.minY), std::min(newy2 - newy1, visibleRegion.maxX), std::min(newy2, visibleRegion.maxY), pRender->getNodeColor(m_pColorPalette), pRender->getOutlineColor(m_pColorPalette), 0);
 
 					if (std::max(lasty, visibleRegion.minY) < newy1) //fill in interval above child up to the last drawn child
-						DasherDrawRectangle(std::min(Range, visibleRegion.maxX), std::max(lasty, visibleRegion.minY), 0, std::min(newy1, visibleRegion.maxY), GetNamedColor(myColor), GetNamedColor(NamedColor::boxOutline), 0);
+						DasherDrawRectangle(std::min(Range, visibleRegion.maxX), std::max(lasty, visibleRegion.minY), 0, std::min(newy1, visibleRegion.maxY), pRender->getNodeColor(m_pColorPalette), pRender->getOutlineColor(m_pColorPalette), 0);
 					lasty = newy2;
 					DisjointRender(pChild, newy1, newy2, pPrevText, policy, dMaxCost, pOutput);
 				}
@@ -731,15 +728,15 @@ void CDasherViewSquare::DisjointRender(CDasherNode* pRender, myint y1, myint y2,
 			if (lasty < std::min(y2, visibleRegion.maxY))
 			{
 				// Finish off the drawing process, filling in any part of the parent below the last-rendered child
-				DasherDrawRectangle(std::min(Range, visibleRegion.maxX), std::max(lasty, visibleRegion.minY), 0, std::min(y2, visibleRegion.maxY), GetNamedColor(myColor), GetNamedColor(NamedColor::boxOutline), 0);
+				DasherDrawRectangle(std::min(Range, visibleRegion.maxX), std::max(lasty, visibleRegion.minY), 0, std::min(y2, visibleRegion.maxY), pRender->getNodeColor(m_pColorPalette), pRender->getOutlineColor(m_pColorPalette), 0);
 			}
 		}
 		//end rendering children, fall through to outline
 	}
 	// Lastly, draw the outline
-	if (GetLongParameter(LP_OUTLINE_WIDTH) && pRender->GetFlag(CDasherNode::NF_VISIBLE))
+	if (GetLongParameter(LP_OUTLINE_WIDTH) && !pRender->getOutlineColor(m_pColorPalette).isTransparent())
 	{
-		DasherDrawRectangle(std::min(Range, visibleRegion.maxX), std::max(y1, visibleRegion.minY), 0, std::min(y2, visibleRegion.maxY), ColorPalette::noColor, GetNamedColor(ColorPalette::boxOutline), abs(GetLongParameter(LP_OUTLINE_WIDTH)));
+		DasherDrawRectangle(std::min(Range, visibleRegion.maxX), std::max(y1, visibleRegion.minY), 0, std::min(y2, visibleRegion.maxY), ColorPalette::noColor, pRender->getOutlineColor(m_pColorPalette), abs(GetLongParameter(LP_OUTLINE_WIDTH)));
 	}
 }
 
@@ -804,9 +801,9 @@ ColorPalette::Color CDasherViewSquare::SimulateTransparency(CDasherNode* pCurren
 {
 	if(pCurrentNode == nullptr) return GetNamedColor(NamedColor::background);
 
-	//Check if this node is transparent
-	const ColorPalette::Color& nodeColor = GetNamedColor(pCurrentNode->getColor());
-	if(nodeColor.Alpha == 255) return nodeColor; // no transparency
+    const ColorPalette::Color nodeColor = pCurrentNode->getNodeColor(m_pColorPalette);
+
+	if(nodeColor.isFullyOpaque()) return nodeColor; // no transparency
 
 	//Interpolate between this and the parent
 	const ColorPalette::Color parentColor = SimulateTransparency(pCurrentNode->Parent());
@@ -827,8 +824,6 @@ void CDasherViewSquare::NewRender(CDasherNode* pCurrentNode, myint y1, myint y2,
 	// area.
 	pCurrentNode->SetFlag(CDasherNode::NF_SUPER, !IsSpaceAroundNode(y1, y2));
 
-	const int myColor = pCurrentNode->getColor();
-
 	if(!pCurrentNode->getLabel())
 	{
 		if(recusionDepth > 0) recusionDepth--; //Use same level as node before, if we are not at level 0 already
@@ -841,10 +836,9 @@ void CDasherViewSquare::NewRender(CDasherNode* pCurrentNode, myint y1, myint y2,
 
 	if (pCurrentNode->getLabel())
 	{
-		const int textColor = GetLongParameter(LP_OUTLINE_WIDTH) < 0 ? myColor : 4;
 		myint ny1 = std::min(visibleRegion.maxY, std::max(visibleRegion.minY, y1)),
 		      ny2 = std::min(visibleRegion.maxY, std::max(visibleRegion.minY, y2));
-		CTextString* pText = DasherDrawText(y2 - y1, (ny1 + ny2) / 2, pCurrentNode->getLabel(), textColor);
+		CTextString* pText = DasherDrawText(y2 - y1, (ny1 + ny2) / 2, pCurrentNode->getLabel(), pCurrentNode->getLabelColor(m_pColorPalette));
 
 		// add text at appropriate queue
 		if(pPrevText){
@@ -875,12 +869,12 @@ void CDasherViewSquare::NewRender(CDasherNode* pCurrentNode, myint y1, myint y2,
 	// _supposed_ to be the same color as their parent, will have no outlines...
 	// (thankfully having 2 "phases" means this doesn't happen in standard
 	// color schemes)
-	if (pCurrentNode->GetFlag(CDasherNode::NF_VISIBLE))
+	if (!pCurrentNode->getNodeColor(m_pColorPalette).isTransparent())
 	{
 		//outline width 0 = fill only; >0 = fill + outline; <0 = outline only
 		const int line_width = abs(GetLongParameter(LP_OUTLINE_WIDTH));
-		const ColorPalette::Color& fill_color = line_width < 0 ? ColorPalette::noColor : (GetBoolParameter(BP_SIMULATE_TRANSPARENCY) ? SimulateTransparency(pCurrentNode) : GetNamedColor(myColor));
-		const ColorPalette::Color& outline_color = line_width == 0 ? ColorPalette::noColor : GetNamedColor(NamedColor::boxOutline);
+		const ColorPalette::Color& fill_color = line_width < 0 ? ColorPalette::noColor : (GetBoolParameter(BP_SIMULATE_TRANSPARENCY) ? SimulateTransparency(pCurrentNode) : pCurrentNode->getNodeColor(m_pColorPalette));
+		const ColorPalette::Color& outline_color = line_width == 0 ? ColorPalette::noColor : pCurrentNode->getOutlineColor(m_pColorPalette);
 		switch (GetLongParameter(LP_SHAPE_TYPE))
 		{
 		case Options::OVERLAPPING_RECTANGLE:
