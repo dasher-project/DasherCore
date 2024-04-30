@@ -104,7 +104,7 @@ bool CColorIO::Parse(pugi::xml_document& document, const std::string, bool bUser
 		GroupColors[groupInfo.attribute("name").as_string()] = group;
 	}
 
-	KnownPalettes[colorSchemeName] = new ColorPalette(KnownPalettes["Default"], parentName, NamedColors, GroupColors);
+	KnownPalettes[colorSchemeName] = new ColorPalette(KnownPalettes["Default"], parentName, NamedColors, GroupColors, colorSchemeName);
 
 	return true;
 }
@@ -143,5 +143,5 @@ void CColorIO::CreateDefault() {
         {NamedColor::gameGuide, ColorPalette::Color(255, 100, 204, 255)}
 	};
 
-	KnownPalettes["Default"] = new ColorPalette(nullptr, "NonExistentRootRootPalette", NamedColors, {}); //TODO: No groups for now, but will later be added
+	KnownPalettes["Default"] = new ColorPalette(nullptr, "NonExistentRootRootPalette", NamedColors, {}, "Default"); //TODO: No groups for now, but will later be added
 }

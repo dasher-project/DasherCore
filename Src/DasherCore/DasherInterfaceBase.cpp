@@ -114,7 +114,7 @@ void CDasherInterfaceBase::Realize(unsigned long ulTime) {
   srand(ulTime);
  
   m_AlphIO = new CAlphIO(this);
-  ScanFiles(m_AlphIO, "alph.*.xml");
+  ScanFiles(m_AlphIO, "alph\\..*\\.xml");
 
   m_ColorIO = new CColorIO(this);
   ScanFiles(m_ColorIO, "color.*.xml");

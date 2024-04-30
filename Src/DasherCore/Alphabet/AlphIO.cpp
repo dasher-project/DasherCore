@@ -36,9 +36,9 @@ SGroupInfo* CAlphIO::ParseGroupRecursive(pugi::xml_node& group_node, CAlphInfo* 
 {
 	SGroupInfo* pNewGroup = new SGroupInfo();
     pNewGroup->iNumChildNodes = 0;
-	pNewGroup->strName = group_node.attribute("name").as_string();
-	pNewGroup->strLabel = group_node.attribute("label").as_string();
-    pNewGroup->colorGroup = group_node.attribute("colorInfoName").as_string();
+	pNewGroup->strName = group_node.attribute("name").as_string("");
+	pNewGroup->strLabel = group_node.attribute("label").as_string("");
+    pNewGroup->colorGroup = group_node.attribute("colorInfoName").as_string("");
 
 	pNewGroup->pNext = previous_sibling;
     pNewGroup->pChild = nullptr;
@@ -70,7 +70,7 @@ SGroupInfo* CAlphIO::ParseGroupRecursive(pugi::xml_node& group_node, CAlphInfo* 
 	}
 
 	pNewGroup->iEnd = static_cast<int>(CurrentAlphabet->m_vCharacters.size()) + 1;
-    if (pNewGroup->iEnd == pNewGroup->iStart || pNewGroup->colorGroup.empty()) {
+    if (pNewGroup->iEnd == pNewGroup->iStart) {
 		//empty or defunct group. Delete it now, and remove from sibling chain
 		SGroupInfo* parent = (ancestors.empty() ? CurrentAlphabet : ancestors.back());
 		parent->pChild = pNewGroup->pNext; //the actually previous node

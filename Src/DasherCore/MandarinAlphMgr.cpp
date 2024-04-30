@@ -50,7 +50,7 @@ void CMandarinAlphMgr::InitMap() {
   m_pPYgroups = makePYgroup(m_pAlphabet);
 
   //add in space and paragraph to end of main PY group...
-  char additonalChars[2] = {' ', '\n'}; //TODO: Paragraph Symbol
+  char additonalChars[2] = {' ', '\n'};
   for (const char i : additonalChars)
   {
     //add a PY mapping to a single CH-character (already rehashed), i.e. the space/para

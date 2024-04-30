@@ -48,13 +48,13 @@ namespace Dasher {
 	public:
 		typedef struct Color
 		{
-			unsigned int Red = 0;
-			unsigned int Green = 0;
-			unsigned int Blue = 0;
-			unsigned int Alpha = 255;
+			int Red = 0;
+			int Green = 0;
+			int Blue = 0;
+			int Alpha = 255;
 
 			Color(){};
-			Color(unsigned int Red, unsigned int Green, unsigned int Blue, unsigned int Alpha = 255);
+			Color(int Red, int Green, int Blue, int Alpha = 255);
             Color(const std::string& HexString);
 
 			bool operator==(const Color& t) const;
@@ -69,6 +69,7 @@ namespace Dasher {
         } Color;
 
 		inline static const Color noColor = {0,0,0,0};
+		inline static const Color undefinedColor = {-1,-1,-1,-1};
 
 		// Represents the colors for one named group
 		// each std::pair<Color,Color> represents a color and an alternative color for the same purpose to not nest the same colors
@@ -84,16 +85,17 @@ namespace Dasher {
 			std::vector<Color> altNodeLabelColorSequence;
 			std::vector<Color> altNodeOutlineColorSequence;
 
-			std::pair<Color,Color> groupColor = {noColor, noColor};
-			std::pair<Color,Color> groupOutlineColor = {noColor, noColor};
-			std::pair<Color,Color> groupLabelColor = {noColor, noColor};
+			std::pair<Color,Color> groupColor = {undefinedColor, undefinedColor};
+			std::pair<Color,Color> groupOutlineColor = {undefinedColor, undefinedColor};
+			std::pair<Color,Color> groupLabelColor = {undefinedColor, undefinedColor};
 		} GroupColorInfo;
 
-		ColorPalette(ColorPalette* ParentPalette, std::string ParentPaletteName, const std::unordered_map<NamedColor::knownColorName, Color>& NamedColors, const std::unordered_map<std::string, GroupColorInfo>& GroupColors);
+		ColorPalette(ColorPalette* ParentPalette, std::string ParentPaletteName, const std::unordered_map<NamedColor::knownColorName, Color>& NamedColors, const std::unordered_map<std::string, GroupColorInfo>& GroupColors, std::string PaletteName);
 
 		// We need both links to the parentPalette, as we first only parse and link the palettes afterwards
 		const ColorPalette* ParentPalette = nullptr;
 		std::string ParentPaletteName;
+		std::string PaletteName;
 
 		const Color& GetNamedColor(const NamedColor::knownColorName& NamedColor) const;
 

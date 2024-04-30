@@ -9,7 +9,9 @@
 
 <!-- Logical groups of symbols, eg name="lowercase" -->
 <!ELEMENT group (node*|group*)>
-<!ATTLIST group colorInfoName CDATA #REQUIRED>
+<!ATTLIST group colorInfoName CDATA #IMPLIED>
+<!ATTLIST group name CDATA #IMPLIED>
+<!ATTLIST group label CDATA #IMPLIED>
 
 <!-- Single symbols -->
 <!ELEMENT node (textCharAction*|deleteTextAction*|moveCursorAction*|fixedTTSAction*|contextTTSAction*|repeatTTSAction*|stopTTSAction*|pauseDasherAction*|atspiAction*|keyboardAction*)>

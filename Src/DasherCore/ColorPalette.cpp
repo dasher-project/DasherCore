@@ -5,7 +5,7 @@
 
 using namespace Dasher;
 
-ColorPalette::Color::Color(unsigned int Red, unsigned int Green, unsigned int Blue, unsigned int Alpha): Red(Red), Green(Green), Blue(Blue), Alpha(Alpha){}
+ColorPalette::Color::Color(int Red, int Green, int Blue, int Alpha): Red(Red), Green(Green), Blue(Blue), Alpha(Alpha){}
 
 
 ColorPalette::Color::Color(const std::string& HexString)
@@ -13,12 +13,12 @@ ColorPalette::Color::Color(const std::string& HexString)
     static const std::regex pattern("#?([0-9a-fA-F]{2})([0-9a-fA-F]{2})([0-9a-fA-F]{2})([0-9a-fA-F]{2})?"); // only instantiate once, thus static
 
     std::smatch match;
-    if (std::regex_match(HexString, match, pattern) && (match.size() == 4 || match.size() == 5))
+    if (std::regex_match(HexString, match, pattern) && (match.size() == 5 || match.size() == 6))
     {
-        Red = std::stoul(match[1].str(), nullptr, 16);
-        Green = std::stoul(match[2].str(), nullptr, 16);
-        Blue = std::stoul(match[3].str(), nullptr, 16);
-        Alpha = (match.size() == 5) ? std::stoul(match[4].str(), nullptr, 16) : 255;
+        Red = static_cast<int>(std::stoul(match[1].str(), nullptr, 16));
+        Green = static_cast<int>(std::stoul(match[2].str(), nullptr, 16));
+        Blue = static_cast<int>(std::stoul(match[3].str(), nullptr, 16));
+        Alpha = (match.size() == 6) ? static_cast<int>(std::stoul(match[4].str(), nullptr, 16)) : 255;
     }
 }
 
@@ -34,10 +34,10 @@ bool ColorPalette::Color::operator!=(const Color& t) const
 
 ColorPalette::Color ColorPalette::Color::operator*(float x) const
 {
-    return {static_cast<unsigned int>(static_cast<float>(Red) * x),
-        static_cast<unsigned int>(static_cast<float>(Green) * x),
-        static_cast<unsigned int>(static_cast<float>(Blue) * x),
-        static_cast<unsigned int>(static_cast<float>(Alpha) * x)
+    return {static_cast<int>(static_cast<float>(Red) * x),
+        static_cast<int>(static_cast<float>(Green) * x),
+        static_cast<int>(static_cast<float>(Blue) * x),
+        static_cast<int>(static_cast<float>(Alpha) * x)
     };
 }
 
@@ -53,8 +53,8 @@ ColorPalette::Color ColorPalette::Color::lerp(const Color& ColorA, const Color& 
 
 ColorPalette::ColorPalette(ColorPalette* ParentPalette, std::string ParentPaletteName,
                            const std::unordered_map<NamedColor::knownColorName, Color>& NamedColors,
-    const std::unordered_map<std::string, GroupColorInfo>& GroupColors) : ParentPalette(ParentPalette), ParentPaletteName(
-                                                                              std::move(ParentPaletteName)), NamedColors(NamedColors), GroupColors(GroupColors)
+    const std::unordered_map<std::string, GroupColorInfo>& GroupColors, std::string PaletteName) : ParentPalette(ParentPalette), ParentPaletteName(
+                                                                              std::move(ParentPaletteName)), NamedColors(NamedColors), GroupColors(GroupColors), PaletteName(PaletteName)
 {
 }
 
@@ -69,30 +69,36 @@ const ColorPalette::Color& ColorPalette::GetNamedColor(const NamedColor::knownCo
 
 const ColorPalette::Color& ColorPalette::GetGroupColor(const std::string& GroupName, const bool& UseAltColor) const
 {
+    if(GroupName.empty()) return noColor;
+
     if (const auto& search = GroupColors.find(GroupName); search != GroupColors.end())
     {
-        const Color& result = (UseAltColor) ? search->second.groupColor.second : search->second.groupColor.first;
-        return (result == noColor && ParentPalette) ? ParentPalette->GetGroupColor(GroupName, UseAltColor) : result;
+        const Color& result = (UseAltColor && search->second.groupColor.second != undefinedColor) ? search->second.groupColor.second : search->second.groupColor.first;
+        if(result != undefinedColor) return result;
     }
     return (ParentPalette) ? ParentPalette->GetGroupColor(GroupName, UseAltColor) : noColor;
 }
 
 const ColorPalette::Color& ColorPalette::GetGroupOutlineColor(const std::string& GroupName, const bool& UseAltColor) const
 {
+    if(GroupName.empty()) return noColor;
+
     if (const auto& search = GroupColors.find(GroupName); search != GroupColors.end())
     {
-        const Color& result = (UseAltColor) ? search->second.groupOutlineColor.second : search->second.groupOutlineColor.first;
-        return (result == noColor && ParentPalette) ? ParentPalette->GetGroupColor(GroupName, UseAltColor) : result;
+        const Color& result = (UseAltColor && search->second.groupOutlineColor.second != undefinedColor) ? search->second.groupOutlineColor.second : search->second.groupOutlineColor.first;
+        if(result != undefinedColor) return result;
     }
     return (ParentPalette) ? ParentPalette->GetGroupOutlineColor(GroupName, UseAltColor) : GetNamedColor(NamedColor::defaultOutline);
 }
 
 const ColorPalette::Color& ColorPalette::GetGroupLabelColor(const std::string& GroupName, const bool& UseAltColor) const
 {
+    if(GroupName.empty()) return noColor;
+
     if (const auto& search = GroupColors.find(GroupName); search != GroupColors.end())
     {
-        const Color& result = (UseAltColor) ? search->second.groupOutlineColor.second : search->second.groupOutlineColor.first;
-        return (result == noColor && ParentPalette) ? ParentPalette->GetGroupColor(GroupName, UseAltColor) : result;
+        const Color& result = (UseAltColor && search->second.groupLabelColor.second != undefinedColor) ? search->second.groupLabelColor.second : search->second.groupLabelColor.first;
+        if(result != undefinedColor) return result;
     }
     return (ParentPalette) ? ParentPalette->GetGroupLabelColor(GroupName, UseAltColor) : GetNamedColor(NamedColor::defaultLabel);
 }
@@ -100,13 +106,14 @@ const ColorPalette::Color& ColorPalette::GetGroupLabelColor(const std::string& G
 const ColorPalette::Color& ColorPalette::GetNodeColor(const std::string& GroupName, const int& nodeIndexInGroup,
     const bool& UseAltColor) const
 {
+    if(GroupName.empty()) return noColor;
+
     if (const auto& search = GroupColors.find(GroupName); search != GroupColors.end())
     {
         const GroupColorInfo& Group = search->second;
 
-        if(UseAltColor)
+        if(UseAltColor && !Group.altNodeColorSequence.empty())
         {
-            if(Group.altNodeColorSequence.empty() && ParentPalette) return ParentPalette->GetNodeColor(GroupName, nodeIndexInGroup, UseAltColor);
             return Group.altNodeColorSequence[nodeIndexInGroup % Group.altNodeColorSequence.size()];
         }
 
@@ -119,12 +126,14 @@ const ColorPalette::Color& ColorPalette::GetNodeColor(const std::string& GroupNa
 const ColorPalette::Color& ColorPalette::GetNodeOutlineColor(const std::string& GroupName, const int& nodeIndexInGroup,
     const bool& UseAltColor) const
 {
+    if(GroupName.empty()) return noColor;
+
     if (const auto& search = GroupColors.find(GroupName); search != GroupColors.end())
     {
         const GroupColorInfo& Group = search->second;
-        if(UseAltColor)
+
+        if(UseAltColor && !Group.altNodeOutlineColorSequence.empty())
         {
-            if(Group.altNodeOutlineColorSequence.empty() && ParentPalette) return ParentPalette->GetNodeOutlineColor(GroupName, nodeIndexInGroup, UseAltColor);
             return Group.altNodeOutlineColorSequence[nodeIndexInGroup % Group.altNodeOutlineColorSequence.size()];
         }
 
@@ -137,13 +146,14 @@ const ColorPalette::Color& ColorPalette::GetNodeOutlineColor(const std::string& 
 const ColorPalette::Color& ColorPalette::GetNodeLabelColor(const std::string& GroupName, const int& nodeIndexInGroup,
     const bool& UseAltColor) const
 {
+    if(GroupName.empty()) return noColor;
+
     if (const auto& search = GroupColors.find(GroupName); search != GroupColors.end())
     {
         const GroupColorInfo& Group = search->second;
 
-        if(UseAltColor)
+        if(UseAltColor && !Group.altNodeLabelColorSequence.empty())
         {
-            if(Group.altNodeLabelColorSequence.empty() && ParentPalette) return ParentPalette->GetNodeLabelColor(GroupName, nodeIndexInGroup, UseAltColor);
             return Group.altNodeLabelColorSequence[nodeIndexInGroup % Group.altNodeLabelColorSequence.size()];
         }
 

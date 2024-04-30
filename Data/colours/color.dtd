@@ -28,6 +28,8 @@
     warningTextColor CDATA #IMPLIED
     warningTextBackgroundColor CDATA #IMPLIED
     gameGuideColor CDATA #IMPLIED
+    oneButtonDynamicOuterGuidesColor CDATA #IMPLIED
+    conversionNodeColor CDATA #IMPLIED
 >
 
 <!-- Group Color Definition -->
