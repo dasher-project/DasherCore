@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE alphabet SYSTEM "../alphabet.dtd">
 <alphabet name="English without punctuation" orientation="LR" trainingFilename="training_english_GB.txt" colorsName="European/Asian">
-	<group name="Lower case Latin letters" colorInfoName="lowercase">
+	<group name="Lower case Latin letters" colorInfoName="lowercaseBackground">
 		<node label="a">
 			<!--Old Char Color: 10-->
 			<textCharAction />

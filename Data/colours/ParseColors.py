@@ -64,6 +64,7 @@ def cr(min, max) :
 
 knownGroups = [
     ["lowercase", cr(10,39), True, -1],
+    ["lowercaseBackground", cr(10,39), True, 99],
     ["uppercase", cr(10,38), True, 111],
     ["punctuation", [105,103,104,100,104], True, 112],
     ["limitedPunctuation", [99,109,105,103,104,100,104], True, 112],

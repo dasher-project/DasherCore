@@ -190,13 +190,13 @@
 <!-- light grey 95   -->
 <colour r="170" g="170" b="170"/>
 <!--  dark grey 96  -->
-<colour r="120" g="120" b="120"/>
+<colour r="120" g="120" b="120" a="128"/>
 <!--  grey  97  -->
 <colour r="195" g="195" b="195"/>
 <!--  v light grey  98  -->
 <colour r="145" g="145" b="145"/>
 <!--  v light grey  99  -->
-<colour r="220" g="220" b="220"/>
+<colour r="220" g="220" b="220" a="128"/>
 <!-- slate blues     100  101 102 103 104  -->
 <colour r="142" g="172" b="222"/>
 <colour r="110" g="130" b="188"/>
@@ -214,7 +214,7 @@
 <!-- slate blue  110  -->
 <colour r="100" g="155" b="200"/>
 <!-- yellow = capitals 111  -->
-<colour r="255" g="255" b="0"/>
+<colour r="120" g="120" b="120" a="128"/>
 <!-- NOW GREEN - was dark red 112  (punctuation 112 is usually green)  -->
 <colour r="0" g="200" b="0"/>
 <!-- NOW RED   - was green 113 - (red 113 usually used for numbers) -->

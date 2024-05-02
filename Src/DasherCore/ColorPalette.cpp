@@ -18,7 +18,7 @@ ColorPalette::Color::Color(const std::string& HexString)
         Red = static_cast<int>(std::stoul(match[1].str(), nullptr, 16));
         Green = static_cast<int>(std::stoul(match[2].str(), nullptr, 16));
         Blue = static_cast<int>(std::stoul(match[3].str(), nullptr, 16));
-        Alpha = (match.size() == 6) ? static_cast<int>(std::stoul(match[4].str(), nullptr, 16)) : 255;
+        Alpha = (match[4].matched) ? static_cast<int>(std::stoul(match[4].str(), nullptr, 16)) : 255;
     }
 }
 
