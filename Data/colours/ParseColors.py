@@ -1,3 +1,4 @@
+import glob
 import xml.etree.ElementTree as ET
 
 def getAttrib(Element, attrib, alt=None) :
@@ -6,6 +7,8 @@ def getAttrib(Element, attrib, alt=None) :
 
 def parseColor(element):
     return [int(getAttrib(element, 'r', 0)), int(getAttrib(element, 'g', 0)), int(getAttrib(element, 'b', 0)), int(getAttrib(element, 'a', 255))]
+
+def cleanString(s) : return "".join(x for x in s.lower().replace(" ", ".") if x.isascii() and x.isalnum() or x == ".")
 
 def printColor(color):
     if(len(color) == 3 or (len(color) == 4 and color[3] == 255)):
@@ -27,7 +30,6 @@ def addGroup(colorsRange, name, groupColor, generateAltColors, parent, colors):
         group.attrib["groupOutlineColor"] = printColor(parseColor(colors[3]))
     group.attrib["nodeColorSequence"] = getColorSequence(colors, colorsRange)
     if(generateAltColors) : group.attrib["altNodeColorSequence"] = getColorSequence(colors, [x + 130 for x in colorsRange])
-        
 
 NamedColors = [
 [0, "backgroundColor"],
@@ -57,36 +59,55 @@ NamedColors = [
 [9, "conversionNodeColor"]
 ]
 
+def cr(min, max) :
+    return range(min, max + 1)
 
-
-parser = ET.XMLParser(target=ET.TreeBuilder(insert_comments=True))
-input = ET.parse("colour.xml", parser=parser).getroot().find("palette")
-name = "test" # input.attrib["name"]
-output = ET.Element("colors",{
-            "name": name,
-            "parentName" : "Default"
-        })
-
-colors = input.findall('colour')
-
-for [colorIndex,colorName] in NamedColors:
-    output.attrib[colorName] = printColor(parseColor(colors[colorIndex]))
-    
 knownGroups = [
-    ["lowercase", [10,35], True, -1],
+    ["lowercase", cr(10,39), True, -1],
+    ["uppercase", cr(10,38), True, 111],
     ["punctuation", [105,103,104,100,104], True, 112],
+    ["limitedPunctuation", [99,109,105,103,104,100,104], True, 112],
+    ["punctuationLong", [90,91,92,93,94,95,96,97,98,99,95,96,97,98,105,106,107,108,109,105,106,107,108,109,106,107,108,109,105,9,100,101,102,103,104,100,104], True, 112], #English with accents, numerals, punctuation
+    ["numbers", cr(90,94), True, 113],
+    ["accents", [72,82], True, 112],
     ["space", [9], False, -1],
-    ["paragraph", [9], False, -1]
+    ["paragraph", [9], False, -1],
+    ["paragraphSpace", [9,9], False, -1]
 ]
 
-for [name, ranges, generateAltColors, groupColor] in knownGroups:
-    if(len(ranges) == 2 and ranges[0] < ranges[1]) : ranges = range(ranges[0], ranges[1] + 1)
-    addGroup(ranges, name, groupColor, generateAltColors, output, colors)
+
+def ExtractColors(filename, excludeColors):
+    extractedNamedColors = {}
     
+    parser = ET.XMLParser(target=ET.TreeBuilder(insert_comments=True))
+    input = ET.parse(filename, parser=parser).getroot().find("palette")
+    paletteName = input.attrib["name"]
+    output = ET.Element("colors",{
+                "name": paletteName,
+                "parentName" : "Default"
+            })
+
+    colors = input.findall('colour')
+    for [colorIndex,colorName] in NamedColors:
+        color = printColor(parseColor(colors[colorIndex]))
+        if(not colorName in excludeColors or excludeColors[colorName] != color) :
+            output.attrib[colorName] = printColor(parseColor(colors[colorIndex]))
+            extractedNamedColors[colorName] = printColor(parseColor(colors[colorIndex]))
+
+    for [name, ranges, generateAltColors, groupColor] in knownGroups:
+        addGroup(ranges, name, groupColor, generateAltColors, output, colors)
+        
+    tree = ET.ElementTree(output)
+    ET.indent(tree, space="\t", level=0)
+    with open(f"../colors/color.{cleanString(paletteName)}.xml", 'wb') as f:
+        f.write(b'<?xml version="1.0" encoding="UTF-8"?>\n')
+        f.write(b'<!DOCTYPE colors SYSTEM "color.dtd">\n')
+        tree.write(f, encoding="utf-8")
     
-tree = ET.ElementTree(output)
-ET.indent(tree, space="\t", level=0)
-with open("color.test.xml", 'wb') as f:
-    f.write(b'<?xml version="1.0" encoding="UTF-8"?>\n')
-    f.write(b'<!DOCTYPE colors SYSTEM "color.dtd">\n')
-    tree.write(f, encoding="utf-8")
+    return extractedNamedColors
+        
+defaultNamedColors = ExtractColors("colour.xml", [])
+for filename in glob.glob('./colour*.xml'):
+    if(filename.endswith("colour.xml")): continue
+
+    ExtractColors(filename, defaultNamedColors)

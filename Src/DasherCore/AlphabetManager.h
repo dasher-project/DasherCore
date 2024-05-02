@@ -199,7 +199,7 @@ namespace Dasher {
 
       bool UseAltColor() const override
       {
-          return (offset()&1) == 1;
+          return (offset()&1) == 0;
       }
 
     protected:

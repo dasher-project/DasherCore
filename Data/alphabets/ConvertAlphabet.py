@@ -20,7 +20,7 @@ def AddCharData(Parent, data) :
     if not data[1] == None and not data[0] == data[1] :
         inputAction.attrib["unicode"] = str(ord(data[1]))
 
-for filename in glob.glob('./alphabet.*.xml'):
+for filename in glob.glob('./oldAlphabets/alphabet.*.xml'):
     AlphabetUsesCharColors = False
     AlphabetUsesGroupColors = False
     parser = ET.XMLParser(target=ET.TreeBuilder(insert_comments=True))
@@ -139,8 +139,7 @@ for filename in glob.glob('./alphabet.*.xml'):
         tree = ET.ElementTree(output)
         ET.indent(tree, space="\t", level=0)
         alphnamePath = cleanString(name.lower().replace(" ", ".").replace(",", "")).replace("..", ".")
-        subdir = "done/" if (not AlphabetUsesCharColors and not AlphabetUsesGroupColors) else ("groups/" if AlphabetUsesGroupColors and not AlphabetUsesCharColors else "")
-        newFilename = f"./alph/{subdir}alphabet.{alphnamePath}.xml"
+        newFilename = f"./autoConverted/alphabet.{alphnamePath}.xml"
         with open(newFilename, 'wb') as f:
             f.write(b'<?xml version="1.0" encoding="UTF-8"?>\n')
             f.write(b'<!DOCTYPE alphabet SYSTEM "../alphabet.dtd">\n')
