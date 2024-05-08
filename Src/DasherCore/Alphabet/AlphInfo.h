@@ -119,7 +119,7 @@ public:
   {
       None = 0,
       Mandarin = 2,
-      RoutingContextInsensitve = 3,
+      RoutingContextInsensitive = 3,
       RoutingContextSensitive = 4
   };
   alphabetConversion m_iConversionID;

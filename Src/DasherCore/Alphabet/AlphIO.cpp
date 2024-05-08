@@ -115,8 +115,8 @@ bool Dasher::CAlphIO::Parse(pugi::xml_document & document, const std::string, bo
     if (conversion_mode == "mandarin") {
         CurrentAlphabet->m_iConversionID = CAlphInfo::Mandarin;
     }
-    else if (conversion_mode == "routingContextInsensitve") {
-        CurrentAlphabet->m_iConversionID = CAlphInfo::RoutingContextInsensitve;
+    else if (conversion_mode == "routingContextInsensitive") {
+        CurrentAlphabet->m_iConversionID = CAlphInfo::RoutingContextInsensitive;
     }
     else if (conversion_mode == "routingContextSensitive") {
         CurrentAlphabet->m_iConversionID = CAlphInfo::RoutingContextSensitive;

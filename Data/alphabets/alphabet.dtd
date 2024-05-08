@@ -3,7 +3,7 @@
 <!ELEMENT alphabet (group*)>
 <!ATTLIST alphabet name CDATA #REQUIRED> <!-- unique name that can be referenced in Dasher to choose this alphabet -->
 <!ATTLIST alphabet orientation (LR|RL|TB|BT) #REQUIRED> <!-- orientation in which this alphabet is typed. Example: LR=Left-to-Right -->
-<!ATTLIST alphabet conversionMode (none|mandarin|routingContextInsensitve|routingContextSensitive) "none"> <!-- conversion mode that is used internally to spawn a decoder that can handle phonetic writing -->
+<!ATTLIST alphabet conversionMode (none|mandarin|routingContextInsensitive|routingContextSensitive) "none"> <!-- conversion mode that is used internally to spawn a decoder that can handle phonetic writing -->
 <!ATTLIST alphabet trainingFilename CDATA #IMPLIED> <!-- filename that is referenced for training the language model -->
 <!ATTLIST alphabet colorsName CDATA "Default"> <!-- unique name of the color schema that should be used by default -->
 
