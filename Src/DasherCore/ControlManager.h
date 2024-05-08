@@ -1,25 +1,4 @@
-// ControlManager.h
-//
-// Copyright (c) 2007 The Dasher Team
-//
-// This file is part of Dasher.
-//
-// Dasher is free software; you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation; either version 2 of the License, or
-// (at your option) any later version.
-//
-// Dasher is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with Dasher; if not, write to the Free Software
-// Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-
-#ifndef __controlmanager_h__
-#define __controlmanager_h__
+#pragma once
 
 #include "DasherNode.h"
 #include "NodeManager.h"
@@ -30,27 +9,70 @@
 #include <map>
 #include <string>
 
+#include "Actions.h"
+
 class CNodeCreationManager;
 
 namespace Dasher {
-
-  class CDasherInterfaceBase;
-  class SpeechHeader;
-  class CopyHeader;
+    class CContNode;
+    class CDasherInterfaceBase;
+    class CControlBase;
 
   /// \ingroup Model
   /// @{
 
-  /// A node manager which deals with control nodes.
+  class NodeTemplate : public Action {
+    public:
+      NodeTemplate(const std::string &strLabel, int iColour);
+      virtual ~NodeTemplate();
+      const std::string m_strLabel;
+      const int m_iColour;
+      std::list<NodeTemplate *> successors;
+
+    private:
+      friend class CControlBase;
+      friend class CContNode;
+      CDasherScreen::Label *m_pLabel;
+   };
+
+    /// A node manager which deals with control nodes.
   ///
   class CControlBase : public CNodeManager, protected CSettingsUser {
   public:
 
-    class NodeTemplate;
+    NodeTemplate *GetRootTemplate();
 
-    class CContNode : public CDasherNode {
+    CControlBase(CSettingsUser *pCreateFrom, CDasherInterfaceBase *pInterface, CNodeCreationManager *pNCManager);
+
+    ///Make this manager ready to make nodes renderable on the screen by preallocating labels
+    virtual void ChangeScreen(CDasherScreen *pScreen);
+    
+    ///
+    /// Get a new root node owned by this manager
+    ///
+
+    virtual CDasherNode *GetRoot(CDasherNode *pContext, int iOffset);
+    CDasherInterfaceBase* GetDasherInterface() { return m_pInterface; }
+  protected:
+      friend class CContNode;
+    ///Sets the root - should be called by subclass constructor to make
+    /// superclass ready for use.
+    ///Note, may only be called once, and with a non-null pRoot, or will throw an error message.
+    void SetRootTemplate(NodeTemplate *pRoot);
+
+    CDasherInterfaceBase *m_pInterface;
+    CNodeCreationManager *m_pNCManager;
+    
+    int getColour(NodeTemplate *pTemplate, CDasherNode *pParent);
+    CDasherScreen *m_pScreen;
+    
+  private:
+    NodeTemplate *m_pRoot;
+  };
+
+  class CContNode : public CDasherNode {
     public:
-      CControlBase *mgr() const override {return m_pMgr;}
+      CControlBase* mgr() const override {return m_pMgr;}
       CContNode(int iOffset, NodeTemplate *pTemplate, CControlBase *pMgr);
       CDasherScreen::Label *getLabel() override { return m_pTemplate->m_pLabel; }
 
@@ -73,54 +95,6 @@ namespace Dasher {
       CControlBase *m_pMgr;
     };
 
-    class Action {
-    public:
-      virtual ~Action() { };
-      virtual int calculateNewOffset(CControlBase::CContNode *pNode, int offsetBefore) { return offsetBefore; }
-        virtual void happen(CContNode *pNode) {}
-    };
-    class NodeTemplate : public Action {
-    public:
-      NodeTemplate(const std::string &strLabel, int iColour);
-      virtual ~NodeTemplate();
-      const std::string m_strLabel;
-      const int m_iColour;
-      std::list<NodeTemplate *> successors;
-
-    private:
-      friend class CControlBase;
-      CDasherScreen::Label *m_pLabel;
-    };
-
-    NodeTemplate *GetRootTemplate();
-
-    CControlBase(CSettingsUser *pCreateFrom, CDasherInterfaceBase *pInterface, CNodeCreationManager *pNCManager);
-
-    ///Make this manager ready to make nodes renderable on the screen by preallocating labels
-    virtual void ChangeScreen(CDasherScreen *pScreen);
-    
-    ///
-    /// Get a new root node owned by this manager
-    ///
-
-    virtual CDasherNode *GetRoot(CDasherNode *pContext, int iOffset);
-    CDasherInterfaceBase* GetDasherInterface() { return m_pInterface; }
-  protected:
-    ///Sets the root - should be called by subclass constructor to make
-    /// superclass ready for use.
-    ///Note, may only be called once, and with a non-null pRoot, or will throw an error message.
-    void SetRootTemplate(NodeTemplate *pRoot);
-
-    CDasherInterfaceBase *m_pInterface;
-    CNodeCreationManager *m_pNCManager;
-    
-    int getColour(NodeTemplate *pTemplate, CDasherNode *pParent);
-    CDasherScreen *m_pScreen;
-    
-  private:
-    NodeTemplate *m_pRoot;
-  };
-
 ///Class reads node tree definitions from an XML file, linking together the NodeTemplates
 /// according to defined names, nesting of <node/>s, and  <ref/>s. Also handles the
 /// <alph/> tag, meaning one child of the node is to escape back to the alphabet. Subclasses
@@ -131,7 +105,7 @@ class CControlParser : public AbstractXMLParser
 public:
 	CControlParser(CMessageDisplay* pMsgs);
 private:
-	void ParseNodeRecursive(pugi::xml_node node, std::list<CControlBase::NodeTemplate*>& parent);
+	void ParseNodeRecursive(pugi::xml_node node, std::list<NodeTemplate*>& parent);
 public:
 	///Loads all node definitions from the specified filename. Note that
 	/// system files will not be loaded if user files are (and user files will
@@ -141,11 +115,11 @@ public:
 	bool Parse(pugi::xml_document& document, const std::string filePath, bool bUser) override;
 protected:
 	/// \return all node definitions that have been loaded by this CControlParser.
-	const std::list<CControlBase::NodeTemplate*>& parsedNodes();
+	const std::list<NodeTemplate*>& parsedNodes();
 	///Subclasses may override to parse other nodes (besides "node", "ref" and "alph").
 	///The default implementation always returns NULL.
 	/// \return A node template, if the name was recognised; NULL if not recognised.
-	virtual CControlBase::NodeTemplate* parseOther(pugi::xml_node node)
+	virtual NodeTemplate* parseOther(pugi::xml_node node)
 	{
 		return nullptr;
 	}
@@ -153,19 +127,19 @@ protected:
 	///Subclasses may override to parse actions within nodes.
 	///The default implementation always returns NULL.
 	/// \return A (new) action pointer, if the name+attributes were successfully parsed; NULL if not recognised.
-	virtual CControlBase::Action* parseAction(pugi::xml_node node)
+	virtual Action* parseAction(pugi::xml_node node)
 	{
 		return nullptr;
 	};
 private:
 	///all top-level parsed nodes
-	std::list<CControlBase::NodeTemplate*> m_vParsed;
+	std::list<NodeTemplate*> m_vParsed;
 	///whether parsed nodes were from user file or not
 	bool m_bUser;
 
 	///Following only used as temporary variables during parsing...
-	std::map<std::string, CControlBase::NodeTemplate*> namedNodes;
-	std::list<std::pair<CControlBase::NodeTemplate**, std::string>> unresolvedRefs;
+	std::map<std::string, NodeTemplate*> namedNodes;
+	std::list<std::pair<NodeTemplate**, std::string>> unresolvedRefs;
 };
 
   ///subclass which we actually construct! Parses editing node definitions from a file,
@@ -175,10 +149,6 @@ private:
   public:
     CControlManager(CSettingsUser *pCreateFrom, CNodeCreationManager *pNCManager, CDasherInterfaceBase *pInterface);
     void HandleEvent(Parameter parameter);
-
-    typedef enum {
-      EDIT_CHAR, EDIT_WORD, EDIT_SENTENCE, EDIT_PARAGRAPH, EDIT_FILE, EDIT_LINE, EDIT_PAGE, EDIT_SELECTION,
-    } EditDistance;
 
     ///Recomputes which of pause, stop, speak and copy the root control node should have amongst its children.
     /// Automatically called whenever copy-on-stop/speak-on-stop or input filter changes;
@@ -196,10 +166,7 @@ private:
     Action *parseAction(pugi::xml_node node) override;
 
   private:
-    std::map<std::string, CControlBase::Action*> m_actions;
-    ///group of statefull actions (all/new/repeat/...)
-    SpeechHeader *m_pSpeech;
-    CopyHeader *m_pCopy;
+    std::map<std::string, Dasher::Action*> m_actions;
   };
   /// @}
 
@@ -217,5 +184,3 @@ private:
 };
 
 }
-
-#endif

@@ -168,7 +168,7 @@ public:
   /// by OS, e.g. for non-european languages)
   ///\return the offset, into the edit buffer where the cursor would be *after* the move.
   virtual unsigned int ctrlOffsetAfterMove(unsigned int offsetBefore, bool bForwards,
-    CControlManager::EditDistance iDist) {
+    EditDistance iDist) {
     return offsetBefore;
   }
 
@@ -177,7 +177,7 @@ public:
   ///\param dist how far to move: character, word, line, file. (Usually defined
   /// by OS, e.g. for non-european languages)
   ///\return the offset, into the edit buffer of the cursor *after* the move.
-  virtual unsigned int ctrlMove(bool bForwards, CControlManager::EditDistance dist)=0;
+  virtual unsigned int ctrlMove(bool bForwards, EditDistance dist)=0;
 
   ///Called to execute a control-mode "delete" command.
   ///\param bForwards true to delete forwards (right), false for backwards
@@ -185,29 +185,12 @@ public:
   /// by OS, e.g. for non-european languages)
   ///\return the offset, into the edit buffer, of the cursor *after* the delete
   /// (for forwards deletion, this will be the same as the offset *before*)
-  virtual unsigned int ctrlDelete(bool bForwards, CControlManager::EditDistance dist)=0;
+  virtual unsigned int ctrlDelete(bool bForwards, EditDistance dist)=0;
 
   virtual void editOutput(const std::string &strText, CDasherNode *pCause);
   virtual void editDelete(const std::string &strText, CDasherNode *pCause);
   virtual void editConvert(CDasherNode *pCause);
   virtual void editProtect(CDasherNode *pCause);
-
-  class TextAction {
-  public:
-    TextAction(CDasherInterfaceBase *pMgr);
-    void executeOnDistance(CControlManager::EditDistance dist);
-    void executeOnNew();
-    void executeLast();
-    void NotifyOffset(int iOffset);
-    virtual ~TextAction();
-  protected:
-    virtual void operator()(const std::string &strText)=0;
-    CDasherInterfaceBase *m_pIntf;
-  private:
-    int m_iStartOffset;
-    std::string strLast;
-  };
-
 
   /// @name Starting and stopping
   /// Methods used to instruct dynamic motion of Dasher to start or stop
@@ -366,7 +349,7 @@ public:
   /// For character around cursor decision is arbitrary. Let's settle for character before cursor.
   /// TODO. Consistently name functions dealing with dasher context, versus functions dealing with editor text.
   /// I.E. GetAllContext should be named GetAllTtext
-  virtual std::string GetTextAroundCursor(CControlManager::EditDistance) { // =0;
+  virtual std::string GetTextAroundCursor(EditDistance) { // =0;
     return std::string();
   }
 
@@ -575,8 +558,8 @@ protected:
   bool m_bLastMoved;
 
   /// @}
-
-  std::set<TextAction *> m_vTextActions;
+public:
+  std::set<TextAction *> m_vTextActions; // Can this maybe be made better without this list?
 };
 /// @}
 

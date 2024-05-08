@@ -404,34 +404,6 @@ void CDasherInterfaceBase::CreateNCManager() {
   delete pOldMgr;
 }
 
-CDasherInterfaceBase::TextAction::TextAction(CDasherInterfaceBase *pIntf) : m_pIntf(pIntf) {
-  m_iStartOffset= pIntf->GetAllContextLenght();
-  pIntf->m_vTextActions.insert(this);
-}
-
-CDasherInterfaceBase::TextAction::~TextAction() {
-  m_pIntf->m_vTextActions.erase(this);
-}
-
-void CDasherInterfaceBase::TextAction::executeOnDistance(CControlManager::EditDistance dist) {
-  (*this)(strLast = m_pIntf->GetTextAroundCursor(dist));
-  m_iStartOffset = m_pIntf->GetAllContextLenght();
-}
-
-void CDasherInterfaceBase::TextAction::executeOnNew() {
-  (*this)(strLast = m_pIntf->GetContext(m_iStartOffset, m_pIntf->GetAllContextLenght() - m_iStartOffset));
-  m_iStartOffset = m_pIntf->GetAllContextLenght();
-}
-
-void CDasherInterfaceBase::TextAction::executeLast() {
-  (*this)(strLast);
-}
-
-void CDasherInterfaceBase::TextAction::NotifyOffset(int iOffset) {
-  m_iStartOffset = std::min(m_pIntf->GetAllContextLenght(), m_iStartOffset);
-}
-
-
 bool CDasherInterfaceBase::hasDone() {
   return (GetBoolParameter(BP_COPY_ALL_ON_STOP) && SupportsClipboard())
   || (GetBoolParameter(BP_SPEAK_ALL_ON_STOP) && SupportsSpeech());
@@ -694,8 +666,8 @@ void CDasherInterfaceBase::ResetNats() {
 }
 
 void CDasherInterfaceBase::ClearAllContext() {
-  ctrlDelete(true, CControlManager::EDIT_FILE);
-  ctrlDelete(false, CControlManager::EDIT_FILE);
+  ctrlDelete(true, EDIT_FILE);
+  ctrlDelete(false, EDIT_FILE);
   SetBuffer(0);
 }
 

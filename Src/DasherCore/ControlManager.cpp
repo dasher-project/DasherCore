@@ -29,7 +29,7 @@ CControlBase::CControlBase(CSettingsUser* pCreateFrom, CDasherInterfaceBase* pIn
 {
 }
 
-CControlBase::NodeTemplate* CControlBase::GetRootTemplate()
+NodeTemplate* CControlBase::GetRootTemplate()
 {
 	return m_pRoot;
 }
@@ -84,27 +84,27 @@ void CControlBase::ChangeScreen(CDasherScreen* pScreen)
 	}
 }
 
-CControlBase::NodeTemplate::NodeTemplate(const std::string& strLabel, int iColour)
+NodeTemplate::NodeTemplate(const std::string& strLabel, int iColour)
 	: m_strLabel(strLabel), m_iColour(iColour), m_pLabel(NULL)
 {
 }
 
-CControlBase::NodeTemplate::~NodeTemplate()
+NodeTemplate::~NodeTemplate()
 {
 	delete m_pLabel;
 }
 
-CControlBase::CContNode::CContNode(int iOffset, NodeTemplate* pTemplate, CControlBase* pMgr)
+CContNode::CContNode(int iOffset, NodeTemplate* pTemplate, CControlBase* pMgr)
 	: CDasherNode(iOffset, pTemplate->m_pLabel), m_pTemplate(pTemplate), m_pMgr(pMgr)
 {
 }
 
-double CControlBase::CContNode::SpeedMul()
+double CContNode::SpeedMul()
 {
 	return m_pMgr->GetBoolParameter(BP_SLOW_CONTROL_BOX) ? 0.5 : 1;
 }
 
-void CControlBase::CContNode::PopulateChildren()
+void CContNode::PopulateChildren()
 {
 	CDasherNode* pNewNode;
 
@@ -132,50 +132,50 @@ void CControlBase::CContNode::PopulateChildren()
 	}
 }
 
-int CControlBase::CContNode::ExpectedNumChildren()
+int CContNode::ExpectedNumChildren()
 {
 	return static_cast<int>(m_pTemplate->successors.size());
 }
 
-void CControlBase::CContNode::Output()
+void CContNode::Output()
 {
 	m_pTemplate->happen(this);
 }
 
-const ColorPalette::Color& CControlBase::CContNode::getLabelColor(const ColorPalette* colorPalette)
+const ColorPalette::Color& CContNode::getLabelColor(const ColorPalette* colorPalette)
 {
     //TODO: I dont know know these work. This needs to be implemented at a later stage
     return ColorPalette::noColor;
 }
 
-const ColorPalette::Color& CControlBase::CContNode::getOutlineColor(const ColorPalette* colorPalette)
+const ColorPalette::Color& CContNode::getOutlineColor(const ColorPalette* colorPalette)
 {
     //TODO: I dont know know these work. This needs to be implemented at a later stage
     return ColorPalette::noColor;
 }
 
-const ColorPalette::Color& CControlBase::CContNode::getNodeColor(const ColorPalette* colorPalette)
+const ColorPalette::Color& CContNode::getNodeColor(const ColorPalette* colorPalette)
 {
     //TODO: I dont know know these work. This needs to be implemented at a later stage
 	// Probably depends on getColour(m_pRoot, pContext)
     return ColorPalette::noColor;
 }
 
-const std::list<CControlBase::NodeTemplate*>& CControlParser::parsedNodes()
+const std::list<NodeTemplate*>& CControlParser::parsedNodes()
 {
 	return m_vParsed;
 }
 
 ///Template used for all node defns read in from XML - just
 /// execute a list of Actions.
-class XMLNodeTemplate : public CControlBase::NodeTemplate
+class XMLNodeTemplate : public NodeTemplate
 {
 public:
 	XMLNodeTemplate(const std::string& label, int color) : NodeTemplate(label, color)
 	{
 	}
 
-	int calculateNewOffset(CControlBase::CContNode* pNode, int offsetBefore) override
+	int calculateNewOffset(CContNode* pNode, int offsetBefore) override
 	{
 		int newOffset = offsetBefore;
 		for (auto pAction : actions)
@@ -183,7 +183,7 @@ public:
 		return newOffset;
 	}
 
-	void happen(CControlBase::CContNode* pNode) override
+	void happen(CContNode* pNode) override
 	{
 		for (auto pAction : actions)
 			pAction->happen(pNode);
@@ -195,14 +195,14 @@ public:
 			delete pAction;
 	}
 
-	std::vector<CControlBase::Action*> actions;
+	std::vector<Action*> actions;
 };
 
 CControlParser::CControlParser(CMessageDisplay* pMsgs) : AbstractXMLParser(pMsgs), m_bUser(false)
 {
 }
 
-void CControlParser::ParseNodeRecursive(pugi::xml_node node, std::list<CControlBase::NodeTemplate*>& parent)
+void CControlParser::ParseNodeRecursive(pugi::xml_node node, std::list<NodeTemplate*>& parent)
 {
 	XMLNodeTemplate* newNode = new XMLNodeTemplate(node.attribute("label").as_string(), node.attribute("color").as_int(-1));
 	parent.push_back(newNode);
@@ -234,11 +234,11 @@ void CControlParser::ParseNodeRecursive(pugi::xml_node node, std::list<CControlB
 		{
 			parent.push_back(nullptr);
 		}
-		else if (CControlBase::NodeTemplate* n = parseOther(sub_node))
+		else if (NodeTemplate* n = parseOther(sub_node))
 		{
 			parent.push_back(n);
 		}
-		else if (CControlBase::Action* a = parseAction(sub_node))
+		else if (Action* a = parseAction(sub_node))
 		{
 			DASHER_ASSERT(!nodeStack.empty());
 			newNode->actions.push_back(a);
@@ -290,150 +290,11 @@ bool CControlParser::Parse(pugi::xml_document& document, const std::string, bool
 	return true;
 }
 
-class Dasher::SpeechHeader : public CDasherInterfaceBase::TextAction
-{
-public:
-	SpeechHeader(CDasherInterfaceBase* pIntf) : TextAction(pIntf)
-	{
-	}
-
-	void operator()(const std::string& strText)
-	{
-		m_pIntf->Speak(strText, false);
-	}
-};
-
-class Dasher::CopyHeader : public CDasherInterfaceBase::TextAction
-{
-public:
-	CopyHeader(CDasherInterfaceBase* pIntf) : TextAction(pIntf)
-	{
-	}
-
-	void operator()(const std::string& strText)
-	{
-		m_pIntf->CopyToClipboard(strText);
-	}
-};
-
-class TextDistanceAction : public CControlBase::Action
-{
-	CDasherInterfaceBase::TextAction* m_header;
-	CControlManager::EditDistance m_dist;
-public:
-	TextDistanceAction(CDasherInterfaceBase::TextAction* header, CControlManager::EditDistance dist)
-		: m_header(header), m_dist(dist)
-	{
-	}
-
-	virtual void happen(CControlBase::CContNode* pNode)
-	{
-		m_header->executeOnDistance(m_dist);
-	}
-};
-
-// TODO Duplicated logic, here and in DefaultFilter. Refactor. 
-class Stop : public CControlBase::Action
-{
-public:
-	void happen(CControlBase::CContNode* pNode)
-	{
-		pNode->mgr()->GetDasherInterface()->Done();
-		pNode->mgr()->GetDasherInterface()->GetActiveInputMethod()->pause();
-	}
-};
-
-class Pause : public CControlBase::Action
-{
-public:
-	void happen(CControlBase::CContNode* pNode)
-	{
-		pNode->mgr()->GetDasherInterface()->GetActiveInputMethod()->pause();
-	}
-};
-
-class SpeakCancel : public CControlBase::Action
-{
-public:
-	void happen(CControlBase::CContNode* pNode)
-	{
-		pNode->mgr()->GetDasherInterface()->Speak("", true);
-	}
-};
-
-template <typename T>
-class MethodAction : public CControlBase::Action
-{
-public:
-	///A "Method" is pointer to a function "void X()", that is a member of a T...
-	typedef void (T::*Method)();
-
-	MethodAction(T* pRecv, Method f) : m_pRecv(pRecv), m_f(f)
-	{
-	}
-
-	virtual void happen(CControlBase::CContNode* pNode)
-	{
-		//invoke pointer-to-member-function m_f on object *m_pRecv!
-		(m_pRecv->*m_f)();
-	}
-
-private:
-	T* m_pRecv;
-	Method m_f;
-};
-
-class Delete : public CControlBase::Action
-{
-	const bool m_bForwards;
-	const CControlManager::EditDistance m_dist;
-public:
-	Delete(bool bForwards, CControlManager::EditDistance dist) : m_bForwards(bForwards), m_dist(dist)
-	{
-	}
-
-	int calculateNewOffset(CControlBase::CContNode* pNode, int offsetBefore) override
-	{
-		if (m_bForwards)
-			return offsetBefore;
-
-		return pNode->mgr()->GetDasherInterface()->ctrlOffsetAfterMove(offsetBefore + 1, m_bForwards, m_dist) - 1;
-	}
-
-	virtual void happen(CControlBase::CContNode* pNode) override
-	{
-		pNode->mgr()->GetDasherInterface()->ctrlDelete(m_bForwards, m_dist);
-	}
-};
-
-class Move : public CControlBase::Action
-{
-	const bool m_bForwards;
-	const CControlManager::EditDistance m_dist;
-public:
-	Move(bool bForwards, CControlManager::EditDistance dist) : m_bForwards(bForwards), m_dist(dist)
-	{
-	}
-
-	int calculateNewOffset(CControlBase::CContNode* pNode, int offsetBefore) override
-	{
-		return pNode->mgr()->GetDasherInterface()->ctrlOffsetAfterMove(offsetBefore + 1, m_bForwards, m_dist) - 1;
-	}
-
-	virtual void happen(CControlBase::CContNode* pNode)
-	{
-		pNode->mgr()->GetDasherInterface()->ctrlMove(m_bForwards, m_dist);
-	}
-};
-
-
 CControlManager::CControlManager(CSettingsUser* pCreateFrom, CNodeCreationManager* pNCManager, CDasherInterfaceBase* pInterface)
-	: CSettingsObserver(pCreateFrom), CControlBase(pCreateFrom, pInterface, pNCManager), CControlParser(pInterface), m_pSpeech(NULL), m_pCopy(NULL)
+	: CSettingsObserver(pCreateFrom), CControlBase(pCreateFrom, pInterface, pNCManager), CControlParser(pInterface)
 {
 	//TODO, used to be able to change label+colour of root/pause/stop from controllabels.xml
 	// (or, get the root node title "control" from the alphabet!)
-	m_pSpeech = new SpeechHeader(pInterface);
-	m_pCopy = new CopyHeader(pInterface);
 	SetRootTemplate(new NodeTemplate("", 8)); //default NodeTemplate does nothing
 
 	// Key in actions map is name plus arguments in alphabetical order.
@@ -441,26 +302,26 @@ CControlManager::CControlManager(CSettingsUser* pCreateFrom, CNodeCreationManage
 	m_actions["pause"] = new Pause();
 	if (pInterface->SupportsSpeech())
 	{
-		m_actions["speak what=all"] = new TextDistanceAction(m_pSpeech, EDIT_FILE);
-		m_actions["speak what=page"] = new TextDistanceAction(m_pSpeech, EDIT_PAGE);
-		m_actions["speak what=paragraph"] = new TextDistanceAction(m_pSpeech, EDIT_PARAGRAPH);
-		m_actions["speak what=sentence"] = new TextDistanceAction(m_pSpeech, EDIT_SENTENCE);
-		m_actions["speak what=line"] = new TextDistanceAction(m_pSpeech, EDIT_LINE);
-		m_actions["speak what=word"] = new TextDistanceAction(m_pSpeech, EDIT_WORD);
-		m_actions["speak what=new"] = new MethodAction<SpeechHeader>(m_pSpeech, &SpeechHeader::executeOnNew);
-		m_actions["speak what=repeat"] = new MethodAction<SpeechHeader>(m_pSpeech, &SpeechHeader::executeLast);
+		m_actions["speak what=all"] = new SpeechAction(pInterface, TextAction::Distance, EDIT_FILE);
+		m_actions["speak what=page"] = new SpeechAction(pInterface, TextAction::Distance,  EDIT_PAGE);
+		m_actions["speak what=paragraph"] = new SpeechAction(pInterface, TextAction::Distance, EDIT_PARAGRAPH);
+		m_actions["speak what=sentence"] = new SpeechAction(pInterface, TextAction::Distance, EDIT_SENTENCE);
+		m_actions["speak what=line"] = new SpeechAction(pInterface, TextAction::Distance,  EDIT_LINE);
+		m_actions["speak what=word"] = new SpeechAction(pInterface, TextAction::Distance, EDIT_WORD);
+		m_actions["speak what=new"] = new SpeechAction(pInterface, TextAction::NewText);
+		m_actions["speak what=repeat"] = new SpeechAction(pInterface, TextAction::Repeat);
 		m_actions["speak what=cancel"] = new SpeakCancel();
 	}
 	if (pInterface->SupportsClipboard())
 	{
-		m_actions["copy what=all"] = new TextDistanceAction(m_pCopy, EDIT_FILE);
-		m_actions["copy what=page"] = new TextDistanceAction(m_pCopy, EDIT_PAGE);
-		m_actions["copy what=paragraph"] = new TextDistanceAction(m_pCopy, EDIT_PARAGRAPH);
-		m_actions["copy what=sentence"] = new TextDistanceAction(m_pCopy, EDIT_SENTENCE);
-		m_actions["copy what=line"] = new TextDistanceAction(m_pCopy, EDIT_LINE);
-		m_actions["copy what=word"] = new TextDistanceAction(m_pCopy, EDIT_WORD);
-		m_actions["copy what=new"] = new MethodAction<CopyHeader>(m_pCopy, &CopyHeader::executeOnNew);
-		m_actions["copy what=repeat"] = new MethodAction<CopyHeader>(m_pCopy, &CopyHeader::executeLast);
+		m_actions["copy what=all"] = new CopyAction(pInterface, TextAction::Distance, EDIT_FILE);
+		m_actions["copy what=page"] = new CopyAction(pInterface, TextAction::Distance,  EDIT_PAGE);
+		m_actions["copy what=paragraph"] = new CopyAction(pInterface, TextAction::Distance, EDIT_PARAGRAPH);
+		m_actions["copy what=sentence"] = new CopyAction(pInterface, TextAction::Distance, EDIT_SENTENCE);
+		m_actions["copy what=line"] = new CopyAction(pInterface, TextAction::Distance, EDIT_LINE);
+		m_actions["copy what=word"] = new CopyAction(pInterface, TextAction::Distance, EDIT_WORD);
+		m_actions["copy what=new"] = new CopyAction(pInterface, TextAction::NewText);
+		m_actions["copy what=repeat"] = new CopyAction(pInterface, TextAction::Repeat);
 	}
 	m_actions["move dist=char forward=yes"] = new Move(true, EDIT_CHAR);
 	m_actions["move dist=word forward=yes"] = new Move(true, EDIT_WORD);
@@ -495,13 +356,13 @@ CControlManager::CControlManager(CSettingsUser* pCreateFrom, CNodeCreationManage
 	m_actions["delete dist=all forward=no"] = new Delete(false, EDIT_FILE);
 }
 
-CControlBase::NodeTemplate* CControlManager::parseOther(pugi::xml_node node)
+NodeTemplate* CControlManager::parseOther(pugi::xml_node node)
 {
 	if (strcmp(node.name(), "root") == 0) return GetRootTemplate();
 	return CControlParser::parseOther(node);
 }
 
-CControlBase::Action* CControlManager::parseAction(pugi::xml_node node)
+Action* CControlManager::parseAction(pugi::xml_node node)
 {
 	std::map<std::string, std::string> arguments;
 	for(auto attribute : node.attributes())
