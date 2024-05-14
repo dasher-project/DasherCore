@@ -29,7 +29,7 @@ namespace Dasher {
  *
  * This class handles logic and drawing code with respect to the above.
  */
-class CGameModule : protected CSettingsUser, protected TransientObserver<const CEditEvent *>, protected TransientObserver<CGameNodeDrawEvent*>, private TransientObserver<CDasherNode*>, private TransientObserver<CDasherView*> {
+class CGameModule : protected CSettingsUser, protected TransientObserver<const CEditEvent *>, protected TransientObserver<CGameNodeDrawEvent*>, private TransientObserver<CDasherNode*> {
  public:
   friend class CDemoFilter;
   /**
@@ -81,11 +81,8 @@ protected:
   virtual void HandleEvent(const CEditEvent *);
   
   /// Called when a NF_GAME node has been drawn.
-  virtual void HandleEvent(CGameNodeDrawEvent *evt); 
-  
-  /// Called when screen geometry has changed. We just use this to look for when the View changes
-  /// (to re-register for CGameNodeDrawEvents - a bit of a hack...)
-  virtual void HandleEvent(CDasherView *);
+  virtual void HandleEvent(CGameNodeDrawEvent *evt);
+  void HandleViewChange(CDasherView* pView);
 
   ///Draw the target and currently-entered text for the user to follow.
   /// Subclasses should implement using appropriate GUI components, maybe using
@@ -99,6 +96,7 @@ protected:
   int lastCorrectSym() {return m_iLastSym;}
   const CAlphInfo *m_pAlph;
   CDasherInterfaceBase * const m_pInterface;
+  CDasherView* m_pView;
 private:
 
   ///

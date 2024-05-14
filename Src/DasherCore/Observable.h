@@ -1,5 +1,4 @@
-#ifndef __eventhandler_h__
-#define __eventhandler_h__
+#pragma once
 
 #include <list>
 #include <algorithm>
@@ -98,4 +97,3 @@ template <typename T> void Observable<T>::DispatchEvent(T evt) {
     m_vListeners.splice(m_vListeners.end(), m_vListenersToAdd);
   }
 }
-#endif

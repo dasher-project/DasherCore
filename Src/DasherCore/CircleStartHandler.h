@@ -8,14 +8,14 @@
 /// \ingroup Start
 /// @{
 namespace Dasher {
-class CCircleStartHandler : public CStartHandler, public CSettingsUserObserver, public Observer<CDasherView *> {
+class CCircleStartHandler : public CStartHandler, public CSettingsUserObserver {
 public:
   CCircleStartHandler(CDefaultFilter *pCreator);
   ~CCircleStartHandler();
   virtual bool DecorateView(CDasherView *pView);
   virtual void Timer(unsigned long iTime, dasherint iX, dasherint iY, CDasherView *pView);
+  void RegisterView(CDasherView* pView);
   virtual void HandleEvent(Parameter parameter);
-  virtual void HandleEvent(CDasherView *pView);
   void onPause();
   void onRun(unsigned long iTime);
 protected:

@@ -50,7 +50,7 @@ class CDasherNode;
 /// CGameNodeDrawEvents are broadcast whenever a node with NF_GAME set is rendered (or has
 /// its y-coordinate range computed); is using an Observable worth it, or should we just
 /// call directly to the game module?
-class Dasher::CDasherView : public Observable<CDasherView*>, public Observable<CGameNodeDrawEvent*>
+class Dasher::CDasherView : public Observable<CGameNodeDrawEvent*>
 {
 public:
 	/// Constructor
@@ -115,10 +115,8 @@ public:
 	{
 	}
 
-	void TransferObserversTo(CDasherView* pNewView)
-	{
-		Observable<CDasherView*>::DispatchEvent(pNewView);
-	}
+	Event<CDasherView*> OnViewChanged;
+	Event<> OnGeometryChanged;
 
 	/// @name High level drawing
 	/// Drawing more complex structures, generally implemented by derived class

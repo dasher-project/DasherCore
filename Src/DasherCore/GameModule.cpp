@@ -13,12 +13,17 @@ static SModuleSettings gameSets[] = {
 
 CGameModule::CGameModule(CSettingsUser *pCreateFrom, Dasher::CDasherInterfaceBase *pInterface, CDasherView *pView, CDasherModel *pModel) 
 : CSettingsUser(pCreateFrom), TransientObserver<const Dasher::CEditEvent *>(pInterface), TransientObserver<CGameNodeDrawEvent*>(pView),
-TransientObserver<CDasherNode*>(pModel), TransientObserver<CDasherView*>(pView),
-m_pInterface(pInterface), m_iLastSym(-1),
+TransientObserver<CDasherNode*>(pModel), m_pInterface(pInterface),
+m_pView(pView), m_iLastSym(-1),
 m_y1(std::numeric_limits<myint>::min()), m_y2(std::numeric_limits<myint>::max()),
 m_iTargetY(CDasherModel::ORIGIN_Y), m_uHelpStart(std::numeric_limits<unsigned long>::max()),
 m_ulTotalTime(0), m_dTotalNats(0.0), m_uiTotalSyms(0), m_iFontSize(36)
-{}
+{
+    m_pView->OnViewChanged.Subscribe(this, [this](CDasherView* newView)
+    {
+        HandleViewChange(newView);
+    });
+}
 
 bool CGameModule::GetSettings(SModuleSettings **sets, int *count) {
   *sets = gameSets;
@@ -36,6 +41,7 @@ CGameModule::~CGameModule()  {
     m_pInterface->Message(summary.str(),true);
   }
   m_pInterface->ClearAllContext();
+    m_pView->OnViewChanged.Unsubscribe(this);
 }
 
 //Node populated...
@@ -88,11 +94,19 @@ void CGameModule::HandleEvent(CGameNodeDrawEvent *gmd) {
   if (gmd->m_y2 < m_y2) m_y2 = gmd->m_y2;
 }
 
-void CGameModule::HandleEvent(CDasherView *pView) {
-  if (pView!=TransientObserver<CGameNodeDrawEvent*>::m_pEventHandler) {
+void CGameModule::HandleViewChange(CDasherView *pView) {
+    if (m_pView == pView || pView == nullptr) return; //Nothing changed
+
     TransientObserver<CGameNodeDrawEvent*>::m_pEventHandler->Unregister(this);
-    (TransientObserver<CGameNodeDrawEvent*>::m_pEventHandler = pView)->Register(this);
-  }
+    TransientObserver<CGameNodeDrawEvent*>::m_pEventHandler = pView;
+    TransientObserver<CGameNodeDrawEvent*>::m_pEventHandler->Register(this);
+
+    m_pView->OnViewChanged.Unsubscribe(this);
+    m_pView = pView;
+    m_pView->OnViewChanged.Subscribe(this, [this](CDasherView* newView)
+    {
+        HandleViewChange(newView);
+    });
 }
 
 void CGameModule::SetWordGenerator(const CAlphInfo *pAlph, CWordGeneratorBase *pWordGenerator) {

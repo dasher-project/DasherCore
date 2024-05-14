@@ -1,9 +1,9 @@
-#ifndef __event_h__
-#define __event_h__
+#pragma once
 
 // Classes representing different event types.
 
 #include <string>
+#include <functional>
 #include "DasherTypes.h"
 
 
@@ -56,4 +56,32 @@ public:
 /// @}
 /// @}
 
-#endif
+// Simple Event Implementation, very similar to a Signal/Slot (Publisher/Subscriber) Pattern
+template<typename... Args>
+class Event
+{
+public:
+    const std::function<void(Args...)>& Subscribe(void* Listener, const std::function<void(Args...)>& Function)
+    {
+        Listeners[Listener] = Function;
+        return Function;
+    }
+
+    void Unsubscribe(void* Listener)
+    {
+        Listeners.erase(Listener);
+    }
+
+    void Clear(){Listeners.clear();}
+
+    void Broadcast(Args... i)
+    {
+        for(auto& [key, value] : Listeners)
+        {
+            if(value) value(i...);
+        }
+    }
+
+private:
+    std::unordered_map<void*, std::function<void(Args...)>> Listeners;
+};

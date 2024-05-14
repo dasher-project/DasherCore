@@ -623,7 +623,9 @@ void CDasherInterfaceBase::ChangeView() {
     CDasherView *pNewView = new CDasherViewSquare(this, m_DasherScreen, ComputeOrientation());
     //the previous sends an event to all listeners registered with it, but there aren't any atm!
     // so send an event to tell them of the new view object _and_ get them to recompute coords:  
-    if (m_pDasherView) m_pDasherView->TransferObserversTo(pNewView);
+    if (m_pDasherView){
+        m_pDasherView->OnViewChanged.Broadcast(pNewView);
+    }
     delete m_pDasherView;
 
     m_pDasherView = pNewView;

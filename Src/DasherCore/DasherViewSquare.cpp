@@ -1110,7 +1110,7 @@ void CDasherViewSquare::SetScaleFactor(void)
 	iScaleFactorY = static_cast<myint>(dScaleFactorY * SCALE_FACTOR);
 
 	//notify listeners that coordinates have changed...
-	Observable<CDasherView*>::DispatchEvent(this);
+	OnGeometryChanged.Broadcast();
 }
 
 
