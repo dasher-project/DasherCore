@@ -1,6 +1,8 @@
 #include "../Common/Common.h"
 
 #include "UserLog.h"
+
+#include <algorithm>
 #include <fstream>
 #include <cstring>
 
@@ -33,8 +35,8 @@ static UserLogParamMask s_UserLogParamMaskTable [] = {
 };
 
 CUserLog::CUserLog(CSettingsUser *pCreateFrom,
-                   Observable<const CEditEvent *> *pObsv, int iLogTypeMask)
-: CUserLogBase(pObsv), CSettingsUserObserver(pCreateFrom) {
+                   CDasherInterfaceBase *pInterface, int iLogTypeMask)
+: CUserLogBase(pInterface), CSettingsUserObserver(pCreateFrom) {
   //CFunctionLogger f1("CUserLog::CUserLog", g_pLogger);
 
   InitMemberVars();

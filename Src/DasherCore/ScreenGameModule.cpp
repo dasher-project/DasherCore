@@ -9,16 +9,10 @@ CScreenGameModule::CScreenGameModule(CSettingsUser *pCreateFrom, CDasherInterfac
 : CGameModule(pCreateFrom, pIntf, pView, pModel), m_pLabEntered(NULL), m_pLabTarget(NULL), m_pLabWrong(NULL) {
 }
 
-void CScreenGameModule::ChunkGenerated() {
-  delete m_pLabEntered; m_pLabEntered = NULL;
-  delete m_pLabTarget; m_pLabTarget = NULL;
-  delete m_pLabWrong; m_pLabWrong = NULL;
-  m_iFirstSym = m_iLastSym = 0;
-}
-
-void CScreenGameModule::HandleEvent(const CEditEvent *pEvt) {
+void CScreenGameModule::HandleEditEvent(CEditEvent::EditEventType type, const std::string& strText, CDasherNode* node)
+{
   const int iPrev(lastCorrectSym());
-  CGameModule::HandleEvent(pEvt);
+  CGameModule::HandleEditEvent(type, strText, node);
   if (iPrev==lastCorrectSym()) {
     if (m_pLabWrong) DASHER_ASSERT(m_pLabWrong->m_strText != m_strWrong);
     delete m_pLabWrong;
@@ -40,6 +34,13 @@ void CScreenGameModule::HandleEvent(const CEditEvent *pEvt) {
       m_strEntered += written;
     }
   }
+}
+
+void CScreenGameModule::ChunkGenerated() {
+  delete m_pLabEntered; m_pLabEntered = NULL;
+  delete m_pLabTarget; m_pLabTarget = NULL;
+  delete m_pLabWrong; m_pLabWrong = NULL;
+  m_iFirstSym = m_iLastSym = 0;
 }
 
 void CScreenGameModule::DrawText(CDasherView *pView) {

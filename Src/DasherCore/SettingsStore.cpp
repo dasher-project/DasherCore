@@ -9,7 +9,6 @@
 #include "../Common/Common.h"
 
 #include "SettingsStore.h"
-#include "Observable.h"
 
 #include <cstdlib>
 #include <iostream>
@@ -104,12 +103,12 @@ void CSettingsStore::SetParameter(Parameter parameter, T value)
     if(parameter_value == parameters_.end()) return; // Unknown parameter
 	if(value == GetParameter<T>(parameter)) return; // Known, but nothing changed
 
-	pre_set_observable_.DispatchEvent(CParameterChange(parameter,value));
+	OnPreParameterChange.Broadcast(parameter,value);
 
 	parameter_value->second.value = value;
 
 	// Initiate events for changed parameter
-	DispatchEvent(parameter);
+	OnParameterChanged.Broadcast(parameter);
 	if (parameter_value->second.persistence == Settings::Persistence::PERSISTENT) {
 		// Write out to permanent storage
 		SaveSetting(parameter_value->second.name, value);
@@ -234,11 +233,14 @@ bool CSettingsUser::IsParameterSaved(const std::string &Key)
 CSettingsObserver::CSettingsObserver(CSettingsUser *pCreateFrom) {
   DASHER_ASSERT(pCreateFrom);
   s_pSettingsStore = pCreateFrom;
-  s_pSettingsStore->GetSettingsStore()->Register(this);
+  s_pSettingsStore->GetSettingsStore()->OnParameterChanged.Subscribe(this, [this](Parameter p)
+  {
+      HandleEvent(p);
+  });
 }
 
 CSettingsObserver::~CSettingsObserver() {
-  s_pSettingsStore->GetSettingsStore()->Unregister(this);
+  s_pSettingsStore->GetSettingsStore()->OnParameterChanged.Unsubscribe(this);
 }
 
 CSettingsUserObserver::CSettingsUserObserver(CSettingsUser *pCreateFrom)

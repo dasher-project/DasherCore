@@ -14,7 +14,6 @@ class CDasherNode;
 #include "DasherTypes.h"
 #include "ExpansionPolicy.h"
 #include "DasherScreen.h"
-#include "Observable.h"
 #include "Event.h"
 #include "ColorPalette.h"
 
@@ -41,16 +40,7 @@ class CDasherNode;
 /// mode). We should probably consider creating separate classes for
 /// these.
 
-///Also an Observable: CDasherView* events should be generated whenever the screen
-/// geometry changes: e.g. aspect ratio, size, degree of nonlinearity,
-/// orientation, or generally whenever values returned by Dasher2Screen/Screen2Dasher
-/// might have changed (thus, any code caching such values should recompute/invalidate them).
-/// The "event" is just a pointer to the View itself, but can also be used
-/// to send round a pointer to a new view (i.e. replacing this one).
-/// CGameNodeDrawEvents are broadcast whenever a node with NF_GAME set is rendered (or has
-/// its y-coordinate range computed); is using an Observable worth it, or should we just
-/// call directly to the game module?
-class Dasher::CDasherView : public Observable<CGameNodeDrawEvent*>
+class Dasher::CDasherView
 {
 public:
 	/// Constructor
@@ -115,8 +105,20 @@ public:
 	{
 	}
 
+	/// The event is just a pointer to the View itself, but can also be used
+    /// to send round a pointer to a new view (i.e. replacing this one).
 	Event<CDasherView*> OnViewChanged;
-	Event<> OnGeometryChanged;
+
+	/// Events should be generated whenever the screen
+    /// geometry changes: e.g. aspect ratio, size, degree of nonlinearity,
+    /// orientation, or generally whenever values returned by Dasher2Screen/Screen2Dasher
+    /// might have changed (thus, any code caching such values should recompute/invalidate them).
+    Event<> OnGeometryChanged;
+
+	/// Events are broadcast whenever a node with NF_GAME set is rendered (or has
+    /// its y-coordinate range computed)
+    /// Parameters: <DrawnNode, yRangeMin, yRangeMax>
+    Event<CDasherNode*, myint, myint> OnGameNodeDraw;
 
 	/// @name High level drawing
 	/// Drawing more complex structures, generally implemented by derived class

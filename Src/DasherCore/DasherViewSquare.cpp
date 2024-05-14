@@ -22,7 +22,6 @@
 #include "DasherView.h"
 #include "DasherTypes.h"
 #include "Event.h"
-#include "Observable.h"
 
 #include <algorithm>
 #include <limits>
@@ -685,8 +684,7 @@ void CDasherViewSquare::DisjointRender(CDasherNode* pRender, myint y1, myint y2,
 
 				if (pChild->GetFlag(CDasherNode::NF_GAME))
 				{
-					CGameNodeDrawEvent evt(pChild, newy1, newy2);
-					Observable<CGameNodeDrawEvent*>::DispatchEvent(&evt);
+					OnGameNodeDraw.Broadcast(pChild, newy1, newy2);
 				}
 				//switch to "render just one child" mode if all others are off the screen,
 				//and if this _won't_ cause us to avoid rendering a game node...
@@ -965,8 +963,7 @@ void CDasherViewSquare::NewRender(CDasherNode* pCurrentNode, myint y1, myint y2,
 		myint newy2 = y1 + (Range * pChild->Hbnd()) / CDasherModel::NORMALIZATION;
 		if (pChild->GetFlag(CDasherNode::NF_GAME))
 		{
-			CGameNodeDrawEvent evt(pChild, newy1, newy2);
-			Observable<CGameNodeDrawEvent*>::DispatchEvent(&evt);
+			OnGameNodeDraw.Broadcast(pChild, newy1, newy2);
 		}
 		if (newy1 <= visibleRegion.maxY && newy2 >= visibleRegion.minY)
 		{

@@ -13,7 +13,7 @@
 #include <unordered_map>
 #include <variant>
 
-#include "Observable.h"
+#include "Event.h"
 #include "Parameters.h"
 
 namespace Dasher {
@@ -37,7 +37,7 @@ namespace Dasher {
 /// The public interface uses UTF-8 strings. All Keys should be
 /// in American English and encodable in ASCII. However,
 /// string Values may contain special characters where appropriate.
-class CSettingsStore : public Observable<Parameter> {
+class CSettingsStore {
 public:
 
   CSettingsStore();
@@ -62,7 +62,9 @@ public:
 
   // TODO: just load the application parameters by default?
   void AddParameters(const std::unordered_map<Parameter, const Settings::Parameter_Value> table);
-  Observable<CParameterChange>& PreSetObservable() { return pre_set_observable_; }
+
+    Event<Parameter, std::variant<bool, long, std::string>> OnPreParameterChange;
+    Event<Parameter> OnParameterChanged;
     
   virtual bool IsParameterSaved(const std::string & Key) { return false; }; // avoid undef sub-classes error
 
@@ -116,7 +118,6 @@ private:
   virtual void SaveSetting(const std::string & Key, const std::string & Value);
 
   std::unordered_map<Parameter, Settings::Parameter_Value> parameters_;
-  Observable<CParameterChange> pre_set_observable_;
 };
 
 /// Superclass for anything that wants to use/access/store persistent settings.
@@ -157,12 +158,13 @@ private:
   /// wanting to introduce settings-listener capabilities.
   ///Note we don't inherit from TransientObserver as it saves storing the SettingsStore ptr
   /// in every instance; if we move to multiple settings stores, we could so inherit.
-  class CSettingsObserver : public Observer<Parameter> {
+  class CSettingsObserver {
   public:
     ///Create a CSettingsObserver listening to changes to the settings values
     /// used by a particular CSettingsUser.
     CSettingsObserver(CSettingsUser *pCreateFrom);
-    ~CSettingsObserver() override;
+    virtual ~CSettingsObserver();
+     virtual void HandleEvent(Parameter) = 0;
   private:
       CSettingsUser* s_pSettingsStore;
   };

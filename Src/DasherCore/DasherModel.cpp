@@ -486,7 +486,7 @@ void CDasherModel::ExpandNode(CDasherNode *pNode) {
 
   pNode->SetFlag(CDasherNode::NF_ALLCHILDREN, true);
 
-  DispatchEvent(pNode);
+    OnNodeChildrenCreated.Broadcast(pNode);
 }
 
 void CDasherModel::RenderToView(CDasherView *pView, CExpansionPolicy &policy) {

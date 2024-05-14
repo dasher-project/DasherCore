@@ -28,7 +28,6 @@
 #include "DasherView.h"
 #include "DasherInput.h"
 #include "DasherModel.h"
-#include "Observable.h"
 #include "Event.h"
 #include "NodeCreationManager.h"
 #include "UserLog.h"
@@ -74,11 +73,42 @@ CDasherInterfaceBase::CDasherInterfaceBase(CSettingsStore *pSettingsStore)
   m_pFramerate(new CFrameRate(this)), 
   m_pSettingsStore(pSettingsStore), 
   m_pLockLabel(NULL),
-  m_preSetObserver(*pSettingsStore),
   m_bLastMoved(false) {
-  
-  pSettingsStore->Register(this);
-  pSettingsStore->PreSetObservable().Register(&m_preSetObserver);
+
+    m_pSettingsStore->OnParameterChanged.Subscribe(this, [this](Parameter p)
+    {
+       HandleParameterChange(p); 
+    });
+
+    m_pSettingsStore->OnPreParameterChange.Subscribe(this, [this](Parameter parameter, const std::variant<bool, long, std::string>& newValue)
+    {
+        switch(parameter) {
+          case SP_ALPHABET_ID:
+              const std::string value = std::get<std::string>(newValue);
+            // Cycle the alphabet history
+            std::vector<std::string> newHistory;
+            newHistory.push_back(m_pSettingsStore->GetStringParameter(SP_ALPHABET_ID));
+            std::string v;
+            if ((v = m_pSettingsStore->GetStringParameter(SP_ALPHABET_1)) != value)
+              newHistory.push_back(v);
+            if ((v = m_pSettingsStore->GetStringParameter(SP_ALPHABET_2)) != value)
+              newHistory.push_back(v);
+            if ((v = m_pSettingsStore->GetStringParameter(SP_ALPHABET_3)) != value)
+              newHistory.push_back(v);
+            if ((v = m_pSettingsStore->GetStringParameter(SP_ALPHABET_4)) != value)
+              newHistory.push_back(v);
+
+            // Fill empty slots. 
+            while (newHistory.size() < 4)
+              newHistory.push_back("");
+
+            m_pSettingsStore->SetStringParameter(SP_ALPHABET_1, newHistory[0]);
+            m_pSettingsStore->SetStringParameter(SP_ALPHABET_2, newHistory[1]);
+            m_pSettingsStore->SetStringParameter(SP_ALPHABET_3, newHistory[2]);
+            m_pSettingsStore->SetStringParameter(SP_ALPHABET_4, newHistory[3]);
+            break;
+          }
+    });
   
   // Ensure that pointers to 'owned' objects are set to NULL.
   m_DasherScreen = NULL;
@@ -151,8 +181,8 @@ void CDasherInterfaceBase::Realize(unsigned long ulTime) {
   if (CControlManager *pCon = m_pNCManager->GetControlManager())
     pCon->HandleEvent(SP_INPUT_FILTER);
 
-  HandleEvent(LP_NODE_BUDGET);
-  HandleEvent(BP_SPEAK_WORDS);
+  HandleParameterChange(LP_NODE_BUDGET);
+  HandleParameterChange(BP_SPEAK_WORDS);
 
   // FIXME - need to rationalise this sort of thing.
   // InvalidateContext(true);
@@ -166,8 +196,8 @@ void CDasherInterfaceBase::Realize(unsigned long ulTime) {
 
 CDasherInterfaceBase::~CDasherInterfaceBase() {
   //Deregistering here allows for reusing a settings instance
-  m_pSettingsStore->Unregister(this);
-  m_pSettingsStore->PreSetObservable().Unregister(&m_preSetObserver);
+  m_pSettingsStore->OnParameterChanged.Unsubscribe(this);
+  m_pSettingsStore->OnPreParameterChange.Unsubscribe(this);
 
   //WriteTrainFileFull();???
   delete m_pDasherModel;        // The order of some of these deletions matters
@@ -194,36 +224,7 @@ CDasherInterfaceBase::~CDasherInterfaceBase() {
   delete m_pFramerate;
 }
 
-void CDasherInterfaceBase::CPreSetObserver::HandleEvent(CParameterChange d) {
-  switch(d.iParameter) {
-  case SP_ALPHABET_ID:
-    std::string value = std::get<std::string>(d.value);
-    // Cycle the alphabet history
-    std::vector<std::string> newHistory;
-    newHistory.push_back(m_settingsStore.GetStringParameter(SP_ALPHABET_ID));
-    std::string v;
-    if ((v = m_settingsStore.GetStringParameter(SP_ALPHABET_1)) != value)
-      newHistory.push_back(v);
-    if ((v = m_settingsStore.GetStringParameter(SP_ALPHABET_2)) != value)
-      newHistory.push_back(v);
-    if ((v = m_settingsStore.GetStringParameter(SP_ALPHABET_3)) != value)
-      newHistory.push_back(v);
-    if ((v = m_settingsStore.GetStringParameter(SP_ALPHABET_4)) != value)
-      newHistory.push_back(v);
-
-    // Fill empty slots. 
-    while (newHistory.size() < 4)
-      newHistory.push_back("");
-
-    m_settingsStore.SetStringParameter(SP_ALPHABET_1, newHistory[0]);
-    m_settingsStore.SetStringParameter(SP_ALPHABET_2, newHistory[1]);
-    m_settingsStore.SetStringParameter(SP_ALPHABET_3, newHistory[2]);
-    m_settingsStore.SetStringParameter(SP_ALPHABET_4, newHistory[3]);
-    break;
-  }
-}
-
-void CDasherInterfaceBase::HandleEvent(Parameter parameter) {
+void CDasherInterfaceBase::HandleParameterChange(Parameter parameter) {
   switch (parameter) {
 
   case LP_OUTLINE_WIDTH:
@@ -317,24 +318,29 @@ void CDasherInterfaceBase::LeaveGameMode() {
   SetBuffer(0);
 }
 
-CDasherInterfaceBase::WordSpeaker::WordSpeaker(CDasherInterfaceBase *pIntf) : TransientObserver<const CEditEvent *>(pIntf) {
+CDasherInterfaceBase::WordSpeaker::WordSpeaker(CDasherInterfaceBase *pIntf) : m_pInterface(pIntf) {
+
+    m_pInterface->OnEditEvent.Subscribe(this, [this](CEditEvent::EditEventType type, const std::string & strText, CDasherNode*)
+    {
+        if (m_pInterface->GetGameModule()) return;
+        if(type == CEditEvent::EDIT_OUTPUT) {
+            if (m_pInterface->SupportsSpeech()) {
+                if (!strText.empty() && std::isspace(strText[0])) {
+                    m_pInterface->Speak(m_strCurrentWord, false);
+                    m_strCurrentWord="";
+                } else
+                    m_strCurrentWord += strText;
+            }
+        }
+        else if(type == CEditEvent::EDIT_DELETE) {
+            m_strCurrentWord = m_strCurrentWord.substr(0, std::max(static_cast<std::string::size_type>(0), m_strCurrentWord.size() - strText.size()));
+        }
+    });
 }
 
-void CDasherInterfaceBase::WordSpeaker::HandleEvent(const CEditEvent *pEditEvent) {
-  CDasherInterfaceBase *pIntf(static_cast<CDasherInterfaceBase *> (m_pEventHandler));
-  if (pIntf->GetGameModule()) return;
-  if(pEditEvent->m_iEditType == 1) {
-    if (pIntf->SupportsSpeech()) {
-      if (!pEditEvent->m_sText.empty() && std::isspace(pEditEvent->m_sText[0])) {
-        pIntf->Speak(m_strCurrentWord, false);
-        m_strCurrentWord="";
-      } else
-        m_strCurrentWord+=pEditEvent->m_sText;
-    }
-  }
-  else if(pEditEvent->m_iEditType == 2) {
-    m_strCurrentWord = m_strCurrentWord.substr(0, std::max(static_cast<std::string::size_type>(0), m_strCurrentWord.size()-pEditEvent->m_sText.size()));
-  }
+CDasherInterfaceBase::WordSpeaker::~WordSpeaker()
+{
+    m_pInterface->OnEditEvent.Unsubscribe(this);
 }
 
 void CDasherInterfaceBase::SetLockStatus(const std::string &strText, int iPercent) {
@@ -356,23 +362,19 @@ void CDasherInterfaceBase::SetLockStatus(const std::string &strText, int iPercen
 }
 
 void CDasherInterfaceBase::editOutput(const std::string &strText, CDasherNode *pCause) {
-  CEditEvent evt(CEditEvent::EDIT_OUTPUT, strText, pCause);
-  DispatchEvent(&evt);
+    OnEditEvent.Broadcast(CEditEvent::EDIT_OUTPUT, strText, pCause);
 }
 
 void CDasherInterfaceBase::editDelete(const std::string &strText, CDasherNode *pCause) {
-  CEditEvent evt(CEditEvent::EDIT_DELETE, strText, pCause);
-  DispatchEvent(&evt);
+    OnEditEvent.Broadcast(CEditEvent::EDIT_DELETE, strText, pCause);
 }
 
 void CDasherInterfaceBase::editConvert(CDasherNode *pCause) {
-  CEditEvent evt(CEditEvent::EDIT_CONVERT, "", pCause);
-  DispatchEvent(&evt);
+    OnEditEvent.Broadcast(CEditEvent::EDIT_CONVERT, "", pCause);
 }
 
 void CDasherInterfaceBase::editProtect(CDasherNode *pCause) {
-  CEditEvent evt(CEditEvent::EDIT_PROTECT, "", pCause);
-  DispatchEvent(&evt);
+    OnEditEvent.Broadcast(CEditEvent::EDIT_PROTECT, "", pCause);
 }
 
 void CDasherInterfaceBase::WriteTrainFileFull() {

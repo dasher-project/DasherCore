@@ -74,7 +74,7 @@ typedef std::vector<VECTOR_STRING>::iterator     VECTOR_VECTOR_STRING_ITER;
 // is already watching BP_DASHER_PAUSED
 class CUserLog : public CUserLogBase, protected Dasher::CSettingsUserObserver {
 public:
-  CUserLog(Dasher::CSettingsUser *pCreateFrom, Observable<const Dasher::CEditEvent *> *pHandler, int iLogTypeMask);
+  CUserLog(Dasher::CSettingsUser *pCreateFrom, Dasher::CDasherInterfaceBase *pInterface, int iLogTypeMask);
 
   ~CUserLog();
 

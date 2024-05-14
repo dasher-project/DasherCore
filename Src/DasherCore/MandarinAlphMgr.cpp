@@ -21,6 +21,9 @@
 #include "../Common/Common.h"
 
 #include "MandarinAlphMgr.h"
+
+#include <algorithm>
+
 #include "LanguageModelling/PPMPYLanguageModel.h"
 #include "DasherInterfaceBase.h"
 #include "DasherNode.h"

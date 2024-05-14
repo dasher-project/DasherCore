@@ -31,6 +31,7 @@
 #include "../Common/NoClones.h"
 #include "DasherNode.h"
 #include "DasherTypes.h"
+#include "Event.h"
 #include "ExpansionPolicy.h"
 #include "SettingsStore.h"
 
@@ -54,9 +55,7 @@ namespace Dasher {
 /// calling CDasherNode::Output() / Undo() on nodes falling under/leaving the crosshair
 /// (However, determining which nodes are under the crosshair, is done by the CDasherView).
 ///
-/// The class is Observable in that it broadcasts a pointer to a CDasherNode when the node's
-/// children are created.
-class Dasher::CDasherModel: public Observable<CDasherNode*>, private NoClones
+class Dasher::CDasherModel: private NoClones
 {
  public:
   static const unsigned int NORMALIZATION = 1<<16;
@@ -186,6 +185,9 @@ class Dasher::CDasherModel: public Observable<CDasherNode*>, private NoClones
 
   /// Create the children of a Dasher node
   void ExpandNode(CDasherNode * pNode);
+
+  /// broadcasts a pointer to a CDasherNode when the node's children are created.
+  Event<CDasherNode*> OnNodeChildrenCreated;
 
  private:
 

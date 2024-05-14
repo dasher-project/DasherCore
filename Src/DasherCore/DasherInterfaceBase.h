@@ -74,7 +74,7 @@ class CNodeCreationManager;
 /// the UI to use. Note: CMessageDisplay unimplemented; platforms should
 /// provide their own methods using appropriate GUI components, or subclass
 /// CDashIntfScreenMsgs instead.
-class Dasher::CDasherInterfaceBase : public CMessageDisplay, public Observable<const CEditEvent *>, protected Observer<Parameter>, protected CSettingsUser, private NoClones {
+class Dasher::CDasherInterfaceBase : public CMessageDisplay, protected CSettingsUser, private NoClones {
 public:
   ///Create a new interface by providing the only-and-only settings store that will be used throughout.
   CDasherInterfaceBase(CSettingsStore *pSettingsStore);
@@ -126,7 +126,7 @@ public:
   /// \param iParameter The parameter that's just changed.
   /// \todo Should be protected (??)
 
-  void HandleEvent(Parameter parameter) override;
+  void HandleParameterChange(Parameter parameter);
   
   ///Locks/unlocks Dasher. The default here stores the lock message and percentage
   /// in m_strLockMessage, such that NewFrame renders this instead of the canvas
@@ -191,6 +191,8 @@ public:
   virtual void editDelete(const std::string &strText, CDasherNode *pCause);
   virtual void editConvert(CDasherNode *pCause);
   virtual void editProtect(CDasherNode *pCause);
+
+  Event<CEditEvent::EditEventType, const std::string &, CDasherNode*> OnEditEvent;
 
   /// @name Starting and stopping
   /// Methods used to instruct dynamic motion of Dasher to start or stop
@@ -487,15 +489,6 @@ protected:
   /// (TODO _could_ move these into CSettingsUser, but that seems uglier given so few clients?)
   CSettingsStore * const m_pSettingsStore;
 
-  class CPreSetObserver : public Observer<CParameterChange> {
-    CSettingsStore& m_settingsStore;
-  public:
-    CPreSetObserver(CSettingsStore& settingsStore) : m_settingsStore(settingsStore) {};
-    void HandleEvent(CParameterChange evt) override;
-  };
-
-  CPreSetObserver m_preSetObserver;
-
   //The default expansion policy to use - an amortized policy depending on the LP_NODE_BUDGET parameter.
   CExpansionPolicy *m_defaultPolicy;
 
@@ -516,13 +509,14 @@ protected:
   // preference with the alphabet.
   Options::ScreenOrientations ComputeOrientation();
 
-  class WordSpeaker : public TransientObserver<const CEditEvent *> {
+  class WordSpeaker {
   public:
     WordSpeaker(CDasherInterfaceBase *pIntf);
-    void HandleEvent(const CEditEvent *);
+      ~WordSpeaker();
   private:
     ///builds up the word currently being entered
     std::string m_strCurrentWord;
+    CDasherInterfaceBase* m_pInterface;
   } *m_pWordSpeaker;
   
   /// @name Child components
