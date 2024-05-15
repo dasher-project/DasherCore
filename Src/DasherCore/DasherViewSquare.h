@@ -27,7 +27,7 @@ class CDasherNode;
 ///
 /// Horizontal mapping - linear and log
 /// Vertical mapping - linear with different gradient
-class Dasher::CDasherViewSquare : public Dasher::CDasherView, public CSettingsUserObserver
+class Dasher::CDasherViewSquare : public CDasherView
 {
 public:
 	/// Constructor
@@ -37,14 +37,12 @@ public:
 	/// passed as parameter to the drawing functions, and data structure
 	/// can be extracted from the model and passed too.
 
-	CDasherViewSquare(CSettingsUser* pCreateFrom, CDasherScreen* DasherScreen, Options::ScreenOrientations orient);
+	CDasherViewSquare(CSettingsStore* pSettingsStore, CDasherScreen* DasherScreen, Options::ScreenOrientations orient);
 	~CDasherViewSquare() override;
 
 	///
 	/// Event handler
 	///
-
-	void HandleEvent(Parameter parameter) override;
 
 	//Override to additionally reset scale factors etc.
 	void SetOrientation(Options::ScreenOrientations newOrient) override;
@@ -212,6 +210,8 @@ private:
 
 	bool m_bVisibleRegionValid = false;
 	ScreenRegion m_visible_region;
+
+	CSettingsStore* m_pSettingsStore;
 };
 
 /// @}

@@ -37,12 +37,12 @@ namespace Dasher {
 
     /// A node manager which deals with control nodes.
   ///
-  class CControlBase : public CNodeManager, protected CSettingsUser {
+  class CControlBase : public CNodeManager {
   public:
 
     NodeTemplate *GetRootTemplate();
 
-    CControlBase(CSettingsUser *pCreateFrom, CDasherInterfaceBase *pInterface, CNodeCreationManager *pNCManager);
+    CControlBase(CSettingsStore* pSettingsStore, CDasherInterfaceBase *pInterface, CNodeCreationManager *pNCManager);
 
     ///Make this manager ready to make nodes renderable on the screen by preallocating labels
     virtual void ChangeScreen(CDasherScreen *pScreen);
@@ -65,7 +65,7 @@ namespace Dasher {
     
     int getColour(NodeTemplate *pTemplate, CDasherNode *pParent);
     CDasherScreen *m_pScreen;
-    
+    CSettingsStore* m_pSettingsStore;
   private:
     NodeTemplate *m_pRoot;
   };
@@ -145,10 +145,9 @@ private:
   ///subclass which we actually construct! Parses editing node definitions from a file,
   /// then adds Pause and/or Stop, Speak, and Copy (to clipboard), all as children
   /// of the "root" control node.
-  class CControlManager : public CSettingsObserver, public CControlBase, public CControlParser {
+  class CControlManager : public CControlBase, public CControlParser {
   public:
-    CControlManager(CSettingsUser *pCreateFrom, CNodeCreationManager *pNCManager, CDasherInterfaceBase *pInterface);
-    void HandleEvent(Parameter parameter);
+    CControlManager(CSettingsStore* pSettingsStore, CNodeCreationManager *pNCManager, CDasherInterfaceBase *pInterface);
 
     ///Recomputes which of pause, stop, speak and copy the root control node should have amongst its children.
     /// Automatically called whenever copy-on-stop/speak-on-stop or input filter changes;
@@ -176,7 +175,8 @@ public:
 	CControlBoxIO(CMessageDisplay* pMsgs);
 
 	void GetControlBoxes(std::vector<std::string>* pList) const;
-	CControlManager* CreateControlManager(const std::string& id, CSettingsUser* pCreateFrom, CNodeCreationManager* pNCManager, CDasherInterfaceBase* pInterface) const;
+	CControlManager* CreateControlManager(const std::string& id, CSettingsStore* pSettingsStore, CNodeCreationManager* pNCManager, CDasherInterfaceBase*
+                                          pInterface) const;
 	bool Parse(pugi::xml_document& document, const std::string filePath, bool bUser) override;
 private:
 	std::map<std::string, std::string> m_controlFiles;

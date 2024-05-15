@@ -107,10 +107,11 @@ CWordLanguageModel::CWordnode * CWordLanguageModel::AddSymbolToNode(CWordnode *p
 // CWordLanguageModel defs
 /////////////////////////////////////////////////////////////////////
 
-CWordLanguageModel::CWordLanguageModel(CSettingsUser *pCreator, 
+CWordLanguageModel::CWordLanguageModel(CSettingsStore *pSettingsStore, 
 				       const CAlphInfo *pAlph, const CAlphabetMap *pAlphMap)
-  :CLanguageModel(pAlph->iEnd-1), CSettingsUser(pCreator), NodesAllocated(0),
-   max_order(2), m_NodeAlloc(8192), m_ContextAlloc(1024), m_pAlphInfo(pAlph) {
+  :CLanguageModel(pAlph->iEnd-1), m_pSettingsStore(pSettingsStore), m_pAlphInfo(pAlph),
+   NodesAllocated(0), max_order(2), m_NodeAlloc(8192), m_ContextAlloc(1024)
+{
   
   // Construct a root node for the trie
 
@@ -120,7 +121,7 @@ CWordLanguageModel::CWordLanguageModel(CSettingsUser *pCreator,
 
   // Create a spelling model
 
-  pSpellingModel = new CPPMLanguageModel(this, m_iNumSyms);
+  pSpellingModel = new CPPMLanguageModel(m_pSettingsStore, m_iNumSyms);
 
   // Construct a root context
   
@@ -203,7 +204,7 @@ void CWordLanguageModel::GetProbs(Context context, std::vector<unsigned int> &pr
   for(std::vector < double >::iterator it(dProbs.begin()); it != dProbs.end(); ++it)
     *it = 0.0;
 
-  double alpha = GetLongParameter(LP_LM_WORD_ALPHA) / 100.0;
+  double alpha = m_pSettingsStore->GetLongParameter(LP_LM_WORD_ALPHA) / 100.0;
   //  double beta = LanguageModelParams()->GetValue( std::string( "LMBeta" ) )/100.0;
 
   // Ignore beta for now - we'll need to know how many different words have been seen, not just the total count.

@@ -7,8 +7,8 @@
 
 using namespace Dasher;
 
-CDemoFilter::CDemoFilter(CSettingsUser *pCreator, CDasherInterfaceBase *pInterface, CFrameRate *pFramerate)
-  : CDynamicFilter(pCreator, pInterface, pFramerate, 19, _("Demo Mode (no input)")),
+CDemoFilter::CDemoFilter(CSettingsStore* pSettingsStore, CDasherInterfaceBase *pInterface, CFrameRate *pFramerate)
+  : CDynamicFilter(pSettingsStore, pInterface, pFramerate, 19, _("Demo Mode (no input)")),
 m_dNoiseX(0.0), m_dNoiseY(0.0), m_iDemoX(0), m_iDemoY(0) {
 
 }
@@ -18,7 +18,7 @@ CDemoFilter::~CDemoFilter() {
 
 bool CDemoFilter::DecorateView(CDasherView *pView, CDasherInput *pInput) {
 
-  if(GetBoolParameter(BP_DRAW_MOUSE)) {
+  if(m_pSettingsStore->GetBoolParameter(BP_DRAW_MOUSE)) {
     pView->DasherDrawCentredRectangle(m_iDemoX, m_iDemoY, 5, pView->GetNamedColor(NamedColor::inputPosition), ColorPalette::noColor, false);
   }
 
@@ -33,10 +33,10 @@ bool CDemoFilter::DecorateView(CDasherView *pView, CDasherInput *pInput) {
   x[1] = m_iDemoX; y[1] = m_iDemoY;
   
   // Actually plot the line
-  if (GetBoolParameter(BP_CURVE_MOUSE_LINE))
-    pView->DasherSpaceLine(x[0],y[0],x[1],y[1], GetLongParameter(LP_LINE_WIDTH), pView->GetNamedColor(NamedColor::inputLine));
+  if (m_pSettingsStore->GetBoolParameter(BP_CURVE_MOUSE_LINE))
+    pView->DasherSpaceLine(x[0],y[0],x[1],y[1], m_pSettingsStore->GetLongParameter(LP_LINE_WIDTH), pView->GetNamedColor(NamedColor::inputLine));
   else
-    pView->DasherPolyline(x, y, 2, GetLongParameter(LP_LINE_WIDTH), pView->GetNamedColor(NamedColor::inputLine));
+    pView->DasherPolyline(x, y, 2, m_pSettingsStore->GetLongParameter(LP_LINE_WIDTH), pView->GetNamedColor(NamedColor::inputLine));
   
   return true;
 }
@@ -83,7 +83,7 @@ void CDemoFilter::Timer(unsigned long Time, CDasherView *m_pDasherView, CDasherI
   
   // ...and springy behaviour...
   //if(!m_bSentenceFinished) {
-    const myint iNoiseMag(GetLongParameter(LP_DEMO_NOISE_MAG));
+    const myint iNoiseMag(m_pSettingsStore->GetLongParameter(LP_DEMO_NOISE_MAG));
     m_iDemoX = myint((CDasherModel::ORIGIN_X+(1500*iIdealUnitVec[0])+iNoiseMag*m_dNoiseX)*m_dSpring
                      +(1.0-m_dSpring)*m_iDemoX);
     m_iDemoY = myint((CDasherModel::ORIGIN_Y+(1500*iIdealUnitVec[1])+iNoiseMag*m_dNoiseY)*m_dSpring
@@ -100,8 +100,8 @@ void CDemoFilter::Timer(unsigned long Time, CDasherView *m_pDasherView, CDasherI
 
 void CDemoFilter::KeyDown(unsigned long iTime, Keys::VirtualKey Key, CDasherView *pDasherView, CDasherInput *pInput, CDasherModel *pModel) {
   
-  if ((Key==Keys::Big_Start_Stop_Key && GetBoolParameter(BP_START_SPACE))
-      || (Key==Keys::Primary_Input && GetBoolParameter(BP_START_MOUSE))) {
+  if ((Key==Keys::Big_Start_Stop_Key && m_pSettingsStore->GetBoolParameter(BP_START_SPACE))
+      || (Key==Keys::Primary_Input && m_pSettingsStore->GetBoolParameter(BP_START_MOUSE))) {
     if(isPaused())
       run(iTime);
     else
@@ -116,9 +116,9 @@ void CDemoFilter::HandleEvent(Parameter parameter) {
       case LP_MAX_BITRATE:
       case LP_FRAMERATE:
         // Recalculates the parameters used in the demo following a change in framerate or speed.
-        double spring = GetLongParameter(LP_DEMO_SPRING)/100.0;
-        double noisemem = GetLongParameter(LP_DEMO_NOISE_MEM)/100.0;
-        double lambda = 0.7*GetLongParameter(LP_MAX_BITRATE)/(double)GetLongParameter(LP_FRAMERATE);
+        double spring = m_pSettingsStore->GetLongParameter(LP_DEMO_SPRING)/100.0;
+        double noisemem = m_pSettingsStore->GetLongParameter(LP_DEMO_NOISE_MEM)/100.0;
+        double lambda = 0.7*m_pSettingsStore->GetLongParameter(LP_MAX_BITRATE)/(double)m_pSettingsStore->GetLongParameter(LP_FRAMERATE);
         
         m_dSpring = (1-exp(-spring*lambda));
         m_dNoiseNew = noisemem*(1-exp(-lambda));

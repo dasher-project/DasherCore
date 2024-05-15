@@ -24,8 +24,8 @@
 
 using namespace Dasher;
 
-CControlBase::CControlBase(CSettingsUser* pCreateFrom, CDasherInterfaceBase* pInterface, CNodeCreationManager* pNCManager)
-	: CSettingsUser(pCreateFrom), m_pInterface(pInterface), m_pNCManager(pNCManager), m_pScreen(NULL), m_pRoot(NULL)
+CControlBase::CControlBase(CSettingsStore* pSettingsStore, CDasherInterfaceBase* pInterface, CNodeCreationManager* pNCManager)
+	: m_pSettingsStore(pSettingsStore), m_pInterface(pInterface), m_pNCManager(pNCManager), m_pScreen(NULL), m_pRoot(NULL)
 {
 }
 
@@ -101,7 +101,7 @@ CContNode::CContNode(int iOffset, NodeTemplate* pTemplate, CControlBase* pMgr)
 
 double CContNode::SpeedMul()
 {
-	return m_pMgr->GetBoolParameter(BP_SLOW_CONTROL_BOX) ? 0.5 : 1;
+	return m_pMgr->m_pSettingsStore->GetBoolParameter(BP_SLOW_CONTROL_BOX) ? 0.5 : 1;
 }
 
 void CContNode::PopulateChildren()
@@ -290,8 +290,8 @@ bool CControlParser::Parse(pugi::xml_document& document, const std::string, bool
 	return true;
 }
 
-CControlManager::CControlManager(CSettingsUser* pCreateFrom, CNodeCreationManager* pNCManager, CDasherInterfaceBase* pInterface)
-	: CSettingsObserver(pCreateFrom), CControlBase(pCreateFrom, pInterface, pNCManager), CControlParser(pInterface)
+CControlManager::CControlManager(CSettingsStore* pSettingsStore, CNodeCreationManager* pNCManager, CDasherInterfaceBase* pInterface)
+	: CControlBase(pSettingsStore, pInterface, pNCManager), CControlParser(pInterface)
 {
 	//TODO, used to be able to change label+colour of root/pause/stop from controllabels.xml
 	// (or, get the root node title "control" from the alphabet!)
@@ -354,6 +354,18 @@ CControlManager::CControlManager(CSettingsUser* pCreateFrom, CNodeCreationManage
 	m_actions["delete dist=paragraph forward=no"] = new Delete(false, EDIT_PARAGRAPH);
 	m_actions["delete dist=page forward=no"] = new Delete(false, EDIT_PAGE);
 	m_actions["delete dist=all forward=no"] = new Delete(false, EDIT_FILE);
+
+	m_pSettingsStore->OnParameterChanged.Subscribe(this, [this](Parameter p)
+    {
+        switch (p)
+	    {
+	    case BP_COPY_ALL_ON_STOP:
+	    case BP_SPEAK_ALL_ON_STOP:
+	    case SP_INPUT_FILTER:
+		    updateActions();
+        default: break;
+        }
+    });
 }
 
 NodeTemplate* CControlManager::parseOther(pugi::xml_node node)
@@ -390,17 +402,7 @@ Action* CControlManager::parseAction(pugi::xml_node node)
 
 CControlManager::~CControlManager()
 {
-}
-
-void CControlManager::HandleEvent(Parameter parameter)
-{
-	switch (parameter)
-	{
-	case BP_COPY_ALL_ON_STOP:
-	case BP_SPEAK_ALL_ON_STOP:
-	case SP_INPUT_FILTER:
-		updateActions();
-	}
+	m_pSettingsStore->OnParameterChanged.Unsubscribe(this);
 }
 
 void CControlManager::updateActions()
@@ -434,10 +436,10 @@ CControlBoxIO::CControlBoxIO(CMessageDisplay* pMsgs) : AbstractXMLParser(pMsgs)
 }
 
 CControlManager* CControlBoxIO::CreateControlManager(
-	const std::string& id, CSettingsUser* pCreateFrom, CNodeCreationManager* pNCManager,
+	const std::string& id, CSettingsStore* pSettingsStore, CNodeCreationManager* pNCManager,
 	CDasherInterfaceBase* pInterface) const
 {
-	auto mgr = new CControlManager(pCreateFrom, pNCManager, pInterface);
+	auto mgr = new CControlManager(pSettingsStore, pNCManager, pInterface);
 	auto it = m_controlFiles.find(id);
 	if (it != m_controlFiles.end())
 		mgr->ParseFile(it->second, true);

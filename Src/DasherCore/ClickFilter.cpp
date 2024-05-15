@@ -20,10 +20,10 @@ static SModuleSettings sSettings[] = {
 
 bool CClickFilter::DecorateView(CDasherView *pView, CDasherInput *pInput) {
   bool bChanged(false);
-  if (GetBoolParameter(BP_DRAW_MOUSE_LINE)) {
+  if (m_pSettingsStore->GetBoolParameter(BP_DRAW_MOUSE_LINE)) {
     myint mouseX, mouseY;
     pInput->GetDasherCoords(mouseX, mouseY, pView);
-    AdjustZoomX(mouseX, pView, GetLongParameter(LP_S), GetLongParameter(LP_MAXZOOM));
+    AdjustZoomX(mouseX, pView, m_pSettingsStore->GetLongParameter(LP_S), m_pSettingsStore->GetLongParameter(LP_MAXZOOM));
     if (m_iLastX != mouseX || m_iLastY != mouseY) {
       bChanged = true;
       m_iLastX = mouseX; m_iLastY = mouseY;
@@ -34,9 +34,9 @@ bool CClickFilter::DecorateView(CDasherView *pView, CDasherInput *pInput) {
     y[0] = mouseY - mouseX;
     y[1] = mouseY;
     y[2] = mouseY + mouseX;
-    if (GetBoolParameter(BP_CURVE_MOUSE_LINE)) {
-      pView->DasherSpaceLine(x[0], y[0], x[1], y[1], GetLongParameter(LP_LINE_WIDTH), pView->GetNamedColor(NamedColor::inputLine));
-      pView->DasherSpaceLine(x[1], y[1], x[2], y[2], GetLongParameter(LP_LINE_WIDTH), pView->GetNamedColor(NamedColor::inputLine));
+    if (m_pSettingsStore->GetBoolParameter(BP_CURVE_MOUSE_LINE)) {
+      pView->DasherSpaceLine(x[0], y[0], x[1], y[1], m_pSettingsStore->GetLongParameter(LP_LINE_WIDTH), pView->GetNamedColor(NamedColor::inputLine));
+      pView->DasherSpaceLine(x[1], y[1], x[2], y[2], m_pSettingsStore->GetLongParameter(LP_LINE_WIDTH), pView->GetNamedColor(NamedColor::inputLine));
     } else {
       //Note that the nonlinearity at edges of screen causes the lines to wobble close to the top/bottom:
       // we draw lines _straight_ towards their targets on the Y-axis (calculated after applying nonlinearity),
@@ -51,7 +51,7 @@ bool CClickFilter::DecorateView(CDasherView *pView, CDasherInput *pInput) {
         //  x[2] = mouseX - (iDasherMaxY - mouseY);
         //  y[2] = iDasherMaxY;
         //}
-      pView->DasherPolyline(x, y, 3, GetLongParameter(LP_LINE_WIDTH), pView->GetNamedColor(NamedColor::inputLine));
+      pView->DasherPolyline(x, y, 3, m_pSettingsStore->GetLongParameter(LP_LINE_WIDTH), pView->GetNamedColor(NamedColor::inputLine));
     }
   }
   return bChanged;
@@ -79,7 +79,7 @@ void CClickFilter::KeyDown(unsigned long iTime, Keys::VirtualKey Key, CDasherVie
       myint iDasherY;
 
       pInput->GetDasherCoords(iDasherX, iDasherY, pView);
-      AdjustZoomX(iDasherX, pView, GetLongParameter(LP_S), GetLongParameter(LP_MAXZOOM));
+      AdjustZoomX(iDasherX, pView, m_pSettingsStore->GetLongParameter(LP_S), m_pSettingsStore->GetLongParameter(LP_MAXZOOM));
       ScheduleZoom(pModel, iDasherY-iDasherX, iDasherY+iDasherX);
     }
     break;

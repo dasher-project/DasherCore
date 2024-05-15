@@ -107,5 +107,5 @@ void CDashIntfScreenMsgs::onUnpause(unsigned long lTime) {
 }
 
 CGameModule *CDashIntfScreenMsgs::CreateGameModule() {
-  return new CScreenGameModule(this, this, GetView(), m_pDasherModel);
+  return new CScreenGameModule(m_pSettingsStore, this, GetView(), m_pDasherModel);
 }

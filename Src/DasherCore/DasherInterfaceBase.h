@@ -74,7 +74,7 @@ class CNodeCreationManager;
 /// the UI to use. Note: CMessageDisplay unimplemented; platforms should
 /// provide their own methods using appropriate GUI components, or subclass
 /// CDashIntfScreenMsgs instead.
-class Dasher::CDasherInterfaceBase : public CMessageDisplay, protected CSettingsUser, private NoClones {
+class Dasher::CDasherInterfaceBase : public CMessageDisplay, private NoClones {
 public:
   ///Create a new interface by providing the only-and-only settings store that will be used throughout.
   CDasherInterfaceBase(CSettingsStore *pSettingsStore);
@@ -482,13 +482,11 @@ protected:
   ///Framerate monitor; created in constructor, req'd for DynamicFilter subclasses
   CFrameRate * const m_pFramerate;
   
- private:
-  
   ///We keep a reference to the (currently unique/global) SettingsStore with which
   /// this interface was created, as ClSet and ResetParameter need to access it.
-  /// (TODO _could_ move these into CSettingsUser, but that seems uglier given so few clients?)
   CSettingsStore * const m_pSettingsStore;
 
+private:
   //The default expansion policy to use - an amortized policy depending on the LP_NODE_BUDGET parameter.
   CExpansionPolicy *m_defaultPolicy;
 

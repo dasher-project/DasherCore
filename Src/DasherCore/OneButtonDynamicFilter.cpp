@@ -39,8 +39,8 @@ static SModuleSettings sSettings[] = {
   {LP_DYNAMIC_SPEED_DEC, T_LONG, 1, 99, 1, 1, _("Percentage by which to decrease speed upon reverse")}
 };
 
-COneButtonDynamicFilter::COneButtonDynamicFilter(CSettingsUser *pCreator, CDasherInterfaceBase *pInterface, CFrameRate *pFramerate)
-  : CButtonMultiPress(pCreator, pInterface, pFramerate, 6, _("One Button Dynamic Mode")) {
+COneButtonDynamicFilter::COneButtonDynamicFilter(CSettingsStore* pSettingsStore, CDasherInterfaceBase *pInterface, CFrameRate *pFramerate)
+  : CButtonMultiPress(pSettingsStore, pInterface, pFramerate, 6, _("One Button Dynamic Mode")) {
   m_iTarget = 0;
 
   m_iTargetX[0] = 100;
@@ -92,7 +92,7 @@ bool COneButtonDynamicFilter::DecorateView(CDasherView *pView, CDasherInput *pIn
 }
 
 void COneButtonDynamicFilter::KeyDown(unsigned long Time, Keys::VirtualKey Key, CDasherView *pDasherView, CDasherInput *pInput, CDasherModel *pModel) {
-  if (Key == Keys::Primary_Input && !GetBoolParameter(BP_BACKOFF_BUTTON))
+  if (Key == Keys::Primary_Input && !m_pSettingsStore->GetBoolParameter(BP_BACKOFF_BUTTON))
     //mouse click - will be ignored by superclass method.
     //simulate press of button 2...
     Key= Keys::Button_2;
@@ -100,7 +100,7 @@ void COneButtonDynamicFilter::KeyDown(unsigned long Time, Keys::VirtualKey Key, 
 }
 
 void COneButtonDynamicFilter::KeyUp(unsigned long Time, Keys::VirtualKey Key, CDasherView *pDasherView, CDasherInput *pInput, CDasherModel *pModel) {
-  if (Key == Keys::Primary_Input && !GetBoolParameter(BP_BACKOFF_BUTTON))
+  if (Key == Keys::Primary_Input && !m_pSettingsStore->GetBoolParameter(BP_BACKOFF_BUTTON))
     //mouse click - will be ignored by superclass method.
     //simulate press of button 2...
     Key= Keys::Button_2;

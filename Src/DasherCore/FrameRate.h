@@ -20,13 +20,14 @@ namespace Dasher {
 /// keeps the framerate (LP_FRAMERATE / 100.0) up-to-date,
 /// computes the Steps parameter,
 /// computes RXmax - which controls the maximum rate of zooming in
-class CFrameRate : public CSettingsUserObserver  {
+class CFrameRate {
 public:
-  CFrameRate(CSettingsUser *pCreator);
+  CFrameRate(CSettingsStore* pSettingsStore);
+  ~CFrameRate();
 
   //Responds to a change to LP_FRAMERATE or LP_MAX_BITRATE
   // by recomputing the Steps() parameter.
-  virtual void HandleEvent(Parameter parameter);
+  virtual void HandleParameterChange(Parameter parameter);
 
   ///The number of frames, in which we will attempt to bring
   /// the target location (under the cursor, or in dynamic button
@@ -58,6 +59,8 @@ private:
   int m_iSteps;
   
   double m_dBitsAtLimX;
+
+  CSettingsStore* m_pSettingsStore;
 };
 /// \}
 }

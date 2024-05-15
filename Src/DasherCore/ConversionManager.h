@@ -60,11 +60,11 @@ namespace Dasher {
   /// aspects of conversion, and CNodeManager for details of the node
   /// management process.
   ///
-  class CConversionManager : protected CSettingsUser, public CNodeManager {
+  class CConversionManager : public CNodeManager {
     friend class CConvertingAlphMgr;
   protected:  class CConvNode; //fwd decl
   public:
-    CConversionManager(CSettingsUser *pCreateFrom, CDasherInterfaceBase *pInterface, CNodeCreationManager *pNCManager, const CAlphInfo *pAlphabet, CLanguageModel *pLanguageModel);
+    CConversionManager(CSettingsStore* pSettingsStore, CDasherInterfaceBase *pInterface, CNodeCreationManager *pNCManager, const CAlphInfo *pAlphabet, CLanguageModel *pLanguageModel);
 
     ///
     /// Get a new root node owned by this manager
@@ -77,7 +77,8 @@ namespace Dasher {
     void ChangeScreen(CDasherScreen *pScreen);
     
   protected:
-    
+    CSettingsStore* m_pSettingsStore;
+
     class CConvNode : public CDasherNode {
     public:
       CConversionManager *mgr() const {return m_pMgr;}
@@ -90,7 +91,7 @@ namespace Dasher {
     virtual int ExpectedNumChildren();
       virtual void SetFlag(int iFlag, bool bValue);
 
-    ~CConvNode();
+    virtual ~CConvNode();
 
     ///Attempts to fill vContextSymbols with the context that would exist _after_ this node has been entered
     void GetContext(CDasherInterfaceBase *pInterface, const CAlphabetMap *pAlphabetMap, std::vector<symbol> &vContextSymbols, int iOffset, int iLength);

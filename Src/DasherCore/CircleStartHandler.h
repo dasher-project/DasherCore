@@ -8,14 +8,13 @@
 /// \ingroup Start
 /// @{
 namespace Dasher {
-class CCircleStartHandler : public CStartHandler, public CSettingsUserObserver {
+class CCircleStartHandler : public CStartHandler {
 public:
   CCircleStartHandler(CDefaultFilter *pCreator);
   ~CCircleStartHandler();
   virtual bool DecorateView(CDasherView *pView);
   virtual void Timer(unsigned long iTime, dasherint iX, dasherint iY, CDasherView *pView);
   void RegisterView(CDasherView* pView);
-  virtual void HandleEvent(Parameter parameter);
   void onPause();
   void onRun(unsigned long iTime);
 protected:
@@ -30,6 +29,7 @@ protected:
 private:
   ///Cached center of screen circle (needs recomputing if radius does)
   CDasherScreen::point m_screenCircleCenter;
+  CSettingsStore* m_pSettingsStore;
 };
 }
 /// @}

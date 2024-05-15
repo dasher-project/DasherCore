@@ -18,7 +18,7 @@ namespace Dasher {
 class CUserLogBase {
  public:
   CUserLogBase(Dasher::CDasherInterfaceBase *pInterface);
-  ~CUserLogBase();
+  virtual ~CUserLogBase();
 
   virtual void AddParam(const std::string& strName, const std::string& strValue, int iOptionMask = 0) = 0;
   virtual void AddParam(const std::string& strName, double dValue, int iOptionMask = 0) = 0;

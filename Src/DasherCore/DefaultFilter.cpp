@@ -24,35 +24,51 @@ bool CDefaultFilter::GetSettings(SModuleSettings **sets, int *iCount) {
   return true;
 }
 
-CDefaultFilter::CDefaultFilter(CSettingsUser *pCreator, CDasherInterfaceBase *pInterface, CFrameRate *pFramerate, ModuleID_t iID, const char *szName)
-  : CDynamicFilter(pCreator, pInterface, pFramerate, iID, szName), CSettingsObserver(pCreator), m_bTurbo(false) {
+CDefaultFilter::CDefaultFilter(CSettingsStore* pSettingsStore, CDasherInterfaceBase *pInterface, CFrameRate *pFramerate, ModuleID_t iID, const char *szName)
+  : CDynamicFilter(pSettingsStore, pInterface, pFramerate, iID, szName), m_bTurbo(false) {
   m_pStartHandler = 0;
-  m_pAutoSpeedControl = new CAutoSpeedControl(this);
+  m_pAutoSpeedControl = new CAutoSpeedControl(m_pSettingsStore);
 
   // Initialize autocalibration (i.e. seen nothing yet)
   m_iSum = 0;
   m_iCounter = 0;
-  if (GetBoolParameter(BP_AUTOCALIBRATE)) //eyetracker calibration has likely changed from previous session
-    SetLongParameter(LP_TARGET_OFFSET, 0); //so start over from scratch
+  if (pSettingsStore->GetBoolParameter(BP_AUTOCALIBRATE)) //eyetracker calibration has likely changed from previous session
+    pSettingsStore->SetLongParameter(LP_TARGET_OFFSET, 0); //so start over from scratch
+
+  m_pSettingsStore->OnParameterChanged.Subscribe(this, [this](Parameter p)
+  {
+      switch (p) {
+          case BP_CIRCLE_START:
+          case BP_MOUSEPOS_MODE:
+            CreateStartHandler();
+            break;
+          case BP_TURBO_MODE:
+            m_bTurbo &= m_pSettingsStore->GetBoolParameter(BP_TURBO_MODE);
+            break;
+          default: break;
+      }
+  });
+
 }
 
 CDefaultFilter::~CDefaultFilter() {
   delete m_pAutoSpeedControl;
   delete m_pStartHandler;
+  m_pSettingsStore->OnParameterChanged.Unsubscribe(this);
 }
 
 bool CDefaultFilter::DecorateView(CDasherView *pView, CDasherInput *pInput) {
 
   bool bDidSomething(false);
 
-  if(GetBoolParameter(BP_DRAW_MOUSE)) {
+  if(m_pSettingsStore->GetBoolParameter(BP_DRAW_MOUSE)) {
     //Draw a small box at the current mouse position
     pView->DasherDrawCentredRectangle(m_iLastX, m_iLastY, 5, pView->GetNamedColor(NamedColor::inputPosition), ColorPalette::noColor, false);
 
     bDidSomething = true;
   }
 
-  if(GetBoolParameter(BP_DRAW_MOUSE_LINE)) {
+  if(m_pSettingsStore->GetBoolParameter(BP_DRAW_MOUSE_LINE)) {
     // Draw a line from the origin to the current mouse position
     myint x[2];
     myint y[2];
@@ -67,10 +83,10 @@ bool CDefaultFilter::DecorateView(CDasherView *pView, CDasherInput *pInput) {
     y[1] = m_iLastY;
 
     // Actually plot the line
-    if (GetBoolParameter(BP_CURVE_MOUSE_LINE))
-      pView->DasherSpaceLine(x[0],y[0],x[1],y[1], GetLongParameter(LP_LINE_WIDTH), pView->GetNamedColor(NamedColor::inputLine));
+    if (m_pSettingsStore->GetBoolParameter(BP_CURVE_MOUSE_LINE))
+      pView->DasherSpaceLine(x[0],y[0],x[1],y[1], m_pSettingsStore->GetLongParameter(LP_LINE_WIDTH), pView->GetNamedColor(NamedColor::inputLine));
     else
-      pView->DasherPolyline(x, y, 2, GetLongParameter(LP_LINE_WIDTH), pView->GetNamedColor(NamedColor::inputLine));
+      pView->DasherPolyline(x, y, 2, m_pSettingsStore->GetLongParameter(LP_LINE_WIDTH), pView->GetNamedColor(NamedColor::inputLine));
 
   /*  // Plot a brachistochrone
 
@@ -116,7 +132,7 @@ void CDefaultFilter::Timer(unsigned long Time, CDasherView *pView, CDasherInput 
   ApplyTransform(m_iLastX, m_iLastY, pView);
   if (!isPaused())
   {
-    if(GetBoolParameter(BP_STOP_OUTSIDE)) {
+    if(m_pSettingsStore->GetBoolParameter(BP_STOP_OUTSIDE)) {
       const CDasherView::ScreenRegion visibleRegion = pView->VisibleRegion();
 
       if((m_iLastX > visibleRegion.maxX) || (m_iLastX < visibleRegion.minX) || (m_iLastY > visibleRegion.maxY) || (m_iLastY < visibleRegion.minY)) {
@@ -150,8 +166,8 @@ void CDefaultFilter::pause() {
 
 void CDefaultFilter::KeyDown(unsigned long iTime, Keys::VirtualKey Key, CDasherView *pDasherView, CDasherInput *pInput, CDasherModel *pModel) {
 
-  if ((Key==Keys::Big_Start_Stop_Key && GetBoolParameter(BP_START_SPACE))
-      || (Key==Keys::Primary_Input && GetBoolParameter(BP_START_MOUSE))) {
+  if ((Key==Keys::Big_Start_Stop_Key && m_pSettingsStore->GetBoolParameter(BP_START_SPACE))
+      || (Key==Keys::Primary_Input && m_pSettingsStore->GetBoolParameter(BP_START_MOUSE))) {
     if(isPaused())
       run(iTime);
     else
@@ -159,7 +175,7 @@ void CDefaultFilter::KeyDown(unsigned long iTime, Keys::VirtualKey Key, CDasherV
   }
   else if (Key==Keys::Secondary_Input || Key==Keys::Tertiary_Input || Key==Keys::Button_1) {
     //Other mouse buttons, if platforms support; or button 1
-    if (GetBoolParameter(BP_TURBO_MODE))
+    if (m_pSettingsStore->GetBoolParameter(BP_TURBO_MODE))
       m_bTurbo = true;
   }
 }
@@ -175,15 +191,8 @@ void CDefaultFilter::stop() {
   m_pInterface->Done();
 }
 
-void CDefaultFilter::HandleEvent(Parameter parameter) {
-  switch (parameter) {
-  case BP_CIRCLE_START:
-  case BP_MOUSEPOS_MODE:
-    CreateStartHandler();
-    break;
-  case BP_TURBO_MODE:
-    m_bTurbo &= GetBoolParameter(BP_TURBO_MODE);
-  }
+void CDefaultFilter::HandleParameterChange(Parameter parameter) {
+  
 }
 
 void CDefaultFilter::CreateStartHandler() {
@@ -202,10 +211,10 @@ void CDefaultFilter::Deactivate() {
 }
 
 CStartHandler *CDefaultFilter::MakeStartHandler() {
-  if(GetBoolParameter(BP_CIRCLE_START))
+  if(m_pSettingsStore->GetBoolParameter(BP_CIRCLE_START))
     return new CCircleStartHandler(this);
-  if(GetBoolParameter(BP_MOUSEPOS_MODE))
-    return new CTwoBoxStartHandler(this);
+  if(m_pSettingsStore->GetBoolParameter(BP_MOUSEPOS_MODE))
+    return new CTwoBoxStartHandler(this, m_pSettingsStore);
   return NULL;
 }
 
@@ -224,7 +233,7 @@ double xmax(double y) {
 
 void CDefaultFilter::ApplyTransform(myint &iDasherX, myint &iDasherY, CDasherView *pView) {
   ApplyOffset(iDasherX, iDasherY);
-  if (GetLongParameter(LP_GEOMETRY)==1) {
+  if (m_pSettingsStore->GetLongParameter(LP_GEOMETRY)==1) {
     //crosshair may be offscreen; so do something to allow us to navigate
     // up/down and reverse
     const CDasherView::ScreenRegion visibleRegion = pView->VisibleRegion();
@@ -237,7 +246,7 @@ void CDefaultFilter::ApplyTransform(myint &iDasherX, myint &iDasherY, CDasherVie
     //boost reversing if near centerpoint of LHS (even if xhair onscreen)
     iDasherX += (2*CDasherModel::ORIGIN_Y*CDasherModel::ORIGIN_Y)/(dist+50); //and close to centerpoint = reverse
   }
-  if (GetBoolParameter(BP_REMAP_XTREME)) {
+  if (m_pSettingsStore->GetBoolParameter(BP_REMAP_XTREME)) {
     // Y co-ordinate...
     myint dasherOY=CDasherModel::ORIGIN_Y;
     double double_y = ((iDasherY-dasherOY)/(double)(dasherOY) ); // Fraction above the crosshair
@@ -256,9 +265,9 @@ void CDefaultFilter::ApplyOffset(myint &iDasherX, myint &iDasherY) {
   // factor of 10 to get the offset in Dasher coordinates, but it
   // would be a good idea at some point to sort this out properly.
 
-  iDasherY += 10 * GetLongParameter(LP_TARGET_OFFSET);
+  iDasherY += 10 * m_pSettingsStore->GetLongParameter(LP_TARGET_OFFSET);
 
-  if(GetBoolParameter(BP_AUTOCALIBRATE) && !isPaused()) {
+  if(m_pSettingsStore->GetBoolParameter(BP_AUTOCALIBRATE) && !isPaused()) {
     // Auto-update the offset
 
     m_iSum += CDasherModel::ORIGIN_Y - iDasherY; // Distance above crosshair
@@ -273,7 +282,7 @@ void CDefaultFilter::ApplyOffset(myint &iDasherX, myint &iDasherY) {
       //int m_iSigBiasPixels(CDasherModel::MAX_Y/2);
 
       if (((m_iSum>0)?m_iSum:-m_iSum) > CDasherModel::MAX_Y/2)
-        SetLongParameter(LP_TARGET_OFFSET, GetLongParameter(LP_TARGET_OFFSET) + ((m_iSum>0) ? -1 : 1));
+        m_pSettingsStore->SetLongParameter(LP_TARGET_OFFSET, m_pSettingsStore->GetLongParameter(LP_TARGET_OFFSET) + ((m_iSum>0) ? -1 : 1));
       //TODO, "else return" - check effectiveness with/without?
       // old code exited now if neither above cases applied,
       // but had TODO suggesting maybe we should _always_ reset m_iSum

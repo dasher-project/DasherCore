@@ -2,17 +2,26 @@
 
 using namespace Dasher;
 
-CFrameRate::CFrameRate(CSettingsUser *pCreator) :
-  CSettingsUserObserver(pCreator) {
+CFrameRate::CFrameRate(CSettingsStore* pSettingsStore) :
+  m_pSettingsStore(pSettingsStore) {
 
-  //Sampling parameters...
-  m_iFrames = 0;
-  m_iSamples = 1;
-  m_iTime = 0;
+    //Sampling parameters...
+    m_iFrames = 0;
+    m_iSamples = 1;
+    m_iTime = 0;
 
-  //try and carry on from where we left off at last run
-  HandleEvent(LP_X_LIMIT_SPEED);
-  //Sets m_dBitsAtLimX and m_iSteps
+    //try and carry on from where we left off at last run
+    CFrameRate::HandleParameterChange(LP_X_LIMIT_SPEED);
+    //Sets m_dBitsAtLimX and m_iSteps
+    m_pSettingsStore->OnParameterChanged.Subscribe(this, [this](const Parameter p)
+    {
+        HandleParameterChange(p);
+    });
+}
+
+CFrameRate::~CFrameRate()
+{
+    m_pSettingsStore->OnParameterChanged.Unsubscribe(this);
 }
 
 void CFrameRate::RecordFrame(unsigned long Time)
@@ -39,7 +48,7 @@ void CFrameRate::RecordFrame(unsigned long Time)
     if(m_iTime2 - m_iTime > 0) {
       double dFrNow = m_iFrames * 1000.0 / (m_iTime2 - m_iTime);
       //LP_FRAMERATE records a decaying average, smoothed 50:50 with previous value
-      SetLongParameter(LP_FRAMERATE, long(GetLongParameter(LP_FRAMERATE) + (dFrNow*100))/2);
+      m_pSettingsStore->SetLongParameter(LP_FRAMERATE, long(m_pSettingsStore->GetLongParameter(LP_FRAMERATE) + (dFrNow*100))/2);
       m_iTime = m_iTime2;
       m_iFrames = 0;
 
@@ -50,16 +59,16 @@ void CFrameRate::RecordFrame(unsigned long Time)
   }
 }
 
-void CFrameRate::HandleEvent(Parameter parameter) {
+void CFrameRate::HandleParameterChange(Parameter parameter) {
   switch (parameter) {
     case LP_X_LIMIT_SPEED:
-      m_dBitsAtLimX = (log(static_cast<double>(CDasherModel::MAX_Y)) - log (2.*GetLongParameter(LP_X_LIMIT_SPEED)))/log(2.);
+      m_dBitsAtLimX = (log(static_cast<double>(CDasherModel::MAX_Y)) - log (2.0*m_pSettingsStore->GetLongParameter(LP_X_LIMIT_SPEED)))/log(2.0);
       //fallthrough
     case LP_MAX_BITRATE:
     case LP_FRAMERATE:
     //Calculate m_iSteps from the decaying-average framerate, as the number
     // of steps that, at the X limit, will cause LP_MAX_BITRATE bits to be
     // entered per second
-    m_iSteps = std::max(1,(int)(GetLongParameter(LP_FRAMERATE)*m_dBitsAtLimX/GetLongParameter(LP_MAX_BITRATE)));
+    m_iSteps = std::max(1,(int)(m_pSettingsStore->GetLongParameter(LP_FRAMERATE)*m_dBitsAtLimX/m_pSettingsStore->GetLongParameter(LP_MAX_BITRATE)));
   }
 }

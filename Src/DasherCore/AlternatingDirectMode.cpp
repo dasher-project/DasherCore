@@ -19,8 +19,8 @@ static SModuleSettings sSettings[] = {
   {BP_GLOBAL_KEYBOARD, T_BOOL, -1, -1, -1, -1, _("Global keyboard grab")}
 };
 
-CAlternatingDirectMode::CAlternatingDirectMode(CSettingsUser *pCreator, CDasherInterfaceBase *pInterface)
-  : CDasherButtons(pCreator, pInterface, false/*menu*/, 12, _("Alternating Direct Mode")) {}
+CAlternatingDirectMode::CAlternatingDirectMode(CSettingsStore* pSettingsStore, CDasherInterfaceBase *pInterface)
+  : CDasherButtons(pSettingsStore, pInterface, false/*menu*/, 12, _("Alternating Direct Mode")) {}
 
 void CAlternatingDirectMode::SetupBoxes()
 {

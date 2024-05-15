@@ -25,11 +25,18 @@
 using namespace Dasher;
 
 CCircleStartHandler::CCircleStartHandler(CDefaultFilter *pCreator)
-: CStartHandler(pCreator), CSettingsUserObserver(pCreator), m_iEnterTime(std::numeric_limits<long>::max()), m_iScreenRadius(-1), m_pView(nullptr) {
+: CStartHandler(pCreator), m_iEnterTime(std::numeric_limits<long>::max()), m_iScreenRadius(-1), m_pView(nullptr),
+  m_pSettingsStore(pCreator->m_pSettingsStore)
+{
+    m_pSettingsStore->OnParameterChanged.Subscribe(this, [this](const Parameter p)
+    {
+        if (p == LP_CIRCLE_PERCENT) m_iScreenRadius = -1; //recompute geometry.
+    });
 }
 
 CCircleStartHandler::~CCircleStartHandler() {
     if(m_pView) m_pView->OnViewChanged.Unsubscribe(this);
+    m_pSettingsStore->OnParameterChanged.Unsubscribe(this);
 }
 
 CDasherScreen::point CCircleStartHandler::CircleCenter(CDasherView *pView) {
@@ -40,7 +47,7 @@ CDasherScreen::point CCircleStartHandler::CircleCenter(CDasherView *pView) {
   // Math.min(screen width, screen height) * LP_CIRCLE_PERCENT / 100
   // - should we?
   screenint iEdgeX, iEdgeY;
-  m_pView->Dasher2Screen(CDasherModel::ORIGIN_X, CDasherModel::ORIGIN_Y + (CDasherModel::MAX_Y*GetLongParameter(LP_CIRCLE_PERCENT))/100, iEdgeX, iEdgeY);
+  m_pView->Dasher2Screen(CDasherModel::ORIGIN_X, CDasherModel::ORIGIN_Y + (CDasherModel::MAX_Y*m_pSettingsStore->GetLongParameter(LP_CIRCLE_PERCENT))/100, iEdgeX, iEdgeY);
 
   const Options::ScreenOrientations iDirection(m_pView->GetOrientation());
 
@@ -115,11 +122,6 @@ void CCircleStartHandler::RegisterView(CDasherView *pView)
         RegisterView(pView);
         m_iScreenRadius = -1;
     });
-}
-
-void CCircleStartHandler::HandleEvent(Parameter parameter) {
-  if (parameter==LP_CIRCLE_PERCENT)
-      m_iScreenRadius = -1; //recompute geometry.
 }
 
 void CCircleStartHandler::onPause() {

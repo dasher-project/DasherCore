@@ -41,10 +41,20 @@ static SModuleSettings sSettings[] = {
   {LP_DYNAMIC_BUTTON_LAG, T_LONG, 0, 1000, 1, 25, _("Lag before user actually pushes button (ms)")}, 
 };
 
-CTwoPushDynamicFilter::CTwoPushDynamicFilter(CSettingsUser *pCreator, CDasherInterfaceBase *pInterface, CFrameRate *pFramerate)
-  : CDynamicButtons(pCreator, pInterface, pFramerate, 14, _("Two-push Dynamic Mode (New One Button)")), CSettingsObserver(pCreator), m_dNatsSinceFirstPush(-std::numeric_limits<double>::infinity()) {
-  
-  HandleEvent(LP_TWO_PUSH_OUTER);//and all the others too!
+CTwoPushDynamicFilter::CTwoPushDynamicFilter(CSettingsStore* pSettingsStore, CDasherInterfaceBase *pInterface, CFrameRate *pFramerate)
+  : CDynamicButtons(pSettingsStore, pInterface, pFramerate, 14, _("Two-push Dynamic Mode (New One Button)")),
+    m_dNatsSinceFirstPush(-std::numeric_limits<double>::infinity())
+{
+    CTwoPushDynamicFilter::HandleParameterChange(LP_TWO_PUSH_OUTER);//and all the others too!
+    m_pSettingsStore->OnParameterChanged.Subscribe(this, [this](Parameter p)
+    {
+        HandleParameterChange(p);
+    });
+}
+
+CTwoPushDynamicFilter::~CTwoPushDynamicFilter()
+{
+    m_pSettingsStore->OnParameterChanged.Unsubscribe(this);
 }
 
 void GuideLine(CDasherView *pView, const myint iDasherY, NamedColor::knownColorName Colour)
@@ -63,11 +73,11 @@ void GuideLine(CDasherView *pView, const myint iDasherY, NamedColor::knownColorN
 }
 
 long CTwoPushDynamicFilter::downDist() {
-  return GetLongParameter(LP_TWO_PUSH_OUTER) - GetLongParameter(LP_TWO_PUSH_LONG);
+  return m_pSettingsStore->GetLongParameter(LP_TWO_PUSH_OUTER) - m_pSettingsStore->GetLongParameter(LP_TWO_PUSH_LONG);
 }
 
 long CTwoPushDynamicFilter::upDist() {
-  return GetLongParameter(LP_TWO_PUSH_OUTER) - (GetLongParameter(LP_TWO_PUSH_LONG) * GetLongParameter(LP_TWO_PUSH_SHORT))/100;
+  return m_pSettingsStore->GetLongParameter(LP_TWO_PUSH_OUTER) - (m_pSettingsStore->GetLongParameter(LP_TWO_PUSH_LONG) * m_pSettingsStore->GetLongParameter(LP_TWO_PUSH_SHORT))/100;
 }
 
 bool CTwoPushDynamicFilter::DecorateView(CDasherView *pView, CDasherInput *pInput) {
@@ -89,8 +99,8 @@ bool CTwoPushDynamicFilter::DecorateView(CDasherView *pView, CDasherInput *pInpu
   GuideLine(pView, 2048 + downDist(), NamedColor::selectionHighlight);
 
   //outer guides (at center of rects) - red lines
-  GuideLine(pView, 2048 - GetLongParameter(LP_TWO_PUSH_OUTER), NamedColor::selectionHighlight);
-  GuideLine(pView, 2048 + GetLongParameter(LP_TWO_PUSH_OUTER), NamedColor::selectionHighlight);
+  GuideLine(pView, 2048 - m_pSettingsStore->GetLongParameter(LP_TWO_PUSH_OUTER), NamedColor::selectionHighlight);
+  GuideLine(pView, 2048 + m_pSettingsStore->GetLongParameter(LP_TWO_PUSH_OUTER), NamedColor::selectionHighlight);
 
   //moving markers - green if active, else yellow
   if (m_bDecorationChanged && isRunning() && m_dNatsSinceFirstPush > -std::numeric_limits<double>::infinity()) {
@@ -103,13 +113,13 @@ bool CTwoPushDynamicFilter::DecorateView(CDasherView *pView, CDasherInput *pInpu
   return bRV;
 }
 
-void CTwoPushDynamicFilter::HandleEvent(Parameter parameter) {
+void CTwoPushDynamicFilter::HandleParameterChange(Parameter parameter) {
   switch (parameter) {
   case LP_TWO_PUSH_OUTER: //fallthrough
   case LP_TWO_PUSH_LONG: //fallthrough
   case LP_TWO_PUSH_SHORT: {
     //TODO, short gap always at the top - allow other way around also?
-    double dOuter = GetLongParameter(LP_TWO_PUSH_OUTER);
+    double dOuter = m_pSettingsStore->GetLongParameter(LP_TWO_PUSH_OUTER);
     m_dLogUpMul = log(dOuter / upDist());
     m_dLogDownMul = log(dOuter / downDist());
 //cout << "bitsUp " << m_dLogUpMul << " bitsDown " << m_dLogDownMul << std::endl;
@@ -125,7 +135,7 @@ void CTwoPushDynamicFilter::updateBitrate(double dBitrate) {
   if (dBitrate==m_dLastBitRate) return;
   m_dLastBitRate = dBitrate;
 
-  double dPressBits = dBitrate * (double) GetLongParameter(LP_TWO_PUSH_TOLERANCE) / 1000.0;
+  double dPressBits = dBitrate * (double) m_pSettingsStore->GetLongParameter(LP_TWO_PUSH_TOLERANCE) / 1000.0;
 //cout << "Max Bitrate changed - now " << dBitrate << " user accuracy " << dPressBits;
   m_dMinShortTwoPushTime = m_dLogUpMul - dPressBits;
   m_dMaxShortTwoPushTime = m_dLogUpMul + dPressBits;
@@ -137,7 +147,7 @@ void CTwoPushDynamicFilter::updateBitrate(double dBitrate) {
 //cout << "bits; minShort " << m_dMinShortTwoPushTime << " maxShort " << m_dMaxShortTwoPushTime << " minLong " << m_dMinLongTwoPushTime << " maxLong " << m_dMaxLongTwoPushTime << std::endl;
   m_bDecorationChanged = true;
 
-  m_dLagBits = dBitrate * GetLongParameter(LP_DYNAMIC_BUTTON_LAG)/1000.0;
+  m_dLagBits = dBitrate * m_pSettingsStore->GetLongParameter(LP_DYNAMIC_BUTTON_LAG)/1000.0;
 
   const long down(downDist()), up(upDist());
   
@@ -151,7 +161,7 @@ void CTwoPushDynamicFilter::updateBitrate(double dBitrate) {
 }
 
 void CTwoPushDynamicFilter::KeyDown(unsigned long Time, Keys::VirtualKey Key, CDasherView *pView, CDasherInput *pInput, CDasherModel *pModel) {
-  if (Key == Keys::Primary_Input && !GetBoolParameter(BP_BACKOFF_BUTTON))
+  if (Key == Keys::Primary_Input && !m_pSettingsStore->GetBoolParameter(BP_BACKOFF_BUTTON))
     //mouse click - will be ignored by superclass method.
     //simulate press of button 2...
     Key= Keys::Button_2;
@@ -159,11 +169,11 @@ void CTwoPushDynamicFilter::KeyDown(unsigned long Time, Keys::VirtualKey Key, CD
 }
 
 void CTwoPushDynamicFilter::KeyUp(unsigned long Time, Keys::VirtualKey Key, CDasherView *pView, CDasherInput *pInput, CDasherModel *pModel) {
-  if (Key == Keys::Primary_Input && !GetBoolParameter(BP_BACKOFF_BUTTON))
+  if (Key == Keys::Primary_Input && !m_pSettingsStore->GetBoolParameter(BP_BACKOFF_BUTTON))
     //mouse click - will be ignored by superclass method.
     //simulate press of button 2...
     Key= Keys::Button_2;
-  if (GetBoolParameter(BP_TWO_PUSH_RELEASE_TIME)
+  if (m_pSettingsStore->GetBoolParameter(BP_TWO_PUSH_RELEASE_TIME)
       && isRunning() && Key==m_iHeldId
       && m_dNatsSinceFirstPush!=-std::numeric_limits<double>::infinity())
     ActionButton(Time, Key, 0, pModel);
@@ -207,10 +217,10 @@ bool doSet(int &var, const int val) {
 void CTwoPushDynamicFilter::TimerImpl(unsigned long iTime, CDasherView *m_pDasherView, CDasherModel *m_pDasherModel, CExpansionPolicy **pol) {
   DASHER_ASSERT(isRunning());
   const double dSpeedMul(FrameSpeedMul(m_pDasherModel, iTime));
-  updateBitrate(GetLongParameter(LP_MAX_BITRATE)*dSpeedMul/100.0);
+  updateBitrate(m_pSettingsStore->GetLongParameter(LP_MAX_BITRATE)*dSpeedMul/100.0);
   if (m_dNatsSinceFirstPush > -std::numeric_limits<double>::infinity()) {
     // first button has been pushed
-    double dLogGrowth(m_pDasherModel->GetNats() - m_dNatsSinceFirstPush), dOuter(GetLongParameter(LP_TWO_PUSH_OUTER)),
+    double dLogGrowth(m_pDasherModel->GetNats() - m_dNatsSinceFirstPush), dOuter(m_pSettingsStore->GetLongParameter(LP_TWO_PUSH_OUTER)),
            dUp(upDist()), dDown(downDist());
     
     //to move to point currently at outer marker: set m_aiTarget to dOuter==exp( log(dOuter/dUp) ) * dUp

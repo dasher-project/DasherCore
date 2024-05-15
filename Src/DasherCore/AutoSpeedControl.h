@@ -10,9 +10,9 @@
 /// \defgroup AutoSpeed Auto speed control
 /// @{
 namespace Dasher {
-  class CAutoSpeedControl : private CSettingsUser {
+  class CAutoSpeedControl {
  public:
-  CAutoSpeedControl(CSettingsUser *pCreateFrom);
+  CAutoSpeedControl(CSettingsStore* pSettingsStore);
   
   ///
   /// AUTO-SPEED-CONTROL
@@ -77,6 +77,7 @@ namespace Dasher {
   
   //variables for adaptive radius calculations...
   double m_dSigma1, m_dSigma2, m_dMinRadius;
+  CSettingsStore* m_pSettingsStore;
 };
 }
 /// @}

@@ -33,9 +33,9 @@ namespace Dasher {
 /// need to monitor the framerate (using CFrameRate) to maintain a steady
 /// speed of movement. Also implements Slow Start following a call to the
 /// Unpause method.
-class CDynamicFilter : public CInputFilter, public CSettingsUser {
+class CDynamicFilter : public CInputFilter {
  public:
-  CDynamicFilter(CSettingsUser *pCreator, CDasherInterfaceBase *pInterface, CFrameRate *pFramerate, ModuleID_t iID, const char *szName);
+  CDynamicFilter(CSettingsStore* pSettingsStore, CDasherInterfaceBase *pInterface, CFrameRate *pFramerate, ModuleID_t iID, const char *szName);
 
   virtual bool supportsPause() {return true;}
   
@@ -68,6 +68,7 @@ class CDynamicFilter : public CInputFilter, public CSettingsUser {
   bool isPaused() {return m_bPaused;}
   
   CFrameRate * const m_pFramerate;
+  CSettingsStore* m_pSettingsStore;
  private:
   //Time at which Unpause() was called, used for Slow Start.
   unsigned long m_iStartTime;

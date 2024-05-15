@@ -24,14 +24,16 @@ static SModuleSettings sSettings[] = {
 
 // FIX iStyle == 2
 
-CCompassMode::CCompassMode(CSettingsUser *pCreator, CDasherInterfaceBase *pInterface)
-  : CDasherButtons(pCreator, pInterface, false /*bMenu*/, 13, _("Compass Mode")) {}
+CCompassMode::CCompassMode(CSettingsStore* pSettingsStore, CDasherInterfaceBase *pInterface)
+    : CDasherButtons(pSettingsStore, pInterface, false /*bMenu*/, 13, _("Compass Mode")), iTargetWidth(0)
+{
+}
 
 void CCompassMode::SetupBoxes()
 {
   m_pBoxes = new SBoxInfo[m_iNumBoxes = 4];
 
-  iTargetWidth = CDasherModel::MAX_Y * 1024 / GetLongParameter(LP_RIGHTZOOM);
+  iTargetWidth = CDasherModel::MAX_Y * 1024 / m_pSettingsStore->GetLongParameter(LP_RIGHTZOOM);
 
   // FIXME - need to relate these to cross-hair position as stored in the parameters
 

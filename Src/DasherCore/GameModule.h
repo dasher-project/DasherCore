@@ -29,7 +29,7 @@ namespace Dasher {
  *
  * This class handles logic and drawing code with respect to the above.
  */
-class CGameModule : protected CSettingsUser {
+class CGameModule {
  public:
   friend class CDemoFilter;
   /**
@@ -41,9 +41,9 @@ class CGameModule : protected CSettingsUser {
    * @param szName The name of this module
    * @param pWordGenerator A pointer to the word generator
    */
-  CGameModule(CSettingsUser *pCreateFrom, CDasherInterfaceBase *pInterface, CDasherView *pView, CDasherModel *pModel);
+  CGameModule(CSettingsStore* pSettingsStore, CDasherInterfaceBase *pInterface, CDasherView *pView, CDasherModel *pModel);
 
-  ~CGameModule() override;
+  virtual ~CGameModule();
 
   virtual void HandleEditEvent(CEditEvent::EditEventType type, const std::string& strText, CDasherNode* node);
 
@@ -96,6 +96,7 @@ protected:
   CDasherInterfaceBase* const m_pInterface;
   CDasherModel* const m_pModel;
   CDasherView* m_pView;
+  CSettingsStore* m_pSettingsStore;
 private:
 
   ///

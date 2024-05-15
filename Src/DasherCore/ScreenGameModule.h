@@ -27,7 +27,7 @@
 namespace Dasher {
   class CScreenGameModule : public CGameModule {
   public:
-    CScreenGameModule(Dasher::CSettingsUser *pCreateFrom, CDasherInterfaceBase *pInterface,CDasherView *pView, CDasherModel *pModel);
+    CScreenGameModule(CSettingsStore* pSettingsStore, CDasherInterfaceBase *pInterface,CDasherView *pView, CDasherModel *pModel);
     void HandleEditEvent(CEditEvent::EditEventType type, const std::string& strText, CDasherNode* node) override;
   protected:
     virtual void ChunkGenerated();

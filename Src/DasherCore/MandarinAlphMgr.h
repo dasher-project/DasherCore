@@ -88,7 +88,7 @@ namespace Dasher {
     /// \param pAlphabet the Pinyin alphabet. This should have a hierarchy of groups to be
     /// displayed to the user, where all CH symbols that are direct children of the same group,
     /// are to be modelled as sharing the PY sound+tone represented by that group.
-    CMandarinAlphMgr(CSettingsUser *pCreator, CDasherInterfaceBase *pInterface, CNodeCreationManager *pNCManager, const CAlphInfo *pAlphabet);
+    CMandarinAlphMgr(CSettingsStore* pSettingsStore, CDasherInterfaceBase *pInterface, CNodeCreationManager *pNCManager, const CAlphInfo *pAlphabet);
     ~CMandarinAlphMgr();
     
     ///ACL: returns a MandarinTrainer too.

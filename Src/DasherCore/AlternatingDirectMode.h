@@ -17,7 +17,7 @@ namespace Dasher {
   class CAlternatingDirectMode : public CDasherButtons
 {
  public:
-  CAlternatingDirectMode(CSettingsUser *pCreator, CDasherInterfaceBase *pInterface);
+  CAlternatingDirectMode(CSettingsStore* pSettingsStore, CDasherInterfaceBase *pInterface);
 
   bool DecorateView(CDasherView *pView, CDasherInput *pInput);
 

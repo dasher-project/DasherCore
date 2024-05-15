@@ -33,7 +33,7 @@ namespace Dasher {
 /// with iType 1 or to the number of presses, respectively, for subclasses to decide how to respond.
 class CButtonMultiPress : public CDynamicButtons {
  public:
-  CButtonMultiPress(CSettingsUser *pCreator, CDasherInterfaceBase *pInterface, CFrameRate *pFramerate, ModuleID_t iID, const char *szName);
+  CButtonMultiPress(CSettingsStore* pSettingsStore, CDasherInterfaceBase *pInterface, CFrameRate *pFramerate, ModuleID_t iID, const char *szName);
 
   void Timer(unsigned long iTime, CDasherView *pView, CDasherInput *pInput, CDasherModel *pModel, CExpansionPolicy **pol);
   void KeyDown(unsigned long iTime, Keys::VirtualKey Key, CDasherView *pView, CDasherInput *pInput, CDasherModel *pModel);

@@ -18,8 +18,8 @@ using namespace Dasher;
 
 /////////////////////////////////////////////////////////////////////
 
-CAbstractPPM::CAbstractPPM(CSettingsUser *pCreator, int iNumSyms, CPPMnode *pRoot, int iMaxOrder)
-: CLanguageModel(iNumSyms), CSettingsUser(pCreator), m_pRoot(pRoot), m_iMaxOrder(iMaxOrder<0 ? GetLongParameter(LP_LM_MAX_ORDER) : iMaxOrder), bUpdateExclusion( GetLongParameter(LP_LM_UPDATE_EXCLUSION)!=0 ), m_ContextAlloc(1024) {
+CAbstractPPM::CAbstractPPM(CSettingsStore* pSettingsStore, int iNumSyms, CPPMnode *pRoot, int iMaxOrder)
+: CLanguageModel(iNumSyms), m_pRoot(pRoot), m_pSettingsStore(pSettingsStore), m_iMaxOrder(iMaxOrder<0 ? m_pSettingsStore->GetLongParameter(LP_LM_MAX_ORDER) : iMaxOrder), bUpdateExclusion(m_pSettingsStore->GetLongParameter(LP_LM_UPDATE_EXCLUSION)!=0 ), m_ContextAlloc(1024) {
   m_pRootContext = m_ContextAlloc.Alloc();
   m_pRootContext->head = m_pRoot;
   m_pRootContext->order = 0;
@@ -62,8 +62,8 @@ void CPPMLanguageModel::GetProbs(Context context, std::vector<unsigned int> &pro
   //  bool doExclusion = GetLongParameter( LP_LM_ALPHA );
   bool doExclusion = 0; //FIXME
 
-  int alpha = GetLongParameter( LP_LM_ALPHA );
-  int beta = GetLongParameter( LP_LM_BETA );
+  int alpha = m_pSettingsStore->GetLongParameter( LP_LM_ALPHA );
+  int beta = m_pSettingsStore->GetLongParameter( LP_LM_BETA );
 
   for (CPPMnode *pTemp = ppmcontext->head; pTemp; pTemp=pTemp->vine) {
     int iTotal = 0;
@@ -432,8 +432,8 @@ CAbstractPPM::CPPMnode * CAbstractPPM::AddSymbolToNode(CPPMnode *pNode, symbol s
   return pReturn;
 }
 
-CPPMLanguageModel::CPPMLanguageModel(CSettingsUser *pCreator, int iNumSyms)
-: CAbstractPPM(pCreator, iNumSyms, new CPPMnode(-1)), NodesAllocated(0), m_NodeAlloc(8192) {
+CPPMLanguageModel::CPPMLanguageModel(CSettingsStore* pSettingsStore, int iNumSyms)
+: CAbstractPPM(pSettingsStore, iNumSyms, new CPPMnode(-1)), NodesAllocated(0), m_NodeAlloc(8192) {
 }
 
 CAbstractPPM::CPPMnode *CPPMLanguageModel::makeNode(int sym) {

@@ -41,7 +41,7 @@ namespace Dasher {
   class CRoutingAlphMgr : public CAlphabetManager {
   public:
     /// Create a RoutingAlphMgr! Changes are in InitMap() and CreateLanguageModel()...
-    CRoutingAlphMgr(CSettingsUser *pCreator, CDasherInterfaceBase *pInterface, CNodeCreationManager *pNCManager, const CAlphInfo *pAlphabet);
+    CRoutingAlphMgr(CSettingsStore* pSettingsStore, CDasherInterfaceBase *pInterface, CNodeCreationManager *pNCManager, const CAlphInfo *pAlphabet);
     
     ///Override to return a CRoutingTrainer
     CTrainer *GetTrainer();

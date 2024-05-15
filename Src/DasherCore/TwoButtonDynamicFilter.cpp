@@ -47,11 +47,36 @@ static SModuleSettings sSettings[] = {
   {LP_DYNAMIC_SPEED_DEC, T_LONG, 1, 99, 1, 1, _("Percentage by which to decrease speed upon reverse")}
 };
 
-CTwoButtonDynamicFilter::CTwoButtonDynamicFilter(CSettingsUser *pCreator, CDasherInterfaceBase *pInterface, CFrameRate *pFramerate)
-  : CButtonMultiPress(pCreator, pInterface, pFramerate, 14, _("Two Button Dynamic Mode")), CSettingsObserver(pCreator), m_iMouseButton(Keys::Invalid_Key)
+CTwoButtonDynamicFilter::CTwoButtonDynamicFilter(CSettingsStore* pSettingsStore, CDasherInterfaceBase *pInterface, CFrameRate *pFramerate)
+  : CButtonMultiPress(pSettingsStore, pInterface, pFramerate, 14, _("Two Button Dynamic Mode")),
+    m_iMouseButton(Keys::Invalid_Key)
 {
-  //ensure that m_dLagBits is properly initialised
-  HandleEvent(LP_DYNAMIC_BUTTON_LAG);
+    CTwoButtonDynamicFilter::ComputeLagBits();
+
+    m_pSettingsStore->OnParameterChanged.Subscribe(this, [this](Parameter parameter)
+    {
+        switch (parameter) {
+          case LP_MAX_BITRATE:// Deliberate fallthrough
+          case LP_DYNAMIC_BUTTON_LAG:
+              ComputeLagBits();
+              m_bDecorationChanged = true;
+              break;
+          case LP_TWO_BUTTON_OFFSET:
+              m_bDecorationChanged = true;
+              break;
+          default: break;
+        }
+    });
+}
+
+CTwoButtonDynamicFilter::~CTwoButtonDynamicFilter()
+{
+    m_pSettingsStore->OnParameterChanged.Unsubscribe(this);
+}
+
+void CTwoButtonDynamicFilter::ComputeLagBits()
+{
+    m_dLagBits = m_pSettingsStore->GetLongParameter(LP_MAX_BITRATE)/100.0 * m_pSettingsStore->GetLongParameter(LP_DYNAMIC_BUTTON_LAG)/1000.0;
 }
 
 bool CTwoButtonDynamicFilter::DecorateView(CDasherView *pView, CDasherInput *pInput) {
@@ -63,24 +88,24 @@ bool CTwoButtonDynamicFilter::DecorateView(CDasherView *pView, CDasherInput *pIn
   myint iDasherY;
   
   iDasherX = -100;
-  iDasherY = 2048 - GetLongParameter(LP_TWO_BUTTON_OFFSET);
+  iDasherY = 2048 - m_pSettingsStore->GetLongParameter(LP_TWO_BUTTON_OFFSET);
   
   pView->Dasher2Screen(iDasherX, iDasherY, p[0].x, p[0].y);
   
   iDasherX = -1000;
-  iDasherY = 2048 - GetLongParameter(LP_TWO_BUTTON_OFFSET);
+  iDasherY = 2048 - m_pSettingsStore->GetLongParameter(LP_TWO_BUTTON_OFFSET);
   
   pView->Dasher2Screen(iDasherX, iDasherY, p[1].x, p[1].y);
   
   pScreen->Polyline(p, 2, 3, pView->GetNamedColor(NamedColor::selectionHighlight));
 
   iDasherX = -100;
-  iDasherY = 2048 + GetLongParameter(LP_TWO_BUTTON_OFFSET);
+  iDasherY = 2048 + m_pSettingsStore->GetLongParameter(LP_TWO_BUTTON_OFFSET);
   
   pView->Dasher2Screen(iDasherX, iDasherY, p[0].x, p[0].y);
   
   iDasherX = -1000;
-  iDasherY = 2048 + GetLongParameter(LP_TWO_BUTTON_OFFSET);
+  iDasherY = 2048 + m_pSettingsStore->GetLongParameter(LP_TWO_BUTTON_OFFSET);
   
   pView->Dasher2Screen(iDasherX, iDasherY, p[1].x, p[1].y);
   
@@ -92,7 +117,7 @@ bool CTwoButtonDynamicFilter::DecorateView(CDasherView *pView, CDasherInput *pIn
 }
 
 void CTwoButtonDynamicFilter::KeyDown(unsigned long Time, Keys::VirtualKey Key, CDasherView *pView, CDasherInput *pInput, CDasherModel *pModel) {
-	if (Key == Keys::Primary_Input && !GetBoolParameter(BP_BACKOFF_BUTTON)) {
+	if (Key == Keys::Primary_Input && !m_pSettingsStore->GetBoolParameter(BP_BACKOFF_BUTTON)) {
     //mouse click - will be ignored by superclass method.
 		//simulate press of button 2/3 according to whether click in top/bottom half
     myint iDasherX, iDasherY;
@@ -103,7 +128,7 @@ void CTwoButtonDynamicFilter::KeyDown(unsigned long Time, Keys::VirtualKey Key, 
 }
 
 void CTwoButtonDynamicFilter::KeyUp(unsigned long Time, Keys::VirtualKey Key, CDasherView *pView, CDasherInput *pInput, CDasherModel *pModel) {
-	if (Key == Keys::Primary_Input && !GetBoolParameter(BP_BACKOFF_BUTTON)) {
+	if (Key == Keys::Primary_Input && !m_pSettingsStore->GetBoolParameter(BP_BACKOFF_BUTTON)) {
     //mouse click - will be ignored by superclass method.
     //Although we could check current mouse coordinates,
     // since we don't generally do anything in response to KeyUp, seems more consistent just to
@@ -122,10 +147,10 @@ void CTwoButtonDynamicFilter::TimerImpl(unsigned long Time, CDasherView *m_pDash
 
 void CTwoButtonDynamicFilter::ActionButton(unsigned long iTime, Keys::VirtualKey Key, int iType, CDasherModel* pModel) {
   
-  double dFactor(GetBoolParameter(BP_TWOBUTTON_REVERSE) ? -1.0 : 1.0);
+  double dFactor(m_pSettingsStore->GetBoolParameter(BP_TWOBUTTON_REVERSE) ? -1.0 : 1.0);
   int iEffect; //for user log
 
-  if (GetBoolParameter(BP_2B_INVERT_DOUBLE) && iType == 2 && Key >= Keys::Button_2 && Key <= Keys::Button_4)
+  if (m_pSettingsStore->GetBoolParameter(BP_2B_INVERT_DOUBLE) && iType == 2 && Key >= Keys::Button_2 && Key <= Keys::Button_4)
   { //double-press - go BACK in opposite direction,
     //far enough to invert previous jump (from first press of double-)
     //and then AGAIN.
@@ -151,7 +176,7 @@ void CTwoButtonDynamicFilter::ActionButton(unsigned long iTime, Keys::VirtualKey
     return;
   }
   //fell through to apply offset
-  ApplyOffset(pModel, static_cast<int>(dFactor * GetLongParameter(LP_TWO_BUTTON_OFFSET) * exp(m_dLagBits * FrameSpeedMul(pModel, iTime))));
+  ApplyOffset(pModel, static_cast<int>(dFactor * m_pSettingsStore->GetLongParameter(LP_TWO_BUTTON_OFFSET) * exp(m_dLagBits * FrameSpeedMul(pModel, iTime))));
   pModel->ResetNats();
   
   if(CUserLogBase *pUserLog=m_pInterface->GetUserLogPtr())
@@ -168,16 +193,4 @@ bool CTwoButtonDynamicFilter::GetSettings(SModuleSettings **pSettings, int *iCou
 bool CTwoButtonDynamicFilter::GetMinWidth(int &iMinWidth) {
   iMinWidth = 1024;
   return true;
-}
-
-void CTwoButtonDynamicFilter::HandleEvent(Parameter parameter)
-{
-  switch (parameter) {
-  case LP_MAX_BITRATE:// Deliberate fallthrough
-  case LP_DYNAMIC_BUTTON_LAG:
-      m_dLagBits = GetLongParameter(LP_MAX_BITRATE)/100.0 * GetLongParameter(LP_DYNAMIC_BUTTON_LAG)/1000.0;
-      //and fallthrough again:
-  case LP_TWO_BUTTON_OFFSET:
-      m_bDecorationChanged = true;
-  }
 }

@@ -36,10 +36,11 @@
 
 using namespace Dasher;
 
-CMandarinAlphMgr::CMandarinAlphMgr(CSettingsUser *pCreator, CDasherInterfaceBase *pInterface, CNodeCreationManager *pNCManager, const CAlphInfo *pAlphabet)
-  : CAlphabetManager(pCreator, pInterface, pNCManager, pAlphabet) {
-  
-  DASHER_ASSERT(pAlphabet->m_iConversionID==2);
+CMandarinAlphMgr::CMandarinAlphMgr(CSettingsStore* pSettingsStore, CDasherInterfaceBase *pInterface, CNodeCreationManager *pNCManager, const CAlphInfo *pAlphabet)
+    : CAlphabetManager(pSettingsStore, pInterface, pNCManager, pAlphabet), m_pPYgroups(nullptr), m_iCHpara(0),
+      m_pScreen(nullptr)
+{
+    DASHER_ASSERT(pAlphabet->m_iConversionID==2);
 }
 
 void CMandarinAlphMgr::InitMap() {
@@ -143,7 +144,7 @@ CMandarinAlphMgr::~CMandarinAlphMgr() {
 void CMandarinAlphMgr::CreateLanguageModel() {
   //std::cout<<"CHALphabet size "<< pCHAlphabet->GetNumberTextSymbols(); [7603]
   //std::cout<<"Setting PPMPY model"<<std::endl;
-  m_pLanguageModel = new CPPMPYLanguageModel(this, static_cast<int>(m_vGroupsByConversion.size())-1, static_cast<int>(m_vConversionsByGroup.size())-1);
+  m_pLanguageModel = new CPPMPYLanguageModel(m_pSettingsStore, static_cast<int>(m_vGroupsByConversion.size())-1, static_cast<int>(m_vConversionsByGroup.size())-1);
 }
 
 CMandarinAlphMgr::CMandarinTrainer::CMandarinTrainer(CMessageDisplay *pMsgs, CMandarinAlphMgr *pMgr)
@@ -354,7 +355,7 @@ const ColorPalette::Color& CMandarinAlphMgr::CConvRoot::getNodeColor(const Color
 
 void CMandarinAlphMgr::CConvRoot::SetFlag(int iFlag, bool bValue) {
   if (iFlag==NF_COMMITTED && bValue && !GetFlag(NF_COMMITTED)
-      && !GetFlag(NF_GAME) && mgr()->GetBoolParameter(BP_LM_ADAPTIVE)) {
+      && !GetFlag(NF_GAME) && mgr()->m_pSettingsStore->GetBoolParameter(BP_LM_ADAPTIVE)) {
     //CConvRoot's context is the same as parent's context (no symbol yet!),
     // i.e. is the context in which the pinyin was predicted.
     static_cast<CPPMPYLanguageModel *>(mgr()->m_pLanguageModel)->LearnPYSymbol(iContext, m_pySym);
@@ -382,9 +383,9 @@ void CMandarinAlphMgr::GetConversions(std::vector<std::pair<symbol,unsigned int>
   std::set<symbol> haveProbs;
   uint64 iRemaining(CDasherModel::NORMALIZATION);
   
-  if (long percent=GetLongParameter(LP_PY_PROB_SORT_THRES)) {
+  if (long percent=m_pSettingsStore->GetLongParameter(LP_PY_PROB_SORT_THRES)) {
     const uint64 iNorm(iRemaining);
-    const unsigned int uniform(static_cast<unsigned int>((GetLongParameter(LP_UNIFORM)*iNorm)/1000));
+    const unsigned int uniform(static_cast<unsigned int>((m_pSettingsStore->GetLongParameter(LP_UNIFORM)*iNorm)/1000));
     
     //Set up list of symbols with blank probability entries...
     for(std::vector<symbol>::const_iterator it = convs.begin(); it != convs.end(); ++it) {

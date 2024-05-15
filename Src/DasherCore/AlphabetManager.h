@@ -52,10 +52,10 @@ namespace Dasher {
   /// GetColour (called from CSymbolNode constructor); CreateSymbolNode and
   /// CSymbolNode::outputText(). [many other routines access e.g. default context, training file, and so on]
 
-  class CAlphabetManager : public CNodeManager, protected CSettingsUser {
+  class CAlphabetManager : public CNodeManager {
   public:
     ///Create a new AlphabetManager. Note, not usable until Setup() called.
-    CAlphabetManager(CSettingsUser *pCreateFrom, CDasherInterfaceBase *pInterface, CNodeCreationManager *pNCManager, const CAlphInfo *pAlphabet);
+    CAlphabetManager(CSettingsStore *pSettingsStore, CDasherInterfaceBase *pInterface, CNodeCreationManager *pNCManager, const CAlphInfo *pAlphabet);
     
     ///Must be called after construction, before the AlphMgr is used. Calls
     /// InitMap(), looks for a usable context-switch delimiter, and
@@ -290,6 +290,7 @@ namespace Dasher {
     CNodeCreationManager *m_pNCManager;
     const CAlphInfo *m_pAlphabet;
     CAlphabetMap m_map;
+    CSettingsStore* m_pSettingsStore;
     
   private:
     ///Wraps m_pLanguageModel->GetProbs to implement nonuniformity
@@ -323,6 +324,7 @@ namespace Dasher {
     ///A character, 33<=c<=255, not in the alphabet; used to delimit contexts.
     ///"" if no such could be found (=> will be found on a per-context basis)
     std::string m_sDelim;
+
   };
 /// @}
 

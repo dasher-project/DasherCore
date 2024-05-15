@@ -30,14 +30,34 @@ static SModuleSettings sSettings[] = {
 
 // FIX iStyle == 0
 
-CButtonMode::CButtonMode(CSettingsUser *pCreator, CDasherInterfaceBase *pInterface, bool bMenu, int iID, const char *szName)
-: CDasherButtons(pCreator, pInterface, bMenu, iID, szName), CSettingsObserver(pCreator) {}
+CButtonMode::CButtonMode(CSettingsStore* pSettingsStore, CDasherInterfaceBase *pInterface, bool bMenu, int iID, const char *szName)
+: CDasherButtons(pSettingsStore, pInterface, bMenu, iID, szName)
+{
+    m_pSettingsStore->OnParameterChanged.Subscribe(this, [this](Parameter p)
+    {
+        switch (p) {
+          case LP_B:
+          case LP_R:
+            // Deliberate fallthrough
+            delete[] m_pBoxes;
+            SetupBoxes();
+            m_pInterface->ScheduleRedraw();
+            break;
+          default: break;
+        }
+    });
+}
+
+CButtonMode::~CButtonMode()
+{
+    m_pSettingsStore->OnParameterChanged.Unsubscribe(this);
+}
 
 void CButtonMode::SetupBoxes()
 {
   int iDasherY(CDasherModel::MAX_Y);
 
-  int iForwardBoxes(GetLongParameter(LP_B));
+  int iForwardBoxes(m_pSettingsStore->GetLongParameter(LP_B));
   m_pBoxes = new SBoxInfo[m_iNumBoxes = iForwardBoxes+1];
 
   // Calculate the sizes of non-uniform boxes using standard
@@ -45,7 +65,7 @@ void CButtonMode::SetupBoxes()
 
   // FIXME - implement this using DJCM's integer method?
   // See ~mackay/dasher/buttons/
-  const double dRatio = pow(129/127.0, -static_cast<double>(GetLongParameter(LP_R)));
+  const double dRatio = pow(129/127.0, -static_cast<double>(m_pSettingsStore->GetLongParameter(LP_R)));
 
   if(m_bMenu) {
 
@@ -67,8 +87,8 @@ void CButtonMode::SetupBoxes()
       m_pBoxes[i].iDisplayTop = static_cast<int>(dMin);
       m_pBoxes[i].iDisplayBottom = static_cast<int>(dMax);
 
-      m_pBoxes[i].iTop = m_pBoxes[i].iDisplayTop - GetLongParameter(LP_S);
-      m_pBoxes[i].iBottom = m_pBoxes[i].iDisplayBottom + GetLongParameter(LP_S);
+      m_pBoxes[i].iTop = m_pBoxes[i].iDisplayTop - m_pSettingsStore->GetLongParameter(LP_S);
+      m_pBoxes[i].iBottom = m_pBoxes[i].iDisplayBottom + m_pSettingsStore->GetLongParameter(LP_S);
 
       dMin = dMax;
     }
@@ -122,8 +142,8 @@ void CButtonMode::SetupBoxes()
   }
 
   for(int i(0); i < m_iNumBoxes - 1; ++i) {
-    m_pBoxes[i].iTop = m_pBoxes[i].iDisplayTop - GetLongParameter(LP_S);
-    m_pBoxes[i].iBottom = m_pBoxes[i].iDisplayBottom + GetLongParameter(LP_S);
+    m_pBoxes[i].iTop = m_pBoxes[i].iDisplayTop - m_pSettingsStore->GetLongParameter(LP_S);
+    m_pBoxes[i].iBottom = m_pBoxes[i].iDisplayBottom + m_pSettingsStore->GetLongParameter(LP_S);
   }
 
   m_pBoxes[m_iNumBoxes-1].iDisplayTop = 0;
@@ -160,7 +180,7 @@ void CButtonMode::KeyDown(unsigned long iTime, Keys::VirtualKey Key, CDasherView
     //Mouse!
     if (m_bMenu) {
       bool bScan;
-      if (GetLongParameter(LP_BUTTON_SCAN_TIME))
+      if (m_pSettingsStore->GetLongParameter(LP_BUTTON_SCAN_TIME))
         bScan = false; //auto-scan, any click selects
       else {
         //top scans, bottom selects
@@ -192,18 +212,6 @@ void CButtonMode::KeyDown(unsigned long iTime, Keys::VirtualKey Key, CDasherView
 void CButtonMode::DirectKeyDown(unsigned long iTime, Keys::VirtualKey Key, CDasherView *pView, CDasherModel *pModel) {
   CDasherButtons::DirectKeyDown(iTime, Key, pView, pModel);
  if (Key!=Keys::Primary_Input) m_iLastTime = iTime;
-}
-
-void CButtonMode::HandleEvent(Parameter parameter) {
-  switch (parameter) {
-  case LP_B:
-  case LP_R:
-    // Deliberate fallthrough
-    delete[] m_pBoxes;
-    SetupBoxes();
-    m_pInterface->ScheduleRedraw();
-    break;
-  }
 }
 
 bool CButtonMode::GetSettings(SModuleSettings **pSettings, int *iCount) {

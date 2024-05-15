@@ -14,7 +14,7 @@ namespace Dasher {
 class CCompassMode : public CDasherButtons
 {
  public:
-  CCompassMode(CSettingsUser *pCreator, CDasherInterfaceBase *pInterface);
+  CCompassMode(CSettingsStore* pSettingsStore, CDasherInterfaceBase *pInterface);
 
   virtual void HandleEvent(Parameter parameter);
 

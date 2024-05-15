@@ -8,13 +8,13 @@
 namespace Dasher {
 /// \ingroup InputFilter
 /// @{
-class CDefaultFilter : public CDynamicFilter, public CSettingsObserver {
+class CDefaultFilter : public CDynamicFilter {
  public:
-  CDefaultFilter(CSettingsUser *pCreator, CDasherInterfaceBase *pInterface, CFrameRate *pFramerate, ModuleID_t iID, const char *szName);
-  ~CDefaultFilter();
+  CDefaultFilter(CSettingsStore* pSettingsStore, CDasherInterfaceBase *pInterface, CFrameRate *pFramerate, ModuleID_t iID, const char *szName);
+  virtual ~CDefaultFilter();
 
   /// Responds to changes in BP_START_MOUSE / BP_MOUSEPOS_MODE to create StartHandler
-  virtual void HandleEvent(Parameter parameter);
+  virtual void HandleParameterChange(Parameter parameter);
 
   virtual bool DecorateView(CDasherView *pView, CDasherInput *pInput);
   virtual void Timer(unsigned long Time, CDasherView *pView, CDasherInput *pInput, CDasherModel *pModel, CExpansionPolicy **pol);

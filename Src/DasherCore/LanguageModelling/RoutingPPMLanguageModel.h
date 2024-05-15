@@ -39,7 +39,7 @@ namespace Dasher {
     /// \param bRoutesContextSensitive if false, the distribution over (routes by
     ///        which a given symbol is entered) is considered independent of context;
     ///        if true, likely routes are learnt according to the preceding context.
-    CRoutingPPMLanguageModel(CSettingsUser *pCreator, const std::vector<symbol> *pBaseSyms, const std::vector<std::set<symbol> > *pRoutes, bool bRoutesContextSensitive);
+    CRoutingPPMLanguageModel(CSettingsStore* pSettingsStore, const std::vector<symbol> *pBaseSyms, const std::vector<std::set<symbol> > *pRoutes, bool bRoutesContextSensitive);
     
     /// Learns a base symbol (but not which route we are likely to enter it by).
     /// Includes moving on the context to include that base sym.

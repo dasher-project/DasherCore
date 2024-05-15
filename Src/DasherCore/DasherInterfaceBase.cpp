@@ -68,9 +68,9 @@ CFileLogger* g_pLogger = NULL;
 using namespace Dasher;
 
 CDasherInterfaceBase::CDasherInterfaceBase(CSettingsStore *pSettingsStore) 
-  : CSettingsUser(pSettingsStore), 
+  :  
   m_pDasherModel(new CDasherModel()), 
-  m_pFramerate(new CFrameRate(this)), 
+  m_pFramerate(new CFrameRate(pSettingsStore)), 
   m_pSettingsStore(pSettingsStore), 
   m_pLockLabel(NULL),
   m_bLastMoved(false) {
@@ -161,12 +161,12 @@ void CDasherInterfaceBase::Realize(unsigned long ulTime) {
 
   // TODO: Sort out log type selection
 
-  int iUserLogLevel = GetLongParameter(LP_USER_LOG_LEVEL_MASK);
+  int iUserLogLevel = m_pSettingsStore->GetLongParameter(LP_USER_LOG_LEVEL_MASK);
 
   if(iUserLogLevel == 10)
-    m_pUserLog = new CBasicLog(this, this);
+    m_pUserLog = new CBasicLog(m_pSettingsStore, this);
   else if (iUserLogLevel > 0)
-    m_pUserLog = new CUserLog(this, this, iUserLogLevel);
+    m_pUserLog = new CUserLog(m_pSettingsStore, this, iUserLogLevel);
 
   CreateModules();
 
@@ -179,7 +179,7 @@ void CDasherInterfaceBase::Realize(unsigned long ulTime) {
   // it to realize there's now an inputfilter (which may provide more actions).
   // So tell it the setting has changed...
   if (CControlManager *pCon = m_pNCManager->GetControlManager())
-    pCon->HandleEvent(SP_INPUT_FILTER);
+    pCon->updateActions();
 
   HandleParameterChange(LP_NODE_BUDGET);
   HandleParameterChange(BP_SPEAK_WORDS);
@@ -249,8 +249,8 @@ void CDasherInterfaceBase::HandleParameterChange(Parameter parameter) {
     ScheduleRedraw();
     break;
   case BP_PALETTE_CHANGE:
-    if(GetBoolParameter(BP_PALETTE_CHANGE))
- SetStringParameter(SP_COLOUR_ID, m_pNCManager->GetAlphabet()->GetPalette());
+    if(m_pSettingsStore->GetBoolParameter(BP_PALETTE_CHANGE))
+ m_pSettingsStore->SetStringParameter(SP_COLOUR_ID, m_pNCManager->GetAlphabet()->GetPalette());
     break;
   case LP_LANGUAGE_MODEL_ID:
     CreateNCManager();
@@ -277,11 +277,11 @@ void CDasherInterfaceBase::HandleParameterChange(Parameter parameter) {
       break;
   case LP_NODE_BUDGET:
     delete m_defaultPolicy;
-    m_defaultPolicy = new AmortizedPolicy(m_pDasherModel,GetLongParameter(LP_NODE_BUDGET));
+    m_defaultPolicy = new AmortizedPolicy(m_pDasherModel,m_pSettingsStore->GetLongParameter(LP_NODE_BUDGET));
     break;
   case BP_SPEAK_WORDS:
     delete m_pWordSpeaker;
-    m_pWordSpeaker = GetBoolParameter(BP_SPEAK_WORDS) ? new WordSpeaker(this) : NULL;
+    m_pWordSpeaker = m_pSettingsStore->GetBoolParameter(BP_SPEAK_WORDS) ? new WordSpeaker(this) : NULL;
     break;
   case BP_CONTROL_MODE:
   case SP_CONTROL_BOX_ID:
@@ -383,16 +383,16 @@ void CDasherInterfaceBase::WriteTrainFileFull() {
 
 void CDasherInterfaceBase::CreateNCManager() {
 
-  if(!m_AlphIO || GetLongParameter(LP_LANGUAGE_MODEL_ID)==-1)
+  if(!m_AlphIO || m_pSettingsStore->GetLongParameter(LP_LANGUAGE_MODEL_ID)==-1)
     return;
 
   //can't delete the old manager yet until we've deleted all its nodes...
   CNodeCreationManager *pOldMgr = m_pNCManager;
 
   //now create the new manager...
-  m_pNCManager = new CNodeCreationManager(this, this, m_AlphIO, m_ControlBoxIO);
-  if (GetBoolParameter(BP_PALETTE_CHANGE))
-    SetStringParameter(SP_COLOUR_ID, m_pNCManager->GetAlphabet()->GetPalette());
+  m_pNCManager = new CNodeCreationManager(m_pSettingsStore, this, m_AlphIO, m_ControlBoxIO);
+  if (m_pSettingsStore->GetBoolParameter(BP_PALETTE_CHANGE))
+    m_pSettingsStore->SetStringParameter(SP_COLOUR_ID, m_pNCManager->GetAlphabet()->GetPalette());
 
   if (m_DasherScreen) {
     m_pNCManager->ChangeScreen(m_DasherScreen);
@@ -407,8 +407,8 @@ void CDasherInterfaceBase::CreateNCManager() {
 }
 
 bool CDasherInterfaceBase::hasDone() {
-  return (GetBoolParameter(BP_COPY_ALL_ON_STOP) && SupportsClipboard())
-  || (GetBoolParameter(BP_SPEAK_ALL_ON_STOP) && SupportsSpeech());
+  return (m_pSettingsStore->GetBoolParameter(BP_COPY_ALL_ON_STOP) && SupportsClipboard())
+  || (m_pSettingsStore->GetBoolParameter(BP_SPEAK_ALL_ON_STOP) && SupportsSpeech());
 }
 
 void CDasherInterfaceBase::Done() {
@@ -417,10 +417,10 @@ void CDasherInterfaceBase::Done() {
   if (m_pUserLog != NULL)
     m_pUserLog->StopWriting((float) GetNats());
 
-  if (GetBoolParameter(BP_COPY_ALL_ON_STOP) && SupportsClipboard()) {
+  if (m_pSettingsStore->GetBoolParameter(BP_COPY_ALL_ON_STOP) && SupportsClipboard()) {
     CopyToClipboard(GetAllContext());
   }
-  if (GetBoolParameter(BP_SPEAK_ALL_ON_STOP) && SupportsSpeech()) {
+  if (m_pSettingsStore->GetBoolParameter(BP_SPEAK_ALL_ON_STOP) && SupportsSpeech()) {
     Speak(GetAllContext(), true);
   }
 }
@@ -430,7 +430,7 @@ void CDasherInterfaceBase::CreateInput() {
     m_pInput->Deactivate();
   }
 
-  m_pInput = (CDasherInput *)GetModuleByName(GetStringParameter(SP_INPUT_DEVICE));
+  m_pInput = (CDasherInput *)GetModuleByName(m_pSettingsStore->GetStringParameter(SP_INPUT_DEVICE));
 
   if (m_pInput == NULL)
     m_pInput = m_oModuleManager.GetDefaultInputDevice();
@@ -465,7 +465,7 @@ void CDasherInterfaceBase::NewFrame(unsigned long iTime, bool bForceRedraw) {
       m_DasherScreen->SendMarker(0); //this replaces the nodes...
       const screenint iSW = m_DasherScreen->GetWidth(), iSH = m_DasherScreen->GetHeight();
       m_DasherScreen->DrawRectangle(0,0,iSW,iSH,m_pDasherView->GetNamedColor(NamedColor::infoTextBackground),ColorPalette::noColor,0); //fill in colour 0 = white
-      unsigned int iSize(GetLongParameter(LP_MESSAGE_FONTSIZE));
+      unsigned int iSize(m_pSettingsStore->GetLongParameter(LP_MESSAGE_FONTSIZE));
       if (!m_pLockLabel) m_pLockLabel = m_DasherScreen->MakeLabel(m_strLockMessage, iSize);
       std::pair<screenint,screenint> dims = m_DasherScreen->TextSize(m_pLockLabel, iSize);
       m_DasherScreen->DrawString(m_pLockLabel, (iSW-dims.first)/2, (iSH-dims.second)/2, iSize, m_pDasherView->GetNamedColor(NamedColor::infoText));
@@ -555,8 +555,8 @@ bool CDasherInterfaceBase::Redraw(unsigned long ulTime, bool bRedrawNodes, CExpa
 }
 
 void CDasherInterfaceBase::ChangeAlphabet() {
-  if(GetStringParameter(SP_ALPHABET_ID) == "") {
-    SetStringParameter(SP_ALPHABET_ID, m_AlphIO->GetDefault());
+  if(m_pSettingsStore->GetStringParameter(SP_ALPHABET_ID) == "") {
+    m_pSettingsStore->SetStringParameter(SP_ALPHABET_ID, m_AlphIO->GetDefault());
     // This will result in ChangeAlphabet() being called again, so
     // exit from the first recursion
     return;
@@ -576,7 +576,7 @@ void CDasherInterfaceBase::ChangeAlphabet() {
 }
 
 Options::ScreenOrientations CDasherInterfaceBase::ComputeOrientation() {
-  Options::ScreenOrientations pref(Options::ScreenOrientations(GetLongParameter(LP_ORIENTATION)));
+  Options::ScreenOrientations pref(Options::ScreenOrientations(m_pSettingsStore->GetLongParameter(LP_ORIENTATION)));
   if (pref!=Options::AlphabetDefault) return pref;
   if (m_pNCManager) return m_pNCManager->GetAlphabet()->GetOrientation();
   //haven't created the NCManager yet, so not yet reached Realize, but must
@@ -589,7 +589,7 @@ void CDasherInterfaceBase::ChangeColors() {
   if(!m_ColorIO || !m_pDasherView)
     return;
 
-  m_pDasherView->SetColorScheme(m_ColorIO->FindPalette(GetStringParameter(SP_COLOUR_ID)));
+  m_pDasherView->SetColorScheme(m_ColorIO->FindPalette(m_pSettingsStore->GetStringParameter(SP_COLOUR_ID)));
 }
 
 void CDasherInterfaceBase::ChangeScreen(CDasherScreen *NewScreen) {
@@ -622,7 +622,7 @@ void CDasherInterfaceBase::ScreenResized(CDasherScreen *pScreen) {
 
 void CDasherInterfaceBase::ChangeView() {
   if(m_DasherScreen != 0 /*&& m_pDasherModel != 0*/) {
-    CDasherView *pNewView = new CDasherViewSquare(this, m_DasherScreen, ComputeOrientation());
+    CDasherView *pNewView = new CDasherViewSquare(m_pSettingsStore, m_DasherScreen, ComputeOrientation());
     //the previous sends an event to all listeners registered with it, but there aren't any atm!
     // so send an event to tell them of the new view object _and_ get them to recompute coords:  
     if (m_pDasherView){
@@ -647,7 +647,7 @@ double CDasherInterfaceBase::GetCurFPS() {
 }
 
 const CAlphInfo *CDasherInterfaceBase::GetActiveAlphabet() {
-  return m_AlphIO->GetInfo(GetStringParameter(SP_ALPHABET_ID));
+  return m_AlphIO->GetInfo(m_pSettingsStore->GetStringParameter(SP_ALPHABET_ID));
 }
 
 // int CDasherInterfaceBase::GetAutoOffset() {
@@ -717,7 +717,7 @@ void CDasherInterfaceBase::CreateInputFilter() {
     m_pInputFilter = NULL;
   }
 
-  m_pInputFilter = (CInputFilter *)GetModuleByName(GetStringParameter(SP_INPUT_FILTER));
+  m_pInputFilter = (CInputFilter *)GetModuleByName(m_pSettingsStore->GetStringParameter(SP_INPUT_FILTER));
 
   if (m_pInputFilter == NULL)
     m_pInputFilter = m_oModuleManager.GetDefaultInputMethod();
@@ -746,23 +746,23 @@ void CDasherInterfaceBase::SetDefaultInputMethod(CInputFilter *pModule) {
 }
 
 void CDasherInterfaceBase::CreateModules() {
-  CInputFilter *defFil = new CDefaultFilter(this, this, m_pFramerate, 3, _("Normal Control"));
+  CInputFilter *defFil = new CDefaultFilter(m_pSettingsStore, this, m_pFramerate, 3, _("Normal Control"));
   RegisterModule(defFil);
   SetDefaultInputMethod(defFil);
-  RegisterModule(new CPressFilter(this, this, m_pFramerate));
-  RegisterModule(new COneDimensionalFilter(this, this, m_pFramerate));
-  RegisterModule(new CClickFilter(this, this));
-  RegisterModule(new COneButtonFilter(this, this));
-  RegisterModule(new COneButtonDynamicFilter(this, this, m_pFramerate));
-  RegisterModule(new CTwoButtonDynamicFilter(this, this, m_pFramerate));
-  RegisterModule(new CTwoPushDynamicFilter(this, this, m_pFramerate));
+  RegisterModule(new CPressFilter(m_pSettingsStore, this, m_pFramerate));
+  RegisterModule(new COneDimensionalFilter(m_pSettingsStore, this, m_pFramerate));
+  RegisterModule(new CClickFilter(m_pSettingsStore, this));
+  RegisterModule(new COneButtonFilter(m_pSettingsStore, this));
+  RegisterModule(new COneButtonDynamicFilter(m_pSettingsStore, this, m_pFramerate));
+  RegisterModule(new CTwoButtonDynamicFilter(m_pSettingsStore, this, m_pFramerate));
+  RegisterModule(new CTwoPushDynamicFilter(m_pSettingsStore, this, m_pFramerate));
   // TODO: specialist factory for button mode
-  RegisterModule(new CButtonMode(this, this, true, 8, _("Menu Mode")));
-  RegisterModule(new CButtonMode(this, this, false,10, _("Direct Mode")));
+  RegisterModule(new CButtonMode(m_pSettingsStore, this, true, 8, _("Menu Mode")));
+  RegisterModule(new CButtonMode(m_pSettingsStore, this, false,10, _("Direct Mode")));
   //  RegisterModule(new CDasherButtons(this, this, 4, 0, false,11, "Buttons 3"));
-  RegisterModule(new CAlternatingDirectMode(this, this));
-  RegisterModule(new CCompassMode(this, this));
-  RegisterModule(new CStylusFilter(this, this, m_pFramerate));
+  RegisterModule(new CAlternatingDirectMode(m_pSettingsStore, this));
+  RegisterModule(new CCompassMode(m_pSettingsStore, this));
+  RegisterModule(new CStylusFilter(m_pSettingsStore, this, m_pFramerate));
   //WIP Temporary as too many segfaults! //RegisterModule(new CDemoFilter(this, this, m_pFramerate));
 }
 

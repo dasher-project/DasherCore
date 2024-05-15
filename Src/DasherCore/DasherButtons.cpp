@@ -11,8 +11,8 @@
 
 using namespace Dasher;
 
-CDasherButtons::CDasherButtons(CSettingsUser *pCreator, CDasherInterfaceBase *pInterface, bool bMenu, ModuleID_t iID, const char *szName)
-  : CStaticFilter(pCreator, pInterface, iID, szName), m_bMenu(bMenu), m_bDecorationChanged(true), m_pBoxes(NULL), iActiveBox(0) {}
+CDasherButtons::CDasherButtons(CSettingsStore* pSettingsStore, CDasherInterfaceBase *pInterface, bool bMenu, ModuleID_t iID, const char *szName)
+  : CStaticFilter(pSettingsStore, pInterface, iID, szName), m_bMenu(bMenu), m_bDecorationChanged(true), m_pBoxes(NULL), iActiveBox(0) {}
 
 CDasherButtons::~CDasherButtons()
 {
@@ -68,9 +68,9 @@ void CDasherButtons::DirectKeyDown(unsigned long iTime, Keys::VirtualKey Key, CD
 }
 
 void CDasherButtons::Timer(unsigned long Time, CDasherView *pView, CDasherInput *pInput, CDasherModel *pModel, CExpansionPolicy **pol) {
-  if (m_bMenu && GetLongParameter(LP_BUTTON_SCAN_TIME) &&
+  if (m_bMenu && m_pSettingsStore->GetLongParameter(LP_BUTTON_SCAN_TIME) &&
       Time > m_iScanTime) {
-    m_iScanTime = Time + GetLongParameter(LP_BUTTON_SCAN_TIME);
+    m_iScanTime = Time + m_pSettingsStore->GetLongParameter(LP_BUTTON_SCAN_TIME);
     m_bDecorationChanged = true;
     ++iActiveBox;
     if(iActiveBox == m_iNumBoxes)

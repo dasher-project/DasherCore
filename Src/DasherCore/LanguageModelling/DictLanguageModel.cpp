@@ -53,7 +53,7 @@ CDictLanguageModel::CDictnode * CDictLanguageModel::AddSymbolToNode(CDictnode *p
   CDictnode *pReturn = pNode->find_symbol(sym);
 
   if(pReturn != NULL) {
-    if(GetLongParameter(LP_LM_UPDATE_EXCLUSION)) {
+    if(m_pSettingsStore->GetLongParameter(LP_LM_UPDATE_EXCLUSION)) {
       if(pReturn->count < USHRT_MAX)    // Truncate counts at storage limit
         pReturn->count++;
       *update = 0;
@@ -76,8 +76,8 @@ CDictLanguageModel::CDictnode * CDictLanguageModel::AddSymbolToNode(CDictnode *p
 // CDictLanguageModel defs
 /////////////////////////////////////////////////////////////////////
 
-CDictLanguageModel::CDictLanguageModel(CSettingsUser *pCreator, const CAlphInfo *pAlph, const CAlphabetMap *pAlphMap)
-:CLanguageModel(pAlph->iEnd-1), CSettingsUser(pCreator), m_pAlphMap(pAlphMap), NodesAllocated(0), max_order(0), m_NodeAlloc(8192), m_ContextAlloc(1024), m_pAlph(pAlph) {
+CDictLanguageModel::CDictLanguageModel(CSettingsStore* pSettingsStore, const CAlphInfo *pAlph, const CAlphabetMap *pAlphMap)
+:CLanguageModel(pAlph->iEnd-1), m_pSettingsStore(pSettingsStore), m_pAlphMap(pAlphMap), NodesAllocated(0), max_order(0), m_NodeAlloc(8192), m_ContextAlloc(1024), m_pAlph(pAlph) {
   m_pRoot = m_NodeAlloc.Alloc();
   m_pRoot->sbl = -1;
   m_rootcontext = new CDictContext(m_pRoot, 0);
@@ -176,7 +176,7 @@ void CDictLanguageModel::GetProbs(Context context, std::vector<unsigned int > &p
     exclusions[i] = false;
   }
 
-  bool doExclusion = (GetLongParameter(LP_LM_EXCLUSION) == 1);
+  bool doExclusion = (m_pSettingsStore->GetLongParameter(LP_LM_EXCLUSION) == 1);
 
   unsigned int iToSpend = norm;
 
@@ -520,7 +520,7 @@ void CDictLanguageModel::AddSymbol(CDictLanguageModel::CDictContext &context, sy
     CollapseContext(context);
   }
 
-while(context.order > GetLongParameter( LP_LM_MAX_ORDER )) {
+while(context.order > m_pSettingsStore->GetLongParameter( LP_LM_MAX_ORDER )) {
     context.head = context.head->vine;
     context.order--;
   }
@@ -559,7 +559,7 @@ void CDictLanguageModel::EnterSymbol(Context c, int Symbol) {
 
   while(context.head) {
 
-    if(context.order < GetLongParameter( LP_LM_MAX_ORDER )) {
+    if(context.order < m_pSettingsStore->GetLongParameter( LP_LM_MAX_ORDER )) {
       find = context.head->find_symbol(Symbol);
       if(find) {
         context.order++;

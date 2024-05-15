@@ -38,8 +38,11 @@ using namespace Dasher;
 
 
 
-CAlphabetManager::CAlphabetManager(CSettingsUser *pCreateFrom, CDasherInterfaceBase *pInterface, CNodeCreationManager *pNCManager, const CAlphInfo *pAlphabet)
-  : CSettingsUser(pCreateFrom), m_pBaseGroup(NULL), m_pInterface(pInterface), m_pNCManager(pNCManager), m_pAlphabet(pAlphabet), m_pLastOutput(NULL) {
+CAlphabetManager::CAlphabetManager(CSettingsStore *pSettingsStore, CDasherInterfaceBase *pInterface, CNodeCreationManager *pNCManager, const CAlphInfo *pAlphabet)
+    : m_pBaseGroup(NULL), m_pInterface(pInterface), m_pLanguageModel(nullptr), m_pNCManager(pNCManager),
+      m_pAlphabet(pAlphabet), m_pLastOutput(NULL),
+      m_pSettingsStore(pSettingsStore)
+{
 }
 
 const string &CAlphabetManager::GetLabelText(symbol i) const {
@@ -87,18 +90,18 @@ void CAlphabetManager::InitMap() {
 
 void CAlphabetManager::CreateLanguageModel() {
   // FIXME - return to using enum here
-  switch (GetLongParameter(LP_LANGUAGE_MODEL_ID)) {
+  switch (m_pSettingsStore->GetLongParameter(LP_LANGUAGE_MODEL_ID)) {
     default:
       // If there is a bogus value for the language model ID, we'll default
       // to our trusty old PPM language model.
     case 0:
-      m_pLanguageModel = new CPPMLanguageModel(this, m_pAlphabet->iEnd-1);
+      m_pLanguageModel = new CPPMLanguageModel(m_pSettingsStore, m_pAlphabet->iEnd-1);
       break;
     case 2:
-      m_pLanguageModel = new CWordLanguageModel(this, m_pAlphabet, &m_map);
+      m_pLanguageModel = new CWordLanguageModel(m_pSettingsStore, m_pAlphabet, &m_map);
       break;
     case 3:
-      m_pLanguageModel = new CMixtureLanguageModel(this, m_pAlphabet, &m_map);
+      m_pLanguageModel = new CMixtureLanguageModel(m_pSettingsStore, m_pAlphabet, &m_map);
       break;
     case 4:
       m_pLanguageModel = new CCTWLanguageModel(m_pAlphabet->iEnd-1);
@@ -188,8 +191,8 @@ SGroupInfo *CAlphabetManager::copyGroups(const SGroupInfo *pBase, CDasherScreen 
 CWordGeneratorBase *CAlphabetManager::GetGameWords() {
   CFileWordGenerator *pGen = new CFileWordGenerator(m_pInterface, m_pAlphabet, &m_map);
   pGen->setAcceptUser(true);
-  if (!GetStringParameter(SP_GAME_TEXT_FILE).empty()) {
-    const string &gtf(GetStringParameter(SP_GAME_TEXT_FILE));
+  if (!m_pSettingsStore->GetStringParameter(SP_GAME_TEXT_FILE).empty()) {
+    const string &gtf(m_pSettingsStore->GetStringParameter(SP_GAME_TEXT_FILE));
     if (pGen->ParseFile(gtf,true)) return pGen;
     ///TRANSLATORS: the string "GameTextFile" is the name of a setting in gsettings
     /// (or equivalent), and should not be translated. The %s is the value of that
@@ -363,7 +366,7 @@ void CAlphabetManager::CSymbolNode::PopulateChildren() {
 }
 int CAlphabetManager::CAlphNode::ExpectedNumChildren() {
   int i=m_pMgr->m_pBaseGroup->iNumChildNodes;
-  return (m_pMgr->GetBoolParameter(BP_CONTROL_MODE)) ? i+1 : i;
+  return (m_pMgr->m_pSettingsStore->GetBoolParameter(BP_CONTROL_MODE)) ? i+1 : i;
 }
 
 void CAlphabetManager::GetProbs(vector<unsigned int> *pProbInfo, CLanguageModel::Context context) {
@@ -375,7 +378,7 @@ void CAlphabetManager::GetProbs(vector<unsigned int> *pProbInfo, CLanguageModel:
   const unsigned long iNorm(m_pNCManager->GetAlphNodeNormalization());
   //the case for control mode on, generalizes to handle control mode off also,
   // as then iNorm - control_space == iNorm...
-  const unsigned int iUniformAdd = max(1ul, ((iNorm * GetLongParameter(LP_UNIFORM)) / 1000) / iSymbols);
+  const unsigned int iUniformAdd = max(1ul, ((iNorm * m_pSettingsStore->GetLongParameter(LP_UNIFORM)) / 1000) / iSymbols);
   const unsigned long iNonUniformNorm = iNorm - iSymbols * iUniformAdd;
   //  m_pLanguageModel->GetProbs(context, Probs, iNorm, ((iNorm * uniform) / 1000));
 
@@ -601,7 +604,7 @@ int CAlphabetManager::CSymbolNode::numChars() {
 }
 
 void CAlphabetManager::CSymbolNode::Output() {
-  if (m_pMgr->GetBoolParameter(BP_LM_ADAPTIVE)) {
+  if (m_pMgr->m_pSettingsStore->GetBoolParameter(BP_LM_ADAPTIVE)) {
     if (m_pMgr->m_pLastOutput != Parent()) {
       //Context changed. Flush to disk the old context + text written in it...
       m_pMgr->WriteTrainFileFull(m_pMgr->m_pInterface);
@@ -633,7 +636,7 @@ SymbolProb CAlphabetManager::CSymbolNode::GetSymbolProb() const {
 
 void CAlphabetManager::CSymbolNode::Undo() {
   DASHER_ASSERT(GetFlag(NF_SEEN));
-  if (m_pMgr->GetBoolParameter(BP_LM_ADAPTIVE)) {
+  if (m_pMgr->m_pSettingsStore->GetBoolParameter(BP_LM_ADAPTIVE)) {
     if (m_pMgr->m_pLastOutput == this) {
       //Erase from training buffer, and move lastOutput backwards,
       // iff this node was actually written (i.e. not rebuilt _from_ context!)
@@ -689,7 +692,7 @@ void CAlphabetManager::CAlphBase::RebuildForwardsFromAncestor(CAlphNode *pNewNod
 // For want of a better solution, game mode exemption explicit in this function
 void CAlphabetManager::CSymbolNode::SetFlag(int iFlag, bool bValue) {
   if ((iFlag & NF_COMMITTED) && bValue && !GetFlag(NF_COMMITTED | NF_GAME)
-      && m_pMgr->GetBoolParameter(BP_LM_ADAPTIVE)) {
+      && m_pMgr->m_pSettingsStore->GetBoolParameter(BP_LM_ADAPTIVE)) {
     //try to commit...if we have parent (else rebuilding (backwards) => don't)
     if (Parent()) {
       if (Parent()->mgr() != mgr()) return; //do not set flag

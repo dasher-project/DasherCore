@@ -31,7 +31,7 @@ namespace Dasher {
 /// then any key restarts.
 class CDynamicButtons : public CDynamicFilter {
  public:
-  CDynamicButtons(CSettingsUser *pCreator, CDasherInterfaceBase *pInterface, CFrameRate *pFramerate, ModuleID_t iID, const char *szName);
+  CDynamicButtons(CSettingsStore* pSettingsStore, CDasherInterfaceBase *pInterface, CFrameRate *pFramerate, ModuleID_t iID, const char *szName);
 
   ///when reversing, backs off; when paused, does nothing; when running, delegates to TimerImpl
   virtual void Timer(unsigned long Time, CDasherView *pView, CDasherInput *pInput, CDasherModel *m_pDasherModel, CExpansionPolicy **pol);

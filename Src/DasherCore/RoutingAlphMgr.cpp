@@ -11,8 +11,8 @@
 using namespace Dasher;
 
 
-CRoutingAlphMgr::CRoutingAlphMgr(CSettingsUser *pCreator, CDasherInterfaceBase *pInterface, CNodeCreationManager *pNCManager, const CAlphInfo *pAlphabet)
-: CAlphabetManager(pCreator, pInterface, pNCManager, pAlphabet) {
+CRoutingAlphMgr::CRoutingAlphMgr(CSettingsStore* pSettingsStore, CDasherInterfaceBase *pInterface, CNodeCreationManager *pNCManager, const CAlphInfo *pAlphabet)
+: CAlphabetManager(pSettingsStore, pInterface, pNCManager, pAlphabet) {
   
   DASHER_ASSERT(pAlphabet->m_iConversionID==3 || pAlphabet->m_iConversionID==4);
 }
@@ -44,7 +44,7 @@ void CRoutingAlphMgr::InitMap() {
 }
 
 void CRoutingAlphMgr::CreateLanguageModel() {
-  m_pLanguageModel = new CRoutingPPMLanguageModel(this, &m_vBaseSyms, &m_vRoutes, m_pAlphabet->m_iConversionID == CAlphInfo::RoutingContextSensitive);
+  m_pLanguageModel = new CRoutingPPMLanguageModel(m_pSettingsStore, &m_vBaseSyms, &m_vRoutes, m_pAlphabet->m_iConversionID == CAlphInfo::RoutingContextSensitive);
 }
 
 std::string CRoutingAlphMgr::CRoutedSym::trainText() {

@@ -38,25 +38,25 @@
 
 using namespace Dasher;
 
-CConversionManager::CConversionManager(CSettingsUser *pCreateFrom, CDasherInterfaceBase *pInterface, CNodeCreationManager *pNCManager, const CAlphInfo *pAlphabet, CLanguageModel *pLanguageModel)
-: CSettingsUser(pCreateFrom), m_pInterface(pInterface), m_pNCManager(pNCManager), m_pAlphabet(pAlphabet), m_pLanguageModel(pLanguageModel) {
+CConversionManager::CConversionManager(CSettingsStore* pSettingsStore, CDasherInterfaceBase *pInterface, CNodeCreationManager *pNCManager, const CAlphInfo *pAlphabet, CLanguageModel *pLanguageModel)
+    : m_pSettingsStore(pSettingsStore), m_pInterface(pInterface), m_pNCManager(pNCManager), m_pAlphabet(pAlphabet),
+      m_pScreen(nullptr), m_pLanguageModel(pLanguageModel)
+{
+    //Testing for alphabet details, delete if needed:
+    /*
+    int alphSize = pNCManager->GetAlphabet()->GetNumberSymbols();
+    std::cout<<"Alphabet size: "<<alphSize<<std::endl;
+    for(int i =0; i<alphSize; i++)
+      std::cout<<"symbol: "<<i<<"    display text:"<<pNCManager->GetAlphabet()->GetDisplayText(i)<<std::endl;
+    */
+    colourStore[0][0] = 66; //light blue
+    colourStore[0][1] = 64; //very light green
+    colourStore[0][2] = 62; //light yellow
+    colourStore[1][0] = 78; //light purple
+    colourStore[1][1] = 81; //brownish
+    colourStore[1][2] = 60; //red
 
-  //Testing for alphabet details, delete if needed:
-  /*
-  int alphSize = pNCManager->GetAlphabet()->GetNumberSymbols();
-  std::cout<<"Alphabet size: "<<alphSize<<std::endl;
-  for(int i =0; i<alphSize; i++)
-    std::cout<<"symbol: "<<i<<"    display text:"<<pNCManager->GetAlphabet()->GetDisplayText(i)<<std::endl;
-  */
-  colourStore[0][0]=66;//light blue
-  colourStore[0][1]=64;//very light green
-  colourStore[0][2]=62;//light yellow
-  colourStore[1][0]=78;//light purple
-  colourStore[1][1]=81;//brownish
-  colourStore[1][2]=60;//red
-  
-  m_iLearnContext = m_pLanguageModel->CreateEmptyContext();
-
+    m_iLearnContext = m_pLanguageModel->CreateEmptyContext();
 }
 
 CConversionManager::CConvNode *CConversionManager::makeNode(int iOffset, CDasherScreen::Label *pLabel) {
@@ -189,7 +189,7 @@ const ColorPalette::Color& CConversionManager::CConvNode::getNodeColor(const Col
 
 void CConversionManager::AssignChildSizes(const std::vector<SCENode *> &nodes, CLanguageModel::Context context) {
   
-  AssignSizes(nodes, context, CDasherModel::NORMALIZATION, GetLongParameter(LP_UNIFORM));
+  AssignSizes(nodes, context, CDasherModel::NORMALIZATION,  m_pSettingsStore->GetLongParameter(LP_UNIFORM));
   
 }
 
