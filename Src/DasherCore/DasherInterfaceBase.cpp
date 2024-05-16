@@ -69,9 +69,10 @@ using namespace Dasher;
 
 CDasherInterfaceBase::CDasherInterfaceBase(CSettingsStore *pSettingsStore) 
   :  
-  m_pDasherModel(new CDasherModel()), 
-  m_pFramerate(new CFrameRate(pSettingsStore)), 
-  m_pSettingsStore(pSettingsStore), 
+  m_pDasherModel(new CDasherModel()),
+  m_pFramerate(new CFrameRate(pSettingsStore)),
+  m_pSettingsStore(pSettingsStore),
+  m_pModuleManager(new CModuleManager()), 
   m_pLockLabel(NULL),
   m_bLastMoved(false) {
 
@@ -430,10 +431,10 @@ void CDasherInterfaceBase::CreateInput() {
     m_pInput->Deactivate();
   }
 
-  m_pInput = (CDasherInput *)GetModuleByName(m_pSettingsStore->GetStringParameter(SP_INPUT_DEVICE));
+  m_pInput = GetModuleManager()->GetInputDeviceByName(m_pSettingsStore->GetStringParameter(SP_INPUT_DEVICE));
 
-  if (m_pInput == NULL)
-    m_pInput = m_oModuleManager.GetDefaultInputDevice();
+  if (m_pInput == nullptr)
+    m_pInput = m_pModuleManager->GetDefaultInputDevice();
 
   if(m_pInput) {
     m_pInput->Activate();
@@ -714,55 +715,33 @@ void CDasherInterfaceBase::CreateInputFilter() {
   if(m_pInputFilter) {
     m_pInputFilter->pause();
     m_pInputFilter->Deactivate();
-    m_pInputFilter = NULL;
+    m_pInputFilter = nullptr;
   }
 
-  m_pInputFilter = (CInputFilter *)GetModuleByName(m_pSettingsStore->GetStringParameter(SP_INPUT_FILTER));
+  m_pInputFilter = GetModuleManager()->GetInputMethodByName(m_pSettingsStore->GetStringParameter(SP_INPUT_FILTER));
 
-  if (m_pInputFilter == NULL)
-    m_pInputFilter = m_oModuleManager.GetDefaultInputMethod();
+  if (m_pInputFilter == nullptr)
+    m_pInputFilter = m_pModuleManager->GetDefaultInputMethod();
 
   m_pInputFilter->Activate();
 }
 
-CDasherModule *CDasherInterfaceBase::RegisterModule(CDasherModule *pModule) {
-    return m_oModuleManager.RegisterModule(pModule);
-}
-
-CDasherModule *CDasherInterfaceBase::GetModule(ModuleID_t iID) {
-    return m_oModuleManager.GetModule(iID);
-}
-
-CDasherModule *CDasherInterfaceBase::GetModuleByName(const std::string &strName) {
-    return m_oModuleManager.GetModuleByName(strName);
-}
-
-void CDasherInterfaceBase::SetDefaultInputDevice(CDasherInput *pModule) {
-    m_oModuleManager.SetDefaultInputDevice(pModule);
-}
-
-void CDasherInterfaceBase::SetDefaultInputMethod(CInputFilter *pModule) {
-    m_oModuleManager.SetDefaultInputMethod(pModule);
-}
-
 void CDasherInterfaceBase::CreateModules() {
-  CInputFilter *defFil = new CDefaultFilter(m_pSettingsStore, this, m_pFramerate, 3, _("Normal Control"));
-  RegisterModule(defFil);
-  SetDefaultInputMethod(defFil);
-  RegisterModule(new CPressFilter(m_pSettingsStore, this, m_pFramerate));
-  RegisterModule(new COneDimensionalFilter(m_pSettingsStore, this, m_pFramerate));
-  RegisterModule(new CClickFilter(m_pSettingsStore, this));
-  RegisterModule(new COneButtonFilter(m_pSettingsStore, this));
-  RegisterModule(new COneButtonDynamicFilter(m_pSettingsStore, this, m_pFramerate));
-  RegisterModule(new CTwoButtonDynamicFilter(m_pSettingsStore, this, m_pFramerate));
-  RegisterModule(new CTwoPushDynamicFilter(m_pSettingsStore, this, m_pFramerate));
+  GetModuleManager()->RegisterInputMethodModule(new CDefaultFilter(m_pSettingsStore, this, m_pFramerate, _("Normal Control")), true);
+  GetModuleManager()->RegisterInputMethodModule(new CPressFilter(m_pSettingsStore, this, m_pFramerate));
+  GetModuleManager()->RegisterInputMethodModule(new COneDimensionalFilter(m_pSettingsStore, this, m_pFramerate));
+  GetModuleManager()->RegisterInputMethodModule(new CClickFilter(m_pSettingsStore, this));
+  GetModuleManager()->RegisterInputMethodModule(new COneButtonFilter(m_pSettingsStore, this));
+  GetModuleManager()->RegisterInputMethodModule(new COneButtonDynamicFilter(m_pSettingsStore, this, m_pFramerate));
+  GetModuleManager()->RegisterInputMethodModule(new CTwoButtonDynamicFilter(m_pSettingsStore, this, m_pFramerate));
+  GetModuleManager()->RegisterInputMethodModule(new CTwoPushDynamicFilter(m_pSettingsStore, this, m_pFramerate));
   // TODO: specialist factory for button mode
-  RegisterModule(new CButtonMode(m_pSettingsStore, this, true, 8, _("Menu Mode")));
-  RegisterModule(new CButtonMode(m_pSettingsStore, this, false,10, _("Direct Mode")));
+  GetModuleManager()->RegisterInputMethodModule(new CButtonMode(m_pSettingsStore, this, true, _("Menu Mode")));
+  GetModuleManager()->RegisterInputMethodModule(new CButtonMode(m_pSettingsStore, this, false, _("Direct Mode")));
   //  RegisterModule(new CDasherButtons(this, this, 4, 0, false,11, "Buttons 3"));
-  RegisterModule(new CAlternatingDirectMode(m_pSettingsStore, this));
-  RegisterModule(new CCompassMode(m_pSettingsStore, this));
-  RegisterModule(new CStylusFilter(m_pSettingsStore, this, m_pFramerate));
+  GetModuleManager()->RegisterInputMethodModule(new CAlternatingDirectMode(m_pSettingsStore, this));
+  GetModuleManager()->RegisterInputMethodModule(new CCompassMode(m_pSettingsStore, this));
+  GetModuleManager()->RegisterInputMethodModule(new CStylusFilter(m_pSettingsStore, this, m_pFramerate));
   //WIP Temporary as too many segfaults! //RegisterModule(new CDemoFilter(this, this, m_pFramerate));
 }
 
@@ -782,16 +761,12 @@ void CDasherInterfaceBase::GetPermittedValues(Parameter parameter, std::vector<s
     m_ControlBoxIO->GetControlBoxes(&vList);
     break;
   case SP_INPUT_FILTER:
-    m_oModuleManager.ListModules(1, vList);
+    m_pModuleManager->ListInputMethodModules(vList);
     break;
   case SP_INPUT_DEVICE:
-    m_oModuleManager.ListModules(0, vList);
+    m_pModuleManager->ListInputDeviceModules(vList);
     break;
   }
-}
-
-bool CDasherInterfaceBase::GetModuleSettings(const std::string &strName, SModuleSettings **pSettings, int *iCount) {
-  return GetModuleByName(strName)->GetSettings(pSettings, iCount);
 }
 
 void CDasherInterfaceBase::SetOffset(int iOffset, bool bForce) {

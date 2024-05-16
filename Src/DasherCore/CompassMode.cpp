@@ -25,7 +25,7 @@ static SModuleSettings sSettings[] = {
 // FIX iStyle == 2
 
 CCompassMode::CCompassMode(CSettingsStore* pSettingsStore, CDasherInterfaceBase *pInterface)
-    : CDasherButtons(pSettingsStore, pInterface, false /*bMenu*/, 13, _("Compass Mode")), iTargetWidth(0)
+    : CDasherButtons(pSettingsStore, pInterface, false /*bMenu*/, _("Compass Mode")), iTargetWidth(0)
 {
 }
 

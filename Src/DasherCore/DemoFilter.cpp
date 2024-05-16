@@ -8,7 +8,7 @@
 using namespace Dasher;
 
 CDemoFilter::CDemoFilter(CSettingsStore* pSettingsStore, CDasherInterfaceBase *pInterface, CFrameRate *pFramerate)
-  : CDynamicFilter(pSettingsStore, pInterface, pFramerate, 19, _("Demo Mode (no input)")),
+  : CDynamicFilter(pSettingsStore, pInterface, pFramerate, _("Demo Mode (no input)")),
 m_dNoiseX(0.0), m_dNoiseY(0.0), m_iDemoX(0), m_iDemoY(0) {
 
 }

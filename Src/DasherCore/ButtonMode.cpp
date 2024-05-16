@@ -30,8 +30,8 @@ static SModuleSettings sSettings[] = {
 
 // FIX iStyle == 0
 
-CButtonMode::CButtonMode(CSettingsStore* pSettingsStore, CDasherInterfaceBase *pInterface, bool bMenu, int iID, const char *szName)
-: CDasherButtons(pSettingsStore, pInterface, bMenu, iID, szName)
+CButtonMode::CButtonMode(CSettingsStore* pSettingsStore, CDasherInterfaceBase *pInterface, bool bMenu, const char *szName)
+: CDasherButtons(pSettingsStore, pInterface, bMenu, szName)
 {
     m_pSettingsStore->OnParameterChanged.Subscribe(this, [this](Parameter p)
     {

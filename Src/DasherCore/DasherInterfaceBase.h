@@ -110,12 +110,6 @@ public:
 
   void GetPermittedValues(Parameter parameter, std::vector<std::string> &vList);
 
-  ///
-  /// Get a list of settings which apply to a particular module
-  ///
-
-  bool GetModuleSettings(const std::string &strName, SModuleSettings **pSettings, int *iCount);
-
   //@}
 
   /// Called when a parameter changes - but *after* components have been notified.
@@ -318,14 +312,10 @@ public:
   /// @}
 
   // Module management functions
-  CDasherModule *RegisterModule(CDasherModule *pModule);
-  CDasherModule *GetModule(ModuleID_t iID);
-  CDasherModule *GetModuleByName(const std::string &strName);
   CDasherInput *GetActiveInputDevice() {return m_pInput;}
   CInputFilter *GetActiveInputMethod() {return m_pInputFilter;}
   const CAlphInfo *GetActiveAlphabet();
-  void SetDefaultInputDevice(CDasherInput *);
-  void SetDefaultInputMethod(CInputFilter *);
+  CModuleManager* GetModuleManager(){return m_pModuleManager;}
 
   void StartShutdown();
 
@@ -524,7 +514,7 @@ private:
   CDasherView *m_pDasherView;
   CDasherInput *m_pInput;
   CInputFilter* m_pInputFilter;
-  CModuleManager m_oModuleManager;
+  CModuleManager* m_pModuleManager;
   CAlphIO *m_AlphIO;
   CColorIO *m_ColorIO;
   CControlBoxIO *m_ControlBoxIO;

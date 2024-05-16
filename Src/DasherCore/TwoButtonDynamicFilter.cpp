@@ -48,7 +48,7 @@ static SModuleSettings sSettings[] = {
 };
 
 CTwoButtonDynamicFilter::CTwoButtonDynamicFilter(CSettingsStore* pSettingsStore, CDasherInterfaceBase *pInterface, CFrameRate *pFramerate)
-  : CButtonMultiPress(pSettingsStore, pInterface, pFramerate, 14, _("Two Button Dynamic Mode")),
+  : CButtonMultiPress(pSettingsStore, pInterface, pFramerate, _("Two Button Dynamic Mode")),
     m_iMouseButton(Keys::Invalid_Key)
 {
     CTwoButtonDynamicFilter::ComputeLagBits();

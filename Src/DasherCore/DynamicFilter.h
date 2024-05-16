@@ -35,7 +35,7 @@ namespace Dasher {
 /// Unpause method.
 class CDynamicFilter : public CInputFilter {
  public:
-  CDynamicFilter(CSettingsStore* pSettingsStore, CDasherInterfaceBase *pInterface, CFrameRate *pFramerate, ModuleID_t iID, const char *szName);
+  CDynamicFilter(CSettingsStore* pSettingsStore, CDasherInterfaceBase *pInterface, CFrameRate *pFramerate, const char *szName);
 
   virtual bool supportsPause() {return true;}
   

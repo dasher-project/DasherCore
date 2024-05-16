@@ -24,8 +24,8 @@ bool CDefaultFilter::GetSettings(SModuleSettings **sets, int *iCount) {
   return true;
 }
 
-CDefaultFilter::CDefaultFilter(CSettingsStore* pSettingsStore, CDasherInterfaceBase *pInterface, CFrameRate *pFramerate, ModuleID_t iID, const char *szName)
-  : CDynamicFilter(pSettingsStore, pInterface, pFramerate, iID, szName), m_bTurbo(false) {
+CDefaultFilter::CDefaultFilter(CSettingsStore* pSettingsStore, CDasherInterfaceBase *pInterface, CFrameRate *pFramerate, const char *szName)
+  : CDynamicFilter(pSettingsStore, pInterface, pFramerate, szName), m_bTurbo(false) {
   m_pStartHandler = 0;
   m_pAutoSpeedControl = new CAutoSpeedControl(m_pSettingsStore);
 

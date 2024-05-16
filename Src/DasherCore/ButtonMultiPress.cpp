@@ -23,8 +23,8 @@
 
 using namespace Dasher;
 
-CButtonMultiPress::CButtonMultiPress(CSettingsStore* pSettingsStore, CDasherInterfaceBase *pInterface, CFrameRate *pFramerate, ModuleID_t iID, const char *szName)
-  : CDynamicButtons(pSettingsStore, pInterface, pFramerate, iID, szName) {
+CButtonMultiPress::CButtonMultiPress(CSettingsStore* pSettingsStore, CDasherInterfaceBase *pInterface, CFrameRate *pFramerate, const char *szName)
+  : CDynamicButtons(pSettingsStore, pInterface, pFramerate, szName) {
 }
 
 void CButtonMultiPress::Timer(unsigned long iTime, CDasherView *pView, CDasherInput *pInput, CDasherModel *pModel, CExpansionPolicy **pol) {

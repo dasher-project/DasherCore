@@ -15,7 +15,7 @@ namespace Dasher {
 class CButtonMode : public CDasherButtons
 {
  public:
-  CButtonMode(CSettingsStore* pSettingsStore, CDasherInterfaceBase *pInterface, bool bMenu, int iID, const char *szName);
+  CButtonMode(CSettingsStore* pSettingsStore, CDasherInterfaceBase *pInterface, bool bMenu, const char *szName);
   ~CButtonMode() override;
 
   void Timer(unsigned long Time, CDasherView *pView, CDasherInput *pInput, CDasherModel *pModel, CExpansionPolicy **pol) override;

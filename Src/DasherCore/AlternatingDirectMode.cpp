@@ -20,7 +20,7 @@ static SModuleSettings sSettings[] = {
 };
 
 CAlternatingDirectMode::CAlternatingDirectMode(CSettingsStore* pSettingsStore, CDasherInterfaceBase *pInterface)
-  : CDasherButtons(pSettingsStore, pInterface, false/*menu*/, 12, _("Alternating Direct Mode")) {}
+  : CDasherButtons(pSettingsStore, pInterface, false/*menu*/, ("Alternating Direct Mode")) {}
 
 void CAlternatingDirectMode::SetupBoxes()
 {

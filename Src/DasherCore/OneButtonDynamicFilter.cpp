@@ -40,7 +40,7 @@ static SModuleSettings sSettings[] = {
 };
 
 COneButtonDynamicFilter::COneButtonDynamicFilter(CSettingsStore* pSettingsStore, CDasherInterfaceBase *pInterface, CFrameRate *pFramerate)
-  : CButtonMultiPress(pSettingsStore, pInterface, pFramerate, 6, _("One Button Dynamic Mode")) {
+  : CButtonMultiPress(pSettingsStore, pInterface, pFramerate, _("One Button Dynamic Mode")) {
   m_iTarget = 0;
 
   m_iTargetX[0] = 100;

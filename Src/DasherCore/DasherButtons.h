@@ -14,7 +14,7 @@ namespace Dasher {
 class CDasherButtons : public CStaticFilter
 {
  public:
-  CDasherButtons(CSettingsStore* pSettingsStore, CDasherInterfaceBase *pInterface, bool bMenu, ModuleID_t iID, const char *szName);
+  CDasherButtons(CSettingsStore* pSettingsStore, CDasherInterfaceBase *pInterface, bool bMenu, const char *szName);
   virtual ~CDasherButtons();
 
   virtual bool DecorateView(CDasherView *pView, CDasherInput *pInput)=0;

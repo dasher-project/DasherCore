@@ -15,8 +15,8 @@ namespace Dasher {
 namespace Dasher {
 class CInputFilter : public CDasherModule {
  public:
-  CInputFilter(CDasherInterfaceBase *pInterface, ModuleID_t iID, const char *szName)
-    : CDasherModule(iID, InputMethod, szName), m_pInterface(pInterface) {
+  CInputFilter(CDasherInterfaceBase *pInterface, const char *szName)
+    : CDasherModule(szName), m_pInterface(pInterface) {
   };
 
   ///Called after nodes have been rendered, to draw any decorations on the view.
@@ -73,8 +73,8 @@ class CInputFilter : public CDasherModule {
   /// cancels any such zoom in progress.
   class CStaticFilter : public CInputFilter {
   public:
-    CStaticFilter(CSettingsStore* pSettingsStore, CDasherInterfaceBase *pIntf, ModuleID_t iId, const char *szName)
-    : CInputFilter(pIntf, iId, szName), m_pSettingsStore(pSettingsStore), m_pModel(NULL) {
+    CStaticFilter(CSettingsStore* pSettingsStore, CDasherInterfaceBase *pIntf, const char *szName)
+    : CInputFilter(pIntf, szName), m_pSettingsStore(pSettingsStore), m_pModel(NULL) {
     }
     void pause() {if (m_pModel) m_pModel->ClearScheduledSteps();}
   protected:

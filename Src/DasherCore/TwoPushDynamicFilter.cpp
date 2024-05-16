@@ -42,7 +42,7 @@ static SModuleSettings sSettings[] = {
 };
 
 CTwoPushDynamicFilter::CTwoPushDynamicFilter(CSettingsStore* pSettingsStore, CDasherInterfaceBase *pInterface, CFrameRate *pFramerate)
-  : CDynamicButtons(pSettingsStore, pInterface, pFramerate, 14, _("Two-push Dynamic Mode (New One Button)")),
+  : CDynamicButtons(pSettingsStore, pInterface, pFramerate, _("Two-push Dynamic Mode (New One Button)")),
     m_dNatsSinceFirstPush(-std::numeric_limits<double>::infinity())
 {
     CTwoPushDynamicFilter::HandleParameterChange(LP_TWO_PUSH_OUTER);//and all the others too!

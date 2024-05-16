@@ -10,7 +10,7 @@ namespace Dasher {
 /// @{
 class CDefaultFilter : public CDynamicFilter {
  public:
-  CDefaultFilter(CSettingsStore* pSettingsStore, CDasherInterfaceBase *pInterface, CFrameRate *pFramerate, ModuleID_t iID, const char *szName);
+  CDefaultFilter(CSettingsStore* pSettingsStore, CDasherInterfaceBase *pInterface, CFrameRate *pFramerate, const char *szName);
   virtual ~CDefaultFilter();
 
   /// Responds to changes in BP_START_MOUSE / BP_MOUSEPOS_MODE to create StartHandler

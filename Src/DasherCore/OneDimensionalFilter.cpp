@@ -28,8 +28,8 @@ void C1DCircleStartHandler::onPause()
     CCircleStartHandler::onPause();
 }
 
-COneDimensionalFilter::COneDimensionalFilter(CSettingsStore* pSettingsStore, CDasherInterfaceBase *pInterface, CFrameRate *pFramerate, ModuleID_t iID, const char *szName)
-  : CDefaultFilter(pSettingsStore, pInterface, pFramerate, iID, szName), forwardmax(static_cast<const Dasher::myint>(CDasherModel::MAX_Y/2.5)) {
+COneDimensionalFilter::COneDimensionalFilter(CSettingsStore* pSettingsStore, CDasherInterfaceBase *pInterface, CFrameRate *pFramerate, const char *szName)
+  : CDefaultFilter(pSettingsStore, pInterface, pFramerate, szName), forwardmax(static_cast<const Dasher::myint>(CDasherModel::MAX_Y/2.5)) {
 }
 
 void COneDimensionalFilter::ApplyTransform(myint &iDasherX, myint &iDasherY, CDasherView *pView) {

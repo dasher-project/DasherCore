@@ -23,8 +23,8 @@
 
 using namespace Dasher;
 
-CDynamicFilter::CDynamicFilter(CSettingsStore* pSettingsStore, CDasherInterfaceBase *pInterface, CFrameRate *pFramerate, ModuleID_t iID, const char *szName)
-: CInputFilter(pInterface, iID, szName), m_pFramerate(pFramerate),
+CDynamicFilter::CDynamicFilter(CSettingsStore* pSettingsStore, CDasherInterfaceBase *pInterface, CFrameRate *pFramerate, const char *szName)
+: CInputFilter(pInterface, szName), m_pFramerate(pFramerate),
   m_pSettingsStore(pSettingsStore), m_bPaused(true) {
 }
 

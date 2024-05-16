@@ -10,8 +10,8 @@ static SModuleSettings sSettings[] = {
   {LP_ZOOMSTEPS, T_LONG, 1, 63, 1, 1, _("Frames over which to perform zoom")},
 };
 
-CStylusFilter::CStylusFilter(CSettingsStore* pSettingsStore, CDasherInterfaceBase *pInterface, CFrameRate *pFramerate, ModuleID_t iID, const char *szName)
-  : CDefaultFilter(pSettingsStore, pInterface, pFramerate, iID, szName), m_pModel(NULL) {
+CStylusFilter::CStylusFilter(CSettingsStore* pSettingsStore, CDasherInterfaceBase *pInterface, CFrameRate *pFramerate, const char *szName)
+  : CDefaultFilter(pSettingsStore, pInterface, pFramerate, szName), m_pModel(NULL) {
 }
 
 void CStylusFilter::KeyDown(unsigned long iTime, Keys::VirtualKey Key, CDasherView *pView, CDasherInput *pInput, CDasherModel *pModel) {

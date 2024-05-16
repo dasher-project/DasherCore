@@ -21,22 +21,16 @@
 #ifndef DASHER_MODULE_H
 #define DASHER_MODULE_H
 
-#include <vector>
-
 #include "../Common/ModuleSettings.h"
 
 class CDasherModule;
-typedef std::vector<CDasherModule*>::size_type ModuleID_t;
 
 /// \ingroup Core
 /// @{
 class CDasherModule {
  public:
-  CDasherModule(ModuleID_t iID, int iType, const char *szName);
+  CDasherModule(const char *szName);
 
-  virtual ModuleID_t GetID();
-  virtual void SetID(ModuleID_t);
-  virtual int GetType();
   virtual const char *GetName();
 
   virtual bool GetSettings(SModuleSettings **pSettings, int *iCount) {
@@ -44,8 +38,6 @@ class CDasherModule {
   };
 
  private:
-  ModuleID_t m_iID;
-  int m_iType;
   const char *m_szName;
 };
 /// @}

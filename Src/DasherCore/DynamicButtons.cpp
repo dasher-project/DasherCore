@@ -23,8 +23,8 @@
 
 using namespace Dasher;
 
-CDynamicButtons::CDynamicButtons(CSettingsStore* pSettingsStore, CDasherInterfaceBase *pInterface, CFrameRate *pFramerate, ModuleID_t iID, const char *szName)
-  : CDynamicFilter(pSettingsStore, pInterface, pFramerate, iID, szName), m_pModel(NULL) {
+CDynamicButtons::CDynamicButtons(CSettingsStore* pSettingsStore, CDasherInterfaceBase *pInterface, CFrameRate *pFramerate, const char *szName)
+  : CDynamicFilter(pSettingsStore, pInterface, pFramerate, szName), m_pModel(NULL) {
   m_bDecorationChanged = true;
   m_bKeyDown = false;
   pause();
