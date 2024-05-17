@@ -207,6 +207,7 @@ CDasherInterfaceBase::~CDasherInterfaceBase() {
   delete m_ColorIO;
   delete m_AlphIO;
   delete m_pNCManager;
+  delete m_pModuleManager;
   // Do NOT delete Edit box or Screen. This class did not create them.
 
   // When we destruct on shutdown, we'll output any detailed log file
