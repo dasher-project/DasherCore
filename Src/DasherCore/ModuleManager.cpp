@@ -18,10 +18,8 @@
 // along with Dasher; if not, write to the Free Software 
 // Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
-#include <iostream>
-#include <stdexcept>
-
 #include "ModuleManager.h"
+
 #include "DasherInput.h"
 #include "InputFilter.h"
 
@@ -43,6 +41,12 @@ CInputFilter* CModuleManager::RegisterInputMethodModule(CInputFilter* pModule, b
     return pModule;
 }
 
+CActionModule* CModuleManager::RegisterActionModule(CActionModule* pModule)
+{
+    m_ActionModules[pModule->GetName()] = pModule;
+    return pModule;
+}
+
 void CModuleManager::ListInputDeviceModules(std::vector<std::string>& vList)
 {
     for(auto& [key,_] : m_InputDeviceModules)
@@ -54,6 +58,14 @@ void CModuleManager::ListInputDeviceModules(std::vector<std::string>& vList)
 void CModuleManager::ListInputMethodModules(std::vector<std::string>& vList)
 {
     for(auto& [key,_] : m_InputMethodModules)
+    {
+        vList.push_back(key);
+    }
+}
+
+void CModuleManager::ListActionModules(std::vector<std::string>& vList)
+{
+    for(auto& [key,_] : m_ActionModules)
     {
         vList.push_back(key);
     }
@@ -71,6 +83,16 @@ CInputFilter* CModuleManager::GetInputMethodByName(const std::string strName)
 {
     if (m_InputMethodModules.find(strName) != m_InputMethodModules.end()) {
         return m_InputMethodModules[strName];
+    }
+    return nullptr;
+}
+
+
+
+CActionModule* CModuleManager::GetActionModuleByName(const std::string strName)
+{
+    if (m_ActionModules.find(strName) != m_ActionModules.end()) {
+        return m_ActionModules[strName];
     }
     return nullptr;
 }

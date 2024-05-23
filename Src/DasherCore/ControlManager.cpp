@@ -298,8 +298,8 @@ CControlManager::CControlManager(CSettingsStore* pSettingsStore, CNodeCreationMa
 	SetRootTemplate(new NodeTemplate("", 8)); //default NodeTemplate does nothing
 
 	// Key in actions map is name plus arguments in alphabetical order.
-	m_actions["stop"] = new Stop();
-	m_actions["pause"] = new Pause();
+	m_actions["stop"] = new StopDasherAction();
+	m_actions["pause"] = new PauseDasherAction();
 	if (pInterface->SupportsSpeech())
 	{
 		m_actions["speak what=all"] = new SpeechAction(pInterface, TextAction::Distance, EDIT_FILE);
@@ -310,7 +310,7 @@ CControlManager::CControlManager(CSettingsStore* pSettingsStore, CNodeCreationMa
 		m_actions["speak what=word"] = new SpeechAction(pInterface, TextAction::Distance, EDIT_WORD);
 		m_actions["speak what=new"] = new SpeechAction(pInterface, TextAction::NewText);
 		m_actions["speak what=repeat"] = new SpeechAction(pInterface, TextAction::Repeat);
-		m_actions["speak what=cancel"] = new SpeakCancel();
+		m_actions["speak what=cancel"] = new SpeakCancelAction();
 	}
 	if (pInterface->SupportsClipboard())
 	{
@@ -323,37 +323,37 @@ CControlManager::CControlManager(CSettingsStore* pSettingsStore, CNodeCreationMa
 		m_actions["copy what=new"] = new CopyAction(pInterface, TextAction::NewText);
 		m_actions["copy what=repeat"] = new CopyAction(pInterface, TextAction::Repeat);
 	}
-	m_actions["move dist=char forward=yes"] = new Move(true, EDIT_CHAR);
-	m_actions["move dist=word forward=yes"] = new Move(true, EDIT_WORD);
-	m_actions["move dist=line forward=yes"] = new Move(true, EDIT_LINE);
-	m_actions["move dist=sentence forward=yes"] = new Move(true, EDIT_SENTENCE);
-	m_actions["move dist=paragraph forward=yes"] = new Move(true, EDIT_PARAGRAPH);
-	m_actions["move dist=page forward=yes"] = new Move(true, EDIT_PAGE);
-	m_actions["move dist=all forward=yes"] = new Move(true, EDIT_FILE);
+	m_actions["move dist=char forward=yes"] = new MoveAction(true, EDIT_CHAR);
+	m_actions["move dist=word forward=yes"] = new MoveAction(true, EDIT_WORD);
+	m_actions["move dist=line forward=yes"] = new MoveAction(true, EDIT_LINE);
+	m_actions["move dist=sentence forward=yes"] = new MoveAction(true, EDIT_SENTENCE);
+	m_actions["move dist=paragraph forward=yes"] = new MoveAction(true, EDIT_PARAGRAPH);
+	m_actions["move dist=page forward=yes"] = new MoveAction(true, EDIT_PAGE);
+	m_actions["move dist=all forward=yes"] = new MoveAction(true, EDIT_FILE);
 
-	m_actions["move dist=char forward=no"] = new Move(false, EDIT_CHAR);
-	m_actions["move dist=word forward=no"] = new Move(false, EDIT_WORD);
-	m_actions["move dist=line forward=no"] = new Move(false, EDIT_LINE);
-	m_actions["move dist=sentence forward=no"] = new Move(false, EDIT_SENTENCE);
-	m_actions["move dist=paragraph forward=no"] = new Move(false, EDIT_PARAGRAPH);
-	m_actions["move dist=page forward=no"] = new Move(false, EDIT_PAGE);
-	m_actions["move dist=all forward=no"] = new Move(false, EDIT_FILE);
+	m_actions["move dist=char forward=no"] = new MoveAction(false, EDIT_CHAR);
+	m_actions["move dist=word forward=no"] = new MoveAction(false, EDIT_WORD);
+	m_actions["move dist=line forward=no"] = new MoveAction(false, EDIT_LINE);
+	m_actions["move dist=sentence forward=no"] = new MoveAction(false, EDIT_SENTENCE);
+	m_actions["move dist=paragraph forward=no"] = new MoveAction(false, EDIT_PARAGRAPH);
+	m_actions["move dist=page forward=no"] = new MoveAction(false, EDIT_PAGE);
+	m_actions["move dist=all forward=no"] = new MoveAction(false, EDIT_FILE);
 
-	m_actions["delete dist=char forward=yes"] = new Delete(true, EDIT_CHAR);
-	m_actions["delete dist=word forward=yes"] = new Delete(true, EDIT_WORD);
-	m_actions["delete dist=line forward=yes"] = new Delete(true, EDIT_LINE);
-	m_actions["delete dist=sentence forward=yes"] = new Delete(true, EDIT_SENTENCE);
-	m_actions["delete dist=paragraph forward=yes"] = new Delete(true, EDIT_PARAGRAPH);
-	m_actions["delete dist=page forward=yes"] = new Delete(true, EDIT_PAGE);
-	m_actions["delete dist=all forward=yes"] = new Delete(true, EDIT_FILE);
+	m_actions["delete dist=char forward=yes"] = new DeleteAction(true, EDIT_CHAR);
+	m_actions["delete dist=word forward=yes"] = new DeleteAction(true, EDIT_WORD);
+	m_actions["delete dist=line forward=yes"] = new DeleteAction(true, EDIT_LINE);
+	m_actions["delete dist=sentence forward=yes"] = new DeleteAction(true, EDIT_SENTENCE);
+	m_actions["delete dist=paragraph forward=yes"] = new DeleteAction(true, EDIT_PARAGRAPH);
+	m_actions["delete dist=page forward=yes"] = new DeleteAction(true, EDIT_PAGE);
+	m_actions["delete dist=all forward=yes"] = new DeleteAction(true, EDIT_FILE);
 
-	m_actions["delete dist=char forward=no"] = new Delete(false, EDIT_CHAR);
-	m_actions["delete dist=word forward=no"] = new Delete(false, EDIT_WORD);
-	m_actions["delete dist=line forward=no"] = new Delete(false, EDIT_LINE);
-	m_actions["delete dist=sentence forward=no"] = new Delete(false, EDIT_SENTENCE);
-	m_actions["delete dist=paragraph forward=no"] = new Delete(false, EDIT_PARAGRAPH);
-	m_actions["delete dist=page forward=no"] = new Delete(false, EDIT_PAGE);
-	m_actions["delete dist=all forward=no"] = new Delete(false, EDIT_FILE);
+	m_actions["delete dist=char forward=no"] = new DeleteAction(false, EDIT_CHAR);
+	m_actions["delete dist=word forward=no"] = new DeleteAction(false, EDIT_WORD);
+	m_actions["delete dist=line forward=no"] = new DeleteAction(false, EDIT_LINE);
+	m_actions["delete dist=sentence forward=no"] = new DeleteAction(false, EDIT_SENTENCE);
+	m_actions["delete dist=paragraph forward=no"] = new DeleteAction(false, EDIT_PARAGRAPH);
+	m_actions["delete dist=page forward=no"] = new DeleteAction(false, EDIT_PAGE);
+	m_actions["delete dist=all forward=no"] = new DeleteAction(false, EDIT_FILE);
 
 	m_pSettingsStore->OnParameterChanged.Subscribe(this, [this](Parameter p)
     {

@@ -51,27 +51,27 @@ void CopyAction::happen(CContNode* pNode)
     }
 }
 
-void Stop::happen(CContNode* pNode)
+void StopDasherAction::happen(CContNode* pNode)
 {
     pNode->mgr()->GetDasherInterface()->Done();
     pNode->mgr()->GetDasherInterface()->GetActiveInputMethod()->pause();
 }
 
-void Pause::happen(CContNode* pNode)
+void PauseDasherAction::happen(CContNode* pNode)
 {
     pNode->mgr()->GetDasherInterface()->GetActiveInputMethod()->pause();
 }
 
-void SpeakCancel::happen(CContNode* pNode)
+void SpeakCancelAction::happen(CContNode* pNode)
 {
     pNode->mgr()->GetDasherInterface()->Speak("", true);
 }
 
-Delete::Delete(bool bForwards, EditDistance dist): m_bForwards(bForwards), m_dist(dist)
+DeleteAction::DeleteAction(bool bForwards, EditDistance dist): m_bForwards(bForwards), m_dist(dist)
 {
 }
 
-int Delete::calculateNewOffset(CContNode* pNode, int offsetBefore)
+int DeleteAction::calculateNewOffset(CContNode* pNode, int offsetBefore)
 {
     if (m_bForwards)
         return offsetBefore;
@@ -79,21 +79,21 @@ int Delete::calculateNewOffset(CContNode* pNode, int offsetBefore)
     return pNode->mgr()->GetDasherInterface()->ctrlOffsetAfterMove(offsetBefore + 1, m_bForwards, m_dist) - 1;
 }
 
-void Delete::happen(CContNode* pNode)
+void DeleteAction::happen(CContNode* pNode)
 {
     pNode->mgr()->GetDasherInterface()->ctrlDelete(m_bForwards, m_dist);
 }
 
-Move::Move(bool bForwards, EditDistance dist): m_bForwards(bForwards), m_dist(dist)
+MoveAction::MoveAction(bool bForwards, EditDistance dist): m_bForwards(bForwards), m_dist(dist)
 {
 }
 
-int Move::calculateNewOffset(CContNode* pNode, int offsetBefore)
+int MoveAction::calculateNewOffset(CContNode* pNode, int offsetBefore)
 {
     return pNode->mgr()->GetDasherInterface()->ctrlOffsetAfterMove(offsetBefore + 1, m_bForwards, m_dist) - 1;
 }
 
-void Move::happen(CContNode* pNode)
+void MoveAction::happen(CContNode* pNode)
 {
     pNode->mgr()->GetDasherInterface()->ctrlMove(m_bForwards, m_dist);
 }

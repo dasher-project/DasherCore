@@ -20,6 +20,7 @@ public:
     virtual void happen(CContNode *pNode) {}
 };
 
+// Baseclass for actions that use some context of the already entered text
 class TextAction : public Action {
     public:
 		typedef enum ActionContext
@@ -61,42 +62,42 @@ public:
 	void happen(CContNode* pNode) override;
 };
 
-class Stop : public Action
+class StopDasherAction : public Action
 {
 public:
 	void happen(CContNode* pNode);
 };
 
-class Pause : public Action
+class PauseDasherAction : public Action
 {
 public:
 	void happen(CContNode* pNode);
 };
 
-class SpeakCancel : public Action
+class SpeakCancelAction : public Action
 {
 public:
 	void happen(CContNode* pNode);
 };
 
-class Delete : public Action
+class DeleteAction : public Action
 {
 	const bool m_bForwards;
 	const EditDistance m_dist;
 public:
-	Delete(bool bForwards, EditDistance dist);
+	DeleteAction(bool bForwards, EditDistance dist);
 
 	int calculateNewOffset(CContNode* pNode, int offsetBefore) override;
 
     void happen(CContNode* pNode) override;
 };
 
-class Move : public Action
+class MoveAction : public Action
 {
 	const bool m_bForwards;
 	const EditDistance m_dist;
 public:
-	Move(bool bForwards, EditDistance dist);
+	MoveAction(bool bForwards, EditDistance dist);
 
 	int calculateNewOffset(CContNode* pNode, int offsetBefore) override;
 

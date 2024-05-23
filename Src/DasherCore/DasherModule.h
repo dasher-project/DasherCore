@@ -28,17 +28,18 @@ class CDasherModule;
 /// \ingroup Core
 /// @{
 class CDasherModule {
- public:
-  CDasherModule(const char *szName);
+public:
+    CDasherModule(const char *szName);
+    virtual ~CDasherModule() = default;
 
-  virtual const char *GetName();
+    virtual const char *GetName();
 
-  virtual bool GetSettings(SModuleSettings **pSettings, int *iCount) {
-    return false;
-  };
+    virtual bool GetSettings(SModuleSettings **pSettings, int *iCount) {
+        return false;
+    }
 
- private:
-  const char *m_szName;
+private:
+    const char *m_szName;
 };
 /// @}
 
