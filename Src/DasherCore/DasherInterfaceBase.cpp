@@ -23,7 +23,6 @@
 #include "DasherInterfaceBase.h"
 
 #include "DasherViewSquare.h"
-#include "ControlManager.h"
 #include "DasherScreen.h"
 #include "DasherView.h"
 #include "DasherInput.h"
@@ -53,6 +52,7 @@
 
 // Declare our global file logging object
 
+#include "ActionManager.h"
 #include "FileUtils.h"
 #include "../DasherCore/FileLogger.h"
 #ifdef _DEBUG
@@ -67,14 +67,15 @@ CFileLogger* g_pLogger = NULL;
 
 using namespace Dasher;
 
-CDasherInterfaceBase::CDasherInterfaceBase(CSettingsStore *pSettingsStore) 
-  :  
+CDasherInterfaceBase::CDasherInterfaceBase(CSettingsStore *pSettingsStore) :
   m_pDasherModel(new CDasherModel()),
   m_pFramerate(new CFrameRate(pSettingsStore)),
   m_pSettingsStore(pSettingsStore),
-  m_pModuleManager(new CModuleManager()), 
+  m_pModuleManager(new CModuleManager()),
+  m_pActionManager(new CActionManager()),
   m_pLockLabel(NULL),
-  m_bLastMoved(false) {
+  m_bLastMoved(false)
+{
 
     m_pSettingsStore->OnParameterChanged.Subscribe(this, [this](Parameter p)
     {
@@ -118,7 +119,6 @@ CDasherInterfaceBase::CDasherInterfaceBase(CSettingsStore *pSettingsStore)
   m_pInputFilter = NULL;
   m_AlphIO = NULL;
   m_ColorIO = NULL;
-  m_ControlBoxIO = NULL;
   m_pUserLog = NULL;
   m_pNCManager = NULL;
   m_defaultPolicy = NULL;
@@ -134,6 +134,15 @@ CDasherInterfaceBase::CDasherInterfaceBase(CSettingsStore *pSettingsStore)
   g_pLogger = new CFileLogger("dasher.log",
                               g_iLogLevel,
                               g_iLogOptions);
+
+  GetActionManager()->OnCharEntered.Subscribe(this, [this](CSymbolNode* Trigger, TextCharAction*)
+  {
+      editOutput(Trigger->outputText(), Trigger);
+  });
+  GetActionManager()->OnCharRemoved.Subscribe(this, [this](CSymbolNode* Trigger, TextCharUndoAction*)
+  {
+      editDelete(Trigger->outputText(), Trigger);
+  });
 }
 
 void CDasherInterfaceBase::Realize(unsigned long ulTime) {
@@ -149,9 +158,6 @@ void CDasherInterfaceBase::Realize(unsigned long ulTime) {
 
   m_ColorIO = new CColorIO(this);
   ScanFiles(m_ColorIO, "color.*.xml");
-
-  m_ControlBoxIO = new CControlBoxIO(this);
-  ScanFiles(m_ControlBoxIO, "control.*.xml");
 
   ChangeView();
 
@@ -179,8 +185,6 @@ void CDasherInterfaceBase::Realize(unsigned long ulTime) {
   //we may have created a control manager already; in which case, we need
   // it to realize there's now an inputfilter (which may provide more actions).
   // So tell it the setting has changed...
-  if (CControlManager *pCon = m_pNCManager->GetControlManager())
-    pCon->updateActions();
 
   HandleParameterChange(LP_NODE_BUDGET);
   HandleParameterChange(BP_SPEAK_WORDS);
@@ -199,15 +203,17 @@ CDasherInterfaceBase::~CDasherInterfaceBase() {
   //Deregistering here allows for reusing a settings instance
   m_pSettingsStore->OnParameterChanged.Unsubscribe(this);
   m_pSettingsStore->OnPreParameterChange.Unsubscribe(this);
+  GetActionManager()->OnCharEntered.Unsubscribe(this);
+  GetActionManager()->OnCharRemoved.Unsubscribe(this);
 
   //WriteTrainFileFull();???
   delete m_pDasherModel;        // The order of some of these deletions matters
   delete m_pDasherView;
-  delete m_ControlBoxIO;
   delete m_ColorIO;
   delete m_AlphIO;
   delete m_pNCManager;
   delete m_pModuleManager;
+  delete m_pActionManager;
   // Do NOT delete Edit box or Screen. This class did not create them.
 
   // When we destruct on shutdown, we'll output any detailed log file
@@ -284,11 +290,6 @@ void CDasherInterfaceBase::HandleParameterChange(Parameter parameter) {
   case BP_SPEAK_WORDS:
     delete m_pWordSpeaker;
     m_pWordSpeaker = m_pSettingsStore->GetBoolParameter(BP_SPEAK_WORDS) ? new WordSpeaker(this) : NULL;
-    break;
-  case BP_CONTROL_MODE:
-  case SP_CONTROL_BOX_ID:
-    // force rebuilding every node. If not control box is accessed after delete.
-    CreateNCManager();
     break;
   default:
     break;
@@ -392,7 +393,7 @@ void CDasherInterfaceBase::CreateNCManager() {
   CNodeCreationManager *pOldMgr = m_pNCManager;
 
   //now create the new manager...
-  m_pNCManager = new CNodeCreationManager(m_pSettingsStore, this, m_AlphIO, m_ControlBoxIO);
+  m_pNCManager = new CNodeCreationManager(m_pSettingsStore, this, m_AlphIO);
   if (m_pSettingsStore->GetBoolParameter(BP_PALETTE_CHANGE))
     m_pSettingsStore->SetStringParameter(SP_COLOUR_ID, m_pNCManager->GetAlphabet()->GetPalette());
 
@@ -756,10 +757,6 @@ void CDasherInterfaceBase::GetPermittedValues(Parameter parameter, std::vector<s
   case SP_COLOUR_ID:
     DASHER_ASSERT(m_ColourIO != NULL);
     m_ColorIO->GetKnownPalettes(&vList);
-    break;
-  case SP_CONTROL_BOX_ID:
-    DASHER_ASSERT(m_ControlBoxIO != NULL);
-    m_ControlBoxIO->GetControlBoxes(&vList);
     break;
   case SP_INPUT_FILTER:
     m_pModuleManager->ListInputMethodModules(vList);

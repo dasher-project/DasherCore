@@ -101,7 +101,7 @@ namespace Dasher {
     /// moves under the crosshair
     ///
 
-    virtual void Output();
+    virtual void Do();
 
     ///
     /// Called when a node is left backwards
@@ -212,6 +212,7 @@ namespace Dasher {
     ///
 
     void RecursiveDumpTree(std::ostream &out, SCENode *pCurrent, unsigned int iDepth);
+    ~CConversionManager() override = default;
 
     CLanguageModel *m_pLanguageModel;
     

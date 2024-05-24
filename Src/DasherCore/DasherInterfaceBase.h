@@ -39,7 +39,6 @@
 #include "ColorIO.h"
 #include "InputFilter.h"
 #include "ModuleManager.h"
-#include "ControlManager.h"
 #include "FrameRate.h"
 #include <set>
 
@@ -316,6 +315,7 @@ public:
   CInputFilter *GetActiveInputMethod() {return m_pInputFilter;}
   const CAlphInfo *GetActiveAlphabet();
   CModuleManager* GetModuleManager(){return m_pModuleManager;}
+  CActionManager* GetActionManager(){return m_pActionManager;}
 
   void StartShutdown();
 
@@ -497,6 +497,7 @@ private:
   // preference with the alphabet.
   Options::ScreenOrientations ComputeOrientation();
 
+private:
   class WordSpeaker {
   public:
     WordSpeaker(CDasherInterfaceBase *pIntf);
@@ -515,9 +516,9 @@ private:
   CDasherInput *m_pInput;
   CInputFilter* m_pInputFilter;
   CModuleManager* m_pModuleManager;
+  CActionManager* m_pActionManager;
   CAlphIO *m_AlphIO;
   CColorIO *m_ColorIO;
-  CControlBoxIO *m_ControlBoxIO;
   CNodeCreationManager *m_pNCManager;
   CUserLogBase *m_pUserLog;
 

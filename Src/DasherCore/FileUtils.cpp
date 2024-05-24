@@ -1,3 +1,4 @@
+#include <fstream>
 #ifndef HAVE_OWN_FILEUTILS
 #include "FileUtils.h"
 #include <regex>

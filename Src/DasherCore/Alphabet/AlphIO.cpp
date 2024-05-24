@@ -54,7 +54,9 @@ SGroupInfo* CAlphIO::ParseGroupRecursive(pugi::xml_node& group_node, CAlphInfo* 
 		if(std::strcmp(node.name(),"node") == 0)
 		{
 			CurrentAlphabet->m_vCharacters.resize(CurrentAlphabet->m_vCharacters.size() + 1); //new char
-			ReadCharAttributes(node, &CurrentAlphabet->m_vCharacters.back(), pNewGroup);
+			CurrentAlphabet->m_vCharacterDoActions.resize(CurrentAlphabet->m_vCharacterDoActions.size() + 1); //new Do Actions
+			CurrentAlphabet->m_vCharacterUndoActions.resize(CurrentAlphabet->m_vCharacterUndoActions.size() + 1); //new Undo Actions
+			ReadCharAttributes(node, CurrentAlphabet->m_vCharacters.back(), pNewGroup, CurrentAlphabet->m_vCharacterDoActions.back(), CurrentAlphabet->m_vCharacterUndoActions.back());
 			pNewGroup->iNumChildNodes++;
 		}
 
@@ -203,22 +205,24 @@ CAlphInfo *CAlphIO::CreateDefault() {
 	return Default;
 }
 
-void CAlphIO::ReadCharAttributes(pugi::xml_node xml_node, CAlphInfo::character* alphabet_character, SGroupInfo* parentGroup) {
+void CAlphIO::ReadCharAttributes(pugi::xml_node xml_node, CAlphInfo::character& alphabet_character, SGroupInfo* parentGroup, std::vector<Action*>& DoActions, std::vector<Action*>& UndoActions) {
 
 	if(xml_node.type() == pugi::node_null) return;
 
-	alphabet_character->Display = xml_node.attribute("label").as_string();
+	alphabet_character.Display = xml_node.attribute("label").as_string();
 
 	//Potential Unicode Symbol
 	const auto textAction = xml_node.child("textCharAction");
 	if(textAction.type() != pugi::node_null)
 	{
 	    const int unicodeSymbol = textAction.attribute("unicode").as_int(-1);
-		alphabet_character->Text = (unicodeSymbol >= 0) ? std::string(1, static_cast<char>(unicodeSymbol)) : alphabet_character->Display;
+		alphabet_character.Text = (unicodeSymbol >= 0) ? std::string(1, static_cast<char>(unicodeSymbol)) : alphabet_character.Display;
 	}
 
-	alphabet_character->parentGroup = parentGroup;
-	alphabet_character->ColorGroupOffset = parentGroup->iNumChildNodes;
+	alphabet_character.parentGroup = parentGroup;
+	alphabet_character.ColorGroupOffset = parentGroup->iNumChildNodes;
+	DoActions.push_back(new TextCharAction());
+	UndoActions.push_back(new TextCharUndoAction());
 }
 
 // Reverses the internal linked list for the given SGroupInfo

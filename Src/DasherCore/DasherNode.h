@@ -240,7 +240,7 @@ class Dasher::CDasherNode:private NoClones {
   /// moves under the crosshair
   ///
 
-  virtual void Output() {};
+  virtual void Do() {};
   virtual void Undo() {};
 
   ///Called by logging code to get information about node which has just been

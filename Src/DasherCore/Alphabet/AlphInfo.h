@@ -33,8 +33,11 @@
 #include "GroupInfo.h"
 
 #include <string>
+#include <unordered_map>
 #include <vector>
 #include <utility>              // for std::pair
+
+#include "Actions.h"
 
 namespace Dasher {
   class CAlphInfo;
@@ -82,6 +85,9 @@ public:
   //Determine that this character denotes a word gap
   bool SymbolIsSpaceCharacter(symbol s) const {return std::isspace(m_vCharacters[s-1].Text[0]);}
   bool SymbolPrintsNewLineCharacter(symbol s) const {return m_vCharacters[s-1].Text == "\n";}
+
+  const std::vector<Action*>& GetCharDoActions(symbol s) const {return m_vCharacterDoActions[s-1];}
+  const std::vector<Action*>& GetCharUndoActions(symbol s) const {return m_vCharacterUndoActions[s-1];}
 
   //symbol GetStartConversionSymbol() const;
   //symbol GetEndConversionSymbol() const;
@@ -149,7 +155,8 @@ private:
 
 protected:
   struct character {
-    character() : Display(""), Text(""), parentGroup(nullptr), ColorGroupOffset(-1) {};
+    character() : Display(""), Text(""), parentGroup(nullptr), ColorGroupOffset(-1), fixedProbability(0), speedFactor(0){}
+
     std::string Display;
     std::string Text;
     SGroupInfo* parentGroup;
@@ -158,6 +165,8 @@ protected:
     float speedFactor; //allows for slowdown in this box. Currently not supported but parsed already.
   };
   std::vector<character> m_vCharacters;
+  std::vector<std::vector<Action*>> m_vCharacterDoActions = {};
+  std::vector<std::vector<Action*>> m_vCharacterUndoActions = {};
 
   void copyCharacterFrom(const CAlphInfo *other, int idx);
 };

@@ -20,8 +20,6 @@
 
 #include "AlphInfo.h"
 
-#include <iostream>
-
 using namespace Dasher;
 
 CAlphInfo::CAlphInfo() {
@@ -49,6 +47,17 @@ std::string CAlphInfo::escape(const std::string &ch) const {
 CAlphInfo::~CAlphInfo() {
     pChild->RecursiveDelete();
     pNext->RecursiveDelete();
+
+    for(auto action_vector : m_vCharacterDoActions)
+    {
+        for(auto a : action_vector) delete a;
+        action_vector.clear();
+    }
+    for(auto action_vector : m_vCharacterUndoActions)
+    {
+        for(auto a : action_vector) delete a;
+        action_vector.clear();
+    }
 }
 
 void CAlphInfo::copyCharacterFrom(const CAlphInfo *other, int idx) {

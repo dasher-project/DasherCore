@@ -62,7 +62,7 @@ CRoutingAlphMgr::CRoutedSym::CRoutedSym(int iOffset, CDasherScreen::Label *pLabe
 };
 
 
-CAlphabetManager::CAlphNode *CRoutingAlphMgr::CreateSymbolRoot(int iOffset, CLanguageModel::Context ctx, symbol sym) {
+CAlphNode *CRoutingAlphMgr::CreateSymbolRoot(int iOffset, CLanguageModel::Context ctx, symbol sym) {
   //sym is from the map, so a base symbol. It's at the end of the context,
   // TODO unless this is the completely-empty context,
   // so ask the LM for which way it's most likely to have been entered

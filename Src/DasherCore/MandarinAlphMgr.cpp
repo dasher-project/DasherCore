@@ -250,7 +250,7 @@ CTrainer *CMandarinAlphMgr::GetTrainer() {
   return new CMandarinTrainer(m_pInterface, this);
 }
 
-CAlphabetManager::CAlphNode *CMandarinAlphMgr::CreateSymbolRoot(int iOffset, CLanguageModel::Context ctx, symbol chSym) {
+CAlphNode *CMandarinAlphMgr::CreateSymbolRoot(int iOffset, CLanguageModel::Context ctx, symbol chSym) {
   return new CMandSym(iOffset, this, chSym, 0);
 }
 

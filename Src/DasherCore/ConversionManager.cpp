@@ -131,7 +131,7 @@ void CConversionManager::CConvNode::GetContext(CDasherInterfaceBase *pInterface,
   CDasherNode::GetContext(pInterface, pAlphabetMap, vContextSymbols, iOffset, iLength);
 }
 
-void CConversionManager::CConvNode::Output() {
+void CConversionManager::CConvNode::Do() {
   // TODO: Reimplement this
   //  m_pNCManager->m_bContextSensitive = true;
 

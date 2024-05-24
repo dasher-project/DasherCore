@@ -58,7 +58,6 @@ ADD_library(DasherCore STATIC
 	${CMAKE_CURRENT_LIST_DIR}/Src/DasherCore/ColorIO.cpp
 	${CMAKE_CURRENT_LIST_DIR}/Src/DasherCore/ColorPalette.cpp
 	${CMAKE_CURRENT_LIST_DIR}/Src/DasherCore/CompassMode.cpp
-	${CMAKE_CURRENT_LIST_DIR}/Src/DasherCore/ControlManager.cpp
 	${CMAKE_CURRENT_LIST_DIR}/Src/DasherCore/ConversionManager.cpp
 	${CMAKE_CURRENT_LIST_DIR}/Src/DasherCore/ConvertingAlphMgr.cpp
 	${CMAKE_CURRENT_LIST_DIR}/Src/DasherCore/DasherButtons.cpp

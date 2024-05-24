@@ -443,7 +443,7 @@ void CDasherModel::OutputTo(CDasherNode *pNewNode) {
     OutputTo(pNewNode->Parent());
 
     m_pLastOutput = pNewNode;
-    pNewNode->Output();
+    pNewNode->Do();
     pNewNode->SetFlag(CDasherNode::NF_SEEN, true); //becomes NF_SEEN after output.
 
   } else {

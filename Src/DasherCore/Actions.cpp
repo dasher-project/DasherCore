@@ -1,4 +1,7 @@
 #include "Actions.h"
+
+#include "ActionManager.h"
+#include "AlphabetManager.h"
 #include "DasherInterfaceBase.h"
 
 using namespace Dasher;
@@ -16,7 +19,7 @@ SpeechAction::SpeechAction(CDasherInterfaceBase* pIntf, ActionContext c, EditDis
 {
 }
 
-void SpeechAction::happen(CContNode* pNode)
+void SpeechAction::happen(CSymbolNode* pNode)
 {
     switch (context)
     {
@@ -35,7 +38,7 @@ CopyAction::CopyAction(CDasherInterfaceBase* pIntf, ActionContext c, EditDistanc
 {
 }
 
-void CopyAction::happen(CContNode* pNode)
+void CopyAction::happen(CSymbolNode* pNode)
 {
     switch (context)
     {
@@ -51,51 +54,61 @@ void CopyAction::happen(CContNode* pNode)
     }
 }
 
-void StopDasherAction::happen(CContNode* pNode)
+void StopDasherAction::happen(CSymbolNode* pNode)
 {
-    pNode->mgr()->GetDasherInterface()->Done();
-    pNode->mgr()->GetDasherInterface()->GetActiveInputMethod()->pause();
+    pNode->GetInterface()->Done();
+    pNode->GetInterface()->GetActiveInputMethod()->pause();
 }
 
-void PauseDasherAction::happen(CContNode* pNode)
+void PauseDasherAction::happen(CSymbolNode* pNode)
 {
-    pNode->mgr()->GetDasherInterface()->GetActiveInputMethod()->pause();
+    pNode->GetInterface()->GetActiveInputMethod()->pause();
 }
 
-void SpeakCancelAction::happen(CContNode* pNode)
+void SpeakCancelAction::happen(CSymbolNode* pNode)
 {
-    pNode->mgr()->GetDasherInterface()->Speak("", true);
+    pNode->GetInterface()->Speak("", true);
 }
 
 DeleteAction::DeleteAction(bool bForwards, EditDistance dist): m_bForwards(bForwards), m_dist(dist)
 {
 }
 
-int DeleteAction::calculateNewOffset(CContNode* pNode, int offsetBefore)
+unsigned DeleteAction::calculateNewOffset(CSymbolNode* pNode, int offsetBefore)
 {
     if (m_bForwards)
         return offsetBefore;
 
-    return pNode->mgr()->GetDasherInterface()->ctrlOffsetAfterMove(offsetBefore + 1, m_bForwards, m_dist) - 1;
+    return pNode->GetInterface()->ctrlOffsetAfterMove(offsetBefore + 1, m_bForwards, m_dist) - 1;
 }
 
-void DeleteAction::happen(CContNode* pNode)
+void DeleteAction::happen(CSymbolNode* pNode)
 {
-    pNode->mgr()->GetDasherInterface()->ctrlDelete(m_bForwards, m_dist);
+    pNode->GetInterface()->ctrlDelete(m_bForwards, m_dist);
 }
 
 MoveAction::MoveAction(bool bForwards, EditDistance dist): m_bForwards(bForwards), m_dist(dist)
 {
 }
 
-int MoveAction::calculateNewOffset(CContNode* pNode, int offsetBefore)
+unsigned MoveAction::calculateNewOffset(CSymbolNode* pNode, int offsetBefore)
 {
-    return pNode->mgr()->GetDasherInterface()->ctrlOffsetAfterMove(offsetBefore + 1, m_bForwards, m_dist) - 1;
+    return pNode->GetInterface()->ctrlOffsetAfterMove(offsetBefore + 1, m_bForwards, m_dist) - 1;
 }
 
-void MoveAction::happen(CContNode* pNode)
+void MoveAction::happen(CSymbolNode* pNode)
 {
-    pNode->mgr()->GetDasherInterface()->ctrlMove(m_bForwards, m_dist);
+    pNode->GetInterface()->ctrlMove(m_bForwards, m_dist);
+}
+
+void TextCharAction::Broadcast(CActionManager* Manager, CSymbolNode* Trigger)
+{
+    Manager->OnCharEntered.Broadcast(Trigger, this);
+}
+
+void TextCharUndoAction::Broadcast(CActionManager* Manager, CSymbolNode* Trigger)
+{
+    Manager->OnCharRemoved.Broadcast(Trigger, this);
 }
 
 std::string TextAction::getBasedOnDistance(EditDistance dist) {

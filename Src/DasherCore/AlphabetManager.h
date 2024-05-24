@@ -29,6 +29,13 @@
 #include "SettingsStore.h"
 #include "WordGeneratorBase.h"
 
+namespace Dasher
+{
+    class CAlphNode;
+    class CAlphabetManager;
+    class Action;
+}
+
 class CNodeCreationManager;
 struct SGroupInfo;
 
@@ -36,85 +43,27 @@ namespace Dasher {
 
   class CDasherInterfaceBase;
 
-  /// \ingroup Model
-  /// @{
+    /// \ingroup Model
+    /// @{
 
-  /// Implementation of CNodeManager for regular 'alphabet' nodes, ie
-  /// the basic Dasher behaviour. Child nodes are populated according
-  /// to the appropriate alphabet file, with sizes given by the
-  /// language model.
-  ///
-  /// Note Dec11, refactoring to allow subclasses to change how character
-  /// data is obtained from the alphabet. All information on valid symbol indices
-  /// and the tree of groups, is obtained from m_pBaseGroup, which is created
-  /// by a call to copyGroups. Besides this, the only routines accessing _symbol_
-  /// data from the alphabet are: CreateLanguageModel; GetTrainer;
-  /// GetColour (called from CSymbolNode constructor); CreateSymbolNode and
-  /// CSymbolNode::outputText(). [many other routines access e.g. default context, training file, and so on]
+    /// Implementation of CNodeManager for regular 'alphabet' nodes, ie
+    /// the basic Dasher behaviour. Child nodes are populated according
+    /// to the appropriate alphabet file, with sizes given by the
+    /// language model.
+    ///
+    /// Note Dec11, refactoring to allow subclasses to change how character
+    /// data is obtained from the alphabet. All information on valid symbol indices
+    /// and the tree of groups, is obtained from m_pBaseGroup, which is created
+    /// by a call to copyGroups. Besides this, the only routines accessing _symbol_
+    /// data from the alphabet are: CreateLanguageModel; GetTrainer;
+    /// GetColour (called from CSymbolNode constructor); CreateSymbolNode and
+    /// CSymbolNode::outputText(). [many other routines access e.g. default context, training file, and so on]
 
-  class CAlphabetManager : public CNodeManager {
-  public:
-    ///Create a new AlphabetManager. Note, not usable until Setup() called.
-    CAlphabetManager(CSettingsStore *pSettingsStore, CDasherInterfaceBase *pInterface, CNodeCreationManager *pNCManager, const CAlphInfo *pAlphabet);
-    
-    ///Must be called after construction, before the AlphMgr is used. Calls
-    /// InitMap(), looks for a usable context-switch delimiter, and
-    /// calls CreateLanguageModel.
-    void Setup();
-
-    virtual void MakeLabels(CDasherScreen *pScreen);
-    ///Gets a new trainer to train this LM. Caller is responsible for deallocating the
-    /// trainer later.
-    virtual CTrainer *GetTrainer();
-    
-    /// Gets a (Game) Word Generator to make target sentences for the current alphabet
-    CWordGeneratorBase *GetGameWords();
-
-    virtual ~CAlphabetManager();
-    /// Flush to the user's training file everything written in this AlphMgr
-    /// \param pInterface to use for I/O by calling WriteTrainFile(fname,txt)
-    void WriteTrainFileFull(CDasherInterfaceBase *pInterface);
-  protected:
-    ///Initializes the alphabet map (m_map) from the characters in the alphabet.
-    /// Called from Setup(), i.e. before the manager is or need be usable.
-    /// The default adds all symbols in the alphabet to the map (inc. dealing
-    /// with the paragraph symbol, if any), and DASHER_ASSERTs that all such
-    /// characters have distinct texts.
-    virtual void InitMap();
-    
-    ///Creates the LM, and stores in m_pLanguageModel.
-    /// Default implementation switches on LP_LANGUAGE_MODEL_ID.
-    /// Note subclasses changing the interpretation of the AlphInfo, should override
-    /// this to take account of its new meaning.
-    virtual void CreateLanguageModel();
-
-    ///Base of all group+character information presented to the user;
-    /// created by calling copyGroups on the alphabet.
-    SGroupInfo *m_pBaseGroup;
-    ///Called to create the base group the AlphMgr will use from the alphabet.
-    /// The default implementation elides all single-element groups, and fills in
-    /// m_mGroupLabels and m_vLabels using the supplied screen; subclasses may
-    /// override to do more, but should call the superclass method to set up the
-    /// labels too.
-    /// (Note: each invocation creates labels for all symbols in pBase, *and*
-    /// all symbols in any later siblings of pBase (by recursive call on pNext).
-    /// Of those, symbols in any child groups may be made by recursive call on
-    /// pChild, but only if pBase has >1 child node (symbol/group).)
-    virtual SGroupInfo *copyGroups(const SGroupInfo *pBase, CDasherScreen *pScreen);
-    
-    ///A label for each group in the elided tree
-    std::map<const SGroupInfo *,CDasherScreen::Label *> m_mGroupLabels;
-    ///A label for each symbol, indexed by symbol id (element 0 = null)
-    std::vector<CDasherScreen::Label *> m_vLabels;
-    
-    virtual const std::string &GetLabelText(symbol i) const;
-    
-    class CAlphNode;
     /// Abstract superclass for alphabet manager nodes, provides common implementation
     /// code for rebuilding parent nodes = reversing.
     class CAlphBase : public CDasherNode {
     public:
-      CAlphabetManager *mgr() const {return m_pMgr;}
+      CNodeManager* mgr() const override;
       ///Rebuilds this node's parent by recreating the previous 'root' node,
       /// then calling RebuildForwardsFromAncestor
       CDasherNode *RebuildParent();
@@ -132,9 +81,9 @@ namespace Dasher {
       /// \param pParent parent of the symbol node to create; could be the previous root, or an intervening node (e.g. group)
       virtual CDasherNode *RebuildGroup(CAlphNode* pParent, const SGroupInfo* pInfo);
       ///Just keep track of the last node output (for training file purposes)
-      void Undo();
+      void Undo() override;
       ///Just keep track of the last node output (for training file purposes)
-      void Output();
+      void Do() override;
     protected:
       ///Called in process of rebuilding parent: fill in the hierarchy _beneath_ the
       /// the previous root node, by calling IterateChildGroups passing this node as
@@ -158,6 +107,7 @@ namespace Dasher {
       /// (as a symbol or subgroup), any number of levels beneath it
       virtual bool isInGroup(const SGroupInfo *pGroup)=0;
     };
+
     ///Additionally stores LM contexts and probabilities calculated therefrom
     class CAlphNode : public CAlphBase {
     public:
@@ -173,6 +123,7 @@ namespace Dasher {
     private:
       std::vector<unsigned int> *m_pProbInfo;
     };
+
     class CSymbolNode : public CAlphNode {
     public:
       ///Standard constructor, gets colour from GetColour(symbol,offset) and label from current alphabet
@@ -181,7 +132,7 @@ namespace Dasher {
 
       ///Create the children of this node, by starting traversal of the alphabet from the top
       virtual void PopulateChildren();
-      virtual void Output();
+      virtual void Do();
       virtual void Undo();
       ///Override to provide symbol number, probability, _edit_ text from alphabet
       virtual SymbolProb GetSymbolProb() const;
@@ -202,8 +153,10 @@ namespace Dasher {
           return (offset()&1) == 0;
       }
 
-    protected:
+      CDasherInterfaceBase* GetInterface();
+
       virtual const std::string &outputText() const;
+  protected:
       ///Text to write to user training file/buffer when this symbol output.
       /// Default just returns the output text escaped if necessary.
       virtual std::string trainText();
@@ -212,6 +165,8 @@ namespace Dasher {
       /// (i.e. '\r' and '\n'); every other symbol enters only a single
       /// unicode char, even if that might take >1 octet.
       int numChars();
+      void TrainSymbol();
+      void UntrainSymbol();
       ///Override: true iff pGroup encloses this symbol (according to its start/end symbol#)
       bool isInGroup(const SGroupInfo *pGroup);
 
@@ -249,7 +204,68 @@ namespace Dasher {
       const SGroupInfo* m_pGroupInfo;
     };
 
-  public:
+    class CAlphabetManager : public CNodeManager {
+        
+    public:
+    ///Create a new AlphabetManager. Note, not usable until Setup() called.
+    CAlphabetManager(CSettingsStore *pSettingsStore, CDasherInterfaceBase *pInterface, CNodeCreationManager *pNCManager, const CAlphInfo *pAlphabet);
+
+    ///Must be called after construction, before the AlphMgr is used. Calls
+    /// InitMap(), looks for a usable context-switch delimiter, and
+    /// calls CreateLanguageModel.
+    void Setup();
+
+    virtual void MakeLabels(CDasherScreen *pScreen);
+    ///Gets a new trainer to train this LM. Caller is responsible for deallocating the
+    /// trainer later.
+    virtual CTrainer *GetTrainer();
+
+    /// Gets a (Game) Word Generator to make target sentences for the current alphabet
+    CWordGeneratorBase *GetGameWords();
+
+    virtual ~CAlphabetManager();
+    /// Flush to the user's training file everything written in this AlphMgr
+    /// \param pInterface to use for I/O by calling WriteTrainFile(fname,txt)
+    void WriteTrainFileFull(CDasherInterfaceBase *pInterface);
+    protected:
+        friend CGroupNode;
+        friend CSymbolNode;
+        friend CAlphNode;
+    ///Initializes the alphabet map (m_map) from the characters in the alphabet.
+    /// Called from Setup(), i.e. before the manager is or need be usable.
+    /// The default adds all symbols in the alphabet to the map (inc. dealing
+    /// with the paragraph symbol, if any), and DASHER_ASSERTs that all such
+    /// characters have distinct texts.
+    virtual void InitMap();
+
+    ///Creates the LM, and stores in m_pLanguageModel.
+    /// Default implementation switches on LP_LANGUAGE_MODEL_ID.
+    /// Note subclasses changing the interpretation of the AlphInfo, should override
+    /// this to take account of its new meaning.
+    virtual void CreateLanguageModel();
+
+    ///Base of all group+character information presented to the user;
+    /// created by calling copyGroups on the alphabet.
+    SGroupInfo *m_pBaseGroup;
+    ///Called to create the base group the AlphMgr will use from the alphabet.
+    /// The default implementation elides all single-element groups, and fills in
+    /// m_mGroupLabels and m_vLabels using the supplied screen; subclasses may
+    /// override to do more, but should call the superclass method to set up the
+    /// labels too.
+    /// (Note: each invocation creates labels for all symbols in pBase, *and*
+    /// all symbols in any later siblings of pBase (by recursive call on pNext).
+    /// Of those, symbols in any child groups may be made by recursive call on
+    /// pChild, but only if pBase has >1 child node (symbol/group).)
+    virtual SGroupInfo *copyGroups(const SGroupInfo *pBase, CDasherScreen *pScreen);
+
+    ///A label for each group in the elided tree
+    std::map<const SGroupInfo *,CDasherScreen::Label *> m_mGroupLabels;
+    ///A label for each symbol, indexed by symbol id (element 0 = null)
+    std::vector<CDasherScreen::Label *> m_vLabels;
+
+    virtual const std::string &GetLabelText(symbol i) const;
+
+    public:
     ///
     /// Get a new root node owned by this manager
     /// pContext - node from which to extract context (e.g. perhaps an un-seen node);
@@ -262,7 +278,9 @@ namespace Dasher {
 
     const CAlphInfo *GetAlphabet() const;
 
-  protected:
+    CDasherInterfaceBase* GetInterface() const {return m_pInterface;}
+
+    protected:
     ///Called to get the symbols in the context for (preceding) a new node
     /// \param pParent node to assume has been output, when obtaining context
     /// \param iRootOffset offset of the node that will be constructed; i.e. context should include symbols
@@ -282,8 +300,8 @@ namespace Dasher {
     /// \param iOffset index of symbol entered by the node
     /// \param sym symbol number as returned as first element of GetContextSymbols
     virtual CAlphNode *CreateSymbolRoot(int iOffset, CLanguageModel::Context ctx, symbol sym);
-    
-    CDasherInterfaceBase * const m_pInterface;
+
+    CDasherInterfaceBase* m_pInterface;
 
     CLanguageModel *m_pLanguageModel;
 
@@ -291,13 +309,14 @@ namespace Dasher {
     const CAlphInfo *m_pAlphabet;
     CAlphabetMap m_map;
     CSettingsStore* m_pSettingsStore;
-    
-  private:
+
+    private:
+        friend CAlphBase;
     ///Wraps m_pLanguageModel->GetProbs to implement nonuniformity
     /// (also leaves space for NCManager::AddExtras to add control node)
     /// Returns array of non-cumulative probs. Should this be protected and/or virtual???
     void GetProbs(std::vector<unsigned int> *pProbs, CLanguageModel::Context iContext);
-    
+
     ///Constructs child nodes under the specified parent according to provided group.
     /// Nodes are created by calling CreateSymbolNode and CreateGroupNode, unless buildAround is non-null.
     /// \param pParentGroup group describing which symbols and/or subgroups should be constructed
@@ -325,7 +344,7 @@ namespace Dasher {
     ///"" if no such could be found (=> will be found on a per-context basis)
     std::string m_sDelim;
 
-  };
+    };
 /// @}
 
 }

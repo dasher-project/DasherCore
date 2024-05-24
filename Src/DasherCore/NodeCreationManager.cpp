@@ -3,7 +3,6 @@
 #include "NodeCreationManager.h"
 #include "MandarinAlphMgr.h"
 #include "RoutingAlphMgr.h"
-#include "ControlManager.h"
 
 #include <string>
 
@@ -72,9 +71,8 @@ private:
 CNodeCreationManager::CNodeCreationManager(
 	CSettingsStore* pSettingsStore,
 	CDasherInterfaceBase* pInterface,
-	const CAlphIO* pAlphIO,
-	const CControlBoxIO* pControlBoxIO
-): m_pInterface(pInterface), m_pControlManager(nullptr), m_pScreen(nullptr), m_pSettingsStore(pSettingsStore)
+	const CAlphIO* pAlphIO
+): m_pInterface(pInterface), m_pScreen(nullptr), m_pSettingsStore(pSettingsStore)
 {
 	m_pSettingsStore->OnParameterChanged.Subscribe(this, [this](const Parameter p)
     {
@@ -131,14 +129,12 @@ CNodeCreationManager::CNodeCreationManager(
 	}
 
 	HandleParameterChange(LP_ORIENTATION);
-	CreateControlBox(pControlBoxIO);
 }
 
 CNodeCreationManager::~CNodeCreationManager()
 {
 	delete m_pAlphabetManager;
 	delete m_pTrainer;
-	delete m_pControlManager;
 
 	m_pSettingsStore->OnParameterChanged.Unsubscribe(this);
 }
@@ -148,40 +144,6 @@ void CNodeCreationManager::ChangeScreen(CDasherScreen* pScreen)
 	if (m_pScreen == pScreen) return;
 	m_pScreen = pScreen;
 	m_pAlphabetManager->MakeLabels(pScreen);
-	if (m_pControlManager) m_pControlManager->ChangeScreen(pScreen);
-}
-
-void CNodeCreationManager::CreateControlBox(const CControlBoxIO* pControlIO)
-{
-	delete m_pControlManager;
-	unsigned long iControlSpace;
-	//don't allow a control manager during Game Mode 
-	if (m_pSettingsStore->GetBoolParameter(BP_CONTROL_MODE) && !m_pInterface->GetGameModule())
-	{
-		auto id = m_pSettingsStore->GetStringParameter(SP_CONTROL_BOX_ID);
-		m_pControlManager = pControlIO->CreateControlManager(id, m_pSettingsStore, this, m_pInterface);
-		if (m_pScreen) m_pControlManager->ChangeScreen(m_pScreen);
-		iControlSpace = CDasherModel::NORMALIZATION / 20;
-	}
-	else
-	{
-		m_pControlManager = nullptr;
-		iControlSpace = 0;
-	}
-	m_iAlphNorm = CDasherModel::NORMALIZATION - iControlSpace;
-}
-
-void CNodeCreationManager::AddExtras(CDasherNode* pParent)
-{
-	//control mode:
-	DASHER_ASSERT(pParent->GetChildren().back()->Hbnd() == m_iAlphNorm);
-	if (m_pControlManager)
-	{
-		//ACL leave offset as is - like its groupnode parent, but unlike its alphnode siblings,
-		//the control node does not enter a symbol....
-		CDasherNode* ctl = m_pControlManager->GetRoot(pParent, pParent->offset());
-		ctl->Reparent(pParent, pParent->GetChildren().back()->Hbnd(), CDasherModel::NORMALIZATION);
-	}
 }
 
 void CNodeCreationManager::ImportTrainingText(const std::string& strPath)
