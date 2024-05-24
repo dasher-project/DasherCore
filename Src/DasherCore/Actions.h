@@ -1,17 +1,10 @@
 #pragma once
 #include <string>
 
-namespace Dasher
-{
-    class CActionManager;
-}
-
 namespace Dasher {
     class CSymbolNode;
-    class CDasherNode;
+    class CActionManager;
     class CDasherInterfaceBase;
-    class CControlBase;
-    class CContNode;
 
 typedef enum EditDistance : unsigned int {
     EDIT_CHAR, EDIT_WORD, EDIT_SENTENCE, EDIT_PARAGRAPH, EDIT_FILE, EDIT_LINE, EDIT_PAGE, EDIT_SELECTION, EDIT_NONE
@@ -23,7 +16,6 @@ public:
     virtual ~Action() = default;
 
     virtual unsigned calculateNewOffset(CSymbolNode* pNode, int offsetBefore) { return offsetBefore; }
-    virtual void happen(CSymbolNode* pNode) {}
     virtual void Broadcast(CActionManager* Manager, CSymbolNode* Trigger) = 0;
 };
 
@@ -43,9 +35,6 @@ class TextAction : public Action {
         void NotifyOffset(int iOffset);
         ~TextAction() override;
 
-        void happen(CSymbolNode* pNode) override = 0;
-
-    protected:
         CDasherInterfaceBase *m_pIntf;
         int m_iStartOffset;
         std::string strLast;
@@ -58,8 +47,7 @@ class SpeechAction : public TextAction
 public:
     SpeechAction(CDasherInterfaceBase* pIntf, ActionContext c, EditDistance dist = EDIT_NONE);
 
-	void happen(CSymbolNode* pNode) override;
-    void Broadcast(CActionManager* Manager, CSymbolNode* Trigger) override {}
+    void Broadcast(CActionManager* Manager, CSymbolNode* Trigger) override;
 };
 
 class CopyAction : public TextAction
@@ -67,55 +55,51 @@ class CopyAction : public TextAction
 public:
 	CopyAction(CDasherInterfaceBase* pIntf, ActionContext c, EditDistance dist = EDIT_NONE);
 
-	void happen(CSymbolNode* pNode) override;
-    void Broadcast(CActionManager* Manager, CSymbolNode* Trigger) override {}
+    void Broadcast(CActionManager* Manager, CSymbolNode* Trigger) override;
 };
 
 class StopDasherAction : public Action
 {
 public:
-	void happen(CSymbolNode* pNode) override;
-    void Broadcast(CActionManager* Manager, CSymbolNode* Trigger) override {}
+    void Broadcast(CActionManager* Manager, CSymbolNode* Trigger) override;
 };
 
 class PauseDasherAction : public Action
 {
 public:
-	void happen(CSymbolNode* pNode) override;
-    void Broadcast(CActionManager* Manager, CSymbolNode* Trigger) override {}
+    void Broadcast(CActionManager* Manager, CSymbolNode* Trigger) override;
 };
 
 class SpeakCancelAction : public Action
 {
 public:
-	void happen(CSymbolNode* pNode) override;
-    void Broadcast(CActionManager* Manager, CSymbolNode* Trigger) override {}
+    void Broadcast(CActionManager* Manager, CSymbolNode* Trigger) override;
 };
 
 class DeleteAction : public Action
 {
-	const bool m_bForwards;
-	const EditDistance m_dist;
 public:
 	DeleteAction(bool bForwards, EditDistance dist);
 
 	unsigned calculateNewOffset(CSymbolNode* pNode, int offsetBefore) override;
 
-    void happen(CSymbolNode* pNode) override;
-    void Broadcast(CActionManager* Manager, CSymbolNode* Trigger) override {}
+    void Broadcast(CActionManager* Manager, CSymbolNode* Trigger) override;
+
+	bool m_bForwards;
+	EditDistance m_dist;
 };
 
 class MoveAction : public Action
 {
-	const bool m_bForwards;
-	const EditDistance m_dist;
 public:
 	MoveAction(bool bForwards, EditDistance dist);
 
 	unsigned calculateNewOffset(CSymbolNode* pNode, int offsetBefore) override;
 
-    void happen(CSymbolNode* pNode) override;
-    void Broadcast(CActionManager* Manager, CSymbolNode* Trigger) override {}
+    void Broadcast(CActionManager* Manager, CSymbolNode* Trigger) override;
+
+	bool m_bForwards;
+	EditDistance m_dist;
 };
 
 class TextCharAction : public Action

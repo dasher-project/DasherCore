@@ -135,6 +135,7 @@ CDasherInterfaceBase::CDasherInterfaceBase(CSettingsStore *pSettingsStore) :
                               g_iLogLevel,
                               g_iLogOptions);
 
+  //Register for all events that we are "responsible" for
   GetActionManager()->OnCharEntered.Subscribe(this, [this](CSymbolNode* Trigger, TextCharAction*)
   {
       editOutput(Trigger->outputText(), Trigger);
@@ -142,6 +143,58 @@ CDasherInterfaceBase::CDasherInterfaceBase(CSettingsStore *pSettingsStore) :
   GetActionManager()->OnCharRemoved.Subscribe(this, [this](CSymbolNode* Trigger, TextCharUndoAction*)
   {
       editDelete(Trigger->outputText(), Trigger);
+  });
+  GetActionManager()->OnSpeak.Subscribe(this, [this](CSymbolNode*, SpeechAction* Action)
+  {
+      //Should be moved into own module/class
+     switch (Action->context)
+     {
+     case TextAction::Repeat:
+        Speak(Action->strLast, false);
+        break;
+     case TextAction::NewText:
+        Speak(Action->getNewContext(), false);
+        break;
+     case TextAction::Distance:
+        Speak(Action->getBasedOnDistance(Action->m_dist), false);
+     }
+  });
+  GetActionManager()->OnSpeakCancel.Subscribe(this, [this](CSymbolNode*, SpeakCancelAction*)
+  {
+     Speak("", true);
+  });
+  GetActionManager()->OnDasherPause.Subscribe(this, [this](CSymbolNode*, PauseDasherAction*)
+  {
+     GetActiveInputMethod()->pause();
+  });
+  GetActionManager()->OnDasherStop.Subscribe(this, [this](CSymbolNode*, StopDasherAction*)
+  {
+    Done();
+    GetActiveInputMethod()->pause();
+  });
+  GetActionManager()->OnCopy.Subscribe(this, [this](CSymbolNode*, CopyAction* Action)
+  {
+      //Should be moved into own module/class
+    switch (Action->context)
+    {
+    case TextAction::Repeat:
+        CopyToClipboard(Action->strLast);
+        break;
+    case TextAction::NewText:
+        CopyToClipboard(Action->getNewContext());
+        break;
+    case TextAction::Distance:
+        CopyToClipboard(Action->getBasedOnDistance(Action->m_dist));
+        break;
+    }
+  });
+  GetActionManager()->OnDelete.Subscribe(this, [this](CSymbolNode*, DeleteAction* Action)
+  {
+    ctrlDelete(Action->m_bForwards, Action->m_dist);
+  });
+  GetActionManager()->OnMove.Subscribe(this, [this](CSymbolNode*, MoveAction* Action)
+  {
+    ctrlMove(Action->m_bForwards, Action->m_dist);
   });
 }
 
@@ -203,8 +256,7 @@ CDasherInterfaceBase::~CDasherInterfaceBase() {
   //Deregistering here allows for reusing a settings instance
   m_pSettingsStore->OnParameterChanged.Unsubscribe(this);
   m_pSettingsStore->OnPreParameterChange.Unsubscribe(this);
-  GetActionManager()->OnCharEntered.Unsubscribe(this);
-  GetActionManager()->OnCharRemoved.Unsubscribe(this);
+  GetActionManager()->UnsubscribeAll(this);
 
   //WriteTrainFileFull();???
   delete m_pDasherModel;        // The order of some of these deletions matters
