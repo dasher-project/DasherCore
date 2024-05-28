@@ -155,7 +155,7 @@ private:
 
 protected:
   struct character {
-    character() : Display(""), Text(""), parentGroup(nullptr), ColorGroupOffset(-1), fixedProbability(0), speedFactor(0){}
+    character() : parentGroup(nullptr), ColorGroupOffset(-1), fixedProbability(0), speedFactor(0){}
 
     std::string Display;
     std::string Text;

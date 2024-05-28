@@ -541,8 +541,6 @@ private:
   bool m_bLastMoved;
 
   /// @}
-public:
-  std::set<TextAction *> m_vTextActions; // Can this maybe be made better without this list?
 };
 /// @}
 

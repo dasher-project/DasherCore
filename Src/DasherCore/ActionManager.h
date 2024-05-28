@@ -13,7 +13,7 @@ class CActionManager {
     {
         OnCharEntered.Unsubscribe(Listener);
         OnCharRemoved.Unsubscribe(Listener);
-        OnSpeak.Unsubscribe(Listener);
+        OnContextSpeak.Unsubscribe(Listener);
         OnSpeakCancel.Unsubscribe(Listener);
         OnCopy.Unsubscribe(Listener);
         OnDasherStop.Unsubscribe(Listener);
@@ -24,11 +24,15 @@ class CActionManager {
 
     Event<CSymbolNode*, TextCharAction*> OnCharEntered;
     Event<CSymbolNode*, TextCharUndoAction*> OnCharRemoved; //Explicitly only does one char removal
-    Event<CSymbolNode*, SpeechAction*> OnSpeak;
+    Event<CSymbolNode*, ContextSpeechAction*, CDasherInterfaceBase*> OnContextSpeak;
+    Event<CSymbolNode*, FixedSpeechAction*> OnFixedSpeak;
     Event<CSymbolNode*, SpeakCancelAction*> OnSpeakCancel;
-    Event<CSymbolNode*, CopyAction*> OnCopy;
+    Event<CSymbolNode*, KeyboardAction*> OnKeyboard;
+    Event<CSymbolNode*, SocketOutputAction*> OnSocketOutput;
+    Event<CSymbolNode*, CopyAction*, CDasherInterfaceBase*> OnCopy;
     Event<CSymbolNode*, StopDasherAction*> OnDasherStop;
     Event<CSymbolNode*, PauseDasherAction*> OnDasherPause;
+    Event<CSymbolNode*, ATSPIAction*> OnATSPI;
     Event<CSymbolNode*, DeleteAction*> OnDelete;
     Event<CSymbolNode*, MoveAction*> OnMove;
 };

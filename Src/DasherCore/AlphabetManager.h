@@ -131,19 +131,19 @@ namespace Dasher {
       CSymbolNode(int iOffset, CDasherScreen::Label *pLabel, CAlphabetManager *pMgr, symbol iSymbol);
 
       ///Create the children of this node, by starting traversal of the alphabet from the top
-      virtual void PopulateChildren();
-      virtual void Do();
-      virtual void Undo();
+      void PopulateChildren() override;
+      void Do() override;
+      void Undo() override;
       ///Override to provide symbol number, probability, _edit_ text from alphabet
-      virtual SymbolProb GetSymbolProb() const;
+      SymbolProb GetSymbolProb() const override;
 
-      virtual void SetFlag(int iFlag, bool bValue);
+      void SetFlag(int iFlag, bool bValue) override;
 
-      virtual bool GameSearchNode(symbol sym);
-      virtual void GetContext(CDasherInterfaceBase *pInterface, const CAlphabetMap *pAlphabetMap, std::vector<symbol> &vContextSymbols, int iOffset, int iLength);
-      virtual symbol GetAlphSymbol();
+      bool GameSearchNode(symbol sym) override;
+      void GetContext(CDasherInterfaceBase *pInterface, const CAlphabetMap *pAlphabetMap, std::vector<symbol> &vContextSymbols, int iOffset, int iLength) override;
+      symbol GetAlphSymbol() override;
       ///Override: if the symbol to create is the same as this node's symbol, return this node instead of creating a new one
-      virtual CDasherNode *RebuildSymbol(CAlphNode *pParent, symbol iSymbol);
+      CDasherNode *RebuildSymbol(CAlphNode *pParent, symbol iSymbol) override;
       const ColorPalette::Color& getLabelColor(const ColorPalette* colorPalette) override;
       const ColorPalette::Color& getOutlineColor(const ColorPalette* colorPalette) override;
       const ColorPalette::Color& getNodeColor(const ColorPalette* colorPalette) override;

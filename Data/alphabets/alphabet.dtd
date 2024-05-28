@@ -16,6 +16,7 @@
 <!-- Single symbols -->
 <!ELEMENT node (textCharAction*|deleteTextAction*|moveCursorAction*|fixedTTSAction*|contextTTSAction*|repeatTTSAction*|stopTTSAction*|pauseDasherAction*|atspiAction*|keyboardAction*)>
 <!ATTLIST node label CDATA #REQUIRED>
+<!ATTLIST node text CDATA #IMPLIED> <!-- represents the text that is output and also used for training, defaults to the same value as label -->
 <!ATTLIST node fixedProbability CDATA #IMPLIED>
 <!ATTLIST node speedFactor CDATA #IMPLIED>
 
@@ -59,8 +60,11 @@
 <!ATTLIST keyboardAction release CDATA #IMPLIED> <!-- As above, but only performing the release -->
 
 <!-- External actions: -->
-<!-- <socketOutputAction doString="doAction" undoString="undoAction"/> -->
 <!-- Similar to the socket input option, this action enables connecting Dasher to other accessibility tools, sending messages that the other tool can process. -->
+<!ELEMENT socketOutputAction EMPTY>
+<!ATTLIST socketOutputAction socketName CDATA #IMPLIED>
+<!ATTLIST socketOutputAction doString CDATA #IMPLIED>
+<!ATTLIST socketOutputAction undoString CDATA #IMPLIED>
 
 <!-- Especially for the last two, it probably makes sense to add a windowTitle attribute to nodes: -->
 <!-- <node label="New Tab" windowTitle=".*(Firefox|Chrome|Edge).*" fixedProbability="0.02"> Only shows this node if the title of the currently focused window matches the given regex. -->

@@ -599,7 +599,7 @@ const std::string &CSymbolNode::outputText() const {
 }
 
 string CSymbolNode::trainText() {
-  return m_pMgr->m_pAlphabet->escape(outputText());
+    return m_pMgr->m_pAlphabet->escape(outputText());
 }
 
 int CSymbolNode::numChars() {
@@ -654,7 +654,7 @@ void CSymbolNode::Do() {
     const std::vector<Action*>& uA = m_pMgr->GetAlphabet()->GetCharDoActions(iSymbol);
     for(Action* a : uA)
     {
-        a->Broadcast(GetInterface()->GetActionManager(), this);
+        a->Broadcast(GetInterface(), GetInterface()->GetActionManager(), this);
     }
 }
 
@@ -668,7 +668,7 @@ void CSymbolNode::Undo() {
     const std::vector<Action*>& uA = m_pMgr->GetAlphabet()->GetCharUndoActions(iSymbol);
     for(Action* a : uA)
     {
-        a->Broadcast(GetInterface()->GetActionManager(), this);
+        a->Broadcast(GetInterface(), GetInterface()->GetActionManager(), this);
     }
 }
 

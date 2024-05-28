@@ -144,7 +144,7 @@ CDasherInterfaceBase::CDasherInterfaceBase(CSettingsStore *pSettingsStore) :
   {
       editDelete(Trigger->outputText(), Trigger);
   });
-  GetActionManager()->OnSpeak.Subscribe(this, [this](CSymbolNode*, SpeechAction* Action)
+  GetActionManager()->OnContextSpeak.Subscribe(this, [this](CSymbolNode*, ContextSpeechAction* Action, CDasherInterfaceBase* Intf)
   {
       //Should be moved into own module/class
      switch (Action->context)
@@ -153,10 +153,10 @@ CDasherInterfaceBase::CDasherInterfaceBase(CSettingsStore *pSettingsStore) :
         Speak(Action->strLast, false);
         break;
      case TextAction::NewText:
-        Speak(Action->getNewContext(), false);
+        Speak(Action->getNewContext(Intf), false);
         break;
      case TextAction::Distance:
-        Speak(Action->getBasedOnDistance(Action->m_dist), false);
+        Speak(Action->getBasedOnDistance(Intf, Action->m_dist), false);
      }
   });
   GetActionManager()->OnSpeakCancel.Subscribe(this, [this](CSymbolNode*, SpeakCancelAction*)
@@ -172,7 +172,7 @@ CDasherInterfaceBase::CDasherInterfaceBase(CSettingsStore *pSettingsStore) :
     Done();
     GetActiveInputMethod()->pause();
   });
-  GetActionManager()->OnCopy.Subscribe(this, [this](CSymbolNode*, CopyAction* Action)
+  GetActionManager()->OnCopy.Subscribe(this, [this](CSymbolNode*, CopyAction* Action, CDasherInterfaceBase* Intf)
   {
       //Should be moved into own module/class
     switch (Action->context)
@@ -181,10 +181,10 @@ CDasherInterfaceBase::CDasherInterfaceBase(CSettingsStore *pSettingsStore) :
         CopyToClipboard(Action->strLast);
         break;
     case TextAction::NewText:
-        CopyToClipboard(Action->getNewContext());
+        CopyToClipboard(Action->getNewContext(Intf));
         break;
     case TextAction::Distance:
-        CopyToClipboard(Action->getBasedOnDistance(Action->m_dist));
+        CopyToClipboard(Action->getBasedOnDistance(Intf, Action->m_dist));
         break;
     }
   });
@@ -825,16 +825,7 @@ void CDasherInterfaceBase::SetOffset(int iOffset, bool bForce) {
   CDasherNode *pNode = m_pNCManager->GetAlphabetManager()->GetRoot(NULL, iOffset!=0, iOffset);
   if (GetGameModule()) pNode->SetFlag(CDasherNode::NF_GAME, true);
   m_pDasherModel->SetNode(pNode);
-  
-  //ACL TODO note that CTL_MOVE, etc., do not come here (that would probably
-  // rebuild the model / violently repaint the screen every time!). But we
-  // still want to notifyOffset all text actions, so the "New" suboption sees
-  // all the editing the user's done...
 
-  for (std::set<TextAction *>::iterator it = m_vTextActions.begin(); it!=m_vTextActions.end(); it++) {
-    (*it)->NotifyOffset(iOffset);
-  }
-  
   ScheduleRedraw();
 }
 

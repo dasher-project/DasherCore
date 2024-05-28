@@ -6,46 +6,49 @@
 
 using namespace Dasher;
 
-TextAction::TextAction(CDasherInterfaceBase *pIntf, ActionContext context, EditDistance dist) : m_pIntf(pIntf), context(context), m_dist(dist) {
-  m_iStartOffset= pIntf->GetAllContextLenght();
-  pIntf->m_vTextActions.insert(this);
-}
+TextAction::TextAction(ActionContext context, EditDistance dist) : context(context), m_dist(dist) {}
 
-TextAction::~TextAction() {
-  m_pIntf->m_vTextActions.erase(this);
-}
-
-SpeechAction::SpeechAction(CDasherInterfaceBase* pIntf, ActionContext c, EditDistance dist): TextAction(pIntf, c, dist)
+ContextSpeechAction::ContextSpeechAction(ActionContext c, EditDistance dist): TextAction(c, dist)
 {
 }
 
-void SpeechAction::Broadcast(CActionManager* Manager, CSymbolNode* Trigger)
+void ContextSpeechAction::Broadcast(CDasherInterfaceBase* InterfaceBase, CActionManager* Manager, CSymbolNode* Trigger)
 {
-    Manager->OnSpeak.Broadcast(Trigger, this);
+    Manager->OnContextSpeak.Broadcast(Trigger, this, InterfaceBase);
 }
 
-CopyAction::CopyAction(CDasherInterfaceBase* pIntf, ActionContext c, EditDistance dist): TextAction(pIntf,c,dist)
+void FixedSpeechAction::Broadcast(CDasherInterfaceBase* InterfaceBase, CActionManager* Manager, CSymbolNode* Trigger)
+{
+    Manager->OnFixedSpeak.Broadcast(Trigger, this);
+}
+
+CopyAction::CopyAction(ActionContext c, EditDistance dist): TextAction(c,dist)
 {
 }
 
-void CopyAction::Broadcast(CActionManager* Manager, CSymbolNode* Trigger)
+void CopyAction::Broadcast(CDasherInterfaceBase* InterfaceBase, CActionManager* Manager, CSymbolNode* Trigger)
 {
-    Manager->OnCopy.Broadcast(Trigger, this);
+    Manager->OnCopy.Broadcast(Trigger, this, InterfaceBase);
 }
 
-void StopDasherAction::Broadcast(CActionManager* Manager, CSymbolNode* Trigger)
+void StopDasherAction::Broadcast(CDasherInterfaceBase* InterfaceBase, CActionManager* Manager, CSymbolNode* Trigger)
 {
     Manager->OnDasherStop.Broadcast(Trigger, this);
 }
 
-void PauseDasherAction::Broadcast(CActionManager* Manager, CSymbolNode* Trigger)
+void PauseDasherAction::Broadcast(CDasherInterfaceBase* InterfaceBase, CActionManager* Manager, CSymbolNode* Trigger)
 {
     Manager->OnDasherPause.Broadcast(Trigger, this);
 }
 
-void SpeakCancelAction::Broadcast(CActionManager* Manager, CSymbolNode* Trigger)
+void ATSPIAction::Broadcast(CDasherInterfaceBase* InterfaceBase, CActionManager* Manager, CSymbolNode* Trigger)
 {
-    Manager->OnSpeakCancel.Broadcast(Trigger, this);
+    Manager->OnATSPI.Broadcast(Trigger, this);
+}
+
+void SpeakCancelAction::Broadcast(CDasherInterfaceBase* InterfaceBase, CActionManager* Manager, CSymbolNode* Trigger)
+{
+     Manager->OnSpeakCancel.Broadcast(Trigger, this);
 }
 
 DeleteAction::DeleteAction(bool bForwards, EditDistance dist): m_bForwards(bForwards), m_dist(dist)
@@ -60,7 +63,7 @@ unsigned DeleteAction::calculateNewOffset(CSymbolNode* pNode, int offsetBefore)
     return pNode->GetInterface()->ctrlOffsetAfterMove(offsetBefore + 1, m_bForwards, m_dist) - 1;
 }
 
-void DeleteAction::Broadcast(CActionManager* Manager, CSymbolNode* Trigger)
+void DeleteAction::Broadcast(CDasherInterfaceBase* InterfaceBase, CActionManager* Manager, CSymbolNode* Trigger)
 {
     Manager->OnDelete.Broadcast(Trigger, this);
 }
@@ -74,33 +77,39 @@ unsigned MoveAction::calculateNewOffset(CSymbolNode* pNode, int offsetBefore)
     return pNode->GetInterface()->ctrlOffsetAfterMove(offsetBefore + 1, m_bForwards, m_dist) - 1;
 }
 
-void MoveAction::Broadcast(CActionManager* Manager, CSymbolNode* Trigger)
+void MoveAction::Broadcast(CDasherInterfaceBase* InterfaceBase, CActionManager* Manager, CSymbolNode* Trigger)
 {
     Manager->OnMove.Broadcast(Trigger, this);
 }
 
-void TextCharAction::Broadcast(CActionManager* Manager, CSymbolNode* Trigger)
+void TextCharAction::Broadcast(CDasherInterfaceBase* InterfaceBase, CActionManager* Manager, CSymbolNode* Trigger)
 {
     Manager->OnCharEntered.Broadcast(Trigger, this);
 }
 
-void TextCharUndoAction::Broadcast(CActionManager* Manager, CSymbolNode* Trigger)
+void TextCharUndoAction::Broadcast(CDasherInterfaceBase* InterfaceBase, CActionManager* Manager, CSymbolNode* Trigger)
 {
     Manager->OnCharRemoved.Broadcast(Trigger, this);
 }
 
-std::string TextAction::getBasedOnDistance(EditDistance dist) {
-    strLast = m_pIntf->GetTextAroundCursor(dist);
-    m_iStartOffset = m_pIntf->GetAllContextLenght();
+void KeyboardAction::Broadcast(CDasherInterfaceBase* InterfaceBase, CActionManager* Manager, CSymbolNode* Trigger)
+{
+    Manager->OnKeyboard.Broadcast(Trigger, this);
+}
+
+void SocketOutputAction::Broadcast(CDasherInterfaceBase* InterfaceBase, CActionManager* Manager, CSymbolNode* Trigger)
+{
+    Manager->OnSocketOutput.Broadcast(Trigger, this);
+}
+
+std::string TextAction::getBasedOnDistance(CDasherInterfaceBase* p_Intf, EditDistance dist) {
+    strLast = p_Intf->GetTextAroundCursor(dist);
+    m_iStartOffset = p_Intf->GetAllContextLenght();
     return strLast;
 }
 
-std::string TextAction::getNewContext() {
-    strLast = m_pIntf->GetContext(m_iStartOffset, m_pIntf->GetAllContextLenght() - m_iStartOffset);
-    m_iStartOffset = m_pIntf->GetAllContextLenght();
+std::string TextAction::getNewContext(CDasherInterfaceBase* p_Intf) {
+    strLast = p_Intf->GetContext(m_iStartOffset, p_Intf->GetAllContextLenght() - m_iStartOffset);
+    m_iStartOffset = p_Intf->GetAllContextLenght();
     return strLast;
-}
-
-void TextAction::NotifyOffset(int iOffset) {
-  m_iStartOffset = std::min(m_pIntf->GetAllContextLenght(), m_iStartOffset);
 }

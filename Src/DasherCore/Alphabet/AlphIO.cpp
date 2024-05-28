@@ -23,6 +23,7 @@
 #include <string>
 #include <cstring>
 #include <algorithm>
+#include <sstream>
 
 #include "../ColorIO.h"
 
@@ -205,24 +206,120 @@ CAlphInfo *CAlphIO::CreateDefault() {
 	return Default;
 }
 
+inline bool ends_with(std::string const & value, std::string const & ending)
+{
+    if (ending.size() > value.size()) return false;
+    return std::equal(ending.rbegin(), ending.rend(), value.rbegin());
+}
+
+inline std::pair<bool, EditDistance> parseDistance(std::string const & value)
+{
+	EditDistance e = EDIT_NONE;
+	if(ends_with(value, "char")) e = EDIT_CHAR;
+	if(ends_with(value, "word")) e = EDIT_WORD;
+	if(ends_with(value, "sentence")) e = EDIT_SENTENCE;
+	if(ends_with(value, "paragraph")) e = EDIT_PARAGRAPH;
+	if(ends_with(value, "all")) e = EDIT_ALL;
+	return {value.rfind("next", 0) == 0, e};
+}
+
 void CAlphIO::ReadCharAttributes(pugi::xml_node xml_node, CAlphInfo::character& alphabet_character, SGroupInfo* parentGroup, std::vector<Action*>& DoActions, std::vector<Action*>& UndoActions) {
 
 	if(xml_node.type() == pugi::node_null) return;
 
 	alphabet_character.Display = xml_node.attribute("label").as_string();
+	alphabet_character.Text = xml_node.attribute("text").as_string(alphabet_character.Display.c_str());
 
-	//Potential Unicode Symbol
-	const auto textAction = xml_node.child("textCharAction");
-	if(textAction.type() != pugi::node_null)
+	for(auto potentialActions : xml_node.children())
 	{
-	    const int unicodeSymbol = textAction.attribute("unicode").as_int(-1);
-		alphabet_character.Text = (unicodeSymbol >= 0) ? std::string(1, static_cast<char>(unicodeSymbol)) : alphabet_character.Display;
+	    if(std::strcmp(potentialActions.name(),"textCharAction") == 0)
+	    {
+			DoActions.push_back(new TextCharAction());
+	        UndoActions.push_back(new TextCharUndoAction());
+	    }
+	    else if(std::strcmp(potentialActions.name(),"deleteTextAction") == 0 && !potentialActions.attribute("distance").empty())
+	    {
+			const std::string distance = potentialActions.attribute("distance").as_string();
+            const std::pair<bool, EditDistance> d = parseDistance(distance);
+	        DoActions.push_back(new DeleteAction(d.first, d.second));
+	    }
+		else if(std::strcmp(potentialActions.name(),"moveCursorAction") == 0 && !potentialActions.attribute("distance").empty())
+	    {
+			const std::string distance = potentialActions.attribute("distance").as_string();
+            const std::pair<bool, EditDistance> d = parseDistance(distance);
+	        DoActions.push_back(new MoveAction(d.first, d.second));
+	    }
+		else if(std::strcmp(potentialActions.name(),"fixedTTSAction") == 0 && !potentialActions.attribute("text").empty())
+	    {
+	        DoActions.push_back(new FixedSpeechAction(potentialActions.attribute("text").as_string()));
+	    }
+		else if(std::strcmp(potentialActions.name(),"moveCursorAction") == 0 && !potentialActions.attribute("distance").empty())
+	    {
+			const std::string distance = potentialActions.attribute("context").as_string();
+            const std::pair<bool, EditDistance> d = parseDistance(distance);
+	        DoActions.push_back(new ContextSpeechAction(TextAction::Distance, d.second));
+	    }
+		else if(std::strcmp(potentialActions.name(),"repeatTTSAction") == 0)
+	    {
+	        DoActions.push_back(new ContextSpeechAction(TextAction::Repeat));
+	    }
+	    else if(std::strcmp(potentialActions.name(),"contextTTSAction") == 0)
+	    {
+			const std::string context = potentialActions.attribute("context").as_string();
+            const std::pair<bool, EditDistance> c = parseDistance(context);
+	        DoActions.push_back(new ContextSpeechAction(TextAction::Distance, c.second));
+	    }
+		else if(std::strcmp(potentialActions.name(),"stopTTSAction") == 0)
+	    {
+	        DoActions.push_back(new SpeakCancelAction());
+	    }
+		else if(std::strcmp(potentialActions.name(),"pauseDasherAction") == 0)
+	    {
+	        DoActions.push_back(new PauseDasherAction(static_cast<long>(potentialActions.attribute("time").as_llong(-1))));
+	    }
+		else if(std::strcmp(potentialActions.name(),"atspiAction") == 0 && !potentialActions.attribute("action").empty())
+	    {
+	        DoActions.push_back(new ATSPIAction(potentialActions.attribute("action").as_string()));
+	    }
+	    else if(std::strcmp(potentialActions.name(),"keyboardAction") == 0
+			&& (!potentialActions.attribute("key").empty()
+			|| !potentialActions.attribute("press").empty()
+			|| !potentialActions.attribute("release").empty()
+			))
+	    {
+			std::string keycodes;
+			KeyboardAction::pressType p;
+			if(!potentialActions.attribute("key").empty()) keycodes = potentialActions.attribute("key").as_string(); p = KeyboardAction::KEY_PRESS_RELEASE;
+			if(!potentialActions.attribute("press").empty()) keycodes = potentialActions.attribute("press").as_string(); p = KeyboardAction::KEY_PRESS;
+			if(!potentialActions.attribute("release").empty()) keycodes = potentialActions.attribute("release").as_string(); p = KeyboardAction::KEY_RELEASE;
+
+
+			std::istringstream keycodeStream(keycodes);
+            std::string code;
+			std::vector<std::vector<unsigned short>> keyArray;
+            while (std::getline(keycodeStream, code, ',')) {
+				std::vector<unsigned short> keycodesArray;
+
+				for (int i=0; i<code.length(); i+=2) {
+                    if(i+1 < code.length()){
+                        keycodesArray.push_back(static_cast<unsigned short>(std::stoul(std::string(&code[i], 2), nullptr, 16)));
+                    }
+                }
+
+				keyArray.push_back(keycodesArray);
+            }
+
+	        DoActions.push_back(new KeyboardAction(p, keyArray));
+	    }
+	    else if(std::strcmp(potentialActions.name(),"socketOutputAction") == 0)
+	    {
+	        if(!potentialActions.attribute("doString").empty()) DoActions.push_back(new SocketOutputAction(potentialActions.attribute("socketName").as_string(""), potentialActions.attribute("doString").as_string("")));
+	        if(!potentialActions.attribute("undoString").empty()) UndoActions.push_back(new SocketOutputAction(potentialActions.attribute("socketName").as_string(""), potentialActions.attribute("undoString").as_string("")));
+	    }
 	}
 
 	alphabet_character.parentGroup = parentGroup;
 	alphabet_character.ColorGroupOffset = parentGroup->iNumChildNodes;
-	DoActions.push_back(new TextCharAction());
-	UndoActions.push_back(new TextCharUndoAction());
 }
 
 // Reverses the internal linked list for the given SGroupInfo

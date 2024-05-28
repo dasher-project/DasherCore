@@ -38,8 +38,8 @@ CAlphInfo::CAlphInfo() {
 }
 
 std::string CAlphInfo::escape(const std::string &ch) const {
-    if ((m_strConversionTrainStart.length() && ch==m_strConversionTrainStart)
-        || (m_strCtxChar.length() && ch==m_strCtxChar))
+    if ((!m_strConversionTrainStart.empty() && ch==m_strConversionTrainStart)
+        || (!m_strCtxChar.empty() && ch==m_strCtxChar))
         return ch+ch;
   return ch;
 }
