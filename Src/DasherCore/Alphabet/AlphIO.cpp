@@ -320,6 +320,8 @@ void CAlphIO::ReadCharAttributes(pugi::xml_node xml_node, CAlphInfo::character& 
 
 	alphabet_character.parentGroup = parentGroup;
 	alphabet_character.ColorGroupOffset = parentGroup->iNumChildNodes;
+	alphabet_character.fixedProbability = xml_node.attribute("fixedProbability").as_float();
+	alphabet_character.speedFactor = xml_node.attribute("speedFactor").as_float();
 }
 
 // Reverses the internal linked list for the given SGroupInfo

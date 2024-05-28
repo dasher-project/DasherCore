@@ -170,6 +170,9 @@ namespace Dasher {
       ///Override: true iff pGroup encloses this symbol (according to its start/end symbol#)
       bool isInGroup(const SGroupInfo *pGroup);
 
+  public:
+      double SpeedMul() override;
+
   protected:
       const symbol iSymbol;
     };
@@ -198,6 +201,7 @@ namespace Dasher {
       const ColorPalette::Color& getLabelColor(const ColorPalette* colorPalette) override;
       const ColorPalette::Color& getOutlineColor(const ColorPalette* colorPalette) override;
       const ColorPalette::Color& getNodeColor(const ColorPalette* colorPalette) override;
+      double SpeedMul() override;
 
   private:
       bool renderInRootColor = false;

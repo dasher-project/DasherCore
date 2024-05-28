@@ -97,6 +97,8 @@ public:
 
   /// return text for edit box for i'th symbol
   const std::string & GetText(symbol i) const {return m_vCharacters[i-1].Text;}
+  const double GetSymbolFixedProbability(symbol i) const {return m_vCharacters[i-1].fixedProbability;}
+  const double GetSymbolSpeedMultiplier(symbol i) const {return m_vCharacters[i-1].speedFactor;}
 
   int getColorGroupOffset(symbol i) const
   {
@@ -155,14 +157,14 @@ private:
 
 protected:
   struct character {
-    character() : parentGroup(nullptr), ColorGroupOffset(-1), fixedProbability(0), speedFactor(0){}
+    character() = default;
 
     std::string Display;
     std::string Text;
-    SGroupInfo* parentGroup;
-    int ColorGroupOffset; //Offset within group
-    float fixedProbability; //fixed probability, resulting in fixed size later on. Currently not supported but parsed already.
-    float speedFactor; //allows for slowdown in this box. Currently not supported but parsed already.
+    SGroupInfo* parentGroup = nullptr;
+    int ColorGroupOffset = -1; //Offset within group
+    float fixedProbability = -1; //fixed probability, resulting in fixed size later on. Currently not supported but parsed already.
+    float speedFactor = -1; //allows for slowdown in this box
   };
   std::vector<character> m_vCharacters;
   std::vector<std::vector<Action*>> m_vCharacterDoActions = {};

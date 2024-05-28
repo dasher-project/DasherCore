@@ -489,8 +489,21 @@ const ColorPalette::Color& CGroupNode::getNodeColor(const ColorPalette* colorPal
     return colorPalette->GetGroupColor(m_pGroupInfo->colorGroup, UseAltColor());
 }
 
+double CGroupNode::SpeedMul()
+{
+    if(Parent() != nullptr) return Parent()->SpeedMul();
+    return 1.0;
+}
+
 bool CSymbolNode::isInGroup(const SGroupInfo *pInfo) {
   return (pInfo->iStart <= iSymbol && pInfo->iEnd > iSymbol);
+}
+
+double CSymbolNode::SpeedMul()
+{
+  const double speedMult = m_pMgr->GetAlphabet()->GetSymbolSpeedMultiplier(iSymbol);
+  if(speedMult > 0) return speedMult;
+  return 1.0;
 }
 
 CDasherNode *CAlphabetManager::CreateSymbolNode(CAlphNode *pParent, symbol iSymbol) {
