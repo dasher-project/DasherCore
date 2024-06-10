@@ -102,6 +102,15 @@ void SocketOutputAction::Broadcast(CDasherInterfaceBase* InterfaceBase, CActionM
     Manager->OnSocketOutput.Broadcast(Trigger, this);
 }
 
+void ChangeSettingsAction::Broadcast(CDasherInterfaceBase* InterfaceBase, CActionManager* Manager, CSymbolNode* Trigger)
+{
+    //Needs to be delayed to the end of the frame, as many parameters influence the frame rendering and should not be changed during rendering of a frame
+    Manager->DelayAction([Manager, Trigger, this]()
+    {
+        Manager->OnSettingChange.Broadcast(Trigger, this);
+    });
+}
+
 std::string TextAction::getBasedOnDistance(CDasherInterfaceBase* p_Intf, EditDistance dist) {
     strLast = p_Intf->GetTextAroundCursor(dist);
     m_iStartOffset = p_Intf->GetAllContextLenght();

@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 #include <vector>
+#include "Parameters.h"
 
 namespace Dasher {
     class CSymbolNode;
@@ -149,10 +150,20 @@ public:
 class SocketOutputAction : public Action
 {
 public:
-    SocketOutputAction(const std::string& socketName, const std::string& action) : action(action), socketName(socketName) {}
+    SocketOutputAction(const std::string& socketName, const std::string& action, bool addNewLine) : action(action), socketName(socketName), addNewLine(addNewLine) {}
     void Broadcast(CDasherInterfaceBase* InterfaceBase, CActionManager* Manager, CSymbolNode* Trigger) override;
     std::string socketName;
     std::string action;
+    bool addNewLine = true;
+};
+
+class ChangeSettingsAction : public Action
+{
+public:
+    ChangeSettingsAction(Parameter setting, std::variant<bool, long, std::string> newValue) : parameter(setting), newValue(newValue) {}
+    void Broadcast(CDasherInterfaceBase* InterfaceBase, CActionManager* Manager, CSymbolNode* Trigger) override;
+    Parameter parameter;
+    std::variant<bool, long, std::string> newValue;
 };
 
 }

@@ -49,15 +49,24 @@
 
 <!-- System/application control: -->
 
+<!ELEMENT changeSettingAction EMPTY>
+<!ATTLIST changeSettingAction settingsName CDATA #REQUIRED> <!-- Stringname of the Setting -->
+<!ATTLIST changeSettingAction doValue CDATA #IMPLIED> <!-- New Value of the Setting in case of selection -->
+<!ATTLIST changeSettingAction undoValue CDATA #IMPLIED> <!-- New Value of the Setting in case of deselection -->
+
 <!-- These two actions enable triggering any action in an application that can be bound to a keyboard shortcut or is accessible
      via the Assistive Technology Service Provider Interface (AT-SPI). Anything else probably isn't technically feasible. -->
 <!ELEMENT atspiAction EMPTY>
 <!ATTLIST atspiAction action CDATA #REQUIRED> <!-- Sends the specified AT-SPI action to the currently focused application -->
+<!ATTLIST atspiAction undoAction CDATA #REQUIRED> <!-- Sends the specified AT-SPI action to the currently focused application -->
 
 <!ELEMENT keyboardAction EMPTY>
 <!ATTLIST keyboardAction key CDATA #IMPLIED> <!-- Emulates a keyboard shortcut, possibly with several modifiers, given as keyboard scancodes divided by commas (e.g. "1d,38,e053" for Ctrl+Alt+Entf), performing a press and a release -->
 <!ATTLIST keyboardAction press CDATA #IMPLIED> <!-- As above, but only performing the press -->
 <!ATTLIST keyboardAction release CDATA #IMPLIED> <!-- As above, but only performing the release -->
+<!ATTLIST keyboardAction undoKey CDATA #IMPLIED> <!-- Emulates a keyboard shortcut, possibly with several modifiers, given as keyboard scancodes divided by commas (e.g. "1d,38,e053" for Ctrl+Alt+Entf), performing a press and a release -->
+<!ATTLIST keyboardAction undoPress CDATA #IMPLIED> <!-- As above, but only performing the press -->
+<!ATTLIST keyboardAction undoRelease CDATA #IMPLIED> <!-- As above, but only performing the release -->
 
 <!-- External actions: -->
 <!-- Similar to the socket input option, this action enables connecting Dasher to other accessibility tools, sending messages that the other tool can process. -->
@@ -65,6 +74,7 @@
 <!ATTLIST socketOutputAction socketName CDATA #IMPLIED>
 <!ATTLIST socketOutputAction doString CDATA #IMPLIED>
 <!ATTLIST socketOutputAction undoString CDATA #IMPLIED>
+<!ATTLIST socketOutputAction suppressNewline CDATA #IMPLIED>
 
 <!-- Especially for the last two, it probably makes sense to add a windowTitle attribute to nodes: -->
 <!-- <node label="New Tab" windowTitle=".*(Firefox|Chrome|Edge).*" fixedProbability="0.02"> Only shows this node if the title of the currently focused window matches the given regex. -->

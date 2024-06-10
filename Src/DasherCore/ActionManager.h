@@ -22,6 +22,20 @@ class CActionManager {
         OnMove.Unsubscribe(Listener);
     }
 
+    void DelayAction(std::function<void()> action)
+    {
+        DelayedActions.push_back(action);
+    }
+
+    void ExecuteDelayedActions()
+    {
+        for(auto& action : DelayedActions)
+        {
+            action();
+        }
+        DelayedActions.clear();
+    }
+
     Event<CSymbolNode*, TextCharAction*> OnCharEntered;
     Event<CSymbolNode*, TextCharUndoAction*> OnCharRemoved; //Explicitly only does one char removal
     Event<CSymbolNode*, ContextSpeechAction*, CDasherInterfaceBase*> OnContextSpeak;
@@ -29,12 +43,18 @@ class CActionManager {
     Event<CSymbolNode*, SpeakCancelAction*> OnSpeakCancel;
     Event<CSymbolNode*, KeyboardAction*> OnKeyboard;
     Event<CSymbolNode*, SocketOutputAction*> OnSocketOutput;
+    Event<CSymbolNode*, ChangeSettingsAction*> OnSettingChange;
     Event<CSymbolNode*, CopyAction*, CDasherInterfaceBase*> OnCopy;
     Event<CSymbolNode*, StopDasherAction*> OnDasherStop;
     Event<CSymbolNode*, PauseDasherAction*> OnDasherPause;
     Event<CSymbolNode*, ATSPIAction*> OnATSPI;
     Event<CSymbolNode*, DeleteAction*> OnDelete;
     Event<CSymbolNode*, MoveAction*> OnMove;
+
+private:
+
+    // Lambda Functions that are executed after the next rendering. Mostly used for actions that are triggered during rendering.
+    std::vector<std::function<void()>> DelayedActions;
 };
 
 }

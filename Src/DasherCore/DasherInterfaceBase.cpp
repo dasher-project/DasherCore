@@ -188,13 +188,19 @@ CDasherInterfaceBase::CDasherInterfaceBase(CSettingsStore *pSettingsStore) :
         break;
     }
   });
-  GetActionManager()->OnDelete.Subscribe(this, [this](CSymbolNode*, DeleteAction* Action)
+  GetActionManager()->OnDelete.Subscribe(this, [this](CSymbolNode*, const DeleteAction* Action)
   {
     ctrlDelete(Action->m_bForwards, Action->m_dist);
   });
-  GetActionManager()->OnMove.Subscribe(this, [this](CSymbolNode*, MoveAction* Action)
+  GetActionManager()->OnMove.Subscribe(this, [this](CSymbolNode*, const MoveAction* Action)
   {
     ctrlMove(Action->m_bForwards, Action->m_dist);
+  });
+  GetActionManager()->OnSettingChange.Subscribe(this, [this](CSymbolNode*, const ChangeSettingsAction* Action)
+  {
+     if(std::holds_alternative<bool>(Action->newValue)) m_pSettingsStore->SetBoolParameter(Action->parameter, std::get<bool>(Action->newValue));
+     if(std::holds_alternative<long>(Action->newValue)) m_pSettingsStore->SetLongParameter(Action->parameter, std::get<long>(Action->newValue));
+     if(std::holds_alternative<std::string>(Action->newValue)) m_pSettingsStore->SetStringParameter(Action->parameter, std::get<std::string>(Action->newValue));
   });
 }
 
@@ -568,6 +574,8 @@ void CDasherInterfaceBase::NewFrame(unsigned long iTime, bool bForceRedraw) {
   }
 
   bReentered=false;
+
+  GetActionManager()->ExecuteDelayedActions();
 }
 
 void CDasherInterfaceBase::onUnpause(unsigned long lTime) {

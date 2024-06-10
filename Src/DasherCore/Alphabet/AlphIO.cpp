@@ -223,6 +223,25 @@ inline std::pair<bool, EditDistance> parseDistance(std::string const & value)
 	return {value.rfind("next", 0) == 0, e};
 }
 
+inline std::vector<std::vector<unsigned short>> parseKeyArray(const std::string& keycodes)
+{
+    std::istringstream keycodeStream(keycodes);
+    std::string code;
+	std::vector<std::vector<unsigned short>> keyArray;
+    while (std::getline(keycodeStream, code, ',')) {
+		std::vector<unsigned short> keycodesArray;
+
+		for (int i=0; i<code.length(); i+=2) {
+            if(i+1 < code.length()){
+                keycodesArray.push_back(static_cast<unsigned short>(std::stoul(std::string(&code[i], 2), nullptr, 16)));
+            }
+        }
+
+		keyArray.push_back(keycodesArray);
+    }
+	return keyArray;
+}
+
 void CAlphIO::ReadCharAttributes(pugi::xml_node xml_node, CAlphInfo::character& alphabet_character, SGroupInfo* parentGroup, std::vector<Action*>& DoActions, std::vector<Action*>& UndoActions) {
 
 	if(xml_node.type() == pugi::node_null) return;
@@ -277,9 +296,10 @@ void CAlphIO::ReadCharAttributes(pugi::xml_node xml_node, CAlphInfo::character& 
 	    {
 	        DoActions.push_back(new PauseDasherAction(static_cast<long>(potentialActions.attribute("time").as_llong(-1))));
 	    }
-		else if(std::strcmp(potentialActions.name(),"atspiAction") == 0 && !potentialActions.attribute("action").empty())
+		else if(std::strcmp(potentialActions.name(),"atspiAction") == 0)
 	    {
-	        DoActions.push_back(new ATSPIAction(potentialActions.attribute("action").as_string()));
+	        if(!potentialActions.attribute("action").empty()) DoActions.push_back(new ATSPIAction(potentialActions.attribute("action").as_string()));
+	        if(!potentialActions.attribute("undoAction").empty()) UndoActions.push_back(new ATSPIAction(potentialActions.attribute("undoAction ").as_string()));
 	    }
 	    else if(std::strcmp(potentialActions.name(),"keyboardAction") == 0
 			&& (!potentialActions.attribute("key").empty()
@@ -289,32 +309,37 @@ void CAlphIO::ReadCharAttributes(pugi::xml_node xml_node, CAlphInfo::character& 
 	    {
 			std::string keycodes;
 			KeyboardAction::pressType p;
+
 			if(!potentialActions.attribute("key").empty()) keycodes = potentialActions.attribute("key").as_string(); p = KeyboardAction::KEY_PRESS_RELEASE;
 			if(!potentialActions.attribute("press").empty()) keycodes = potentialActions.attribute("press").as_string(); p = KeyboardAction::KEY_PRESS;
 			if(!potentialActions.attribute("release").empty()) keycodes = potentialActions.attribute("release").as_string(); p = KeyboardAction::KEY_RELEASE;
+	        DoActions.push_back(new KeyboardAction(p, parseKeyArray(keycodes)));
 
-
-			std::istringstream keycodeStream(keycodes);
-            std::string code;
-			std::vector<std::vector<unsigned short>> keyArray;
-            while (std::getline(keycodeStream, code, ',')) {
-				std::vector<unsigned short> keycodesArray;
-
-				for (int i=0; i<code.length(); i+=2) {
-                    if(i+1 < code.length()){
-                        keycodesArray.push_back(static_cast<unsigned short>(std::stoul(std::string(&code[i], 2), nullptr, 16)));
-                    }
-                }
-
-				keyArray.push_back(keycodesArray);
-            }
-
-	        DoActions.push_back(new KeyboardAction(p, keyArray));
+			if(!potentialActions.attribute("undoKey").empty()) keycodes = potentialActions.attribute("undoKey").as_string(); p = KeyboardAction::KEY_PRESS_RELEASE;
+			if(!potentialActions.attribute("undoPress").empty()) keycodes = potentialActions.attribute("undoPress").as_string(); p = KeyboardAction::KEY_PRESS;
+			if(!potentialActions.attribute("undoRelease").empty()) keycodes = potentialActions.attribute("undoRelease").as_string(); p = KeyboardAction::KEY_RELEASE;
+	        UndoActions.push_back(new KeyboardAction(p, parseKeyArray(keycodes)));
 	    }
 	    else if(std::strcmp(potentialActions.name(),"socketOutputAction") == 0)
 	    {
-	        if(!potentialActions.attribute("doString").empty()) DoActions.push_back(new SocketOutputAction(potentialActions.attribute("socketName").as_string(""), potentialActions.attribute("doString").as_string("")));
-	        if(!potentialActions.attribute("undoString").empty()) UndoActions.push_back(new SocketOutputAction(potentialActions.attribute("socketName").as_string(""), potentialActions.attribute("undoString").as_string("")));
+			const bool suppressNewLine = potentialActions.attribute("suppressNewline").as_bool(false);
+	        if(!potentialActions.attribute("doString").empty()) DoActions.push_back(new SocketOutputAction(potentialActions.attribute("socketName").as_string(""), potentialActions.attribute("doString").as_string(""), suppressNewLine));
+	        if(!potentialActions.attribute("undoString").empty()) UndoActions.push_back(new SocketOutputAction(potentialActions.attribute("socketName").as_string(""), potentialActions.attribute("undoString").as_string(""), suppressNewLine));
+	    }
+		else if(std::strcmp(potentialActions.name(),"changeSettingAction") == 0 && !potentialActions.attribute("settingsName").empty())
+	    {
+			const std::pair<Parameter, Settings::ParameterType> param =  Settings::GetParameter(potentialActions.attribute("settingsName").as_string());
+			if(!potentialActions.attribute("doValue").empty()){
+			    if (param.second == Settings::PARAM_STRING) DoActions.push_back(new ChangeSettingsAction(param.first, std::string(potentialActions.attribute("doValue").as_string())));
+			    if (param.second == Settings::PARAM_BOOL) DoActions.push_back(new ChangeSettingsAction(param.first, potentialActions.attribute("doValue").as_bool()));
+			    if (param.second == Settings::PARAM_LONG) DoActions.push_back(new ChangeSettingsAction(param.first, static_cast<long>(potentialActions.attribute("doValue").as_llong())));
+			}
+	        if(!potentialActions.attribute("undoValue").empty())
+	        {
+	            if (param.second == Settings::PARAM_STRING) UndoActions.push_back(new ChangeSettingsAction(param.first, std::string(potentialActions.attribute("undoValue").as_string())));
+			    if (param.second == Settings::PARAM_BOOL) UndoActions.push_back(new ChangeSettingsAction(param.first, potentialActions.attribute("undoValue").as_bool()));
+			    if (param.second == Settings::PARAM_LONG) UndoActions.push_back(new ChangeSettingsAction(param.first, static_cast<long>(potentialActions.attribute("undoValue").as_llong())));
+	        }
 	    }
 	}
 

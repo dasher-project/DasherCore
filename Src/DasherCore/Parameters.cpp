@@ -150,6 +150,15 @@ namespace Dasher{
 		return PARAM_INVALID;
 	}
 
+	std::pair<Parameter, ParameterType> GetParameter(const std::string& parameterName) {
+
+		for(auto& [key, value] : parameter_defaults)
+		{
+			if(value.name == parameterName) return {key, value.type};
+		}
+		return {PM_INVALID, PARAM_INVALID};
+	}
+
 	std::string GetParameterName(Parameter parameter) {
 		if (parameter_defaults.find(parameter) != parameter_defaults.end())
 		{

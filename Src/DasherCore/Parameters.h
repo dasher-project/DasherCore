@@ -51,18 +51,8 @@ namespace Dasher
 		SP_COLOUR_ID, SP_DASHER_FONT, SP_GAME_TEXT_FILE,
 		SP_SOCKET_INPUT_X_LABEL, SP_SOCKET_INPUT_Y_LABEL, SP_INPUT_FILTER, SP_INPUT_DEVICE,
 		SP_BUTTON_0, SP_BUTTON_1, SP_BUTTON_2, SP_BUTTON_3, SP_BUTTON_4, SP_BUTTON_10, SP_JOYSTICK_DEVICE,
-		END_OF_SPS
-	};
-
-	struct CParameterChange {
-	    CParameterChange(Parameter parameter, bool value)
-	        :iParameter(parameter), value(value) {}
-	    CParameterChange(Parameter parameter, long value)
-	        :iParameter(parameter), value(value) {}
-	    CParameterChange(Parameter parameter, std::string value)
-	        :iParameter(parameter),value(value){}
-	    Parameter iParameter;
-		std::variant<bool, long, std::string> value;
+		END_OF_SPS,
+		PM_INVALID
 	};
 
   ///Namespace containing all static (i.e. fixed/constant) data about
@@ -105,5 +95,7 @@ namespace Dasher
     /// \return the regName member of the corresponding bp_table, lp_table,
     /// or sp_table struct.
     std::string GetParameterName(Parameter iParameter);
+
+    std::pair<Parameter, ParameterType> GetParameter(const std::string& parameterName);
   }
 }
