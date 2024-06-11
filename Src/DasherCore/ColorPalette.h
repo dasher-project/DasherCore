@@ -55,7 +55,7 @@ namespace Dasher {
 
 			Color(){};
 			Color(int Red, int Green, int Blue, int Alpha = 255);
-            Color(const std::string& HexString);
+            Color(const std::string& HexString, const Color& defaultColor = undefinedColor);
 
 			bool operator==(const Color& t) const;
             bool operator!=(const Color& t) const;
@@ -91,13 +91,16 @@ namespace Dasher {
 		} GroupColorInfo;
 
 		ColorPalette(ColorPalette* ParentPalette, std::string ParentPaletteName, const std::unordered_map<NamedColor::knownColorName, Color>& NamedColors, const std::unordered_map<std::string, GroupColorInfo>& GroupColors, std::string PaletteName);
+        const Color& GetAltColor(const std::vector<Color>& NormalColors, const std::vector<Color>& AltColors, bool useAlt, int Index, const Color& Default) const;
+        const Color& GetAltColor(const Color& NormalColor, const Color& AltColor, bool useAlt,
+                                           const Color& Default) const;
 
-		// We need both links to the parentPalette, as we first only parse and link the palettes afterwards
+        // We need both links to the parentPalette, as we first only parse and link the palettes afterwards
 		const ColorPalette* ParentPalette = nullptr;
 		std::string ParentPaletteName;
 		std::string PaletteName;
 
-		const Color& GetNamedColor(const NamedColor::knownColorName& NamedColor) const;
+		const Color& GetNamedColor(const NamedColor::knownColorName& NamedColor, bool AskParent = true) const;
 
 		const Color& GetGroupColor(const std::string& GroupName, const bool& UseAltColor) const;
 		const Color& GetGroupOutlineColor(const std::string& GroupName, const bool& UseAltColor) const;

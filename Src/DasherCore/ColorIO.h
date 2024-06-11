@@ -26,8 +26,8 @@ namespace Dasher {
         void RelinkParents();
 
     private:
-        static ColorPalette::Color GetAttributeAsColor(pugi::xml_attribute attribute, ColorPalette::Color defaultColor);
-        static std::vector<ColorPalette::Color> GetAttributeAsColorList(pugi::xml_attribute attribute, ColorPalette::Color defaultColor);
+        static ColorPalette::Color GetAttributeAsColor(pugi::xml_attribute attribute, ColorPalette::Color defaultColor = ColorPalette::undefinedColor);
+        static std::vector<ColorPalette::Color> GetAttributeAsColorList(pugi::xml_attribute attribute, ColorPalette::Color defaultColor = ColorPalette::undefinedColor);
 
 	    std::map <std::string, ColorPalette*> KnownPalettes;
 

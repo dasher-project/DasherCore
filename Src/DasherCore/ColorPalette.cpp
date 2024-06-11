@@ -8,7 +8,7 @@ using namespace Dasher;
 ColorPalette::Color::Color(int Red, int Green, int Blue, int Alpha): Red(Red), Green(Green), Blue(Blue), Alpha(Alpha){}
 
 
-ColorPalette::Color::Color(const std::string& HexString)
+ColorPalette::Color::Color(const std::string& HexString, const Color& defaultColor)
 {
     static const std::regex pattern("#?([0-9a-fA-F]{2})([0-9a-fA-F]{2})([0-9a-fA-F]{2})([0-9a-fA-F]{2})?"); // only instantiate once, thus static
 
@@ -19,6 +19,13 @@ ColorPalette::Color::Color(const std::string& HexString)
         Green = static_cast<int>(std::stoul(match[2].str(), nullptr, 16));
         Blue = static_cast<int>(std::stoul(match[3].str(), nullptr, 16));
         Alpha = (match[4].matched) ? static_cast<int>(std::stoul(match[4].str(), nullptr, 16)) : 255;
+    }
+    else // Either match or copy default
+    {
+        Red = defaultColor.Red;
+        Green = defaultColor.Green;
+        Blue = defaultColor.Blue;
+        Alpha = defaultColor.Alpha;
     }
 }
 
@@ -58,13 +65,27 @@ ColorPalette::ColorPalette(ColorPalette* ParentPalette, std::string ParentPalett
 {
 }
 
-const ColorPalette::Color& ColorPalette::GetNamedColor(const NamedColor::knownColorName& NamedColor) const
+const ColorPalette::Color& ColorPalette::GetAltColor(const std::vector<Color>& NormalColors, const std::vector<Color>& AltColors, bool useAlt, int Index, const Color& Default) const
+{
+    if(useAlt && !AltColors.empty()) return AltColors[Index % AltColors.size()];
+    if(!NormalColors.empty()) return NormalColors[Index % NormalColors.size()];
+    return Default;
+}
+
+const ColorPalette::Color& ColorPalette::GetAltColor(const Color& NormalColor, const Color& AltColor, bool useAlt, const Color& Default) const
+{
+    if(useAlt && AltColor != undefinedColor) return AltColor;
+    if(NormalColor != undefinedColor) return NormalColor;
+    return Default;
+}
+
+const ColorPalette::Color& ColorPalette::GetNamedColor(const NamedColor::knownColorName& NamedColor, bool AskParent) const
 {
     if (const auto& search = NamedColors.find(NamedColor); search != NamedColors.end())
     {
         return search->second;
     }
-    return (ParentPalette) ? ParentPalette->GetNamedColor(NamedColor) : noColor;
+    return (ParentPalette && AskParent) ? ParentPalette->GetNamedColor(NamedColor) : undefinedColor;
 }
 
 const ColorPalette::Color& ColorPalette::GetGroupColor(const std::string& GroupName, const bool& UseAltColor) const
@@ -73,10 +94,12 @@ const ColorPalette::Color& ColorPalette::GetGroupColor(const std::string& GroupN
 
     if (const auto& search = GroupColors.find(GroupName); search != GroupColors.end())
     {
-        const Color& result = (UseAltColor && search->second.groupColor.second != undefinedColor) ? search->second.groupColor.second : search->second.groupColor.first;
+        const Color& result = GetAltColor(search->second.groupColor.first, search->second.groupColor.second, UseAltColor, undefinedColor);
+
         if(result != undefinedColor) return result;
     }
-    return (ParentPalette) ? ParentPalette->GetGroupColor(GroupName, UseAltColor) : noColor;
+    if(ParentPalette) return ParentPalette->GetGroupColor(GroupName, UseAltColor);
+    return noColor;
 }
 
 const ColorPalette::Color& ColorPalette::GetGroupOutlineColor(const std::string& GroupName, const bool& UseAltColor) const
@@ -85,10 +108,12 @@ const ColorPalette::Color& ColorPalette::GetGroupOutlineColor(const std::string&
 
     if (const auto& search = GroupColors.find(GroupName); search != GroupColors.end())
     {
-        const Color& result = (UseAltColor && search->second.groupOutlineColor.second != undefinedColor) ? search->second.groupOutlineColor.second : search->second.groupOutlineColor.first;
+        const Color& result = GetAltColor(search->second.groupOutlineColor.first, search->second.groupOutlineColor.second, UseAltColor, GetNamedColor(NamedColor::defaultOutline, false));
+
         if(result != undefinedColor) return result;
     }
-    return (ParentPalette) ? ParentPalette->GetGroupOutlineColor(GroupName, UseAltColor) : GetNamedColor(NamedColor::defaultOutline);
+    if(ParentPalette) return ParentPalette->GetGroupOutlineColor(GroupName, UseAltColor);
+    return noColor;
 }
 
 const ColorPalette::Color& ColorPalette::GetGroupLabelColor(const std::string& GroupName, const bool& UseAltColor) const
@@ -97,68 +122,55 @@ const ColorPalette::Color& ColorPalette::GetGroupLabelColor(const std::string& G
 
     if (const auto& search = GroupColors.find(GroupName); search != GroupColors.end())
     {
-        const Color& result = (UseAltColor && search->second.groupLabelColor.second != undefinedColor) ? search->second.groupLabelColor.second : search->second.groupLabelColor.first;
+        const Color& result = GetAltColor(search->second.groupLabelColor.first, search->second.groupLabelColor.second, UseAltColor, GetNamedColor(NamedColor::defaultLabel, false));
+
         if(result != undefinedColor) return result;
     }
-    return (ParentPalette) ? ParentPalette->GetGroupLabelColor(GroupName, UseAltColor) : GetNamedColor(NamedColor::defaultLabel);
+    if(ParentPalette) return ParentPalette->GetGroupLabelColor(GroupName, UseAltColor);
+    return noColor;
 }
 
 const ColorPalette::Color& ColorPalette::GetNodeColor(const std::string& GroupName, const int& nodeIndexInGroup,
     const bool& UseAltColor) const
 {
-    if(GroupName.empty()) return noColor;
+    if(GroupName.empty()) return undefinedColor;
 
     if (const auto& search = GroupColors.find(GroupName); search != GroupColors.end())
     {
-        const GroupColorInfo& Group = search->second;
-
-        if(UseAltColor && !Group.altNodeColorSequence.empty())
-        {
-            return Group.altNodeColorSequence[nodeIndexInGroup % Group.altNodeColorSequence.size()];
-        }
-
-        if(Group.nodeColorSequence.empty() && ParentPalette) return ParentPalette->GetNodeColor(GroupName, nodeIndexInGroup, UseAltColor);
-        return Group.nodeColorSequence[nodeIndexInGroup % Group.nodeColorSequence.size()];
+        const Color& color = GetAltColor(search->second.nodeColorSequence, search->second.altNodeColorSequence, UseAltColor, nodeIndexInGroup, undefinedColor);
+        if(color != undefinedColor) return color;
     }
-    return (ParentPalette) ? ParentPalette->GetNodeColor(GroupName, nodeIndexInGroup, UseAltColor) : noColor;
+    if(ParentPalette) return ParentPalette->GetNodeColor(GroupName, nodeIndexInGroup, UseAltColor);
+
+    return noColor;
 }
 
-const ColorPalette::Color& ColorPalette::GetNodeOutlineColor(const std::string& GroupName, const int& nodeIndexInGroup,
-    const bool& UseAltColor) const
+const ColorPalette::Color& ColorPalette::GetNodeOutlineColor(const std::string& GroupName, const int& nodeIndexInGroup, const bool& UseAltColor) const
 {
-    if(GroupName.empty()) return noColor;
+    if(GroupName.empty()) return undefinedColor;
 
     if (const auto& search = GroupColors.find(GroupName); search != GroupColors.end())
     {
-        const GroupColorInfo& Group = search->second;
-
-        if(UseAltColor && !Group.altNodeOutlineColorSequence.empty())
-        {
-            return Group.altNodeOutlineColorSequence[nodeIndexInGroup % Group.altNodeOutlineColorSequence.size()];
-        }
-
-        if(Group.nodeOutlineColorSequence.empty() && ParentPalette) return ParentPalette->GetNodeOutlineColor(GroupName, nodeIndexInGroup, UseAltColor);
-        return Group.nodeOutlineColorSequence[nodeIndexInGroup % Group.nodeOutlineColorSequence.size()];
+        const Color& color = GetAltColor(search->second.nodeOutlineColorSequence, search->second.altNodeOutlineColorSequence, UseAltColor, nodeIndexInGroup, GetNamedColor(NamedColor::defaultOutline, false));
+        if(color != undefinedColor) return color;
     }
-    return (ParentPalette) ? ParentPalette->GetNodeOutlineColor(GroupName, nodeIndexInGroup, UseAltColor) : GetNamedColor(NamedColor::defaultOutline);
+    if(ParentPalette) return ParentPalette->GetNodeOutlineColor(GroupName, nodeIndexInGroup, UseAltColor);
+
+    return noColor;
 }
 
 const ColorPalette::Color& ColorPalette::GetNodeLabelColor(const std::string& GroupName, const int& nodeIndexInGroup,
     const bool& UseAltColor) const
 {
-    if(GroupName.empty()) return noColor;
+    if(GroupName.empty()) return undefinedColor;
 
     if (const auto& search = GroupColors.find(GroupName); search != GroupColors.end())
     {
-        const GroupColorInfo& Group = search->second;
+        const Color& color = GetAltColor(search->second.nodeLabelColorSequence, search->second.altNodeLabelColorSequence, UseAltColor, nodeIndexInGroup, GetNamedColor(NamedColor::defaultLabel, false));
 
-        if(UseAltColor && !Group.altNodeLabelColorSequence.empty())
-        {
-            return Group.altNodeLabelColorSequence[nodeIndexInGroup % Group.altNodeLabelColorSequence.size()];
-        }
-
-        if(Group.nodeLabelColorSequence.empty() && ParentPalette) return ParentPalette->GetNodeLabelColor(GroupName, nodeIndexInGroup, UseAltColor);
-        return Group.nodeLabelColorSequence[nodeIndexInGroup % Group.nodeLabelColorSequence.size()];
+        if(color != undefinedColor) return color;
     }
-    return (ParentPalette) ? ParentPalette->GetNodeLabelColor(GroupName, nodeIndexInGroup, UseAltColor) : GetNamedColor(NamedColor::defaultLabel);
+    if(ParentPalette) return ParentPalette->GetNodeLabelColor(GroupName, nodeIndexInGroup, UseAltColor);
+
+    return noColor;
 }

@@ -39,13 +39,12 @@ const ColorPalette* CColorIO::FindPalette(const std::string& ColorPaletteName) {
 	return KnownPalettes["Default"];
 }
 
-ColorPalette::Color CColorIO::GetAttributeAsColor(pugi::xml_attribute attribute, ColorPalette::Color defaultColor = ColorPalette::noColor)
+ColorPalette::Color CColorIO::GetAttributeAsColor(pugi::xml_attribute attribute, ColorPalette::Color defaultColor)
 {
-    if(attribute.empty()) return defaultColor;
-	return {attribute.as_string()};
+    return {attribute.as_string(), defaultColor};
 }
 
-std::vector<ColorPalette::Color> CColorIO::GetAttributeAsColorList(pugi::xml_attribute attribute, ColorPalette::Color defaultColor = ColorPalette::noColor)
+std::vector<ColorPalette::Color> CColorIO::GetAttributeAsColorList(pugi::xml_attribute attribute, ColorPalette::Color defaultColor)
 {
     if(attribute.empty()) return {};
 
@@ -57,11 +56,11 @@ std::vector<ColorPalette::Color> CColorIO::GetAttributeAsColorList(pugi::xml_att
 	{
 	    if(*i == ',')
 	    {
-			result.push_back(ColorPalette::Color(std::string(lastStart, i)));
+			result.push_back(ColorPalette::Color(std::string(lastStart, i), defaultColor));
 			lastStart = i + 1;
 	    }
 	}
-	result.push_back(ColorPalette::Color(std::string(lastStart, colorDef.end())));
+	result.push_back(ColorPalette::Color(std::string(lastStart, colorDef.end()), defaultColor));
 
 	return result;
 }
