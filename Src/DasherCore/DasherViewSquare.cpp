@@ -109,9 +109,21 @@ CDasherNode* CDasherViewSquare::Render(CDasherNode* pRoot, myint iRootMin, myint
 	}
 	else if(m_pSettingsStore->GetLongParameter(LP_SHAPE_TYPE) == Options::CUBE)
 	{
-		DasherDrawCube(visibleRegion.maxX, visibleRegion.minY, visibleRegion.minX, visibleRegion.maxY, -1, 0, GetNamedColor(NamedColor::background), ColorPalette::noColor, 0);
+		//Stolen from disjoint rectangle code (above)
+		if (iRootMin > visibleRegion.minY)
+			DasherDrawCube(visibleRegion.maxX, visibleRegion.minY, visibleRegion.minX, iRootMin, -1, 0, GetNamedColor(NamedColor::background), GetNamedColor(NamedColor::defaultOutline), 0);
 
-		// No "clearing" needed as geometry is used anyway
+		if (iRootMax < visibleRegion.maxY)
+			DasherDrawCube(visibleRegion.maxX, iRootMax, visibleRegion.minX, visibleRegion.maxY, -1, 0, GetNamedColor(NamedColor::background), GetNamedColor(NamedColor::defaultOutline), 0);
+
+		//to left (greater Dasher X)
+		if (iRootMax - iRootMin < visibleRegion.maxX)
+			DasherDrawCube(visibleRegion.maxX, std::max(iRootMin, visibleRegion.minY), iRootMax - iRootMin, std::min(iRootMax, visibleRegion.maxY), -1, 0, GetNamedColor(NamedColor::background), GetNamedColor(NamedColor::defaultOutline), 0);
+
+		//to right (margin)
+		DasherDrawCube(0, visibleRegion.minY, visibleRegion.minX, visibleRegion.maxY, -1, 0, GetNamedColor(NamedColor::background), GetNamedColor(NamedColor::defaultOutline), 0);
+
+
 		m_CrosshairCubeLevel = -1;
 		NewRender(pRoot, iRootMin, iRootMax, nullptr, policy, std::numeric_limits<double>::infinity(), currentTopCenterNode, 0,0);
 
@@ -860,7 +872,7 @@ void CDasherViewSquare::NewRender(CDasherNode* pCurrentNode, myint y1, myint y2,
 	// _supposed_ to be the same color as their parent, will have no outlines...
 	// (thankfully having 2 "phases" means this doesn't happen in standard
 	// color schemes)
-	if (!pCurrentNode->getNodeColor(m_pColorPalette).isFullyTransparent())
+	if (!pCurrentNode->getNodeColor(m_pColorPalette).isFullyTransparent() || m_pSettingsStore->GetBoolParameter(BP_SIMULATE_TRANSPARENCY))
 	{
 		//outline width 0 = fill only; >0 = fill + outline; <0 = outline only
 		const int line_width = abs(m_pSettingsStore->GetLongParameter(LP_OUTLINE_WIDTH));
