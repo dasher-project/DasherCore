@@ -72,8 +72,12 @@ public:
 
 	/// (Default implementation returns false)
 	///\return true if this Screen can efficiently support fonts of many sizes (by continuous scaling);
-	/// false if clients should try to minimise the number of distinct font sizes required.
-	virtual bool MultiSizeFonts() { return false; }
+	/// if false it returned the supported fontsizes are determined by calling SupportedFontSizes()
+	virtual bool SupportsDynamicFontScaling() = 0;
+
+	/// If SupportsDynamicFontScaling() returns false, this method is used to determine which font sizes are available
+	///\return array of supported font sizes
+	virtual const std::vector<int>& SupportedFontSizes(){return m_vSupportedFontSizes;}
 
 	///Abstract class for objects representing strings that can be drawn on the screen.
 	/// Platform-specific instances are created by the MakeLabel(String) method, which
@@ -182,6 +186,8 @@ private:
 	screenint m_iWidth, m_iHeight;
 
 protected:
+    std::vector<int> m_vSupportedFontSizes = {22, 28, 40};
+
 	///Subclasses should call this if the canvas dimensions have changed.
 	/// It is up to subclasses to make sure they also call
 	/// ScreenResized on the intf.

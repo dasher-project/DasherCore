@@ -140,7 +140,7 @@ void CDasherView::DasherDrawRectangle(myint iDasherMaxX, myint iDasherMinY, myin
   Dasher2Screen(iDasherMaxX, iDasherMinY, iScreenLeft, iScreenTop);
   Dasher2Screen(iDasherMinX, iDasherMaxY, iScreenRight, iScreenBottom);
 
-  Screen()->DrawRectangle(iScreenLeft, iScreenTop, iScreenRight, iScreenBottom, color, outlineColor, iThickness);
+  Screen()->DrawRectangle(std::min(iScreenLeft, iScreenRight), std::min(iScreenTop, iScreenBottom), std::max(iScreenLeft, iScreenRight), std::max(iScreenTop, iScreenBottom), color, outlineColor, iThickness);
 }
 
 /// Draw a rectangle centred on a given dasher co-ordinate, but with a size specified in screen co-ordinates (used for drawing the mouse blob)
