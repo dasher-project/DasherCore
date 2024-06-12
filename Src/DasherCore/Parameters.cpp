@@ -44,7 +44,7 @@ namespace Dasher{
 		{LP_MAX_BITRATE          , Parameter_Value{ "MaxBitRateTimes100"        , PARAM_LONG, Persistence::PERSISTENT, 80l  , "Max Bit Rate Times 100"}},
 		{LP_FRAMERATE            , Parameter_Value{ "FrameRate"                 , PARAM_LONG, Persistence::EPHEMERAL , 3200l , "Decaying average of last known frame rates, *100"}},
 		{LP_LANGUAGE_MODEL_ID    , Parameter_Value{ "LanguageModelID"           , PARAM_LONG, Persistence::PERSISTENT, 0l    , "LanguageModelID"}},
-		{LP_DASHER_FONTSIZE      , Parameter_Value{ "DasherFontSize"            , PARAM_LONG, Persistence::PERSISTENT, 22l    , "Smallest used Font size for boxes (in points)"}},
+		{LP_DASHER_FONTSIZE      , Parameter_Value{ "DasherFontSize"            , PARAM_LONG, Persistence::PERSISTENT, 22l    , "Font size reached at crosshair (in points)"}},
 		{LP_MESSAGE_FONTSIZE     , Parameter_Value{ "MessageFontSize"           , PARAM_LONG, Persistence::PERSISTENT, 14l   , "Size of font for messages (in points)"}},
 		{LP_SHAPE_TYPE           , Parameter_Value{ "RenderStyle"               , PARAM_LONG, Persistence::PERSISTENT, static_cast<long>(Options::DISJOINT_RECTANGLE), "Shapes to render in (see Options::Rendering_Shape_Types)"}},
 		{LP_UNIFORM              , Parameter_Value{ "UniformTimes1000"          , PARAM_LONG, Persistence::PERSISTENT, 50l   , "UniformTimes1000"}},

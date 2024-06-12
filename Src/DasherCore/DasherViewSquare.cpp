@@ -180,24 +180,14 @@ CDasherViewSquare::CTextString* CDasherViewSquare::DasherDrawText(myint iDasherM
 	screenint x, y;
 	Dasher2Screen(iDasherMaxX, iDasherMidY, x, y);
 
-	//compute font size...
-	myint iSize = m_pSettingsStore->GetLongParameter(LP_DASHER_FONTSIZE);
-	const myint iMaxY(CDasherModel::MAX_Y);
+	// Old formulation based, where fontSize gave the smallest font size used:
+	    //font size maxes out at ((iMaxY*3)/2)+iMaxY)/iMaxY = 3/2*smallest
+	    // which is reached when iDasherMaxX == iMaxY/2, i.e. the crosshair (ORIGIN_X)
+	    //const myint iSize = (std::min(iDasherMaxX * 3, (iMaxY * 3) / 2) + iMaxY) * m_pSettingsStore->GetLongParameter(LP_DASHER_FONTSIZE) / iMaxY;
 
-	//font size maxes out at ((iMaxY*3)/2)+iMaxY)/iMaxY = 3/2*smallest
-	// which is reached when iDasherMaxX == iMaxY/2, i.e. the crosshair
-	iSize = (std::min(iDasherMaxX * 3, (iMaxY * 3) / 2) + iMaxY) * iSize / iMaxY;
-
-	if (!Screen()->SupportsDynamicFontScaling())
-	{
-        const std::vector<int>& sizes = Screen()->SupportedFontSizes();
-
-		//Find closest supported font size
-        iSize = *std::min_element(sizes.begin(), sizes.end(), [&iSize](int x, int y)
-        {
-            return abs(x - iSize) < abs(y - iSize);
-        });
-	}
+	// New formulation, where fontSize gives the maximum font size, which is reached at the crosshair
+	const float fSize = static_cast<float>(m_pSettingsStore->GetLongParameter(LP_DASHER_FONTSIZE));
+    const float iSize = std::min(fSize,fSize * (0.6f * static_cast<float>(iDasherMaxX)/CDasherModel::ORIGIN_X + 0.4f)); // linear function passing through (0, fSize/2.5) and (CDasherModel::ORIGIN_X, fSize), capped at fSize
 
 	return new CTextString(pLabel, x, y, static_cast<int>(iSize), Color);
 }
