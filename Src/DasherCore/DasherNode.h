@@ -268,7 +268,11 @@ class Dasher::CDasherNode:private NoClones {
   virtual bool GameSearchNode(symbol sym) {return false;}
 
   virtual symbol GetAlphSymbol() {
+#ifdef __EXCEPTIONS
     throw "Hack for pre-MandarinDasher ConversionManager::BuildTree method, needs to access CAlphabetManager-private struct";
+#else
+	return -1;
+#endif
   }
 
   virtual const ColorPalette::Color& getLabelColor(const ColorPalette* colorPalette) = 0;
