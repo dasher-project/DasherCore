@@ -122,11 +122,12 @@ private:
 		/// iSize is desired size (already computed from requested position)
 		CTextString(CDasherScreen::Label* pLabel, screenint x, screenint y, int iSize, const ColorPalette::Color& iColor)
 			: m_pLabel(pLabel), m_ix(x), m_iy(y), m_iSize(iSize), m_Color(iColor)
-		{
+        {
 		}
 
 		~CTextString();
-		CDasherScreen::Label* m_pLabel;
+
+	    CDasherScreen::Label* m_pLabel;
 		screenint m_ix, m_iy;
 		std::vector<CTextString*> m_children;
 		int m_iSize;
@@ -164,7 +165,9 @@ private:
 	/// (according to LP_SHAPE_TYPE)
 	/// Each call responsible for rendering exactly the area contained within the node.
 	/// @param pCurrentTopCenterNode The innermost node covering the crosshair (if any)
-	void NewRender(CDasherNode* pCurrentNode, myint y1, myint y2, CTextString* pPrevText, CExpansionPolicy& policy, double dMaxCost, CDasherNode*& pCurrentTopCenterNode, myint recusionDepth, myint groupRecursionDepth);
+    void NewRender(CDasherNode* pCurrentNode, myint y1, myint y2, CTextString* pPrevText, CExpansionPolicy& policy,
+                   double dMaxCost, CDasherNode*& pCurrentTopCenterNode, myint recusionDepth,
+                   myint groupRecursionDepth);
 
 	/// @name Nonlinearity
 	/// Implements the non-linear part of the coordinate space mapping

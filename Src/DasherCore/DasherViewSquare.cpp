@@ -209,8 +209,8 @@ void CDasherViewSquare::DoDelayedText(CTextString* pText, myint extrusionLevel, 
 	std::pair<screenint, screenint> textDims = Screen()->TextSize(pText->m_pLabel, pText->m_iSize);
 	const bool extrudedText = m_pSettingsStore->GetLongParameter(LP_SHAPE_TYPE) == Options::CUBE;
 
-	const screenint textInset = m_pSettingsStore->GetLongParameter(LP_OUTLINE_WIDTH) + m_pSettingsStore->GetLongParameter(LP_TEXT_PADDING);
-
+	screenint textInset = m_pSettingsStore->GetLongParameter(LP_OUTLINE_WIDTH) + m_pSettingsStore->GetLongParameter(LP_TEXT_PADDING);
+	
 	switch (GetOrientation())
 	{
 	case Options::LeftToRight:
