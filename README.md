@@ -1,116 +1,34 @@
-## Dasher MIT
-
-> :warning: This repo is undergoing a relicense
-
-## Description
-
+# The Dasher Text Entry System
 Dasher is a zooming predictive text entry system, designed for situations
 where keyboard input is impractical (for instance, accessibility or PDAs). It
 is usable with highly limited amounts of physical input while still allowing
 high rates of text entry.
 
+## DasherCore
+In the past Dasher was developed in a one big repository, featuring multiple frontends with shared code base. This project aims at separating the shared code basis into a _Core_ version, featuring all the functionality needed by all current and future platforms. This allows the "easy" development for new platforms, without having to deal with all other platforms. Currently, we offer Linux (Unix) and Windows support for this library.
+
+If you are looking for a frontend that acutally offers some of the functionality that you might be used to from the old Dasher, have a look at [DasherUI](https://github.com/PapeCoding/DasherUI), which is build based on this library.
+
+## Build Instructions
+
+This library version can be build, simply by generating the required make files via CMake and then building with these. A viable workflow could look something like this:
+
+1. Clone the repository with all submodules: `git clone --recursive https://github.com/PapeCoding/DasherCore.git ./DasherCore`
+2. Generate some project files with CMake:
+  * `cd ./DasherCore && mkdir build && cd build`
+  * `cmake ..`
+3. Build the project with the selected build system (e.g. Visual Studio on Windows or `make` on Linux)
+
 ## License
 
 Dasher was originally built by Inference Group. It was released and maintained under GPL, [you can see that version here.](https://gitlab.gnome.org/GNOME/dasher)
-
 This version of Dasher is licensed under the MIT License.
 
 [You can read more about the relicensing process and why we decided to relicense Dasher here.](./LICENSE_NOTES.md)
 
-## Requirements
-
-Dasher makes use of the following third party software (note that this
-list is potentially inaccurate or incomplete - please send any
-corrections to dasherteam@yahoogroups.com):
-
-General:
-
-- The Expat XML parser (required)
-
-Linux (see INSTALL.Linux for build time requirements):
-
-- GTK+ (2.6 or greater) (required)
-- GNOME (optional, but highly recommended)
-- Libcanna (optional, for Hiragana to Kanji conversion)
-
-MS Windows:
-
-- MS Speech API (optional)
-- MS Table API (optional - required for tablet start/stop mode)
-
-MS Windows CE:
-
-- (not sure - if anyone knows then please fill this in)
-
-## Platform Specific Notes
-
-### Solaris
-
-Dasher has been tested on Solaris 10. You will need to upgrade to gnome-doc-utils 0.3.2 to install the documentation, which
-in turn will require libxml 2.6.12 and libxslt 1.1.8. These packages
-are not required to run dasher once it is built.
-
-There have been some issues with the gthread-2.0 pkgconfig file
-including compiler flags which are not understood by the compiler. You
-may need to shadow this file in another directory with these flags
-removed.
-
-GNU make (gmake) must be used if building gnome documentation.
-
-### macOS
-
-The macOS version has [its own README](README_macOS.md).
-
-The native UI in the MacOSX directory builds in Xcode 11.3
-and has been tested on macOS 10.14.
-
-The GTK2 front end should
-build on Darwin with minimal changes, and with a recent enough version of GTK will not
-require the X11 server.
-
-## Installation Instructions
-
-Please see the file INSTALL.[platform] for details on how to build and
-install Dasher from source on your host system.
-
-## Font Support
-
-Dasher includes some alphabets which require fonts that you probably don't
-have installed; for example, for the International Phonetic Alphabet, Korean
-and Hiragana (Japanese). We aren't legally allowed to distribute a font for
-the IPA, but you can download one yourself from:
-
-http://www.sil.org/computing/fonts/encore-ipa.html
-
-## Kanji Entry
-
-As of Dasher 3.99.0, experimental support for Japanese Kanji entry
-by Hiragana conversion. To build Dasher with this enabled on Linux,
-you need the libcanna conversion library. You also need to be able to
-access a canna conversion server, which can be on the local machine or
-over a network. Please note that Dasher will not start a canna server
-if none is running - you must do so manually before running Dasher.
-Please see the Canna documentation for more details.
-
-Kanji conversion in Microsoft Windows is via the IME API, which is
-part of Windows XP and Asian builds of earlier Windows
-versions. Support for Kanji conversion in Dasher under Windows is
-still very much under development, so please take care when trying
-it out. In particular, Dasher will crash if you try to enable Kanji
-conversion on a machine which does not have Japanese localisation
-installed.
-
-To use Kanji conversion in Dasher, you must select 'Japanese Canna'
-from the 'Alphabet' section of the preferences dialogue, and the
-Japanese language model from the 'Prediction' section.
-
 ## Support and Feedback
 
-Please file any bug reports in [the GNOME GitLab system](https://gitlab.gnome.org/GNOME/dasher/-/issues).
+Please file any bug reports in the issues of this repository.
 
-We also appreciate general feedback -
-please send any comments to 'dasher@inf.phy.cam.ac.uk'.
-
-You can find the Dasher website at:
-
-http://www.inference.org.uk/dasher/
+You can find the Dasher website and more info at:
+https://github.com/dasher-project
