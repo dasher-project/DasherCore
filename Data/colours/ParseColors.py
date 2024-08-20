@@ -84,9 +84,10 @@ def ExtractColors(filename, excludeColors):
     input = ET.parse(filename, parser=parser).getroot().find("palette")
     paletteName = input.attrib["name"]
     output = ET.Element("colors",{
-                "name": paletteName,
-                "parentName" : "Default"
+                "name": paletteName
             })
+    if paletteName != "Default" :
+        output.attrib[parentName] = "Default"
 
     colors = input.findall('colour')
     for [colorIndex,colorName] in NamedColors:

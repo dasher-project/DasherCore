@@ -187,6 +187,7 @@ void CDasherInterfaceBase::Realize(unsigned long ulTime) {
 
   m_ColorIO = new CColorIO(this);
   ScanFiles(m_ColorIO, "color.*.xml");
+  m_ColorIO->RelinkParents();
 
   ChangeView();
 

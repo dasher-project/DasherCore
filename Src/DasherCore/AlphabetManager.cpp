@@ -148,7 +148,10 @@ CTrainer *CAlphabetManager::GetTrainer() {
 }
 
 void CAlphabetManager::MakeLabels(CDasherScreen *pScreen) {
-  m_pBaseGroup->RecursiveDelete();
+  if(m_pBaseGroup){
+    m_pBaseGroup->RecursiveDelete();
+    m_pBaseGroup = nullptr;
+  }
   for (vector<CDasherScreen::Label *>::iterator it=m_vLabels.begin(); it!=m_vLabels.end(); it++)
     delete (*it);
   m_vLabels.clear();
@@ -503,13 +506,15 @@ bool CGroupNode::isInGroup(const SGroupInfo *pInfo) {
 const ColorPalette::Color& CGroupNode::getLabelColor(const ColorPalette* colorPalette)
 {
     if(renderInRootColor || colorPalette == nullptr) return ColorPalette::noColor;
-    return colorPalette->GetGroupLabelColor(m_pGroupInfo->colorGroup, UseAltColor());
+    const ColorPalette::Color& result = colorPalette->GetGroupLabelColor(m_pGroupInfo->colorGroup, UseAltColor());
+    return result != ColorPalette::undefinedColor ? result : ColorPalette::noColor;
 }
 
 const ColorPalette::Color& CGroupNode::getOutlineColor(const ColorPalette* colorPalette)
 {
     if(renderInRootColor || colorPalette == nullptr) return ColorPalette::noColor;
-    return colorPalette->GetGroupOutlineColor(m_pGroupInfo->colorGroup, UseAltColor());
+    const ColorPalette::Color& result = colorPalette->GetGroupOutlineColor(m_pGroupInfo->colorGroup, UseAltColor());
+    return result != ColorPalette::undefinedColor ? result : ColorPalette::noColor;
 }
 
 const ColorPalette::Color& CGroupNode::getNodeColor(const ColorPalette* colorPalette)
@@ -572,13 +577,15 @@ CDasherNode* CSymbolNode::RebuildSymbol(CAlphNode *pParent, symbol iSymbol) {
 const ColorPalette::Color& CSymbolNode::getLabelColor(const ColorPalette* colorPalette)
 {
     if(colorPalette == nullptr) return ColorPalette::noColor;
-    return colorPalette->GetNodeLabelColor(m_pMgr->GetAlphabet()->getColorGroup(iSymbol), m_pMgr->GetAlphabet()->getColorGroupOffset(iSymbol), UseAltColor());
+    const ColorPalette::Color& result = colorPalette->GetNodeLabelColor(m_pMgr->GetAlphabet()->getColorGroup(iSymbol), m_pMgr->GetAlphabet()->getColorGroupOffset(iSymbol), UseAltColor());
+    return result != ColorPalette::undefinedColor ? result : ColorPalette::noColor;
 }
 
 const ColorPalette::Color& CSymbolNode::getOutlineColor(const ColorPalette* colorPalette)
 {
     if(colorPalette == nullptr) return ColorPalette::noColor;
-    return colorPalette->GetNodeOutlineColor(m_pMgr->GetAlphabet()->getColorGroup(iSymbol), m_pMgr->GetAlphabet()->getColorGroupOffset(iSymbol), UseAltColor());
+    const ColorPalette::Color& result = colorPalette->GetNodeOutlineColor(m_pMgr->GetAlphabet()->getColorGroup(iSymbol), m_pMgr->GetAlphabet()->getColorGroupOffset(iSymbol), UseAltColor());
+    return result != ColorPalette::undefinedColor ? result : ColorPalette::noColor;
 }
 
 const ColorPalette::Color& CSymbolNode::getNodeColor(const ColorPalette* colorPalette)

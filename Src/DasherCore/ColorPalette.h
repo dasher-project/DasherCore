@@ -91,9 +91,8 @@ namespace Dasher {
 		} GroupColorInfo;
 
 		ColorPalette(ColorPalette* ParentPalette, std::string ParentPaletteName, const std::unordered_map<NamedColor::knownColorName, Color>& NamedColors, const std::unordered_map<std::string, GroupColorInfo>& GroupColors, std::string PaletteName);
-        const Color& GetAltColor(const std::vector<Color>& NormalColors, const std::vector<Color>& AltColors, bool useAlt, int Index, const Color& Default) const;
-        const Color& GetAltColor(const Color& NormalColor, const Color& AltColor, bool useAlt,
-                                           const Color& Default) const;
+        const Color& GetAltColor(const std::vector<Color>& NormalColors, const std::vector<Color>& AltColors, bool useAlt, int Index) const;
+        const Color& GetAltColor(const Color& NormalColor, const Color& AltColor, bool useAlt) const;
 
         // We need both links to the parentPalette, as we first only parse and link the palettes afterwards
 		const ColorPalette* ParentPalette = nullptr;
@@ -103,13 +102,12 @@ namespace Dasher {
 		const Color& GetNamedColor(const NamedColor::knownColorName& NamedColor, bool AskParent = true) const;
 
 		const Color& GetGroupColor(const std::string& GroupName, const bool& UseAltColor) const;
-		const Color& GetGroupOutlineColor(const std::string& GroupName, const bool& UseAltColor) const;
-		const Color& GetGroupLabelColor(const std::string& GroupName, const bool& UseAltColor) const;
+        const Color& GetGroupOutlineColor(const std::string& GroupName, const bool& UseAltColor, bool UseDefaultColor = true) const;
+		const Color& GetGroupLabelColor(const std::string& GroupName, const bool& UseAltColor, bool UseDefaultColor = true) const;
 
 		const Color& GetNodeColor(const std::string& GroupName, const int& nodeIndexInGroup, const bool& UseAltColor) const;
-		const Color& GetNodeOutlineColor(const std::string& GroupName, const int& nodeIndexInGroup, const bool& UseAltColor) const;
-		const Color& GetNodeLabelColor(const std::string& GroupName, const int& nodeIndexInGroup, const bool& UseAltColor) const;
-
+		const Color& GetNodeOutlineColor(const std::string& GroupName, const int& nodeIndexInGroup, const bool& UseAltColor, bool UseDefaultColor = true) const;
+		const Color& GetNodeLabelColor(const std::string& GroupName, const int& nodeIndexInGroup, const bool& UseAltColor, bool UseDefaultColor = true) const;
     private:
 	    std::unordered_map<NamedColor::knownColorName, Color> NamedColors;
 		std::unordered_map<std::string, GroupColorInfo> GroupColors;

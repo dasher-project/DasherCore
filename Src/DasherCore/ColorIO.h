@@ -31,6 +31,7 @@ namespace Dasher {
 
 	    std::map <std::string, ColorPalette*> KnownPalettes;
 
+        ColorPalette* HardcodedDefaultPalette;
 	    void CreateDefault();         // Give the user a default colour scheme rather than nothing if anything goes horribly wrong.
     };
 }

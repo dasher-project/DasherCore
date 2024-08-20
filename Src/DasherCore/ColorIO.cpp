@@ -1,7 +1,3 @@
-// ColourIO.cpp
-//
-// Copyright (c) 2002 Iain Murray
-
 #include "ColorIO.h"
 #include <cstring>
 
@@ -15,6 +11,7 @@ CColorIO::CColorIO(CMessageDisplay *pMsgs) : AbstractXMLParser(pMsgs) {
 CColorIO::~CColorIO()
 {
 	KnownPalettes.clear();
+	delete HardcodedDefaultPalette;
 }
 
 void CColorIO::GetKnownPalettes(std::vector<std::string>* ColourList) const {
@@ -27,7 +24,7 @@ void CColorIO::GetKnownPalettes(std::vector<std::string>* ColourList) const {
 
 const ColorPalette* CColorIO::FindPalette(const std::string& ColorPaletteName) {
 	if(ColorPaletteName.empty()){ // return Default if no colour scheme is specified
-		return KnownPalettes["Default"];
+		return HardcodedDefaultPalette;
 	}
 
 	//count acts like contains(key)
@@ -36,7 +33,7 @@ const ColorPalette* CColorIO::FindPalette(const std::string& ColorPaletteName) {
 	}
 
 	// if we don't have the colour scheme they asked for, return default
-	return KnownPalettes["Default"];
+	return HardcodedDefaultPalette;
 }
 
 ColorPalette::Color CColorIO::GetAttributeAsColor(pugi::xml_attribute attribute, ColorPalette::Color defaultColor)
@@ -74,7 +71,7 @@ bool CColorIO::Parse(pugi::xml_document& document, const std::string, bool bUser
 
 	std::unordered_map<NamedColor::knownColorName, ColorPalette::Color> NamedColors;
 	std::unordered_map<std::string, ColorPalette::GroupColorInfo> GroupColors;
-	std::string parentName = outer.attribute("parentName").as_string("Default");
+	std::string parentName = outer.attribute("parentName").as_string(HardcodedDefaultPalette->PaletteName.c_str());
 	std::string colorSchemeName = outer.attribute("name").as_string(); // definitely exists, we checked above
 
 	for(pugi::xml_attribute attribute : outer.attributes())
@@ -103,7 +100,8 @@ bool CColorIO::Parse(pugi::xml_document& document, const std::string, bool bUser
 		GroupColors[groupInfo.attribute("name").as_string()] = group;
 	}
 
-	KnownPalettes[colorSchemeName] = new ColorPalette(KnownPalettes["Default"], parentName, NamedColors, GroupColors, colorSchemeName);
+	//"HardcodedDefault" is the parent for now, later on the parents get relinked by looking up the parentNames
+	KnownPalettes[colorSchemeName] = new ColorPalette(HardcodedDefaultPalette, parentName, NamedColors, GroupColors, colorSchemeName);
 
 	return true;
 }
@@ -142,5 +140,5 @@ void CColorIO::CreateDefault() {
         {NamedColor::gameGuide, ColorPalette::Color(255, 100, 204, 255)}
 	};
 
-	KnownPalettes["Default"] = new ColorPalette(nullptr, "NonExistentRootRootPalette", NamedColors, {}, "Default"); //TODO: No groups for now, but will later be added
+	HardcodedDefaultPalette = new ColorPalette(nullptr, "NonExistentRootRootPalette", NamedColors, {}, "HardcodedDefault"); //TODO: No groups for now, but will later be added
 }

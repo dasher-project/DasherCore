@@ -23,11 +23,15 @@ struct SGroupInfo {
     // (i.e. group) was used to produce a given target(chinese)-alphabet symbol
     std::string strName;
     void RecursiveDelete() {
-        for(SGroupInfo *t=this; t; ) {
-            SGroupInfo *next = t->pNext;
-            t->pChild->RecursiveDelete();
-            delete t;
-            t = next;
+        SGroupInfo* current = this;
+        while(current != nullptr){
+            if(current->pChild != nullptr){
+                current->pChild->RecursiveDelete();
+                current->pChild = nullptr;
+            }
+            SGroupInfo* next = current->pNext;
+            delete current;
+            current = next;
         }
     }
 };
