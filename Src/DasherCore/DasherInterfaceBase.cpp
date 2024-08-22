@@ -494,14 +494,12 @@ void CDasherInterfaceBase::NewFrame(unsigned long iTime, bool bForceRedraw) {
       // that would be rendering frames, is the same one doing the training.
       // So the following is never actually executed atm, but may be a simple
       // template if/when we ever implement multithreading widely/properly...
-      m_DasherScreen->SendMarker(0); //this replaces the nodes...
       const screenint iSW = m_DasherScreen->GetWidth(), iSH = m_DasherScreen->GetHeight();
       m_DasherScreen->DrawRectangle(0,0,iSW,iSH,m_pDasherView->GetNamedColor(NamedColor::infoTextBackground),ColorPalette::noColor,0); //fill in colour 0 = white
       unsigned int iSize(m_pSettingsStore->GetLongParameter(LP_MESSAGE_FONTSIZE));
       if (!m_pLockLabel) m_pLockLabel = m_DasherScreen->MakeLabel(m_strLockMessage, iSize);
       std::pair<screenint,screenint> dims = m_DasherScreen->TextSize(m_pLockLabel, iSize);
       m_DasherScreen->DrawString(m_pLockLabel, (iSW-dims.first)/2, (iSH-dims.second)/2, iSize, m_pDasherView->GetNamedColor(NamedColor::infoText));
-      m_DasherScreen->SendMarker(1); //decorations - don't draw any
       bBlit = true;
     } else {
       CExpansionPolicy *pol=m_defaultPolicy;
@@ -533,7 +531,7 @@ void CDasherInterfaceBase::NewFrame(unsigned long iTime, bool bForceRedraw) {
       //2. Render nodes decorations, messages
       bBlit = Redraw(iTime, bForceRedraw, *pol);
 
-      if (m_pUserLog != NULL) {
+      if (m_pUserLog != nullptr) {
         //(any) UserLogBase will have been watching output events to gather information
         // about symbols added/deleted; this tells it to apply that information at end-of-frame
         // (previously DashIntf gathered the info, and then passed it to the logger here).
@@ -562,7 +560,6 @@ bool CDasherInterfaceBase::Redraw(unsigned long ulTime, bool bRedrawNodes, CExpa
 
   // Draw the nodes
   if(bRedrawNodes) {
-    m_pDasherView->Screen()->SendMarker(0);
     if (m_pDasherModel) {
       m_pDasherModel->RenderToView(m_pDasherView,policy);
       // if anything was expanded or collapsed render at least one more
@@ -574,11 +571,8 @@ bool CDasherInterfaceBase::Redraw(unsigned long ulTime, bool bRedrawNodes, CExpa
       m_pGameModule->DecorateView(ulTime, m_pDasherView, m_pDasherModel);
     }          
   }
+
   //From here on, we'll use bRedrawNodes just to denote whether we need to blit the display...
-
-  // Draw the decorations
-  m_pDasherView->Screen()->SendMarker(1);
-
 
   if(m_pInputFilter) {
     if (m_pInputFilter->DecorateView(m_pDasherView, m_pInput)) bRedrawNodes=true;

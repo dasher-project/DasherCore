@@ -124,11 +124,6 @@ public:
 	virtual void DrawCube(screenint posX, screenint posY, screenint sizeX, screenint sizeY, myint extrusionLevel, myint groupRecursionDepth, const ColorPalette::Color& color, const ColorPalette::Color& outlineColor, int iThickness) {}
 	virtual void FinishRender3D(myint originX, myint originY, myint originExtrusionLevel) {}
 
-	// Send a marker to indicate 'phases' of drawing. 
-	virtual void SendMarker(int /*iMarker*/)
-	{
-	};
-
 	/// Draw a filled rectangle
 	///
 	/// Draw a colored rectangle on the screen
