@@ -138,7 +138,7 @@ const std::string &CMandarinAlphMgr::GetLabelText(symbol i) const {
 CMandarinAlphMgr::~CMandarinAlphMgr() {
   for (std::vector<CDasherScreen::Label *>::iterator it=m_vCHLabels.begin(); it!=m_vCHLabels.end(); it++)
     delete *it;
-  m_pPYgroups->RecursiveDelete();
+  delete m_pPYgroups;
 }
 
 void CMandarinAlphMgr::CreateLanguageModel() {

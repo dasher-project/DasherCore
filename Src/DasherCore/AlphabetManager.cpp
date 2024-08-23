@@ -149,7 +149,7 @@ CTrainer *CAlphabetManager::GetTrainer() {
 
 void CAlphabetManager::MakeLabels(CDasherScreen *pScreen) {
   if(m_pBaseGroup){
-    m_pBaseGroup->RecursiveDelete();
+    delete m_pBaseGroup;
     m_pBaseGroup = nullptr;
   }
   for (vector<CDasherScreen::Label *>::iterator it=m_vLabels.begin(); it!=m_vLabels.end(); it++)

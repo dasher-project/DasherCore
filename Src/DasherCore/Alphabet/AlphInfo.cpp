@@ -45,8 +45,6 @@ std::string CAlphInfo::escape(const std::string &ch) const {
 }
 
 CAlphInfo::~CAlphInfo() {
-    RecursiveDelete();
-
     for(auto action_vector : m_vCharacterDoActions)
     {
         for(auto a : action_vector) delete a;
