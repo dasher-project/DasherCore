@@ -785,7 +785,6 @@ bool CDasherViewSquare::CoversCrosshair(myint Range, myint y1, myint y2)
 	}
 	return false;
 }
-#pragma optimize( "", off )
 
 ColorPalette::Color CDasherViewSquare::SimulateTransparency(CDasherNode* pCurrentNode)
 {
@@ -794,7 +793,7 @@ ColorPalette::Color CDasherViewSquare::SimulateTransparency(CDasherNode* pCurren
     const ColorPalette::Color nodeColor = pCurrentNode->getNodeColor(m_pColorPalette);
 
 	if(nodeColor.isFullyOpaque()) return nodeColor; // no transparency
-
+	
 	//Interpolate between this and the parent
 	const ColorPalette::Color parentColor = SimulateTransparency(pCurrentNode->Parent());
 	ColorPalette::Color interpolatedColor = ColorPalette::Color::lerp(nodeColor, parentColor, static_cast<float>(nodeColor.Alpha) / 255.0f);
@@ -986,7 +985,6 @@ void CDasherViewSquare::NewRender(CDasherNode* pCurrentNode, myint y1, myint y2,
 	}
 	//all children rendered.
 }
-#pragma optimize( "", on ) 
 
 /// Convert screen co-ordinates to dasher co-ordinates. This doesn't
 /// include the nonlinear mapping for eyetracking mode etc - it is
