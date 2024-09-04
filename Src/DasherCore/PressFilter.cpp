@@ -1,6 +1,6 @@
 ﻿#include "PressFilter.h"
 
-Dasher::CPressFilter::CPressFilter(CSettingsStore* pSettingsStore, CDasherInterfaceBase* pInterface, CFrameRate* pFramerate) : CDefaultFilter(pSettingsStore, pInterface, pFramerate, "Press Mode")
+Dasher::CPressFilter::CPressFilter(CSettingsStore* pSettingsStore, CDasherInterfaceBase* pInterface, CFrameRate* pFramerate, const char *szName) : CDefaultFilter(pSettingsStore, pInterface, pFramerate, szName)
 {
 }
 

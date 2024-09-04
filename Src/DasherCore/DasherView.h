@@ -53,7 +53,7 @@ public:
 	}
 
 	virtual void SetOrientation(Options::ScreenOrientations newOrient) { m_Orientation = newOrient; }
-	Options::ScreenOrientations GetOrientation() { return m_Orientation; }
+	Options::ScreenOrientations GetOrientation() const { return m_Orientation; }
 
 	/// 
 	/// @name Coordinate system conversion
@@ -134,7 +134,7 @@ public:
 
 	////// Return a reference to the screen - can't be protected due to circlestarthandler
 
-	CDasherScreen* Screen()
+	CDasherScreen* Screen() const
 	{
 		return m_pScreen;
 	}
@@ -147,7 +147,7 @@ public:
 	///Draw a straight line in Dasher-space - which may be curved on the screen...
 	void DasherSpaceLine(myint x1, myint y1, myint x2, myint y2, int iWidth, const ColorPalette::Color& color);
 
-	virtual void DasherSpaceArc(myint cy, myint r, myint x1, myint y1, myint x2, myint y2, const ColorPalette::Color& color, int iLineWidth) =0;
+    virtual void DasherSpaceArc(myint cy, myint r, myint x1, myint y1, myint x2, myint y2, const ColorPalette::Color& color, int iLineWidth) =0;
 
 	///
 	/// Draw a polyline specified in Dasher co-ordinates
@@ -199,13 +199,13 @@ public:
 
 	const ColorPalette::Color& GetNamedColor(NamedColor::knownColorName color) const;
 
-protected:
 	/// Clips a line (specified in Dasher co-ordinates) to the visible region
 	/// by intersecting with all boundaries.
 	/// \return true if any part of the line was within the visible region; in this case, (x1,y1)-(x2,y2) delineate exactly that part
 	/// false if the line would be entirely outside the visible region; x1, y1, x2, y2 undefined.
 	bool ClipLineToVisible(myint& x1, myint& y1, myint& x2, myint& y2);
 
+protected:
 	///Convert a straight line in Dasher-space, to coordinates for a corresponding polyline on the screen
 	/// (because of nonlinearity, this may require multiple line segments)
 	/// \param x1 , y1 Dasher co-ordinates of start of line segment; note that these are guaranteed within VisibleRegion.

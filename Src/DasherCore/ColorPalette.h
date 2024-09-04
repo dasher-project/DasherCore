@@ -64,12 +64,17 @@ namespace Dasher {
 			bool isFullyTransparent() const {return Alpha == 0;}
 			bool isFullyOpaque() const {return Alpha == 255;}
 
+			//self * (1 - a) + ColorB * a
+			Color lerp(const Color& ColorB, float a) const;
+
             //ColorB * (1 - a) + ColorA * a
 			static Color lerp(const Color& ColorA, const Color& ColorB, float a);
         } Color;
 
 		inline static const Color noColor = {0,0,0,0};
 		inline static const Color undefinedColor = {-1,-1,-1,-1};
+		inline static const Color black = {0,0,0,1};
+		inline static const Color white = {1,1,1,1};
 
 		// Represents the colors for one named group
 		// each std::pair<Color,Color> represents a color and an alternative color for the same purpose to not nest the same colors

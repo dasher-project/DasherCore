@@ -53,6 +53,11 @@ ColorPalette::Color ColorPalette::Color::operator+(const Color& b) const
     return {Red + b.Red, Green + b.Green, Blue + b.Blue, Alpha + b.Alpha};
 }
 
+ColorPalette::Color ColorPalette::Color::lerp(const Color& ColorB, float a) const
+{
+    return lerp(ColorB, *this, a);
+}
+
 ColorPalette::Color ColorPalette::Color::lerp(const Color& ColorA, const Color& ColorB, float a)
 {
     return ColorB * (1.0f - a) + ColorA * a;

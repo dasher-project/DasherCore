@@ -85,6 +85,7 @@ ADD_library(DasherCore STATIC
 	${CMAKE_CURRENT_LIST_DIR}/Src/DasherCore/OneButtonFilter.cpp
 	${CMAKE_CURRENT_LIST_DIR}/Src/DasherCore/OneDimensionalFilter.cpp
 	${CMAKE_CURRENT_LIST_DIR}/Src/DasherCore/PressFilter.cpp
+	${CMAKE_CURRENT_LIST_DIR}/Src/DasherCore/SmoothingFilter.cpp
 	${CMAKE_CURRENT_LIST_DIR}/Src/DasherCore/RoutingAlphMgr.cpp
 	${CMAKE_CURRENT_LIST_DIR}/Src/DasherCore/SCENode.cpp
 	${CMAKE_CURRENT_LIST_DIR}/Src/DasherCore/ScreenGameModule.cpp

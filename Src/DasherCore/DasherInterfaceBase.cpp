@@ -54,6 +54,7 @@
 
 #include "ActionManager.h"
 #include "FileUtils.h"
+#include "SmoothingFilter.h"
 #include "../DasherCore/FileLogger.h"
 #ifdef _DEBUG
 const eLogLevel g_iLogLevel   = logDEBUG;
@@ -755,7 +756,8 @@ void CDasherInterfaceBase::CreateInputFilter() {
 
 void CDasherInterfaceBase::CreateModules() {
   GetModuleManager()->RegisterInputMethodModule(new CDefaultFilter(m_pSettingsStore, this, m_pFramerate, _("Normal Control")), true);
-  GetModuleManager()->RegisterInputMethodModule(new CPressFilter(m_pSettingsStore, this, m_pFramerate));
+  GetModuleManager()->RegisterInputMethodModule(new CPressFilter(m_pSettingsStore, this, m_pFramerate, _("Press Mode")));
+  GetModuleManager()->RegisterInputMethodModule(new CSmoothingFilter(m_pSettingsStore, this, m_pFramerate, _("Smoothing Mode")));
   GetModuleManager()->RegisterInputMethodModule(new COneDimensionalFilter(m_pSettingsStore, this, m_pFramerate));
   GetModuleManager()->RegisterInputMethodModule(new CClickFilter(m_pSettingsStore, this));
   GetModuleManager()->RegisterInputMethodModule(new COneButtonFilter(m_pSettingsStore, this));
