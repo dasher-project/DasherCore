@@ -46,7 +46,7 @@ namespace Dasher{
 		{LP_LANGUAGE_MODEL_ID    , Parameter_Value{ "LanguageModelID"           , PARAM_LONG, Persistence::PERSISTENT, 0l    , "LanguageModelID"}},
 		{LP_DASHER_FONTSIZE      , Parameter_Value{ "DasherFontSize"            , PARAM_LONG, Persistence::PERSISTENT, 22l    , "Font size reached at crosshair (in points)"}},
 		{LP_MESSAGE_FONTSIZE     , Parameter_Value{ "MessageFontSize"           , PARAM_LONG, Persistence::PERSISTENT, 14l   , "Size of font for messages (in points)"}},
-		{LP_SHAPE_TYPE           , Parameter_Value{ "RenderStyle"               , PARAM_LONG, Persistence::PERSISTENT, static_cast<long>(Options::DISJOINT_RECTANGLE), "Shapes to render in (see Options::Rendering_Shape_Types)"}},
+		{LP_SHAPE_TYPE           , Parameter_Value{ "RenderStyle"               , PARAM_LONG, Persistence::PERSISTENT, static_cast<long>(Options::OVERLAPPING_RECTANGLE), "Shapes to render in (see Options::Rendering_Shape_Types)"}},
 		{LP_UNIFORM              , Parameter_Value{ "UniformTimes1000"          , PARAM_LONG, Persistence::PERSISTENT, 50l   , "UniformTimes1000"}},
 		{LP_YSCALE               , Parameter_Value{ "YScaling"                  , PARAM_LONG, Persistence::PERSISTENT, 0l    , "YScaling"}},
 		{LP_MOUSEPOSDIST         , Parameter_Value{ "MousePositionBoxDistance"  , PARAM_LONG, Persistence::PERSISTENT, 50l   , "MousePositionBoxDistance"}},

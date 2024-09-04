@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE alphabet SYSTEM "../alphabet.dtd">
-<alphabet name="Pure Katakana, halfwidths, many smalls" orientation="LR" trainingFilename="training_Japanese_JP.txt" colorsName="Hiragana">
+<alphabet name="Pure Katakana, halfwidths, many smalls" orientation="LR" trainingFilename="training_Japanese_JP.txt" colorsName="Default">
 	<!-- Halfwidths are only used when writing horizontally -->
 	<group name="katakana merged, no halfwidths" colorInfoName="katakana merged, no halfwidths">
 		<node label="ア">

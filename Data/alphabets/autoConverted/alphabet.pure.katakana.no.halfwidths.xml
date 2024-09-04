@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE alphabet SYSTEM "../alphabet.dtd">
-<alphabet name="Pure Katakana, no halfwidths" orientation="TB" trainingFilename="training_Japanese_JP.txt" colorsName="Hiragana">
+<alphabet name="Pure Katakana, no halfwidths" orientation="TB" trainingFilename="training_Japanese_JP.txt" colorsName="Default">
 	<group name="katakana, finalized" colorInfoName="katakana, finalized">
 		<node label="ア">
 			<!--Old Char Color: 10-->
