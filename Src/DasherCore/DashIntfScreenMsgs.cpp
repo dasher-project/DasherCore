@@ -22,7 +22,7 @@ bool CDashIntfScreenMsgs::FinishRender(unsigned long ulTime) {
   bool bMsgsChanged=false;
   //Finally any messages - newest that will fit at bottom, proceeding upwards.
   // Firstly clear any non-modal messages that have been onscreen for long enough
-  while (!m_dqAsyncMessages.empty() && m_dqAsyncMessages.front().second && ulTime-m_dqAsyncMessages.front().second>GetLongParameter(LP_MESSAGE_TIME)) {
+  while (!m_dqAsyncMessages.empty() && m_dqAsyncMessages.front().second && ulTime-m_dqAsyncMessages.front().second > static_cast<unsigned long>(GetLongParameter(LP_MESSAGE_TIME))) {
     delete m_dqAsyncMessages.front().first; //the Label
     m_dqAsyncMessages.pop_front(); // => stop displaying it
     bMsgsChanged=true;

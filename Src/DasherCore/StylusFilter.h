@@ -1,6 +1,8 @@
 #ifndef __STYLUS_FILTER_H__
 #define __STYLUS_FILTER_H__
 
+#include <I18n.h>
+
 #include "DefaultFilter.h"
 #include "ClickFilter.h"
 

@@ -21,11 +21,6 @@
 #ifndef __ALPHINFO_H__
 #define __ALPHINFO_H__
 
-#include "../../Common/Common.h"
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
-
 #include <locale>
 
 #include "../DasherTypes.h"

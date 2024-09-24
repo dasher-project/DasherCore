@@ -6,7 +6,6 @@
 //
 /////////////////////////////////////////////////////////////////////////////
 
-#include "../../Common/Common.h"
 #include "WordLanguageModel.h"
 #include "PPMLanguageModel.h"
 #include "../Alphabet/AlphabetMap.h"
@@ -15,6 +14,7 @@
 #include <cstdlib>
 #include <fstream>
 #include <iostream>
+#include <myassert.h>
 #include <stack>
 
 using namespace Dasher;

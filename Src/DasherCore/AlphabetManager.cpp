@@ -18,9 +18,10 @@
 // along with Dasher; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
-#include "../Common/Common.h"
-
 #include "AlphabetManager.h"
+
+#include <I18n.h>
+
 #include "ConversionManager.h"
 #include "DasherInterfaceBase.h"
 #include "DasherNode.h"

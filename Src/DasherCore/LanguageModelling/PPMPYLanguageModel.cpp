@@ -10,12 +10,12 @@
 //
 /////////////////////////////////////////////////////////////////////////////
 
-#include "../../Common/Common.h"
 #include "PPMPYLanguageModel.h"
 #include "LanguageModel.h"
 #include <stack>
 #include <sstream>
 #include <iostream>
+#include <myassert.h>
 
 using namespace Dasher;
 

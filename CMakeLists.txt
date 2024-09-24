@@ -30,12 +30,11 @@ add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/Thirdparty/pugixml" EXCLUDE_FROM_ALL
 # Building Core Dasher Library
 ###############################
 
-file(GLOB HEADERS
-    ${CMAKE_CURRENT_LIST_DIR}/Src/DasherCore/*.h
-    ${CMAKE_CURRENT_LIST_DIR}/Src/DasherCore/Alphabet/*.h
+file(GLOB_RECURSE HEADER_FILES
+    ${CMAKE_CURRENT_LIST_DIR}/Src/*.h
 )
 
-ADD_library(DasherCore STATIC
+set(SOURCE_FILES
 	${CMAKE_CURRENT_LIST_DIR}/Src/DasherCore/Actions.cpp
 	${CMAKE_CURRENT_LIST_DIR}/Src/DasherCore/PressFilter.cpp
 	${CMAKE_CURRENT_LIST_DIR}/Src/DasherCore/Parameters.cpp 
@@ -113,10 +112,14 @@ ADD_library(DasherCore STATIC
 	${CMAKE_CURRENT_LIST_DIR}/Src/DasherCore/LanguageModelling/PPMPYLanguageModel.cpp
 	${CMAKE_CURRENT_LIST_DIR}/Src/DasherCore/LanguageModelling/RoutingPPMLanguageModel.cpp
 	${CMAKE_CURRENT_LIST_DIR}/Src/DasherCore/LanguageModelling/WordLanguageModel.cpp
-	${HEADERS}
 )
 
+ADD_library(DasherCore STATIC
+	${HEADER_FILES}
+	${SOURCE_FILES}
+)
 
+source_group(TREE ${CMAKE_CURRENT_LIST_DIR}/Src/ FILES ${HEADER_FILES} ${SOURCE_FILES})
 
 target_include_directories(DasherCore PUBLIC ${CMAKE_CURRENT_LIST_DIR}/Src/DasherCore/)
 target_include_directories(DasherCore PUBLIC ${CMAKE_CURRENT_LIST_DIR}/Src/DasherCore/Alphabet/)

@@ -1,5 +1,7 @@
-#include "../Common/Common.h"
 #include "DemoFilter.h"
+
+#include <I18n.h>
+
 #include "DasherInterfaceBase.h"
 
 #include "CircleStartHandler.h"

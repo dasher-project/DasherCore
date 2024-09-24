@@ -18,11 +18,10 @@
 // along with Dasher; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
-#include "../Common/Common.h"
-
 #include "MandarinAlphMgr.h"
 
 #include <algorithm>
+#include <I18n.h>
 
 #include "LanguageModelling/PPMPYLanguageModel.h"
 #include "DasherInterfaceBase.h"

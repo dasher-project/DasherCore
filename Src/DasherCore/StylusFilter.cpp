@@ -1,4 +1,3 @@
-#include "../Common/Common.h"
 #include "StylusFilter.h"
 #include "DasherInterfaceBase.h"
 #include "ClickFilter.h"
@@ -31,7 +30,7 @@ void CStylusFilter::pause() {
 void CStylusFilter::KeyUp(unsigned long iTime, Keys::VirtualKey Key, CDasherView *pView, CDasherInput *pInput, CDasherModel *pModel) {
   if(Key == Keys::Primary_Input) {
     pause(); //stops superclass from scheduling any more one-step movements
-    if (iTime - m_iKeyDownTime < m_pSettingsStore->GetLongParameter(LP_TAP_TIME)) {
+    if (iTime - m_iKeyDownTime < static_cast<unsigned long>(m_pSettingsStore->GetLongParameter(LP_TAP_TIME))) {
       pInput->GetDasherCoords(m_iLastX, m_iLastY, pView);
       ApplyClickTransform(m_iLastX, m_iLastY, pView);
       (m_pModel=pModel)->ScheduleZoom(m_iLastY-m_iLastX, m_iLastY+m_iLastX, m_pSettingsStore->GetLongParameter(LP_ZOOMSTEPS));

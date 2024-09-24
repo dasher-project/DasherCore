@@ -20,7 +20,6 @@
 
 #pragma once
 
-#include "../../Common/Common.h"
 #include "../AbstractXMLParser.h"
 
 #include "../DasherTypes.h"

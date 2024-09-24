@@ -21,10 +21,6 @@
 #ifndef __DasherModel_h__
 #define __DasherModel_h__
 
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
-
 #include <deque>
 #include <vector>
 

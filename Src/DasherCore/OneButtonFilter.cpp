@@ -1,7 +1,8 @@
 
-#include "../Common/Common.h"
-
 #include "OneButtonFilter.h"
+
+#include <I18n.h>
+
 #include "DasherScreen.h"
 #include "DasherModel.h"
 

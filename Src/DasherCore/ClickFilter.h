@@ -1,6 +1,8 @@
 #ifndef __CLICK_FILTER_H__
 #define __CLICK_FILTER_H__
 
+#include <I18n.h>
+
 #include "InputFilter.h"
 
 /// \ingroup InputFilter

@@ -1,4 +1,7 @@
 #include "GameModule.h"
+
+#include <I18n.h>
+
 #include "GameStatistics.h"
 #include <sstream>
 

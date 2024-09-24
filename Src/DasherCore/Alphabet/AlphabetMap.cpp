@@ -7,17 +7,13 @@
 /////////////////////////////////////////////////////////////////////////////
 
 
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
-
-#include "../../Common/Common.h"
-
 #include "AlphabetMap.h"
 #include <limits>
 #include <iostream>
 #include <sstream>
 #include <cstring>
+#include <I18n.h>
+#include <myassert.h>
 
 using namespace Dasher;
 

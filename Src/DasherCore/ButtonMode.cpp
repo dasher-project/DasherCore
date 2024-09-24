@@ -2,9 +2,10 @@
 // Copyright 2005, Chris Ball and David MacKay.
 // Idea - should back off button always just undo the previous 'forwards' button?
 
-#include "../Common/Common.h"
-
 #include "ButtonMode.h"
+
+#include <I18n.h>
+
 #include "DasherScreen.h"
 #include "DasherInterfaceBase.h"
 #include <valarray>

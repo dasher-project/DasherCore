@@ -6,7 +6,6 @@
 //
 /////////////////////////////////////////////////////////////////////////////
 
-#include "../../Common/Common.h"
 #include "DictLanguageModel.h"
 #include "../Alphabet/AlphabetMap.h"
 
@@ -14,6 +13,7 @@
 #include <stack>
 #include <iostream>
 #include <fstream>
+#include <myassert.h>
 using namespace Dasher;
 
 // static TCHAR debug[256];

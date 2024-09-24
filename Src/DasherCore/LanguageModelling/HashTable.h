@@ -31,7 +31,7 @@ namespace Dasher {
   class CHashTable { //class to store the hashtable used to find indices of nodes	 
 	public:
 		CHashTable(){}		
-		int GetHashOffSet(int c){
+		static int GetHashOffSet(int c){
 			return Tperm[c];
 		}	 
 		private: 

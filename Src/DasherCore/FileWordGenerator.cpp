@@ -1,5 +1,7 @@
 #include "FileWordGenerator.h"
 
+#include <myassert.h>
+
 using namespace Dasher;
 
 CFileWordGenerator::CFileWordGenerator(CMessageDisplay *pMsgs, const CAlphInfo *pAlph, const CAlphabetMap *pAlphMap)
