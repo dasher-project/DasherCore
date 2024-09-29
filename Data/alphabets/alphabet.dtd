@@ -16,7 +16,7 @@
 
 <!-- Single symbols -->
 <!ATTLIST node text CDATA #IMPLIED> <!-- represents the text that is output and also used for training, defaults to the same value as label -->
-<!ELEMENT node (textCharAction*|deleteTextAction*|moveTextCaretAction*|fixedTTSAction*|contextTTSAction*|repeatTTSAction*|stopTTSAction*|pauseDasherAction*|changeSettingAction*|accessibilityAction*|keyboardAction*|socketOutputAction*)>
+<!ELEMENT node (textCharAction*|deleteTextAction*|moveTextCaretAction*|fixedTTSAction*|contextTTSAction*|repeatTTSAction*|stopTTSAction*|pauseDasherAction*|changeAlphabetAction*|accessibilityAction*|keyboardAction*|socketOutputAction*)>
 <!ATTLIST node label CDATA #IMPLIED>
 <!ATTLIST node fixedProbability CDATA #IMPLIED>
 
@@ -47,10 +47,15 @@
 <!ELEMENT pauseDasherAction EMPTY>
 <!ATTLIST pauseDasherAction time CDATA #IMPLIED> <!-- Pauses Dasher for the given time (in milliseconds), or stops forever if time is negative or unspecified -->
 
+<!ELEMENT changeAlphabetAction EMPTY>
+<!ELEMENT changeAlphabetAction alphabetName CDATA #REQUIRED> <!-- Switches Dasher to the given alphabet -->
+
+<!-- A general action that could be used to change any Dasher setting could look like this, but probably is way too complicated and not that useful:
 <!ELEMENT changeSettingAction EMPTY>
-<!ATTLIST changeSettingAction settingsName CDATA #REQUIRED> <!-- Stringname of the Setting -->
-<!ATTLIST changeSettingAction doValue CDATA #IMPLIED> <!-- New Value of the Setting in case of selection -->
-<!ATTLIST changeSettingAction undoValue CDATA #IMPLIED> <!-- New Value of the Setting in case of deselection -->
+<!ATTLIST changeSettingAction settingName CDATA #REQUIRED> <!- Stringname of the setting ->
+<!ATTLIST changeSettingAction doValue CDATA #IMPLIED> <!- New value of the setting in case of selection ->
+<!ATTLIST changeSettingAction undoValue CDATA #IMPLIED> <!- New value of the setting in case of deselection ->
+-->
 
 <!-- System/application control: -->
 <!-- These two actions enable triggering any action in an application that can be bound to a keyboard shortcut or is accessible
