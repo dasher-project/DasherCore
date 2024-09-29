@@ -16,7 +16,7 @@
 
 <!-- Single symbols -->
 <!ATTLIST node text CDATA #IMPLIED> <!-- represents the text that is output and also used for training, defaults to the same value as label -->
-<!ELEMENT node (textCharAction*|deleteTextAction*|moveCursorAction*|fixedTTSAction*|contextTTSAction*|repeatTTSAction*|stopTTSAction*|pauseDasherAction*|atspiAction*|keyboardAction*|socketOutputAction*)>
+<!ELEMENT node (textCharAction*|deleteTextAction*|moveTextCaretAction*|fixedTTSAction*|contextTTSAction*|repeatTTSAction*|stopTTSAction*|pauseDasherAction*|atspiAction*|keyboardAction*|socketOutputAction*)>
 <!ATTLIST node label CDATA #IMPLIED>
 <!ATTLIST node fixedProbability CDATA #IMPLIED>
 
@@ -27,17 +27,17 @@
 <!ATTLIST textCharAction unicode CDATA #IMPLIED> <!-- If the Unicode value is unspecified, the label will be used to determine it. If the label is empty or consists of more than one character, an error will be thrown. -->
 
 <!ELEMENT deleteTextAction EMPTY>
-<!ATTLIST deleteTextAction distance CDATA #REQUIRED> <!-- Can be "(last|next) (char|word|sentence|paragraph)", or "all" -->
+<!ATTLIST deleteTextAction range CDATA #REQUIRED> <!-- Can be "char|word|sentence|line|paragraph|all" -->
 
-<!ELEMENT moveCursorAction EMPTY>
-<!ATTLIST moveCursorAction distance CDATA #REQUIRED> <!-- Can be "(last|next) (char|word|sentence|paragraph)" -->
+<!ELEMENT moveTextCaretAction EMPTY>
+<!ATTLIST moveTextCaretAction target CDATA #REQUIRED> <!-- Can be "(previous|next) (char|word|sentence|line|paragraph)", or "start" or "end" -->
 
 <!-- Text-to-Speech: -->
 <!ELEMENT fixedTTSAction EMPTY>
 <!ATTLIST fixedTTSAction text CDATA #REQUIRED> <!-- Reads out the given text -->
 
 <!ELEMENT contextTTSAction EMPTY>
-<!ATTLIST contextTTSAction context (word|sentence|paragraph|all) #REQUIRED> <!-- Reads out the last word/sentence/paragraph/all -->
+<!ATTLIST contextTTSAction range CDATA #REQUIRED> <!-- Reads out the current char|word|sentence|line|paragraph|all -->
 
 <!ELEMENT repeatTTSAction EMPTY> <!-- Repeats the last TTS output -->
 
