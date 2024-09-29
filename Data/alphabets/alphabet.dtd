@@ -9,7 +9,7 @@
 
 <!-- Logical groups of symbols, eg name="lowercase" -->
 <!ELEMENT group (node*|group*)>
-<!ATTLIST group colorInfoName CDATA #IMPLIED>
+<!ATTLIST group colorInfoName CDATA #REQUIRED>
 <!ATTLIST group name CDATA #IMPLIED>
 <!ATTLIST group label CDATA #IMPLIED>
 
