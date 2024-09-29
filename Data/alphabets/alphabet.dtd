@@ -1,13 +1,13 @@
-<!-- alphabet defintion for Dasher -->
+<!-- Alphabet definition for Dasher -->
 
 <!ELEMENT alphabet (group*)>
 <!ATTLIST alphabet name CDATA #REQUIRED> <!-- unique name that can be referenced in Dasher to choose this alphabet -->
 <!ATTLIST alphabet orientation (LR|RL|TB|BT) #REQUIRED> <!-- orientation in which this alphabet is typed. Example: LR=Left-to-Right -->
 <!ATTLIST alphabet conversionMode (none|mandarin|routingContextInsensitive|routingContextSensitive) "none"> <!-- conversion mode that is used internally to spawn a decoder that can handle phonetic writing -->
 <!ATTLIST alphabet trainingFilename CDATA #IMPLIED> <!-- filename that is referenced for training the language model -->
-<!ATTLIST alphabet colorsName CDATA "Default"> <!-- unique name of the color schema that should be used by default -->
+<!ATTLIST alphabet colorsName CDATA "Default"> <!-- unique name of the color scheme that should be used by default -->
 
-<!-- Logical groups of symbols, eg name="lowercase" -->
+<!-- Logical groups of symbols, e.g. name="lowercase" -->
 <!ELEMENT group (node*|group*)>
 <!ATTLIST group colorInfoName CDATA #REQUIRED>
 <!ATTLIST group name CDATA #IMPLIED>
@@ -34,7 +34,7 @@
 
 <!-- Text-to-Speech: -->
 <!ELEMENT fixedTTSAction EMPTY>
-<!ATTLIST fixedTTSAction text CDATA #REQUIRED> <!-- speaks out the given text -->
+<!ATTLIST fixedTTSAction text CDATA #REQUIRED> <!-- Reads out the given text -->
 
 <!ELEMENT contextTTSAction EMPTY>
 <!ATTLIST contextTTSAction context (word|sentence|paragraph|all) #REQUIRED> <!-- Reads out the last word/sentence/paragraph/all -->
@@ -44,8 +44,8 @@
 <!ELEMENT stopTTSAction EMPTY> <!-- Stops any currently ongoing TTS -->
 
 <!-- Dasher-internal: -->
-<!ELEMENT pauseDasherAction EMPTY> <!-- Stops any currently ongoing TTS -->
-<!ATTLIST pauseDasherAction time CDATA #IMPLIED> <!-- Pauses Dasher for the given time, or stops forever if time is unspecified -->
+<!ELEMENT pauseDasherAction EMPTY>
+<!ATTLIST pauseDasherAction time CDATA #IMPLIED> <!-- Pauses Dasher for the given time (in milliseconds), or stops forever if time is negative or unspecified -->
 
 <!-- System/application control: -->
 
@@ -69,7 +69,8 @@
 <!ATTLIST keyboardAction undoRelease CDATA #IMPLIED> <!-- As above, but only performing the release -->
 
 <!-- External actions: -->
-<!-- Similar to the socket input option, this action enables connecting Dasher to other accessibility tools, sending messages that the other tool can process. -->
+<!-- Similar to the socket input option, this action enables connecting Dasher to other accessibility tools, sending messages that the other tool can process. 
+     The sent messages are implicitly terminated with a newline character, unless suppressNewline is "true".-->
 <!ELEMENT socketOutputAction EMPTY>
 <!ATTLIST socketOutputAction doString CDATA #IMPLIED>
 <!ATTLIST socketOutputAction undoString CDATA #IMPLIED>
