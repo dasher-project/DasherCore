@@ -14,9 +14,9 @@
 <!ATTLIST group label CDATA #IMPLIED>
 
 <!-- Single symbols -->
-<!ELEMENT node (textCharAction*|deleteTextAction*|moveCursorAction*|fixedTTSAction*|contextTTSAction*|repeatTTSAction*|stopTTSAction*|pauseDasherAction*|atspiAction*|keyboardAction*)>
 <!ATTLIST node label CDATA #REQUIRED>
 <!ATTLIST node text CDATA #IMPLIED> <!-- represents the text that is output and also used for training, defaults to the same value as label -->
+<!ELEMENT node (textCharAction*|deleteTextAction*|moveCursorAction*|fixedTTSAction*|contextTTSAction*|repeatTTSAction*|stopTTSAction*|pauseDasherAction*|atspiAction*|keyboardAction*|socketOutputAction*)>
 <!ATTLIST node fixedProbability CDATA #IMPLIED>
 <!ATTLIST node speedFactor CDATA #IMPLIED>
 
