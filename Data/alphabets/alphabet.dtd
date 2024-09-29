@@ -16,7 +16,7 @@
 
 <!-- Single symbols -->
 <!ATTLIST node text CDATA #IMPLIED> <!-- represents the text that is output and also used for training, defaults to the same value as label -->
-<!ELEMENT node (textCharAction*|deleteTextAction*|moveTextCaretAction*|fixedTTSAction*|contextTTSAction*|repeatTTSAction*|stopTTSAction*|pauseDasherAction*|atspiAction*|keyboardAction*|socketOutputAction*)>
+<!ELEMENT node (textCharAction*|deleteTextAction*|moveTextCaretAction*|fixedTTSAction*|contextTTSAction*|repeatTTSAction*|stopTTSAction*|pauseDasherAction*|accessibilityAction*|keyboardAction*|socketOutputAction*)>
 <!ATTLIST node label CDATA #IMPLIED>
 <!ATTLIST node fixedProbability CDATA #IMPLIED>
 
@@ -47,18 +47,17 @@
 <!ELEMENT pauseDasherAction EMPTY>
 <!ATTLIST pauseDasherAction time CDATA #IMPLIED> <!-- Pauses Dasher for the given time (in milliseconds), or stops forever if time is negative or unspecified -->
 
-<!-- System/application control: -->
-
 <!ELEMENT changeSettingAction EMPTY>
 <!ATTLIST changeSettingAction settingsName CDATA #REQUIRED> <!-- Stringname of the Setting -->
 <!ATTLIST changeSettingAction doValue CDATA #IMPLIED> <!-- New Value of the Setting in case of selection -->
 <!ATTLIST changeSettingAction undoValue CDATA #IMPLIED> <!-- New Value of the Setting in case of deselection -->
 
+<!-- System/application control: -->
 <!-- These two actions enable triggering any action in an application that can be bound to a keyboard shortcut or is accessible
-     via the Assistive Technology Service Provider Interface (AT-SPI). Anything else probably isn't technically feasible. -->
-<!ELEMENT atspiAction EMPTY>
-<!ATTLIST atspiAction action CDATA #REQUIRED> <!-- Sends the specified AT-SPI action to the currently focused application -->
-<!ATTLIST atspiAction undoAction CDATA #REQUIRED> <!-- Sends the specified AT-SPI action to the currently focused application -->
+     via accessibility services like the Assistive Technology Service Provider Interface (AT-SPI). Anything else probably isn't technically feasible. -->
+<!ELEMENT accessibilityAction EMPTY>
+<!ATTLIST accessibilityAction doAction CDATA #REQUIRED> <!-- Sends the specified AT-SPI action to the currently focused application -->
+<!ATTLIST accessibilityAction undoAction CDATA #REQUIRED> <!-- Sends the specified AT-SPI action to the currently focused application -->
 
 <!ELEMENT keyboardAction EMPTY>
 <!ATTLIST keyboardAction key CDATA #IMPLIED> <!-- Emulates a keyboard shortcut, possibly with several modifiers, given as keyboard scancodes divided by commas (e.g. "1d,38,e053" for Ctrl+Alt+Entf), performing a press and a release -->
@@ -78,5 +77,5 @@
 
 <!-- Especially for the last two, it probably makes sense to add a windowTitle attribute to nodes: -->
 <!-- <node label="New Tab" windowTitle=".*(Firefox|Chrome|Edge).*" fixedProbability="0.02"> Only shows this node if the title of the currently focused window matches the given regex. -->
- <!--  <atspiAction action="NewTab"/> -->
+<!--   <accessibilityAction doAction="NewTab" undoAction="CloseTab"/> -->
 <!-- </node> -->
