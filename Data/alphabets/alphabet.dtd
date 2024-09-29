@@ -71,7 +71,6 @@
 <!-- External actions: -->
 <!-- Similar to the socket input option, this action enables connecting Dasher to other accessibility tools, sending messages that the other tool can process. -->
 <!ELEMENT socketOutputAction EMPTY>
-<!ATTLIST socketOutputAction socketName CDATA #IMPLIED>
 <!ATTLIST socketOutputAction doString CDATA #IMPLIED>
 <!ATTLIST socketOutputAction undoString CDATA #IMPLIED>
 <!ATTLIST socketOutputAction suppressNewline CDATA #IMPLIED>
