@@ -16,7 +16,7 @@
 
 <!-- Single symbols -->
 <!ATTLIST node text CDATA #IMPLIED> <!-- represents the text that is output and also used for training, defaults to the same value as label -->
-<!ELEMENT node (textCharAction*|deleteTextAction*|moveTextCaretAction*|fixedTTSAction*|contextTTSAction*|repeatTTSAction*|stopTTSAction*|pauseDasherAction*|accessibilityAction*|keyboardAction*|socketOutputAction*)>
+<!ELEMENT node (textCharAction*|deleteTextAction*|moveTextCaretAction*|fixedTTSAction*|contextTTSAction*|repeatTTSAction*|stopTTSAction*|pauseDasherAction*|changeSettingAction*|accessibilityAction*|keyboardAction*|socketOutputAction*)>
 <!ATTLIST node label CDATA #IMPLIED>
 <!ATTLIST node fixedProbability CDATA #IMPLIED>
 
