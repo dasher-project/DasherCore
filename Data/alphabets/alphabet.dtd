@@ -18,7 +18,13 @@
 <!ELEMENT node (textCharAction*|deleteTextAction*|moveTextCaretAction*|fixedTTSAction*|contextTTSAction*|repeatTTSAction*|stopTTSAction*|pauseDasherAction*|changeAlphabetAction*|accessibilityAction*|keyboardAction*|socketOutputAction*)>
 <!ATTLIST node label CDATA #IMPLIED>
 <!ATTLIST node trainingUnicode CDATA #IMPLIED>
+<!ATTLIST node windowTitle CDATA #IMPLIED> <!-- Only show this node if the title of the currently focused window matches the given regex -->
 <!ATTLIST node fixedProbability CDATA #IMPLIED>
+
+<!-- Example usage of the windowTitle attribute: -->
+<!-- <node label="New Tab" windowTitle=".*(Firefox|Chrome|Edge).*" fixedProbability="0.02"> -->
+<!--   <accessibilityAction doAction="NewTab" undoAction="CloseTab"/> -->
+<!-- </node> -->
 
 <!-- Actions that can happen if the node is selected -->
 
@@ -79,8 +85,3 @@
 <!ATTLIST socketOutputAction doString CDATA #IMPLIED>
 <!ATTLIST socketOutputAction undoString CDATA #IMPLIED>
 <!ATTLIST socketOutputAction suppressNewline CDATA #IMPLIED>
-
-<!-- Especially for the last two, it probably makes sense to add a windowTitle attribute to nodes: -->
-<!-- <node label="New Tab" windowTitle=".*(Firefox|Chrome|Edge).*" fixedProbability="0.02"> Only shows this node if the title of the currently focused window matches the given regex. -->
-<!--   <accessibilityAction doAction="NewTab" undoAction="CloseTab"/> -->
-<!-- </node> -->
