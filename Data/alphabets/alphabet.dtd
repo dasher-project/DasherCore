@@ -70,13 +70,20 @@
 <!ATTLIST accessibilityAction doAction CDATA #REQUIRED> <!-- Sends the specified AT-SPI action to the currently focused application -->
 <!ATTLIST accessibilityAction undoAction CDATA #REQUIRED> <!-- Sends the specified AT-SPI action to the currently focused application -->
 
+<!-- Emulates keyboard keys, given as Java virtual key codes (see https://docs.oracle.com/javase/8/docs/api/java/awt/event/KeyEvent.html) -->
+<!-- Key combinations (mostly used with modifiers) can be achieved using the "press" and "release" attributes and/or a sequence
+     of several actions. Can additionally use "undoPress", "undoKey" and "undoRelease" attributes to specify the key combination
+     to undo this action. Example for "Ctrl+Alt+Del" (using the "x" prefix for hexadecimal numbers): -->
+<!-- <keyboardAction press="x1D"/> -->
+<!-- <keyboardAction press="x38" key="xE053" release="x38"/> -->
+<!-- <keyboardAction release="x1D"/> -->
 <!ELEMENT keyboardAction EMPTY>
-<!ATTLIST keyboardAction key CDATA #IMPLIED> <!-- Emulates a keyboard shortcut, possibly with several modifiers, given as keyboard scancodes divided by commas (e.g. "1d,38,e053" for Ctrl+Alt+Entf), performing a press and a release -->
-<!ATTLIST keyboardAction press CDATA #IMPLIED> <!-- As above, but only performing the press -->
-<!ATTLIST keyboardAction release CDATA #IMPLIED> <!-- As above, but only performing the release -->
-<!ATTLIST keyboardAction undoKey CDATA #IMPLIED> <!-- Emulates a keyboard shortcut, possibly with several modifiers, given as keyboard scancodes divided by commas (e.g. "1d,38,e053" for Ctrl+Alt+Entf), performing a press and a release -->
-<!ATTLIST keyboardAction undoPress CDATA #IMPLIED> <!-- As above, but only performing the press -->
-<!ATTLIST keyboardAction undoRelease CDATA #IMPLIED> <!-- As above, but only performing the release -->
+<!ATTLIST keyboardAction press CDATA #IMPLIED>
+<!ATTLIST keyboardAction key CDATA #IMPLIED>
+<!ATTLIST keyboardAction release CDATA #IMPLIED>
+<!ATTLIST keyboardAction undoPress CDATA #IMPLIED>
+<!ATTLIST keyboardAction undoKey CDATA #IMPLIED>
+<!ATTLIST keyboardAction undoRelease CDATA #IMPLIED>
 
 <!-- External actions: -->
 <!-- Similar to the socket input option, this action enables connecting Dasher to other accessibility tools, sending messages that the other tool can process. 
