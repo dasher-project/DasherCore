@@ -18,6 +18,7 @@
 <!ATTLIST node text CDATA #IMPLIED> <!-- represents the text that is output and also used for training, defaults to the same value as label -->
 <!ELEMENT node (textCharAction*|deleteTextAction*|moveTextCaretAction*|fixedTTSAction*|contextTTSAction*|repeatTTSAction*|stopTTSAction*|pauseDasherAction*|changeAlphabetAction*|accessibilityAction*|keyboardAction*|socketOutputAction*)>
 <!ATTLIST node label CDATA #IMPLIED>
+<!ATTLIST node trainingUnicode CDATA #IMPLIED>
 <!ATTLIST node fixedProbability CDATA #IMPLIED>
 
 <!-- Actions that can happen if the node is selected -->
