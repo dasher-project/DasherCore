@@ -112,6 +112,30 @@ void CColorIO::RelinkParents()
 	{
 	    palette->ParentPalette = FindPalette(palette->ParentPaletteName);
 	}
+
+	// try to detect and (temporarily) remove cycles in parenting, issuing a warning to users
+	for(auto& [paletteName, palette] : KnownPalettes)
+	{
+	    std::vector<std::string> visited = {paletteName};
+
+		const ColorPalette* current = palette;
+		while(current->ParentPalette)
+		{
+			//already visited
+			if(std::find(visited.begin(), visited.end(), current->ParentPalette->PaletteName) != visited.end())
+			{
+				std::string allVisited;
+				for(std::string& s : visited) allVisited += s + "->";
+				allVisited += current->ParentPalette->PaletteName;
+				m_pMsgs->FormatMessageWithString("Found cycle while parsing color-scheme parenting: %s", allVisited.c_str());
+				KnownPalettes.erase(current->ParentPalette->PaletteName);
+				RelinkParents(); //relink as now a palette was removed
+				return;
+			}
+			visited.push_back(current->ParentPalette->PaletteName);
+			current = current->ParentPalette;
+		}
+	}
 }
 
 void CColorIO::CreateDefault() {
