@@ -220,7 +220,7 @@ void CDasherViewSquare::DoDelayedText(CTextString* pText, myint extrusionLevel, 
 			{
 				if(extrudedText)
 				{
-					Screen()->Draw3DLabel(pText->m_pLabel, x + textInset, y - textDims.second / 2, extrusionLevel, groupRecursionDepth, pText->m_iSize, pText->m_Color);
+					Screen()->Draw3DLabel(pText->m_pLabel, x, y - textDims.second / 2, textInset, Options::LeftToRight, extrusionLevel, groupRecursionDepth, pText->m_iSize, pText->m_Color);
 				}
 				else
 				{
@@ -242,7 +242,7 @@ void CDasherViewSquare::DoDelayedText(CTextString* pText, myint extrusionLevel, 
 			{
 				if(extrudedText)
 				{
-					Screen()->Draw3DLabel(pText->m_pLabel, iLeft - textInset, y - textDims.second / 2, extrusionLevel, groupRecursionDepth, pText->m_iSize, pText->m_Color);
+					Screen()->Draw3DLabel(pText->m_pLabel, iLeft, y - textDims.second / 2, -textInset, Options::RightToLeft, extrusionLevel, groupRecursionDepth, pText->m_iSize, pText->m_Color);
 				}
 				else
 				{
@@ -264,7 +264,7 @@ void CDasherViewSquare::DoDelayedText(CTextString* pText, myint extrusionLevel, 
 			{
 				if(extrudedText)
 				{
-					Screen()->Draw3DLabel(pText->m_pLabel, x - textDims.first / 2, y + textInset, extrusionLevel, groupRecursionDepth, pText->m_iSize, pText->m_Color);
+					Screen()->Draw3DLabel(pText->m_pLabel, x - textDims.first / 2, y, textInset, Options::TopToBottom, extrusionLevel, groupRecursionDepth, pText->m_iSize, pText->m_Color);
 				}
 				else
 				{
@@ -286,7 +286,7 @@ void CDasherViewSquare::DoDelayedText(CTextString* pText, myint extrusionLevel, 
 			{
 				if(extrudedText)
 				{
-					Screen()->Draw3DLabel(pText->m_pLabel, x - textDims.first / 2, iTop - textInset, extrusionLevel, groupRecursionDepth, pText->m_iSize, pText->m_Color);
+					Screen()->Draw3DLabel(pText->m_pLabel, x - textDims.first / 2, iTop + textDims.second, textInset, Options::BottomToTop, extrusionLevel, groupRecursionDepth, pText->m_iSize, pText->m_Color);
 				}
 				else
 				{

@@ -120,7 +120,7 @@ public:
 	virtual void DrawString(Label* label, screenint x, screenint y, unsigned int iFontSize, const ColorPalette::Color& color) = 0;
 
 	// Cubes and 3D labels that are drawn in Options::CUBE mode, meant for a 3D rendering
-	virtual void Draw3DLabel(Label* label, screenint x, screenint y, myint extrusionLevel, myint groupRecursionDepth, unsigned int iFontSize, const ColorPalette::Color& color) {}
+	virtual void Draw3DLabel(Label* label, screenint x, screenint y, screenint textInset, Options::ScreenOrientations orientation, myint extrusionLevel, myint groupRecursionDepth, unsigned int iFontSize, const ColorPalette::Color& color) {}
 	virtual void DrawCube(screenint posX, screenint posY, screenint sizeX, screenint sizeY, myint extrusionLevel, myint groupRecursionDepth, const ColorPalette::Color& color, const ColorPalette::Color& outlineColor, int iThickness) {}
 	virtual void FinishRender3D(myint originX, myint originY, myint originExtrusionLevel) {}
 
