@@ -126,7 +126,7 @@ CDasherNode* CDasherViewSquare::Render(CDasherNode* pRoot, myint iRootMin, myint
 		//Vertical Bar of Crosshair
 		screenint sizeX = 7, sizeY = static_cast<screenint>(static_cast<float>(Screen()->GetHeight()) * 1.05f);
 		if(GetOrientation() == Options::TopToBottom || GetOrientation() == Options::BottomToTop) std::swap(sizeX, sizeY);
-		Screen()->DrawCube(originX, originY, sizeX, sizeY, m_CrosshairCubeLevel + 1, 1, GetNamedColor(NamedColor::crosshair), ColorPalette::noColor, 0);
+		Screen()->DrawProjectedRectangle(originX, originY, sizeX, sizeY);
 
 		// Print 3DText
 		for (geometry_3DText& text : m_Delayed3DTexts)
@@ -295,7 +295,6 @@ void CDasherViewSquare::DoDelayedText(CTextString* pText, myint extrusionLevel, 
 			}
 			for (const auto& pChild : pText->m_children)
 			{
-				pChild->m_iy = std::min(pChild->m_iy, iTop);
 				DoDelayedText(pChild, extrusionLevel + 1, 0);
 			}
 			pText->m_children.clear();

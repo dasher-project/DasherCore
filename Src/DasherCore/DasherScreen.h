@@ -122,6 +122,7 @@ public:
 	// Cubes and 3D labels that are drawn in Options::CUBE mode, meant for a 3D rendering
 	virtual void Draw3DLabel(Label* label, screenint x, screenint y, screenint textInset, Options::ScreenOrientations orientation, myint extrusionLevel, myint groupRecursionDepth, unsigned int iFontSize, const ColorPalette::Color& color) {}
 	virtual void DrawCube(screenint posX, screenint posY, screenint sizeX, screenint sizeY, myint extrusionLevel, myint groupRecursionDepth, const ColorPalette::Color& color, const ColorPalette::Color& outlineColor, int iThickness) {}
+	virtual void DrawProjectedRectangle(screenint posX, screenint posY, screenint sizeX, screenint sizeY) {}
 	virtual void FinishRender3D(myint originX, myint originY, myint originExtrusionLevel) {}
 
 	/// Draw a filled rectangle
