@@ -177,7 +177,7 @@ void CGameModule::DecorateView(unsigned long lTime, CDasherView *pView, CDasherM
     x[0] = x[1] = -100;
   
     const int lineWidth(m_pSettingsStore->GetLongParameter(LP_LINE_WIDTH));
-    const CDasherView::ScreenRegion visibleRegion = pView->VisibleRegion();
+    const CDasherView::DasherCoordScreenRegion visibleRegion = pView->VisibleRegion();
 
     if (m_y1 > visibleRegion.maxY) {
       //off the top! make arrow point straight up...

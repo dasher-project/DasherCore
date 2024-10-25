@@ -35,7 +35,7 @@ COneDimensionalFilter::COneDimensionalFilter(CSettingsStore* pSettingsStore, CDa
 void COneDimensionalFilter::ApplyTransform(myint &iDasherX, myint &iDasherY, CDasherView *pView) {
 
   
-  const CDasherView::ScreenRegion visibleRegion = pView->VisibleRegion();
+  const CDasherView::DasherCoordScreenRegion visibleRegion = pView->VisibleRegion();
 
   double disty,circlesize,yfullrange,yforwardrange,angle,ellipse_eccentricity,ybackrange,yb,x;	
   

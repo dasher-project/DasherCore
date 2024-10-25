@@ -80,7 +80,7 @@ public:
 	///
 	/// Get the bounding box of the visible region.
 	///
-	ScreenRegion VisibleRegion() override;
+	DasherCoordScreenRegion VisibleRegion() override;
 
 	///
 	/// Render all nodes, inc. blanking around the root (supplied)
@@ -159,15 +159,15 @@ private:
 	/// @param pOutput The innermost node covering the crosshair (if any)
 	void DisjointRender(CDasherNode* Render, myint y1, myint y2, CTextString* prevText, CExpansionPolicy& policy, double dMaxCost, CDasherNode*& pOutput);
 
-	void DasherDrawCube(myint iDasherMaxX, myint iDasherMinY, myint iDasherMinX, myint iDasherMaxY, myint extrusionLevel, myint
-                        groupRecursionDepth, const ColorPalette::Color& Color, const ColorPalette::Color& outlineColor, int iThickness);
+	void DasherDrawCube(myint iDasherMaxX, myint iDasherMinY, myint iDasherMinX, myint iDasherMaxY, CubeDepthLevel nodeDepth, CubeDepthLevel
+                        parentDepth, const ColorPalette::Color& Color, const ColorPalette::Color& outlineColor, int iThickness, ScreenRegion
+                        * parentScreenBounds);
 	/// (Recursively) render a node and all contained subnodes, in overlapping shapes
 	/// (according to LP_SHAPE_TYPE)
 	/// Each call responsible for rendering exactly the area contained within the node.
 	/// @param pCurrentTopCenterNode The innermost node covering the crosshair (if any)
     void NewRender(CDasherNode* pCurrentNode, myint y1, myint y2, CTextString* pPrevText, CExpansionPolicy& policy,
-                   double dMaxCost, CDasherNode*& pCurrentTopCenterNode, myint recusionDepth,
-                   myint groupRecursionDepth);
+                   double dMaxCost, CDasherNode*& pCurrentTopCenterNode, CubeDepthLevel nodeDepth, CubeDepthLevel parentDepth, ScreenRegion parentScreenBounds);
 
 	/// @name Nonlinearity
 	/// Implements the non-linear part of the coordinate space mapping
@@ -212,7 +212,7 @@ private:
 	static const myint SCALE_FACTOR = 1 << 26; //was 100,000,000; change to power of 2 => easier to multiply/divide
 
 	bool m_bVisibleRegionValid = false;
-	ScreenRegion m_visible_region;
+	DasherCoordScreenRegion m_visible_region;
 
 	CSettingsStore* m_pSettingsStore;
 };

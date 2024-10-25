@@ -79,14 +79,23 @@ public:
 
 	virtual bool IsSpaceAroundNode(myint y1, myint y2) =0;
 
-	struct ScreenRegion
+	// ScreenRegion in DasherCoords
+	struct DasherCoordScreenRegion
 	{
 		Dasher::myint minX;
 		Dasher::myint minY;
 		Dasher::myint maxX;
 		Dasher::myint maxY;
 	};
-	virtual ScreenRegion VisibleRegion() = 0;
+	// ScreenRegion in ScreenCoords
+	struct ScreenRegion
+	{
+	    Dasher::screenint minX;
+		Dasher::screenint minY;
+		Dasher::screenint maxX;
+		Dasher::screenint maxY;
+	};
+	virtual DasherCoordScreenRegion VisibleRegion() = 0;
 
 	/// @}
 

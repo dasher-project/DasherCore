@@ -52,6 +52,13 @@ namespace Dasher
   //typedef unsigned int symbol; // }}}
   typedef int symbol;
 
+	// Used for Cube Rendering only
+	struct CubeDepthLevel
+	{
+	    Dasher::myint extrusionLevel;
+	    Dasher::myint groupRecursionDepth;
+	};
+
 namespace Options
 {
     // Numbers should be applied to elements of the following two enumerations as these preferences may be stored to file. Constancy between

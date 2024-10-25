@@ -53,7 +53,7 @@ void CDasherView::DasherSpaceLine(myint x1, myint y1, myint x2, myint y2, int iW
 bool CDasherView::ClipLineToVisible(myint &x1, myint &y1, myint &x2, myint &y2) {
   if (x1 > x2) return ClipLineToVisible(x2,y2,x1,y1);
   //ok. have x1 <= x2...
-  const CDasherView::ScreenRegion vr = VisibleRegion();
+  const CDasherView::DasherCoordScreenRegion vr = VisibleRegion();
   if (x1 > vr.maxX) {
     DASHER_ASSERT(x2>visibleRegion.maxX);
     return false; //entirely offscreen!

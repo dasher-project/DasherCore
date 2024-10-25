@@ -174,7 +174,7 @@ void CDefaultFilter::ExecuteMovement(unsigned long Time, CDasherView* pView, CDa
     {
         if (m_pSettingsStore->GetBoolParameter(BP_STOP_OUTSIDE))
         {
-            const CDasherView::ScreenRegion visibleRegion = pView->VisibleRegion();
+            const CDasherView::DasherCoordScreenRegion visibleRegion = pView->VisibleRegion();
 
             if ((m_iLastX > visibleRegion.maxX) || (m_iLastX < visibleRegion.minX) || (m_iLastY > visibleRegion.maxY) ||
                 (m_iLastY < visibleRegion.minY))
@@ -294,7 +294,7 @@ void CDefaultFilter::ApplyTransform(myint& iDasherX, myint& iDasherY, CDasherVie
     {
         //crosshair may be offscreen; so do something to allow us to navigate
         // up/down and reverse
-        const CDasherView::ScreenRegion visibleRegion = pView->VisibleRegion();
+        const CDasherView::DasherCoordScreenRegion visibleRegion = pView->VisibleRegion();
         const myint xd(iDasherX - visibleRegion.maxX), yd(iDasherY - CDasherModel::ORIGIN_Y);
         const myint dist(xd * xd + yd * yd); //squared distance from closest point onscreen to crosshair
         if (visibleRegion.maxX < CDasherModel::ORIGIN_X)
