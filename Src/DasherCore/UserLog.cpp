@@ -376,14 +376,14 @@ void CUserLog::NewTrial()
 // Overloaded version that converts a double to a string
 void CUserLog::AddParam(const std::string& strName, double dValue, int iOptionMask)
 {
-  sprintf(m_szTempBuffer, "%0.4f", dValue);
+  snprintf(m_szTempBuffer, TEMP_BUFFER_SIZE, "%0.4f", dValue);
   AddParam(strName, m_szTempBuffer, iOptionMask);
 }
 
 // Overloaded version that converts a int to a string
 void CUserLog::AddParam(const std::string& strName, int iValue, int iOptionMask)
 {
-  sprintf(m_szTempBuffer, "%d", iValue);
+  snprintf(m_szTempBuffer, TEMP_BUFFER_SIZE, "%d", iValue);
   AddParam(strName, m_szTempBuffer, iOptionMask);
 }
 
@@ -844,7 +844,7 @@ std::string CUserLog::GetStartStopCycleStats()
   //  coordinate, (any parameters marked to be put in cycle stats)
   //
   // tsbdxym stands for: time symbols bits deletes x y maxbitrate
-  sprintf(m_szTempBuffer, 
+  snprintf(m_szTempBuffer, TEMP_BUFFER_SIZE,
           "tsbdxym:\t%0.3f\t%zu\t%0.6f\t%d\t%0.3f\t%0.3f%s",
           m_pCycleTimer->GetElapsed(), 
           m_vCycleHistory.size(), 

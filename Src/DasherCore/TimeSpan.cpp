@@ -52,7 +52,7 @@ std::string CTimeSpan::GetXML(const std::string& strPrefix, bool bSinglePointInT
     strResult += strPrefix;
     strResult += "\t<Elapsed>";
     char strNum[256];
-    sprintf(strNum, "%0.3f", m_dElapsed);
+    snprintf(strNum, sizeof(strNum), "%0.3f", m_dElapsed);
     strResult += strNum;
     strResult += "</Elapsed>\n";
   }

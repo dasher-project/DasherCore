@@ -580,7 +580,7 @@ std::string CUserLogTrial::GetLocationXML(NavLocation* pLocation, const std::str
 
   strResult += strPrefix;
   strResult += "\t<AvgBits>";
-  sprintf(m_szTempBuffer, "%0.6f", pLocation->avgBits);
+  snprintf(m_szTempBuffer, TEMP_BUFFER_SIZE, "%0.6f", pLocation->avgBits);
   strResult += m_szTempBuffer;
   strResult += "</AvgBits>\n";
 
@@ -589,7 +589,7 @@ std::string CUserLogTrial::GetLocationXML(NavLocation* pLocation, const std::str
   {
     strResult += strPrefix;
     strResult += "\t\t<Event>";
-    sprintf(m_szTempBuffer, "%d", (int) pLocation->event);
+    snprintf(m_szTempBuffer, TEMP_BUFFER_SIZE, "%d", (int) pLocation->event);
     strResult += m_szTempBuffer;
     strResult += "</Event>\n";                
   }
@@ -598,7 +598,7 @@ std::string CUserLogTrial::GetLocationXML(NavLocation* pLocation, const std::str
   {
     strResult += strPrefix;
     strResult += "\t<NumAdded>";
-    sprintf(m_szTempBuffer, "%zu", pLocation->pVectorAdded->size());
+    snprintf(m_szTempBuffer,TEMP_BUFFER_SIZE, "%zu", pLocation->pVectorAdded->size());
     strResult += m_szTempBuffer;
     strResult += "</NumAdded>\n";
 
@@ -621,7 +621,7 @@ std::string CUserLogTrial::GetLocationXML(NavLocation* pLocation, const std::str
 
         strResult += strPrefix;
         strResult += "\t\t<Prob>";
-        sprintf(m_szTempBuffer, "%0.6f", sItem.prob);
+        snprintf(m_szTempBuffer,TEMP_BUFFER_SIZE, "%0.6f", sItem.prob);
         strResult += m_szTempBuffer;
         strResult += "</Prob>\n";
 
@@ -635,7 +635,7 @@ std::string CUserLogTrial::GetLocationXML(NavLocation* pLocation, const std::str
   {
     strResult += strPrefix;
     strResult += "\t<NumDeleted>";
-    sprintf(m_szTempBuffer, "%d", pLocation->numDeleted);
+    snprintf(m_szTempBuffer,TEMP_BUFFER_SIZE, "%d", pLocation->numDeleted);
     strResult += m_szTempBuffer;
     strResult += "</NumDeleted>\n";
   }
@@ -707,20 +707,20 @@ std::string CUserLogTrial::GetStatsXML(const std::string& strPrefix, const std::
   // Average number of bits along the path to the final string
   strResult += strPrefix;
   strResult += "\t\t<AvgBits>";
-  sprintf(m_szTempBuffer, "%0.6f", dAvgBits);
+  snprintf(m_szTempBuffer, TEMP_BUFFER_SIZE, "%0.6f", dAvgBits);
   strResult += m_szTempBuffer;
   strResult += "</AvgBits>\n";
 
   strResult += strPrefix;
   strResult += "\t\t<TotalBits>";
-  sprintf(m_szTempBuffer, "%0.6f", dTotalBits);
+  snprintf(m_szTempBuffer, TEMP_BUFFER_SIZE,"%0.6f", dTotalBits);
   strResult += m_szTempBuffer;
   strResult += "</TotalBits>\n";
 
   
   strResult += strPrefix;
   strResult += "\t\t<ButtonCount>";
-  sprintf(m_szTempBuffer, "%d", iButtonCount);
+  snprintf(m_szTempBuffer, TEMP_BUFFER_SIZE,"%d", iButtonCount);
   strResult += m_szTempBuffer;
   strResult += "</ButtonCount>\n";
 
@@ -731,14 +731,14 @@ std::string CUserLogTrial::GetStatsXML(const std::string& strPrefix, const std::
   // We want the number of symbols which might differ
   // from the actual length of the text history.
   int iNumChars = static_cast<int>(m_vHistory.size());
-  sprintf(m_szTempBuffer, "%d", iNumChars);
+  snprintf(m_szTempBuffer, TEMP_BUFFER_SIZE,"%d", iNumChars);
   strResult += m_szTempBuffer;
   strResult += "</Chars>\n";
 
   strResult += strPrefix;
   strResult += "\t\t<Words>";
   double dNumWords = (double) iNumChars / (double) 5;
-  sprintf(m_szTempBuffer, "%0.2f", dNumWords);
+  snprintf(m_szTempBuffer, TEMP_BUFFER_SIZE,"%0.2f", dNumWords);
   strResult += m_szTempBuffer;
   strResult += "</Words>\n";
 
@@ -753,13 +753,13 @@ std::string CUserLogTrial::GetStatsXML(const std::string& strPrefix, const std::
 
   strResult += strPrefix;
   strResult += "\t\t<WPM>";
-  sprintf(m_szTempBuffer, "%0.3f", dWPM);
+  snprintf(m_szTempBuffer, TEMP_BUFFER_SIZE,"%0.3f", dWPM);
   strResult += m_szTempBuffer;
   strResult += "</WPM>\n";
 
   strResult += strPrefix;
   strResult += "\t\t<CPM>";
-  sprintf(m_szTempBuffer, "%0.3f", dCPM);
+  snprintf(m_szTempBuffer, TEMP_BUFFER_SIZE,"%0.3f", dCPM);
   strResult += m_szTempBuffer;
   strResult += "</CPM>\n";
 
@@ -783,19 +783,19 @@ std::string CUserLogTrial::GetWindowCanvasXML(const std::string& strPrefix)
   strResult += "\t<WindowCoordinates>\n";
 
   strResult += strPrefix;
-  sprintf(m_szTempBuffer, "\t\t<Top>%d</Top>\n", m_sWindowCoordinates.top);
+  snprintf(m_szTempBuffer, TEMP_BUFFER_SIZE, "\t\t<Top>%d</Top>\n", m_sWindowCoordinates.top);
   strResult += m_szTempBuffer;
 
   strResult += strPrefix;
-  sprintf(m_szTempBuffer, "\t\t<Bottom>%d</Bottom>\n", m_sWindowCoordinates.bottom);
+  snprintf(m_szTempBuffer, TEMP_BUFFER_SIZE, "\t\t<Bottom>%d</Bottom>\n", m_sWindowCoordinates.bottom);
   strResult += m_szTempBuffer;
 
   strResult += strPrefix;
-  sprintf(m_szTempBuffer, "\t\t<Left>%d</Left>\n", m_sWindowCoordinates.left);
+  snprintf(m_szTempBuffer, TEMP_BUFFER_SIZE, "\t\t<Left>%d</Left>\n", m_sWindowCoordinates.left);
   strResult += m_szTempBuffer;
 
   strResult += strPrefix;
-  sprintf(m_szTempBuffer, "\t\t<Right>%d</Right>\n", m_sWindowCoordinates.right);
+  snprintf(m_szTempBuffer, TEMP_BUFFER_SIZE, "\t\t<Right>%d</Right>\n", m_sWindowCoordinates.right);
   strResult += m_szTempBuffer;
 
   strResult += strPrefix;
@@ -806,19 +806,19 @@ std::string CUserLogTrial::GetWindowCanvasXML(const std::string& strPrefix)
   strResult += "\t<CanvasCoordinates>\n";
 
   strResult += strPrefix;
-  sprintf(m_szTempBuffer, "\t\t<Top>%d</Top>\n", m_sCanvasCoordinates.top);
+  snprintf(m_szTempBuffer, TEMP_BUFFER_SIZE, "\t\t<Top>%d</Top>\n", m_sCanvasCoordinates.top);
   strResult += m_szTempBuffer;
 
   strResult += strPrefix;
-  sprintf(m_szTempBuffer, "\t\t<Bottom>%d</Bottom>\n", m_sCanvasCoordinates.bottom);
+  snprintf(m_szTempBuffer, TEMP_BUFFER_SIZE, "\t\t<Bottom>%d</Bottom>\n", m_sCanvasCoordinates.bottom);
   strResult += m_szTempBuffer;
 
   strResult += strPrefix;
-  sprintf(m_szTempBuffer, "\t\t<Left>%d</Left>\n", m_sCanvasCoordinates.left);
+  snprintf(m_szTempBuffer, TEMP_BUFFER_SIZE, "\t\t<Left>%d</Left>\n", m_sCanvasCoordinates.left);
   strResult += m_szTempBuffer;
 
   strResult += strPrefix;
-  sprintf(m_szTempBuffer, "\t\t<Right>%d</Right>\n", m_sCanvasCoordinates.right);
+  snprintf(m_szTempBuffer, TEMP_BUFFER_SIZE, "\t\t<Right>%d</Right>\n", m_sCanvasCoordinates.right);
   strResult += m_szTempBuffer;
 
   strResult += strPrefix;

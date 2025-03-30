@@ -726,7 +726,7 @@ void CDasherViewSquare::DisjointRender(CDasherNode* pRender, myint y1, myint y2,
 	// Lastly, draw the outline
 	if (m_pSettingsStore->GetLongParameter(LP_OUTLINE_WIDTH) && !pRender->getOutlineColor(m_pColorPalette).isFullyTransparent())
 	{
-		DasherDrawRectangle(std::min(Range, visibleRegion.maxX), std::max(y1, visibleRegion.minY), 0, std::min(y2, visibleRegion.maxY), ColorPalette::noColor, pRender->getOutlineColor(m_pColorPalette), abs(m_pSettingsStore->GetLongParameter(LP_OUTLINE_WIDTH)));
+		DasherDrawRectangle(std::min(Range, visibleRegion.maxX), std::max(y1, visibleRegion.minY), 0, std::min(y2, visibleRegion.maxY), ColorPalette::noColor, pRender->getOutlineColor(m_pColorPalette), labs(m_pSettingsStore->GetLongParameter(LP_OUTLINE_WIDTH)));
 	}
 }
 
@@ -835,8 +835,7 @@ void CDasherViewSquare::NewRender(CDasherNode* pCurrentNode, myint y1, myint y2,
 	{
 		nodeDepth.extrusionLevel = parentDepth.extrusionLevel; //Use same level as node before
 		nodeDepth.groupRecursionDepth++;
-	}
-    else
+	} else
 	{
 		nodeDepth.groupRecursionDepth = 0;
 	}
@@ -879,7 +878,7 @@ void CDasherViewSquare::NewRender(CDasherNode* pCurrentNode, myint y1, myint y2,
 	if (!pCurrentNode->getNodeColor(m_pColorPalette).isFullyTransparent())
 	{
 		//outline width 0 = fill only; >0 = fill + outline; <0 = outline only
-		const int line_width = abs(m_pSettingsStore->GetLongParameter(LP_OUTLINE_WIDTH));
+		const int line_width = labs(m_pSettingsStore->GetLongParameter(LP_OUTLINE_WIDTH));
 		const ColorPalette::Color& fill_color = line_width < 0 ? ColorPalette::noColor : (m_pSettingsStore->GetBoolParameter(BP_SIMULATE_TRANSPARENCY) ? SimulateTransparency(pCurrentNode) : pCurrentNode->getNodeColor(m_pColorPalette));
 		const ColorPalette::Color& outline_color = line_width == 0 ? ColorPalette::noColor : pCurrentNode->getOutlineColor(m_pColorPalette);
 

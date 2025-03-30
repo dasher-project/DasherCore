@@ -108,13 +108,13 @@ std::string CUserLocation::GetXML(const std::string& strPrefix)
   {
     strResult += strPrefix;
     strResult += "\t<X>";
-    sprintf(strNum, "%d", m_iLocationX);
+    snprintf(strNum, sizeof(strNum), "%d", m_iLocationX);
     strResult += strNum;
     strResult += "</X>\n";
 
     strResult += strPrefix;
     strResult += "\t<Y>";
-    sprintf(strNum, "%d", m_iLocationY);
+    snprintf(strNum, sizeof(strNum), "%d", m_iLocationY);
     strResult += strNum;
     strResult += "</Y>\n";
   }
@@ -122,20 +122,20 @@ std::string CUserLocation::GetXML(const std::string& strPrefix)
   {
     strResult += strPrefix;
     strResult += "\t<XNorm>";
-    sprintf(strNum, "%0.4f", m_dNormalizedLocationX);
+    snprintf(strNum, sizeof(strNum), "%0.4f", m_dNormalizedLocationX);
     strResult += strNum;
     strResult += "</XNorm>\n";
 
     strResult += strPrefix;
     strResult += "\t<YNorm>";
-    sprintf(strNum, "%0.4f", m_dNormalizedLocationY);
+    snprintf(strNum, sizeof(strNum), "%0.4f", m_dNormalizedLocationY);
     strResult += strNum;
     strResult += "</YNorm>\n";    
   }
 
   strResult += strPrefix;
   strResult += "\t<Bits>";
-  sprintf(strNum, "%0.3f", m_dNats / log(2.0));	
+  snprintf(strNum, sizeof(strNum), "%0.3f", m_dNats / log(2.0));	
   strResult += strNum;
   strResult += "</Bits>\n";
 
@@ -236,9 +236,9 @@ std::string CUserLocation::GetTabMouseXY(bool bReturnNormalized)
   char szNum[256];
 
   if (bReturnNormalized)
-    sprintf(szNum, "%0.4f\t%0.4f\n", m_dNormalizedLocationX, m_dNormalizedLocationY);
+    snprintf(szNum, sizeof(szNum), "%0.4f\t%0.4f\n", m_dNormalizedLocationX, m_dNormalizedLocationY);
   else
-    sprintf(szNum, "%0.4f\t%0.4f\n", (double)m_iLocationX, (double)m_iLocationY);
+    snprintf(szNum, sizeof(szNum),"%0.4f\t%0.4f\n", (double)m_iLocationX, (double)m_iLocationY);
 
   strResult += szNum;
 

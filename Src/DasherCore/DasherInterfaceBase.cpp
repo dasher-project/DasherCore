@@ -334,7 +334,7 @@ void CDasherInterfaceBase::EnterGameMode(CGameModule *pGameModule) {
   } else {
     ///TRANSLATORS: %s is the name of the alphabet; the string "GameTextFile"
     /// refers to a setting name in gsettings or equivalent, and should not be translated.
-    FormatMessageWithString(_("Could not find game sentences file for %s - check alphabet definition, or override with GameTextFile setting"),
+    FormatMessage("Could not find game sentences file for %s - check alphabet definition, or override with GameTextFile setting",
                             m_pNCManager->GetAlphabet()->GetID().c_str());
     delete pGameModule; //does nothing if null.
   }

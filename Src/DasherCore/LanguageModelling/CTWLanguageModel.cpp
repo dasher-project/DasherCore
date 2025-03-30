@@ -24,8 +24,10 @@
 
 //#include "stdafx.h"
 #include "CTWLanguageModel.h"
+#include <cstddef>
 #include <math.h> // not in use anymore? needed it for log
 #include <cstring>
+#include "HashTable.h"
 
 using namespace Dasher;
 
@@ -73,7 +75,7 @@ inline int CCTWLanguageModel::MapIndex(int b, int f){
 	return ((1<<f)-1 + (b>>(NrPhases-f)));  //(2^phase -1) + dec. value of most significant bits
 }
 
-inline void CCTWLanguageModel::Scale(uint64 &a, uint64 &b)
+inline void CCTWLanguageModel::Scale(uint64_t &a, uint64_t &b)
 {
 	// Instead of using the full 16 bits for the probabilities, use only 9,
 	// that's the only relevant information the other bits are noise <- depends on the value of MaxCount,
@@ -105,18 +107,18 @@ void CCTWLanguageModel::UpdatePath(int bit, int Update, int ValidDepth, int* & i
   // Update specifies yes (1) or no (0) (GetProbs). In the case 'no', the new Pws are calculated but the tree is not
   // altered in any way
 
-	uint64 GammaZero;  		// (GammaZero / (GammaZero + GammaOne)) = Pw(0|x)
-	uint64 GammaOne;   		// (GammaOne  / (GammaZero + GammaOne)) = Pw(1|x)
+	uint64_t GammaZero;  		// (GammaZero / (GammaZero + GammaOne)) = Pw(0|x)
+	uint64_t GammaOne;   		// (GammaOne  / (GammaZero + GammaOne)) = Pw(1|x)
 	unsigned short int CountZero; // Number of zeros seen so far in this node
 	unsigned short int CountOne;  // Number of ones seen so far in this node
-	uint64 PeBlockZero;    		// Local block probability of sequence (0,x)
-	uint64 PeBlockOne; 	  	// Local block probability of sequence (1,x)
-	uint64 PwCBlockZero;     	// Product of the weighted block probabilities of the childnodes of sequence (0,x)
-	uint64 PwCBlockOne;      	// Product of the weighted block probabilities of the childnodes of sequence (1,x)
-	uint64 PeCondZero; 		// Conditional local probability (0|x)
-	uint64 PeCondOne;  		// Conditional local probability (1|x)
-	uint64 PwCBlock;      		// Product of the weighted block probabilities of the childnodes of sequence (x)
-	uint64 PeBlock;	  		// Local block probability of sequence (x)
+	uint64_t PeBlockZero;    		// Local block probability of sequence (0,x)
+	uint64_t PeBlockOne; 	  	// Local block probability of sequence (1,x)
+	uint64_t PwCBlockZero;     	// Product of the weighted block probabilities of the childnodes of sequence (0,x)
+	uint64_t PwCBlockOne;      	// Product of the weighted block probabilities of the childnodes of sequence (1,x)
+	uint64_t PeCondZero; 		// Conditional local probability (0|x)
+	uint64_t PeCondOne;  		// Conditional local probability (1|x)
+	uint64_t PwCBlock;      		// Product of the weighted block probabilities of the childnodes of sequence (x)
+	uint64_t PeBlock;	  		// Local block probability of sequence (x)
 
 	// The deepest index can be a leaf, a failed node, or a not-placed node
 	const int DeepestIndex = index[ValidDepth];
@@ -268,8 +270,7 @@ int CCTWLanguageModel::FindPath(CCTWContext & context, char NewChar, int phase, 
 			  found = true;					// to avoid 'failed'
 			  index[i+1] = curindex;		// tell calling function where to find the node, i+1 because index[0] = rootnode
 			  break;						// to escape loop and continue with next character
-		  }
-		  else // can't create a new node
+		  } else // can't create a new node
 		  {
 			  found = false;
 			  index[i+1] = MaxNrNodes+1;	// to indicate node could not be placed
@@ -357,9 +358,9 @@ void CCTWLanguageModel::GetProbs(Context context, std::vector<unsigned int> &Pro
 		Interval[0] = Norm;
 
 	int ValidDepth = 0;
-	uint64 IntervalB = 0; // 'base' interval
-	uint64 IntervalZ = 0; // divided interval for the 0-branch
-	uint64 IntervalO = 0; // divided interval for the 1-branch
+	uint64_t IntervalB = 0; // 'base' interval
+	uint64_t IntervalZ = 0; // divided interval for the 0-branch
+	uint64_t IntervalO = 0; // divided interval for the 1-branch
 	unsigned int MinInterval = 0;
 	unsigned short int Pw0 = 0;
 	unsigned short int Pw1 = 0;
@@ -375,7 +376,7 @@ void CCTWLanguageModel::GetProbs(Context context, std::vector<unsigned int> &Pro
 			IntervalB = Interval[(1<<phase)+ steps - 1];
 			self->UpdatePath(0,0, ValidDepth, Index, Pw0, Pw1);
 
-			IntervalZ = (IntervalB * Pw0)/(uint64)(Pw0+Pw1); // flooring, influence of flooring P0 instead of P1 is negligible
+			IntervalZ = (IntervalB * Pw0)/(uint64_t)(Pw0+Pw1); // flooring, influence of flooring P0 instead of P1 is negligible
 			IntervalO = IntervalB - IntervalZ;
 
 			MinInterval = MinProb*1<<(NrPhases-1-phase); // leafs for each rootnode at the current phase, assuming a full alphabet!!
@@ -423,12 +424,6 @@ void CCTWLanguageModel::GetProbs(Context context, std::vector<unsigned int> &Pro
 
 bool CCTWLanguageModel::WriteToFile(std::string strFilename, std::string AlphabetName){
 	SLMFileHeader GenericHeader;
-	// Magic number ("%DLF" in ASCII)
-	GenericHeader.szMagic[0] = '%';
-	GenericHeader.szMagic[1] = 'D';
-	GenericHeader.szMagic[2] = 'L';
-	GenericHeader.szMagic[3] = 'F';
-
 	GenericHeader.iAlphabetSize = GetSize(); // Number of characters in the alphabet
 	GenericHeader.iHeaderVersion = 1; // Version of the header
 	GenericHeader.iLMID = 5; // ID of the language model, 5 for CTW
@@ -440,38 +435,32 @@ bool CCTWLanguageModel::WriteToFile(std::string strFilename, std::string Alphabe
 	OutputFile = fopen(strFilename.c_str(), "wb");
 	if(OutputFile)
 	{
-		char * buffer;
-		buffer = new char[AlphabetName.length()+1];
-		strcpy(buffer, AlphabetName.c_str());
-
 		// write header
-		fwrite(GenericHeader.szMagic , sizeof(GenericHeader.szMagic[0]), sizeof(GenericHeader.szMagic), OutputFile );
-		fwrite(&GenericHeader.iHeaderVersion, 2,1, OutputFile);
-		fwrite(&GenericHeader.iHeaderSize, 2,1, OutputFile);
-		fwrite(&GenericHeader.iLMID, 2,1, OutputFile);
-		fwrite(&GenericHeader.iLMVersion, 2,1, OutputFile);
-		fwrite(&GenericHeader.iLMMinVersion, 2,1, OutputFile);
-		fwrite(&GenericHeader.iAlphabetSize, 2,1, OutputFile);
-		fwrite(buffer, 1, AlphabetName.length(), OutputFile ); // UTF-8 encoded alphabet name (variable length struct)
-		delete[] buffer;
+		fwrite(GenericHeader.szMagic , sizeof(GenericHeader.szMagic[0]), sizeof(GenericHeader.szMagic) - 1, OutputFile); //Do not print Null-Char
+		fwrite(&GenericHeader.iHeaderVersion, sizeof(GenericHeader.iHeaderVersion), 1, OutputFile);
+		fwrite(&GenericHeader.iHeaderSize, sizeof(GenericHeader.iHeaderSize), 1, OutputFile);
+		fwrite(&GenericHeader.iLMID, sizeof(GenericHeader.iLMID), 1, OutputFile);
+		fwrite(&GenericHeader.iLMVersion, sizeof(GenericHeader.iLMVersion), 1, OutputFile);
+		fwrite(&GenericHeader.iLMMinVersion, sizeof(GenericHeader.iLMMinVersion), 1, OutputFile);
+		fwrite(&GenericHeader.iAlphabetSize, sizeof(GenericHeader.iAlphabetSize), 1, OutputFile);
+		fwrite(AlphabetName.c_str(), sizeof(AlphabetName[0]), AlphabetName.length(), OutputFile); // UTF-8 encoded alphabet name (variable length struct)
 
 		// CTW specific, not in SLMFileHeader
-		fwrite(&MaxNrNodes, 4,1, OutputFile);
+		fwrite(&MaxNrNodes, sizeof(MaxNrNodes), 1, OutputFile);
 
 		for(int i=0;i<MaxNrNodes;i++)
 		{
-			fwrite(&Tree[i].a, 1,1, OutputFile);
-			fwrite(&Tree[i].b, 1,1, OutputFile);
-			fwrite(&Tree[i].Symbol, 1,1,OutputFile);
-			fwrite(&Tree[i].NrTries, 1,1,OutputFile);
-			fwrite(&Tree[i].Pe, 2,1,OutputFile);
-			fwrite(&Tree[i].PwChild, 2,1,OutputFile);
+			fwrite(&Tree[i].a, sizeof(CCTWNode::a), 1, OutputFile);
+			fwrite(&Tree[i].b, sizeof(CCTWNode::b), 1, OutputFile);
+			fwrite(&Tree[i].Symbol, sizeof(CCTWNode::Symbol), 1,OutputFile);
+			fwrite(&Tree[i].NrTries, sizeof(CCTWNode::NrTries),1,OutputFile);
+			fwrite(&Tree[i].Pe, sizeof(CCTWNode::Pe),1,OutputFile);
+			fwrite(&Tree[i].PwChild, sizeof(CCTWNode::PwChild),1,OutputFile);
 		}
 		fclose(OutputFile);
 		return true;
 	}
-	else
-		return false;
+	else return false;
 }
 
 bool CCTWLanguageModel::ReadFromFile(std::string strFilename, std::string AlphabetName){
@@ -485,38 +474,49 @@ bool CCTWLanguageModel::ReadFromFile(std::string strFilename, std::string Alphab
 		The values to compare with should be parameters and not hardcoded. */
 
 		SLMFileHeader GenericHeader;
-		char * ReadAlphabetName;
+		char* ReadAlphabetName;
 
-		fread(&GenericHeader.szMagic , sizeof(GenericHeader.szMagic[0]), sizeof(GenericHeader.szMagic), InputFile);
-		if(memcmp(GenericHeader.szMagic,"%DLF",4))
+		size_t bytesRead;
+
+		bytesRead = fread(&GenericHeader.szMagic, sizeof(GenericHeader.szMagic[0]), sizeof(GenericHeader.szMagic) - 1, InputFile); //Magic string is written without null-char
+		if(bytesRead < (sizeof(GenericHeader.szMagic) - 1) || memcmp(GenericHeader.szMagic,"%DLF",bytesRead))
 		{ // magic strings not equal
 			return false;
 		}
-		fread(&GenericHeader.iHeaderVersion,2,1, InputFile);
-		if(GenericHeader.iHeaderVersion != 1)
+
+		bytesRead = fread(&GenericHeader.iHeaderVersion, sizeof(GenericHeader.iHeaderVersion), 1, InputFile);
+		if(bytesRead < sizeof(GenericHeader.iHeaderVersion) || GenericHeader.iHeaderVersion != 1)
 		{ // unknown header version
 			return false;
 		}
-		fread(&GenericHeader.iHeaderSize,2,1, InputFile);
-		fread(&GenericHeader.iLMID,2,1, InputFile);
-		if(GenericHeader.iLMID != 5)
+
+		bytesRead = fread(&GenericHeader.iHeaderSize,sizeof(GenericHeader.iHeaderSize),1, InputFile);
+		if(bytesRead < sizeof(GenericHeader.iHeaderSize)) return false; //Not enough bytes read
+
+		bytesRead = fread(&GenericHeader.iLMID,sizeof(GenericHeader.iLMID),1, InputFile);
+		if(bytesRead < sizeof(GenericHeader.iLMID) || GenericHeader.iLMID != 5)
 		{ // header indicates this is not a CTW model
 			return false;
 		}
-		fread(&GenericHeader.iLMVersion,2,1, InputFile);
-		fread(&GenericHeader.iLMMinVersion,2,1, InputFile);
-		if(GenericHeader.iLMMinVersion > 1)
+
+		bytesRead = fread(&GenericHeader.iLMVersion,sizeof(GenericHeader.iLMVersion),1, InputFile);
+		if(bytesRead < sizeof(GenericHeader.iLMVersion)) return false; //Not enough bytes read
+
+		bytesRead = fread(&GenericHeader.iLMMinVersion,sizeof(GenericHeader.iLMMinVersion),1, InputFile);
+		if(bytesRead < sizeof(GenericHeader.iLMMinVersion) || GenericHeader.iLMMinVersion > 1)
 		{ // header indicates stored model newer than we can handle
 			return false;
 		}
-		fread(&GenericHeader.iAlphabetSize,2,1, InputFile);
-		if(GenericHeader.iAlphabetSize != GetSize())
+
+		bytesRead = fread(&GenericHeader.iAlphabetSize,sizeof(GenericHeader.iAlphabetSize),1, InputFile);
+		if(bytesRead < sizeof(GenericHeader.iAlphabetSize) || GenericHeader.iAlphabetSize != GetSize())
 		{ // header indicates stored model uses an alphabet of different size
 			return false;
 		}
 
-		ReadAlphabetName = new char[GenericHeader.iHeaderSize - sizeof(SLMFileHeader)+1];
-		fread(ReadAlphabetName,1,GenericHeader.iHeaderSize - sizeof(SLMFileHeader), InputFile);
+		ReadAlphabetName = new char[GenericHeader.iHeaderSize - sizeof(SLMFileHeader) + 1];
+		bytesRead = fread(ReadAlphabetName,sizeof(ReadAlphabetName[0]), GenericHeader.iHeaderSize - sizeof(SLMFileHeader), InputFile);
+		if(bytesRead < GenericHeader.iHeaderSize - sizeof(SLMFileHeader)) return false; //Not enough bytes read
 		ReadAlphabetName[GenericHeader.iHeaderSize - sizeof(SLMFileHeader)] = '\0'; // write the terminating 0 and read it in as well
 
 		if(strcmp(ReadAlphabetName,AlphabetName.c_str()))
@@ -525,21 +525,22 @@ bool CCTWLanguageModel::ReadFromFile(std::string strFilename, std::string Alphab
 			return false;
 		}
 		delete[] ReadAlphabetName;
+
 		int ReadNrNodes;
-		fread(&ReadNrNodes,4,1, InputFile);
-		if(ReadNrNodes != MaxNrNodes)
+		bytesRead = fread(&ReadNrNodes,sizeof(ReadNrNodes), 1, InputFile);
+		if(bytesRead < sizeof(ReadNrNodes) || ReadNrNodes != MaxNrNodes)
 		{ // header indicates different number of nodes in the hashtable
 			return false;
 		}
 
 		for(int i=0;i<MaxNrNodes;i++)
 		{
-			fread(&Tree[i].a,1,1,InputFile);
-			fread(&Tree[i].b,1,1,InputFile);
-			fread(&Tree[i].Symbol, 1,1,InputFile);
-			fread(&Tree[i].NrTries, 1,1,InputFile);
-			fread(&Tree[i].Pe, 2,1,InputFile);
-			fread(&Tree[i].PwChild, 2,1,InputFile);
+			if(fread(&Tree[i].a,sizeof(CCTWNode::a),1,InputFile) < sizeof(CCTWNode::a)) return false;
+			if(fread(&Tree[i].b,sizeof(CCTWNode::b),1,InputFile) < sizeof(CCTWNode::b)) return false;
+			if(fread(&Tree[i].Symbol, sizeof(CCTWNode::Symbol),1,InputFile) < sizeof(CCTWNode::Symbol)) return false;
+			if(fread(&Tree[i].NrTries, sizeof(CCTWNode::NrTries),1,InputFile) < sizeof(CCTWNode::NrTries)) return false;
+			if(fread(&Tree[i].Pe, sizeof(CCTWNode::Pe),1,InputFile) < sizeof(CCTWNode::Pe)) return false;
+			if(fread(&Tree[i].PwChild, sizeof(CCTWNode::PwChild),1,InputFile) < sizeof(CCTWNode::PwChild)) return false;
 		}
 		fclose(InputFile);
 		return true;

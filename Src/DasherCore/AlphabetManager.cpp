@@ -232,7 +232,7 @@ CWordGeneratorBase *CAlphabetManager::GetGameWords() {
     ///TRANSLATORS: the string "GameTextFile" is the name of a setting in gsettings
     /// (or equivalent), and should not be translated. The %s is the value of that
     /// setting (this message displayed only if the user has provided a value)
-    m_pInterface->FormatMessageWithString(_("Note: GameTextFile setting specifies game sentences file '%s' but this does not exist"),gtf.c_str());
+    m_pInterface->FormatMessage("Note: GameTextFile setting specifies game sentences file '%s' but this does not exist", gtf.c_str());
   }
   pGen->setAcceptUser(false);
   m_pInterface->ScanFiles(pGen, m_pAlphabet->GetTrainingFile());

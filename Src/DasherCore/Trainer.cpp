@@ -3,9 +3,7 @@
 
 #include <I18n.h>
 
-#include "LanguageModelling/PPMPYLanguageModel.h"
 #include <vector>
-#include <sstream>
 #include <string>
 
 using namespace Dasher;
@@ -19,7 +17,7 @@ CTrainer::CTrainer(CMessageDisplay *pMsgs, CLanguageModel *pLanguageModel, const
       m_iCtxEsc = syms[0];
     else {      
       //no context switch commands will be executed!
-      pMsgs->FormatMessageWithString(_("Warning: faulty alphabet definition, escape sequence %s must be a single unicode character. This may worsen Dasher's text prediction."),
+      pMsgs->FormatMessage("Warning: faulty alphabet definition, escape sequence %s must be a single unicode character. This may worsen Dasher's text prediction.",
                                      pInfo->GetContextEscapeChar().c_str());
       m_iCtxEsc = -1;
     }
@@ -85,7 +83,7 @@ private:
 
 bool Dasher::CTrainer::Parse(const std::string &strDesc, std::istream &in, bool bUser) {
   if (in.fail()) {
-    m_pMsgs->FormatMessageWithString(_("Unable to open file \"%s\" for reading"),strDesc.c_str());
+    m_pMsgs->FormatMessage("Unable to open file \"%s\" for reading",strDesc.c_str());
     return false;
   }
   ///easy enough to be re-entrant, so might as well

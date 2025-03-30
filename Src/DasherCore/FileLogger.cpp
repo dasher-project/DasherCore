@@ -234,7 +234,7 @@ std::string CFileLogger::GetTimeDateStamp()
 	    std::time_t now = std::chrono::system_clock::to_time_t(timepoint);
 	    int milliseconds = static_cast<int>(std::chrono::time_point_cast<std::chrono::milliseconds>(timepoint).time_since_epoch().count() % 1000);
 		std::string strMillis(3,'0');
-		sprintf(&strMillis[0], "%03d", milliseconds);
+		snprintf(&strMillis[0], strMillis.size(), "%03d", milliseconds);
 
 		std::string Buffer(30, '\0'); //never longer than 30 chars
 		size_t length = std::strftime(&Buffer[0], Buffer.size(), format.c_str(), std::localtime(&now)); //Not thread safe!

@@ -19,8 +19,7 @@
 // along with Dasher; if not, write to the Free Software 
 // Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
-#ifndef __MESSAGES_H__
-#define __MESSAGES_H__
+#pragma once
 
 ///Abstract superclass = interface for displaying messages to the user.
 ///Each platform must implement: see CDasherInterfaceBase, CDashIntfScreenMsgs
@@ -44,16 +43,9 @@ public:
   /// be able to continue writing uninterrupted.
   virtual void Message(const std::string &strText, bool bInterrupt)=0;
   
-  ///Utility method for common case of displaying a modal message with a format
-  /// string containing a single %s.
-  void FormatMessageWithString(const char* fmt, const char* str);
-
-  ///Utility method for less-but-still-quite-common case of displaying a modal
-  /// message with a format string containing two %s
-  void FormatMessageWith2Strings(const char* fmt, const char* str1, const char* str2);
-
+  /// Utility method for common case of displaying a modal message with a format
+  void FormatMessage(const char* format, va_list args);
+  void FormatMessage(const char* format, ...);
 };
 
 /// @}
-
-#endif

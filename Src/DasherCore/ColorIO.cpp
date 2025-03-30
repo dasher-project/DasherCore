@@ -129,7 +129,7 @@ void CColorIO::RelinkParents()
 				std::string allVisited;
 				for(std::string& s : visited) allVisited += s + "->";
 				allVisited += current->ParentPalette->PaletteName;
-				m_pMsgs->FormatMessageWithString("Found cycle while parsing color-scheme parenting: %s", allVisited.c_str());
+				m_pMsgs->FormatMessage("Found cycle while parsing color-scheme parenting: %s", allVisited.c_str());
 				KnownPalettes.erase(current->ParentPalette->PaletteName);
 				RelinkParents(); //relink as now a palette was removed
 				return;

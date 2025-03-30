@@ -151,9 +151,9 @@ void CGameModule::DecorateView(unsigned long lTime, CDasherView *pView, CDasherM
   m_vTargetY.push_back(iNewTarget);
   bool bDrawHelper;
   
-  if (abs(iNewTarget - CDasherModel::ORIGIN_Y) >= m_pSettingsStore->GetLongParameter(LP_GAME_HELP_DIST)) {
+  if (llabs(iNewTarget - CDasherModel::ORIGIN_Y) >= m_pSettingsStore->GetLongParameter(LP_GAME_HELP_DIST)) {
     //offscreen
-    if (abs(iNewTarget - CDasherModel::ORIGIN_Y) >= abs(m_iTargetY - CDasherModel::ORIGIN_Y)) {
+    if (llabs(iNewTarget - CDasherModel::ORIGIN_Y) >= llabs(m_iTargetY - CDasherModel::ORIGIN_Y)) {
       //not decreasing
       if (m_uHelpStart == std::numeric_limits<unsigned long>::max())
         m_uHelpStart = lTime + m_pSettingsStore->GetLongParameter(LP_GAME_HELP_TIME);
@@ -228,7 +228,7 @@ void CGameModule::DrawBrachistochrone(CDasherView *pView) {
   // Plot a brachistochrone - the optimal path from the crosshair to the target
   // this is a circle, passing through both crosshair and target, centered on the y-axis
   const myint CenterY = ComputeBrachCenter();
-  pView->DasherSpaceArc(CenterY, abs(CenterY - m_iTargetY), CDasherModel::ORIGIN_X, CDasherModel::ORIGIN_Y, 0, m_iTargetY, pView->GetNamedColor(NamedColor::gameGuide), 2*(int)m_pSettingsStore->GetLongParameter(LP_LINE_WIDTH));
+  pView->DasherSpaceArc(CenterY, llabs(CenterY - m_iTargetY), CDasherModel::ORIGIN_X, CDasherModel::ORIGIN_Y, 0, m_iTargetY, pView->GetNamedColor(NamedColor::gameGuide), 2*(int)m_pSettingsStore->GetLongParameter(LP_LINE_WIDTH));
 }
 
 void CGameModule::DrawHelperArrow(Dasher::CDasherView* pView)
