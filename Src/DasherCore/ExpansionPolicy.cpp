@@ -10,6 +10,7 @@
 #include "ExpansionPolicy.h"
 #include "DasherModel.h"
 #include <algorithm>
+#include <limits>
 
 using namespace Dasher;
 
