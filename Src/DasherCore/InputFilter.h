@@ -15,8 +15,8 @@ namespace Dasher {
 namespace Dasher {
 class CInputFilter : public CDasherModule {
  public:
-  CInputFilter(CDasherInterfaceBase *pInterface, ModuleID_t iID, const char *szName)
-    : CDasherModule(iID, InputMethod, szName), m_pInterface(pInterface) {
+  CInputFilter(CDasherInterfaceBase *pInterface, const char *szName)
+    : CDasherModule(szName), m_pInterface(pInterface) {
   };
 
   ///Called after nodes have been rendered, to draw any decorations on the view.
@@ -71,16 +71,17 @@ class CInputFilter : public CDasherModule {
   /// ScheduleOneStep, providing a ScheduleZoom method wrapping the
   /// DasherModel one, using LP_ZOOMSTEPS steps and such that pause()
   /// cancels any such zoom in progress.
-  class CStaticFilter : public CInputFilter, protected CSettingsUser {
+  class CStaticFilter : public CInputFilter {
   public:
-    CStaticFilter(CSettingsUser *pCreator, CDasherInterfaceBase *pIntf, ModuleID_t iId, const char *szName)
-    : CInputFilter(pIntf, iId, szName), CSettingsUser(pCreator), m_pModel(NULL) {
+    CStaticFilter(CSettingsStore* pSettingsStore, CDasherInterfaceBase *pIntf, const char *szName)
+    : CInputFilter(pIntf, szName), m_pSettingsStore(pSettingsStore), m_pModel(NULL) {
     }
     void pause() {if (m_pModel) m_pModel->ClearScheduledSteps();}
   protected:
     void ScheduleZoom(CDasherModel *pModel, myint y1, myint y2) {
-      (m_pModel = pModel)->ScheduleZoom(y1,y2,GetLongParameter(LP_ZOOMSTEPS));
+      (m_pModel = pModel)->ScheduleZoom(y1,y2,m_pSettingsStore->GetLongParameter(LP_ZOOMSTEPS));
     }
+    CSettingsStore* m_pSettingsStore;
   private:
     CDasherModel *m_pModel;
   };

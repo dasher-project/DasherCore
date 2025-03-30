@@ -1,7 +1,8 @@
 
-#include "../Common/Common.h"
-
 #include "Trainer.h"
+
+#include <I18n.h>
+
 #include "LanguageModelling/PPMPYLanguageModel.h"
 #include <vector>
 #include <sstream>

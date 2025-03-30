@@ -11,22 +11,24 @@
 
 #include <fstream>
 
+#include "FileUtils.h"
+
 bool AbstractParser::ParseFile(const std::string& strPath, bool bUser)
 {
 	std::ifstream in(strPath.c_str(), std::ios::binary);
-	bool res = Parse("file://" + strPath, in, bUser);
+	bool res = Parse(strPath, in, bUser);
 	in.close();
 	return res;
 }
 
-bool AbstractXMLParser::Parse(const std::string& strDesc, std::istream& in, bool bUser)
+bool AbstractXMLParser::Parse(const std::string& source, std::istream& in, bool bUser)
 {
-	m_strDesc = strDesc;
+	m_strDesc = "File: " + source;
 
 	pugi::xml_document doc;
 	pugi::xml_parse_result result = doc.load(in);
 
 	if (!result) return false;
 
-	return Parse(doc, bUser);
+	return Parse(doc, source, bUser);
 }

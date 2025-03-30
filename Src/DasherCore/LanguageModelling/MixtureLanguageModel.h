@@ -23,20 +23,20 @@ namespace Dasher {
 
   /// \ingroup LM
   /// \{
-  class CMixtureLanguageModel:public CLanguageModel, protected CSettingsUser {
+  class CMixtureLanguageModel: public CLanguageModel {
   public:
 
     /////////////////////////////////////////////////////////////////////////////
 
-    CMixtureLanguageModel(CSettingsUser *pCreator, const CAlphInfo *pAlph, const CAlphabetMap *pAlphMap)
-    : CLanguageModel(pAlph->iEnd-1), CSettingsUser(pCreator) {
+    CMixtureLanguageModel(CSettingsStore* pSettingsStore, const CAlphInfo *pAlph, const CAlphabetMap *pAlphMap)
+    : CLanguageModel(pAlph->iEnd-1), m_pSettingsStore(pSettingsStore) {
 
       //      std::cout << m_pAlphabet << std::endl;
 
       NextContext = 0;
 
-      lma = new CPPMLanguageModel(this, m_iNumSyms);
-      lmb = new CDictLanguageModel(this, pAlph, pAlphMap);
+      lma = new CPPMLanguageModel(m_pSettingsStore, m_iNumSyms);
+      lmb = new CDictLanguageModel(m_pSettingsStore, pAlph, pAlphMap);
 
     };
 
@@ -87,7 +87,7 @@ namespace Dasher {
         std::vector < unsigned int >ProbsA(iNumSymbols);
         std::vector < unsigned int >ProbsB(iNumSymbols);
 
-      int iNormA(iNorm * GetLongParameter(LP_LM_MIXTURE) / 100);
+      int iNormA(iNorm * m_pSettingsStore->GetLongParameter(LP_LM_MIXTURE) / 100);
       int iNormB(iNorm - iNormA);
       
       // TODO: Fix uniform here
@@ -137,6 +137,7 @@ namespace Dasher {
 
     std::map < int, CMixtureContext * >ContextMap;
 
+    CSettingsStore* m_pSettingsStore;
   };
   /// \}
 

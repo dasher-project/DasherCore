@@ -20,7 +20,6 @@
 
 #pragma once
 
-#include "../../Common/Common.h"
 #include "../AbstractXMLParser.h"
 
 #include "../DasherTypes.h"
@@ -48,7 +47,7 @@ public:
 	CAlphIO(CMessageDisplay* pMsgs);
 	virtual ~CAlphIO();
 
-	virtual bool Parse(pugi::xml_document& document, bool bUser) override;
+	virtual bool Parse(pugi::xml_document& document, const std::string filePath, bool bUser) override;
 
 	void GetAlphabets(std::vector< std::string >* AlphabetList) const;
 	const CAlphInfo *GetInfo(const std::string& AlphID) const;
@@ -58,7 +57,8 @@ private:
 	std::map < std::string, const CAlphInfo* > Alphabets; // map AlphabetID to AlphabetInfo. 
 	static CAlphInfo *CreateDefault();         // Give the user an English alphabet rather than nothing if anything goes horribly wrong.
 
-	void ReadCharAttributes(pugi::xml_node xml_node, CAlphInfo::character* alphabet_character);
+	void ReadCharAttributes(pugi::xml_node xml_node, CAlphInfo::character& alphabet_character, SGroupInfo* parentGroup, std::vector<Action*>&
+                            DoActions, std::vector<Action*>& UndoActions);
 	SGroupInfo* ParseGroupRecursive(pugi::xml_node& group_node, CAlphInfo* CurrentAlphabet, SGroupInfo* previous_sibling, std::vector<SGroupInfo*> ancestors);
     void ReverseChildList(SGroupInfo*& pList);
 	// Alphabet types:

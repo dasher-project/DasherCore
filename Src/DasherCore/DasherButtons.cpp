@@ -11,8 +11,8 @@
 
 using namespace Dasher;
 
-CDasherButtons::CDasherButtons(CSettingsUser *pCreator, CDasherInterfaceBase *pInterface, bool bMenu, ModuleID_t iID, const char *szName)
-  : CStaticFilter(pCreator, pInterface, iID, szName), m_bMenu(bMenu), m_bDecorationChanged(true), m_pBoxes(NULL), iActiveBox(0) {}
+CDasherButtons::CDasherButtons(CSettingsStore* pSettingsStore, CDasherInterfaceBase *pInterface, bool bMenu, const char *szName)
+  : CStaticFilter(pSettingsStore, pInterface, szName), m_bMenu(bMenu), m_bDecorationChanged(true), m_pBoxes(NULL), iActiveBox(0) {}
 
 CDasherButtons::~CDasherButtons()
 {
@@ -68,9 +68,9 @@ void CDasherButtons::DirectKeyDown(unsigned long iTime, Keys::VirtualKey Key, CD
 }
 
 void CDasherButtons::Timer(unsigned long Time, CDasherView *pView, CDasherInput *pInput, CDasherModel *pModel, CExpansionPolicy **pol) {
-  if (m_bMenu && GetLongParameter(LP_BUTTON_SCAN_TIME) &&
+  if (m_bMenu && m_pSettingsStore->GetLongParameter(LP_BUTTON_SCAN_TIME) &&
       Time > m_iScanTime) {
-    m_iScanTime = Time + GetLongParameter(LP_BUTTON_SCAN_TIME);
+    m_iScanTime = Time + m_pSettingsStore->GetLongParameter(LP_BUTTON_SCAN_TIME);
     m_bDecorationChanged = true;
     ++iActiveBox;
     if(iActiveBox == m_iNumBoxes)
@@ -87,18 +87,6 @@ void CDasherButtons::Timer(unsigned long Time, CDasherView *pView, CDasherInput 
 void CDasherButtons::NewDrawGoTo(CDasherView *pView, myint iDasherMin, myint iDasherMax, bool bActive) {
    myint iHeight(iDasherMax - iDasherMin);
 
-   int iColour;
-   int iWidth;
-
-   if(bActive) {
-     iColour = 1;
-     iWidth = 3;
-   }
-   else {
-     iColour = 2;
-     iWidth = 1;
-   }
-
    CDasherScreen::point p[4];
 
    pView->Dasher2Screen( 0, iDasherMin, p[0].x, p[0].y);
@@ -106,5 +94,10 @@ void CDasherButtons::NewDrawGoTo(CDasherView *pView, myint iDasherMin, myint iDa
    pView->Dasher2Screen( iHeight, iDasherMax, p[2].x, p[2].y);
    pView->Dasher2Screen( 0, iDasherMax, p[3].x, p[3].y);
 
-   pView->Screen()->Polyline(p, 4, iWidth, iColour);
+   if(bActive) {
+     pView->Screen()->Polyline(p, 4, 3, pView->GetNamedColor(NamedColor::selectionHighlight));
+   }
+   else {
+     pView->Screen()->Polyline(p, 4, 1, pView->GetNamedColor(NamedColor::selectionInactive));
+   }
 }

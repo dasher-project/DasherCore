@@ -19,13 +19,13 @@ static bool Read(const std::map<std::string, T> values, const std::string& key,
 }
 
 XmlSettingsStore::XmlSettingsStore(const std::string& filename, CMessageDisplay* pDisplay)
-	: AbstractXMLParser(pDisplay), filename_(filename)
+	: AbstractXMLParser(pDisplay), last_mutable_filepath(filename)
 {
 }
 
 void XmlSettingsStore::Load()
 {
-	Dasher::FileUtils::ScanFiles(this, filename_);
+	Dasher::FileUtils::ScanFiles(this, last_mutable_filepath);
 	// Load all the settings or create defaults for the ones that don't exist.
 	// The superclass 'ParseFile' saves default settings if not found.
 	mode_ = EXPLICIT_SAVE;
@@ -112,33 +112,32 @@ bool XmlSettingsStore::Save() {
 		string_node.append_attribute("value") = value.c_str();
     }
 
-	std::ostringstream outputstream;
-	doc.save(outputstream, "\t", pugi::format_default, pugi::encoding_utf8);
-
-	return FileUtils::WriteUserDataFile(filename_, outputstream.str(), false);
+	return doc.save_file(last_mutable_filepath.c_str(), "\t", pugi::format_default, pugi::encoding_utf8);
 }
 
-bool XmlSettingsStore::Parse(pugi::xml_document& document, bool bUser)
+bool XmlSettingsStore::Parse(pugi::xml_document& document, const std::string filePath, bool bUser)
 {
-	pugi::xml_node outer = document.child("settings");
+	if(bUser) last_mutable_filepath = filePath;
+
+    const pugi::xml_node outer = document.child("settings");
 	for (pugi::xml_node bool_setting : outer.children("bool"))
     {
 		std::string name = bool_setting.attribute("name").as_string();
-		bool value = bool_setting.attribute("value").as_bool();
+        const bool value = bool_setting.attribute("value").as_bool();
 		if(!name.empty()) boolean_settings_[name] = value;
 	}
 
 	for (pugi::xml_node string_setting : outer.children("string"))
     {
 		std::string name = string_setting.attribute("name").as_string();
-		std::string value = string_setting.attribute("value").as_string();
+        const std::string value = string_setting.attribute("value").as_string();
 		if(!name.empty()) string_settings_[name] = value;
 	}
 
 	for (pugi::xml_node long_setting : outer.children("long"))
     {
 		std::string name = long_setting.attribute("name").as_string();
-		long value = static_cast<long>(long_setting.attribute("value").as_llong());
+        const long value = static_cast<long>(long_setting.attribute("value").as_llong());
 		if(!name.empty()) long_settings_[name] = value;
 	}
 

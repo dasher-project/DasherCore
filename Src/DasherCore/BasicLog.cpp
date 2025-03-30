@@ -13,10 +13,11 @@
 
 using namespace Dasher;
 
-CBasicLog::CBasicLog(CSettingsUser *pCreateFrom, CDasherInterfaceBase *pIntf)
-: CUserLogBase(pIntf), CSettingsUser(pCreateFrom) {
-  m_iSymbolCount = 0;
-  m_bStarted = false;
+CBasicLog::CBasicLog(CSettingsStore* pSettingsStore, CDasherInterfaceBase *pIntf)
+    : CUserLogBase(pIntf), m_pSettingsStore(pSettingsStore), m_iKeyCount(0), m_iInitialRate(0), m_dBits(0)
+{
+    m_iSymbolCount = 0;
+    m_bStarted = false;
 }
 
 CBasicLog::~CBasicLog() {
@@ -55,7 +56,7 @@ void CBasicLog::StartTrial() {
   m_iKeyCount = 0;
   m_dBits = 0.0;
   m_strStartDate = GetDateStamp();
-  m_iInitialRate = GetLongParameter(LP_MAX_BITRATE);
+  m_iInitialRate = m_pSettingsStore->GetLongParameter(LP_MAX_BITRATE);
 }
 
 void CBasicLog::EndTrial() {
@@ -67,7 +68,7 @@ void CBasicLog::EndTrial() {
   std::ofstream oFile;
   oFile.open(strFileName.c_str(), std::ios::out | std::ios::app);
 
-  oFile << "\"" << m_strStartDate << "\":\"" << GetDateStamp() << "\":" << m_iSymbolCount << ":" << m_dBits << ":" << m_iKeyCount << ":" << m_iInitialRate / 100.0 << ":" << GetLongParameter(LP_MAX_BITRATE) / 100.0 << ":\"" << GetStringParameter(SP_INPUT_FILTER) << "\":\"" << GetStringParameter(SP_ALPHABET_ID) << "\"" << std::endl;
+  oFile << "\"" << m_strStartDate << "\":\"" << GetDateStamp() << "\":" << m_iSymbolCount << ":" << m_dBits << ":" << m_iKeyCount << ":" << m_iInitialRate / 100.0 << ":" << m_pSettingsStore->GetLongParameter(LP_MAX_BITRATE) / 100.0 << ":\"" << m_pSettingsStore->GetStringParameter(SP_INPUT_FILTER) << "\":\"" << m_pSettingsStore->GetStringParameter(SP_ALPHABET_ID) << "\"" << std::endl;
 
   oFile.close();
 

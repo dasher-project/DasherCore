@@ -6,17 +6,13 @@
 //
 /////////////////////////////////////////////////////////////////////////////
 
-#include "../Common/Common.h"
-
 #include "SettingsStore.h"
-#include "Observable.h"
 
 #include <cstdlib>
 #include <iostream>
+#include <myassert.h>
 
 using namespace Dasher;
-
-static CSettingsStore *s_pSettingsStore = NULL;
 
 CSettingsStore::CSettingsStore() {
 }
@@ -106,12 +102,12 @@ void CSettingsStore::SetParameter(Parameter parameter, T value)
     if(parameter_value == parameters_.end()) return; // Unknown parameter
 	if(value == GetParameter<T>(parameter)) return; // Known, but nothing changed
 
-	pre_set_observable_.DispatchEvent(CParameterChange(parameter,value));
+	OnPreParameterChange.Broadcast(parameter,value);
 
 	parameter_value->second.value = value;
 
 	// Initiate events for changed parameter
-	DispatchEvent(parameter);
+	OnParameterChanged.Broadcast(parameter);
 	if (parameter_value->second.persistence == Settings::Persistence::PERSISTENT) {
 		// Write out to permanent storage
 		SaveSetting(parameter_value->second.name, value);
@@ -182,65 +178,4 @@ void CSettingsStore::SaveSetting(const std::string &, long ) {
 }
 
 void CSettingsStore::SaveSetting(const std::string &, const std::string &) {
-}
-
-/* SettingsUser and SettingsObserver definitions... */
-
-CSettingsUser::CSettingsUser(CSettingsStore *pSettingsStore) {
-	//ATM, we only allow one settings store, total...
-	DASHER_ASSERT(s_pSettingsStore==NULL);
-	//but in future, remove that if we're allowing multiple settings stores to exist
-	// concurrently.
-	s_pSettingsStore = pSettingsStore;
-}
-
-CSettingsUser::CSettingsUser(CSettingsUser *pCreateFrom) {
-	//No need to do anything atm; but in future, copy CSettingsStore pointer
-	// from argument.
-	DASHER_ASSERT(pCreateFrom);
-}
-
-CSettingsUser::~CSettingsUser() = default;
-
-bool CSettingsUser::GetBoolParameter(Parameter parameter) const
-{
-	return s_pSettingsStore->GetBoolParameter(parameter);
-}
-long CSettingsUser::GetLongParameter(Parameter parameter) const
-{
-	return s_pSettingsStore->GetLongParameter(parameter);
-}
-const std::string &CSettingsUser::GetStringParameter(Parameter parameter) const
-{
-	return s_pSettingsStore->GetStringParameter(parameter);
-}
-void CSettingsUser::SetBoolParameter(Parameter parameter, bool bValue)
-{
-	s_pSettingsStore->SetBoolParameter(parameter, bValue);
-}
-void CSettingsUser::SetLongParameter(Parameter parameter, long lValue)
-{
-	s_pSettingsStore->SetLongParameter(parameter, lValue);
-}
-void CSettingsUser::SetStringParameter(Parameter parameter, const std::string &strValue)
-{
-	s_pSettingsStore->SetStringParameter(parameter, strValue);
-}
-
-bool CSettingsUser::IsParameterSaved(const std::string &Key)
-{
-	return s_pSettingsStore->IsParameterSaved(Key);
-}
-
-CSettingsObserver::CSettingsObserver(CSettingsUser *pCreateFrom) {
-  DASHER_ASSERT(pCreateFrom);
-  s_pSettingsStore->Register(this);
-}
-
-CSettingsObserver::~CSettingsObserver() {
-  s_pSettingsStore->Unregister(this);
-}
-
-CSettingsUserObserver::CSettingsUserObserver(CSettingsUser *pCreateFrom)
-: CSettingsUser(pCreateFrom), CSettingsObserver(pCreateFrom) {
 }

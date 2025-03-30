@@ -23,9 +23,9 @@
 
 using namespace Dasher;
 
-CDynamicFilter::CDynamicFilter(CSettingsUser *pCreator, CDasherInterfaceBase *pInterface, CFrameRate *pFramerate, ModuleID_t iID, const char *szName)
-: CInputFilter(pInterface, iID, szName), CSettingsUser(pCreator),
-  m_pFramerate(pFramerate), m_bPaused(true) {
+CDynamicFilter::CDynamicFilter(CSettingsStore* pSettingsStore, CDasherInterfaceBase *pInterface, CFrameRate *pFramerate, const char *szName)
+: CInputFilter(pInterface, szName), m_pFramerate(pFramerate),
+  m_pSettingsStore(pSettingsStore), m_bPaused(true) {
 }
 
 bool CDynamicFilter::OneStepTowards(CDasherModel *pModel, myint X, myint Y, unsigned long iTime, double dSpeedMul) {
@@ -42,16 +42,16 @@ bool CDynamicFilter::OneStepTowards(CDasherModel *pModel, myint X, myint Y, unsi
   // Not rescaling Y in this case: at that X, all Y's are nearly equivalent!
   X = std::max(myint(1),std::min(X, myint(1<<29)/iSteps));
   
-  pModel->ScheduleOneStep(Y-X, Y+X, iSteps, GetLongParameter(LP_X_LIMIT_SPEED), GetBoolParameter(BP_EXACT_DYNAMICS));
+  pModel->ScheduleOneStep(Y-X, Y+X, iSteps, m_pSettingsStore->GetLongParameter(LP_X_LIMIT_SPEED), m_pSettingsStore->GetBoolParameter(BP_EXACT_DYNAMICS));
   return true;
 }
 
 double CDynamicFilter::FrameSpeedMul(CDasherModel *pModel, unsigned long iTime) {
   CDasherNode *n = pModel->Get_node_under_crosshair();
   double d = n ? n->SpeedMul() : 1.0;
-  if(GetBoolParameter(BP_SLOW_START)) {
-    if ((iTime - m_iStartTime) < GetLongParameter(LP_SLOW_START_TIME))
-      d *= 0.1 * (1 + 9 * ((iTime - m_iStartTime) / static_cast<double>(GetLongParameter(LP_SLOW_START_TIME))));
+  if(m_pSettingsStore->GetBoolParameter(BP_SLOW_START)) {
+    if ((iTime - m_iStartTime) < static_cast<unsigned long>(m_pSettingsStore->GetLongParameter(LP_SLOW_START_TIME)))
+      d *= 0.1 * (1 + 9 * ((iTime - m_iStartTime) / static_cast<double>(m_pSettingsStore->GetLongParameter(LP_SLOW_START_TIME))));
   }
   //else, no slow start, or finished.
   return d;

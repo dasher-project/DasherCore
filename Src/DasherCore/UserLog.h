@@ -72,39 +72,33 @@ typedef std::vector<VECTOR_STRING>::iterator     VECTOR_VECTOR_STRING_ITER;
 
 // We need to be notified when parameters we are logging get changed, but UserLogBase
 // is already watching BP_DASHER_PAUSED
-class CUserLog : public CUserLogBase, protected Dasher::CSettingsUserObserver {
+class CUserLog : public CUserLogBase {
 public:
-  CUserLog(Dasher::CSettingsUser *pCreateFrom, Observable<const Dasher::CEditEvent *> *pHandler, int iLogTypeMask);
+  CUserLog(Dasher::CSettingsStore* pSettingsStore, Dasher::CDasherInterfaceBase *pInterface, int iLogTypeMask);
 
-  ~CUserLog();
+  ~CUserLog() override;
 
   // Methods called whenever our user interface gets a relevant event, this
   // object will decide how to put it into its representation.
-  void                        AddParam(const std::string& strName, const std::string& strValue, int iOptionMask = 0);
-  void                        AddParam(const std::string& strName, double dValue, int iOptionMask = 0);
-  void                        AddParam(const std::string& strName, int iValue, int iOptionMask = 0);
-  void                        StartWriting();
-  void                        StopWriting(float dNats);
-  void                        StopWriting();
-  void                        AddSymbols(Dasher::VECTOR_SYMBOL_PROB* pVectorNewSymbolProbs, eUserLogEventType iEvent = userLogEventMouse);
-  void                        DeleteSymbols(int iNumToDelete, eUserLogEventType iEvent = userLogEventMouse);    
-  void                        NewTrial();
+  void AddParam(const std::string& strName, const std::string& strValue, int iOptionMask = 0) override;
+  void AddParam(const std::string& strName, double dValue, int iOptionMask = 0) override;
+  void AddParam(const std::string& strName, int iValue, int iOptionMask = 0) override;
+  void StartWriting() override;
+  void StopWriting(float dNats) override;
+  void StopWriting() override;
+  void AddSymbols(Dasher::VECTOR_SYMBOL_PROB* pVectorNewSymbolProbs, eUserLogEventType iEvent = userLogEventMouse) override;
+  void DeleteSymbols(int iNumToDelete, eUserLogEventType iEvent = userLogEventMouse) override;    
+  void NewTrial() override;
 
-  void                        AddWindowSize(int iTop, int iLeft, int iBottom, int iRight);
-  void                        AddCanvasSize(int iTop, int iLeft, int iBottom, int iRight);
-  void                        AddMouseLocation(int iX, int iY, float dNats);
-  void                        AddMouseLocationNormalized(int iX, int iY, bool bStoreIntegerRep, float dNats);
-  void                        OutputFile();
-  void                        InitIsDone();
-  void                        SetOuputFilename(const std::string& strFilename = "");
-  int                         GetLogLevelMask();
-  void KeyDown(Dasher::Keys::VirtualKey Key, int iType, int iEffect);
-  void                        HandleEvent(Dasher::Parameter parameter);
-
-  // Methods used by utility that can post-process the log files:
-  CUserLog(std::string strXMLFilename);
-  VECTOR_VECTOR_STRING        GetTabMouseXY(bool bReturnNormalized);
-  VECTOR_VECTOR_DENSITY_GRIDS GetMouseDensity(int iGridSize);
+  void AddWindowSize(int iTop, int iLeft, int iBottom, int iRight) override;
+  void AddCanvasSize(int iTop, int iLeft, int iBottom, int iRight) override;
+  void AddMouseLocation(int iX, int iY, float dNats) override;
+  void AddMouseLocationNormalized(int iX, int iY, bool bStoreIntegerRep, float dNats) override;
+  void OutputFile() override;
+  void InitIsDone() override;
+  void SetOuputFilename(const std::string& strFilename = "") override;
+  int  GetLogLevelMask() override;
+  void KeyDown(Dasher::Keys::VirtualKey Key, int iType, int iEffect) override;
 
 protected:
   CTimeSpan*								            m_pApplicationSpan;         // How long the application has been up
@@ -154,6 +148,9 @@ protected:
   void                        ComputeSimpleMousePos(int iX, int iY);
   void                        ResetCycle();
   void                        InitUsingMask(int iLogLevelMask);
+
+private:
+  Dasher::CSettingsStore* m_pSettingsStore;
 };
 /// @}
 

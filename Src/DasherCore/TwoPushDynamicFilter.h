@@ -34,9 +34,10 @@ namespace Dasher {
   /// on (and reversing can be achieved by making a press of ambiguous length -
   /// too short, too long, or inbetween); otherwise, with BP_TWO_PRESS_RELEASE_TIME
   /// off, reversing can be achieved by making just a single press, and then waiting.
-  class CTwoPushDynamicFilter : public CDynamicButtons, public CSettingsObserver {
+  class CTwoPushDynamicFilter : public CDynamicButtons {
  public:
-  CTwoPushDynamicFilter(CSettingsUser *pCreator, CDasherInterfaceBase *pInterface, CFrameRate *pFramerate);
+  CTwoPushDynamicFilter(CSettingsStore* pSettingsStore, CDasherInterfaceBase *pInterface, CFrameRate *pFramerate);
+  virtual ~CTwoPushDynamicFilter();
   
   // Inherited methods
   virtual bool DecorateView(CDasherView *pView, CDasherInput *pInput);
@@ -52,7 +53,7 @@ namespace Dasher {
   virtual void TimerImpl(unsigned long Time, CDasherView *m_pDasherView, CDasherModel *m_pDasherModel, CExpansionPolicy **pol);
   virtual void ActionButton(unsigned long iTime, Keys::VirtualKey Key, int iType, CDasherModel* pModel);
 
-  virtual void HandleEvent(Parameter parameter);
+  virtual void HandleParameterChange(Parameter parameter);
 
   virtual void run(unsigned long iTime);
 

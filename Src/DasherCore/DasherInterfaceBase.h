@@ -36,10 +36,9 @@
 #include "../Common/ModuleSettings.h"
 #include "Alphabet/AlphIO.h"
 #include "AutoSpeedControl.h"
-#include "ColourIO.h"
+#include "ColorIO.h"
 #include "InputFilter.h"
 #include "ModuleManager.h"
-#include "ControlManager.h"
 #include "FrameRate.h"
 #include <set>
 
@@ -74,7 +73,7 @@ class CNodeCreationManager;
 /// the UI to use. Note: CMessageDisplay unimplemented; platforms should
 /// provide their own methods using appropriate GUI components, or subclass
 /// CDashIntfScreenMsgs instead.
-class Dasher::CDasherInterfaceBase : public CMessageDisplay, public Observable<const CEditEvent *>, protected Observer<Parameter>, protected CSettingsUser, private NoClones {
+class Dasher::CDasherInterfaceBase : public CMessageDisplay, private NoClones {
 public:
   ///Create a new interface by providing the only-and-only settings store that will be used throughout.
   CDasherInterfaceBase(CSettingsStore *pSettingsStore);
@@ -110,12 +109,6 @@ public:
 
   void GetPermittedValues(Parameter parameter, std::vector<std::string> &vList);
 
-  ///
-  /// Get a list of settings which apply to a particular module
-  ///
-
-  bool GetModuleSettings(const std::string &strName, SModuleSettings **pSettings, int *iCount);
-
   //@}
 
   /// Called when a parameter changes - but *after* components have been notified.
@@ -126,7 +119,7 @@ public:
   /// \param iParameter The parameter that's just changed.
   /// \todo Should be protected (??)
 
-  void HandleEvent(Parameter parameter) override;
+  void HandleParameterChange(Parameter parameter);
   
   ///Locks/unlocks Dasher. The default here stores the lock message and percentage
   /// in m_strLockMessage, such that NewFrame renders this instead of the canvas
@@ -168,7 +161,7 @@ public:
   /// by OS, e.g. for non-european languages)
   ///\return the offset, into the edit buffer where the cursor would be *after* the move.
   virtual unsigned int ctrlOffsetAfterMove(unsigned int offsetBefore, bool bForwards,
-    CControlManager::EditDistance iDist) {
+    EditDistance iDist) {
     return offsetBefore;
   }
 
@@ -177,7 +170,7 @@ public:
   ///\param dist how far to move: character, word, line, file. (Usually defined
   /// by OS, e.g. for non-european languages)
   ///\return the offset, into the edit buffer of the cursor *after* the move.
-  virtual unsigned int ctrlMove(bool bForwards, CControlManager::EditDistance dist)=0;
+  virtual unsigned int ctrlMove(bool bForwards, EditDistance dist)=0;
 
   ///Called to execute a control-mode "delete" command.
   ///\param bForwards true to delete forwards (right), false for backwards
@@ -185,29 +178,14 @@ public:
   /// by OS, e.g. for non-european languages)
   ///\return the offset, into the edit buffer, of the cursor *after* the delete
   /// (for forwards deletion, this will be the same as the offset *before*)
-  virtual unsigned int ctrlDelete(bool bForwards, CControlManager::EditDistance dist)=0;
+  virtual unsigned int ctrlDelete(bool bForwards, EditDistance dist)=0;
 
   virtual void editOutput(const std::string &strText, CDasherNode *pCause);
   virtual void editDelete(const std::string &strText, CDasherNode *pCause);
   virtual void editConvert(CDasherNode *pCause);
   virtual void editProtect(CDasherNode *pCause);
 
-  class TextAction {
-  public:
-    TextAction(CDasherInterfaceBase *pMgr);
-    void executeOnDistance(CControlManager::EditDistance dist);
-    void executeOnNew();
-    void executeLast();
-    void NotifyOffset(int iOffset);
-    virtual ~TextAction();
-  protected:
-    virtual void operator()(const std::string &strText)=0;
-    CDasherInterfaceBase *m_pIntf;
-  private:
-    int m_iStartOffset;
-    std::string strLast;
-  };
-
+  Event<CEditEvent::EditEventType, const std::string &, CDasherNode*> OnEditEvent;
 
   /// @name Starting and stopping
   /// Methods used to instruct dynamic motion of Dasher to start or stop
@@ -333,14 +311,11 @@ public:
   /// @}
 
   // Module management functions
-  CDasherModule *RegisterModule(CDasherModule *pModule);
-  CDasherModule *GetModule(ModuleID_t iID);
-  CDasherModule *GetModuleByName(const std::string &strName);
   CDasherInput *GetActiveInputDevice() {return m_pInput;}
   CInputFilter *GetActiveInputMethod() {return m_pInputFilter;}
   const CAlphInfo *GetActiveAlphabet();
-  void SetDefaultInputDevice(CDasherInput *);
-  void SetDefaultInputMethod(CInputFilter *);
+  CModuleManager* GetModuleManager(){return m_pModuleManager;}
+  CActionManager* GetActionManager(){return m_pActionManager;}
 
   void StartShutdown();
 
@@ -366,7 +341,7 @@ public:
   /// For character around cursor decision is arbitrary. Let's settle for character before cursor.
   /// TODO. Consistently name functions dealing with dasher context, versus functions dealing with editor text.
   /// I.E. GetAllContext should be named GetAllTtext
-  virtual std::string GetTextAroundCursor(CControlManager::EditDistance) { // =0;
+  virtual std::string GetTextAroundCursor(EditDistance) { // =0;
     return std::string();
   }
 
@@ -497,22 +472,11 @@ protected:
   ///Framerate monitor; created in constructor, req'd for DynamicFilter subclasses
   CFrameRate * const m_pFramerate;
   
- private:
-  
   ///We keep a reference to the (currently unique/global) SettingsStore with which
   /// this interface was created, as ClSet and ResetParameter need to access it.
-  /// (TODO _could_ move these into CSettingsUser, but that seems uglier given so few clients?)
   CSettingsStore * const m_pSettingsStore;
 
-  class CPreSetObserver : public Observer<CParameterChange> {
-    CSettingsStore& m_settingsStore;
-  public:
-    CPreSetObserver(CSettingsStore& settingsStore) : m_settingsStore(settingsStore) {};
-    void HandleEvent(CParameterChange evt) override;
-  };
-
-  CPreSetObserver m_preSetObserver;
-
+private:
   //The default expansion policy to use - an amortized policy depending on the LP_NODE_BUDGET parameter.
   CExpansionPolicy *m_defaultPolicy;
 
@@ -526,20 +490,22 @@ protected:
   void CreateNCManager();
 
   void ChangeAlphabet();
-  void ChangeColours();
+  void ChangeColors();
   void ChangeView();
 
   //Compute the screen orientation to use - i.e. combining the user's
   // preference with the alphabet.
   Options::ScreenOrientations ComputeOrientation();
 
-  class WordSpeaker : public TransientObserver<const CEditEvent *> {
+private:
+  class WordSpeaker {
   public:
     WordSpeaker(CDasherInterfaceBase *pIntf);
-    void HandleEvent(const CEditEvent *);
+      ~WordSpeaker();
   private:
     ///builds up the word currently being entered
     std::string m_strCurrentWord;
+    CDasherInterfaceBase* m_pInterface;
   } *m_pWordSpeaker;
   
   /// @name Child components
@@ -549,10 +515,10 @@ protected:
   CDasherView *m_pDasherView;
   CDasherInput *m_pInput;
   CInputFilter* m_pInputFilter;
-  CModuleManager m_oModuleManager;
+  CModuleManager* m_pModuleManager;
+  CActionManager* m_pActionManager;
   CAlphIO *m_AlphIO;
-  CColourIO *m_ColourIO;
-  CControlBoxIO *m_ControlBoxIO;
+  CColorIO *m_ColorIO;
   CNodeCreationManager *m_pNCManager;
   CUserLogBase *m_pUserLog;
 
@@ -575,8 +541,6 @@ protected:
   bool m_bLastMoved;
 
   /// @}
-
-  std::set<TextAction *> m_vTextActions;
 };
 /// @}
 

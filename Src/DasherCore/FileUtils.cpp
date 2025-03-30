@@ -1,3 +1,4 @@
+#include <fstream>
 #ifndef HAVE_OWN_FILEUTILS
 #include "FileUtils.h"
 #include <regex>
@@ -35,8 +36,7 @@ void Dasher::FileUtils::ScanFiles(AbstractParser* parser, const std::string& str
 	}
 
 	// Replace * with .* for actual regex matching
-	std::string alteredPattern = StringReplaceAll(strPattern, "*", ".*");
-	const std::regex pattern = std::regex(alteredPattern);
+	const std::regex pattern = std::regex(strPattern);
 
 	// Search in predefined directories for the files. Currently it is searched in {".", "./Data"} (relative to the working directory)
 	for(const std::filesystem::path& current_path : {std::filesystem::current_path(), std::filesystem::current_path() / "Data"})

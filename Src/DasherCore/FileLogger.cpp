@@ -1,10 +1,11 @@
 #include "FileUtils.h"
-#include "../Common/Common.h"
 
 #include <string>
 #include <filesystem>
 #include <chrono>
 #include "FileLogger.h"
+
+#include <cstdarg>
 
 CFileLogger::CFileLogger(const std::string& strFilenamePath, eLogLevel iLogLevel, int iOptionsMask) : m_iLogLevel(iLogLevel)
 {

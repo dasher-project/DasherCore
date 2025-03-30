@@ -46,21 +46,21 @@ public:
   /// as appropriate; display, timeout, etc. is handled in Redraw.)
   /// \param strText text of message to display.
   /// \param bInterrupt whether to interrupt any text entry in progress.
-  virtual void Message(const std::string &strText, bool bInterrupt);
+  void Message(const std::string &strText, bool bInterrupt) override;
   
   /// Override to render (on top of nodes+decorations) any messages, for
   /// LP_MESSAGE_TIME ms, before removing from queue.
-  bool FinishRender(unsigned long ulTime);
+  bool FinishRender(unsigned long ulTime) override;
 
   ///Override to re-MakeLabel any messages.
-  void ChangeScreen(CDasherScreen *pNewScreen);
+  void ChangeScreen(CDasherScreen *pNewScreen) override;
   
   ///Flush any modal messages that have been displayed before resuming.
-  void onUnpause(unsigned long lTime);
+  void onUnpause(unsigned long lTime) override;
   
   ///Implement to return a ScreenGameModule, i.e. rendering text prompts
   /// onto the Screen with Labels, much as we do for messages!
-  CGameModule *CreateGameModule();
+  CGameModule *CreateGameModule() override;
 private:
   /// Asynchronous (non-modal) messages to be displayed to the user, longest-ago
   /// at the front, along with the timestamp of the frame at which each was first

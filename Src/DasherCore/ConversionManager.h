@@ -60,11 +60,11 @@ namespace Dasher {
   /// aspects of conversion, and CNodeManager for details of the node
   /// management process.
   ///
-  class CConversionManager : protected CSettingsUser, public CNodeManager {
+  class CConversionManager : public CNodeManager {
     friend class CConvertingAlphMgr;
   protected:  class CConvNode; //fwd decl
   public:
-    CConversionManager(CSettingsUser *pCreateFrom, CDasherInterfaceBase *pInterface, CNodeCreationManager *pNCManager, const CAlphInfo *pAlphabet, CLanguageModel *pLanguageModel);
+    CConversionManager(CSettingsStore* pSettingsStore, CDasherInterfaceBase *pInterface, CNodeCreationManager *pNCManager, const CAlphInfo *pAlphabet, CLanguageModel *pLanguageModel);
 
     ///
     /// Get a new root node owned by this manager
@@ -77,11 +77,12 @@ namespace Dasher {
     void ChangeScreen(CDasherScreen *pScreen);
     
   protected:
-    
+    CSettingsStore* m_pSettingsStore;
+
     class CConvNode : public CDasherNode {
     public:
       CConversionManager *mgr() const {return m_pMgr;}
-      CConvNode(int iOffset, int iColour, CDasherScreen::Label *pLabel, CConversionManager *pMgr);
+      CConvNode(int iOffset, CDasherScreen::Label *pLabel, CConversionManager *pMgr);
     ///
     /// Provide children for the supplied node
     ///
@@ -90,7 +91,7 @@ namespace Dasher {
     virtual int ExpectedNumChildren();
       virtual void SetFlag(int iFlag, bool bValue);
 
-    ~CConvNode();
+    virtual ~CConvNode();
 
     ///Attempts to fill vContextSymbols with the context that would exist _after_ this node has been entered
     void GetContext(CDasherInterfaceBase *pInterface, const CAlphabetMap *pAlphabetMap, std::vector<symbol> &vContextSymbols, int iOffset, int iLength);
@@ -100,15 +101,18 @@ namespace Dasher {
     /// moves under the crosshair
     ///
 
-    virtual void Output();
+    virtual void Do();
 
     ///
     /// Called when a node is left backwards
     ///
 
     virtual void Undo();
+      const ColorPalette::Color& getLabelColor(const ColorPalette* colorPalette) override;
+      const ColorPalette::Color& getOutlineColor(const ColorPalette* colorPalette) override;
+      const ColorPalette::Color& getNodeColor(const ColorPalette* colorPalette) override;
 
-    protected:
+  protected:
       CConversionManager *m_pMgr;
     public: //to ConversionManager and subclasses only, of course...
 
@@ -121,7 +125,7 @@ namespace Dasher {
       //int iGameOffset;
     };
 
-    virtual CConvNode *makeNode(int iOffset, int iColour, CDasherScreen::Label *pLabel);
+    virtual CConvNode *makeNode(int iOffset, CDasherScreen::Label* pLabel);
 
     CDasherInterfaceBase *m_pInterface;
 	CNodeCreationManager *m_pNCManager;
@@ -208,6 +212,7 @@ namespace Dasher {
     ///
 
     void RecursiveDumpTree(std::ostream &out, SCENode *pCurrent, unsigned int iDepth);
+    ~CConversionManager() override = default;
 
     CLanguageModel *m_pLanguageModel;
     

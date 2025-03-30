@@ -6,9 +6,9 @@
 
 /// \ingroup Logging
 /// @{
-class CBasicLog : public CUserLogBase, public Dasher::CSettingsUser {
+class CBasicLog : public CUserLogBase {
  public:
-  CBasicLog(Dasher::CSettingsUser *pCreateFrom, Dasher::CDasherInterfaceBase *pIntf);
+  CBasicLog(Dasher::CSettingsStore* pSettingsStore, Dasher::CDasherInterfaceBase *pIntf);
   ~CBasicLog();
 
   virtual void AddParam(const std::string& strName, const std::string& strValue, int iOptionMask = 0) {};
@@ -29,7 +29,8 @@ class CBasicLog : public CUserLogBase, public Dasher::CSettingsUser {
   virtual void SetOuputFilename(const std::string& strFilename = "") {};
   virtual int  GetLogLevelMask() {return 0;};
   virtual void KeyDown(Dasher::Keys::VirtualKey Key, int iType, int iEffect);
-
+protected:
+  Dasher::CSettingsStore* m_pSettingsStore;
  private:
   void StartTrial();
   void EndTrial();

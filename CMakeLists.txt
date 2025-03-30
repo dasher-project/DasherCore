@@ -30,15 +30,15 @@ add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/Thirdparty/pugixml" EXCLUDE_FROM_ALL
 # Building Core Dasher Library
 ###############################
 
-file(GLOB HEADERS
-    ${CMAKE_CURRENT_LIST_DIR}/Src/DasherCore/*.h
+file(GLOB_RECURSE HEADER_FILES
+    ${CMAKE_CURRENT_LIST_DIR}/Src/*.h
 )
 
-ADD_library(DasherCore STATIC
+set(SOURCE_FILES
+	${CMAKE_CURRENT_LIST_DIR}/Src/DasherCore/Actions.cpp
 	${CMAKE_CURRENT_LIST_DIR}/Src/DasherCore/PressFilter.cpp
 	${CMAKE_CURRENT_LIST_DIR}/Src/DasherCore/Parameters.cpp 
-	${CMAKE_CURRENT_LIST_DIR}/Src/DasherCore/SettingsStore.cpp 
-	${CMAKE_CURRENT_LIST_DIR}/Src/DasherCore/XmlSettingsStore.h
+	${CMAKE_CURRENT_LIST_DIR}/Src/DasherCore/SettingsStore.cpp
 	${CMAKE_CURRENT_LIST_DIR}/Src/DasherCore/XmlSettingsStore.cpp
 	${CMAKE_CURRENT_LIST_DIR}/Src/DasherCore/AbstractXMLParser.cpp
 	${CMAKE_CURRENT_LIST_DIR}/Src/DasherCore/Alphabet/AlphIO.cpp
@@ -54,13 +54,12 @@ ADD_library(DasherCore STATIC
 	${CMAKE_CURRENT_LIST_DIR}/Src/DasherCore/ButtonMultiPress.cpp
 	${CMAKE_CURRENT_LIST_DIR}/Src/DasherCore/CircleStartHandler.cpp
 	${CMAKE_CURRENT_LIST_DIR}/Src/DasherCore/ClickFilter.cpp
-	${CMAKE_CURRENT_LIST_DIR}/Src/DasherCore/ColourIO.cpp
+	${CMAKE_CURRENT_LIST_DIR}/Src/DasherCore/ColorIO.cpp
+	${CMAKE_CURRENT_LIST_DIR}/Src/DasherCore/ColorPalette.cpp
 	${CMAKE_CURRENT_LIST_DIR}/Src/DasherCore/CompassMode.cpp
-	${CMAKE_CURRENT_LIST_DIR}/Src/DasherCore/ControlManager.cpp
 	${CMAKE_CURRENT_LIST_DIR}/Src/DasherCore/ConversionManager.cpp
 	${CMAKE_CURRENT_LIST_DIR}/Src/DasherCore/ConvertingAlphMgr.cpp
 	${CMAKE_CURRENT_LIST_DIR}/Src/DasherCore/DasherButtons.cpp
-	${CMAKE_CURRENT_LIST_DIR}/Src/DasherCore/DasherInterfaceBase.h
 	${CMAKE_CURRENT_LIST_DIR}/Src/DasherCore/DasherInterfaceBase.cpp
 	${CMAKE_CURRENT_LIST_DIR}/Src/DasherCore/DashIntfSettings.cpp
 	${CMAKE_CURRENT_LIST_DIR}/Src/DasherCore/DashIntfScreenMsgs.cpp
@@ -84,6 +83,8 @@ ADD_library(DasherCore STATIC
 	${CMAKE_CURRENT_LIST_DIR}/Src/DasherCore/OneButtonDynamicFilter.cpp
 	${CMAKE_CURRENT_LIST_DIR}/Src/DasherCore/OneButtonFilter.cpp
 	${CMAKE_CURRENT_LIST_DIR}/Src/DasherCore/OneDimensionalFilter.cpp
+	${CMAKE_CURRENT_LIST_DIR}/Src/DasherCore/PressFilter.cpp
+	${CMAKE_CURRENT_LIST_DIR}/Src/DasherCore/SmoothingFilter.cpp
 	${CMAKE_CURRENT_LIST_DIR}/Src/DasherCore/RoutingAlphMgr.cpp
 	${CMAKE_CURRENT_LIST_DIR}/Src/DasherCore/SCENode.cpp
 	${CMAKE_CURRENT_LIST_DIR}/Src/DasherCore/ScreenGameModule.cpp
@@ -111,10 +112,14 @@ ADD_library(DasherCore STATIC
 	${CMAKE_CURRENT_LIST_DIR}/Src/DasherCore/LanguageModelling/PPMPYLanguageModel.cpp
 	${CMAKE_CURRENT_LIST_DIR}/Src/DasherCore/LanguageModelling/RoutingPPMLanguageModel.cpp
 	${CMAKE_CURRENT_LIST_DIR}/Src/DasherCore/LanguageModelling/WordLanguageModel.cpp
-	${HEADERS}
 )
 
+ADD_library(DasherCore STATIC
+	${HEADER_FILES}
+	${SOURCE_FILES}
+)
 
+source_group(TREE ${CMAKE_CURRENT_LIST_DIR}/Src/ FILES ${HEADER_FILES} ${SOURCE_FILES})
 
 target_include_directories(DasherCore PUBLIC ${CMAKE_CURRENT_LIST_DIR}/Src/DasherCore/)
 target_include_directories(DasherCore PUBLIC ${CMAKE_CURRENT_LIST_DIR}/Src/DasherCore/Alphabet/)

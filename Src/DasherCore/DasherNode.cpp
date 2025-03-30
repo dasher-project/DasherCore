@@ -29,8 +29,8 @@ static int iNumNodes = 0;
 int Dasher::currentNumNodeObjects() {return iNumNodes;}
 
 //TODO this used to be inline - should we make it so again?
-CDasherNode::CDasherNode(int iOffset, int iColour, CDasherScreen::Label *pLabel)
-: onlyChildRendered(NULL),  m_iLbnd(0), m_iHbnd(CDasherModel::NORMALIZATION), m_pParent(NULL), m_iFlags(DEFAULT_FLAGS), m_iOffset(iOffset), m_iColor(iColour), m_pLabel(pLabel) {
+CDasherNode::CDasherNode(int iOffset, CDasherScreen::Label *pLabel)
+: onlyChildRendered(NULL),  m_iLbnd(0), m_iHbnd(CDasherModel::NORMALIZATION), m_pParent(NULL), m_iFlags(DEFAULT_FLAGS), m_iOffset(iOffset), m_pLabel(pLabel) {
   iNumNodes++;
 }
 
@@ -39,7 +39,7 @@ CDasherNode::~CDasherNode() {
   //  std::cout << "Deleting node: " << this << std::endl;
   // Release any storage that the node manager has allocated,
   // unreference ref counted stuff etc.
-  Delete_children();
+  DeleteChildren();
 
   //  std::cout << "done." << std::endl;
 
@@ -91,7 +91,7 @@ void CDasherNode::SetFlag(int iFlag, bool bValue) {
 void CDasherNode::OrphanChild(CDasherNode* pChild) {
     for (CDasherNode* child : Children()) {  //Children is an std::deque
         if (child != pChild) {
-            child->Delete_children();
+            child->DeleteChildren();
             delete(child);
         }
     }
@@ -127,16 +127,16 @@ void CDasherNode::DeleteNephews(CDasherNode *pChild) {
   ChildMap::iterator i;
   for(i = Children().begin(); i != Children().end(); i++) {
       if(*i != pChild) {
-	(*i)->Delete_children();
+	(*i)->DeleteChildren();
     }
   }
 }
-//CDasherNode::Delete_children()
+//CDasherNode::DeleteChildren()
 //- Call delete on all children
 //- Clear Child List
 //- Reset the NF_ALLCHILDREN flag
 //- Set the OnlyChildRendered to nullptr
-void CDasherNode::Delete_children(){
+void CDasherNode::DeleteChildren(){
     for (CDasherNode* child : Children()) {
         delete(child);
     }

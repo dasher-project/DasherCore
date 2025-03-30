@@ -5,20 +5,14 @@
 
 using namespace Dasher;
 
-CScreenGameModule::CScreenGameModule(CSettingsUser *pCreateFrom, CDasherInterfaceBase *pIntf, CDasherView *pView, CDasherModel *pModel)
-: CGameModule(pCreateFrom, pIntf, pView, pModel), m_pLabEntered(NULL), m_pLabTarget(NULL), m_pLabWrong(NULL) {
+CScreenGameModule::CScreenGameModule(CSettingsStore* pSettingsStore, CDasherInterfaceBase *pIntf, CDasherView *pView, CDasherModel *pModel)
+: CGameModule(pSettingsStore, pIntf, pView, pModel), m_pLabEntered(NULL), m_pLabTarget(NULL), m_pLabWrong(NULL) {
 }
 
-void CScreenGameModule::ChunkGenerated() {
-  delete m_pLabEntered; m_pLabEntered = NULL;
-  delete m_pLabTarget; m_pLabTarget = NULL;
-  delete m_pLabWrong; m_pLabWrong = NULL;
-  m_iFirstSym = m_iLastSym = 0;
-}
-
-void CScreenGameModule::HandleEvent(const CEditEvent *pEvt) {
+void CScreenGameModule::HandleEditEvent(CEditEvent::EditEventType type, const std::string& strText, CDasherNode* node)
+{
   const int iPrev(lastCorrectSym());
-  CGameModule::HandleEvent(pEvt);
+  CGameModule::HandleEditEvent(type, strText, node);
   if (iPrev==lastCorrectSym()) {
     if (m_pLabWrong) DASHER_ASSERT(m_pLabWrong->m_strText != m_strWrong);
     delete m_pLabWrong;
@@ -42,13 +36,20 @@ void CScreenGameModule::HandleEvent(const CEditEvent *pEvt) {
   }
 }
 
+void CScreenGameModule::ChunkGenerated() {
+  delete m_pLabEntered; m_pLabEntered = NULL;
+  delete m_pLabTarget; m_pLabTarget = NULL;
+  delete m_pLabWrong; m_pLabWrong = NULL;
+  m_iFirstSym = m_iLastSym = 0;
+}
+
 void CScreenGameModule::DrawText(CDasherView *pView) {
-  const unsigned int uFontSize(GetLongParameter(LP_MESSAGE_FONTSIZE));
+  const unsigned int uFontSize(m_pSettingsStore->GetLongParameter(LP_MESSAGE_FONTSIZE));
   //Assume left-to-right orientation...too many issues for other orientations!
   CDasherScreen *pScreen(pView->Screen());
   screenint maxX,tempy; //maxX = target width of game display...
   //i.e. make <margin width> left of y axis (itself <margin width> to left of screen edge)
-  pView->Dasher2Screen(GetLongParameter(LP_MARGIN_WIDTH), 0, maxX, tempy);
+  pView->Dasher2Screen(m_pSettingsStore->GetLongParameter(LP_MARGIN_WIDTH), 0, maxX, tempy);
 
   if (!m_pLabTarget || !m_pLabEntered) {
     DASHER_ASSERT(!m_pLabTarget && !m_pLabEntered);
@@ -107,15 +108,15 @@ void CScreenGameModule::DrawText(CDasherView *pView) {
   rectDims.first+=targetStart;
 
   //ok. that's the layout done
-  pScreen->DrawRectangle(0, 0, rectDims.first, rectDims.second, 0, 4, 1);
-  pScreen->DrawString(m_pLabEntered, x-entDims.first, 0, uFontSize, 7);//root node green...?
+  pScreen->DrawRectangle(0, 0, rectDims.first, rectDims.second, pView->GetNamedColor((m_pLabWrong) ? NamedColor::warningTextBackground :NamedColor::infoTextBackground), pView->GetNamedColor(NamedColor::infoText), 1);
+  pScreen->DrawString(m_pLabEntered, x-entDims.first, 0, uFontSize, pView->GetNamedColor(NamedColor::infoText));
   if (m_pLabWrong) {
-    pScreen->DrawString(m_pLabWrong, x, 0, uFontSize, 1); //mouse-line red
+    pScreen->DrawString(m_pLabWrong, x, 0, uFontSize, pView->GetNamedColor(NamedColor::warningText));
     CDasherScreen::point p[2];
     p[0].x=x; p[1].x=targetStart;
     p[0].y = p[1].y = rectDims.second/2;
-    pScreen->Polyline(p, 2, 2, 1); //mouse-line red
+    pScreen->Polyline(p, 2, 2, pView->GetNamedColor(NamedColor::gameGuide));
   }
-  pScreen->DrawString(m_pLabTarget, targetStart, 0, uFontSize, 4); //text black
+  pScreen->DrawString(m_pLabTarget, targetStart, 0, uFontSize, pView->GetNamedColor(NamedColor::defaultLabel));
 
 }

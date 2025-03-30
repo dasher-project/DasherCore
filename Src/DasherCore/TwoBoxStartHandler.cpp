@@ -4,8 +4,8 @@
 
 using namespace Dasher;
 
-CTwoBoxStartHandler::CTwoBoxStartHandler(CDefaultFilter *pCreator)
-: CStartHandler(pCreator), CSettingsUser(pCreator), m_bFirstBox(true), m_iBoxEntered(std::numeric_limits<long>::max()) {
+CTwoBoxStartHandler::CTwoBoxStartHandler(CDefaultFilter *pCreator, CSettingsStore* pSettingsStore)
+: CStartHandler(pCreator), m_pSettingsStore(pSettingsStore), m_bFirstBox(true), m_iBoxEntered(std::numeric_limits<long>::max()) {
 }
 
 bool CTwoBoxStartHandler::DecorateView(CDasherView *pView) {
@@ -14,14 +14,14 @@ bool CTwoBoxStartHandler::DecorateView(CDasherView *pView) {
   int iHeight = pView->Screen()->GetHeight();
   int iWidth = pView->Screen()->GetWidth();
 
-  int iMousePosDist = GetLongParameter(LP_MOUSEPOSDIST);
+  int iMousePosDist = m_pSettingsStore->GetLongParameter(LP_MOUSEPOSDIST);
 
   int lineWidth = m_iBoxEntered == std::numeric_limits<long>::max() ? 2 : 4; //out/in box
 
   if (m_bFirstBox) {
-    pView->Screen()->DrawRectangle(8, iHeight / 2 - iMousePosDist + 50, iWidth-16, iHeight / 2 - iMousePosDist - 50, -1, 119, lineWidth);
+    pView->Screen()->DrawRectangle(8, iHeight / 2 - iMousePosDist + 50, iWidth-16, iHeight / 2 - iMousePosDist - 50, ColorPalette::noColor, pView->GetNamedColor(NamedColor::firstStartBox), lineWidth);
   } else {
-    pView->Screen()->DrawRectangle(8, iHeight / 2 + iMousePosDist + 50, iWidth-16, iHeight / 2 + iMousePosDist - 50, -1, 120, lineWidth);
+    pView->Screen()->DrawRectangle(8, iHeight / 2 + iMousePosDist + 50, iWidth-16, iHeight / 2 + iMousePosDist - 50, ColorPalette::noColor, pView->GetNamedColor(NamedColor::secondStartBox), lineWidth);
   }
   return true;
 }
@@ -31,11 +31,11 @@ void CTwoBoxStartHandler::Timer(unsigned long iTime, dasherint iDasherX, dasheri
   
   int iBoxMin, iBoxMax;
   if(m_bFirstBox) {
-    iBoxMax = pView->Screen()->GetHeight() / 2 - (int)GetLongParameter(LP_MOUSEPOSDIST) + 50;
+    iBoxMax = pView->Screen()->GetHeight() / 2 - (int) m_pSettingsStore->GetLongParameter(LP_MOUSEPOSDIST) + 50;
     iBoxMin = iBoxMax - 100;
   }
   else {
-    iBoxMin = pView->Screen()->GetHeight() / 2 + (int)GetLongParameter(LP_MOUSEPOSDIST) - 50;
+    iBoxMin = pView->Screen()->GetHeight() / 2 + (int) m_pSettingsStore->GetLongParameter(LP_MOUSEPOSDIST) - 50;
     iBoxMax = iBoxMin + 100;
   }
 

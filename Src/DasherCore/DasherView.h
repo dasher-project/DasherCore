@@ -14,8 +14,8 @@ class CDasherNode;
 #include "DasherTypes.h"
 #include "ExpansionPolicy.h"
 #include "DasherScreen.h"
-#include "Observable.h"
 #include "Event.h"
+#include "ColorPalette.h"
 
 /// \defgroup View Visualisation of the model
 /// @{
@@ -40,16 +40,7 @@ class CDasherNode;
 /// mode). We should probably consider creating separate classes for
 /// these.
 
-///Also an Observable: CDasherView* events should be generated whenever the screen
-/// geometry changes: e.g. aspect ratio, size, degree of nonlinearity,
-/// orientation, or generally whenever values returned by Dasher2Screen/Screen2Dasher
-/// might have changed (thus, any code caching such values should recompute/invalidate them).
-/// The "event" is just a pointer to the View itself, but can also be used
-/// to send round a pointer to a new view (i.e. replacing this one).
-/// CGameNodeDrawEvents are broadcast whenever a node with NF_GAME set is rendered (or has
-/// its y-coordinate range computed); is using an Observable worth it, or should we just
-/// call directly to the game module?
-class Dasher::CDasherView : public Observable<CDasherView*>, public Observable<CGameNodeDrawEvent*>
+class Dasher::CDasherView
 {
 public:
 	/// Constructor
@@ -62,7 +53,7 @@ public:
 	}
 
 	virtual void SetOrientation(Options::ScreenOrientations newOrient) { m_Orientation = newOrient; }
-	Options::ScreenOrientations GetOrientation() { return m_Orientation; }
+	Options::ScreenOrientations GetOrientation() const { return m_Orientation; }
 
 	/// 
 	/// @name Coordinate system conversion
@@ -88,14 +79,23 @@ public:
 
 	virtual bool IsSpaceAroundNode(myint y1, myint y2) =0;
 
-	struct ScreenRegion
+	// ScreenRegion in DasherCoords
+	struct DasherCoordScreenRegion
 	{
 		Dasher::myint minX;
 		Dasher::myint minY;
 		Dasher::myint maxX;
 		Dasher::myint maxY;
 	};
-	virtual ScreenRegion VisibleRegion() = 0;
+	// ScreenRegion in ScreenCoords
+	struct ScreenRegion
+	{
+	    Dasher::screenint minX;
+		Dasher::screenint minY;
+		Dasher::screenint maxX;
+		Dasher::screenint maxY;
+	};
+	virtual DasherCoordScreenRegion VisibleRegion() = 0;
 
 	/// @}
 
@@ -114,10 +114,20 @@ public:
 	{
 	}
 
-	void TransferObserversTo(CDasherView* pNewView)
-	{
-		Observable<CDasherView*>::DispatchEvent(pNewView);
-	}
+	/// The event is just a pointer to the View itself, but can also be used
+    /// to send round a pointer to a new view (i.e. replacing this one).
+	Event<CDasherView*> OnViewChanged;
+
+	/// Events should be generated whenever the screen
+    /// geometry changes: e.g. aspect ratio, size, degree of nonlinearity,
+    /// orientation, or generally whenever values returned by Dasher2Screen/Screen2Dasher
+    /// might have changed (thus, any code caching such values should recompute/invalidate them).
+    Event<> OnGeometryChanged;
+
+	/// Events are broadcast whenever a node with NF_GAME set is rendered (or has
+    /// its y-coordinate range computed)
+    /// Parameters: <DrawnNode, yRangeMin, yRangeMax>
+    Event<CDasherNode*, myint, myint> OnGameNodeDraw;
 
 	/// @name High level drawing
 	/// Drawing more complex structures, generally implemented by derived class
@@ -133,7 +143,7 @@ public:
 
 	////// Return a reference to the screen - can't be protected due to circlestarthandler
 
-	CDasherScreen* Screen()
+	CDasherScreen* Screen() const
 	{
 		return m_pScreen;
 	}
@@ -144,15 +154,15 @@ public:
 	/// @{
 
 	///Draw a straight line in Dasher-space - which may be curved on the screen...
-	void DasherSpaceLine(myint x1, myint y1, myint x2, myint y2, int iWidth, int iColour);
+	void DasherSpaceLine(myint x1, myint y1, myint x2, myint y2, int iWidth, const ColorPalette::Color& color);
 
-	virtual void DasherSpaceArc(myint cy, myint r, myint x1, myint y1, myint x2, myint y2, int iColour, int iLineWidth) =0;
+    virtual void DasherSpaceArc(myint cy, myint r, myint x1, myint y1, myint x2, myint y2, const ColorPalette::Color& color, int iLineWidth) =0;
 
 	///
 	/// Draw a polyline specified in Dasher co-ordinates
 	///
 
-	void DasherPolyline(myint* x, myint* y, int n, int iWidth, int iColour);
+	void DasherPolyline(myint* x, myint* y, int n, int iWidth, const ColorPalette::Color& color);
 
 	/// Draw a polyarrow
 	/// The parameters x and y allow the client to specify points in Dasher space
@@ -166,36 +176,45 @@ public:
 	/// \param y - an array of y coordinates to draw the arrow through
 	/// \param iWidth - the width to make the arrow lines - typically of the form
 	///        GetLongParameter(LP_LINE_WIDTH)*CONSTANT
-	/// \param iColour line colour, as per Polyline (-1 => use "default" 0)
+	/// \param color line color, as per Polyline (-1 => use "default" 0)
 	/// \param dArrowSizeFactor - the factor by which to scale the "hat" on the arrow
 	///
-	void DasherPolyarrow(myint* x, myint* y, int n, int iWidth, int iColour, double dArrowSizeFactor = 0.7071);
+	void DasherPolyarrow(myint* x, myint* y, int n, int iWidth, const ColorPalette::Color& color, double dArrowSizeFactor = 0.7071);
 
 	///
 	/// Draw a rectangle specified in Dasher co-ordinates
-	/// \param Color color in which to fill, -1 => no fill
-	/// \param iOutlineColour color in which to draw outline, -1 => use default
+	/// \param color color in which to fill, -1 => no fill
+	/// \param outlineColor color in which to draw outline, -1 => use default
 	/// \param iThickness line width for outline, < 1 => no outline.
 	///
-	void DasherDrawRectangle(myint iDasherMaxX, myint iDasherMinY, myint iDasherMinX, myint iDasherMaxY, const int Color, int iOutlineColour, int iThickness);
+	void DasherDrawRectangle(myint iDasherMaxX, myint iDasherMinY, myint iDasherMinX, myint iDasherMaxY, const ColorPalette::Color& color, const
+                             ColorPalette::Color& outlineColor, int iThickness);
 
 	///
 	/// Draw a centred rectangle specified in Dasher co-ordinates (used for mouse cursor)
-	/// \param Color fill color for rectangle (-1 => don't fill)
-	/// \param bDrawOutline if true, rectangle will be outlined with width 1 and default line colour (-1 => 3)
+	/// \param color fill color for rectangle (-1 => don't fill)
+	/// \param bDrawOutline if true, rectangle will be outlined with width 1 and default line color (-1 => 3)
 	///
 
-	void DasherDrawCentredRectangle(myint iDasherX, myint iDasherY, screenint iSize, const int Color, bool bDrawOutline);
+	void DasherDrawCentredRectangle(myint iDasherX, myint iDasherY, screenint iSize, const ColorPalette::Color& color, const ColorPalette::Color&
+                                    outlineColor, bool bDrawOutline);
 
-	/// @}
+	/// Set a color scheme
+	///
+	/// \param pColorScheme A color scheme that should be used
+	///
+	virtual void SetColorScheme(const ColorPalette* pColorScheme);
 
-protected:
+
+	const ColorPalette::Color& GetNamedColor(NamedColor::knownColorName color) const;
+
 	/// Clips a line (specified in Dasher co-ordinates) to the visible region
 	/// by intersecting with all boundaries.
 	/// \return true if any part of the line was within the visible region; in this case, (x1,y1)-(x2,y2) delineate exactly that part
 	/// false if the line would be entirely outside the visible region; x1, y1, x2, y2 undefined.
 	bool ClipLineToVisible(myint& x1, myint& y1, myint& x2, myint& y2);
 
+protected:
 	///Convert a straight line in Dasher-space, to coordinates for a corresponding polyline on the screen
 	/// (because of nonlinearity, this may require multiple line segments)
 	/// \param x1 , y1 Dasher co-ordinates of start of line segment; note that these are guaranteed within VisibleRegion.
@@ -205,6 +224,7 @@ protected:
 	/// will then add exactly one CDasherScreen::point for each line segment required.
 	virtual void DasherLine2Screen(myint x1, myint y1, myint x2, myint y2, std::vector<CDasherScreen::point>& vPoints) =0;
 
+	const ColorPalette* m_pColorPalette = nullptr;
 private:
 	Options::ScreenOrientations m_Orientation;
 	CDasherScreen* m_pScreen; // provides the graphics (text, lines, rectangles):

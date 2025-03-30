@@ -21,18 +21,18 @@
 #ifndef __ALPHINFO_H__
 #define __ALPHINFO_H__
 
-#include "../../Common/Common.h"
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
+#include <locale>
 
 #include "../DasherTypes.h"
 #include "AlphabetMap.h"
 #include "GroupInfo.h"
 
 #include <string>
+#include <unordered_map>
 #include <vector>
 #include <utility>              // for std::pair
+
+#include "Actions.h"
 
 namespace Dasher {
   class CAlphInfo;
@@ -73,21 +73,16 @@ public:
 
   Options::ScreenOrientations GetOrientation() const {return Orientation;}
 
-  Options::AlphabetTypes GetType() const {return Type;}
-
   const std::string & GetTrainingFile() const {return TrainingFile;}
 
-  const std::string &GetGameModeFile() const {return GameModeFile;}
+  const std::string & GetPalette() const {return PreferredColors;}
 
-  const std::string & GetPalette() const {return PreferredColours;}
+  //Determine that this character denotes a word gap
+  bool SymbolIsSpaceCharacter(symbol s) const {return std::isspace(m_vCharacters[s-1].Text[0]);}
+  bool SymbolPrintsNewLineCharacter(symbol s) const {return m_vCharacters[s-1].Text == "\n";}
 
-  symbol GetParagraphSymbol() const {return iParagraphCharacter;}
-
-  ///Space symbol is special in three ways:
-  /// (1) defines word boundaries for speak-as-we-go, i.e. we speak when we see a space;
-  /// (2) Unknown characters in game mode text file are converted into spaces;
-  /// (3) Default colour is 9 if none specified
-  symbol GetSpaceSymbol() const {return iSpaceCharacter;}
+  const std::vector<Action*>& GetCharDoActions(symbol s) const {return m_vCharacterDoActions[s-1];}
+  const std::vector<Action*>& GetCharUndoActions(symbol s) const {return m_vCharacterUndoActions[s-1];}
 
   //symbol GetStartConversionSymbol() const;
   //symbol GetEndConversionSymbol() const;
@@ -97,10 +92,17 @@ public:
 
   /// return text for edit box for i'th symbol
   const std::string & GetText(symbol i) const {return m_vCharacters[i-1].Text;}
+  const double GetSymbolFixedProbability(symbol i) const {return m_vCharacters[i-1].fixedProbability;}
+  const double GetSymbolSpeedMultiplier(symbol i) const {return m_vCharacters[i-1].speedFactor;}
 
-  // return colour specified for i'th symbol, or -1 if nothing in the XML
-  int GetColour(symbol i) const {
-    return m_vCharacters[i-1].Colour;
+  int getColorGroupOffset(symbol i) const
+  {
+      return m_vCharacters[i-1].ColorGroupOffset;
+  };
+
+  std::string& getColorGroup(symbol i) const
+  {
+      return m_vCharacters[i-1].parentGroup->colorGroup;
   };
 
   const std::string &GetDefaultContext() const {return m_strDefaultContext;}
@@ -116,13 +118,21 @@ public:
   /// with groups in a second alphabet, identified by strConversionTarget,
   /// which contains actual output symbols possibly including duplicates;
   /// all this handled by MandarinAlphMgr (+MandarinTrainer, PPMPYLanguageModel).
-  int m_iConversionID;
+  enum alphabetConversion
+  {
+      None = 0,
+      Mandarin = 2,
+      RoutingContextInsensitive = 3,
+      RoutingContextSensitive = 4
+  };
+  alphabetConversion m_iConversionID;
 
   ///Single-unicode characters used in the training file to delimit the name of a group
   /// containing the next symbol, in order to disambiguate which group (=route, pronunciation)
   /// was used to produce the symbol in this case (see MandarinTrainer).
   /// Only used if m_iConversionID==2, 3 or 4. Default to "<" and ">"
-  std::string m_strConversionTrainStart,m_strConversionTrainStop;
+  std::string m_strConversionTrainStart = "<";
+  std::string m_strConversionTrainStop = ">";
 
   ~CAlphInfo();
 
@@ -131,15 +141,10 @@ private:
   CAlphInfo();
   // Basic information
   std::string AlphID;
-  bool Mutable;               // If from user we may play. If from system defaults this is immutable. User should take a copy.
-  //AlphIO wants a LanguageCode:
-  std::string LanguageCode;
 
   // Complete description of the alphabet:
   std::string TrainingFile;
-  std::string GameModeFile;
-  std::string PreferredColours;
-  Options::AlphabetTypes Type;
+  std::string PreferredColors;
   Options::ScreenOrientations Orientation;
 
   std::string m_strDefaultContext;
@@ -147,18 +152,18 @@ private:
 
 protected:
   struct character {
-    character();
+    character() = default;
+
     std::string Display;
     std::string Text;
-    int Colour;
+    SGroupInfo* parentGroup = nullptr;
+    int ColorGroupOffset = -1; //Offset within group
+    float fixedProbability = -1; //fixed probability, resulting in fixed size later on. Currently not supported but parsed already.
+    float speedFactor = -1; //allows for slowdown in this box
   };
   std::vector<character> m_vCharacters;
-
-  symbol iParagraphCharacter;       // symbol number (index into m_vCharacters +1) of paragraph char (for display and default edit-text), 0 for none.
-  symbol iSpaceCharacter;   // symbol number (index into m_vCharacters +1) of space char (display and edit text), 0 for none.
-  character *ControlCharacter; // display and edit text of Control character. Typically ("", "Control"). Use ("", "") if no control character.
-  character *StartConvertCharacter;
-  character *EndConvertCharacter;
+  std::vector<std::vector<Action*>> m_vCharacterDoActions = {};
+  std::vector<std::vector<Action*>> m_vCharacterUndoActions = {};
 
   void copyCharacterFrom(const CAlphInfo *other, int idx);
 };

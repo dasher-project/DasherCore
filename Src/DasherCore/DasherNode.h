@@ -79,20 +79,13 @@ class Dasher::CDasherNode:private NoClones {
 		/// to be made the new root)
 		NF_SUPER = 32,
 
-		/// NF_VISIBLE - an invisible node is one which lets its parent's
-		/// colour show through, and has no outline drawn round it (it may
-		/// still have a label). Note that this flag is set (i.e. the node
-		/// is drawn and outlined) by default in the constructor.
-		NF_VISIBLE = 64,
-
 		///Flags to assign to a newly created node:
-		DEFAULT_FLAGS = NF_VISIBLE
+		DEFAULT_FLAGS = 0
 	};
 
   /// Display attributes of this node, used for rendering.
-  /// Colour; note invisible nodes just have the same colour as their parent.
+  /// Color; note invisible nodes just have the same colour as their parent.
   /// (so we know what colour to use when their parents are deleted)
-  inline int getColor() {return m_iColor;}
   virtual CDasherScreen::Label *getLabel() { return m_pLabel; }
   ///Whether labels on child nodes should be displaced to the right of this node's label.
   /// (Default implementation returns true, subclasses should override if appropriate)
@@ -107,6 +100,7 @@ class Dasher::CDasherNode:private NoClones {
   virtual double SpeedMul() {return 1.0;}
   
   inline int offset() const {return m_iOffset;}
+
   CDasherNode *onlyChildRendered; //cache that only one child was rendered (as it filled the screen)
 
   /// Container type for storing children. Note that it's worth
@@ -121,9 +115,8 @@ class Dasher::CDasherNode:private NoClones {
   ///
   /// \param pParent Parent of the new node; automatically adds to end of parent's child list
   /// \param iOffset Index into text buffer of character to LHS of cursor _after_ this node is Output().
-  /// \param iColour background colour of node (for transparent nodes, same colour as parent)
   /// \param pLabel label to render onto node, NULL if no label required.
-  CDasherNode(int iOffset, int iColour, CDasherScreen::Label *pLabel);
+  CDasherNode(int iOffset, CDasherScreen::Label *pLabel);
 
   /// @brief Destructor
   ///
@@ -215,7 +208,7 @@ class Dasher::CDasherNode:private NoClones {
   /// @brief Delete the children of this node
   ///
   ///
-  void Delete_children();
+  void DeleteChildren();
   /// @}
 
   ///
@@ -247,7 +240,7 @@ class Dasher::CDasherNode:private NoClones {
   /// moves under the crosshair
   ///
 
-  virtual void Output() {};
+  virtual void Do() {};
   virtual void Undo() {};
 
   ///Called by logging code to get information about node which has just been
@@ -275,8 +268,16 @@ class Dasher::CDasherNode:private NoClones {
   virtual bool GameSearchNode(symbol sym) {return false;}
 
   virtual symbol GetAlphSymbol() {
+#ifdef __EXCEPTIONS
     throw "Hack for pre-MandarinDasher ConversionManager::BuildTree method, needs to access CAlphabetManager-private struct";
+#else
+	return -1;
+#endif
   }
+
+  virtual const ColorPalette::Color& getLabelColor(const ColorPalette* colorPalette) = 0;
+  virtual const ColorPalette::Color& getOutlineColor(const ColorPalette* colorPalette) = 0;
+  virtual const ColorPalette::Color& getNodeColor(const ColorPalette* colorPalette) = 0;
 
   /// @}
 
@@ -295,7 +296,6 @@ class Dasher::CDasherNode:private NoClones {
   int m_iOffset;
 
  protected:
-  const int m_iColor;
   CDasherScreen::Label * m_pLabel;
 };
 /// @}

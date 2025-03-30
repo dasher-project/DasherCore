@@ -12,8 +12,8 @@
 
 using namespace Dasher;
 
-CConvertingAlphMgr::CConvertingAlphMgr(CSettingsUser *pCreateFrom, CDasherInterfaceBase *pInterface, CNodeCreationManager *pNCManager, CConversionManager *pConvMgr, const CAlphInfo *pAlphabet)
- : CAlphabetManager(pCreateFrom, pInterface, pNCManager, pAlphabet), m_pConvMgr(pConvMgr) {
+CConvertingAlphMgr::CConvertingAlphMgr(CSettingsStore* pSettingsStore, CDasherInterfaceBase *pInterface, CNodeCreationManager *pNCManager, CConversionManager *pConvMgr, const CAlphInfo *pAlphabet)
+ : CAlphabetManager(pSettingsStore, pInterface, pNCManager, pAlphabet), m_pConvMgr(pConvMgr) {
  }
 
 void CConvertingAlphMgr::MakeLabels(CDasherScreen *pScreen) {

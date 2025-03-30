@@ -443,7 +443,7 @@ void CDasherModel::OutputTo(CDasherNode *pNewNode) {
     OutputTo(pNewNode->Parent());
 
     m_pLastOutput = pNewNode;
-    pNewNode->Output();
+    pNewNode->Do();
     pNewNode->SetFlag(CDasherNode::NF_SEEN, true); //becomes NF_SEEN after output.
 
   } else {
@@ -472,7 +472,7 @@ void CDasherModel::ExpandNode(CDasherNode *pNode) {
   }
 
   // TODO: Do we really need to delete all of the children at this point?
-  pNode->Delete_children(); // trial commented out - pconlon
+  pNode->DeleteChildren(); // trial commented out - pconlon
 
 #ifdef DEBUG
   unsigned int iExpect = pNode->ExpectedNumChildren();
@@ -486,7 +486,7 @@ void CDasherModel::ExpandNode(CDasherNode *pNode) {
 
   pNode->SetFlag(CDasherNode::NF_ALLCHILDREN, true);
 
-  DispatchEvent(pNode);
+    OnNodeChildrenCreated.Broadcast(pNode);
 }
 
 void CDasherModel::RenderToView(CDasherView *pView, CExpansionPolicy &policy) {

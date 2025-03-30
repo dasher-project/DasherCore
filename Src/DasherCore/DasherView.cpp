@@ -21,6 +21,7 @@
 #include "DasherInput.h"
 #include "DasherView.h"
 
+
 using namespace Dasher;
 
 /////////////////////////////////////////////////////////////////////////////
@@ -37,7 +38,7 @@ void CDasherView::ChangeScreen(CDasherScreen *NewScreen) {
 
 /////////////////////////////////////////////////////////////////////////////
 
-void CDasherView::DasherSpaceLine(myint x1, myint y1, myint x2, myint y2, int iWidth, int iColor) {
+void CDasherView::DasherSpaceLine(myint x1, myint y1, myint x2, myint y2, int iWidth, const ColorPalette::Color& color) {
   if (!ClipLineToVisible(x1, y1, x2, y2)) return;
   std::vector<CDasherScreen::point> vPoints;
   CDasherScreen::point p;
@@ -46,13 +47,13 @@ void CDasherView::DasherSpaceLine(myint x1, myint y1, myint x2, myint y2, int iW
   DasherLine2Screen(x1,y1,x2,y2,vPoints);
   CDasherScreen::point *pts = new CDasherScreen::point[vPoints.size()];
   for (int i = static_cast<int>(vPoints.size()); i-->0; ) pts[i] = vPoints[i];
-  Screen()->Polyline(pts, static_cast<int>(vPoints.size()), iWidth, iColor);
+  Screen()->Polyline(pts, static_cast<int>(vPoints.size()), iWidth, color);
 }
 
 bool CDasherView::ClipLineToVisible(myint &x1, myint &y1, myint &x2, myint &y2) {
   if (x1 > x2) return ClipLineToVisible(x2,y2,x1,y1);
   //ok. have x1 <= x2...
-  const CDasherView::ScreenRegion vr = VisibleRegion();
+  const CDasherView::DasherCoordScreenRegion vr = VisibleRegion();
   if (x1 > vr.maxX) {
     DASHER_ASSERT(x2>visibleRegion.maxX);
     return false; //entirely offscreen!
@@ -87,24 +88,20 @@ bool CDasherView::ClipLineToVisible(myint &x1, myint &y1, myint &x2, myint &y2) 
 
 /// Draw a polyline specified in Dasher co-ordinates
 
-void CDasherView::DasherPolyline(myint *x, myint *y, int n, int iWidth, int iColour) {
+void CDasherView::DasherPolyline(myint *x, myint *y, int n, int iWidth, const ColorPalette::Color& color) {
 
   CDasherScreen::point * ScreenPoints = new CDasherScreen::point[n];
 
   for(int i(0); i < n; ++i)
     Dasher2Screen(x[i], y[i], ScreenPoints[i].x, ScreenPoints[i].y);
 
-  if(iColour != -1) {
-    Screen()->Polyline(ScreenPoints, n, iWidth, iColour);
-  }
-  else {
-    Screen()->Polyline(ScreenPoints, n, iWidth,0);//no color given
-  }
+  Screen()->Polyline(ScreenPoints, n, iWidth, color);
+
   delete[]ScreenPoints;
 }
 
 // Draw a polyline with an arrow on the end
-void CDasherView::DasherPolyarrow(myint *x, myint *y, int n, int iWidth, int iColour, double dArrowSizeFactor) {
+void CDasherView::DasherPolyarrow(myint *x, myint *y, int n, int iWidth, const ColorPalette::Color& color, double dArrowSizeFactor) {
 
   CDasherScreen::point * ScreenPoints = new CDasherScreen::point[n+3];
 
@@ -121,14 +118,14 @@ void CDasherView::DasherPolyarrow(myint *x, myint *y, int n, int iWidth, int iCo
   ScreenPoints[n+2].x = ScreenPoints[n-1].x + iXvec - iYvec;
   ScreenPoints[n+2].y = ScreenPoints[n-1].y + iXvec + iYvec;
 
-  Screen()->Polyline(ScreenPoints, n+3, iWidth, (iColour==-1) ? 0 : iColour);
+  Screen()->Polyline(ScreenPoints, n+3, iWidth, color);
 
-  delete[]ScreenPoints;
+  delete[] ScreenPoints;
 }
 
 // Draw a box specified in Dasher co-ordinates
 
-void CDasherView::DasherDrawRectangle(myint iDasherMaxX, myint iDasherMinY, myint iDasherMinX, myint iDasherMaxY, const int Color, int iOutlineColour, int iThickness) {
+void CDasherView::DasherDrawRectangle(myint iDasherMaxX, myint iDasherMinY, myint iDasherMinX, myint iDasherMaxY, const ColorPalette::Color& color, const ColorPalette::Color& outlineColor, int iThickness) {
   //This assertion is more aggressive than necessary (Dasher has been working
   // in many cases where it would fail, with only occassional display glitches)
   // so if it causes trouble, it should be safe to remove...
@@ -143,16 +140,27 @@ void CDasherView::DasherDrawRectangle(myint iDasherMaxX, myint iDasherMinY, myin
   Dasher2Screen(iDasherMaxX, iDasherMinY, iScreenLeft, iScreenTop);
   Dasher2Screen(iDasherMinX, iDasherMaxY, iScreenRight, iScreenBottom);
 
-  Screen()->DrawRectangle(iScreenLeft, iScreenTop, iScreenRight, iScreenBottom, Color, iOutlineColour, iThickness);
+  Screen()->DrawRectangle(std::min(iScreenLeft, iScreenRight), std::min(iScreenTop, iScreenBottom), std::max(iScreenLeft, iScreenRight), std::max(iScreenTop, iScreenBottom), color, outlineColor, iThickness);
 }
 
 /// Draw a rectangle centred on a given dasher co-ordinate, but with a size specified in screen co-ordinates (used for drawing the mouse blob)
 
-void CDasherView::DasherDrawCentredRectangle(myint iDasherX, myint iDasherY, screenint iSize, const int Color, bool bDrawOutline) {
+void CDasherView::DasherDrawCentredRectangle(myint iDasherX, myint iDasherY, screenint iSize, const ColorPalette::Color& color, const ColorPalette::Color& outlineColor, bool bDrawOutline) {
   screenint iScreenX;
   screenint iScreenY;
 
   Dasher2Screen(iDasherX, iDasherY, iScreenX, iScreenY);
 
-  Screen()->DrawRectangle(iScreenX - iSize, iScreenY - iSize, iScreenX + iSize, iScreenY + iSize, Color, -1, bDrawOutline ? 1 : 0);
+  Screen()->DrawRectangle(iScreenX - iSize, iScreenY - iSize, iScreenX + iSize, iScreenY + iSize, color, outlineColor, bDrawOutline ? 1 : 0);
+}
+
+void CDasherView::SetColorScheme(const ColorPalette* pColorScheme)
+{
+    m_pColorPalette = pColorScheme;
+}
+
+const ColorPalette::Color& CDasherView::GetNamedColor(NamedColor::knownColorName color) const
+{
+    if(color.empty() || !m_pColorPalette) return ColorPalette::noColor;
+    return m_pColorPalette->GetNamedColor(color);
 }

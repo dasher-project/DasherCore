@@ -6,7 +6,6 @@
 //
 /////////////////////////////////////////////////////////////////////////////
 
-#include "../../Common/Common.h"
 #include "DictLanguageModel.h"
 #include "../Alphabet/AlphabetMap.h"
 
@@ -14,6 +13,7 @@
 #include <stack>
 #include <iostream>
 #include <fstream>
+#include <myassert.h>
 using namespace Dasher;
 
 // static TCHAR debug[256];
@@ -53,7 +53,7 @@ CDictLanguageModel::CDictnode * CDictLanguageModel::AddSymbolToNode(CDictnode *p
   CDictnode *pReturn = pNode->find_symbol(sym);
 
   if(pReturn != NULL) {
-    if(GetLongParameter(LP_LM_UPDATE_EXCLUSION)) {
+    if(m_pSettingsStore->GetLongParameter(LP_LM_UPDATE_EXCLUSION)) {
       if(pReturn->count < USHRT_MAX)    // Truncate counts at storage limit
         pReturn->count++;
       *update = 0;
@@ -76,8 +76,8 @@ CDictLanguageModel::CDictnode * CDictLanguageModel::AddSymbolToNode(CDictnode *p
 // CDictLanguageModel defs
 /////////////////////////////////////////////////////////////////////
 
-CDictLanguageModel::CDictLanguageModel(CSettingsUser *pCreator, const CAlphInfo *pAlph, const CAlphabetMap *pAlphMap)
-:CLanguageModel(pAlph->iEnd-1), CSettingsUser(pCreator), m_pAlphMap(pAlphMap), m_iSpaceSymbol(pAlph->GetSpaceSymbol()), NodesAllocated(0), max_order(0), m_NodeAlloc(8192), m_ContextAlloc(1024) {
+CDictLanguageModel::CDictLanguageModel(CSettingsStore* pSettingsStore, const CAlphInfo *pAlph, const CAlphabetMap *pAlphMap)
+:CLanguageModel(pAlph->iEnd-1), m_pSettingsStore(pSettingsStore), m_pAlphMap(pAlphMap), NodesAllocated(0), max_order(0), m_NodeAlloc(8192), m_ContextAlloc(1024), m_pAlph(pAlph) {
   m_pRoot = m_NodeAlloc.Alloc();
   m_pRoot->sbl = -1;
   m_rootcontext = new CDictContext(m_pRoot, 0);
@@ -176,7 +176,7 @@ void CDictLanguageModel::GetProbs(Context context, std::vector<unsigned int > &p
     exclusions[i] = false;
   }
 
-  bool doExclusion = (GetLongParameter(LP_LM_EXCLUSION) == 1);
+  bool doExclusion = (m_pSettingsStore->GetLongParameter(LP_LM_EXCLUSION) == 1);
 
   unsigned int iToSpend = norm;
 
@@ -516,11 +516,11 @@ void CDictLanguageModel::AddSymbol(CDictLanguageModel::CDictContext &context, sy
 
   // Collapse the context if we have started a new word
 
-  if(sym == m_iSpaceSymbol) {
+  if(sym > 0 && m_pAlph->SymbolIsSpaceCharacter(sym)) {
     CollapseContext(context);
   }
 
-while(context.order > GetLongParameter( LP_LM_MAX_ORDER )) {
+while(context.order > m_pSettingsStore->GetLongParameter( LP_LM_MAX_ORDER )) {
     context.head = context.head->vine;
     context.order--;
   }
@@ -548,7 +548,7 @@ void CDictLanguageModel::EnterSymbol(Context c, int Symbol) {
   // collapse the context - the information required to update the
   // word part of the context is stored in the string.
 
-  if(Symbol == m_iSpaceSymbol) {
+  if(Symbol > 0 && m_pAlph->SymbolIsSpaceCharacter(Symbol)) {
     CollapseContext(context);
     return;
   }
@@ -559,7 +559,7 @@ void CDictLanguageModel::EnterSymbol(Context c, int Symbol) {
 
   while(context.head) {
 
-    if(context.order < GetLongParameter( LP_LM_MAX_ORDER )) {
+    if(context.order < m_pSettingsStore->GetLongParameter( LP_LM_MAX_ORDER )) {
       find = context.head->find_symbol(Symbol);
       if(find) {
         context.order++;

@@ -1,6 +1,8 @@
 #ifndef __CLICK_FILTER_H__
 #define __CLICK_FILTER_H__
 
+#include <I18n.h>
+
 #include "InputFilter.h"
 
 /// \ingroup InputFilter
@@ -19,8 +21,8 @@ namespace Dasher {
   
 class CClickFilter : public CStaticFilter, private CZoomAdjuster {
  public:
-  CClickFilter(CSettingsUser *pCreator, CDasherInterfaceBase *pInterface)
-    : CStaticFilter(pCreator, pInterface, 7, _("Click Mode")) { };
+  CClickFilter(CSettingsStore* pSettingsStore, CDasherInterfaceBase *pInterface)
+    : CStaticFilter(pSettingsStore, pInterface, _("Click Mode")) { };
 
   virtual bool DecorateView(CDasherView *pView, CDasherInput *pInput);
   virtual void KeyDown(unsigned long iTime, Keys::VirtualKey Key, CDasherView *pView, CDasherInput *pInput, CDasherModel *pModel);

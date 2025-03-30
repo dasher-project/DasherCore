@@ -15,7 +15,7 @@ namespace Dasher {
 /// @{
 class Dasher::CCustomColours {
  public:
-  CCustomColours(const CColourIO::ColourInfo & ColourInfo);
+  CCustomColours(const CColorIO::ColourInfo & ColourInfo);
   int GetNumColours() const {
     return m_Red.size();
   }
@@ -29,7 +29,7 @@ class Dasher::CCustomColours {
     return m_Blue[colour];
   }
  private:
-  const CColourIO::ColourInfo * m_ColourInfo;
+  const CColorIO::ColourInfo * m_ColourInfo;
   std::vector<int> m_Red;
   std::vector<int> m_Green;
   std::vector<int> m_Blue;

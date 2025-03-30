@@ -13,7 +13,7 @@
 #include <unordered_map>
 #include <variant>
 
-#include "Observable.h"
+#include "Event.h"
 #include "Parameters.h"
 
 namespace Dasher {
@@ -37,7 +37,7 @@ namespace Dasher {
 /// The public interface uses UTF-8 strings. All Keys should be
 /// in American English and encodable in ASCII. However,
 /// string Values may contain special characters where appropriate.
-class CSettingsStore : public Observable<Parameter> {
+class CSettingsStore {
 public:
 
   CSettingsStore();
@@ -62,7 +62,9 @@ public:
 
   // TODO: just load the application parameters by default?
   void AddParameters(const std::unordered_map<Parameter, const Settings::Parameter_Value> table);
-  Observable<CParameterChange>& PreSetObservable() { return pre_set_observable_; }
+
+    Event<Parameter, std::variant<bool, long, std::string>> OnPreParameterChange;
+    Event<Parameter> OnParameterChanged;
     
   virtual bool IsParameterSaved(const std::string & Key) { return false; }; // avoid undef sub-classes error
 
@@ -116,58 +118,6 @@ private:
   virtual void SaveSetting(const std::string & Key, const std::string & Value);
 
   std::unordered_map<Parameter, Settings::Parameter_Value> parameters_;
-  Observable<CParameterChange> pre_set_observable_;
 };
-
-/// Superclass for anything that wants to use/access/store persistent settings.
-  /// (The nearest thing remaining to the old CDasherComponent,
-  /// but more of a mixin rather than a universal superclass.)
-  /// At the moment, _all_ clients share a single SettingsStore (static),
-  /// but for future-proofing in case we ever want more than one SettingsStore
-  /// (this has been suggested), SettingsUsers can only be created from other
-  /// SettingsUsers (i.e. in a tree), so _could_ be modified to copy a SettingsStore
-  /// pointer from the creator to inherit settings.
-  class CSettingsUser {
-  private:
-    friend class CDasherInterfaceBase;
-    ///Create the root of the SettingsUser hierarchy from a SettingsStore.
-    /// ATM we allow only one SettingsStore, so this c'tor is private and 
-    /// used only by the DasherInterface; if/when multiple SettingsStores
-    /// are used, could be made public.
-    CSettingsUser(CSettingsStore *pSettingsStore);
-  public:
-    virtual ~CSettingsUser();
-    bool IsParameterSaved(const std::string & Key);
-  protected:
-    ///Create a new SettingsUser, inheriting+sharing settings from the creator.
-    CSettingsUser(CSettingsUser *pCreateFrom);
-    bool GetBoolParameter(Parameter parameter) const;
-    long GetLongParameter(Parameter parameter) const;
-    const std::string &GetStringParameter(Parameter parameter) const;
-    void SetBoolParameter(Parameter parameter, bool bValue);
-    void SetLongParameter(Parameter parameter, long lValue);
-    void SetStringParameter(Parameter parameter, const std::string &strValue);
-  };
-  ///Superclass for anything that wants to be notified when settings change.
-  /// (Note inherited pure virtual HandleEvent(Parameter) method, called when any pref changes).
-  ///Exists as a distinct class from CSettingsUserObserver (below) to get round C++'s
-  /// multiple inheritance problems, i.e. for indirect subclasses of CSettingsUser
-  /// wanting to introduce settings-listener capabilities.
-  ///Note we don't inherit from TransientObserver as it saves storing the SettingsStore ptr
-  /// in every instance; if we move to multiple settings stores, we could so inherit.
-  class CSettingsObserver : public Observer<Parameter> {
-  public:
-    ///Create a CSettingsObserver listening to changes to the settings values
-    /// used by a particular CSettingsUser.
-    CSettingsObserver(CSettingsUser *pCreateFrom);
-    ~CSettingsObserver() override;
-  };
-  ///Utility class, for (majority of) cases where a class wants to be both
-  /// a CSettingsUser and CSettingsObserver.
-  class CSettingsUserObserver : public CSettingsUser, public CSettingsObserver {
-  public:
-    CSettingsUserObserver(CSettingsUser *pCreateFrom);
-  };
-/// @}
 }
 #endif /* #ifndef __SettingsStore_h__ */

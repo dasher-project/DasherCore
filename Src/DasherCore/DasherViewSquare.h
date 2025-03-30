@@ -27,7 +27,7 @@ class CDasherNode;
 ///
 /// Horizontal mapping - linear and log
 /// Vertical mapping - linear with different gradient
-class Dasher::CDasherViewSquare : public Dasher::CDasherView, public CSettingsUserObserver
+class Dasher::CDasherViewSquare : public CDasherView
 {
 public:
 	/// Constructor
@@ -37,14 +37,12 @@ public:
 	/// passed as parameter to the drawing functions, and data structure
 	/// can be extracted from the model and passed too.
 
-	CDasherViewSquare(CSettingsUser* pCreateFrom, CDasherScreen* DasherScreen, Options::ScreenOrientations orient);
+	CDasherViewSquare(CSettingsStore* pSettingsStore, CDasherScreen* DasherScreen, Options::ScreenOrientations orient);
 	~CDasherViewSquare() override;
 
 	///
 	/// Event handler
 	///
-
-	void HandleEvent(Parameter parameter) override;
 
 	//Override to additionally reset scale factors etc.
 	void SetOrientation(Options::ScreenOrientations newOrient) override;
@@ -82,7 +80,7 @@ public:
 	///
 	/// Get the bounding box of the visible region.
 	///
-	ScreenRegion VisibleRegion() override;
+	DasherCoordScreenRegion VisibleRegion() override;
 
 	///
 	/// Render all nodes, inc. blanking around the root (supplied)
@@ -91,14 +89,15 @@ public:
 
 	/// @}
 
-	void DasherSpaceArc(myint cy, myint r, myint x1, myint y1, myint x2, myint y2, int colour, int iLineWidth) override;
+	void DasherSpaceArc(myint cy, myint r, myint x1, myint y1, myint x2, myint y2, const ColorPalette::Color& color, int iLineWidth) override;
 
 private:
 	///draw a possibly-truncated triangle given dasher-space coords & accounting for non-linearity
 	/// @param x = max dasher-x extent
 	/// @param y1, y2 = dasher-y extent along y-axis
 	/// @param midy1,midy2 = extent along line of max x (midy1==midy2 => triangle, midy1<midy2 => truncated tri)
-	void TruncateTri(myint x, myint y1, myint y2, myint midy1, myint midy2, int fillColor, int outlineColor, int lineWidth);
+	void TruncateTri(myint x, myint y1, myint y2, myint midy1, myint midy2, const ColorPalette::Color& fillColor, const ColorPalette::Color&
+                     outlineColor, int lineWidth);
 
 	/// compute screen coords for a circle, centered on y-axis, between two points
 	/// cy, r - dasher coords of center (on y-axis), radius
@@ -108,8 +107,9 @@ private:
 	/// pts - vector into which to store points; on entry, last element should already be screen-coords of (x1,y1)
 	/// dXMul - multiply x coords (in dasher space) by this (i.e. aspect ratio), for ovals
 	void CircleTo(myint cy, myint r, myint y1, myint x1, myint y3, myint x3, CDasherScreen::point dest, std::vector<CDasherScreen::point>& pts, double dXMul);
-	void Circle(myint Range, myint lowY, myint highY, int fCol, int oCol, int lWidth);
-	void Quadric(myint Range, myint lowY, myint highY, int fillColor, int outlineColor, int lineWidth);
+	void Circle(myint Range, myint y1, myint y2, const ColorPalette::Color& fillColor, const ColorPalette::Color& outlineColor, int lineWidth);
+	void Quadric(myint Range, myint lowY, myint highY, const ColorPalette::Color& fillColor, const ColorPalette::Color& outlineColor, int
+                 lineWidth);
 	///draw isoceles triangle, with baseline from y1-y2 along y axis (x=0), and other point at (x,(y1+y2)/2)
 	/// (all in Dasher coords).
 	void Triangle(myint x, myint y1, myint y2, int fillColor, int outlineColor, int lineWidth);
@@ -120,27 +120,37 @@ private:
 		///Creates a request that label will be drawn.
 		/// x,y are screen coords of midpoint of leading edge;
 		/// iSize is desired size (already computed from requested position)
-		CTextString(CDasherScreen::Label* pLabel, screenint x, screenint y, int iSize, int iColor)
-			: m_pLabel(pLabel), m_ix(x), m_iy(y), m_iSize(iSize), m_iColor(iColor)
-		{
+		CTextString(CDasherScreen::Label* pLabel, screenint x, screenint y, int iSize, const ColorPalette::Color& iColor)
+			: m_pLabel(pLabel), m_ix(x), m_iy(y), m_iSize(iSize), m_Color(iColor)
+        {
 		}
 
 		~CTextString();
-		CDasherScreen::Label* m_pLabel;
+
+	    CDasherScreen::Label* m_pLabel;
 		screenint m_ix, m_iy;
 		std::vector<CTextString*> m_children;
 		int m_iSize;
-		int m_iColor;
+		const ColorPalette::Color& m_Color;
 	};
 
 	std::vector<CTextString*> m_DelayedTexts;
+	//ExtrusionLevel is used for 3DRendering
+	void DoDelayedText(CTextString* pText, myint extrusionLevel = 0, myint groupRecursionDepth = 0);
 
-	void DoDelayedText(CTextString* pText);
+	struct geometry_3DText
+	{
+		CTextString* root_node;
+		myint extrusionLevel;
+		myint groupRecursionDepth;
+	};
+	std::vector<geometry_3DText> m_Delayed3DTexts;
+	myint m_CrosshairCubeLevel = -1;
+
 	///
 	/// Draw text specified in Dasher co-ordinates
 	///
-
-	CTextString* DasherDrawText(myint iDasherMaxX, myint iDasherMidY, CDasherScreen::Label* pLabel, CTextString* pParent, int iColor);
+	CTextString* DasherDrawText(myint iDasherMaxX, myint iDasherMidY, CDasherScreen::Label* pLabel, const ColorPalette::Color& Color);
 
 	///
 	/// (Recursively) render a node and all contained subnodes, in disjoint rects.
@@ -149,11 +159,15 @@ private:
 	/// @param pOutput The innermost node covering the crosshair (if any)
 	void DisjointRender(CDasherNode* Render, myint y1, myint y2, CTextString* prevText, CExpansionPolicy& policy, double dMaxCost, CDasherNode*& pOutput);
 
+	void DasherDrawCube(myint iDasherMaxX, myint iDasherMinY, myint iDasherMinX, myint iDasherMaxY, CubeDepthLevel nodeDepth, CubeDepthLevel
+                        parentDepth, const ColorPalette::Color& Color, const ColorPalette::Color& outlineColor, int iThickness, ScreenRegion
+                        * parentScreenBounds);
 	/// (Recursively) render a node and all contained subnodes, in overlapping shapes
 	/// (according to LP_SHAPE_TYPE)
 	/// Each call responsible for rendering exactly the area contained within the node.
-	/// @param pOutput The innermost node covering the crosshair (if any)
-	void NewRender(CDasherNode* Render, myint y1, myint y2, CTextString* prevText, CExpansionPolicy& policy, double dMaxCost, CDasherNode*& pOutput);
+	/// @param pCurrentTopCenterNode The innermost node covering the crosshair (if any)
+    void NewRender(CDasherNode* pCurrentNode, myint y1, myint y2, CTextString* pPrevText, CExpansionPolicy& policy,
+                   double dMaxCost, CDasherNode*& pCurrentTopCenterNode, CubeDepthLevel nodeDepth, CubeDepthLevel parentDepth, ScreenRegion parentScreenBounds);
 
 	/// @name Nonlinearity
 	/// Implements the non-linear part of the coordinate space mapping
@@ -174,13 +188,12 @@ private:
 
 	inline void Crosshair();
 	bool CoversCrosshair(myint Range, myint y1, myint y2);
+    ColorPalette::Color SimulateTransparency(CDasherNode* pCurrentNode);
 
-	//Divides by SCALE_FACTOR, rounding away from 0
+    //Divides by SCALE_FACTOR, rounding away from 0
 	inline myint CustomIDivScaleFactor(myint iNumerator);
 
 	void DasherLine2Screen(myint x1, myint y1, myint x2, myint y2, std::vector<CDasherScreen::point>& vPoints) override;
-
-	bool m_bVisibleRegionValid = false;
 
 	// Called on screen size or orientation changes
 	void SetScaleFactor();
@@ -198,11 +211,10 @@ private:
 	myint iScaleFactorX, iScaleFactorY;
 	static const myint SCALE_FACTOR = 1 << 26; //was 100,000,000; change to power of 2 => easier to multiply/divide
 
-	/// Cached extents of visible region
-	myint m_iDasherMinX;
-	myint m_iDasherMaxX;
-	myint m_iDasherMinY;
-	myint m_iDasherMaxY;
+	bool m_bVisibleRegionValid = false;
+	DasherCoordScreenRegion m_visible_region;
+
+	CSettingsStore* m_pSettingsStore;
 };
 
 /// @}

@@ -18,10 +18,6 @@
 // along with Dasher; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
-
 #include "ConversionManager.h"
 #include "Event.h"
 #include "NodeCreationManager.h"
@@ -38,29 +34,29 @@
 
 using namespace Dasher;
 
-CConversionManager::CConversionManager(CSettingsUser *pCreateFrom, CDasherInterfaceBase *pInterface, CNodeCreationManager *pNCManager, const CAlphInfo *pAlphabet, CLanguageModel *pLanguageModel)
-: CSettingsUser(pCreateFrom), m_pInterface(pInterface), m_pNCManager(pNCManager), m_pAlphabet(pAlphabet), m_pLanguageModel(pLanguageModel) {
+CConversionManager::CConversionManager(CSettingsStore* pSettingsStore, CDasherInterfaceBase *pInterface, CNodeCreationManager *pNCManager, const CAlphInfo *pAlphabet, CLanguageModel *pLanguageModel)
+    : m_pSettingsStore(pSettingsStore), m_pInterface(pInterface), m_pNCManager(pNCManager), m_pAlphabet(pAlphabet),
+      m_pScreen(nullptr), m_pLanguageModel(pLanguageModel)
+{
+    //Testing for alphabet details, delete if needed:
+    /*
+    int alphSize = pNCManager->GetAlphabet()->GetNumberSymbols();
+    std::cout<<"Alphabet size: "<<alphSize<<std::endl;
+    for(int i =0; i<alphSize; i++)
+      std::cout<<"symbol: "<<i<<"    display text:"<<pNCManager->GetAlphabet()->GetDisplayText(i)<<std::endl;
+    */
+    colourStore[0][0] = 66; //light blue
+    colourStore[0][1] = 64; //very light green
+    colourStore[0][2] = 62; //light yellow
+    colourStore[1][0] = 78; //light purple
+    colourStore[1][1] = 81; //brownish
+    colourStore[1][2] = 60; //red
 
-  //Testing for alphabet details, delete if needed:
-  /*
-  int alphSize = pNCManager->GetAlphabet()->GetNumberSymbols();
-  std::cout<<"Alphabet size: "<<alphSize<<std::endl;
-  for(int i =0; i<alphSize; i++)
-    std::cout<<"symbol: "<<i<<"    display text:"<<pNCManager->GetAlphabet()->GetDisplayText(i)<<std::endl;
-  */
-  colourStore[0][0]=66;//light blue
-  colourStore[0][1]=64;//very light green
-  colourStore[0][2]=62;//light yellow
-  colourStore[1][0]=78;//light purple
-  colourStore[1][1]=81;//brownish
-  colourStore[1][2]=60;//red
-  
-  m_iLearnContext = m_pLanguageModel->CreateEmptyContext();
-
+    m_iLearnContext = m_pLanguageModel->CreateEmptyContext();
 }
 
-CConversionManager::CConvNode *CConversionManager::makeNode(int iOffset, int iColour, CDasherScreen::Label *pLabel) {
-  return new CConvNode(iOffset, iColour, pLabel, this);
+CConversionManager::CConvNode *CConversionManager::makeNode(int iOffset, CDasherScreen::Label *pLabel) {
+  return new CConvNode(iOffset, pLabel, this);
 }
 
 void CConversionManager::ChangeScreen(CDasherScreen *pScreen) {
@@ -83,7 +79,7 @@ CConversionManager::CConvNode *CConversionManager::GetRoot(int iOffset, CLanguag
   // TODO: Parameters here are placeholders - need to figure out what's right
 
   //TODO: hard-coded colour, and hard-coded displaytext... (ACL: read from Alphabet -> startConversionSymbol ?)
-  CConvNode *pNewNode = makeNode(iOffset, 9, NULL);
+  CConvNode *pNewNode = makeNode(iOffset, nullptr);
 
   pNewNode->iContext = newCtx;
 
@@ -94,8 +90,8 @@ CConversionManager::CConvNode *CConversionManager::GetRoot(int iOffset, CLanguag
   return pNewNode;
 }
 
-CConversionManager::CConvNode::CConvNode(int iOffset, int iColour, CDasherScreen::Label *pLabel, CConversionManager *pMgr)
- : CDasherNode(iOffset, iColour, pLabel), m_pMgr(pMgr) {
+CConversionManager::CConvNode::CConvNode(int iOffset, CDasherScreen::Label *pLabel, CConversionManager *pMgr)
+ : CDasherNode(iOffset, pLabel), m_pMgr(pMgr) {
 }
 
 CConversionManager::CConvNode::~CConvNode() {
@@ -131,7 +127,7 @@ void CConversionManager::CConvNode::GetContext(CDasherInterfaceBase *pInterface,
   CDasherNode::GetContext(pInterface, pAlphabetMap, vContextSymbols, iOffset, iLength);
 }
 
-void CConversionManager::CConvNode::Output() {
+void CConversionManager::CConvNode::Do() {
   // TODO: Reimplement this
   //  m_pNCManager->m_bContextSensitive = true;
 
@@ -166,12 +162,30 @@ void CConversionManager::CConvNode::Undo() {
   }
 }
 
+const ColorPalette::Color& CConversionManager::CConvNode::getLabelColor(const ColorPalette* colorPalette)
+{
+    //TODO: I dont know know these work. This needs to be implemented at a later stage
+    return ColorPalette::noColor;
+}
+
+const ColorPalette::Color& CConversionManager::CConvNode::getOutlineColor(const ColorPalette* colorPalette)
+{
+    //TODO: I dont know know these work. This needs to be implemented at a later stage
+    return ColorPalette::noColor;
+}
+
+const ColorPalette::Color& CConversionManager::CConvNode::getNodeColor(const ColorPalette* colorPalette)
+{
+    //TODO: I dont know know these work. This needs to be implemented at a later stage
+    return ColorPalette::noColor;
+}
+
 // TODO: This function needs to be significantly tidied up
 // TODO: get rid of pSizes
 
 void CConversionManager::AssignChildSizes(const std::vector<SCENode *> &nodes, CLanguageModel::Context context) {
   
-  AssignSizes(nodes, context, CDasherModel::NORMALIZATION, GetLongParameter(LP_UNIFORM));
+  AssignSizes(nodes, context, CDasherModel::NORMALIZATION,  m_pSettingsStore->GetLongParameter(LP_UNIFORM));
   
 }
 
@@ -196,7 +210,7 @@ void CConversionManager::CConvNode::PopulateChildren() {
     int iIdx(0);
     int iCum(0);
     
-    //    int parentClr = pNode->Colour();
+    //    int parentClr = pNode->Color();
     // TODO: Fixme
     int parentClr = 0;
     
@@ -217,7 +231,7 @@ void CConversionManager::CConvNode::PopulateChildren() {
       
       //  std::cout << "#" << pCurrentSCEChild->pszConversion << "#" << std::endl;
       
-      CConvNode *pNewNode = mgr()->makeNode(offset()+1, mgr()->AssignColour(parentClr, pCurrentSCEChild, iIdx), mgr()->GetLabel(pCurrentSCEChild->pszConversion));
+      CConvNode *pNewNode = mgr()->makeNode(offset()+1, mgr()->GetLabel(pCurrentSCEChild->pszConversion));
 
       // TODO: Reimplement ----
 

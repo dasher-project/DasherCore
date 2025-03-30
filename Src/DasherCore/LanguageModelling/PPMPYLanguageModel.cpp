@@ -10,19 +10,19 @@
 //
 /////////////////////////////////////////////////////////////////////////////
 
-#include "../../Common/Common.h"
 #include "PPMPYLanguageModel.h"
 #include "LanguageModel.h"
 #include <stack>
 #include <sstream>
 #include <iostream>
+#include <myassert.h>
 
 using namespace Dasher;
 
 /////////////////////////////////////////////////////////////////////
 
-CPPMPYLanguageModel::CPPMPYLanguageModel(CSettingsUser *pCreator, int iNumCHsyms, int iNumPYsyms)
-  :CAbstractPPM(pCreator, iNumCHsyms, new CPPMPYnode(-1), 2), NodesAllocated(0), m_NodeAlloc(8192), m_iNumPYsyms(iNumPYsyms) {
+CPPMPYLanguageModel::CPPMPYLanguageModel(CSettingsStore* pSettingsStore, int iNumCHsyms, int iNumPYsyms)
+  :CAbstractPPM(pSettingsStore, iNumCHsyms, new CPPMPYnode(-1), 2), NodesAllocated(0), m_NodeAlloc(8192), m_iNumPYsyms(iNumPYsyms) {
 }
 
 /////////////////////////////////////////////////////////////////////
@@ -190,8 +190,8 @@ void CPPMPYLanguageModel::GetPartProbs(Context context, std::vector<std::pair<sy
 
   DASHER_ASSERT(iUniformLeft == 0);
 
-  int alpha = GetLongParameter( LP_LM_ALPHA );
-  int beta = GetLongParameter( LP_LM_BETA );
+  int alpha = m_pSettingsStore->GetLongParameter( LP_LM_ALPHA );
+  int beta = m_pSettingsStore->GetLongParameter( LP_LM_BETA );
 
   int *vCounts=new int[vChildren.size()]; //num occurrences of symbol at same index in vChildren
 
@@ -311,8 +311,8 @@ void CPPMPYLanguageModel::GetProbs(Context context, std::vector<unsigned int> &p
   //  bool doExclusion = GetLongParameter( LP_LM_ALPHA );
   bool doExclusion = 0; //FIXME
 
-  int alpha = GetLongParameter( LP_LM_ALPHA );
-  int beta = GetLongParameter( LP_LM_BETA );
+  int alpha = m_pSettingsStore->GetLongParameter( LP_LM_ALPHA );
+  int beta = m_pSettingsStore->GetLongParameter( LP_LM_BETA );
 
   for (CPPMnode *pTemp = ppmcontext->head; pTemp; pTemp = pTemp->vine) {
     int iTotal = 0;

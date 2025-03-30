@@ -22,7 +22,7 @@ bool CDashIntfScreenMsgs::FinishRender(unsigned long ulTime) {
   bool bMsgsChanged=false;
   //Finally any messages - newest that will fit at bottom, proceeding upwards.
   // Firstly clear any non-modal messages that have been onscreen for long enough
-  while (!m_dqAsyncMessages.empty() && m_dqAsyncMessages.front().second && ulTime-m_dqAsyncMessages.front().second>GetLongParameter(LP_MESSAGE_TIME)) {
+  while (!m_dqAsyncMessages.empty() && m_dqAsyncMessages.front().second && ulTime-m_dqAsyncMessages.front().second > static_cast<unsigned long>(GetLongParameter(LP_MESSAGE_TIME))) {
     delete m_dqAsyncMessages.front().first; //the Label
     m_dqAsyncMessages.pop_front(); // => stop displaying it
     bMsgsChanged=true;
@@ -55,24 +55,23 @@ bool CDashIntfScreenMsgs::FinishRender(unsigned long ulTime) {
       }
     }
     //Now render messages proceeding downwards - non-modal first, then oldest first
-    bool bModal(false);
     for (std::deque<std::pair<CDasherScreen::Label*, unsigned long> >::const_iterator it = m_dqAsyncMessages.begin(); it != m_dqAsyncMessages.end(); it++) {
       if (it->second==0) continue;
       std::pair<screenint,screenint> textDims = pScreen->TextSize(it->first, GetLongParameter(LP_MESSAGE_FONTSIZE));
       //black (5) rectangle:
-      pScreen->DrawRectangle((iSW - textDims.first)/2, iY, (iSW+textDims.first)/2, iY+textDims.second, 5, -1, -1);
-      //white (0) text for non-modal, yellow (111) for modal
-      pScreen->DrawString(it->first, (iSW-textDims.first)/2, iY, GetLongParameter(LP_MESSAGE_FONTSIZE), bModal ? 111 : 0);
+      pScreen->DrawRectangle((iSW - textDims.first)/2, iY, (iSW+textDims.first)/2, iY+textDims.second, GetView()->GetNamedColor(NamedColor::infoTextBackground), ColorPalette::noColor, -1);
+      //white (0) text for non-modal
+      pScreen->DrawString(it->first, (iSW-textDims.first)/2, iY, GetLongParameter(LP_MESSAGE_FONTSIZE), GetView()->GetNamedColor(NamedColor::infoText));
       iY+=textDims.second;
     }
-    bModal=true;
+
     for (std::deque<std::pair<CDasherScreen::Label*, unsigned long> >::const_iterator it = m_dqModalMessages.begin(); it != m_dqModalMessages.end(); it++) {
       if (it->second==0) continue;
       std::pair<screenint,screenint> textDims = pScreen->TextSize(it->first, GetLongParameter(LP_MESSAGE_FONTSIZE));
       //black (5) rectangle:
-      pScreen->DrawRectangle((iSW - textDims.first)/2, iY, (iSW+textDims.first)/2, iY+textDims.second, 5, -1, -1);
-      //white (0) text for non-modal, yellow (111) for modal
-      pScreen->DrawString(it->first, (iSW-textDims.first)/2, iY, GetLongParameter(LP_MESSAGE_FONTSIZE), bModal ? 111 : 0);
+      pScreen->DrawRectangle((iSW - textDims.first)/2, iY, (iSW+textDims.first)/2, iY+textDims.second, GetView()->GetNamedColor(NamedColor::warningTextBackground), ColorPalette::noColor, -1);
+      //yellow (111) for modal
+      pScreen->DrawString(it->first, (iSW-textDims.first)/2, iY, GetLongParameter(LP_MESSAGE_FONTSIZE), GetView()->GetNamedColor(NamedColor::warningText));
       iY+=textDims.second;
     }
   }
@@ -108,5 +107,5 @@ void CDashIntfScreenMsgs::onUnpause(unsigned long lTime) {
 }
 
 CGameModule *CDashIntfScreenMsgs::CreateGameModule() {
-  return new CScreenGameModule(this, this, GetView(), m_pDasherModel);
+  return new CScreenGameModule(m_pSettingsStore, this, GetView(), m_pDasherModel);
 }

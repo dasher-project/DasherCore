@@ -1,6 +1,3 @@
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
 
 #include "AutoSpeedControl.h"
 
@@ -8,13 +5,13 @@
 
 using namespace Dasher;
 
-CAutoSpeedControl::CAutoSpeedControl(CSettingsUser *pCreateFrom)
-  : CSettingsUser(pCreateFrom) {
+CAutoSpeedControl::CAutoSpeedControl(CSettingsStore* pSettingsStore)
+  : m_pSettingsStore(pSettingsStore) {
   //scale #samples by #samples = m_dSamplesScale / (current bitrate) + m_dSampleOffset
   m_dSampleScale = 1.5;
   m_dSampleOffset = 1.3;
   m_dMinRRate = 80.0;
-  m_dSensitivity = GetLongParameter(LP_AUTOSPEED_SENSITIVITY) / 100.0; //param only, no GUI!
+  m_dSensitivity = m_pSettingsStore->GetLongParameter(LP_AUTOSPEED_SENSITIVITY) / 100.0; //param only, no GUI!
   //tolerance for automatic speed control
   m_dTier1 = 0.0005;  //  should be arranged so that tier4 > tier3 > tier2 > tier1 !!!
   m_dTier2 = 0.01;
@@ -33,10 +30,10 @@ CAutoSpeedControl::CAutoSpeedControl(CSettingsUser *pCreateFrom)
   m_dSigma2 = 0.05;
   //Initialise auto-speed control
   m_nSpeedCounter = 0;
-  m_dBitrate = double(round(GetLongParameter(LP_MAX_BITRATE) / 100.0));
+  m_dBitrate = double(round(m_pSettingsStore->GetLongParameter(LP_MAX_BITRATE) / 100.0));
 
   UpdateMinRadius();
-  UpdateSampleSize(GetLongParameter(LP_FRAMERATE) / 100.0);
+  UpdateSampleSize(m_pSettingsStore->GetLongParameter(LP_FRAMERATE) / 100.0);
 }
 
   ////////////////////////////////////////////////
@@ -162,14 +159,14 @@ inline void CAutoSpeedControl::UpdateSigmas(double r, double dFrameRate)
 
 
 void CAutoSpeedControl::SpeedControl(myint iDasherX, myint iDasherY, CDasherView *pView) {
-  if (GetBoolParameter(BP_AUTO_SPEEDCONTROL)) {
+  if (m_pSettingsStore->GetBoolParameter(BP_AUTO_SPEEDCONTROL)) {
 
     //  Coordinate transforms:
     double r, theta;
     pView->Dasher2Polar(iDasherX, iDasherY, r, theta);
 
-    m_dBitrate = GetLongParameter(LP_MAX_BITRATE) / 100.0; //  stored as long(round(true bitrate * 100))
-    double dFrameRate = GetLongParameter(LP_FRAMERATE) / 100.0;
+    m_dBitrate = m_pSettingsStore->GetLongParameter(LP_MAX_BITRATE) / 100.0; //  stored as long(round(true bitrate * 100))
+    double dFrameRate = m_pSettingsStore->GetLongParameter(LP_FRAMERATE) / 100.0;
     UpdateSigmas(r, dFrameRate);
 
     //  Data collection:
@@ -182,14 +179,14 @@ void CAutoSpeedControl::SpeedControl(myint iDasherX, myint iDasherY, CDasherView
       }
 
     }
-    m_dSensitivity = GetLongParameter(LP_AUTOSPEED_SENSITIVITY) / 100.0;
+    m_dSensitivity = m_pSettingsStore->GetLongParameter(LP_AUTOSPEED_SENSITIVITY) / 100.0;
     if (m_nSpeedCounter > round(m_nSpeedSamples / m_dSensitivity)) {
       //do speed control every so often!
       UpdateSampleSize(dFrameRate);
       UpdateMinRadius();
       UpdateBitrate();
       long lBitrateTimes100 = long(round(m_dBitrate * 100)); //Dasher settings want long numerical parameters
-      SetLongParameter(LP_MAX_BITRATE, lBitrateTimes100);
+      m_pSettingsStore->SetLongParameter(LP_MAX_BITRATE, lBitrateTimes100);
       m_nSpeedCounter = 0;
     }
   }

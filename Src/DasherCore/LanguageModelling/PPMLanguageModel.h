@@ -34,7 +34,7 @@ namespace Dasher {
   /// Subclasses must implement CLanguageModel::GetProbs and a makeNode() method (perhaps
   /// using a pooled allocator).
   ///
-  class CAbstractPPM :public CLanguageModel, protected CSettingsUser, private NoClones {
+  class CAbstractPPM : public CLanguageModel, private NoClones {
   protected:
     class ChildIterator;
     class CPPMnode {
@@ -101,14 +101,15 @@ namespace Dasher {
     /// is required by the subclass, for the specified symbol. (Initial count will be 1.)
     virtual CPPMnode *makeNode(int sym)=0;
     /// \param iMaxOrder max order of model; anything <0 means to use LP_LM_MAX_ORDER.
-    CAbstractPPM(CSettingsUser *pCreator, int iNumSyms, CPPMnode *pRoot, int iMaxOrder=-1);
-    
+    CAbstractPPM(CSettingsStore* pSettingsStore, int iNumSyms, CPPMnode *pRoot, int iMaxOrder=-1);
+          
     void dumpSymbol(symbol sym);
     void dumpString(char *str, int pos, int len);
     void dumpTrie(CPPMnode * t, int d);
     
     CPPMContext *m_pRootContext;
     CPPMnode *m_pRoot;
+    CSettingsStore* m_pSettingsStore;
     
     /// Cache parameters that don't make sense to adjust during the life of a language model...
     const int m_iMaxOrder; 
@@ -140,7 +141,7 @@ namespace Dasher {
   /// max order from LP_LM_MAX_ORDER.
   class CPPMLanguageModel : public CAbstractPPM {
   public:
-    CPPMLanguageModel(CSettingsUser *pCreator, int iNumSyms);
+    CPPMLanguageModel(CSettingsStore* pSettingsStore, int iNumSyms);
     virtual void GetProbs(Context context, std::vector < unsigned int >&Probs, int norm, int iUniform) const;
   protected:
     /// Makes a standard CPPMnode, but using a pooled allocator (m_NodeAlloc) - faster!

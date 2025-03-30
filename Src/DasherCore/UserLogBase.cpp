@@ -14,18 +14,27 @@
 
 using namespace Dasher;
 
-CUserLogBase::CUserLogBase(Observable<const CEditEvent *> *pHandler)
-: TransientObserver<const CEditEvent *>(pHandler), m_iNumDeleted(0) {
+CUserLogBase::CUserLogBase(CDasherInterfaceBase *pInterface)
+: m_iNumDeleted(0), m_pInterface(pInterface) {
+    m_pInterface->OnEditEvent.Subscribe(this, [this](CEditEvent::EditEventType type, const std::string&, CDasherNode* node)
+    {
+        if (type == CEditEvent::EDIT_OUTPUT) {
+            m_vAdded.push_back(node->GetSymbolProb());
+            //output
+        } else if (type == CEditEvent::EDIT_DELETE) {
+            //delete
+            m_iNumDeleted++;
+        }
+    });
 };
 
+CUserLogBase::~CUserLogBase()
+{
+    m_pInterface->OnEditEvent.Unsubscribe(this);
+}
+
 void CUserLogBase::HandleEvent(const CEditEvent *evt) {
-  if (evt->m_iEditType == 1) {
-    m_vAdded.push_back(evt->m_pNode->GetSymbolProb());
-    //output
-  } else if (evt->m_iEditType == 2) {
-    //delete
-    m_iNumDeleted++;
-  }
+  
 }
 
 void CUserLogBase::FrameEnded() {

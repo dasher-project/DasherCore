@@ -34,9 +34,9 @@ namespace Dasher {
   ///
   /// Language model using words
   ///
-  class CWordLanguageModel:public CLanguageModel, protected CSettingsUser {
+  class CWordLanguageModel:public CLanguageModel {
   public:
-    CWordLanguageModel(CSettingsUser *pCreator, const CAlphInfo *pAlph, const CAlphabetMap *pAlphMap);
+    CWordLanguageModel(CSettingsStore *pSettingsStore, const CAlphInfo *pAlph, const CAlphabetMap *pAlphMap);
       virtual ~ CWordLanguageModel();
 
     Context CreateEmptyContext();
@@ -47,7 +47,8 @@ namespace Dasher {
 
     virtual void EnterSymbol(Context context, int Symbol);
     virtual void LearnSymbol(Context context, int Symbol);
-
+  protected:
+    CSettingsStore* m_pSettingsStore;
   private:
     
       class CWordnode {
@@ -113,11 +114,10 @@ namespace Dasher {
 
     int lookup_word(const std::string & w);
     int lookup_word_const(const std::string & w) const;
-
-    const int m_iSpaceSymbol;
-    
+        
     CWordContext *m_rootcontext;
     CWordnode *m_pRoot;
+    const CAlphInfo* m_pAlphInfo;
 
     std::map < std::string, int >dict;  // Dictionary
     int nextid;

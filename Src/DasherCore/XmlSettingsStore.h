@@ -20,7 +20,7 @@ class XmlSettingsStore : public Dasher::CSettingsStore, public AbstractXMLParser
 	// Saves the XML file, returns true on success.
 	bool Save();
 
-	bool Parse(pugi::xml_document& document, bool bUser) override;
+	bool Parse(pugi::xml_document& document, const std::string filePath, bool bUser) override;
 
  private:
 	bool LoadSetting(const std::string& Key, bool* Value) override;
@@ -43,7 +43,7 @@ class XmlSettingsStore : public Dasher::CSettingsStore, public AbstractXMLParser
 	};
 
 	Mode mode_ = EXPLICIT_SAVE;
-	std::string filename_;
+	std::string last_mutable_filepath;
 	bool modified_ = false;
 	std::map<std::string, bool> boolean_settings_;
 	std::map<std::string, long> long_settings_;

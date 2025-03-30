@@ -1,4 +1,3 @@
-#include "../Common/Common.h"
 #include "StylusFilter.h"
 #include "DasherInterfaceBase.h"
 #include "ClickFilter.h"
@@ -10,8 +9,8 @@ static SModuleSettings sSettings[] = {
   {LP_ZOOMSTEPS, T_LONG, 1, 63, 1, 1, _("Frames over which to perform zoom")},
 };
 
-CStylusFilter::CStylusFilter(CSettingsUser *pCreator, CDasherInterfaceBase *pInterface, CFrameRate *pFramerate, ModuleID_t iID, const char *szName)
-  : CDefaultFilter(pCreator, pInterface, pFramerate, iID, szName), m_pModel(NULL) {
+CStylusFilter::CStylusFilter(CSettingsStore* pSettingsStore, CDasherInterfaceBase *pInterface, CFrameRate *pFramerate, const char *szName)
+  : CDefaultFilter(pSettingsStore, pInterface, pFramerate, szName), m_pModel(NULL) {
 }
 
 void CStylusFilter::KeyDown(unsigned long iTime, Keys::VirtualKey Key, CDasherView *pView, CDasherInput *pInput, CDasherModel *pModel) {
@@ -31,10 +30,10 @@ void CStylusFilter::pause() {
 void CStylusFilter::KeyUp(unsigned long iTime, Keys::VirtualKey Key, CDasherView *pView, CDasherInput *pInput, CDasherModel *pModel) {
   if(Key == Keys::Primary_Input) {
     pause(); //stops superclass from scheduling any more one-step movements
-    if (iTime - m_iKeyDownTime < GetLongParameter(LP_TAP_TIME)) {
+    if (iTime - m_iKeyDownTime < static_cast<unsigned long>(m_pSettingsStore->GetLongParameter(LP_TAP_TIME))) {
       pInput->GetDasherCoords(m_iLastX, m_iLastY, pView);
       ApplyClickTransform(m_iLastX, m_iLastY, pView);
-      (m_pModel=pModel)->ScheduleZoom(m_iLastY-m_iLastX, m_iLastY+m_iLastX, GetLongParameter(LP_ZOOMSTEPS));
+      (m_pModel=pModel)->ScheduleZoom(m_iLastY-m_iLastX, m_iLastY+m_iLastX, m_pSettingsStore->GetLongParameter(LP_ZOOMSTEPS));
     } else {
       m_pInterface->Done();
     }
@@ -43,7 +42,7 @@ void CStylusFilter::KeyUp(unsigned long iTime, Keys::VirtualKey Key, CDasherView
 }
 
 void CStylusFilter::ApplyClickTransform(myint &iDasherX, myint &iDasherY, CDasherView *pView) {
-  AdjustZoomX(iDasherX, pView, GetLongParameter(LP_S), GetLongParameter(LP_MAXZOOM));
+  AdjustZoomX(iDasherX, pView, m_pSettingsStore->GetLongParameter(LP_S), m_pSettingsStore->GetLongParameter(LP_MAXZOOM));
 }
 
 CStartHandler *CStylusFilter::MakeStartHandler() {

@@ -18,9 +18,11 @@
 // along with Dasher; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
-#include "../Common/Common.h"
-
 #include "MandarinAlphMgr.h"
+
+#include <algorithm>
+#include <I18n.h>
+
 #include "LanguageModelling/PPMPYLanguageModel.h"
 #include "DasherInterfaceBase.h"
 #include "DasherNode.h"
@@ -33,16 +35,16 @@
 
 using namespace Dasher;
 
-CMandarinAlphMgr::CMandarinAlphMgr(CSettingsUser *pCreator, CDasherInterfaceBase *pInterface, CNodeCreationManager *pNCManager, const CAlphInfo *pAlphabet)
-  : CAlphabetManager(pCreator, pInterface, pNCManager, pAlphabet) {
-  
-  DASHER_ASSERT(pAlphabet->m_iConversionID==2);
+CMandarinAlphMgr::CMandarinAlphMgr(CSettingsStore* pSettingsStore, CDasherInterfaceBase *pInterface, CNodeCreationManager *pNCManager, const CAlphInfo *pAlphabet)
+    : CAlphabetManager(pSettingsStore, pInterface, pNCManager, pAlphabet), m_pPYgroups(nullptr), m_iCHpara(0),
+      m_pScreen(nullptr)
+{
+    DASHER_ASSERT(pAlphabet->m_iConversionID==2);
 }
 
 void CMandarinAlphMgr::InitMap() {
   m_vCHtext.resize(1);
   m_vCHdisplayText.resize(1);
-  m_vCHcolours.resize(1);
   m_vGroupsByConversion.resize(1);
   m_vConversionsByGroup.resize(1);
   m_vGroupNames.resize(1);
@@ -51,15 +53,11 @@ void CMandarinAlphMgr::InitMap() {
   m_pPYgroups = makePYgroup(m_pAlphabet);
 
   //add in space and paragraph to end of main PY group...
-  symbol copy[2];
-  copy[0] = m_pAlphabet->GetSpaceSymbol();
-  copy[1] = m_pAlphabet->GetParagraphSymbol();
-  
-  for (int i=0; i<sizeof(copy)/sizeof(copy[0]); i++) {
-    if (!copy[i]) continue;
-    
+  char additonalChars[2] = {' ', '\n'};
+  for (const char i : additonalChars)
+  {
     //add a PY mapping to a single CH-character (already rehashed), i.e. the space/para
-    int hashed = m_map.Get(m_pAlphabet->GetText(copy[i]));
+    int hashed = m_map.GetSingleChar(i);
     DASHER_ASSERT(hashed);
     m_vGroupsByConversion[hashed].insert(static_cast<int>(m_vConversionsByGroup.size())); //identifies the new PY sound
     m_vConversionsByGroup.push_back(std::vector<symbol>(1,hashed));
@@ -85,15 +83,14 @@ SGroupInfo *CMandarinAlphMgr::makePYgroup(const SGroupInfo *in) {
         hashed = static_cast<int>(m_vCHtext.size());
         m_vCHtext.push_back(text);
         m_vCHdisplayText.push_back(m_pAlphabet->GetDisplayText(i));
-        m_vCHcolours.push_back(m_pAlphabet->GetColour(i));
-        if (i==m_pAlphabet->GetParagraphSymbol())
+        if (m_pAlphabet->SymbolPrintsNewLineCharacter(i))
           m_map.AddParagraphSymbol(m_iCHpara=hashed);
         else
           m_map.Add(text,hashed);
         m_vGroupsByConversion.push_back(std::set<symbol>());
       }
       //now, put in PY-group...
-      if (i!=m_pAlphabet->GetSpaceSymbol() && i!=m_pAlphabet->GetParagraphSymbol()) {
+      //if (i!=m_pAlphabet->GetSpaceSymbol() && i!=m_pAlphabet->GetParagraphSymbol()) { // Pretty sure that these characters do not exist in any group, so this should never happen in my understanding
         if (m_vConversionsByGroup.size() == ret->iStart) {
           //First symbol that is directly child of group. Allocate index...
           ret->iNumChildNodes++;
@@ -104,7 +101,7 @@ SGroupInfo *CMandarinAlphMgr::makePYgroup(const SGroupInfo *in) {
         DASHER_ASSERT(m_vConversionsByGroup.size() > ret->iStart);
         m_vConversionsByGroup.back().push_back(hashed);
         m_vGroupsByConversion[hashed].insert(ret->iStart);
-      } //space and para we will put in their own/different groups, later...
+      //} //space and para we will put in their own/different groups, later...
       i++;
     } else {
       //subgroup; skip over
@@ -140,13 +137,13 @@ const std::string &CMandarinAlphMgr::GetLabelText(symbol i) const {
 CMandarinAlphMgr::~CMandarinAlphMgr() {
   for (std::vector<CDasherScreen::Label *>::iterator it=m_vCHLabels.begin(); it!=m_vCHLabels.end(); it++)
     delete *it;
-  m_pPYgroups->RecursiveDelete();
+  delete m_pPYgroups;
 }
 
 void CMandarinAlphMgr::CreateLanguageModel() {
   //std::cout<<"CHALphabet size "<< pCHAlphabet->GetNumberTextSymbols(); [7603]
   //std::cout<<"Setting PPMPY model"<<std::endl;
-  m_pLanguageModel = new CPPMPYLanguageModel(this, static_cast<int>(m_vGroupsByConversion.size())-1, static_cast<int>(m_vConversionsByGroup.size())-1);
+  m_pLanguageModel = new CPPMPYLanguageModel(m_pSettingsStore, static_cast<int>(m_vGroupsByConversion.size())-1, static_cast<int>(m_vConversionsByGroup.size())-1);
 }
 
 CMandarinAlphMgr::CMandarinTrainer::CMandarinTrainer(CMessageDisplay *pMsgs, CMandarinAlphMgr *pMgr)
@@ -252,26 +249,8 @@ CTrainer *CMandarinAlphMgr::GetTrainer() {
   return new CMandarinTrainer(m_pInterface, this);
 }
 
-CAlphabetManager::CAlphNode *CMandarinAlphMgr::CreateSymbolRoot(int iOffset, CLanguageModel::Context ctx, symbol chSym) {
+CAlphNode *CMandarinAlphMgr::CreateSymbolRoot(int iOffset, CLanguageModel::Context ctx, symbol chSym) {
   return new CMandSym(iOffset, this, chSym, 0);
-}
-
-int CMandarinAlphMgr::GetColour(symbol CHsym, int iOffset) const {
-  int iColour = m_vCHcolours[CHsym]; //colours were rehashed with CH symbol text
-  if (iColour==-1) {
-    //none specified in alphabet
-    static int colourStore[2][3] = {
-      {66,//light blue
-        64,//very light green
-        62},//light yellow
-      {78,//light purple
-        81,//brownish
-        60},//red
-    };    
-    return colourStore[iOffset&1][CHsym % 3];
-  }
-  if ((iOffset&1)==0 && iColour<130) iColour+=130;
-  return iColour;
 }
 
 CDasherNode *CMandarinAlphMgr::CreateSymbolNode(CAlphNode *pParent, symbol iSymbol) {
@@ -295,7 +274,7 @@ CDasherNode *CMandarinAlphMgr::CreateSymbolNode(CAlphNode *pParent, symbol iSymb
 CMandarinAlphMgr::CConvRoot *CMandarinAlphMgr::CreateConvRoot(CAlphNode *pParent, symbol iPYsym) {
   
   // the same offset as we've still not entered/selected a symbol (leaf);
-  // Colour is always 9 so ignore iBkgCol
+  // Color is always 9 so ignore iBkgCol
   CConvRoot *pConv = new CConvRoot(pParent->offset(), this, iPYsym);
     
   // and use the same context too (pinyin syll+tone is _not_ used as part of the LM context)
@@ -304,7 +283,7 @@ CMandarinAlphMgr::CConvRoot *CMandarinAlphMgr::CreateConvRoot(CAlphNode *pParent
 }
 
 CMandarinAlphMgr::CConvRoot::CConvRoot(int iOffset, CMandarinAlphMgr *pMgr, symbol pySym)
-: CAlphBase(iOffset, 9, pMgr->m_vLabels[pySym], pMgr), m_pySym(pySym) {
+: CAlphBase(iOffset, pMgr->m_vLabels[pySym], pMgr), m_pySym(pySym) {
   //We do sometimes create CConvRoots with only one child, where we
   // need them to display a label...
   DASHER_ASSERT(pMgr->m_vConversionsByGroup[pySym].size()>1
@@ -358,9 +337,24 @@ bool CMandarinAlphMgr::CConvRoot::isInGroup(const SGroupInfo *pGroup) {
   return pGroup->iStart <= m_pySym && pGroup->iEnd > m_pySym;
 }
 
+const ColorPalette::Color& CMandarinAlphMgr::CConvRoot::getLabelColor(const ColorPalette* colorPalette)
+{
+    return colorPalette->GetNamedColor(NamedColor::defaultLabel);
+}
+
+const ColorPalette::Color& CMandarinAlphMgr::CConvRoot::getOutlineColor(const ColorPalette* colorPalette)
+{
+     return colorPalette->GetNamedColor(NamedColor::defaultOutline);
+}
+
+const ColorPalette::Color& CMandarinAlphMgr::CConvRoot::getNodeColor(const ColorPalette* colorPalette)
+{
+     return colorPalette->GetNamedColor(NamedColor::conversionNode);
+}
+
 void CMandarinAlphMgr::CConvRoot::SetFlag(int iFlag, bool bValue) {
   if (iFlag==NF_COMMITTED && bValue && !GetFlag(NF_COMMITTED)
-      && !GetFlag(NF_GAME) && mgr()->GetBoolParameter(BP_LM_ADAPTIVE)) {
+      && !GetFlag(NF_GAME) && mgr()->m_pSettingsStore->GetBoolParameter(BP_LM_ADAPTIVE)) {
     //CConvRoot's context is the same as parent's context (no symbol yet!),
     // i.e. is the context in which the pinyin was predicted.
     static_cast<CPPMPYLanguageModel *>(mgr()->m_pLanguageModel)->LearnPYSymbol(iContext, m_pySym);
@@ -388,9 +382,9 @@ void CMandarinAlphMgr::GetConversions(std::vector<std::pair<symbol,unsigned int>
   std::set<symbol> haveProbs;
   uint64 iRemaining(CDasherModel::NORMALIZATION);
   
-  if (long percent=GetLongParameter(LP_PY_PROB_SORT_THRES)) {
+  if (long percent=m_pSettingsStore->GetLongParameter(LP_PY_PROB_SORT_THRES)) {
     const uint64 iNorm(iRemaining);
-    const unsigned int uniform(static_cast<unsigned int>((GetLongParameter(LP_UNIFORM)*iNorm)/1000));
+    const unsigned int uniform(static_cast<unsigned int>((m_pSettingsStore->GetLongParameter(LP_UNIFORM)*iNorm)/1000));
     
     //Set up list of symbols with blank probability entries...
     for(std::vector<symbol>::const_iterator it = convs.begin(); it != convs.end(); ++it) {

@@ -25,11 +25,18 @@
 using namespace Dasher;
 
 CCircleStartHandler::CCircleStartHandler(CDefaultFilter *pCreator)
-: CStartHandler(pCreator), CSettingsUserObserver(pCreator), m_iEnterTime(std::numeric_limits<long>::max()), m_iScreenRadius(-1), m_pView(NULL) {
+: CStartHandler(pCreator), m_iEnterTime(std::numeric_limits<long>::max()), m_iScreenRadius(-1), m_pView(nullptr),
+  m_pSettingsStore(pCreator->m_pSettingsStore)
+{
+    m_pSettingsStore->OnParameterChanged.Subscribe(this, [this](const Parameter p)
+    {
+        if (p == LP_CIRCLE_PERCENT) m_iScreenRadius = -1; //recompute geometry.
+    });
 }
 
 CCircleStartHandler::~CCircleStartHandler() {
-  if (m_pView) m_pView->Observable<CDasherView*>::Unregister(this);
+    if(m_pView) m_pView->OnViewChanged.Unsubscribe(this);
+    m_pSettingsStore->OnParameterChanged.Unsubscribe(this);
 }
 
 CDasherScreen::point CCircleStartHandler::CircleCenter(CDasherView *pView) {
@@ -40,7 +47,7 @@ CDasherScreen::point CCircleStartHandler::CircleCenter(CDasherView *pView) {
   // Math.min(screen width, screen height) * LP_CIRCLE_PERCENT / 100
   // - should we?
   screenint iEdgeX, iEdgeY;
-  m_pView->Dasher2Screen(CDasherModel::ORIGIN_X, CDasherModel::ORIGIN_Y + (CDasherModel::MAX_Y*GetLongParameter(LP_CIRCLE_PERCENT))/100, iEdgeX, iEdgeY);
+  m_pView->Dasher2Screen(CDasherModel::ORIGIN_X, CDasherModel::ORIGIN_Y + (CDasherModel::MAX_Y*m_pSettingsStore->GetLongParameter(LP_CIRCLE_PERCENT))/100, iEdgeX, iEdgeY);
 
   const Options::ScreenOrientations iDirection(m_pView->GetOrientation());
 
@@ -54,26 +61,22 @@ CDasherScreen::point CCircleStartHandler::CircleCenter(CDasherView *pView) {
 }
 
 bool CCircleStartHandler::DecorateView(CDasherView *pView) {
-  if (!m_pView) (m_pView=pView)->Observable<CDasherView*>::Register(this);
+  RegisterView(pView);
   CDasherScreen::point ctr = CircleCenter(pView);
 
   const bool bAboutToChange = m_bInCircle && m_iEnterTime != std::numeric_limits<long>::max();
-  int fillColor, lineColor, lineWidth;
   if (m_pFilter->isPaused()) {
-    lineColor=2; lineWidth=1;
-    fillColor = bAboutToChange ? 241 : 242;
+    pView->Screen()->DrawCircle(ctr.x, ctr.y, m_iScreenRadius, pView->GetNamedColor(bAboutToChange ? NamedColor::circleWaiting : NamedColor::circleStopped), pView->GetNamedColor(NamedColor::circleOutline), 1);
   } else {
-    lineColor=240; fillColor=-1; //don't fill
-    lineWidth = bAboutToChange ? 3 : 1;
+	pView->Screen()->DrawCircle(ctr.x, ctr.y, m_iScreenRadius, ColorPalette::noColor, pView->GetNamedColor(NamedColor::circleOutline), bAboutToChange ? 3 : 1);
   }
-
-  pView->Screen()->DrawCircle(ctr.x, ctr.y, m_iScreenRadius, fillColor, lineColor, lineWidth);
 
   return true;
 }
 
 void CCircleStartHandler::Timer(unsigned long iTime, dasherint mouseX, dasherint mouseY,CDasherView *pView) {
-  if (!m_pView) (m_pView=pView)->Observable<CDasherView*>::Register(this);
+  RegisterView(pView);
+
   CDasherScreen::point ctr = CircleCenter(pView);
   screenint x,y;
   pView->Dasher2Screen(mouseX, mouseY, x, y);
@@ -104,9 +107,21 @@ void CCircleStartHandler::Timer(unsigned long iTime, dasherint mouseX, dasherint
   }
 }
 
-void CCircleStartHandler::HandleEvent(Parameter parameter) {
-  if (parameter==LP_CIRCLE_PERCENT)
-      m_iScreenRadius = -1; //recompute geometry.
+void CCircleStartHandler::RegisterView(CDasherView *pView)
+{
+    if(m_pView) return; // We already have one
+    m_pView = pView;
+    m_pView->OnGeometryChanged.Subscribe(this, [this]()
+    {
+        m_iScreenRadius = -1;
+    });
+    m_pView->OnViewChanged.Subscribe(this, [this](CDasherView *pView)
+    {
+        m_pView->OnGeometryChanged.Unsubscribe(this);
+        m_pView->OnViewChanged.Unsubscribe(this);
+        RegisterView(pView);
+        m_iScreenRadius = -1;
+    });
 }
 
 void CCircleStartHandler::onPause() {
@@ -121,13 +136,4 @@ void CCircleStartHandler::onPause() {
 void CCircleStartHandler::onRun(unsigned long iTime) {
   //reset things in exactly the same way as when we pause...
   onPause();
-}
-
-void CCircleStartHandler::HandleEvent(CDasherView *pNewView) {
-  //need to recompute geometry...
-  m_iScreenRadius = -1; //even if it's the same view
-  if (pNewView != m_pView) {
-    if (m_pView) m_pView->Observable<CDasherView*>::Unregister(this);
-    (m_pView=pNewView)->Observable<CDasherView*>::Register(this);
-  }
 }

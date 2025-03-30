@@ -6,7 +6,6 @@
 //
 /////////////////////////////////////////////////////////////////////////////
 
-#include "../../Common/Common.h"
 #include "WordLanguageModel.h"
 #include "PPMLanguageModel.h"
 #include "../Alphabet/AlphabetMap.h"
@@ -15,6 +14,7 @@
 #include <cstdlib>
 #include <fstream>
 #include <iostream>
+#include <myassert.h>
 #include <stack>
 
 using namespace Dasher;
@@ -107,10 +107,11 @@ CWordLanguageModel::CWordnode * CWordLanguageModel::AddSymbolToNode(CWordnode *p
 // CWordLanguageModel defs
 /////////////////////////////////////////////////////////////////////
 
-CWordLanguageModel::CWordLanguageModel(CSettingsUser *pCreator, 
+CWordLanguageModel::CWordLanguageModel(CSettingsStore *pSettingsStore, 
 				       const CAlphInfo *pAlph, const CAlphabetMap *pAlphMap)
-  :CLanguageModel(pAlph->iEnd-1), CSettingsUser(pCreator), m_iSpaceSymbol(pAlph->GetSpaceSymbol()), NodesAllocated(0),
-   max_order(2), m_NodeAlloc(8192), m_ContextAlloc(1024) {
+  :CLanguageModel(pAlph->iEnd-1), m_pSettingsStore(pSettingsStore), m_pAlphInfo(pAlph),
+   NodesAllocated(0), max_order(2), m_NodeAlloc(8192), m_ContextAlloc(1024)
+{
   
   // Construct a root node for the trie
 
@@ -120,7 +121,7 @@ CWordLanguageModel::CWordLanguageModel(CSettingsUser *pCreator,
 
   // Create a spelling model
 
-  pSpellingModel = new CPPMLanguageModel(this, m_iNumSyms);
+  pSpellingModel = new CPPMLanguageModel(m_pSettingsStore, m_iNumSyms);
 
   // Construct a root context
   
@@ -203,7 +204,7 @@ void CWordLanguageModel::GetProbs(Context context, std::vector<unsigned int> &pr
   for(std::vector < double >::iterator it(dProbs.begin()); it != dProbs.end(); ++it)
     *it = 0.0;
 
-  double alpha = GetLongParameter(LP_LM_WORD_ALPHA) / 100.0;
+  double alpha = m_pSettingsStore->GetLongParameter(LP_LM_WORD_ALPHA) / 100.0;
   //  double beta = LanguageModelParams()->GetValue( std::string( "LMBeta" ) )/100.0;
 
   // Ignore beta for now - we'll need to know how many different words have been seen, not just the total count.
@@ -574,7 +575,7 @@ void CWordLanguageModel::AddSymbol(CWordLanguageModel::CWordContext &context, sy
   // Collapse the context (with learning) if we've just entered a space
   // FIXME - we need to generalise this for more languages.
 
-  if(sym == m_iSpaceSymbol) {
+  if(sym > 0 && m_pAlphInfo->SymbolIsSpaceCharacter(sym)) {
     CollapseContext(context, bLearn);
     context.m_dSpellingFactor = 1.0;
   }

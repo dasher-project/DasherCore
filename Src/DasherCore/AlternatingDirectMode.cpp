@@ -3,9 +3,11 @@
 
 // Idea - should back off button always just undo the previous 'forwards' button?
 
-#include "../Common/Common.h"
 
 #include "AlternatingDirectMode.h"
+
+#include <I18n.h>
+
 #include "DasherInterfaceBase.h"
 #include <valarray>
 
@@ -19,8 +21,8 @@ static SModuleSettings sSettings[] = {
   {BP_GLOBAL_KEYBOARD, T_BOOL, -1, -1, -1, -1, _("Global keyboard grab")}
 };
 
-CAlternatingDirectMode::CAlternatingDirectMode(CSettingsUser *pCreator, CDasherInterfaceBase *pInterface)
-  : CDasherButtons(pCreator, pInterface, false/*menu*/, 12, _("Alternating Direct Mode")) {}
+CAlternatingDirectMode::CAlternatingDirectMode(CSettingsStore* pSettingsStore, CDasherInterfaceBase *pInterface)
+  : CDasherButtons(pSettingsStore, pInterface, false/*menu*/, ("Alternating Direct Mode")) {}
 
 void CAlternatingDirectMode::SetupBoxes()
 {

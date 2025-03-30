@@ -1,6 +1,6 @@
-#include "../Common/Common.h"
-
 #include "UserLog.h"
+
+#include <algorithm>
 #include <fstream>
 #include <cstring>
 
@@ -19,7 +19,6 @@ static UserLogParamMask s_UserLogParamMaskTable [] = {
                             userLogParamTrackInTrial |
                             userLogParamForceInTrial |
                             userLogParamShortInCycle},
-  {BP_CONTROL_MODE,         userLogParamOutputToSimple},
   {LP_UNIFORM,              userLogParamOutputToSimple},
   {LP_YSCALE,               userLogParamOutputToSimple},
   {LP_LANGUAGE_MODEL_ID,    userLogParamOutputToSimple},
@@ -32,30 +31,44 @@ static UserLogParamMask s_UserLogParamMaskTable [] = {
   {LP_LM_WORD_ALPHA,        userLogParamOutputToSimple}
 };
 
-CUserLog::CUserLog(CSettingsUser *pCreateFrom,
-                   Observable<const CEditEvent *> *pObsv, int iLogTypeMask)
-: CUserLogBase(pObsv), CSettingsUserObserver(pCreateFrom) {
-  //CFunctionLogger f1("CUserLog::CUserLog", g_pLogger);
+CUserLog::CUserLog(CSettingsStore* pSettingsStore,
+                   CDasherInterfaceBase *pInterface, int iLogTypeMask)
+: CUserLogBase(pInterface), m_pSettingsStore(pSettingsStore) {
+    //CFunctionLogger f1("CUserLog::CUserLog", g_pLogger);
+    m_pSettingsStore->OnParameterChanged.Subscribe(this, [this](const Parameter parameter)
+    {
+        // Go through each of the parameters in our lookup table from UserLogParam.h.
+        // If the key matches the notification event, then we want to push the
+        // parameter change to the logging object.
+        for(auto [key, mask] : s_UserLogParamMaskTable)
+        {
+            if (key == parameter)
+            {
+                UpdateParam(parameter, mask);
+                return;
+            }
+        }
+    });
 
-  InitMemberVars();
+    InitMemberVars();
 
-  m_iLevelMask    = iLogTypeMask;
+    m_iLevelMask    = iLogTypeMask;
 
-  InitUsingMask(iLogTypeMask);
+    InitUsingMask(iLogTypeMask);
 
-  if ((m_bSimple) && (m_pSimpleLogger != NULL))
+    if ((m_bSimple) && (m_pSimpleLogger != NULL))
     m_pSimpleLogger->Log("start, %s", logDEBUG, GetVersionInfo().c_str());
 
-  SetOuputFilename();
-  m_pApplicationSpan = new CTimeSpan("Application", true);
+    SetOuputFilename();
+    m_pApplicationSpan = new CTimeSpan("Application", true);
 
-  if (m_pApplicationSpan == NULL)
-    g_pLogger->Log("CUserLog::CUserLog, failed to create m_pApplicationSpan!", logNORMAL);
+    if (m_pApplicationSpan == NULL)
+        g_pLogger->Log("CUserLog::CUserLog, failed to create m_pApplicationSpan!", logNORMAL);
 
-  // TODO: for the load test harness, we apparently need to create the object directly
-  // without a settings store (which will break CSettingsObserver, etc.); and then,
-  // don't call the following:
-  AddInitialParam();
+    // TODO: for the load test harness, we apparently need to create the object directly
+    // without a settings store (which will break CSettingsObserver, etc.); and then,
+    // don't call the following:
+    AddInitialParam();
 }
 
 CUserLog::~CUserLog()
@@ -104,6 +117,8 @@ CUserLog::~CUserLog()
     delete m_pCycleTimer;
     m_pCycleTimer = NULL;
   }
+
+  m_pSettingsStore->OnParameterChanged.Unsubscribe(this);
 }
 
 // Do initialization of member variables based on the user log level mask
@@ -657,22 +672,6 @@ void CUserLog::KeyDown(Dasher::Keys::VirtualKey Key, int iType, int iEffect) {
     pTrial->AddKeyDown(Key, iType, iEffect);
 }
   
-// This gets called whenever parameters get changed that we are tracking
-void CUserLog::HandleEvent(Parameter parameter)
-{  
-  // Go through each of the parameters in our lookup table from UserLogParam.h.
-  // If the key matches the notification event, then we want to push the
-  // parameter change to the logging object.
-  for(auto [key, mask] : s_UserLogParamMaskTable)
-  {
-	if (key == parameter)
-	{
-		UpdateParam(parameter, mask);
-		return;
-	}
-  }
-}
-
 ////////////////////////////////////////// private methods ////////////////////////////////////////////////
 
 // Just inits all our member variables, called by the constructors
@@ -1054,7 +1053,7 @@ void CUserLog::UpdateParam(Parameter parameter, int iOptionMask)
     {
       // Convert bool to a integer
       int iValue = 0;
-      if (GetBoolParameter(parameter))
+      if (m_pSettingsStore->GetBoolParameter(parameter))
         iValue = 1;
       AddParam(strParamName, iValue, iOptionMask);
       return;
@@ -1062,13 +1061,13 @@ void CUserLog::UpdateParam(Parameter parameter, int iOptionMask)
     }
   case (PARAM_LONG):
     {
-      AddParam(strParamName, (int) GetLongParameter(parameter), iOptionMask);
+      AddParam(strParamName, (int) m_pSettingsStore->GetLongParameter(parameter), iOptionMask);
       return;
       break;
     }
   case (PARAM_STRING):
     {
-      AddParam(strParamName, GetStringParameter(parameter), iOptionMask);
+      AddParam(strParamName, m_pSettingsStore->GetStringParameter(parameter), iOptionMask);
       return;
       break;
     }       
@@ -1079,86 +1078,3 @@ void CUserLog::UpdateParam(Parameter parameter, int iOptionMask)
     }
   };
 }
-
-
-///////////////////////////////////////////////////////////////////////////////////////
-// Below here are methods that are just used in the standalone tool that reads in 
-// UserLog XML files and does cool things to them.  
-// TODO these are broken by settings rewrite. Fix???
-
-// Load the object from an XML file
-CUserLog::CUserLog(std::string strXMLFilename)
-: CUserLogBase(NULL), CSettingsUserObserver(NULL) {
-  //CFunctionLogger f1("CUserLog::CUserLog(XML)", g_pLogger);
-
-  InitMemberVars();
-
-  // We are representing detailed logging when we create from XML
-  m_bDetailed = true;
-
-  VECTOR_STRING vectorTrials;
-
-  // First split up various parts of the XML
-  std::string strXML           = XMLUtil::LoadFile(strXMLFilename);        
-  std::string strApp           = XMLUtil::GetElementString("Application", strXML, true);    
-  std::string strParams        = XMLUtil::GetElementString("Params", strXML, true);           
-  std::string strTrials        = XMLUtil::GetElementString("Trials", strXML, true);
-  vectorTrials            = XMLUtil::GetElementStrings("Trial", strTrials, true);
-
-  m_pApplicationSpan      = new CTimeSpan("Application", strApp);
-  m_vParams               = CUserLogTrial::ParseParamsXML(strParams);
-
-  // Now construct each of the Trial objects based on its section of XML
-  for (VECTOR_STRING_ITER iter = vectorTrials.begin(); iter < vectorTrials.end(); iter++)
-  {
-    CUserLogTrial* pTrial = new CUserLogTrial(*iter, 0);
-
-    if (pTrial != NULL)
-      m_vpTrials.push_back(pTrial);
-  }
-
-}
-
-// Returns a vector that contains vectors of strings which each 
-// contain a tab delimited list of mouse coordinates for each
-// navigation cycle.
-VECTOR_VECTOR_STRING CUserLog::GetTabMouseXY(bool bReturnNormalized)
-{
-  //CFunctionLogger f1("CUserLog::GetTabMouseXY", g_pLogger);
-
-  VECTOR_VECTOR_STRING vResult;
-
-  for (VECTOR_USER_LOG_TRIAL_PTR_ITER iter = m_vpTrials.begin();
-    iter < m_vpTrials.end();
-    iter++)
-  {
-    if (*iter != NULL)
-    {
-      VECTOR_STRING vectorTrial = (*iter)->GetTabMouseXY(bReturnNormalized);
-      vResult.push_back(vectorTrial);
-    }
-  }
-
-  return vResult;
-}
-
-// Returns a vector that contains a vector of density grids.
-VECTOR_VECTOR_DENSITY_GRIDS CUserLog::GetMouseDensity(int iGridSize)
-{
-  //CFunctionLogger f1("CUserLog::GetMouseDensity", g_pLogger);
-
-  VECTOR_VECTOR_DENSITY_GRIDS vResult;
-  for (VECTOR_USER_LOG_TRIAL_PTR_ITER iter = m_vpTrials.begin();
-    iter < m_vpTrials.end();
-    iter++)
-  {
-    if (*iter != NULL)
-    {
-      VECTOR_DENSITY_GRIDS vTrial = (*iter)->GetMouseDensity(iGridSize);
-      vResult.push_back(vTrial);
-    }
-  }
-
-  return vResult;
-}
-

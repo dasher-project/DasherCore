@@ -8,8 +8,8 @@ namespace Dasher {
 /// @{
 class CDemoFilter : public CDynamicFilter {
  public:
-  CDemoFilter(CSettingsUser *pCreator, CDasherInterfaceBase *pInterface, CFrameRate *pFramerate);
-  ~CDemoFilter();
+  CDemoFilter(CSettingsStore* pSettingsStore, CDasherInterfaceBase *pInterface, CFrameRate *pFramerate);
+  virtual ~CDemoFilter();
 
   virtual void HandleEvent(Parameter parameter);
 

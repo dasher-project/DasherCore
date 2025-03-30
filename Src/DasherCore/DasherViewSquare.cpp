@@ -22,7 +22,6 @@
 #include "DasherView.h"
 #include "DasherTypes.h"
 #include "Event.h"
-#include "Observable.h"
 
 #include <algorithm>
 #include <limits>
@@ -39,36 +38,31 @@ using namespace Dasher;
 /////////////////////////////////////////////////////////////////////////////
 // Functions reimplemented from description
 
-//CDasherViewSquare::HandleEvent(int)
-//- Check, if the parameter is either LP_MARGIN_WIDTH, BP_NONLINEAR_Y, LP_NONLINEAR_X or LP_GEOMETRY
-//- if so, invalidate the VisibleRegionand set the scale factor
-//- For all other events do nothing
-
-
-void CDasherViewSquare::HandleEvent(Parameter parameter)
-{
-	if (parameter == LP_MARGIN_WIDTH ||
-		parameter == BP_NONLINEAR_Y ||
-		parameter == LP_NONLINEAR_X ||
-		parameter == LP_GEOMETRY)
-	{
-		m_bVisibleRegionValid = false;
-		SetScaleFactor();
-	}
-}
-
 
 /////////////////////////////////////////////////////////////////////////////
 
-CDasherViewSquare::CDasherViewSquare(CSettingsUser* pCreateFrom, CDasherScreen* DasherScreen, Options::ScreenOrientations orient)
-	: CDasherView(DasherScreen, orient), CSettingsUserObserver(pCreateFrom)
+CDasherViewSquare::CDasherViewSquare(CSettingsStore* pSettingsStore, CDasherScreen* DasherScreen, Options::ScreenOrientations orient)
+	: CDasherView(DasherScreen, orient), m_pSettingsStore(pSettingsStore)
 {
 	//Note, nonlinearity parameters set in SetScaleFactor
 	ScreenResized(DasherScreen);
+
+	m_pSettingsStore->OnParameterChanged.Subscribe(this, [this](const Parameter parameter)
+    {
+        if (parameter == LP_MARGIN_WIDTH ||
+		    parameter == BP_NONLINEAR_Y ||
+		    parameter == LP_NONLINEAR_X ||
+		    parameter == LP_GEOMETRY)
+	    {
+		    m_bVisibleRegionValid = false;
+		    SetScaleFactor();
+	    }
+    });
 }
 
 CDasherViewSquare::~CDasherViewSquare()
 {
+	m_pSettingsStore->OnParameterChanged.Unsubscribe(this);
 }
 
 void CDasherViewSquare::SetOrientation(Options::ScreenOrientations newOrient)
@@ -89,45 +83,83 @@ CDasherNode* CDasherViewSquare::Render(CDasherNode* pRoot, myint iRootMin, myint
                                        CExpansionPolicy& policy)
 {
 	DASHER_ASSERT(pRoot != 0);
-	const ScreenRegion visibleRegion = VisibleRegion();
+	const DasherCoordScreenRegion visibleRegion = VisibleRegion();
+	const ScreenRegion screenRegion = {0,0,Screen()->GetWidth(), Screen()->GetHeight()};
 
-	CDasherNode* pOutput = pRoot->Parent();
+	CDasherNode* currentTopCenterNode = pRoot->Parent(); //Node under crosshair
 
 	// Blank the region around the root node:
-	if (GetLongParameter(LP_SHAPE_TYPE) == Options::DISJOINT_RECTANGLE)
+	if (m_pSettingsStore->GetLongParameter(LP_SHAPE_TYPE) == Options::DISJOINT_RECTANGLE)
 	{
 		//disjoint rects, so go round root
 		if (iRootMin > visibleRegion.minY)
-			DasherDrawRectangle(visibleRegion.maxX, visibleRegion.minY, visibleRegion.minX, iRootMin, 0, -1, 0);
+			DasherDrawRectangle(visibleRegion.maxX, visibleRegion.minY, visibleRegion.minX, iRootMin, GetNamedColor(NamedColor::background), GetNamedColor(NamedColor::defaultOutline), 0);
 
 		if (iRootMax < visibleRegion.maxY)
-			DasherDrawRectangle(visibleRegion.maxX, iRootMax, visibleRegion.minX, visibleRegion.maxY, 0, -1, 0);
+			DasherDrawRectangle(visibleRegion.maxX, iRootMax, visibleRegion.minX, visibleRegion.maxY, GetNamedColor(NamedColor::background), GetNamedColor(NamedColor::defaultOutline), 0);
 
 		//to left (greater Dasher X)
 		if (iRootMax - iRootMin < visibleRegion.maxX)
-			DasherDrawRectangle(visibleRegion.maxX, std::max(iRootMin, visibleRegion.minY), iRootMax - iRootMin, std::min(iRootMax, visibleRegion.maxY), 0, -1, 0);
+			DasherDrawRectangle(visibleRegion.maxX, std::max(iRootMin, visibleRegion.minY), iRootMax - iRootMin, std::min(iRootMax, visibleRegion.maxY), GetNamedColor(NamedColor::background), GetNamedColor(NamedColor::defaultOutline), 0);
 
 		//to right (margin)
-		DasherDrawRectangle(0, visibleRegion.minY, visibleRegion.minX, visibleRegion.maxY, 0, -1, 0);
+		DasherDrawRectangle(0, visibleRegion.minY, visibleRegion.minX, visibleRegion.maxY, GetNamedColor(NamedColor::background), GetNamedColor(NamedColor::defaultOutline), 0);
 
 		//and render root.
-		DisjointRender(pRoot, iRootMin, iRootMax, nullptr, policy, std::numeric_limits<double>::infinity(), pOutput);
+		DisjointRender(pRoot, iRootMin, iRootMax, nullptr, policy, std::numeric_limits<double>::infinity(), currentTopCenterNode);
+	}
+	else if(m_pSettingsStore->GetLongParameter(LP_SHAPE_TYPE) == Options::CUBE)
+	{
+		//Render white box to left side of screen if other nodes do not completely cover the screen
+		if(IsSpaceAroundNode(iRootMin, iRootMax))
+			DasherDrawCube(visibleRegion.maxX, visibleRegion.minY, 0, visibleRegion.maxY, {-1,0}, {-1,-1}, GetNamedColor(NamedColor::background), GetNamedColor(NamedColor::defaultOutline), 0, nullptr);
+
+		m_CrosshairCubeLevel = -1;
+		NewRender(pRoot, iRootMin, iRootMax, nullptr, policy, std::numeric_limits<double>::infinity(), currentTopCenterNode, {0,0},{-1,0}, screenRegion);
+
+		//to right (margin)
+		DasherDrawCube(0, visibleRegion.minY, visibleRegion.minX, visibleRegion.maxY, {m_CrosshairCubeLevel,0}, {-1,-1}, GetNamedColor(NamedColor::background), GetNamedColor(NamedColor::defaultOutline), 0, nullptr);
+
+		// Get Origin
+		screenint originX, originY = -1;
+		Dasher2Screen(CDasherModel::ORIGIN_X, CDasherModel::ORIGIN_Y, originX, originY);
+
+		//Vertical Bar of Crosshair
+		screenint sizeX = 7, sizeY = static_cast<screenint>(static_cast<float>(Screen()->GetHeight()) * 1.05f);
+		if(GetOrientation() == Options::TopToBottom || GetOrientation() == Options::BottomToTop) std::swap(sizeX, sizeY);
+		Screen()->DrawProjectedRectangle(originX, originY, sizeX, sizeY);
+
+		// Print 3DText
+		for (geometry_3DText& text : m_Delayed3DTexts)
+		{
+			DoDelayedText(text.root_node, text.extrusionLevel, text.groupRecursionDepth);
+		}
+		m_Delayed3DTexts.clear();
+
+		//Backshift all cubes and letters
+		Screen()->FinishRender3D(originX, originY, m_CrosshairCubeLevel);
+
+		// Finally decorate the view
+		// Crosshair();
+		return currentTopCenterNode;
 	}
 	else
 	{
 		//overlapping rects/shapes
-		if (pOutput)
+		if (currentTopCenterNode)
 		{
 			//LEFT of Y axis, would be entirely covered by the root node parent (before we render root)
 			// (getColor() gives the right color, even if pOutput is invisible - in that case it gives
 			// the color of its parent)
-			DasherDrawRectangle(visibleRegion.maxX, visibleRegion.minY, 0, visibleRegion.maxY, pOutput->getColor(), -1, 0);
+			DasherDrawRectangle(visibleRegion.maxX, visibleRegion.minY, 0, visibleRegion.maxY, currentTopCenterNode->getNodeColor(m_pColorPalette), GetNamedColor(NamedColor::defaultOutline), 0);
 			//RIGHT of Y axis, should be white.
-			DasherDrawRectangle(0, visibleRegion.minY, visibleRegion.minX, visibleRegion.maxY, 0, -1, 0);
+			DasherDrawRectangle(0, visibleRegion.minY, visibleRegion.minX, visibleRegion.maxY, GetNamedColor(NamedColor::background), GetNamedColor(NamedColor::defaultOutline), 0);
 		}
 		else //easy case, whole screen is white (outside root node, e.g. when starting)
-			Screen()->DrawRectangle(0, 0, Screen()->GetWidth(), Screen()->GetHeight(), 0, -1, 0);
-		NewRender(pRoot, iRootMin, iRootMax, nullptr, policy, std::numeric_limits<double>::infinity(), pOutput);
+		{
+			Screen()->DrawRectangle(0, 0, Screen()->GetWidth(), Screen()->GetHeight(), GetNamedColor(NamedColor::background), GetNamedColor(NamedColor::defaultOutline), 0);
+		}
+		NewRender(pRoot, iRootMin, iRootMax, nullptr, policy, std::numeric_limits<double>::infinity(), currentTopCenterNode, {0,0},{0,0}, screenRegion);
 	}
 
 	// Labels are drawn in a second parse to get the overlapping right
@@ -137,119 +169,136 @@ CDasherNode* CDasherViewSquare::Render(CDasherNode* pRoot, myint iRootMin, myint
 
 	// Finally decorate the view
 	Crosshair();
-	return pOutput;
+	return currentTopCenterNode;
 }
 
 /// Draw text specified in Dasher co-ordinates. The position is
 /// specified as two co-ordinates, intended to the be the corners of
 /// the leading edge of the containing box.
 
-CDasherViewSquare::CTextString* CDasherViewSquare::DasherDrawText(myint iDasherMaxX, myint iDasherMidY, CDasherScreen::Label* pLabel, CTextString* pParent, int iColor)
+CDasherViewSquare::CTextString* CDasherViewSquare::DasherDrawText(myint iDasherMaxX, myint iDasherMidY, CDasherScreen::Label* pLabel, const ColorPalette::Color& Color)
 {
 	screenint x, y;
 	Dasher2Screen(iDasherMaxX, iDasherMidY, x, y);
 
-	//compute font size...
-	myint iSize = GetLongParameter(LP_DASHER_FONTSIZE);
-	{
-		const myint iMaxY(CDasherModel::MAX_Y);
-		if (Screen()->MultiSizeFonts() && iSize > 4)
-		{
-			//font size maxes out at ((iMaxY*3)/2)+iMaxY)/iMaxY = 3/2*smallest
-			// which is reached when iDasherMaxX == iMaxY/2, i.e. the crosshair
-			iSize = (std::min(iDasherMaxX * 3, (iMaxY * 3) / 2) + iMaxY) * iSize / iMaxY;
-		}
-		else
-		{
-			//old style fonts; ignore iSize passed-in.
-			myint iLeftTimesFontSize = (iMaxY - iDasherMaxX) * iSize;
-			if (iLeftTimesFontSize < iMaxY * 19 / 20)
-				iSize *= 20;
-			else if (iLeftTimesFontSize < iMaxY * 159 / 160)
-				iSize *= 14;
-			else
-				iSize *= 11;
-		}
-	}
+	// Old formulation based, where fontSize gave the smallest font size used:
+	    //font size maxes out at ((iMaxY*3)/2)+iMaxY)/iMaxY = 3/2*smallest
+	    // which is reached when iDasherMaxX == iMaxY/2, i.e. the crosshair (ORIGIN_X)
+	    //const myint iSize = (std::min(iDasherMaxX * 3, (iMaxY * 3) / 2) + iMaxY) * m_pSettingsStore->GetLongParameter(LP_DASHER_FONTSIZE) / iMaxY;
 
-	auto pRet = new CTextString(pLabel, x, y, static_cast<int>(iSize), iColor);
-	std::vector<CTextString*>& dest(pParent ? pParent->m_children : m_DelayedTexts);
-	dest.push_back(pRet);
-	return pRet;
+	// New formulation, where fontSize gives the maximum font size, which is reached at the crosshair
+	const float fSize = static_cast<float>(m_pSettingsStore->GetLongParameter(LP_DASHER_FONTSIZE));
+    const float iSize = std::min(fSize,fSize * (0.6f * static_cast<float>(iDasherMaxX)/CDasherModel::ORIGIN_X + 0.4f)); // linear function passing through (0, fSize/2.5) and (CDasherModel::ORIGIN_X, fSize), capped at fSize
+
+	return new CTextString(pLabel, x, y, static_cast<int>(iSize), Color);
 }
 
-void CDasherViewSquare::DoDelayedText(CTextString* pText)
+void CDasherViewSquare::DoDelayedText(CTextString* pText, myint extrusionLevel, myint groupRecursionDepth)
 {
 	//note that it'd be better to compute old-style font sizes here, or even after shunting
 	// across according to the aiMax array, but this needs Dasher co-ordinates, which were
 	// more easily available at CTextString creation time. If it really doesn't look as good,
 	// can put in extra calls to Screen2Dasher....
-	screenint x(pText->m_ix), y(pText->m_iy);
+	// Coordinate Definitions <x,y>:
+	// LR: <left, center>
+	// RL: <right, center>
+	// TB: <center, top>
+	// BT: <center, lower>
+	// x gives the coordinate of the side of the corresponding box
+	// y gives the midpoint in y direction
+	screenint x(pText->m_ix), y(pText->m_iy); 
 	std::pair<screenint, screenint> textDims = Screen()->TextSize(pText->m_pLabel, pText->m_iSize);
+	const bool extrudedText = m_pSettingsStore->GetLongParameter(LP_SHAPE_TYPE) == Options::CUBE;
+
+	screenint textInset = m_pSettingsStore->GetLongParameter(LP_OUTLINE_WIDTH) + m_pSettingsStore->GetLongParameter(LP_TEXT_PADDING);
+	
 	switch (GetOrientation())
 	{
 	case Options::LeftToRight:
 		{
-			screenint iRight = x + textDims.first;
-			if (iRight < Screen()->GetWidth())
+	        const screenint iRight = x + textDims.first;
+			if (x < Screen()->GetWidth() && iRight >= 0)
 			{
-				Screen()->DrawString(pText->m_pLabel, x, y - textDims.second / 2, pText->m_iSize, pText->m_iColor);
-				for (auto it = pText->m_children.begin(); it != pText->m_children.end(); ++it)
+				if(extrudedText)
 				{
-					CTextString* pChild = *it;
-					pChild->m_ix = std::max(pChild->m_ix, iRight);
-					DoDelayedText(pChild);
+					Screen()->Draw3DLabel(pText->m_pLabel, x, y - textDims.second / 2, textInset, Options::LeftToRight, extrusionLevel, groupRecursionDepth, pText->m_iSize, pText->m_Color);
 				}
-				pText->m_children.clear();
+				else
+				{
+					Screen()->DrawString(pText->m_pLabel, x + textInset, y - textDims.second / 2, pText->m_iSize, pText->m_Color);
+				}
 			}
+			for (const auto& pChild : pText->m_children)
+			{
+				pChild->m_ix = std::max(pChild->m_ix, iRight);
+				DoDelayedText(pChild, extrusionLevel + 1, 0);
+			}
+			pText->m_children.clear();
 			break;
 		}
 	case Options::RightToLeft:
 		{
-			screenint iLeft = x - textDims.first;
-			if (iLeft >= 0)
+            const screenint iLeft = x - textDims.first;
+			if (iLeft < Screen()->GetWidth() && x >= 0)
 			{
-				Screen()->DrawString(pText->m_pLabel, iLeft, y - textDims.second / 2, pText->m_iSize, pText->m_iColor);
-				for (auto it = pText->m_children.begin(); it != pText->m_children.end(); ++it)
+				if(extrudedText)
 				{
-					CTextString* pChild = *it;
-					pChild->m_ix = std::min(pChild->m_ix, iLeft);
-					DoDelayedText(*it);
+					Screen()->Draw3DLabel(pText->m_pLabel, iLeft, y - textDims.second / 2, -textInset, Options::RightToLeft, extrusionLevel, groupRecursionDepth, pText->m_iSize, pText->m_Color);
 				}
-				pText->m_children.clear();
+				else
+				{
+					Screen()->DrawString(pText->m_pLabel, iLeft - textInset, y - textDims.second / 2, pText->m_iSize, pText->m_Color);
+				}
 			}
+			for (const auto& pChild : pText->m_children)
+			{
+				pChild->m_ix = std::min(pChild->m_ix, iLeft);
+				DoDelayedText(pChild, extrusionLevel + 1, 0);
+			}
+			pText->m_children.clear();
 			break;
 		}
 	case Options::TopToBottom:
 		{
-			screenint iBottom = y + textDims.second;
-			if (iBottom < Screen()->GetHeight())
+            const screenint iBottom = y + textDims.second;
+			if (y < Screen()->GetHeight() && iBottom >= 0)
 			{
-				Screen()->DrawString(pText->m_pLabel, x - textDims.first / 2, y, pText->m_iSize, pText->m_iColor);
-				for (auto it = pText->m_children.begin(); it != pText->m_children.end(); ++it)
+				if(extrudedText)
 				{
-					CTextString* pChild = *it;
-					pChild->m_iy = std::max(pChild->m_iy, iBottom);
-					DoDelayedText(*it);
+					Screen()->Draw3DLabel(pText->m_pLabel, x - textDims.first / 2, y, textInset, Options::TopToBottom, extrusionLevel, groupRecursionDepth, pText->m_iSize, pText->m_Color);
 				}
-				pText->m_children.clear();
+				else
+				{
+					Screen()->DrawString(pText->m_pLabel, x - textDims.first / 2, y + textInset, pText->m_iSize, pText->m_Color);
+				}
 			}
+			for (const auto& pChild : pText->m_children)
+			{
+				pChild->m_iy = std::max(pChild->m_iy, iBottom);
+				DoDelayedText(pChild, extrusionLevel + 1, 0);
+			}
+			pText->m_children.clear();
 			break;
 		}
 	case Options::BottomToTop:
 		{
-			screenint iTop = y - textDims.second;
-			if (y >= 0)
+            const screenint iTop = y - textDims.second;
+			if (iTop < Screen()->GetHeight() && y >= 0)
 			{
-				Screen()->DrawString(pText->m_pLabel, x - textDims.first / 2, iTop, pText->m_iSize, pText->m_iColor);
-				for (auto it = pText->m_children.begin(); it != pText->m_children.end(); ++it)
+				if(extrudedText)
 				{
-					CTextString* pChild = *it;
-					pChild->m_iy = std::min(pChild->m_iy, iTop);
-					DoDelayedText(*it);
+					Screen()->Draw3DLabel(pText->m_pLabel, x - textDims.first / 2, iTop + textDims.second, textInset, Options::BottomToTop, extrusionLevel, groupRecursionDepth, pText->m_iSize, pText->m_Color);
 				}
-				pText->m_children.clear();
+				else
+				{
+					Screen()->DrawString(pText->m_pLabel, x - textDims.first / 2, iTop - textInset, pText->m_iSize, pText->m_Color);
+				}
 			}
+			for (const auto& pChild : pText->m_children)
+			{
+				DoDelayedText(pChild, extrusionLevel + 1, 0);
+			}
+			pText->m_children.clear();
 			break;
 		}
 	default:
@@ -260,15 +309,17 @@ void CDasherViewSquare::DoDelayedText(CTextString* pText)
 
 CDasherViewSquare::CTextString::~CTextString()
 {
-	for (auto it = m_children.begin(); it != m_children.end(); ++it)
-		delete*it;
+	for (auto& child : m_children)
+	{
+		delete child;
+	}
 }
 
-void CDasherViewSquare::TruncateTri(myint x, myint y1, myint y2, myint midy1, myint midy2, int fillColor, int outlineColor, int lineWidth)
+void CDasherViewSquare::TruncateTri(myint x, myint y1, myint y2, myint midy1, myint midy2, const ColorPalette::Color& fillColor, const ColorPalette::Color& outlineColor, int lineWidth)
 {
 	DASHER_ASSERT(y1 <= midy1 && midy1 <= midy2 && midy2 <= y2);
 	
-	const ScreenRegion visibleRegion = VisibleRegion();
+	const DasherCoordScreenRegion visibleRegion = VisibleRegion();
 
 	myint x1(x), x2(x); //(max)x-coords of the two lines
 	myint tempx1(0), tempx2(0); //& min x-coords
@@ -359,11 +410,11 @@ void CDasherViewSquare::TruncateTri(myint x, myint y1, myint y2, myint midy1, my
 
 #define sq(X) ((X)*(X))
 
-void CDasherViewSquare::Circle(myint Range, myint y1, myint y2, int fCol, int oCol, int lWidth)
+void CDasherViewSquare::Circle(myint Range, myint y1, myint y2, const ColorPalette::Color& fillColor, const ColorPalette::Color& outlineColor, int lineWidth)
 {
 	std::vector<CDasherScreen::point> pts;
 	myint cy((y1 + y2) / 2), r(Range / 2), x1, x2;
-	const ScreenRegion visibleRegion = VisibleRegion();
+	const DasherCoordScreenRegion visibleRegion = VisibleRegion();
 
 	CDasherScreen::point p;
 	//run along bottom edge...
@@ -393,7 +444,7 @@ void CDasherViewSquare::Circle(myint Range, myint y1, myint y2, int fCol, int oC
 		{
 			//circle entirely covers screen
 			DASHER_ASSERT(y1 == visibleRegion.minY);
-			DasherDrawRectangle(visibleRegion.maxX, visibleRegion.minY, 0, visibleRegion.maxY, fCol, oCol, lWidth);
+			DasherDrawRectangle(visibleRegion.maxX, visibleRegion.minY, 0, visibleRegion.maxY, fillColor, outlineColor, lineWidth);
 			return;
 		}
 		//will also need final point at top-right (0,y2 in dasher coords)....
@@ -410,7 +461,7 @@ void CDasherViewSquare::Circle(myint Range, myint y1, myint y2, int fCol, int oC
 	}
 	auto p_array = new CDasherScreen::point[pts.size()];
 	for (unsigned int i = 0; i < pts.size(); i++) p_array[i] = pts[i];
-	Screen()->Polygon(p_array, static_cast<int>(pts.size()), fCol, oCol, lWidth);
+	Screen()->Polygon(p_array, static_cast<int>(pts.size()), fillColor, outlineColor, lineWidth);
 	delete[] p_array;
 }
 
@@ -434,7 +485,7 @@ void CDasherViewSquare::CircleTo(myint cy, myint r, myint y1, myint x1, myint y3
 }
 #undef sq
 
-void CDasherViewSquare::DasherSpaceArc(myint cy, myint r, myint x1, myint y1, myint x2, myint y2, int iColor, int iLineWidth)
+void CDasherViewSquare::DasherSpaceArc(myint cy, myint r, myint x1, myint y1, myint x2, myint y2, const ColorPalette::Color& color, int iLineWidth)
 {
 	CDasherScreen::point p;
 	//start point
@@ -453,17 +504,17 @@ void CDasherViewSquare::DasherSpaceArc(myint cy, myint r, myint x1, myint y1, my
 	CircleTo(cy, r, y1, x1, y2, x2, p, pts, 1.0);
 	auto p_array = new CDasherScreen::point[pts.size()];
 	for (unsigned int i = 0; i < pts.size(); i++) p_array[i] = pts[i];
-	Screen()->Polyline(p_array, static_cast<int>(pts.size()), iLineWidth, iColor);
+	Screen()->Polyline(p_array, static_cast<int>(pts.size()), iLineWidth, color);
 }
 
-void CDasherViewSquare::Quadric(myint Range, myint lowY, myint highY, int fillColor, int outlineColor, int lineWidth)
+void CDasherViewSquare::Quadric(myint Range, myint lowY, myint highY, const ColorPalette::Color& fillColor, const ColorPalette::Color& outlineColor, int lineWidth)
 {
 	static const double RR2 = 1.0 / sqrt(2.0);
 	const int midY = static_cast<int>((lowY + highY) / 2);
 #define NUM_STEPS 40
 	CDasherScreen::point p_array[2 * NUM_STEPS + 2];
 	
-	const ScreenRegion visibleRegion = VisibleRegion();
+	const DasherCoordScreenRegion visibleRegion = VisibleRegion();
 	{
 		myint x1(0), y1(highY), x2(static_cast<myint>(Range * RR2)), y2(static_cast<myint>(highY * RR2 + midY * (1.0 - RR2))), x3(Range), y3(midY);
 		for (int i = 0; i <= NUM_STEPS; i++)
@@ -487,7 +538,7 @@ void CDasherViewSquare::Quadric(myint Range, myint lowY, myint highY, int fillCo
 
 bool CDasherViewSquare::IsSpaceAroundNode(myint y1, myint y2)
 {
-	const ScreenRegion visibleRegion = VisibleRegion();
+	const DasherCoordScreenRegion visibleRegion = VisibleRegion();
 	const myint maxX(y2 - y1);
 	if ((maxX < visibleRegion.maxX) || (y1 > visibleRegion.minY) || (y2 < visibleRegion.maxY))
 		return true; //space around sq => space around anything smaller!
@@ -495,10 +546,11 @@ bool CDasherViewSquare::IsSpaceAroundNode(myint y1, myint y2)
 	//in theory, even if the crosshair is off-screen (!), anything spanning y1-y2 should cover it...
 	DASHER_ASSERT(CoversCrosshair(y2 - y1, y1, y2));
 
-	switch (GetLongParameter(LP_SHAPE_TYPE))
+	switch (m_pSettingsStore->GetLongParameter(LP_SHAPE_TYPE))
 	{
 	case Options::DISJOINT_RECTANGLE:
 	case Options::OVERLAPPING_RECTANGLE:
+	case Options::CUBE:
 		return false;
 	case Options::TRIANGLE:
 		{
@@ -539,17 +591,16 @@ void CDasherViewSquare::DisjointRender(CDasherNode* pRender, myint y1, myint y2,
 	// Set the NF_SUPER flag if this node entirely frames the visual
 	// area.
 
-	const ScreenRegion visibleRegion = VisibleRegion();
+	const DasherCoordScreenRegion visibleRegion = VisibleRegion();
 	pRender->SetFlag(CDasherNode::NF_SUPER, (y2 - y1 >= visibleRegion.maxX) && (y1 <= visibleRegion.minY) && (y2 >= visibleRegion.maxY));
-
-	const int myColor = pRender->getColor();
 
 	if (pRender->getLabel())
 	{
-		const int textColor = GetLongParameter(LP_OUTLINE_WIDTH) < 0 ? myColor : 4;
 		myint ny1 = std::min(visibleRegion.maxY, std::max(visibleRegion.minY, y1)),
 		      ny2 = std::min(visibleRegion.maxY, std::max(visibleRegion.minY, y2));
-		CTextString* pText = DasherDrawText(y2 - y1, (ny1 + ny2) / 2, pRender->getLabel(), pPrevText, textColor);
+		CTextString* pText = DasherDrawText(y2 - y1, (ny1 + ny2) / 2, pRender->getLabel(), pRender->getLabelColor(m_pColorPalette));
+		((pPrevText) ? pPrevText->m_children : m_DelayedTexts).push_back(pText); // add text at appropriate queue
+
 		if (pRender->bShove()) pPrevText = pText;
 	}
 
@@ -570,7 +621,7 @@ void CDasherViewSquare::DisjointRender(CDasherNode* pRender, myint y1, myint y2,
 		//allow empty node to be expanded, it's big enough.
 		policy.pushNode(pRender, static_cast<int>(y1), static_cast<int>(y2), true, dMaxCost);
 		//and render whole node in one go
-		DasherDrawRectangle(std::min(Range, visibleRegion.maxX), std::max(y1, visibleRegion.minY), 0, std::min(y2, visibleRegion.maxY), myColor, -1, 0);
+		DasherDrawRectangle(std::min(Range, visibleRegion.maxX), std::max(y1, visibleRegion.minY), 0, std::min(y2, visibleRegion.maxY), pRender->getNodeColor(m_pColorPalette), pRender->getOutlineColor(m_pColorPalette), 0);
 		//fall through to draw outline
 	}
 	else
@@ -601,7 +652,7 @@ void CDasherViewSquare::DisjointRender(CDasherNode* pRender, myint y1, myint y2,
 				DASHER_ASSERT(dMaxCost == std::numeric_limits<double>::infinity());
 
 				if (newy2 - newy1 < visibleRegion.maxX) //fill in to it's left...
-					DasherDrawRectangle(std::min(Range, visibleRegion.maxX), std::max(y1, visibleRegion.minY), newy2 - newy1, std::min(y2, visibleRegion.maxY), myColor, -1, 0);
+					DasherDrawRectangle(std::min(Range, visibleRegion.maxX), std::max(y1, visibleRegion.minY), newy2 - newy1, std::min(y2, visibleRegion.maxY), pRender->getNodeColor(m_pColorPalette), pRender->getOutlineColor(m_pColorPalette), 0);
 				DisjointRender(pChild, newy1, newy2, pPrevText,
 				               policy, dMaxCost, pOutput);
 				//leave pRender->onlyChildRendered set, so remaining children are skipped
@@ -625,8 +676,7 @@ void CDasherViewSquare::DisjointRender(CDasherNode* pRender, myint y1, myint y2,
 
 				if (pChild->GetFlag(CDasherNode::NF_GAME))
 				{
-					CGameNodeDrawEvent evt(pChild, newy1, newy2);
-					Observable<CGameNodeDrawEvent*>::DispatchEvent(&evt);
+					OnGameNodeDraw.Broadcast(pChild, newy1, newy2);
 				}
 				//switch to "render just one child" mode if all others are off the screen,
 				//and if this _won't_ cause us to avoid rendering a game node...
@@ -635,24 +685,24 @@ void CDasherViewSquare::DisjointRender(CDasherNode* pRender, myint y1, myint y2,
 					DASHER_ASSERT(dMaxCost == std::numeric_limits<double>::infinity());
 					pRender->onlyChildRendered = pChild;
 					if (newy2 - newy1 < visibleRegion.maxX)
-						DasherDrawRectangle(std::min(Range, visibleRegion.maxX), std::max(y1, visibleRegion.minY), newy2 - newy1, std::min(y2, visibleRegion.maxY), myColor, -1, 0);
+						DasherDrawRectangle(std::min(Range, visibleRegion.maxX), std::max(y1, visibleRegion.minY), newy2 - newy1, std::min(y2, visibleRegion.maxY), pRender->getNodeColor(m_pColorPalette), pRender->getOutlineColor(m_pColorPalette), 0);
 					DisjointRender(pChild, newy1, newy2, pPrevText, policy, dMaxCost, pOutput);
 					//ensure we don't blank over this child in "finishing off" the parent (!)
 					lasty = newy2;
 					//all remaining children are offscreen. quickly delete, avoid recomputing ranges...
 					while ((++i) != pRender->GetChildren().end())
-						if (!(*i)->GetFlag(CDasherNode::NF_SEEN)) (*i)->Delete_children();
+						if (!(*i)->GetFlag(CDasherNode::NF_SEEN)) (*i)->DeleteChildren();
 					break;
 				}
-				if (newy2 - newy1 >= GetLongParameter(LP_MIN_NODE_SIZE) //simple test if big enough
+				if (newy2 - newy1 >= m_pSettingsStore->GetLongParameter(LP_MIN_NODE_SIZE) //simple test if big enough
 					&& newy1 <= visibleRegion.maxY && newy2 >= visibleRegion.minY) //at least partly on screen
 				{
 					//child should be rendered!
 					//fill in to its left
-					DasherDrawRectangle(std::min(y2 - y1, visibleRegion.maxX), std::max(newy1, visibleRegion.minY), std::min(newy2 - newy1, visibleRegion.maxX), std::min(newy2, visibleRegion.maxY), myColor, -1, 0);
+					DasherDrawRectangle(std::min(y2 - y1, visibleRegion.maxX), std::max(newy1, visibleRegion.minY), std::min(newy2 - newy1, visibleRegion.maxX), std::min(newy2, visibleRegion.maxY), pRender->getNodeColor(m_pColorPalette), pRender->getOutlineColor(m_pColorPalette), 0);
 
 					if (std::max(lasty, visibleRegion.minY) < newy1) //fill in interval above child up to the last drawn child
-						DasherDrawRectangle(std::min(Range, visibleRegion.maxX), std::max(lasty, visibleRegion.minY), 0, std::min(newy1, visibleRegion.maxY), myColor, -1, 0);
+						DasherDrawRectangle(std::min(Range, visibleRegion.maxX), std::max(lasty, visibleRegion.minY), 0, std::min(newy1, visibleRegion.maxY), pRender->getNodeColor(m_pColorPalette), pRender->getOutlineColor(m_pColorPalette), 0);
 					lasty = newy2;
 					DisjointRender(pChild, newy1, newy2, pPrevText, policy, dMaxCost, pOutput);
 				}
@@ -661,33 +711,63 @@ void CDasherViewSquare::DisjointRender(CDasherNode* pRender, myint y1, myint y2,
 					// We get here if the node is too small to render or is off-screen.
 					// So, collapse it immediately.
 					if (!pChild->GetFlag(CDasherNode::NF_SEEN))
-						pChild->Delete_children();
+						pChild->DeleteChildren();
 				}
 			}
 			//all children rendered.
 			if (lasty < std::min(y2, visibleRegion.maxY))
 			{
 				// Finish off the drawing process, filling in any part of the parent below the last-rendered child
-				DasherDrawRectangle(std::min(Range, visibleRegion.maxX), std::max(lasty, visibleRegion.minY), 0, std::min(y2, visibleRegion.maxY), myColor, -1, 0);
+				DasherDrawRectangle(std::min(Range, visibleRegion.maxX), std::max(lasty, visibleRegion.minY), 0, std::min(y2, visibleRegion.maxY), pRender->getNodeColor(m_pColorPalette), pRender->getOutlineColor(m_pColorPalette), 0);
 			}
 		}
 		//end rendering children, fall through to outline
 	}
 	// Lastly, draw the outline
-	if (GetLongParameter(LP_OUTLINE_WIDTH) && pRender->GetFlag(CDasherNode::NF_VISIBLE))
+	if (m_pSettingsStore->GetLongParameter(LP_OUTLINE_WIDTH) && !pRender->getOutlineColor(m_pColorPalette).isFullyTransparent())
 	{
-		DasherDrawRectangle(std::min(Range, visibleRegion.maxX), std::max(y1, visibleRegion.minY), 0, std::min(y2, visibleRegion.maxY), -1, -1, abs(GetLongParameter(LP_OUTLINE_WIDTH)));
+		DasherDrawRectangle(std::min(Range, visibleRegion.maxX), std::max(y1, visibleRegion.minY), 0, std::min(y2, visibleRegion.maxY), ColorPalette::noColor, pRender->getOutlineColor(m_pColorPalette), abs(m_pSettingsStore->GetLongParameter(LP_OUTLINE_WIDTH)));
 	}
+}
+
+void CDasherViewSquare::DasherDrawCube(myint iDasherMaxX, myint iDasherMinY, myint iDasherMinX, myint iDasherMaxY, CubeDepthLevel nodeDepth, CubeDepthLevel parentDepth, const ColorPalette::Color& Color, const ColorPalette::Color& outlineColor, int iThickness, ScreenRegion* parentScreenBounds)
+{
+	screenint iScreenMaxX, iScreenMinY, iScreenMinX, iScreenMaxY;
+	Dasher2Screen(iDasherMaxX, iDasherMinY, iScreenMaxX, iScreenMinY);
+	Dasher2Screen(iDasherMinX, iDasherMaxY, iScreenMinX, iScreenMaxY);
+
+	if(iScreenMaxX < iScreenMinX) std::swap(iScreenMaxX,iScreenMinX);
+	if(iScreenMaxY < iScreenMinY) std::swap(iScreenMaxY,iScreenMinY);
+
+
+	if(parentScreenBounds){
+	    //Clip to parentBounds
+	    iScreenMaxX = std::min(parentScreenBounds->maxX, iScreenMaxX);
+	    iScreenMaxY = std::min(parentScreenBounds->maxY, iScreenMaxY);
+	    iScreenMinX = std::max(parentScreenBounds->minX, iScreenMinX);
+	    iScreenMinY = std::max(parentScreenBounds->minY, iScreenMinY);
+
+	    parentScreenBounds->minX = iScreenMinX;
+	    parentScreenBounds->minY = iScreenMinY;
+	    parentScreenBounds->maxX = iScreenMaxX;
+	    parentScreenBounds->maxY = iScreenMaxY;
+	}
+
+	const float sizeX = static_cast<float>(iScreenMaxX - iScreenMinX);
+	const float sizeY = static_cast<float>(iScreenMaxY - iScreenMinY);
+
+	Screen()->DrawCube(static_cast<float>(iScreenMinX) + (sizeX / 2.0f), static_cast<float>(iScreenMinY) + (sizeY / 2.0f), sizeX, sizeY, nodeDepth, parentDepth, Color, outlineColor, iThickness);
 }
 
 bool CDasherViewSquare::CoversCrosshair(myint Range, myint y1, myint y2)
 {
 	if (Range > CDasherModel::ORIGIN_X && y1 < CDasherModel::ORIGIN_Y && y2 > CDasherModel::ORIGIN_Y)
 	{
-		switch (GetLongParameter(LP_SHAPE_TYPE))
+		switch (m_pSettingsStore->GetLongParameter(LP_SHAPE_TYPE))
 		{
-		case Options::DISJOINT_RECTANGLE: //Disjoint rectangles
-		case Options::OVERLAPPING_RECTANGLE: //Rectangles
+		case Options::DISJOINT_RECTANGLE:
+		case Options::OVERLAPPING_RECTANGLE:
+		case Options::CUBE:
 			return true;
 		case Options::TRIANGLE:
 			{
@@ -723,27 +803,65 @@ bool CDasherViewSquare::CoversCrosshair(myint Range, myint y1, myint y2)
 	return false;
 }
 
-void CDasherViewSquare::NewRender(CDasherNode* pRender, myint y1, myint y2,
+ColorPalette::Color CDasherViewSquare::SimulateTransparency(CDasherNode* pCurrentNode)
+{
+	if(pCurrentNode == nullptr) return GetNamedColor(NamedColor::background);
+
+    const ColorPalette::Color nodeColor = pCurrentNode->getNodeColor(m_pColorPalette);
+
+	if(nodeColor.isFullyOpaque()) return nodeColor; // no transparency
+	
+	//Interpolate between this and the parent
+	const ColorPalette::Color parentColor = SimulateTransparency(pCurrentNode->Parent());
+	ColorPalette::Color interpolatedColor = ColorPalette::Color::lerp(nodeColor, parentColor, static_cast<float>(nodeColor.Alpha) / 255.0f);
+	interpolatedColor.Alpha = 255;
+	return interpolatedColor;
+}
+
+void CDasherViewSquare::NewRender(CDasherNode* pCurrentNode, myint y1, myint y2,
                                   CTextString* pPrevText, CExpansionPolicy& policy, double dMaxCost,
-                                  CDasherNode*& pOutput)
+                                  CDasherNode*& pCurrentTopCenterNode, CubeDepthLevel nodeDepth, CubeDepthLevel parentDepth, ScreenRegion parentScreenBounds)
 {
 	DASHER_ASSERT_VALIDPTR_RW(pRender);
 	
-	// Set the NF_SUPER flag if this node entirely frames the visual
-	// area.
+	const DasherCoordScreenRegion visibleRegion = VisibleRegion();
 
-	const ScreenRegion visibleRegion = VisibleRegion();
-	pRender->SetFlag(CDasherNode::NF_SUPER, !IsSpaceAroundNode(y1, y2));
+	// Set the NF_SUPER flag if this node entirely frames the visual area.
+	// This causes the model to adjust its root. Do not change the root node, if it would be fully transparent
+	// as this leads to part of the screen not being rendered correctly
+	pCurrentNode->SetFlag(CDasherNode::NF_SUPER, (!IsSpaceAroundNode(y1, y2) && !pCurrentNode->getNodeColor(m_pColorPalette).isFullyTransparent()));
 
-	const int myColor = pRender->getColor();
-
-	if (pRender->getLabel())
+	if(!pCurrentNode->getLabel())
 	{
-		const int textColor = GetLongParameter(LP_OUTLINE_WIDTH) < 0 ? myColor : 4;
+		nodeDepth.extrusionLevel = parentDepth.extrusionLevel; //Use same level as node before
+		nodeDepth.groupRecursionDepth++;
+	}
+    else
+	{
+		nodeDepth.groupRecursionDepth = 0;
+	}
+
+	if (pCurrentNode->getLabel())
+	{
 		myint ny1 = std::min(visibleRegion.maxY, std::max(visibleRegion.minY, y1)),
 		      ny2 = std::min(visibleRegion.maxY, std::max(visibleRegion.minY, y2));
-		CTextString* pText = DasherDrawText(y2 - y1, (ny1 + ny2) / 2, pRender->getLabel(), pPrevText, textColor);
-		if (pRender->bShove()) pPrevText = pText;
+		CTextString* pText = DasherDrawText(y2 - y1, (ny1 + ny2) / 2, pCurrentNode->getLabel(), pCurrentNode->getLabelColor(m_pColorPalette));
+
+		// add text at appropriate queue
+		if(pPrevText){
+			pPrevText->m_children.push_back(pText);
+		} else {
+			if(m_pSettingsStore->GetLongParameter(LP_SHAPE_TYPE) == Options::CUBE)
+			{
+				m_Delayed3DTexts.push_back({pText, nodeDepth.extrusionLevel, nodeDepth.groupRecursionDepth});
+			}
+			else
+			{
+				m_DelayedTexts.push_back(pText);
+			}
+		}
+
+		if (pCurrentNode->bShove()) pPrevText = pText;
 	}
 
 	const myint Range(y2 - y1);
@@ -758,46 +876,57 @@ void CDasherViewSquare::NewRender(CDasherNode* pRender, myint y1, myint y2,
 	// _supposed_ to be the same color as their parent, will have no outlines...
 	// (thankfully having 2 "phases" means this doesn't happen in standard
 	// color schemes)
-	if (pRender->GetFlag(CDasherNode::NF_VISIBLE))
+	if (!pCurrentNode->getNodeColor(m_pColorPalette).isFullyTransparent())
 	{
 		//outline width 0 = fill only; >0 = fill + outline; <0 = outline only
-		const int fill_color = GetLongParameter(LP_OUTLINE_WIDTH) >= 0 ? myColor : -1;
-		const int line_width = abs(GetLongParameter(LP_OUTLINE_WIDTH));
-		switch (GetLongParameter(LP_SHAPE_TYPE))
+		const int line_width = abs(m_pSettingsStore->GetLongParameter(LP_OUTLINE_WIDTH));
+		const ColorPalette::Color& fill_color = line_width < 0 ? ColorPalette::noColor : (m_pSettingsStore->GetBoolParameter(BP_SIMULATE_TRANSPARENCY) ? SimulateTransparency(pCurrentNode) : pCurrentNode->getNodeColor(m_pColorPalette));
+		const ColorPalette::Color& outline_color = line_width == 0 ? ColorPalette::noColor : pCurrentNode->getOutlineColor(m_pColorPalette);
+
+	    switch (m_pSettingsStore->GetLongParameter(LP_SHAPE_TYPE))
 		{
 		case Options::OVERLAPPING_RECTANGLE:
-			DasherDrawRectangle(std::min(Range, visibleRegion.maxX), std::max(y1, visibleRegion.minY), 0, std::min(y2, visibleRegion.maxY), fill_color, -1, line_width);
+	        DasherDrawRectangle(std::min(Range, visibleRegion.maxX), std::max(y1, visibleRegion.minY), 0, std::min(y2, visibleRegion.maxY), fill_color, outline_color, line_width);
 			break;
 		case Options::TRIANGLE:
-			TruncateTri(Range, y1, y2, (y1 + y2) / 2, (y1 + y2) / 2, fill_color, -1, line_width);
+			TruncateTri(Range, y1, y2, (y1 + y2) / 2, (y1 + y2) / 2, fill_color, outline_color, line_width);
 			break;
 		case Options::TRUNCATED_TRIANGLE:
-			TruncateTri(Range, y1, y2, (y1 + y1 + y2) / 3, (y1 + y2 + y2) / 3, fill_color, -1, line_width);
+			TruncateTri(Range, y1, y2, (y1 + y1 + y2) / 3, (y1 + y2 + y2) / 3, fill_color, outline_color, line_width);
 			break;
 		case Options::QUADRIC:
-			Quadric(Range, y1, y2, fill_color, -1, line_width);
+			Quadric(Range, y1, y2, fill_color, outline_color, line_width);
 			break;
 		case Options::CIRCLE:
-			Circle(Range, y1, y2, fill_color, -1, line_width);
+			Circle(Range, y1, y2, fill_color, outline_color, line_width);
 			break;
-		}
+		case Options::CUBE:
+			DasherDrawCube(std::min(Range, visibleRegion.maxX), std::max(y1, visibleRegion.minY), 0, std::min(y2, visibleRegion.maxY), nodeDepth, parentDepth, fill_color, outline_color, line_width, &parentScreenBounds);
+			break;
+		default: break;
+        }
 	}
 
-	//Does node cover crosshair?
-	if (pOutput == pRender->Parent() && CoversCrosshair(Range, y1, y2))
-		pOutput = pRender;
-
-	if (pRender->ChildCount() == 0)
+	// Are we a decendent of the current crosshair covering node?
+	// + Do we cover the crosshair
+	// Covering means (below crosshair)
+	if (pCurrentTopCenterNode == pCurrentNode->Parent() && CoversCrosshair(Range, y1, y2))
 	{
-		if (pOutput == pRender)
+		pCurrentTopCenterNode = pCurrentNode;
+		m_CrosshairCubeLevel = nodeDepth.extrusionLevel; //Current extrusionLevel
+	}
+
+	if (pCurrentNode->ChildCount() == 0)
+	{
+		if (pCurrentTopCenterNode == pCurrentNode)
 		{
 			//covers crosshair! forcibly populate, now!
-			policy.ExpandNode(pRender);
+			policy.ExpandNode(pCurrentNode);
 		}
 		else
 		{
 			//allow empty node to be expanded, it's big enough.
-			policy.pushNode(pRender, static_cast<int>(y1), static_cast<int>(y2), true, dMaxCost);
+			policy.pushNode(pCurrentNode, static_cast<int>(y1), static_cast<int>(y2), true, dMaxCost);
 			return; //no children atm => nothing more to do
 		}
 	}
@@ -811,14 +940,15 @@ void CDasherViewSquare::NewRender(CDasherNode* pRender, myint y1, myint y2,
 		//No reason why we can't collapse a game mode node that's too small/offscreen
 		// - we've got its coordinates, and can recreate its children and set their
 		// NF_GAME flags appropriately when it becomes renderable again...
-		if (pRender != pOutput)
-			dMaxCost = policy.pushNode(pRender, static_cast<int>(y1), static_cast<int>(y2), false, dMaxCost);
+		if (pCurrentNode != pCurrentTopCenterNode)
+			dMaxCost = policy.pushNode(pCurrentNode, static_cast<int>(y1), static_cast<int>(y2), false, dMaxCost);
 	}
 	//Node has children - either it already did, or else it covers the crosshair,
 	// and we've just made them...so render them.
 
+    const CubeDepthLevel nextLevel = {nodeDepth.extrusionLevel + 1, nodeDepth.groupRecursionDepth};
 	//first check if there's only one child we need to render
-	if (CDasherNode* pChild = pRender->onlyChildRendered)
+	if (CDasherNode* pChild = pCurrentNode->onlyChildRendered)
 	{
 		//if child still covers screen, render _just_ it and return
 		myint newy1 = y1 + (Range * pChild->Lbnd()) / CDasherModel::NORMALIZATION;
@@ -828,15 +958,15 @@ void CDasherViewSquare::NewRender(CDasherNode* pRender, myint y1, myint y2,
 		{
 			//covers entire y-axis!
 			//render just that child; nothing more to do for this node => tail call to beginning
-			NewRender(pChild, newy1, newy2, pPrevText, policy, dMaxCost, pOutput);
+			NewRender(pChild, newy1, newy2, pPrevText, policy, dMaxCost, pCurrentTopCenterNode, nextLevel, nodeDepth, parentScreenBounds);
 			return;
 		}
-		pRender->onlyChildRendered = nullptr;
+		pCurrentNode->onlyChildRendered = nullptr;
 	}
 
 	//ok, need to render all children...
 	myint newy1 = y1;
-	auto I = pRender->GetChildren().begin(), E = pRender->GetChildren().end();
+	auto I = pCurrentNode->GetChildren().begin(), E = pCurrentNode->GetChildren().end();
 	while (I != E)
 	{
 		CDasherNode* pChild(*I);
@@ -844,23 +974,22 @@ void CDasherViewSquare::NewRender(CDasherNode* pRender, myint y1, myint y2,
 		myint newy2 = y1 + (Range * pChild->Hbnd()) / CDasherModel::NORMALIZATION;
 		if (pChild->GetFlag(CDasherNode::NF_GAME))
 		{
-			CGameNodeDrawEvent evt(pChild, newy1, newy2);
-			Observable<CGameNodeDrawEvent*>::DispatchEvent(&evt);
+			OnGameNodeDraw.Broadcast(pChild, newy1, newy2);
 		}
 		if (newy1 <= visibleRegion.maxY && newy2 >= visibleRegion.minY)
 		{
 			//onscreen
-			if (newy2 - newy1 > GetLongParameter(LP_MIN_NODE_SIZE))
+			if (newy2 - newy1 > m_pSettingsStore->GetLongParameter(LP_MIN_NODE_SIZE))
 			{
 				//definitely big enough to render.
-				NewRender(pChild, newy1, newy2, pPrevText, policy, dMaxCost, pOutput);
+				NewRender(pChild, newy1, newy2, pPrevText, policy, dMaxCost, pCurrentTopCenterNode, nextLevel, nodeDepth, parentScreenBounds);
 			}
-			else if (!pChild->GetFlag(CDasherNode::NF_SEEN)) pChild->Delete_children();
-			if (newy2 > visibleRegion.maxY && !pRender->GetFlag(CDasherNode::NF_GAME))
+			else if (!pChild->GetFlag(CDasherNode::NF_SEEN)) pChild->DeleteChildren();
+			if (newy2 > visibleRegion.maxY && !pCurrentNode->GetFlag(CDasherNode::NF_GAME))
 			{
 				//remaining children offscreen and no game-mode child we might skip
 				// (among the remainder, or any previous off the top of the screen)
-				if (newy1 < visibleRegion.minY) pRender->onlyChildRendered = pChild; //previous children also offscreen!
+				if (newy1 < visibleRegion.minY) pCurrentNode->onlyChildRendered = pChild; //previous children also offscreen!
 				break; //skip remaining children
 			}
 		}
@@ -870,7 +999,7 @@ void CDasherViewSquare::NewRender(CDasherNode* pRender, myint y1, myint y2,
 	if (I != E)
 	{
 		//broke out of loop. Possibly more to delete...
-		while (++I != E) if (!(*I)->GetFlag(CDasherNode::NF_SEEN)) (*I)->Delete_children();
+		while (++I != E) if (!(*I)->GetFlag(CDasherNode::NF_SEEN)) (*I)->DeleteChildren();
 	}
 	//all children rendered.
 }
@@ -921,18 +1050,18 @@ void CDasherViewSquare::SetScaleFactor(void)
 
 	//set log scaling coefficient (unused if LP_NONLINEAR_X==0)
 	// note previous value = 1/0.2, i.e. a value of LP_NONLINEAR_X =~= 4.8
-	m_dXlogCoeff = exp(GetLongParameter(LP_NONLINEAR_X) / 3.0);
+	m_dXlogCoeff = exp(m_pSettingsStore->GetLongParameter(LP_NONLINEAR_X) / 3.0);
 
 	const bool bHoriz(GetOrientation() == Options::LeftToRight || GetOrientation() == Options::RightToLeft);
 	const screenint iScreenWidth(Screen()->GetWidth()), iScreenHeight(Screen()->GetHeight());
 	const double dPixelsX(bHoriz ? iScreenWidth : iScreenHeight), dPixelsY(bHoriz ? iScreenHeight : iScreenWidth);
 
 	//Defaults/starting values, will be modified later according to scheme in use...
-	iMarginWidth = GetLongParameter(LP_MARGIN_WIDTH);
+	iMarginWidth = m_pSettingsStore->GetLongParameter(LP_MARGIN_WIDTH);
 	double dScaleFactorY(dPixelsY / CDasherModel::MAX_Y);
 	double dScaleFactorX(dPixelsX / static_cast<double>(CDasherModel::MAX_Y + iMarginWidth));
 
-	switch (GetLongParameter(LP_GEOMETRY))
+	switch (m_pSettingsStore->GetLongParameter(LP_GEOMETRY))
 	{
 	case Options::ScreenGeometry::old_style:
 		{
@@ -973,7 +1102,7 @@ void CDasherViewSquare::SetScaleFactor(void)
 			                        ? (dMinXPerPixel + pow(dAspect, 3.0) * (dDesiredXPerPixel - dMinXPerPixel)) //tall+thin
 			                        : (1.0 / dScaleFactorY)); //square or wide+low
 		iMarginWidth = static_cast<myint>(iMarginWidth / 0.9); //this comes from the old scaling by m_dXmpc=0.9. Drop in new scheme?
-		if (GetLongParameter(LP_GEOMETRY) == Options::ScreenGeometry::squish_and_log)
+		if (m_pSettingsStore->GetLongParameter(LP_GEOMETRY) == Options::ScreenGeometry::squish_and_log)
 		{
 			//make whole screen logarithmic (but keep xhair in same place)
 			myint crosshair(xmap(2048)); //should be 2048...
@@ -988,7 +1117,7 @@ void CDasherViewSquare::SetScaleFactor(void)
 	iScaleFactorY = static_cast<myint>(dScaleFactorY * SCALE_FACTOR);
 
 	//notify listeners that coordinates have changed...
-	Observable<CDasherView*>::DispatchEvent(this);
+	OnGeometryChanged.Broadcast();
 }
 
 
@@ -1071,7 +1200,7 @@ void CDasherViewSquare::DasherLine2Screen(myint x1, myint y1, myint x2, myint y2
 	if (x1 != x2 && y1 != y2)
 	{
 		//only diagonal lines ever get changed...
-		if (GetBoolParameter(BP_NONLINEAR_Y))
+		if (m_pSettingsStore->GetBoolParameter(BP_NONLINEAR_Y))
 		{
 			if ((y1 < m_Y3 && y2 > m_Y3) || (y2 < m_Y3 && y1 > m_Y3))
 			{
@@ -1090,7 +1219,7 @@ void CDasherViewSquare::DasherLine2Screen(myint x1, myint y1, myint x2, myint y2
 				y1 = m_Y2;
 			}
 		}
-		if (GetLongParameter(LP_NONLINEAR_X) && (x1 > m_iXlogThres || x2 > m_iXlogThres))
+		if (m_pSettingsStore->GetLongParameter(LP_NONLINEAR_X) && (x1 > m_iXlogThres || x2 > m_iXlogThres))
 		{
 			//into logarithmic section
 			CDasherScreen::point pStart, pScreenMid, pEnd;
@@ -1136,31 +1265,27 @@ void CDasherViewSquare::DasherLine2Screen(myint x1, myint y1, myint x2, myint y2
 	vPoints.push_back(p);
 }
 
-CDasherView::ScreenRegion CDasherViewSquare::VisibleRegion()
+CDasherView::DasherCoordScreenRegion CDasherViewSquare::VisibleRegion()
 {
-	// TODO: Change output parameters to pointers and allow NULL to mean
-	// 'I don't care'. Need to be slightly careful about this as it will
-	// require a slightly more sophisticated caching mechanism
-
 	if (!m_bVisibleRegionValid)
 	{
 		switch (GetOrientation())
 		{
 		case Options::LeftToRight:
-			Screen2Dasher(Screen()->GetWidth(), 0, m_iDasherMinX, m_iDasherMinY);
-			Screen2Dasher(0, Screen()->GetHeight(), m_iDasherMaxX, m_iDasherMaxY);
+			Screen2Dasher(Screen()->GetWidth(), 0, m_visible_region.minX, m_visible_region.minY);
+			Screen2Dasher(0, Screen()->GetHeight(), m_visible_region.maxX, m_visible_region.maxY);
 			break;
 		case Options::RightToLeft:
-			Screen2Dasher(0, 0, m_iDasherMinX, m_iDasherMinY);
-			Screen2Dasher(Screen()->GetWidth(), Screen()->GetHeight(), m_iDasherMaxX, m_iDasherMaxY);
+			Screen2Dasher(0, 0, m_visible_region.minX, m_visible_region.minY);
+			Screen2Dasher(Screen()->GetWidth(), Screen()->GetHeight(), m_visible_region.maxX, m_visible_region.maxY);
 			break;
 		case Options::TopToBottom:
-			Screen2Dasher(0, Screen()->GetHeight(), m_iDasherMinX, m_iDasherMinY);
-			Screen2Dasher(Screen()->GetWidth(), 0, m_iDasherMaxX, m_iDasherMaxY);
+			Screen2Dasher(0, Screen()->GetHeight(), m_visible_region.minX, m_visible_region.minY);
+			Screen2Dasher(Screen()->GetWidth(), 0, m_visible_region.maxX, m_visible_region.maxY);
 			break;
 		case Options::BottomToTop:
-			Screen2Dasher(0, 0, m_iDasherMinX, m_iDasherMinY);
-			Screen2Dasher(Screen()->GetWidth(), Screen()->GetHeight(), m_iDasherMaxX, m_iDasherMaxY);
+			Screen2Dasher(0, 0, m_visible_region.minX, m_visible_region.minY);
+			Screen2Dasher(Screen()->GetWidth(), Screen()->GetHeight(), m_visible_region.maxX, m_visible_region.maxY);
 			break;
 		default:
 			break;
@@ -1169,7 +1294,7 @@ CDasherView::ScreenRegion CDasherViewSquare::VisibleRegion()
 		m_bVisibleRegionValid = true;
 	}
 
-	return {m_iDasherMinX, m_iDasherMinY, m_iDasherMaxX, m_iDasherMaxY};
+	return {m_visible_region.minX, m_visible_region.minY, m_visible_region.maxX, m_visible_region.maxY};
 }
 
 void CDasherViewSquare::ScreenResized(CDasherScreen* NewScreen)
@@ -1182,7 +1307,7 @@ void CDasherViewSquare::ScreenResized(CDasherScreen* NewScreen)
 
 inline void CDasherViewSquare::Crosshair()
 {
-	const ScreenRegion visibleRegion = VisibleRegion();
+	const DasherCoordScreenRegion visibleRegion = VisibleRegion();
 
 	myint x[2];
 	myint y[2];
@@ -1195,7 +1320,7 @@ inline void CDasherViewSquare::Crosshair()
 	x[1] = CDasherModel::ORIGIN_X;
 	y[1] = visibleRegion.maxY;
 
-	DasherPolyline(x, y, 2, 1, 5);
+	DasherPolyline(x, y, 2, 1, GetNamedColor(NamedColor::crosshair));
 
 	// Horizontal bar of crosshair
 
@@ -1205,13 +1330,13 @@ inline void CDasherViewSquare::Crosshair()
 	x[1] = 17 * CDasherModel::ORIGIN_X / 14;
 	y[1] = CDasherModel::ORIGIN_Y;
 
-	DasherPolyline(x, y, 2, 1, 5);
+	DasherPolyline(x, y, 2, 1, GetNamedColor(NamedColor::crosshair));
 }
 
 inline myint CDasherViewSquare::ixmap(myint x) const
 {
 	x -= iMarginWidth;
-	if (GetLongParameter(LP_NONLINEAR_X) > 0 && x >= m_iXlogThres)
+	if (m_pSettingsStore->GetLongParameter(LP_NONLINEAR_X) > 0 && x >= m_iXlogThres)
 	{
 		double dx = (x - m_iXlogThres) / static_cast<double>(CDasherModel::MAX_Y);
 		dx = (exp(dx * m_dXlogCoeff) - 1) / m_dXlogCoeff;
@@ -1222,7 +1347,7 @@ inline myint CDasherViewSquare::ixmap(myint x) const
 
 inline myint CDasherViewSquare::xmap(myint x) const
 {
-	if (GetLongParameter(LP_NONLINEAR_X) && x >= m_iXlogThres)
+	if (m_pSettingsStore->GetLongParameter(LP_NONLINEAR_X) && x >= m_iXlogThres)
 	{
 		double dx = log(1 + (x - m_iXlogThres) * m_dXlogCoeff / CDasherModel::MAX_Y) / m_dXlogCoeff;
 		dx = (dx * CDasherModel::MAX_Y) + m_iXlogThres;
@@ -1233,7 +1358,7 @@ inline myint CDasherViewSquare::xmap(myint x) const
 
 inline myint CDasherViewSquare::ymap(myint y) const
 {
-	if (GetBoolParameter(BP_NONLINEAR_Y))
+	if (m_pSettingsStore->GetBoolParameter(BP_NONLINEAR_Y))
 	{
 		if (y > m_Y2)
 			return m_Y2 + (y - m_Y2) / m_Y1;
@@ -1245,7 +1370,7 @@ inline myint CDasherViewSquare::ymap(myint y) const
 
 inline myint CDasherViewSquare::iymap(myint ydash) const
 {
-	if (GetBoolParameter(BP_NONLINEAR_Y))
+	if (m_pSettingsStore->GetBoolParameter(BP_NONLINEAR_Y))
 	{
 		if (ydash > m_Y2)
 			return (ydash - m_Y2) * m_Y1 + m_Y2;

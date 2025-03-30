@@ -29,7 +29,7 @@ namespace Dasher {
  *
  * This class handles logic and drawing code with respect to the above.
  */
-class CGameModule : protected CSettingsUser, protected TransientObserver<const CEditEvent *>, protected TransientObserver<CGameNodeDrawEvent*>, private TransientObserver<CDasherNode*>, private TransientObserver<CDasherView*> {
+class CGameModule {
  public:
   friend class CDemoFilter;
   /**
@@ -41,9 +41,11 @@ class CGameModule : protected CSettingsUser, protected TransientObserver<const C
    * @param szName The name of this module
    * @param pWordGenerator A pointer to the word generator
    */
-  CGameModule(CSettingsUser *pCreateFrom, CDasherInterfaceBase *pInterface, CDasherView *pView, CDasherModel *pModel);
+  CGameModule(CSettingsStore* pSettingsStore, CDasherInterfaceBase *pInterface, CDasherView *pView, CDasherModel *pModel);
 
-  ~CGameModule();
+  virtual ~CGameModule();
+
+  virtual void HandleEditEvent(CEditEvent::EditEventType type, const std::string& strText, CDasherNode* node);
 
   void StartWriting(unsigned long lTime);
   
@@ -71,21 +73,14 @@ protected:
   virtual void ChunkGenerated() {}
   
   /// Called when a node has been populated. Look for Game children.
-  virtual void HandleEvent(CDasherNode *pNode);
+  void HandleNodePopulated(CDasherNode *pNode);
   
   void DrawBrachistochrone(Dasher::CDasherView* pView);
   void DrawHelperArrow(Dasher::CDasherView* pView);
   myint ComputeBrachCenter();
-    
-  /// Called when a node has been output/deleted. Update string (to be/) written.
-  virtual void HandleEvent(const CEditEvent *);
   
-  /// Called when a NF_GAME node has been drawn.
-  virtual void HandleEvent(CGameNodeDrawEvent *evt); 
-  
-  /// Called when screen geometry has changed. We just use this to look for when the View changes
-  /// (to re-register for CGameNodeDrawEvents - a bit of a hack...)
-  virtual void HandleEvent(CDasherView *);
+  void HandleGameNodeDraw(CDasherNode*, myint y1, myint y2);
+  void HandleViewChange(CDasherView* pView);
 
   ///Draw the target and currently-entered text for the user to follow.
   /// Subclasses should implement using appropriate GUI components, maybe using
@@ -98,7 +93,10 @@ protected:
   const std::vector<symbol> &targetSyms() {return m_vTargetSymbols;}
   int lastCorrectSym() {return m_iLastSym;}
   const CAlphInfo *m_pAlph;
-  CDasherInterfaceBase * const m_pInterface;
+  CDasherInterfaceBase* const m_pInterface;
+  CDasherModel* const m_pModel;
+  CDasherView* m_pView;
+  CSettingsStore* m_pSettingsStore;
 private:
 
   ///
@@ -151,11 +149,6 @@ private:
  * Constants
  * ---------------------------------------------------------------------
  */
-
-  /**
-   * The color (in Dasher colors) to make the crosshair.
-   */
-  const int m_iCrosshairColor;
 
   /**
    * The font size used to draw the target string.

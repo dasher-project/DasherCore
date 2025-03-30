@@ -28,8 +28,8 @@
 namespace Dasher {
 class COneButtonDynamicFilter : public CButtonMultiPress {
  public:
-  COneButtonDynamicFilter(CSettingsUser *pCreator, CDasherInterfaceBase *pInterface, CFrameRate *pFramerate);
-  ~COneButtonDynamicFilter();
+  COneButtonDynamicFilter(CSettingsStore* pSettingsStore, CDasherInterfaceBase *pInterface, CFrameRate *pFramerate);
+  virtual ~COneButtonDynamicFilter();
 
   virtual bool DecorateView(CDasherView *pView, CDasherInput *pInput);
 

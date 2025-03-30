@@ -12,22 +12,22 @@ namespace Dasher {
 /// \ingroup Input
 /// @{
 /// Handles the "menu mode" and "direct mode" input filters, according to the bMenu constructor parameter.
-class CButtonMode : public CDasherButtons, protected CSettingsObserver
+class CButtonMode : public CDasherButtons
 {
  public:
-  CButtonMode(CSettingsUser *pCreator, CDasherInterfaceBase *pInterface, bool bMenu, int iID, const char *szName);
+  CButtonMode(CSettingsStore* pSettingsStore, CDasherInterfaceBase *pInterface, bool bMenu, const char *szName);
+  ~CButtonMode() override;
 
-  virtual void HandleEvent(Parameter parameter);
-  void Timer(unsigned long Time, CDasherView *pView, CDasherInput *pInput, CDasherModel *pModel, CExpansionPolicy **pol);
-  bool DecorateView(CDasherView *pView, CDasherInput *pInput);
+  void Timer(unsigned long Time, CDasherView *pView, CDasherInput *pInput, CDasherModel *pModel, CExpansionPolicy **pol) override;
+  bool DecorateView(CDasherView *pView, CDasherInput *pInput) override;
 
   //override to get mouse clicks/taps back again
-  virtual void KeyDown(unsigned long Time, Keys::VirtualKey Key, CDasherView *pView, CDasherInput *pInput, CDasherModel *pModel);
+  void KeyDown(unsigned long Time, Keys::VirtualKey Key, CDasherView *pView, CDasherInput *pInput, CDasherModel *pModel) override;
   
-  bool GetSettings(SModuleSettings **pSettings, int *iCount);
+  bool GetSettings(SModuleSettings **pSettings, int *iCount) override;
  protected: 
-  void SetupBoxes();
-  void DirectKeyDown(unsigned long iTime, Keys::VirtualKey Key, CDasherView* pView, CDasherModel* pModel);
+  void SetupBoxes() override;
+  void DirectKeyDown(unsigned long iTime, Keys::VirtualKey Key, CDasherView* pView, CDasherModel* pModel) override;
  private:
   bool m_bHighlight;
   unsigned long m_iLastTime;

@@ -1,5 +1,7 @@
 #include "FileWordGenerator.h"
 
+#include <myassert.h>
+
 using namespace Dasher;
 
 CFileWordGenerator::CFileWordGenerator(CMessageDisplay *pMsgs, const CAlphInfo *pAlph, const CAlphabetMap *pAlphMap)
@@ -59,7 +61,13 @@ std::string CFileWordGenerator::GetLine() {
   m_sFileHandle.seekg(m_vLineIndices[i]);
   m_vLineIndices.erase(m_vLineIndices.begin()+i);
   //TODO: call DashIntf::Message, and return "", instead?
-  if (!m_sFileHandle.good()) throw std::runtime_error("File I/O error reading "+m_sPath);
+  if (!m_sFileHandle.good()){
+#ifdef __EXCEPTIONS
+  	throw std::runtime_error("File I/O error reading "+m_sPath);
+#else
+    return "";
+#endif
+  }
   std::string sRes;
   std::getline(m_sFileHandle, sRes);
   DASHER_ASSERT(!sRes.empty()); //shouldn't have stored index of empty string

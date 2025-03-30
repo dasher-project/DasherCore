@@ -71,7 +71,7 @@ bool BudgettingPolicy::apply() {
     std::pair<double,CDasherNode *> node = sCollapse.back();
     DASHER_ASSERT(node.first >= collapseCost);
     collapseCost = node.first;
-    node.second->Delete_children();    
+    node.second->DeleteChildren();    
     sCollapse.pop_back();
   }
 
@@ -94,7 +94,7 @@ bool BudgettingPolicy::apply() {
       std::pair<double,CDasherNode *> node = sCollapse.back();
       DASHER_ASSERT(node.first >= collapseCost);
       collapseCost = node.first;
-      node.second->Delete_children();
+      node.second->DeleteChildren();
       sCollapse.pop_back();
       //...and see how much room that makes
     }

@@ -236,7 +236,7 @@ int CCTWLanguageModel::FindPath(CCTWContext & context, char NewChar, int phase, 
     for (unsigned int i=0; i<context.Context.size();i++)
     {
 	  unsigned char CurChar = context.Context.at(i);
-	  Stepsize = (HashTable.GetHashOffSet(CurChar)<<1)+1; // get stepsize. Shift+1 to keep result odd, to prevent cycles
+	  Stepsize = (CHashTable::GetHashOffSet(CurChar)<<1)+1; // get stepsize. Shift+1 to keep result odd, to prevent cycles
       bool found = false;
       for (int Tries = 1; Tries<MaxTries; Tries++)
       {

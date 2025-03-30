@@ -8,7 +8,7 @@ namespace Dasher {
 /// @{
 class COneButtonFilter : public CStaticFilter {
  public:
-  COneButtonFilter(CSettingsUser *pCreator, CDasherInterfaceBase *pInterface);
+  COneButtonFilter(CSettingsStore* pSettingsStore, CDasherInterfaceBase *pInterface);
 
   virtual bool DecorateView(CDasherView *pView, CDasherInput *pInput);
   virtual void Timer(unsigned long Time, CDasherView *pView, CDasherInput *pInput, CDasherModel *m_pDasherModel, CExpansionPolicy **pol);

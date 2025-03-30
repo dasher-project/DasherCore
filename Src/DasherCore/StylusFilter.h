@@ -1,6 +1,8 @@
 #ifndef __STYLUS_FILTER_H__
 #define __STYLUS_FILTER_H__
 
+#include <I18n.h>
+
 #include "DefaultFilter.h"
 #include "ClickFilter.h"
 
@@ -9,7 +11,7 @@
 namespace Dasher {
 class CStylusFilter : public CDefaultFilter, protected CZoomAdjuster {
  public:
-  CStylusFilter(CSettingsUser *pCreator, CDasherInterfaceBase *pInterface, CFrameRate *pFramerate, ModuleID_t iID=15, const char *szName=_("Stylus Control"));
+  CStylusFilter(CSettingsStore* pSettingsStore, CDasherInterfaceBase *pInterface, CFrameRate *pFramerate, const char *szName=_("Stylus Control"));
   ///Override DefaultFilter (which supports pause), as we don't
   /// - motion requires continually holding stylus against screen
   virtual bool supportsPause() {return false;}

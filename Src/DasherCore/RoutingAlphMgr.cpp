@@ -7,12 +7,15 @@
 //
 
 #include "RoutingAlphMgr.h"
+
+#include <I18n.h>
+
 #include "DasherInterfaceBase.h"
 using namespace Dasher;
 
 
-CRoutingAlphMgr::CRoutingAlphMgr(CSettingsUser *pCreator, CDasherInterfaceBase *pInterface, CNodeCreationManager *pNCManager, const CAlphInfo *pAlphabet)
-: CAlphabetManager(pCreator, pInterface, pNCManager, pAlphabet) {
+CRoutingAlphMgr::CRoutingAlphMgr(CSettingsStore* pSettingsStore, CDasherInterfaceBase *pInterface, CNodeCreationManager *pNCManager, const CAlphInfo *pAlphabet)
+: CAlphabetManager(pSettingsStore, pInterface, pNCManager, pAlphabet) {
   
   DASHER_ASSERT(pAlphabet->m_iConversionID==3 || pAlphabet->m_iConversionID==4);
 }
@@ -44,7 +47,7 @@ void CRoutingAlphMgr::InitMap() {
 }
 
 void CRoutingAlphMgr::CreateLanguageModel() {
-  m_pLanguageModel = new CRoutingPPMLanguageModel(this, &m_vBaseSyms, &m_vRoutes, m_pAlphabet->m_iConversionID==4);
+  m_pLanguageModel = new CRoutingPPMLanguageModel(m_pSettingsStore, &m_vBaseSyms, &m_vRoutes, m_pAlphabet->m_iConversionID == CAlphInfo::RoutingContextSensitive);
 }
 
 std::string CRoutingAlphMgr::CRoutedSym::trainText() {
@@ -62,32 +65,13 @@ CRoutingAlphMgr::CRoutedSym::CRoutedSym(int iOffset, CDasherScreen::Label *pLabe
 };
 
 
-CAlphabetManager::CAlphNode *CRoutingAlphMgr::CreateSymbolRoot(int iOffset, CLanguageModel::Context ctx, symbol sym) {
+CAlphNode *CRoutingAlphMgr::CreateSymbolRoot(int iOffset, CLanguageModel::Context ctx, symbol sym) {
   //sym is from the map, so a base symbol. It's at the end of the context,
   // TODO unless this is the completely-empty context,
   // so ask the LM for which way it's most likely to have been entered
   sym = static_cast<CRoutingPPMLanguageModel*>(m_pLanguageModel)->GetBestRoute(ctx);
   return new CRoutedSym(iOffset, m_vLabels[sym], this, sym);
 }
-
-int CRoutingAlphMgr::GetColour(symbol route, int iOffset) const {
-  int iColour = m_pAlphabet->GetColour(route); //colours were rehashed with CH symbol text
-  if (iColour==-1) {
-    //none specified in alphabet
-    static int colourStore[2][3] = {
-      {66,//light blue
-        64,//very light green
-        62},//light yellow
-      {78,//light purple
-        81,//brownish
-        60},//red
-    };    
-    return colourStore[iOffset&1][route % 3];
-  }
-  if ((iOffset&1)==0 && iColour<130) iColour+=130;
-  return iColour;
-}
-
 
 CDasherNode *CRoutingAlphMgr::CreateSymbolNode(CAlphNode *pParent, symbol iSymbol) {
 

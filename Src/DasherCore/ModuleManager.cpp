@@ -18,92 +18,73 @@
 // along with Dasher; if not, write to the Free Software 
 // Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
-#include <iostream>
-#include <stdexcept>
-
 #include "ModuleManager.h"
+
 #include "DasherInput.h"
 #include "InputFilter.h"
 
 using namespace Dasher;
 
-CDasherModule *CModuleManager::RegisterModule(CDasherModule *pModule) {
-    m_vModules.push_back(pModule);
-    ModuleID_t id = m_vModules.size() - 1;
-    pModule->SetID(id);
+CModuleManager::~CModuleManager() {}
 
-    // This does
-    //     m_mapNameToID[pModule->GetName()] = id;
-    // but with error checking.
-    std::pair<std::map<std::string, ModuleID_t>::iterator, bool> res;
-    std::pair<const std::string, ModuleID_t> keyvalue(pModule->GetName(), id);
-    res = m_mapNameToID.insert(keyvalue);
-    if (!res.second)
-        std::cerr << "Module \"" << pModule->GetName()
-                  << "\" registered twice" << std::endl;
-
+CDasherInput* CModuleManager::RegisterInputDeviceModule(CDasherInput* pModule, bool makeDefault)
+{
+    m_InputDeviceModules[pModule->GetName()] = pModule;
+    if(makeDefault) m_sDefaultInputDevice = pModule->GetName();
     return pModule;
 }
 
-CDasherModule *CModuleManager::GetModule(ModuleID_t iID) {
-    // This does
-    //     return m_vModules[iID];
-    // but with error checking.
-    try {
-        return m_vModules.at(iID);
-    }
-    catch (std::out_of_range) {
-        std::cerr << "Module with ID " << iID << " not found" << std::endl;
-        return NULL;
+CInputFilter* CModuleManager::RegisterInputMethodModule(CInputFilter* pModule, bool makeDefault)
+{
+    m_InputMethodModules[pModule->GetName()] = pModule;
+    if(makeDefault) m_sDefaultInputMethod = pModule->GetName();
+    return pModule;
+}
+
+void CModuleManager::ListInputDeviceModules(std::vector<std::string>& vList)
+{
+    for(auto& [key,_] : m_InputDeviceModules)
+    {
+        vList.push_back(key);
     }
 }
 
-CDasherModule *CModuleManager::GetModuleByName(const std::string strName) {
-    // This does
-    //    return m_vModules[m_mapNameToID[strName]];
-    // but with error checking.
-    std::map<std::string, ModuleID_t>::iterator res;
-    res = m_mapNameToID.find(strName);
-    if (res == m_mapNameToID.end()) {
-        std::cerr << "Module \"" << strName << "\" not registered" <<std::endl;
-        return NULL;
-    } else {
-        return m_vModules[res->second];
+void CModuleManager::ListInputMethodModules(std::vector<std::string>& vList)
+{
+    for(auto& [key,_] : m_InputMethodModules)
+    {
+        vList.push_back(key);
     }
 }
 
-void CModuleManager::ListModules(int iType, std::vector<std::string> &vList) {
-    for (ModuleID_t i = 0; i < m_vModules.size(); ++i) {
-        if(m_vModules[i]->GetType() == iType)
-            vList.push_back(m_vModules[i]->GetName());
+CDasherInput* CModuleManager::GetInputDeviceByName(const std::string strName)
+{
+    if (m_InputDeviceModules.find(strName) != m_InputDeviceModules.end()) {
+        return m_InputDeviceModules[strName];
     }
+    return nullptr;
 }
 
-CModuleManager::~CModuleManager() {
-/* XXX PRLW: Modules are Components. Components are registered
- * with an event handler on creation. When they are unregistered,
- * they are deleted, so this part is not necessary. One question
- * then is why are effectively maintaining two lists.
-    for (ModuleID_t i = 0; i < m_vModules.size(); ++i) {
-        delete m_vModules[i];
+CInputFilter* CModuleManager::GetInputMethodByName(const std::string strName)
+{
+    if (m_InputMethodModules.find(strName) != m_InputMethodModules.end()) {
+        return m_InputMethodModules[strName];
     }
- */
+    return nullptr;
 }
 
 CDasherInput *CModuleManager::GetDefaultInputDevice() {
-    return m_pDefaultInputDevice;
+    return m_InputDeviceModules[m_sDefaultInputDevice];
 }
 
 CInputFilter *CModuleManager::GetDefaultInputMethod() {
-    return m_pDefaultInputMethod;
+    return m_InputMethodModules[m_sDefaultInputMethod];
 }
 
 void CModuleManager::SetDefaultInputDevice(CDasherInput *p) {
-  DASHER_ASSERT(p->GetType() == InputDevice);
-  m_pDefaultInputDevice = p;
+  m_sDefaultInputDevice = p->GetName();
 }
 
 void CModuleManager::SetDefaultInputMethod(CInputFilter *p) {
-  DASHER_ASSERT(p->GetType() == InputMethod);
-  m_pDefaultInputMethod = p;
+  m_sDefaultInputMethod = p->GetName();
 }

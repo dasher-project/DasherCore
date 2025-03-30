@@ -3,9 +3,10 @@
 
 // Idea - should back off button always just undo the previous 'forwards' button?
 
-#include "../Common/Common.h"
-
 #include "CompassMode.h"
+
+#include <I18n.h>
+
 #include "DasherScreen.h"
 #include "DasherInterfaceBase.h"
 #include <valarray>
@@ -24,14 +25,16 @@ static SModuleSettings sSettings[] = {
 
 // FIX iStyle == 2
 
-CCompassMode::CCompassMode(CSettingsUser *pCreator, CDasherInterfaceBase *pInterface)
-  : CDasherButtons(pCreator, pInterface, false /*bMenu*/, 13, _("Compass Mode")) {}
+CCompassMode::CCompassMode(CSettingsStore* pSettingsStore, CDasherInterfaceBase *pInterface)
+    : CDasherButtons(pSettingsStore, pInterface, false /*bMenu*/, _("Compass Mode")), iTargetWidth(0)
+{
+}
 
 void CCompassMode::SetupBoxes()
 {
   m_pBoxes = new SBoxInfo[m_iNumBoxes = 4];
 
-  iTargetWidth = CDasherModel::MAX_Y * 1024 / GetLongParameter(LP_RIGHTZOOM);
+  iTargetWidth = CDasherModel::MAX_Y * 1024 / m_pSettingsStore->GetLongParameter(LP_RIGHTZOOM);
 
   // FIXME - need to relate these to cross-hair position as stored in the parameters
 
@@ -75,19 +78,19 @@ bool CCompassMode::DecorateView(CDasherView *pView, CDasherInput *pInput) {
     pView->Dasher2Screen(-1000, iPos, p[1].x, p[1].y);
 
     if(bFirst)
-      pScreen->Polyline(p, 2, 1, 1);
+      pScreen->Polyline(p, 2, 1, pView->GetNamedColor(NamedColor::selectionHighlight));
     else
-      pScreen->Polyline(p, 2, 1, 2);
+      pScreen->Polyline(p, 2, 1, pView->GetNamedColor(NamedColor::selectionInactive));
 
     pView->Dasher2Screen(-100, 4096-iPos, p[0].x, p[0].y);
 
     pView->Dasher2Screen(-1000, 4096-iPos, p[1].x, p[1].y);
 
     if(bFirst)
-      pScreen->Polyline(p, 2, 1, 1);
+      pScreen->Polyline(p, 2, 1, pView->GetNamedColor(NamedColor::selectionHighlight));
     else
-      pScreen->Polyline(p, 2, 1, 2);
-
+      pScreen->Polyline(p, 2, 1, pView->GetNamedColor(NamedColor::selectionInactive));
+     
     iPos -= iTargetWidth;
     bFirst = false;
   }

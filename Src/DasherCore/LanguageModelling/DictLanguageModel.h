@@ -25,9 +25,9 @@
 namespace Dasher {
   /// \ingroup LM
   /// \{
-  class CDictLanguageModel:public CLanguageModel, protected CSettingsUser {
+  class CDictLanguageModel: public CLanguageModel {
   public:
-    CDictLanguageModel(CSettingsUser *pCreator, const CAlphInfo *pAlph, const CAlphabetMap *pAlphMap);
+    CDictLanguageModel(CSettingsStore* pSettingsStore, const CAlphInfo *pAlph, const CAlphabetMap *pAlphMap);
     virtual ~CDictLanguageModel();
 
     Context CreateEmptyContext();
@@ -40,6 +40,8 @@ namespace Dasher {
     virtual void LearnSymbol(Context context, int Symbol) {
       EnterSymbol(context, Symbol);
     };                          // Never learn in this model
+  protected:
+    CSettingsStore* m_pSettingsStore;
 
   private:
 
@@ -81,7 +83,7 @@ namespace Dasher {
     };
     
     const CAlphabetMap *m_pAlphMap;
-    const int m_iSpaceSymbol;
+    const CAlphInfo *m_pAlph;
 
     CDictnode *AddSymbolToNode(CDictnode * pNode, symbol sym, int *update);
 

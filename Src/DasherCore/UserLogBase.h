@@ -3,7 +3,6 @@
 
 #include "DasherTypes.h"
 #include "UserLogTrial.h" // Don't want to include this, but needed for event type enum
-#include "Observable.h"
 #include "Event.h"
 #include "SettingsStore.h"
 
@@ -16,9 +15,10 @@ namespace Dasher {
 
 /// \defgroup Logging Logging routines
 /// @{
-class CUserLogBase : protected TransientObserver<const Dasher::CEditEvent *> {
+class CUserLogBase {
  public:
-  CUserLogBase(Observable<const Dasher::CEditEvent*> *pHandler);
+  CUserLogBase(Dasher::CDasherInterfaceBase *pInterface);
+  virtual ~CUserLogBase();
 
   virtual void AddParam(const std::string& strName, const std::string& strValue, int iOptionMask = 0) = 0;
   virtual void AddParam(const std::string& strName, double dValue, int iOptionMask = 0) = 0;
@@ -49,6 +49,7 @@ protected:
 private:
   std::vector<Dasher::SymbolProb> m_vAdded;
   int m_iNumDeleted;
+  Dasher::CDasherInterfaceBase* m_pInterface;
 };
 /// @}
 

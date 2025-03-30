@@ -1,0 +1,2 @@
+The here found color definitions are automatically converted from the old color definitions in the "colours" subdirectory.
+If something is missing you can add the missing group definitions into the ParseColors.py and run it again to update all the here found colour definitions to include these groups.
