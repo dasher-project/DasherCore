@@ -613,12 +613,12 @@ void CAlphabetManager::IterateChildGroups(CAlphNode *pParent, const SGroupInfo *
     bool bSymbol = !pCurrentNode //gone past last subgroup
                   || i < pCurrentNode->iStart; //not reached next subgroup
     const int iStart=i, iEnd = (bSymbol) ? i+1 : pCurrentNode->iEnd;
-    //uint64 is platform-dependently #defined in DasherTypes.h as an (unsigned) 64-bit int ("__int64" or "long long int")
+    //uint64_t is platform-dependently #defined in DasherTypes.h as an (unsigned) 64-bit int ("__int64" or "long long int")
     unsigned int iLbnd = (((*pCProb)[iStart-1] - (*pCProb)[iMin-1]) *
-                          static_cast<uint64>(CDasherModel::NORMALIZATION)) /
+                          static_cast<uint64_t>(CDasherModel::NORMALIZATION)) /
                          iRange;
     unsigned int iHbnd = (((*pCProb)[iEnd-1] - (*pCProb)[iMin-1]) *
-                          static_cast<uint64>(CDasherModel::NORMALIZATION)) /
+                          static_cast<uint64_t>(CDasherModel::NORMALIZATION)) /
                          iRange;
     if (bSymbol) {
       pNewChild = (buildAround) ? buildAround->RebuildSymbol(pParent, i) : CreateSymbolNode(pParent, i);

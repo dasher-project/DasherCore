@@ -32,6 +32,7 @@
 
 #include <vector>
 #include <sstream>
+#include <cstdint>
 
 using namespace Dasher;
 
@@ -381,10 +382,10 @@ void CMandarinAlphMgr::GetConversions(std::vector<std::pair<symbol,unsigned int>
   //Two degenerate cases: PROB_SORT_THRES=0 => all (legal) ch symbols predicted uniformly
   // PROB_SORT_THRES=100 => all symbols put into probability order
   std::set<symbol> haveProbs;
-  uint64 iRemaining(CDasherModel::NORMALIZATION);
+  uint64_t iRemaining(CDasherModel::NORMALIZATION);
   
   if (long percent=m_pSettingsStore->GetLongParameter(LP_PY_PROB_SORT_THRES)) {
-    const uint64 iNorm(iRemaining);
+    const uint64_t iNorm(iRemaining);
     const unsigned int uniform(static_cast<unsigned int>((m_pSettingsStore->GetLongParameter(LP_UNIFORM)*iNorm)/1000));
     
     //Set up list of symbols with blank probability entries...
@@ -398,7 +399,7 @@ void CMandarinAlphMgr::GetConversions(std::vector<std::pair<symbol,unsigned int>
   
     //std::cout<<"after get probs "<<std::endl;
   
-    uint64 sumProb=0;  
+    uint64_t sumProb=0;  
     for (std::vector<std::pair<symbol,unsigned int> >::const_iterator it = vChildren.begin(); it!=vChildren.end(); it++) {
       sumProb += it->second;
     }

@@ -33,18 +33,19 @@
 // new word and don't use underscores (except as above).
 //
 
-#include "../Common/Types/int.h"
 #include <string>
 #include <vector>
+#include <cstdint>
 
+//Some typedefs to not having to change this in all of the DasherCore
 namespace Dasher
 {
   // DasherModel co-ordinates are of type myint
-  typedef int64 myint;
-  typedef int64 dasherint;
+  typedef int64_t myint;
+  typedef int64_t dasherint;
 
   // All screen co-ordinates are of type screenint
-  typedef int32 screenint;
+  typedef int32_t screenint;
 
   // Using a signed symbol type allows "Out of band" ie negative {{{
   // values to be used to flag non-symbol data. For example commands

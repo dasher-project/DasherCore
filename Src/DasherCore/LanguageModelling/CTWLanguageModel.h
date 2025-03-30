@@ -27,7 +27,8 @@
 
 #include <vector>			
 #include "LanguageModel.h"
-#include <deque>			
+#include <deque>
+#include <cstdint>	
 
 using namespace Dasher;
 using namespace std;

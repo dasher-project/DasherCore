@@ -22,14 +22,12 @@
 #define __DasherModel_h__
 
 #include <deque>
-#include <vector>
 
 #include "../Common/NoClones.h"
 #include "DasherNode.h"
 #include "DasherTypes.h"
 #include "Event.h"
 #include "ExpansionPolicy.h"
-#include "SettingsStore.h"
 
 namespace Dasher {
   class CDasherModel;

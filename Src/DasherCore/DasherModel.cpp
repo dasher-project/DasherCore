@@ -20,10 +20,10 @@
 
 #include "DasherModel.h"
 #include "DasherView.h"
-#include "Parameters.h"
 
 #include "NodeCreationManager.h"
 #include <cmath>
+#include <cstdint>
 
 using namespace Dasher;
 
@@ -50,9 +50,8 @@ CDasherModel::CDasherModel() {
 
   m_dAddProb = 0.003;
 
-  m_Rootmin_min = int64_min / NORMALIZATION / 2;
-  m_Rootmax_max = int64_max / NORMALIZATION / 2;
-
+  m_Rootmin_min = std::numeric_limits<int64_t>::min() / NORMALIZATION / 2;
+  m_Rootmax_max = std::numeric_limits<int64_t>::max() / NORMALIZATION / 2;
 }
 
 CDasherModel::~CDasherModel() {
@@ -106,7 +105,7 @@ void CDasherModel::Make_root(CDasherNode *pNewRoot) {
   for(std::deque<std::pair<myint,myint> >::iterator it(m_deGotoQueue.begin()); it != m_deGotoQueue.end(); ++it) {
     //Some of these co-ordinate pairs can be bigger than m_Rootmin_min - m_Rootmax_max,
     // hence using unsigned type...
-    const uint64 r = it->second - it->first;
+    const uint64_t r = it->second - it->first;
     it->second = it->first + (r * m_Root->Hbnd()) / NORMALIZATION;
     it->first += (r * m_Root->Lbnd()) / NORMALIZATION;
   }
