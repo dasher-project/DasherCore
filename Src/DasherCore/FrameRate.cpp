@@ -66,9 +66,11 @@ void CFrameRate::HandleParameterChange(Parameter parameter) {
       //fallthrough
     case LP_MAX_BITRATE:
     case LP_FRAMERATE:
-    //Calculate m_iSteps from the decaying-average framerate, as the number
-    // of steps that, at the X limit, will cause LP_MAX_BITRATE bits to be
-    // entered per second
-    m_iSteps = std::max(1,(int)(m_pSettingsStore->GetLongParameter(LP_FRAMERATE)*m_dBitsAtLimX/m_pSettingsStore->GetLongParameter(LP_MAX_BITRATE)));
+      //Calculate m_iSteps from the decaying-average framerate, as the number
+      // of steps that, at the X limit, will cause LP_MAX_BITRATE bits to be
+      // entered per second
+      m_iSteps = std::max(1,(int)(m_pSettingsStore->GetLongParameter(LP_FRAMERATE)*m_dBitsAtLimX/m_pSettingsStore->GetLongParameter(LP_MAX_BITRATE)));
+      break;
+    default: break;
   }
 }

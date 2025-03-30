@@ -32,6 +32,7 @@
 
 #include <vector>
 #include <sstream>
+#include <cstdint>
 
 using namespace Dasher;
 
@@ -156,7 +157,7 @@ CMandarinAlphMgr::CMandarinTrainer::CMandarinTrainer(CMessageDisplay *pMsgs, CMa
   if (trainStartSyms.size()==1)
     m_iStartSym = trainStartSyms[0];
   else
-    m_pMsgs->FormatMessageWithString(_("Warning: faulty alphabet definition: training-start delimiter %s must be a single unicode character. May be unable to process training file."),
+    m_pMsgs->FormatMessage("Warning: faulty alphabet definition: training-start delimiter %s must be a single unicode character. May be unable to process training file.",
                                      m_pInfo->m_strConversionTrainStart.c_str());
 }
 
@@ -166,7 +167,7 @@ symbol CMandarinAlphMgr::CMandarinTrainer::getPYsym(bool bHavePy, const std::str
     //only one possibility; so we'll use it, but maybe flag.
     symbol pySym = *(posPY.begin());
     if (bHavePy && m_pMgr->m_vGroupNames[pySym] != strPy)
-      m_pMsgs->FormatMessageWith2Strings(_("Warning: training file contains character '%s' as member of group '%s', but no group of that name contains the character; ignoring group specifier"),
+      m_pMsgs->FormatMessage("Warning: training file contains character '%s' as member of group '%s', but no group of that name contains the character; ignoring group specifier",
                                          m_pInfo->GetDisplayText(symCh).c_str(),
                                          strPy.c_str());
     return pySym;
@@ -178,9 +179,9 @@ symbol CMandarinAlphMgr::CMandarinTrainer::getPYsym(bool bHavePy, const std::str
         withName.insert(*it);  
     if (withName.size()==1) return *(withName.begin());
     else
-      m_pMsgs->FormatMessageWith2Strings((withName.empty())
-                                         ? _("Warning: training file contains character '%s' as member of group '%s', but no group of that name contains the character. Dasher will not be able to learn how you want to write this character.")
-                                         : _("Warning: training file contains character '%s' as member of group '%s', but alphabet contains several such groups. Dasher will not be able to learn how you want to write this character."),
+      m_pMsgs->FormatMessage((withName.empty())
+                                         ? "Warning: training file contains character '%s' as member of group '%s', but no group of that name contains the character. Dasher will not be able to learn how you want to write this character."
+                                         : "Warning: training file contains character '%s' as member of group '%s', but alphabet contains several such groups. Dasher will not be able to learn how you want to write this character.",
                                          m_pInfo->GetDisplayText(symCh).c_str(),
                                          strPy.c_str());
   }
@@ -200,7 +201,7 @@ void CMandarinAlphMgr::CMandarinTrainer::Train(CAlphabetMap::SymbolStream &syms)
     if (sym == m_iStartSym) {
       if (sym!=0 || syms.peekBack()==m_pInfo->m_strConversionTrainStart) {
         if (bHavePy)
-          m_pMsgs->FormatMessageWithString(_("Warning: in training file, annotation '<%s>' is followed by another annotation and will be ignored"),
+          m_pMsgs->FormatMessage("Warning: in training file, annotation '<%s>' is followed by another annotation and will be ignored",
                                            strPy.c_str());
         strPy.clear(); bHavePy=true;
         for (std::string s; (s=syms.peekAhead()).length(); strPy+=s) {
@@ -233,8 +234,9 @@ void CMandarinAlphMgr::CMandarinTrainer::Train(CAlphabetMap::SymbolStream &syms)
 #else
     const char* msg = _("In file %s, the following %i symbols appeared without annotations saying how they should be entered, but each can be entered in several ways. Dasher will not be able to learn how you want to enter these symbols:");
 #endif
-    char *buf(new char[strlen(msg) + GetDesc().length() + 10]);
-    sprintf(buf, msg, GetDesc().c_str(), unannotated.size());
+    const size_t buflen =  strlen(msg) + GetDesc().length() + 10;
+    char* buf(new char[buflen]);
+    snprintf(buf, buflen, msg, GetDesc().c_str(), unannotated.size());
     std::ostringstream withChars;
     withChars << msg;
     for (std::set<symbol>::iterator it = unannotated.begin(); it!=unannotated.end(); it++)
@@ -380,10 +382,10 @@ void CMandarinAlphMgr::GetConversions(std::vector<std::pair<symbol,unsigned int>
   //Two degenerate cases: PROB_SORT_THRES=0 => all (legal) ch symbols predicted uniformly
   // PROB_SORT_THRES=100 => all symbols put into probability order
   std::set<symbol> haveProbs;
-  uint64 iRemaining(CDasherModel::NORMALIZATION);
+  uint64_t iRemaining(CDasherModel::NORMALIZATION);
   
   if (long percent=m_pSettingsStore->GetLongParameter(LP_PY_PROB_SORT_THRES)) {
-    const uint64 iNorm(iRemaining);
+    const uint64_t iNorm(iRemaining);
     const unsigned int uniform(static_cast<unsigned int>((m_pSettingsStore->GetLongParameter(LP_UNIFORM)*iNorm)/1000));
     
     //Set up list of symbols with blank probability entries...
@@ -397,7 +399,7 @@ void CMandarinAlphMgr::GetConversions(std::vector<std::pair<symbol,unsigned int>
   
     //std::cout<<"after get probs "<<std::endl;
   
-    uint64 sumProb=0;  
+    uint64_t sumProb=0;  
     for (std::vector<std::pair<symbol,unsigned int> >::const_iterator it = vChildren.begin(); it!=vChildren.end(); it++) {
       sumProb += it->second;
     }

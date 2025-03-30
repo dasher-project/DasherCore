@@ -9,10 +9,9 @@
 #ifndef __LanguageModelling_LanguageModel_h__
 #define __LanguageModelling_LanguageModel_h__
 
-#include "../DasherTypes.h"
-
 
 #include <vector>
+#include <string>
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -126,7 +125,7 @@ public:
  protected:
   struct SLMFileHeader {
     // Magic number ("%DLF" in ASCII)
-    char szMagic[4];
+    char szMagic[5] = "%DLF";
     // Version of the header
     unsigned short int iHeaderVersion;
     // Total size of header (including variable length alphabet name)

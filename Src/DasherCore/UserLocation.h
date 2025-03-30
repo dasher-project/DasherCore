@@ -12,7 +12,7 @@
 
 #include "FileLogger.h"
 #include <string>
-#include "XMLUtil.h"
+#include <vector>
 
 extern CFileLogger* g_pLogger;
 

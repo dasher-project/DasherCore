@@ -26,10 +26,9 @@
 #define __CTWLanguageModel_h__
 
 #include <vector>			
-#include <fstream>			
-#include "LanguageModel.h"	
-#include "HashTable.h"
-#include <deque>			
+#include "LanguageModel.h"
+#include <deque>
+#include <cstdint>	
 
 using namespace Dasher;
 using namespace std;
@@ -120,7 +119,7 @@ namespace Dasher {
 	// Returns depth of found path. ``Create'' specifies whether non-existing nodes need to be
 	// created (LearnSymbol) or not (GetProbs).
 
-	void Scale(uint64 & a, uint64 & b);
+	void Scale(uint64_t & a, uint64_t & b);
 	// Scales both inputs to fit in NrBits
 
   }; // end class CCTWLanguageModel

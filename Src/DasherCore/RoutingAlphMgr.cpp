@@ -99,7 +99,7 @@ CRoutingAlphMgr::CRoutingTrainer::CRoutingTrainer(CMessageDisplay *pMsgs, CRouti
   if (trainStartSyms.size()==1)
     m_iStartSym = trainStartSyms[0];
   else
-    m_pMsgs->FormatMessageWithString(_("Warning: faulty alphabet definition: training-start delimiter %s must be a single unicode character. May be unable to process training file."),
+    m_pMsgs->FormatMessage("Warning: faulty alphabet definition: training-start delimiter %s must be a single unicode character. May be unable to process training file.",
                                      m_pInfo->m_strConversionTrainStart.c_str());
 }
 
@@ -116,9 +116,9 @@ symbol CRoutingAlphMgr::CRoutingTrainer::getRoute(bool bHaveRoute, const std::st
   // that later more-or-less independently
   
   if (bHaveRoute) {
-    m_pMsgs->FormatMessageWith2Strings((named.size()==0)
-                                       ? _("Warning: training file contains character '%s' as member of group '%s', but no group of that name contains the character. Ignoring group specifier.")
-                                       : _("Warning: training file contains character '%s' as member of group '%s', but alphabet contains several such groups. Dasher will not be able to learn how you want to write this character."),
+    m_pMsgs->FormatMessage((named.size()==0)
+                                       ? "Warning: training file contains character '%s' as member of group '%s', but no group of that name contains the character. Ignoring group specifier."
+                                       : "Warning: training file contains character '%s' as member of group '%s', but alphabet contains several such groups. Dasher will not be able to learn how you want to write this character.",
                                          m_pInfo->GetDisplayText(baseSym).c_str(),
                                          strRoute.c_str());
   }
@@ -135,7 +135,7 @@ void CRoutingAlphMgr::CRoutingTrainer::Train(CAlphabetMap::SymbolStream &syms) {
     if (sym == m_iStartSym) {
       if (sym!=0 || syms.peekBack()==m_pInfo->m_strConversionTrainStart) {
         if (bHaveRoute)
-          m_pMsgs->FormatMessageWithString(_("Warning: in training file, annotation '<%s>' is followed by another annotation and will be ignored"),
+          m_pMsgs->FormatMessage("Warning: in training file, annotation '<%s>' is followed by another annotation and will be ignored",
                                            strRoute.c_str());
         strRoute.clear(); bHaveRoute=true;
         for (std::string s; (s=syms.peekAhead()).length(); strRoute+=s) {

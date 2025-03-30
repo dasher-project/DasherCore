@@ -33,7 +33,6 @@
 #include "FileWordGenerator.h"
 
 #include <vector>
-#include <sstream>
 
 using namespace Dasher;
 
@@ -51,32 +50,30 @@ CAlphabetManager::CAlphabetManager(CSettingsStore *pSettingsStore, CDasherInterf
 {
     m_pSettingsStore->OnPreParameterChange.Subscribe(this, [this](Parameter parameter, const std::variant<bool, long, std::string>& newValue)
     {
-        switch(parameter) {
-          case SP_ALPHABET_ID:
-              const std::string value = std::get<std::string>(newValue);
-            // Cycle the alphabet history
-            std::vector<std::string> newHistory;
-            newHistory.push_back(m_pSettingsStore->GetStringParameter(SP_ALPHABET_ID));
-            std::string v;
-            if ((v = m_pSettingsStore->GetStringParameter(SP_ALPHABET_1)) != value)
-              newHistory.push_back(v);
-            if ((v = m_pSettingsStore->GetStringParameter(SP_ALPHABET_2)) != value)
-              newHistory.push_back(v);
-            if ((v = m_pSettingsStore->GetStringParameter(SP_ALPHABET_3)) != value)
-              newHistory.push_back(v);
-            if ((v = m_pSettingsStore->GetStringParameter(SP_ALPHABET_4)) != value)
-              newHistory.push_back(v);
+      if(parameter == SP_ALPHABET_ID){
+          const std::string value = std::get<std::string>(newValue);
+          // Cycle the alphabet history
+          std::vector<std::string> newHistory;
+          newHistory.push_back(m_pSettingsStore->GetStringParameter(SP_ALPHABET_ID));
+          std::string v;
+          if ((v = m_pSettingsStore->GetStringParameter(SP_ALPHABET_1)) != value)
+            newHistory.push_back(v);
+          if ((v = m_pSettingsStore->GetStringParameter(SP_ALPHABET_2)) != value)
+            newHistory.push_back(v);
+          if ((v = m_pSettingsStore->GetStringParameter(SP_ALPHABET_3)) != value)
+            newHistory.push_back(v);
+          if ((v = m_pSettingsStore->GetStringParameter(SP_ALPHABET_4)) != value)
+            newHistory.push_back(v);
 
-            // Fill empty slots. 
-            while (newHistory.size() < 4)
-              newHistory.push_back("");
+          // Fill empty slots. 
+          while (newHistory.size() < 4)
+            newHistory.push_back("");
 
-            m_pSettingsStore->SetStringParameter(SP_ALPHABET_1, newHistory[0]);
-            m_pSettingsStore->SetStringParameter(SP_ALPHABET_2, newHistory[1]);
-            m_pSettingsStore->SetStringParameter(SP_ALPHABET_3, newHistory[2]);
-            m_pSettingsStore->SetStringParameter(SP_ALPHABET_4, newHistory[3]);
-            break;
-          }
+          m_pSettingsStore->SetStringParameter(SP_ALPHABET_1, newHistory[0]);
+          m_pSettingsStore->SetStringParameter(SP_ALPHABET_2, newHistory[1]);
+          m_pSettingsStore->SetStringParameter(SP_ALPHABET_3, newHistory[2]);
+          m_pSettingsStore->SetStringParameter(SP_ALPHABET_4, newHistory[3]);
+      }
     });
 }
 
@@ -235,7 +232,7 @@ CWordGeneratorBase *CAlphabetManager::GetGameWords() {
     ///TRANSLATORS: the string "GameTextFile" is the name of a setting in gsettings
     /// (or equivalent), and should not be translated. The %s is the value of that
     /// setting (this message displayed only if the user has provided a value)
-    m_pInterface->FormatMessageWithString(_("Note: GameTextFile setting specifies game sentences file '%s' but this does not exist"),gtf.c_str());
+    m_pInterface->FormatMessage("Note: GameTextFile setting specifies game sentences file '%s' but this does not exist", gtf.c_str());
   }
   pGen->setAcceptUser(false);
   m_pInterface->ScanFiles(pGen, m_pAlphabet->GetTrainingFile());
@@ -616,12 +613,12 @@ void CAlphabetManager::IterateChildGroups(CAlphNode *pParent, const SGroupInfo *
     bool bSymbol = !pCurrentNode //gone past last subgroup
                   || i < pCurrentNode->iStart; //not reached next subgroup
     const int iStart=i, iEnd = (bSymbol) ? i+1 : pCurrentNode->iEnd;
-    //uint64 is platform-dependently #defined in DasherTypes.h as an (unsigned) 64-bit int ("__int64" or "long long int")
+    //uint64_t is platform-dependently #defined in DasherTypes.h as an (unsigned) 64-bit int ("__int64" or "long long int")
     unsigned int iLbnd = (((*pCProb)[iStart-1] - (*pCProb)[iMin-1]) *
-                          static_cast<uint64>(CDasherModel::NORMALIZATION)) /
+                          static_cast<uint64_t>(CDasherModel::NORMALIZATION)) /
                          iRange;
     unsigned int iHbnd = (((*pCProb)[iEnd-1] - (*pCProb)[iMin-1]) *
-                          static_cast<uint64>(CDasherModel::NORMALIZATION)) /
+                          static_cast<uint64_t>(CDasherModel::NORMALIZATION)) /
                          iRange;
     if (bSymbol) {
       pNewChild = (buildAround) ? buildAround->RebuildSymbol(pParent, i) : CreateSymbolNode(pParent, i);

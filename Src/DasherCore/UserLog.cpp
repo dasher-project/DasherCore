@@ -4,6 +4,7 @@
 #include <fstream>
 #include <cstring>
 
+#include "FileLogger.h"
 #include "FileUtils.h"
 
 
@@ -56,14 +57,13 @@ CUserLog::CUserLog(CSettingsStore* pSettingsStore,
 
     InitUsingMask(iLogTypeMask);
 
-    if ((m_bSimple) && (m_pSimpleLogger != NULL))
-    m_pSimpleLogger->Log("start, %s", logDEBUG, GetVersionInfo().c_str());
+    if ((m_bSimple) && (m_pSimpleLogger != NULL)) m_pSimpleLogger->LogDebug("start, %s", GetVersionInfo().c_str());
 
     SetOuputFilename();
     m_pApplicationSpan = new CTimeSpan("Application", true);
 
     if (m_pApplicationSpan == NULL)
-        g_pLogger->Log("CUserLog::CUserLog, failed to create m_pApplicationSpan!", logNORMAL);
+        g_pLogger->LogNormal("CUserLog::CUserLog, failed to create m_pApplicationSpan!");
 
     // TODO: for the load test harness, we apparently need to create the object directly
     // without a settings store (which will break CSettingsObserver, etc.); and then,
@@ -76,7 +76,7 @@ CUserLog::~CUserLog()
   //CFunctionLogger f1("CUserLog::~CUserLog", g_pLogger);
 
   if ((m_bSimple) && (m_pSimpleLogger != NULL))
-    m_pSimpleLogger->Log("stop", logDEBUG);
+    m_pSimpleLogger->LogDebug("stop");
 
   if (m_pApplicationSpan != NULL)
   {
@@ -147,7 +147,7 @@ void CUserLog::InitUsingMask(int iLogLevelMask)
     m_bSimple       = true;
 
     if (m_pSimpleLogger == NULL)
-      m_pSimpleLogger = new CFileLogger(USER_LOG_SIMPLE_FILENAME, logDEBUG, logTimeStamp | logDateStamp);
+      m_pSimpleLogger = new CFileLogger(USER_LOG_SIMPLE_FILENAME, eLogLevel::logDEBUG, logTimeStamp | logDateStamp);
   }
 
   if (iLogLevelMask & userLogDetailed)
@@ -187,8 +187,7 @@ void CUserLog::StartWriting()
     // one short log entry for the final position the next time they start writing.
     if ((m_bNeedToWriteCanvas) && (m_pSimpleLogger != NULL))
     {
-      m_pSimpleLogger->Log("canvas:\t%d\t%d\t%d\t%d", 
-        logDEBUG, 
+      m_pSimpleLogger->LogDebug("canvas:\t%d\t%d\t%d\t%d", 
         m_sCanvasCoordinates.top, 
         m_sCanvasCoordinates.left, 
         m_sCanvasCoordinates.bottom, 
@@ -212,7 +211,7 @@ void CUserLog::StartWriting()
     if (pTrial != NULL)
       pTrial->StartWriting();
     else
-      g_pLogger->Log("CUserLog::StartWriting, failed to create new pTrial!", logNORMAL);
+      g_pLogger->LogNormal("CUserLog::StartWriting, failed to create new pTrial!");
   }
 
   m_bIsWriting = true;
@@ -243,7 +242,7 @@ void CUserLog::StopWriting()
 
     // In simple logging mode, we'll output the stats for this navigation cycle
     if ((m_bSimple) && (m_pSimpleLogger != NULL))
-      m_pSimpleLogger->Log("%s", logDEBUG, GetStartStopCycleStats().c_str());
+      m_pSimpleLogger->LogDebug("%s", GetStartStopCycleStats().c_str());
 
     if (m_bDetailed)
     {
@@ -251,7 +250,7 @@ void CUserLog::StopWriting()
 
       if (pTrial == NULL)
       {
-        g_pLogger->Log("CUserLog::StopWriting, pTrial was NULL!", logNORMAL);
+        g_pLogger->LogNormal("CUserLog::StopWriting, pTrial was NULL!");
         return;
       }
 
@@ -267,13 +266,13 @@ void CUserLog::AddSymbols(Dasher::VECTOR_SYMBOL_PROB* vpNewSymbols, eUserLogEven
   if (!m_bIsWriting)
   {
     // StartWriting() wasn't called, so we'll do it implicitly now
-    g_pLogger->Log("CUserLog::AddSymbols, StartWriting() not called?", logDEBUG);
+    g_pLogger->LogDebug("CUserLog::AddSymbols, StartWriting() not called?");
     StartWriting();
   }
 
   if (vpNewSymbols == NULL)
   {
-    g_pLogger->Log("CUserLog::AddSymbols, vpNewSymbols was NULL!", logNORMAL);
+    g_pLogger->LogNormal("CUserLog::AddSymbols, vpNewSymbols was NULL!");
     return;
   }
 
@@ -291,7 +290,7 @@ void CUserLog::AddSymbols(Dasher::VECTOR_SYMBOL_PROB* vpNewSymbols, eUserLogEven
     // We should have a pTrial object since StartWriting() should have been called before us
     if (pTrial == NULL)
     {
-      g_pLogger->Log("CUserLog::AddSymbols, pTrial was NULL!", logNORMAL);
+      g_pLogger->LogNormal("CUserLog::AddSymbols, pTrial was NULL!");
       return;
     }
 
@@ -309,7 +308,7 @@ void CUserLog::DeleteSymbols(int iNumToDelete, eUserLogEventType iEvent)
   if (!m_bIsWriting)
   {
     // StartWriting() wasn't called, so we'll do it implicitly now
-    g_pLogger->Log("CUserLog::DeleteSymbols, StartWriting() not called?", logDEBUG);
+    g_pLogger->LogDebug("CUserLog::DeleteSymbols, StartWriting() not called?");
     StartWriting();
   }
 
@@ -331,7 +330,7 @@ void CUserLog::DeleteSymbols(int iNumToDelete, eUserLogEventType iEvent)
     // We should have a pTrial object since StartWriting() should have been called before us
     if (pTrial == NULL)
     {
-      g_pLogger->Log("CUserLog::DeleteSymbols, pTrial was NULL!", logNORMAL);
+      g_pLogger->LogNormal("CUserLog::DeleteSymbols, pTrial was NULL!");
       return;
     }
 
@@ -346,7 +345,7 @@ void CUserLog::NewTrial()
   if (m_bIsWriting)
   {
     // We should have called StopWriting(), but we'll do it here implicitly
-    g_pLogger->Log("CUserLog::NewTrial, StopWriting() not called?", logDEBUG);        
+    g_pLogger->LogDebug("CUserLog::NewTrial, StopWriting() not called?");        
     StopWriting();
   }
 
@@ -377,14 +376,14 @@ void CUserLog::NewTrial()
 // Overloaded version that converts a double to a string
 void CUserLog::AddParam(const std::string& strName, double dValue, int iOptionMask)
 {
-  sprintf(m_szTempBuffer, "%0.4f", dValue);
+  snprintf(m_szTempBuffer, TEMP_BUFFER_SIZE, "%0.4f", dValue);
   AddParam(strName, m_szTempBuffer, iOptionMask);
 }
 
 // Overloaded version that converts a int to a string
 void CUserLog::AddParam(const std::string& strName, int iValue, int iOptionMask)
 {
-  sprintf(m_szTempBuffer, "%d", iValue);
+  snprintf(m_szTempBuffer, TEMP_BUFFER_SIZE, "%d", iValue);
   AddParam(strName, m_szTempBuffer, iOptionMask);
 }
 
@@ -422,7 +421,7 @@ void CUserLog::AddParam(const std::string& strName, const std::string& strValue,
     (m_bInitIsDone) && 
     (!bShortInCycle))
   {
-    m_pSimpleLogger->Log("%s = %s", logDEBUG, strName.c_str(), strValue.c_str());
+    m_pSimpleLogger->LogNormal("%s = %s", strName.c_str(), strValue.c_str());
   }
 
   // See if this matches an existing parameter value that we may want to 
@@ -449,7 +448,7 @@ void CUserLog::AddParam(const std::string& strName, const std::string& strValue,
 
   if (pNewParam == NULL)
   {
-    g_pLogger->Log("CUserLog::AddParam, failed to create CUserLogParam object!", logNORMAL);
+    g_pLogger->LogNormal("CUserLog::AddParam, failed to create CUserLogParam object!");
     return;
   }
 
@@ -579,7 +578,7 @@ void CUserLog::AddMouseLocationNormalized(int iX, int iY, bool bStoreIntegerRep,
       (m_sCanvasCoordinates.right == 0) &&
       (m_sCanvasCoordinates.top == 0))
     {
-      g_pLogger->Log("CUserLog::AddMouseLocationNormalized, called before AddCanvasSize()?", logNORMAL);
+      g_pLogger->LogNormal("CUserLog::AddMouseLocationNormalized, called before AddCanvasSize()?");
       return;
     }
 
@@ -790,7 +789,7 @@ CUserLogTrial* CUserLog::AddTrial()
     PrepareNewTrial();
   }
   else
-    g_pLogger->Log("CUserLog::AddTrial, failed to create CUserLogTrialSpeech!", logNORMAL);
+    g_pLogger->LogNormal("CUserLog::AddTrial, failed to create CUserLogTrialSpeech!");
 
   return pTrial;
 }
@@ -835,7 +834,7 @@ std::string CUserLog::GetStartStopCycleStats()
 
   if (m_pCycleTimer == NULL)
   {
-    g_pLogger->Log("CUserLog::GetStartStopCycleStats, cycle timer was NULL!", logNORMAL);
+    g_pLogger->LogNormal("CUserLog::GetStartStopCycleStats, cycle timer was NULL!");
     return "";
   }
 
@@ -845,7 +844,7 @@ std::string CUserLog::GetStartStopCycleStats()
   //  coordinate, (any parameters marked to be put in cycle stats)
   //
   // tsbdxym stands for: time symbols bits deletes x y maxbitrate
-  sprintf(m_szTempBuffer, 
+  snprintf(m_szTempBuffer, TEMP_BUFFER_SIZE,
           "tsbdxym:\t%0.3f\t%zu\t%0.6f\t%d\t%0.3f\t%0.3f%s",
           m_pCycleTimer->GetElapsed(), 
           m_vCycleHistory.size(), 
@@ -968,7 +967,7 @@ void CUserLog::PrepareNewTrial()
 
   }
   else
-    g_pLogger->Log("CUserLog::PrepareNewTrial, failed to create CUserLogTrial", logNORMAL);
+    g_pLogger->LogNormal("CUserLog::PrepareNewTrial, failed to create CUserLogTrial");
 }
 
 // Parameters can be marked to always end them at the cycle stats in short logging.
@@ -1073,7 +1072,7 @@ void CUserLog::UpdateParam(Parameter parameter, int iOptionMask)
     }       
   default:
     {
-      g_pLogger->Log("CUserLog::UpdateParam, matched parameter %d but unknown type %d", logNORMAL, parameter, GetParameterType(parameter));
+      g_pLogger->LogNormal("CUserLog::UpdateParam, matched parameter %d but unknown type %d", parameter, GetParameterType(parameter));
       break;
     }
   };

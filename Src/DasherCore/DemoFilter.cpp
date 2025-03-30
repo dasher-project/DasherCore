@@ -4,7 +4,6 @@
 
 #include "DasherInterfaceBase.h"
 
-#include "CircleStartHandler.h"
 #include "GameModule.h"
 
 using namespace Dasher;
@@ -116,7 +115,7 @@ void CDemoFilter::HandleEvent(Parameter parameter) {
       case LP_DEMO_SPRING:
       case LP_DEMO_NOISE_MEM:
       case LP_MAX_BITRATE:
-      case LP_FRAMERATE:
+      case LP_FRAMERATE: {
         // Recalculates the parameters used in the demo following a change in framerate or speed.
         double spring = m_pSettingsStore->GetLongParameter(LP_DEMO_SPRING)/100.0;
         double noisemem = m_pSettingsStore->GetLongParameter(LP_DEMO_NOISE_MEM)/100.0;
@@ -125,5 +124,8 @@ void CDemoFilter::HandleEvent(Parameter parameter) {
         m_dSpring = (1-exp(-spring*lambda));
         m_dNoiseNew = noisemem*(1-exp(-lambda));
         m_dNoiseOld = sqrt(1.0-m_dNoiseNew*m_dNoiseNew);
+        break;
+      }
+      default: break;
     }
 }

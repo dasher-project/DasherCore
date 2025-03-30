@@ -31,7 +31,7 @@ public:
   C1DCircleStartHandler(COneDimensionalFilter *f, CSettingsStore* pSettingsStore);
   CDasherScreen::point CircleCenter(CDasherView *pView) override;
 
-  void onPause();
+  void onPause() override;
 
 private:
   CDasherScreen::point m_fwdCenter;
