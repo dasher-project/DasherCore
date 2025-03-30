@@ -1,5 +1,6 @@
 #include "ColorIO.h"
-#include <cstring>
+#include <algorithm>
+#include <string>
 
 using namespace Dasher;
 
