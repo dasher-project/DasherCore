@@ -54,11 +54,11 @@
 #include "FileUtils.h"
 #include "SmoothingFilter.h"
 #include "../DasherCore/FileLogger.h"
-#ifdef _DEBUG
+#ifndef NDEBUG
 const eLogLevel g_iLogLevel   = eLogLevel::logDEBUG;
 const int       g_iLogOptions = logTimeStamp | logDateStamp | logDeleteOldFile;
 #else
-const eLogLevel g_iLogLevel   = logNORMAL;
+const eLogLevel g_iLogLevel   = eLogLevel::logNORMAL;
 const int       g_iLogOptions = logTimeStamp | logDateStamp;
 #endif
 
