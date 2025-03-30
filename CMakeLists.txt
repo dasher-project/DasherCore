@@ -10,7 +10,7 @@ set(CMAKE_SUPPRESS_REGENERATION true)
 option(DASHER_HAVE_OWN_FILEUTILS "Set to true if you provide your own FileUtils implementation" OFF)
 if(${DASHER_HAVE_OWN_FILEUTILS})
 	add_compile_definitions(HAVE_OWN_FILEUTILS)
-else()
+elseif(NOT(WIN32))
 	if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
 		link_libraries(c++fs) #needed for std::filesystem with clang
 	elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
