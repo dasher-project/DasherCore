@@ -4,6 +4,7 @@
 #include <cmath>
 
 #include "TimeSpan.h"
+#include "XMLUtil.h"
 
 
 // Construct a new location at the current point in time and at the specified coordinates.

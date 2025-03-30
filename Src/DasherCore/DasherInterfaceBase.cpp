@@ -55,7 +55,7 @@
 #include "SmoothingFilter.h"
 #include "../DasherCore/FileLogger.h"
 #ifdef _DEBUG
-const eLogLevel g_iLogLevel   = logDEBUG;
+const eLogLevel g_iLogLevel   = eLogLevel::logDEBUG;
 const int       g_iLogOptions = logTimeStamp | logDateStamp | logDeleteOldFile;
 #else
 const eLogLevel g_iLogLevel   = logNORMAL;
@@ -775,20 +775,21 @@ void CDasherInterfaceBase::CreateModules() {
 void CDasherInterfaceBase::GetPermittedValues(Parameter parameter, std::vector<std::string> &vList) {
   // TODO: Deprecate direct calls to these functions
   switch (parameter) {
-  case SP_ALPHABET_ID:
-    DASHER_ASSERT(m_AlphIO != NULL);
-    m_AlphIO->GetAlphabets(&vList);
-    break;
-  case SP_COLOUR_ID:
-    DASHER_ASSERT(m_ColourIO != NULL);
-    m_ColorIO->GetKnownPalettes(&vList);
-    break;
-  case SP_INPUT_FILTER:
-    m_pModuleManager->ListInputMethodModules(vList);
-    break;
-  case SP_INPUT_DEVICE:
-    m_pModuleManager->ListInputDeviceModules(vList);
-    break;
+    case SP_ALPHABET_ID:
+      DASHER_ASSERT(m_AlphIO != NULL);
+      m_AlphIO->GetAlphabets(&vList);
+      break;
+    case SP_COLOUR_ID:
+      DASHER_ASSERT(m_ColourIO != NULL);
+      m_ColorIO->GetKnownPalettes(&vList);
+      break;
+    case SP_INPUT_FILTER:
+      m_pModuleManager->ListInputMethodModules(vList);
+      break;
+    case SP_INPUT_DEVICE:
+      m_pModuleManager->ListInputDeviceModules(vList);
+      break;
+    default: break;
   }
 }
 

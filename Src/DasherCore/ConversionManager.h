@@ -81,33 +81,33 @@ namespace Dasher {
 
     class CConvNode : public CDasherNode {
     public:
-      CConversionManager *mgr() const {return m_pMgr;}
+      CConversionManager *mgr() const override {return m_pMgr;}
       CConvNode(int iOffset, CDasherScreen::Label *pLabel, CConversionManager *pMgr);
     ///
     /// Provide children for the supplied node
     ///
 
-    virtual void PopulateChildren();
-    virtual int ExpectedNumChildren();
-      virtual void SetFlag(int iFlag, bool bValue);
+    virtual void PopulateChildren() override;
+    virtual int ExpectedNumChildren() override;
+      virtual void SetFlag(int iFlag, bool bValue) override;
 
     virtual ~CConvNode();
 
     ///Attempts to fill vContextSymbols with the context that would exist _after_ this node has been entered
-    void GetContext(CDasherInterfaceBase *pInterface, const CAlphabetMap *pAlphabetMap, std::vector<symbol> &vContextSymbols, int iOffset, int iLength);
+    void GetContext(CDasherInterfaceBase *pInterface, const CAlphabetMap *pAlphabetMap, std::vector<symbol> &vContextSymbols, int iOffset, int iLength) override;
 
     ///
     /// Called whenever a node belonging to this manager first
     /// moves under the crosshair
     ///
 
-    virtual void Do();
+    virtual void Do() override;
 
     ///
     /// Called when a node is left backwards
     ///
 
-    virtual void Undo();
+    virtual void Undo() override;
       const ColorPalette::Color& getLabelColor(const ColorPalette* colorPalette) override;
       const ColorPalette::Color& getOutlineColor(const ColorPalette* colorPalette) override;
       const ColorPalette::Color& getNodeColor(const ColorPalette* colorPalette) override;

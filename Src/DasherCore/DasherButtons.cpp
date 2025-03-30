@@ -6,7 +6,6 @@
 #include "DasherButtons.h"
 #include "DasherScreen.h"
 #include "DasherInterfaceBase.h"
-#include <valarray>
 
 
 using namespace Dasher;
@@ -31,21 +30,22 @@ void CDasherButtons::KeyDown(unsigned long iTime, Keys::VirtualKey Key, CDasherV
 
   if(m_bMenu) {
     switch(Key) {
-    case Keys::Button_1:
-    case Keys::Button_4:
-      m_bDecorationChanged = true;
-      ++iActiveBox;
-      if(iActiveBox == m_iNumBoxes)
-        iActiveBox = 0;
-       break;
-    case Keys::Button_2:
-    case Keys::Button_3:
-    case Keys::Primary_Input:
-      m_bDecorationChanged = true;
-      ScheduleZoom(pModel, m_pBoxes[iActiveBox].iTop, m_pBoxes[iActiveBox].iBottom);
-      if(iActiveBox != m_iNumBoxes-1)
-        iActiveBox = 0;
-      break;
+      case Keys::Button_1:
+      case Keys::Button_4:
+        m_bDecorationChanged = true;
+        ++iActiveBox;
+        if(iActiveBox == m_iNumBoxes)
+          iActiveBox = 0;
+        break;
+      case Keys::Button_2:
+      case Keys::Button_3:
+      case Keys::Primary_Input:
+        m_bDecorationChanged = true;
+        ScheduleZoom(pModel, m_pBoxes[iActiveBox].iTop, m_pBoxes[iActiveBox].iBottom);
+        if(iActiveBox != m_iNumBoxes-1)
+          iActiveBox = 0;
+        break;
+      default: break;
     }
   }
   else {
@@ -55,14 +55,15 @@ void CDasherButtons::KeyDown(unsigned long iTime, Keys::VirtualKey Key, CDasherV
 }
 
 void CDasherButtons::DirectKeyDown(unsigned long iTime, Keys::VirtualKey Key, CDasherView *pView, CDasherModel *pModel) {
-  if(Key == Keys::Primary_Input) // Ignore mouse events
-  return;
-  if(Key == Keys::Button_1)
-  iActiveBox = m_iNumBoxes - 1;
-  else if(Key <= m_iNumBoxes) 
-  iActiveBox = Key-2;
-  else
-  iActiveBox = m_iNumBoxes-2;
+  if(Key == Keys::Primary_Input) return; // Ignore mouse events
+    
+  if(Key == Keys::Button_1) {
+    iActiveBox = m_iNumBoxes - 1;
+  } else if(Key <= m_iNumBoxes) {
+    iActiveBox = Key-2;
+  } else {
+    iActiveBox = m_iNumBoxes-2;
+  }
 
   ScheduleZoom(pModel, m_pBoxes[iActiveBox].iTop,m_pBoxes[iActiveBox].iBottom);
 }

@@ -33,7 +33,6 @@
 #include "FileWordGenerator.h"
 
 #include <vector>
-#include <sstream>
 
 using namespace Dasher;
 
@@ -51,32 +50,30 @@ CAlphabetManager::CAlphabetManager(CSettingsStore *pSettingsStore, CDasherInterf
 {
     m_pSettingsStore->OnPreParameterChange.Subscribe(this, [this](Parameter parameter, const std::variant<bool, long, std::string>& newValue)
     {
-        switch(parameter) {
-          case SP_ALPHABET_ID:
-              const std::string value = std::get<std::string>(newValue);
-            // Cycle the alphabet history
-            std::vector<std::string> newHistory;
-            newHistory.push_back(m_pSettingsStore->GetStringParameter(SP_ALPHABET_ID));
-            std::string v;
-            if ((v = m_pSettingsStore->GetStringParameter(SP_ALPHABET_1)) != value)
-              newHistory.push_back(v);
-            if ((v = m_pSettingsStore->GetStringParameter(SP_ALPHABET_2)) != value)
-              newHistory.push_back(v);
-            if ((v = m_pSettingsStore->GetStringParameter(SP_ALPHABET_3)) != value)
-              newHistory.push_back(v);
-            if ((v = m_pSettingsStore->GetStringParameter(SP_ALPHABET_4)) != value)
-              newHistory.push_back(v);
+      if(parameter == SP_ALPHABET_ID){
+          const std::string value = std::get<std::string>(newValue);
+          // Cycle the alphabet history
+          std::vector<std::string> newHistory;
+          newHistory.push_back(m_pSettingsStore->GetStringParameter(SP_ALPHABET_ID));
+          std::string v;
+          if ((v = m_pSettingsStore->GetStringParameter(SP_ALPHABET_1)) != value)
+            newHistory.push_back(v);
+          if ((v = m_pSettingsStore->GetStringParameter(SP_ALPHABET_2)) != value)
+            newHistory.push_back(v);
+          if ((v = m_pSettingsStore->GetStringParameter(SP_ALPHABET_3)) != value)
+            newHistory.push_back(v);
+          if ((v = m_pSettingsStore->GetStringParameter(SP_ALPHABET_4)) != value)
+            newHistory.push_back(v);
 
-            // Fill empty slots. 
-            while (newHistory.size() < 4)
-              newHistory.push_back("");
+          // Fill empty slots. 
+          while (newHistory.size() < 4)
+            newHistory.push_back("");
 
-            m_pSettingsStore->SetStringParameter(SP_ALPHABET_1, newHistory[0]);
-            m_pSettingsStore->SetStringParameter(SP_ALPHABET_2, newHistory[1]);
-            m_pSettingsStore->SetStringParameter(SP_ALPHABET_3, newHistory[2]);
-            m_pSettingsStore->SetStringParameter(SP_ALPHABET_4, newHistory[3]);
-            break;
-          }
+          m_pSettingsStore->SetStringParameter(SP_ALPHABET_1, newHistory[0]);
+          m_pSettingsStore->SetStringParameter(SP_ALPHABET_2, newHistory[1]);
+          m_pSettingsStore->SetStringParameter(SP_ALPHABET_3, newHistory[2]);
+          m_pSettingsStore->SetStringParameter(SP_ALPHABET_4, newHistory[3]);
+      }
     });
 }
 

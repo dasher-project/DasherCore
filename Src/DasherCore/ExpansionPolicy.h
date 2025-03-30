@@ -7,8 +7,7 @@
  *
  */
 
-#ifndef __ExpansionPolicy_h__
-#define __ExpansionPolicy_h__
+#pragma once
 
 #include <vector>
 #include "DasherNode.h"
@@ -20,7 +19,8 @@ namespace Dasher {
 class CExpansionPolicy
 {
 public:
-    virtual ~CExpansionPolicy() { };
+  CExpansionPolicy() = default;
+  virtual ~CExpansionPolicy() = default;
   ///dMaxCost should be the value returned by pushNode from the call for the node most closely enclosing pNode (that was pushed!)
   ///for the first (outermost) node, i.e. when no enclosing node has been passed, (+ive) INFINITY should be passed in.
 	virtual double pushNode(CDasherNode *pNode, int iDasherMinY, int iDasherMaxY, bool bExpand, double dMaxCost)=0;
@@ -40,6 +40,7 @@ class NoExpansions : public CExpansionPolicy
 {
 public:
   NoExpansions() = default;
+  virtual ~NoExpansions() = default;
 	double pushNode(CDasherNode *pNode, int iMin, int iMax, bool bExpand, double dMaxCost) override {return dMaxCost;}
   bool apply() override {return false;}
 };
@@ -50,6 +51,7 @@ class BudgettingPolicy : public CExpansionPolicy
 {
 public:
   BudgettingPolicy(CDasherModel *pModel, unsigned int iNodeBudget);
+  virtual ~BudgettingPolicy() = default;
   ///sets cost according to getCost(pNode,iMin,iMax);
   ///then assures node is cheaper (less important) than its parent;
   ///then adds to relevant queue
@@ -68,9 +70,10 @@ protected:
 class AmortizedPolicy : public BudgettingPolicy
 {
 public:
+  AmortizedPolicy() = delete;
   AmortizedPolicy(CDasherModel *pModel, unsigned int iNodeBudget);
 	AmortizedPolicy(CDasherModel *pModel, unsigned int iNodeBudget, unsigned int iMaxExpands);
-  ~AmortizedPolicy() override = default;
+  ~AmortizedPolicy() = default;
   bool apply() override;
   double pushNode(CDasherNode *pNode, int iMin, int iMax, bool bExpand, double dParentCost) override;
 private:
@@ -78,4 +81,3 @@ private:
   void trim();
 };
 }
-#endif /*defined __ExpansionPolicy_h__*/

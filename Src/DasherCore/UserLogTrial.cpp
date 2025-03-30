@@ -159,7 +159,7 @@ void CUserLogTrial::StartWriting()
 
   if (m_bWritingStart)
   {
-    g_pLogger->Log("CUserLogTrial::StartWriting, nav already marked as started!", logNORMAL);
+    g_pLogger->LogNormal("CUserLogTrial::StartWriting, nav already marked as started!");
     return;
   }
 
@@ -173,7 +173,7 @@ void CUserLogTrial::StartWriting()
 
   if (m_pSpan == NULL) 
   {
-    g_pLogger->Log("CUserLogTrial::StartWriting, m_pSpan was NULL!", logNORMAL);
+    g_pLogger->LogNormal("CUserLogTrial::StartWriting, m_pSpan was NULL!");
     return;
   }
 
@@ -199,27 +199,27 @@ void CUserLogTrial::StopWriting(double dBits)
 
   if (!m_bWritingStart)
   {
-    g_pLogger->Log("CUserLogTrial::StopWriting, nav already marked as stopped!", logNORMAL);
+    g_pLogger->LogNormal("CUserLogTrial::StopWriting, nav already marked as stopped!");
     return;
   }
 
   if (m_vpNavCycles.size() <= 0)
   {
-    g_pLogger->Log("CUserLogTrial::StopWriting, vector was empty!", logNORMAL);
+    g_pLogger->LogNormal("CUserLogTrial::StopWriting, vector was empty!");
     return;
   }
 
   NavCycle* pCycle = GetCurrentNavCycle();
   if (pCycle == NULL)
   {
-    g_pLogger->Log("CUserLogTrial::StopWriting, current cycle was NULL!", logNORMAL);
+    g_pLogger->LogNormal("CUserLogTrial::StopWriting, current cycle was NULL!");
     return;
   }
 
   CTimeSpan* pSpan = (CTimeSpan*) pCycle->pSpan;   
   if (pSpan == NULL)
   {
-    g_pLogger->Log("CUserLogTrial::StopWriting, span was NULL!", logNORMAL);
+    g_pLogger->LogNormal("CUserLogTrial::StopWriting, span was NULL!");
     return;
   }
 
@@ -267,7 +267,7 @@ void CUserLogTrial::AddSymbols(Dasher::VECTOR_SYMBOL_PROB* vpNewSymbolProbs,
 
   if (pLocation == NULL)
   {
-    g_pLogger->Log("CUserLogTrial::AddSymbols, failed to create location!", logNORMAL);
+    g_pLogger->LogNormal("CUserLogTrial::AddSymbols, failed to create location!");
     return;
   }
 
@@ -282,7 +282,7 @@ void CUserLogTrial::AddSymbols(Dasher::VECTOR_SYMBOL_PROB* vpNewSymbolProbs,
   if (pCycle != NULL)
     pCycle->vectorNavLocations.push_back(pLocation);
   else
-    g_pLogger->Log("CUserLogTrial::AddSymbols, cycle was NULL!", logNORMAL);
+    g_pLogger->LogNormal("CUserLogTrial::AddSymbols, cycle was NULL!");
 
 }
 
@@ -312,7 +312,7 @@ void CUserLogTrial::DeleteSymbols(int iNumToDelete, eUserLogEventType iEvent)
 
   if (pLocation == NULL)
   {
-    g_pLogger->Log("CUserLogTrial::DeleteSymbols, failed to create location!", logNORMAL);
+    g_pLogger->LogNormal("CUserLogTrial::DeleteSymbols, failed to create location!");
     return;
   }
 
@@ -327,7 +327,7 @@ void CUserLogTrial::DeleteSymbols(int iNumToDelete, eUserLogEventType iEvent)
   if (pCycle != NULL)
     pCycle->vectorNavLocations.push_back(pLocation);
   else
-    g_pLogger->Log("CUserLogTrial::DeleteSymbols, cycle was NULL!", logNORMAL);
+    g_pLogger->LogNormal("CUserLogTrial::DeleteSymbols, cycle was NULL!");
 
 }
 
@@ -364,10 +364,10 @@ void CUserLogTrial::AddMouseLocation(int iX, int iY, float dNats)
     if (pCycle != NULL)
       pCycle->vectorMouseLocations.push_back(pLocation);
     else
-      g_pLogger->Log("CUserLogTrial::AddLocation, cycle was NULL!", logNORMAL);
+      g_pLogger->LogNormal("CUserLogTrial::AddLocation, cycle was NULL!");
   }
   else
-    g_pLogger->Log("CUserLogTrial::AddLocation, location was NULL!", logNORMAL);
+    g_pLogger->LogNormal("CUserLogTrial::AddLocation, location was NULL!");
 
 }
 
@@ -383,7 +383,7 @@ void CUserLogTrial::AddMouseLocationNormalized(int iX, int iY, bool bStoreIntege
     (m_sCanvasCoordinates.left == 0) &&
     (m_sCanvasCoordinates.right == 0) &&
     (m_sCanvasCoordinates.top == 0))
-    g_pLogger->Log("CUserLogTrial::AddMouseLocationNormalized, called before AddCanvasSize()?", logNORMAL);
+    g_pLogger->LogNormal("CUserLogTrial::AddMouseLocationNormalized, called before AddCanvasSize()?");
 
   pLocation = new CUserLocation(iX, 
                                 iY, 
@@ -402,10 +402,10 @@ void CUserLogTrial::AddMouseLocationNormalized(int iX, int iY, bool bStoreIntege
     if (pCycle != NULL)
       pCycle->vectorMouseLocations.push_back(pLocation);
     else
-      g_pLogger->Log("CUserLogTrial::AddMouseLocationNormalized, cycle was NULL!", logNORMAL);
+      g_pLogger->LogNormal("CUserLogTrial::AddMouseLocationNormalized, cycle was NULL!");
   }
   else
-    g_pLogger->Log("CUserLogTrial::AddLocation, location was NULL!", logNORMAL);    
+    g_pLogger->LogNormal("CUserLogTrial::AddLocation, location was NULL!");    
 }
 
 void CUserLogTrial::AddKeyDown(Dasher::Keys::VirtualKey Key, int iType, int iEffect) {
@@ -417,10 +417,10 @@ void CUserLogTrial::AddKeyDown(Dasher::Keys::VirtualKey Key, int iType, int iEff
     if(pCycle)
       pCycle->vectorButtons.push_back(pButton);
     else
-      g_pLogger->Log("CUserLogTrial::AddLocation, cycle was NULL!", logNORMAL);
+      g_pLogger->LogNormal("CUserLogTrial::AddLocation, cycle was NULL!");
   }
   else
-    g_pLogger->Log("CUserLogTrial::AddLocation, location was NULL!", logNORMAL);
+    g_pLogger->LogNormal("CUserLogTrial::AddLocation, location was NULL!");
 }
 
 // Sets the current window size, this includes area for the menu bar, 
@@ -566,7 +566,7 @@ std::string CUserLogTrial::GetLocationXML(NavLocation* pLocation, const std::str
   std::string strResult = "";
   if (pLocation == NULL)
   {
-    g_pLogger->Log("CUserLogTrial::GetLocationXML, location was NULL!", logNORMAL);
+    g_pLogger->LogNormal("CUserLogTrial::GetLocationXML, location was NULL!");
     return strResult;
   }
 
@@ -695,7 +695,7 @@ std::string CUserLogTrial::GetStatsXML(const std::string& strPrefix, const std::
 
   if (pSpan == NULL)
   {
-    g_pLogger->Log("CUserLogTrial::GetStatsXML, pSpan = NULL!", logNORMAL);
+    g_pLogger->LogNormal("CUserLogTrial::GetStatsXML, pSpan = NULL!");
     return strResult;
   }
 
@@ -912,7 +912,7 @@ void CUserLogTrial::AddParam(const std::string& strName, const std::string& strV
   CUserLogParam* pNewParam = new CUserLogParam;
   if (pNewParam == NULL)
   {
-    g_pLogger->Log("CUserLogTrial::AddParam, newParam was NULL!", logNORMAL);
+    g_pLogger->LogNormal("CUserLogTrial::AddParam, newParam was NULL!");
     return;
   }
 
@@ -1015,7 +1015,7 @@ NavCycle* CUserLogTrial::AddNavCycle()
   NavCycle* pNewCycle = new NavCycle;
   if (pNewCycle == NULL)
   {
-    g_pLogger->Log("CUserLogTrial::AddNavCycle, failed to create NavCycle!", logNORMAL);
+    g_pLogger->LogNormal("CUserLogTrial::AddNavCycle, failed to create NavCycle!");
     return NULL;
   }
 
@@ -1181,7 +1181,7 @@ CUserLogTrial::CUserLogTrial(const std::string& strXML, int iIgnored)
     NavCycle* pCycle = new NavCycle();
     if (pCycle == NULL)
     {
-      g_pLogger->Log("CUserLogTrial::CUserLogTrial, failed to create NavCycle!", logNORMAL);
+      g_pLogger->LogNormal("CUserLogTrial::CUserLogTrial, failed to create NavCycle!");
       return;
     }
 
@@ -1202,7 +1202,7 @@ CUserLogTrial::CUserLogTrial(const std::string& strXML, int iIgnored)
         NavLocation* pLocation = new NavLocation();
         if (pLocation == NULL)
         {
-          g_pLogger->Log("CUserLogTrial::CUserLogTrial, failed to create NavLocation!", logNORMAL);
+          g_pLogger->LogNormal("CUserLogTrial::CUserLogTrial, failed to create NavLocation!");
           return;
         }                
 

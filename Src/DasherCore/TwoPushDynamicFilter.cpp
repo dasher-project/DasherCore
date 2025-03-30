@@ -116,19 +116,21 @@ bool CTwoPushDynamicFilter::DecorateView(CDasherView *pView, CDasherInput *pInpu
 
 void CTwoPushDynamicFilter::HandleParameterChange(Parameter parameter) {
   switch (parameter) {
-  case LP_TWO_PUSH_OUTER: //fallthrough
-  case LP_TWO_PUSH_LONG: //fallthrough
-  case LP_TWO_PUSH_SHORT: {
-    //TODO, short gap always at the top - allow other way around also?
-    double dOuter = m_pSettingsStore->GetLongParameter(LP_TWO_PUSH_OUTER);
-    m_dLogUpMul = log(dOuter / upDist());
-    m_dLogDownMul = log(dOuter / downDist());
-//cout << "bitsUp " << m_dLogUpMul << " bitsDown " << m_dLogDownMul << std::endl;
-  } //and fallthrough
-  case LP_TWO_PUSH_TOLERANCE: //fallthrough
-  case LP_DYNAMIC_BUTTON_LAG:
-    //recompute rest in Timer
-    m_dLastBitRate=-std::numeric_limits<double>::infinity();
+    case LP_TWO_PUSH_OUTER: //fallthrough
+    case LP_TWO_PUSH_LONG: //fallthrough
+    case LP_TWO_PUSH_SHORT: {
+      //TODO, short gap always at the top - allow other way around also?
+      double dOuter = m_pSettingsStore->GetLongParameter(LP_TWO_PUSH_OUTER);
+      m_dLogUpMul = log(dOuter / upDist());
+      m_dLogDownMul = log(dOuter / downDist());
+  //cout << "bitsUp " << m_dLogUpMul << " bitsDown " << m_dLogDownMul << std::endl;
+    } //and fallthrough
+    case LP_TWO_PUSH_TOLERANCE: //fallthrough
+    case LP_DYNAMIC_BUTTON_LAG:
+      //recompute rest in Timer
+      m_dLastBitRate=-std::numeric_limits<double>::infinity();
+      break;
+    default: break;
   }
 }
 

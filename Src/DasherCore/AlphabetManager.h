@@ -66,7 +66,7 @@ namespace Dasher {
       CNodeManager* mgr() const override;
       ///Rebuilds this node's parent by recreating the previous 'root' node,
       /// then calling RebuildForwardsFromAncestor
-      CDasherNode *RebuildParent();
+      CDasherNode *RebuildParent() override;
       ///Called to build a symbol (leaf) node which is a descendant of the symbol or root node preceding this.
       /// Default implementation just calls the manager's CreateSymbolNode method to create a new node,
       /// but subclasses can override to graft themselves into the appropriate point beneath the previous node.
@@ -164,11 +164,11 @@ namespace Dasher {
       /// Uniquely, a paragraph symbol can enter two distinct unicode characters
       /// (i.e. '\r' and '\n'); every other symbol enters only a single
       /// unicode char, even if that might take >1 octet.
-      int numChars();
+      int numChars() override;
       void TrainSymbol();
       void UntrainSymbol();
       ///Override: true iff pGroup encloses this symbol (according to its start/end symbol#)
-      bool isInGroup(const SGroupInfo *pGroup);
+      bool isInGroup(const SGroupInfo *pGroup) override;
 
   public:
       double SpeedMul() override;
@@ -182,20 +182,20 @@ namespace Dasher {
       CGroupNode(int iOffset, CDasherScreen::Label* pLabel, CAlphabetManager* pMgr, const SGroupInfo* pGroup);
 
       ///Override: if m_pGroup==NULL, i.e. whole/root-of alphabet, cannot rebuild.
-      virtual CDasherNode *RebuildParent();
+      virtual CDasherNode *RebuildParent() override;
 
       ///Create children of this group node, by traversing the section of the alphabet
       /// indicated by m_pGroup.
-      virtual void PopulateChildren();
-      virtual int ExpectedNumChildren();
+      virtual void PopulateChildren() override;
+      virtual int ExpectedNumChildren() override;
                  
-      virtual bool GameSearchNode(symbol sym);
-      std::vector<unsigned int> *GetProbInfo();
+      virtual bool GameSearchNode(symbol sym) override;
+      std::vector<unsigned int> *GetProbInfo() override;
       ///Override: if the group to create is the same as this node's group, return this node instead of creating a new one
-      virtual CDasherNode *RebuildGroup(CAlphNode* pParent, const SGroupInfo* pInfo);
+      virtual CDasherNode *RebuildGroup(CAlphNode* pParent, const SGroupInfo* pInfo) override;
     protected:
       ///Override: true if pGroup encloses this one (by start/end symbol#)
-      bool isInGroup(const SGroupInfo *pGroup);
+      bool isInGroup(const SGroupInfo *pGroup) override;
 
   public:
       const ColorPalette::Color& getLabelColor(const ColorPalette* colorPalette) override;

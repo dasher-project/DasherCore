@@ -1,7 +1,6 @@
 #include "FileUtils.h"
 
 #include <string>
-#include <filesystem>
 #include <chrono>
 #include "FileLogger.h"
 
@@ -43,8 +42,8 @@ CFileLogger::~CFileLogger()
 	if (!m_bFunctionTiming) return;
 
 	// Dump the results of our function timing logging
-	Log("%-60s%20s%10s", logNORMAL, "Function","Ticks", "Percent");
-	Log("%-60s%20s%10s", logNORMAL, "--------","-----", "-------");
+	Log("%-60s%20s%10s", eLogLevel::logNORMAL, "Function","Ticks", "Percent");
+	Log("%-60s%20s%10s", eLogLevel::logNORMAL, "--------","-----", "-------");
 
 	// First pass to count the max ticks 
 	// We assume that there was a function logger on the outer most (main) program.
@@ -58,7 +57,7 @@ CFileLogger::~CFileLogger()
 
 	for(const auto &[function_name, duration] : m_mapFunctionDuration)
 	{
-		Log("%-60s%20I64Ld%10.2f", logNORMAL, function_name.c_str(), duration, static_cast<double>(duration) / max_duration  * 100.0);
+		Log("%-60s%20I64Ld%10.2f", eLogLevel::logNORMAL, function_name.c_str(), duration, static_cast<double>(duration) / max_duration  * 100.0);
 	}
 }
 
@@ -127,7 +126,7 @@ void CFileLogger::Log(const std::string strText, eLogLevel iLogLevel, ...)
 // Version that assume log level is logDEBUG
 void CFileLogger::LogDebug(const char* szText, ...)
 {
-	if(m_iLogLevel > logDEBUG) return;
+	if(m_iLogLevel > eLogLevel::logDEBUG) return;
 
     va_list args;  
 
@@ -139,7 +138,7 @@ void CFileLogger::LogDebug(const char* szText, ...)
 // Version that assume log level is logNormal
 void CFileLogger::LogNormal(const char* szText, ...)
 {
-    if(m_iLogLevel > logNORMAL) return;
+    if(m_iLogLevel > eLogLevel::logNORMAL) return;
 
     va_list args;  
 

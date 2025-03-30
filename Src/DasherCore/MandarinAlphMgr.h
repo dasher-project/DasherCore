@@ -160,18 +160,18 @@ namespace Dasher {
     public:
       /// \param pySym symbol in pinyin alphabet; must have >1 possible chinese conversion.
       CConvRoot(int iOffset, CMandarinAlphMgr *pMgr, symbol pySym);
-      CMandarinAlphMgr *mgr() const {return static_cast<CMandarinAlphMgr *>(CAlphBase::mgr());}
-      void PopulateChildren();
+      CMandarinAlphMgr *mgr() const override {return static_cast<CMandarinAlphMgr *>(CAlphBase::mgr());}
+      void PopulateChildren() override;
       void PopulateChildrenWithExisting(CMandSym *existing);
-      int ExpectedNumChildren();
+      int ExpectedNumChildren() override;
       CLanguageModel::Context iContext;
-      void SetFlag(int iFlag, bool bValue);
+      void SetFlag(int iFlag, bool bValue) override;
       const symbol m_pySym;
       ///A "symbol" to be rebuilt, is a PY sound, i.e. potentially this
-      CDasherNode *RebuildSymbol(CAlphNode *pParent, symbol iSymbol);
+      CDasherNode *RebuildSymbol(CAlphNode *pParent, symbol iSymbol) override;
 
     protected:
-      bool isInGroup(const SGroupInfo *pGroup);
+      bool isInGroup(const SGroupInfo *pGroup) override;
 
   public:
       const ColorPalette::Color& getLabelColor(const ColorPalette* colorPalette) override;

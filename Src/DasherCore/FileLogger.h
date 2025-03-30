@@ -55,7 +55,7 @@
     g_pLogger->LogCritical s ;
 
 
-enum eLogLevel
+enum class eLogLevel
 {
     logDEBUG = 0,
     logNORMAL = 1,
@@ -81,13 +81,13 @@ public:
     ~CFileLogger();
 
 
-    void Log(const char* szText, eLogLevel iLogLevel = logNORMAL, ...);         // Logs a string to our file if it meets or exceeds our logging level
+    void Log(const char* szText, eLogLevel iLogLevel = eLogLevel::logNORMAL, ...);         // Logs a string to our file if it meets or exceeds our logging level
     void LogDebug(const char* szText, ...);                                     // Logs debug level messages
     void LogNormal(const char* szText, ...);                                    // Logs normal level messages    
     void LogCritical(const char* szText, ...);                                  // Logs critical level messages
 
     // Versions that exists so we can pass in STD strings
-    void Log(const std::string strText, eLogLevel iLogLevel = logNORMAL, ...);        // Logs a string to our file if it meets or exceeds our logging level
+    void Log(const std::string strText, eLogLevel iLogLevel = eLogLevel::logNORMAL, ...);        // Logs a string to our file if it meets or exceeds our logging level
     
     void SetFilename(const std::string& strFilename);
     void SetLogLevel(const eLogLevel newLevel);
