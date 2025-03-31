@@ -11,6 +11,7 @@
 #include "HashTable.h"
 
 using namespace Dasher;
+using namespace std;
 
 
 CCTWLanguageModel::CCTWLanguageModel(int iNumSyms) : CLanguageModel(iNumSyms) {

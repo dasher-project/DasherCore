@@ -10,9 +10,6 @@
 #include <deque>
 #include <cstdint>	
 
-using namespace Dasher;
-using namespace std;
-
 namespace Dasher {  
  
   // CTW language model 
@@ -78,7 +75,7 @@ namespace Dasher {
 		}		
 		~ CCTWContext(){};
 		bool Full;
-		deque<int> Context;	
+		std::deque<int> Context;	
 	};	
 
 	virtual bool WriteToFile(std::string strFilename, std::string AlphabetName);
