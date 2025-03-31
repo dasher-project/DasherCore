@@ -6,8 +6,7 @@
 //
 // Copyright 2005 by Keith Vertanen
 
-#ifndef __XML_UTIL_H__
-#define __XML_UTIL_H__
+#pragma once
 
 #include <cstdlib>
 #include <string>
@@ -62,5 +61,4 @@ public:
 };
 /// @}
 
-#endif
 

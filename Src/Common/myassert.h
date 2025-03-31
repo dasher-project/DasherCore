@@ -18,8 +18,7 @@
 // along with Dasher; if not, write to the Free Software 
 // Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
-#ifndef __assert_h__
-#define __assert_h__
+#pragma once
 
 #ifdef HAVE_CONFIG_H
 #include <config.h>
@@ -69,4 +68,3 @@
 
 #endif
 
-#endif // __assert_h__

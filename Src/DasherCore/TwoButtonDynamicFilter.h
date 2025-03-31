@@ -18,8 +18,7 @@
 // along with Dasher; if not, write to the Free Software 
 // Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
-#ifndef __TWO_BUTTON_DYNAMIC_FILTER_H__
-#define __TWO_BUTTON_DYNAMIC_FILTER_H__
+#pragma once
 
 #include "ButtonMultiPress.h"
 
@@ -59,4 +58,3 @@ class CTwoButtonDynamicFilter : public CButtonMultiPress {
 }
 /// @}
 
-#endif

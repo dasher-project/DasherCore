@@ -1,5 +1,4 @@
-#ifndef __GameStatistics_h__
-#define __GameStatistics_h__
+#pragma once
 
 // Code examples modified from C++ Cookbook O'Reilly.
 // Code use falls under fair use as dicussed in the book
@@ -62,4 +61,3 @@ template<class T, class Iter_T, class A, class B>
   return std::accumulate(first, last, B(), MemberSumDiffNthPower<A,B,T>(pmember,mean,n))/cnt;
 }
 
-#endif

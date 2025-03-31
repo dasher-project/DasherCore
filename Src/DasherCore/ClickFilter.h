@@ -1,5 +1,4 @@
-#ifndef __CLICK_FILTER_H__
-#define __CLICK_FILTER_H__
+#pragma once
 
 #include <I18n.h>
 
@@ -35,4 +34,3 @@ class CClickFilter : public CStaticFilter, private CZoomAdjuster {
 }
 /// @}
 
-#endif

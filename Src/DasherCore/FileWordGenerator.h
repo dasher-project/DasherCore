@@ -1,5 +1,4 @@
-#ifndef __FileWordGenerator_h__
-#define __FileWordGenerator_h__
+#pragma once
 
 #include <string>
 #include <fstream>
@@ -72,4 +71,3 @@ private:
 };
 }
 
-#endif

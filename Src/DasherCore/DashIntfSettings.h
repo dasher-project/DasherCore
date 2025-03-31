@@ -19,8 +19,7 @@
 // along with Dasher; if not, write to the Free Software 
 // Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
-#ifndef __DASH_INTF_SETTINGS_H__
-#define __DASH_INTF_SETTINGS_H__
+#pragma once
 
 #include "DasherInterfaceBase.h"
 
@@ -49,4 +48,3 @@ public:
 };
 
 }
-#endif

@@ -1,5 +1,4 @@
-#ifndef __BasicLog_h__
-#define __BasicLog_h__
+#pragma once
 
 #include "UserLogBase.h"
 #include "SettingsStore.h"
@@ -45,4 +44,3 @@ protected:
 };
 /// @}
 
-#endif

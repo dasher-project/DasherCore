@@ -6,8 +6,7 @@
 #ifndef _WIN32 
 
 
-#ifndef __socketinputbase_h__
-#define __socketinputbase_h__
+#pragma once
 
 #include "DasherInput.h"
 #include "SettingsStore.h"
@@ -134,4 +133,3 @@ protected:
 #endif
 
 
-#endif

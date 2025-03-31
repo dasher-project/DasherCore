@@ -6,8 +6,7 @@
 //
 /////////////////////////////////////////////////////////////////////////////
 
-#ifndef __WordLanguageModel_h__
-#define __WordLanguageModel_h__
+#pragma once
 
 #include "../../Common/Allocators/PooledAlloc.h"
 #include "PPMLanguageModel.h"
@@ -186,4 +185,3 @@ namespace Dasher {
 
 }                               // end namespace Dasher
 
-#endif /* #ifndef __WordLanguageModel_H__ */

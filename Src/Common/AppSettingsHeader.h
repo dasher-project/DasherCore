@@ -1,5 +1,4 @@
-#ifndef __appsettingsheader_h__
-#define __appsettingsheader_h__
+#pragma once
 
 #include "../DasherCore/Parameters.h"
 #ifdef HAVE_CONFIG_H
@@ -31,4 +30,3 @@ enum {
   APP_STYLE_COMPOSE,
   APP_STYLE_DIRECT,
   APP_STYLE_FULLSCREEN };
-#endif

@@ -18,8 +18,7 @@
 // along with Dasher; if not, write to the Free Software 
 // Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
-#ifndef __i18n_h__
-#define __i18n_h__
+#pragma once
 
 #if defined(_WIN32) || defined(__APPLE__)
 
@@ -42,4 +41,3 @@
 
 #endif
 
-#endif

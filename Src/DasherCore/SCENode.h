@@ -18,8 +18,7 @@
 // along with Dasher; if not, write to the Free Software 
 // Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
-#ifndef __SCENODE_H__
-#define __SCENODE_H__
+#pragma once
 
 /*Common Node Definition for Chinese Pinyin (possibly also Japanese) 
   Conversion Library and Dasher ConversionManager*/
@@ -75,5 +74,4 @@ class SCENode {
 };
 /// \}
 
-#endif
 

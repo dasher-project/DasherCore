@@ -1,5 +1,4 @@
-#ifndef __MSVC_Unannoy_h__
-#define __MSVC_Unannoy_h__
+#pragma once
 
 // Sorry about this frequently included header non-VC++ users.
 // It shouldn't do any harm.
@@ -15,4 +14,3 @@
 #pragma warning(disable:4996)   // warning C4996: 'fopen' was declared deprecated
 #endif
 
-#endif /* #ifndef __MSVC_Unannoy_h__ */

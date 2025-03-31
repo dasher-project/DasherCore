@@ -1,5 +1,4 @@
-#ifndef __START_HANDLER_H__
-#define __START_HANDLER_H__
+#pragma once
 
 #include "DasherTypes.h"
 
@@ -25,4 +24,3 @@ protected:
 }
 /// @}
 
-#endif

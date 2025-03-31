@@ -18,8 +18,7 @@
 // along with Dasher; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
-#ifndef __DasherNode_h__
-#define __DasherNode_h__
+#pragma once
 
 #include "../Common/NoClones.h"
 //Includes needed for used classes
@@ -347,4 +346,3 @@ inline CDasherNode *CDasherNode::Parent() const {
 }
 
 }
-#endif /* #ifndef __DasherNode_h__ */

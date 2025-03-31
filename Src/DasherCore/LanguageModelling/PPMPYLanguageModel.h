@@ -10,8 +10,7 @@
 //
 /////////////////////////////////////////////////////////////////////////////
 
-#ifndef __PPMPYLanguageModel_h__
-#define __PPMPYLanguageModel_h__
+#pragma once
 
 #include "PPMLanguageModel.h"
 #include "DasherTypes.h"
@@ -85,4 +84,3 @@ namespace Dasher {
   /// @}  
 }                               // end namespace Dasher
 
-#endif // __LanguageModelling__PPMPYLanguageModel_h__

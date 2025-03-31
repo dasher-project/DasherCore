@@ -19,8 +19,7 @@
 // along with Dasher; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
-#ifndef __SCREEN_GAME_MODULE_H__
-#define __SCREEN_GAME_MODULE_H__
+#pragma once
 
 #include "GameModule.h"
 
@@ -39,4 +38,3 @@ namespace Dasher {
   };
 }
 
-#endif

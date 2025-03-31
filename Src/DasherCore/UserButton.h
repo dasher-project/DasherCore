@@ -1,5 +1,4 @@
-#ifndef __UserButton_h__
-#define __UserButton_h__
+#pragma once
 
 #include "FileLogger.h"
 #include <string>
@@ -37,4 +36,3 @@ class CUserButton {
 };
 /// \}
 
-#endif

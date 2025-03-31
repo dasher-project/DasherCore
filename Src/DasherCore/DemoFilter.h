@@ -1,5 +1,4 @@
-#ifndef __DEMO_FILTER_H__
-#define __DEMO_FILTER_H__
+#pragma once
 
 #include "DynamicFilter.h"
 
@@ -26,4 +25,3 @@ class CDemoFilter : public CDynamicFilter {
 }
 /// @}
 
-#endif

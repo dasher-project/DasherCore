@@ -1,5 +1,4 @@
-#ifndef __trainer_h__
-#define __trainer_h__
+#pragma once
 
 #include "Alphabet/AlphInfo.h"
 #include "AbstractXMLParser.h"
@@ -55,4 +54,3 @@ namespace Dasher {
 
 }
 
-#endif

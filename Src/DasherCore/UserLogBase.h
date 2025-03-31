@@ -1,5 +1,4 @@
-#ifndef __UserLogBase_h__
-#define __UserLogBase_h__
+#pragma once
 
 #include "DasherTypes.h"
 #include "UserLogTrial.h" // Don't want to include this, but needed for event type enum
@@ -52,4 +51,3 @@ private:
 };
 /// @}
 
-#endif

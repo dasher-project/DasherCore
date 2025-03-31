@@ -2,8 +2,7 @@
 // DasherButtons.h 
 // Copyright 2005 by Chris Ball
 
-#ifndef __DASHER_BUTTONS_H__
-#define __DASHER_BUTTONS_H__
+#pragma once
 
 #include "InputFilter.h"
 
@@ -43,4 +42,3 @@ class CDasherButtons : public CStaticFilter
 }
 /// @}
 
-#endif

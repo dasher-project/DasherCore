@@ -18,8 +18,7 @@
 // along with Dasher; if not, write to the Free Software 
 // Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
-#ifndef DASHER_MODULE_H
-#define DASHER_MODULE_H
+#pragma once
 
 #include "../Common/ModuleSettings.h"
 
@@ -43,4 +42,3 @@ private:
 };
 /// @}
 
-#endif

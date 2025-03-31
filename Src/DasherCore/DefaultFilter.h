@@ -1,5 +1,4 @@
-#ifndef __DEFAULT_FILTER_H__
-#define __DEFAULT_FILTER_H__
+#pragma once
 
 #include "DynamicFilter.h"
 #include "AutoSpeedControl.h"
@@ -50,4 +49,3 @@ protected:
 }
 /// @}
 
-#endif

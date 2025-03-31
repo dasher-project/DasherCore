@@ -6,8 +6,7 @@
 //
 /////////////////////////////////////////////////////////////////////////////
 
-#ifndef __LanguageModelling_MixtureLanguageModel_h__
-#define __LanguageModelling_MixtureLanguageModel_h__
+#pragma once
 
 #include "LanguageModel.h"
 #include "PPMLanguageModel.h"
@@ -174,4 +173,3 @@ namespace Dasher {
 
 /////////////////////////////////////////////////////////////////////////////
 
-#endif // ndef __LanguageModelling_MixtureLanguageModel_h__

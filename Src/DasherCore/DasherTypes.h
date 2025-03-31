@@ -2,8 +2,7 @@
 //
 // Copyright (c) 2001-2002 David Ward
 
-#ifndef __DasherTypes_h__
-#define __DasherTypes_h__
+#pragma once
 
 // We use our own version of hungarian notation to indicate
 // the type of variables:
@@ -114,4 +113,3 @@ namespace Keys
   typedef std::vector<SymbolProb>         VECTOR_SYMBOL_PROB;
 }
 
-#endif /* #ifndef __DasherTypes_h__ */

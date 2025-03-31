@@ -1,5 +1,4 @@
-#ifndef __ONE_DIMENSIONAL_FILTER_H__
-#define __ONE_DIMENSIONAL_FILTER_H__
+#pragma once
 
 #include <I18n.h>
 
@@ -40,4 +39,3 @@ private:
 }
 /// @}
 
-#endif

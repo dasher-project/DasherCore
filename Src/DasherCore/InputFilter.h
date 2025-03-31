@@ -1,5 +1,4 @@
-#ifndef __INPUT_FILTER_H__
-#define __INPUT_FILTER_H__
+#pragma once
 
 #include "DasherView.h"
 #include "DasherModel.h"
@@ -89,4 +88,3 @@ class CInputFilter : public CDasherModule {
 }
 /// @}
 
-#endif

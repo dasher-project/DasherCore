@@ -6,8 +6,7 @@
 //
 /////////////////////////////////////////////////////////////////////////////
 
-#ifndef __Platform_stdminmax__
-#define __Platform_stdminmax__
+#pragma once
 
 #if _MSC_VER < 1300
 
@@ -21,4 +20,3 @@ namespace std {
 };
 #endif
 
-#endif // __Platform_stdminmax__

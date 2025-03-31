@@ -1,5 +1,4 @@
-#ifndef __ONE_BUTTON_FILTER_H__
-#define __ONE_BUTTON_FILTER_H__
+#pragma once
 
 #include "InputFilter.h"
 #include "SettingsStore.h"
@@ -25,4 +24,3 @@ class COneButtonFilter : public CStaticFilter {
 }
 /// @}
 
-#endif

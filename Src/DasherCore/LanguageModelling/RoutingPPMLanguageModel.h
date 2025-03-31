@@ -6,8 +6,7 @@
 //  Copyright 2011 Cambridge University. All rights reserved.
 //
 
-#ifndef __RoutingPPMLanguageModel_h__
-#define __RoutingPPMLanguageModel_h__
+#pragma once
 
 #include "PPMLanguageModel.h"
 
@@ -90,4 +89,3 @@ namespace Dasher {
   /// @}  
 }                               // end namespace Dasher
 
-#endif

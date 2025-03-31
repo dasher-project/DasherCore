@@ -2,8 +2,7 @@
 // DasherButtons.h
 // Copyright 2005 by Chris Ball
 
-#ifndef __COMPASS_MODE_H__
-#define __COMPASS_MODE_H__
+#pragma once
 
 #include "DasherButtons.h"
 
@@ -30,4 +29,3 @@ class CCompassMode : public CDasherButtons
 }
 /// @}
 
-#endif

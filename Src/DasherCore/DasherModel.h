@@ -18,8 +18,7 @@
 // along with Dasher; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
-#ifndef __DasherModel_h__
-#define __DasherModel_h__
+#pragma once
 
 #include <deque>
 
@@ -257,4 +256,3 @@ class Dasher::CDasherModel: private NoClones
 };
 /// @}
 
-#endif /* #ifndef __DasherModel_h__ */

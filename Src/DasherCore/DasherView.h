@@ -2,8 +2,7 @@
 //
 // Copyright (c) 2001-2005 David Ward
 
-#ifndef __DasherView_h_
-#define __DasherView_h_
+#pragma once
 
 namespace Dasher
 {
@@ -232,4 +231,3 @@ private:
 
 /// @}
 
-#endif /* #ifndef __DasherView_h_ */

@@ -1,5 +1,4 @@
-#ifndef __CIRCLE_START_HANDLER_H__
-#define __CIRCLE_START_HANDLER_H__
+#pragma once
 
 #include "StartHandler.h"
 #include "SettingsStore.h"
@@ -34,4 +33,3 @@ private:
 }
 /// @}
 
-#endif

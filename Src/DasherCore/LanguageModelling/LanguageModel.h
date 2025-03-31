@@ -6,8 +6,7 @@
 //
 /////////////////////////////////////////////////////////////////////////////
 
-#ifndef __LanguageModelling_LanguageModel_h__
-#define __LanguageModelling_LanguageModel_h__
+#pragma once
 
 
 #include <vector>
@@ -155,4 +154,3 @@ public:
 
 /////////////////////////////////////////////////////////////////////////////
 
-#endif // ndef __LanguageModelling_LanguageModel_h__

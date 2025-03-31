@@ -22,8 +22,7 @@
 // http://www.sps.ele.tue.nl/members/F.M.J.Willems/RESEARCH_files/CTW/ResearchCTW.htm
 //
 
-#ifndef __CTWLanguageModel_h__
-#define __CTWLanguageModel_h__
+#pragma once
 
 #include <vector>			
 #include "LanguageModel.h"
@@ -126,4 +125,3 @@ namespace Dasher {
 
 } // end namespace 
 
-#endif // __LanguageModelling__CTWLanguageModel_h__

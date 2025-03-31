@@ -18,8 +18,7 @@
 // along with Dasher; if not, write to the Free Software 
 // Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
-#ifndef __TWO_PUSH_DYNAMIC_FILTER_H__
-#define __TWO_PUSH_DYNAMIC_FILTER_H__
+#pragma once
 
 #include "DynamicButtons.h"
 namespace Dasher {
@@ -74,4 +73,3 @@ namespace Dasher {
 }
 /// @}
 
-#endif

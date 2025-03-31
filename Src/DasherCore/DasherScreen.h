@@ -2,8 +2,7 @@
 //
 // Copyright (c) 2001-2004 David Ward
 
-#ifndef __DasherScreen_h_
-#define __DasherScreen_h_
+#pragma once
 
 #include "DasherTypes.h"
 #include "ColorPalette.h"
@@ -230,4 +229,3 @@ private:
 
 /// @}
 
-#endif /* #ifndef __DasherScreen_h_ */

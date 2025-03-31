@@ -2,8 +2,7 @@
 // ButtonMode.h 
 // Copyright 2009 by Alan Lawrence
 
-#ifndef __BUTTON_MODE_H__
-#define __BUTTON_MODE_H__
+#pragma once
 
 #include "DasherButtons.h"
 
@@ -34,4 +33,3 @@ class CButtonMode : public CDasherButtons
 }
 /// @}
 
-#endif

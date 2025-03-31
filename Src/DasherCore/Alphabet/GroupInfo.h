@@ -1,5 +1,4 @@
-#ifndef __GROUP_INFO_H__
-#define __GROUP_INFO_H__
+#pragma once
 
 #include <string>
 
@@ -32,4 +31,3 @@ struct SGroupInfo {
 };
 
 
-#endif
