@@ -24,6 +24,7 @@
 #include "NodeCreationManager.h"
 #include <cmath>
 #include <cstdint>
+#include <algorithm>
 
 using namespace Dasher;
 

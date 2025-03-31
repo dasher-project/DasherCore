@@ -27,6 +27,7 @@
 #include <cstddef>
 #include <cstring>
 #include <cstdint>
+#include <cmath>
 #include "HashTable.h"
 
 using namespace Dasher;
