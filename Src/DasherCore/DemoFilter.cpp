@@ -1,6 +1,7 @@
 #include "DemoFilter.h"
 
 #include <I18n.h>
+#include <cmath>
 
 #include "DasherInterfaceBase.h"
 
