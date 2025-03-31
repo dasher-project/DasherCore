@@ -1,4 +1,4 @@
-// DasherView.h
+
 //
 // Copyright (c) 2001-2005 David Ward
 

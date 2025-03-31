@@ -1,7 +1,3 @@
-// AlphabetManager.cpp
-
-
-
 #include "AlphabetManager.h"
 
 #include <I18n.h>

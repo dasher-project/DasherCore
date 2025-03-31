@@ -1,6 +1,3 @@
-// DynamicFilter.h
-
-
 
 #pragma once
 

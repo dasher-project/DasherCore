@@ -1,10 +1,6 @@
 /*
- *  ExpansionPolicy.cpp
- *  Dasher
- *
  *  Created by Alan Lawrence on 26/10/2009.
  *  Copyright 2009 Cavendish Laboratory. All rights reserved.
- *
  */
 
 #include "ExpansionPolicy.h"

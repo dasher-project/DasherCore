@@ -1,5 +1,5 @@
 //
-//  Globber.cpp
+
 //  Dasher
 //
 //  Created by Alan Lawrence on 21/9/11.

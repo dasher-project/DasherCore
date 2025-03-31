@@ -1,4 +1,4 @@
-// DasherScreen.h
+
 //
 // Copyright (c) 2001-2004 David Ward
 
