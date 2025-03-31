@@ -1,5 +1,4 @@
-#ifndef __TWO_BOX_START_HANDLER_H__
-#define __TWO_BOX_START_HANDLER_H__
+#pragma once
 
 #include "StartHandler.h"
 #include "SettingsStore.h"
@@ -27,4 +26,3 @@ public:
 }
 /// @}
 
-#endif

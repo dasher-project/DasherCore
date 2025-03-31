@@ -20,6 +20,8 @@
  * remains attached.
  */
 
+#pragma once
+
 /* ---------------------------------------------------------------------
 
     Conversions between UTF32, UTF-16, and UTF-8.  Header file.

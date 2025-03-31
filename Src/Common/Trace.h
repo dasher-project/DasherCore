@@ -2,8 +2,7 @@
 //
 // Copyright (c) 2005 David Ward
 
-#ifndef __Common_Trace_h__
-#define __Common_Trace_h__
+#pragma once
 
 // Trace is a mechanism for printf-like debugging that can be switched on/off
 // at compile time
@@ -50,4 +49,3 @@ inline void DasherTraceOutput(const char *pszFormat, ...) {
 
 #endif // DASHER_TRACE
 
-#endif

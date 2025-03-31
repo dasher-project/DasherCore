@@ -7,8 +7,7 @@
 /////////////////////////////////////////////////////////////////////////////
 
 
-#ifndef __AlphabetMap_h__
-#define __AlphabetMap_h__
+#pragma once
 
 #ifndef _WIN32
 #include <sys/types.h>
@@ -176,4 +175,3 @@ private:
 };
 /// \}
 
-#endif /* #ifndef __AlphabetMap_h__ */

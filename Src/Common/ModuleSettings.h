@@ -1,5 +1,4 @@
-#ifndef __ModuleSettings_h__
-#define __ModuleSettings_h__
+#pragma once
 
 enum setting_t {
   T_BOOL,
@@ -20,4 +19,3 @@ struct _SModuleSettings {
   const char *szDescription;
 };
 
-#endif

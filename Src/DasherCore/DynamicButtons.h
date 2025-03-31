@@ -18,8 +18,7 @@
 // along with Dasher; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
-#ifndef __DynamicButtons_h__
-#define __DynamicButtons_h__
+#pragma once
 
 #include "DynamicFilter.h"
 
@@ -85,4 +84,3 @@ private:
   CDasherModel *m_pModel;
 };
 }
-#endif

@@ -1,8 +1,9 @@
-#include <fstream>
 #ifndef HAVE_OWN_FILEUTILS
 #include "FileUtils.h"
+
 #include <regex>
 #include <filesystem>
+#include <fstream>
 
 static bool IsFileWriteable(const std::filesystem::path &file_path)
 {

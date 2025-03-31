@@ -1,5 +1,4 @@
-#ifndef __NoClones_h__
-#define __NoClones_h__
+#pragma once
 
 /* Explanation of NoClones {{{
 
@@ -36,4 +35,3 @@ private:
   NoClones & operator=(const NoClones &);
 };
 
-#endif /* #ifndef __NoClones_h__ */

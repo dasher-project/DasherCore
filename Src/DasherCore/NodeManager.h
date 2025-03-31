@@ -1,5 +1,4 @@
-#ifndef __nodemanager_h__
-#define __nodemanager_h__
+#pragma once
 namespace Dasher {
   
   /// A marker class for anything that can be returned by CDasherNode::mgr()
@@ -9,4 +8,3 @@ namespace Dasher {
       virtual ~CNodeManager() = default;
   };
 }
-#endif

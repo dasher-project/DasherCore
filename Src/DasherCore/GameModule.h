@@ -1,7 +1,6 @@
 // GameModule.h
 
-#ifndef __GameModule_h__
-#define __GameModule_h__
+#pragma once
 
 #include <string>
 
@@ -162,4 +161,3 @@ private:
 
 
 
-#endif

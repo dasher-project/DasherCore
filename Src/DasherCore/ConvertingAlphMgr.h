@@ -7,8 +7,7 @@
  *
  */
 
-#ifndef __CONVERTING_ALPH_MGR_H__
-#define __CONVERTING_ALPH_MGR_H__
+#pragma once
 
 #include "AlphabetManager.h"
 #include "ConversionManager.h"
@@ -38,4 +37,3 @@ namespace Dasher {
   };
 }
 
-#endif

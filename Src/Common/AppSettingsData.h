@@ -1,3 +1,5 @@
+#pragma once
+
 #include "AppSettingsHeader.h"
 #include "../DasherCore/Parameters.h"
 

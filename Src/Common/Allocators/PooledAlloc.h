@@ -2,8 +2,7 @@
 //
 // Copyright (c) 2005 David Ward
 
-#ifndef __PooledAlloc_h__
-#define __PooledAlloc_h__
+#pragma once
 
 // CPooledAlloc allocates objects T in fixed-size blocks (specified in the constructor) 
 // Alloc returns an uninitialized T*
@@ -54,4 +53,3 @@ template<typename T> void CPooledAlloc<T>::Free(T *pFree) {
   m_vpFree.push_back(pFree);
 }
 
-#endif // __include__

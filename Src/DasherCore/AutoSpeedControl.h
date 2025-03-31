@@ -1,5 +1,4 @@
-#ifndef __AUTO_SPEED_CONTROL_H__
-#define __AUTO_SPEED_CONTROL_H__
+#pragma once
 
 #include "DasherTypes.h"
 #include "DasherView.h"
@@ -82,4 +81,3 @@ namespace Dasher {
 }
 /// @}
 
-#endif

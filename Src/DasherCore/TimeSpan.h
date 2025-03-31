@@ -7,8 +7,7 @@
 //
 // Copyright 2005 by Keith Vertanen
 
-#ifndef __TIME_SPAN_H__
-#define __TIME_SPAN_H__
+#pragma once
 
 #include "FileLogger.h"
 #include <string>
@@ -56,4 +55,3 @@ private:
 };
 /// @}
 
-#endif

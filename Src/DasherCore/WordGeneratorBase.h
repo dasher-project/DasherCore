@@ -1,5 +1,4 @@
-#ifndef __WordGeneratorBase_h__
-#define __WordGeneratorBase_h__
+#pragma once
 
 #include <string>
 #include "Alphabet/AlphabetMap.h"
@@ -48,4 +47,3 @@ protected:
   
 };
 }
-#endif

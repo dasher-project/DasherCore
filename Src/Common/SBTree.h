@@ -7,6 +7,8 @@
  *
  */
 
+ #pragma once
+
 class SBTree {
 public:
     SBTree(int iValue);

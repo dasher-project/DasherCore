@@ -6,8 +6,7 @@
 //  Copyright 2011 Cambridge University. All rights reserved.
 //
 
-#ifndef __RoutingAlphMgr_h__
-#define __RoutingAlphMgr_h__
+#pragma once
 
 #include "AlphabetManager.h"
 
@@ -111,4 +110,3 @@ namespace Dasher {
   
 }
 
-#endif

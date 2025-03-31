@@ -6,8 +6,7 @@
 //
 /////////////////////////////////////////////////////////////////////////////
 
-#ifndef __DictLanguageModel_h__
-#define __DictLanguageModel_h__
+#pragma once
 
 #include "../../Common/Allocators/PooledAlloc.h"
 #include "../Alphabet/AlphInfo.h"
@@ -153,4 +152,3 @@ namespace Dasher {
 
 }                               // end namespace Dasher
 
-#endif /* #ifndef __DictLanguageModel_H__ */

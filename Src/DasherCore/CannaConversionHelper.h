@@ -1,5 +1,4 @@
-#ifndef __CANNA_CONVERSION_HELPER_H__
-#define __CANNA_CONVERSION_HELPER_H__
+#pragma once
 
 #define BUFSIZE 10240
 
@@ -145,4 +144,3 @@ class CCannaConversionHelper : public Dasher::CConversionManager {
  
 };
 /// @}
-#endif

@@ -2,8 +2,7 @@
 //
 // Copyright (c) 2005 David Ward
 
-#ifndef __SimplePooledAlloc_h__
-#define __SimplePooledAlloc_h__
+#pragma once
 
 // CSimplePooledAlloc allocates objects T in fixed-size blocks (specified) 
 // Alloc returns a default-constructed T*
@@ -67,4 +66,3 @@ template < typename T > T * CSimplePooledAlloc < T >::Alloc() {
   return m_vPool.back()->Alloc();
 }
 
-#endif // __include__

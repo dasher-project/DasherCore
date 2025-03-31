@@ -6,8 +6,7 @@
 //
 /////////////////////////////////////////////////////////////////////////////
 
-#ifndef __SettingsStore_h__
-#define __SettingsStore_h__
+#pragma once
 
 #include <string>
 #include <unordered_map>
@@ -120,4 +119,3 @@ private:
   std::unordered_map<Parameter, Settings::Parameter_Value> parameters_;
 };
 }
-#endif /* #ifndef __SettingsStore_h__ */

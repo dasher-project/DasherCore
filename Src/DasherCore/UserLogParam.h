@@ -1,6 +1,5 @@
 
-#ifndef __USER_LOG_PARAM_H__
-#define __USER_LOG_PARAM_H__
+#pragma once
 
 // Class that stores a particular parameter
 // 
@@ -50,5 +49,4 @@ public:
 };
 /// @}
 
-#endif
 

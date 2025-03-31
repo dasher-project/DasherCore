@@ -1,5 +1,4 @@
-#ifndef __NodeCreationManager_h__
-#define __NodeCreationManager_h__
+#pragma once
 
 #include "AlphabetManager.h"
 #include "ConversionManager.h"
@@ -61,4 +60,3 @@ private:
 };
 /// @}
 
-#endif

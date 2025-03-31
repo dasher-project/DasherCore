@@ -6,8 +6,7 @@
 //
 /////////////////////////////////////////////////////////////////////////////
 
-#ifndef __PPMLanguageModel_h__
-#define __PPMLanguageModel_h__
+#pragma once
 
 #include "../../Common/NoClones.h"
 #include "../../Common/Allocators/PooledAlloc.h"
@@ -220,4 +219,3 @@ namespace Dasher {
   }
 }                               // end namespace Dasher
 
-#endif // __LanguageModelling__PPMLanguageModel_h__

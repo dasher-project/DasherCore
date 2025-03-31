@@ -22,8 +22,7 @@
 //
 // Copyright 2005 by Keith Vertanen
 
-#ifndef __USER_LOG_H__
-#define __USER_LOG_H__
+#pragma once
 
 #include "FileLogger.h"
 #include <string>
@@ -153,4 +152,3 @@ private:
 };
 /// @}
 
-#endif

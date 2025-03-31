@@ -6,8 +6,7 @@
 //
 /////////////////////////////////////////////////////////////////////////////
 
-#ifndef __FrameRate_h__
-#define __FrameRate_h__
+#pragma once
 
 #include "SettingsStore.h"
 
@@ -62,5 +61,4 @@ private:
 };
 /// \}
 }
-#endif /* #ifndef __FrameRate_h__ */
 

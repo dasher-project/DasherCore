@@ -4,8 +4,7 @@
 //
 // Linux-specific subclass of SocketInputBase: provides network socket control of Dasher cursor
 
-#ifndef __SocketInput_h__
-#define __SocketInput_h__
+#pragma once
 
 #ifndef _WIN32
 
@@ -61,5 +60,4 @@ private:
 };
 }
 /// \}
-#endif
 #endif

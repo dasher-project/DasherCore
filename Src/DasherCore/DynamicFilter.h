@@ -18,8 +18,7 @@
 // along with Dasher; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
-#ifndef __DynamicFilter_h__
-#define __DynamicFilter_h__
+#pragma once
 
 #include "InputFilter.h"
 #include "SettingsStore.h"
@@ -75,4 +74,3 @@ class CDynamicFilter : public CInputFilter {
   bool m_bPaused;
 };
 }
-#endif

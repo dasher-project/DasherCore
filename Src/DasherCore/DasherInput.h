@@ -2,8 +2,7 @@
 //
 // Copyright (c) 2005 Phil Cowans
 
-#ifndef __DasherInput_h__
-#define __DasherInput_h__
+#pragma once
 
 #include "DasherTypes.h"
 #include "DasherModule.h"
@@ -92,4 +91,3 @@ public:
 };
 
 /// \}
-#endif

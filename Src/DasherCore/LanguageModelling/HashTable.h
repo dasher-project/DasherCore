@@ -18,8 +18,7 @@
 // along with Dasher; if not, write to the Free Software 
 // Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
-#ifndef __Hashtable_h__
-#define __Hashtable_h__
+#pragma once
 
 namespace Dasher {
 
@@ -35,4 +34,3 @@ namespace Dasher {
 
 } // end namespace 
 
-#endif // __Hashtable_h__

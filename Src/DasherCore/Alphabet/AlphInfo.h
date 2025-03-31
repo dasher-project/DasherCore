@@ -18,8 +18,7 @@
 // along with Dasher; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
-#ifndef __ALPHINFO_H__
-#define __ALPHINFO_H__
+#pragma once
 
 
 #include "../DasherTypes.h"
@@ -167,4 +166,3 @@ protected:
 
 /// @}
 
-#endif /* #ifndef __AlphInfo_h__ */

@@ -6,8 +6,7 @@
 //  Copyright 2011 Cambridge University. All rights reserved.
 //
 
-#ifndef __GLOBBER_H__
-#define __GLOBBER_H__
+#pragma once
 
 #include "../DasherCore/AbstractXMLParser.h"
 
@@ -19,4 +18,3 @@ void globScan(AbstractParser *parser,
               const char **sysPaths, 
               int(*error_callback)(const char *,int));
 
-#endif

@@ -1,5 +1,4 @@
-#ifndef __STYLUS_FILTER_H__
-#define __STYLUS_FILTER_H__
+#pragma once
 
 #include <I18n.h>
 
@@ -36,4 +35,3 @@ class CStylusFilter : public CDefaultFilter, protected CZoomAdjuster {
 }
 /// @}
 
-#endif
