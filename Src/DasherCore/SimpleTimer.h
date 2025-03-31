@@ -1,4 +1,3 @@
-
 // Simple millisecond accurate timer.
 //
 // Copyright 2004 by Keith Vertanen

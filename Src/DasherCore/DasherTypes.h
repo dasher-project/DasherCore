@@ -1,5 +1,3 @@
-
-//
 // Copyright (c) 2001-2002 David Ward
 
 #ifndef __DasherTypes_h__

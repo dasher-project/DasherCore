@@ -1,5 +1,3 @@
-
-//
 // Copyright (c) 2001-2004 David Ward
 
 #ifndef __DasherScreen_h_

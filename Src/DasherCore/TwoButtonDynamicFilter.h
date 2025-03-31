@@ -1,7 +1,3 @@
-
-
-
-
 #ifndef __TWO_BUTTON_DYNAMIC_FILTER_H__
 #define __TWO_BUTTON_DYNAMIC_FILTER_H__
 

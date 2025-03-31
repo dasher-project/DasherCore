@@ -1,7 +1,3 @@
-
-
-
-
 #ifndef __mandarinalphmgr_h__
 #define __mandarinalphmgr_h__
 

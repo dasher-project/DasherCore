@@ -1,4 +1,3 @@
-
 // Keeps track of the user's mouse location at a certain point in time.
 //
 // Can store a integer x, y coordinate and/or a normalized floating

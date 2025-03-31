@@ -1,7 +1,3 @@
-//
-
-//  Dasher
-//
 //  Created by Alan Lawrence on 13/12/11.
 //  Copyright 2011 Cambridge University. All rights reserved.
 //

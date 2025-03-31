@@ -1,7 +1,3 @@
-
-
-
-
 #ifndef __ALPHINFO_H__
 #define __ALPHINFO_H__
 

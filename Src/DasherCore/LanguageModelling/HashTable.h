@@ -1,8 +1,3 @@
-
-//
-
-
-
 #ifndef __Hashtable_h__
 #define __Hashtable_h__
 

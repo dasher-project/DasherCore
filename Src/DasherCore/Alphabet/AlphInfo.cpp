@@ -1,7 +1,3 @@
-
-
-
-
 #include "AlphInfo.h"
 
 using namespace Dasher;

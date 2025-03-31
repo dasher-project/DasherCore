@@ -1,7 +1,3 @@
-
-
-
-
 #ifndef __SCENODE_H__
 #define __SCENODE_H__
 

@@ -1,5 +1,3 @@
-
-// DasherButtons.h 
 // Copyright 2005 by Chris Ball
 
 #ifndef __DASHER_BUTTONS_H__

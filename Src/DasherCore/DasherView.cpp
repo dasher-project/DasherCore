@@ -1,8 +1,3 @@
-
-//
-
-
-
 #include "DasherView.h"
 #include <algorithm>
 

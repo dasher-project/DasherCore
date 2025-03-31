@@ -1,8 +1,3 @@
-
-//
-
-
-
 #ifndef __DasherModel_h__
 #define __DasherModel_h__
 

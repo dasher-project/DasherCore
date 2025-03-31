@@ -1,7 +1,3 @@
-
-// 
-
-
 #ifndef DASHER_MODULE_H
 #define DASHER_MODULE_H
 

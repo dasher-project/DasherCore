@@ -1,8 +1,3 @@
-
-//
-
-
-
 #include "DasherModel.h"
 #include "DasherView.h"
 

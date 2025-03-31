@@ -1,4 +1,3 @@
-
 #include "OneButtonFilter.h"
 
 #include <I18n.h>

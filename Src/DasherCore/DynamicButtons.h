@@ -1,7 +1,3 @@
-
-
-
-
 #ifndef __DynamicButtons_h__
 #define __DynamicButtons_h__
 

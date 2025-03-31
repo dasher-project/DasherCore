@@ -1,7 +1,3 @@
-
-
-
-
 #include "SCENode.h"
 
 SCENode::SCENode() {

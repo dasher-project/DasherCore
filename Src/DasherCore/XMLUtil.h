@@ -1,4 +1,3 @@
-
 // Some very simple XML utility functions that just function on STL strings.
 //
 // Good for recursively splitting up the job of reinstatiating objects

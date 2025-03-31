@@ -1,8 +1,3 @@
-
-//
-
-
-//
 // For information on the CTW method visit 
 // http://www.sps.ele.tue.nl/members/F.M.J.Willems/RESEARCH_files/CTW/ResearchCTW.htm
 //

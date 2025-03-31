@@ -1,5 +1,3 @@
-
-//
 // (C) Copyright Seb Wills 2005
 //
 // Linux-specific subclass of SocketInputBase: provides network socket control of Dasher cursor

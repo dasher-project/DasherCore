@@ -1,5 +1,3 @@
-
-
 #include "MandarinAlphMgr.h"
 
 #include <algorithm>

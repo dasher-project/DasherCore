@@ -1,7 +1,3 @@
-
-
-
-
 #ifndef __alphabetmanager_h__
 #define __alphabetmanager_h__
 

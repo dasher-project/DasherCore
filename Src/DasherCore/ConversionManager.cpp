@@ -1,7 +1,3 @@
-
-
-
-
 #include "ConversionManager.h"
 #include "Event.h"
 #include "NodeCreationManager.h"

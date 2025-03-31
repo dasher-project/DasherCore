@@ -1,5 +1,3 @@
-
-//
 // Created 2011 by Alan Lawrence
 
 #ifndef __DASH_INTF_SCREEN_MSGS_H__

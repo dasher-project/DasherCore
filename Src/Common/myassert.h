@@ -1,8 +1,3 @@
-
-//
-
-
-
 #ifndef __assert_h__
 #define __assert_h__
 

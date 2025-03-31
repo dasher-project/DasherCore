@@ -1,5 +1,3 @@
-
-//
 // Created by Alan Lawrence on 17/06/2011.
 
 #ifndef __SCREEN_GAME_MODULE_H__

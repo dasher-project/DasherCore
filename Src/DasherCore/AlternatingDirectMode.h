@@ -1,5 +1,3 @@
-
-
 // Copyright 2005 by Chris Ball
 
 #ifndef __ALTERNATING_DIRECT_MODE_H__

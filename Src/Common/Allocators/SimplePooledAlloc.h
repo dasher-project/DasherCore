@@ -1,5 +1,3 @@
-
-//
 // Copyright (c) 2005 David Ward
 
 #ifndef __SimplePooledAlloc_h__

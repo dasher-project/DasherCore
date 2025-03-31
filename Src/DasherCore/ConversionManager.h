@@ -1,5 +1,3 @@
-
-
 #ifndef __conversion_manager_h__
 #define __conversion_manager_h__
 

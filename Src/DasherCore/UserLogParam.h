@@ -1,4 +1,3 @@
-
 #ifndef __USER_LOG_PARAM_H__
 #define __USER_LOG_PARAM_H__
 

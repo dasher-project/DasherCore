@@ -1,5 +1,3 @@
-
-//
 // Copyright (c) 2005 Phil Cowans
 
 #ifndef __DasherInput_h__

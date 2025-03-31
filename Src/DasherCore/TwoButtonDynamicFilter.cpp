@@ -1,7 +1,3 @@
-
-
-
-
 #include "TwoButtonDynamicFilter.h"
 
 #include <I18n.h>

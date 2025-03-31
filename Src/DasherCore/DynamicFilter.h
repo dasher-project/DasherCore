@@ -1,7 +1,3 @@
-
-
-
-
 #ifndef __DynamicFilter_h__
 #define __DynamicFilter_h__
 

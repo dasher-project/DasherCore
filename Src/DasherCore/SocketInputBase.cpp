@@ -1,5 +1,3 @@
-
-//
 // (C) Copyright Seb Wills 2005
 #ifndef _WIN32
 

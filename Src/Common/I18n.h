@@ -1,8 +1,3 @@
-
-//
-
-
-
 #ifndef __i18n_h__
 #define __i18n_h__
 

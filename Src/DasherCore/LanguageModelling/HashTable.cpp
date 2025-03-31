@@ -1,7 +1,3 @@
-
-
-
-
 #include "HashTable.h"
 
 using namespace Dasher;

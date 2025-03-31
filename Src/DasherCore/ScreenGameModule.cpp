@@ -1,6 +1,3 @@
-
-// Dasher
-
 #include "ScreenGameModule.h"
 #include <algorithm>
 

@@ -1,8 +1,3 @@
-
-//
-
-
-
 #ifndef __DasherInterfaceBase_h__
 #define __DasherInterfaceBase_h__
 

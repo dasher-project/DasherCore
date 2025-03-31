@@ -1,7 +1,3 @@
-
-
-
-
 #include "CircleStartHandler.h"
 #include "DefaultFilter.h"
 #include "DasherInterfaceBase.h"
