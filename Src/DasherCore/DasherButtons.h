@@ -5,7 +5,6 @@
 #ifndef __DASHER_BUTTONS_H__
 #define __DASHER_BUTTONS_H__
 
-#include "Event.h"
 #include "InputFilter.h"
 
 namespace Dasher {

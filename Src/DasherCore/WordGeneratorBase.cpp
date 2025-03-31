@@ -1,4 +1,5 @@
 #include "WordGeneratorBase.h"
+#include <sstream>
 
 using namespace Dasher;
 

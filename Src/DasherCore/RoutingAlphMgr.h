@@ -10,7 +10,6 @@
 #define __RoutingAlphMgr_h__
 
 #include "AlphabetManager.h"
-#include "LanguageModelling/RoutingPPMLanguageModel.h"
 
 namespace Dasher {
   

@@ -21,16 +21,12 @@
 #ifndef __ALPHINFO_H__
 #define __ALPHINFO_H__
 
-#include <locale>
 
 #include "../DasherTypes.h"
-#include "AlphabetMap.h"
 #include "GroupInfo.h"
 
 #include <string>
-#include <unordered_map>
 #include <vector>
-#include <utility>              // for std::pair
 
 #include "Actions.h"
 

@@ -5,7 +5,6 @@
 #ifndef __ALTERNATING_DIRECT_MODE_H__
 #define __ALTERNATING_DIRECT_MODE_H__
 
-#include "Event.h"
 #include "DasherButtons.h"
 
 namespace Dasher {

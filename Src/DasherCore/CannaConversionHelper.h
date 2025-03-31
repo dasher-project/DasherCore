@@ -6,12 +6,11 @@
 #include "ConversionManager.h"
 #include <iconv.h>
 
-#include <iostream> 
 /// \ingroup Model
 /// @{
 class CCannaConversionHelper : public Dasher::CConversionManager {
  public:
-  CCannaConversionHelper(CNodeCreationManager *pNCManager, Dasher::const CAlphInfo *pAlphabet, int Type, int Order);
+  CCannaConversionHelper(CNodeCreationManager *pNCManager, const Dasher::CAlphInfo *pAlphabet, int Type, int Order);
   ~CCannaConversionHelper();
 
   virtual bool Convert(const std::string &strSource, SCENode ** pRoot);

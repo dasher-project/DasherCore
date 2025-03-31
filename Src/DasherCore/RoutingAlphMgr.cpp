@@ -11,6 +11,7 @@
 #include <I18n.h>
 
 #include "DasherInterfaceBase.h"
+#include "LanguageModelling/RoutingPPMLanguageModel.h"
 using namespace Dasher;
 
 

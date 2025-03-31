@@ -25,8 +25,6 @@
 #include <algorithm>
 #include <sstream>
 
-#include "../ColorIO.h"
-
 using namespace Dasher;
 
 CAlphIO::CAlphIO(CMessageDisplay *pMsgs) : AbstractXMLParser(pMsgs) {

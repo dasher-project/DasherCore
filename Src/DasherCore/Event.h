@@ -4,8 +4,6 @@
 
 #include <string>
 #include <functional>
-#include "DasherTypes.h"
-
 
 namespace Dasher {
   class CEditEvent;

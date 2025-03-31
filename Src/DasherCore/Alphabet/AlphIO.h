@@ -28,7 +28,6 @@
 #include <map>
 #include <pugixml.hpp>
 #include <vector>
-#include <utility>
 
 namespace Dasher {
   class CAlphIO;

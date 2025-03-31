@@ -9,9 +9,6 @@
 #ifndef __WordLanguageModel_h__
 #define __WordLanguageModel_h__
 
-#include <cstdlib>
-
-#include "../../Common/NoClones.h"
 #include "../../Common/Allocators/PooledAlloc.h"
 #include "PPMLanguageModel.h"
 #include "../SettingsStore.h"
@@ -21,7 +18,6 @@
 #include <vector>
 #include <map>
 #include <string>
-#include <stdio.h>
 
 //static char dumpTrieStr[40000];
 //const int maxcont =200;

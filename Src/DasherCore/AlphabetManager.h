@@ -21,6 +21,8 @@
 #ifndef __alphabetmanager_h__
 #define __alphabetmanager_h__
 
+#include <map>
+
 #include "LanguageModelling/LanguageModel.h"
 #include "DasherNode.h"
 #include "NodeManager.h"

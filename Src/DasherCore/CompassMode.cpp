@@ -9,8 +9,6 @@
 
 #include "DasherScreen.h"
 #include "DasherInterfaceBase.h"
-#include <valarray>
-
 
 using namespace Dasher;
 

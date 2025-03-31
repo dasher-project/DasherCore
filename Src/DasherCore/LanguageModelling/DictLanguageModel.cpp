@@ -10,8 +10,6 @@
 #include "../Alphabet/AlphabetMap.h"
 
 #include <climits>
-#include <stack>
-#include <iostream>
 #include <fstream>
 #include <myassert.h>
 using namespace Dasher;

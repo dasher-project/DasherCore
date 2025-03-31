@@ -1,4 +1,5 @@
 #include "FrameRate.h"
+#include "DasherModel.h"
 
 using namespace Dasher;
 

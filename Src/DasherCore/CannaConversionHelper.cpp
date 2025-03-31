@@ -7,6 +7,7 @@
 #include <canna/jrkanji.h>
 #include <canna/RK.h>
 #include <iconv.h>
+#include "SCENode.h"
 
 #define BUFSIZE 10240
 

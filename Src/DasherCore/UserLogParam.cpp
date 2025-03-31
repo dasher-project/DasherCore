@@ -1,7 +1,5 @@
 #include "UserLogParam.h"
 
-
-
 // Needed so we can sort() vectors of parameters
 bool CUserLogParam::ComparePtr(CUserLogParam* pA, CUserLogParam* pB)
 {

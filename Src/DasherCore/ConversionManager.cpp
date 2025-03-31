@@ -27,7 +27,7 @@
 #include <cstring>
 #include <string>
 #include <vector>
-#include <stdlib.h>
+#include <ostream>
 
 //Note the new implementation in Mandarin Dasher may not be compatible with the previous implementation of Japanese Dasher
 //Need to reconcile (a small project)
