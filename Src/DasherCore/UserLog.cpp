@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <fstream>
 #include <cstring>
+#include <cmath>
 
 #include "FileLogger.h"
 #include "FileUtils.h"

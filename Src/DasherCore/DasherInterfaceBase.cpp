@@ -47,6 +47,7 @@
 
 // STL headers
 #include <sstream>
+#include <algorithm>
 
 // Declare our global file logging object
 

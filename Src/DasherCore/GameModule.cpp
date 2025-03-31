@@ -4,6 +4,7 @@
 
 #include "GameStatistics.h"
 #include <sstream>
+#include <cmath>
 
 using namespace Dasher;
 

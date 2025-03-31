@@ -25,7 +25,6 @@
 //#include "stdafx.h"
 #include "CTWLanguageModel.h"
 #include <cstddef>
-#include <math.h> // not in use anymore? needed it for log
 #include <cstring>
 #include <cstdint>
 #include "HashTable.h"

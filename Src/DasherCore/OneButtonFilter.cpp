@@ -2,6 +2,7 @@
 #include "OneButtonFilter.h"
 
 #include <I18n.h>
+#include <algorithm>
 
 #include "DasherScreen.h"
 #include "DasherModel.h"
