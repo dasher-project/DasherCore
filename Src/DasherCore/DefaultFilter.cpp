@@ -1,6 +1,8 @@
 #include "DefaultFilter.h"
 
 #include <I18n.h>
+#include <algorithm>
+#include <cmath>
 
 #include "DasherInterfaceBase.h"
 
