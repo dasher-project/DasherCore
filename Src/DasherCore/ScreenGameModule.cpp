@@ -2,6 +2,7 @@
 // Dasher
 
 #include "ScreenGameModule.h"
+#include <algorithm>
 
 using namespace Dasher;
 

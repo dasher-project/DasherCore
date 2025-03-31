@@ -1,6 +1,6 @@
 ﻿#include "SmoothingFilter.h"
-
-#include <complex>
+#include <cmath>
+#include <algorithm>
 
 Dasher::CSmoothingFilter::CSmoothingFilter(CSettingsStore* pSettingsStore, CDasherInterfaceBase* pInterface, CFrameRate* pFramerate, const char *szName) : CPressFilter(pSettingsStore, pInterface, pFramerate, szName)
 {

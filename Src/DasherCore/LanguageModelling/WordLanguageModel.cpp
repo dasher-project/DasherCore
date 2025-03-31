@@ -15,7 +15,6 @@
 #include <fstream>
 #include <iostream>
 #include <myassert.h>
-#include <stack>
 
 using namespace Dasher;
 
@@ -234,10 +233,11 @@ void CWordLanguageModel::GetProbs(Context context, std::vector<unsigned int> &pr
 
           double dP;
 
-          if(pTmpChild->count > 0)
+          if(pTmpChild->count > 0){
             dP = dToSpend * (pTmpChild->count) / static_cast < double >(iTotal + alpha);
-          else
-          dP = 0.0;
+          } else {
+            dP = 0.0;
+          }
 
           dProbs[pTmpChild->sbl] += dP;
         }

@@ -8,11 +8,9 @@
 
 #pragma once
 
-#include "AbstractXMLParser.h"
-
-#include <map>
 #include <unordered_map>
 #include <vector>
+#include <string>
 
 namespace Dasher {
 	namespace NamedColor

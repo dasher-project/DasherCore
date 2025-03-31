@@ -1,6 +1,7 @@
 
 #include "AutoSpeedControl.h"
 
+#include <algorithm>
 #include <cmath>
 
 using namespace Dasher;

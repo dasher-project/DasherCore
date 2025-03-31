@@ -1,6 +1,5 @@
 #include "StylusFilter.h"
 #include "DasherInterfaceBase.h"
-#include "ClickFilter.h"
 
 using namespace Dasher;
 

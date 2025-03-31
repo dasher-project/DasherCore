@@ -6,7 +6,7 @@
 #define __DasherScreen_h_
 
 #include "DasherTypes.h"
-#include "../DasherCore/ColorIO.h"
+#include "ColorPalette.h"
 #include "myassert.h"
 #include <set>
 

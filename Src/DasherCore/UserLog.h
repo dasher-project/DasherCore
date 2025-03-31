@@ -34,7 +34,6 @@
 #include "UserLogTrial.h"
 #include "UserLogParam.h"
 #include "UserLogBase.h"
-#include "Event.h"
 #include "XMLUtil.h"
 #include "SettingsStore.h"
 

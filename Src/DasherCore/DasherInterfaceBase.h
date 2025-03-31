@@ -33,14 +33,11 @@
 
 #include "Messages.h"
 #include "../Common/NoClones.h"
-#include "../Common/ModuleSettings.h"
 #include "Alphabet/AlphIO.h"
-#include "AutoSpeedControl.h"
 #include "ColorIO.h"
 #include "InputFilter.h"
 #include "ModuleManager.h"
 #include "FrameRate.h"
-#include <set>
 
 namespace Dasher {
   class CDasherScreen;

@@ -9,7 +9,6 @@
 #include <I18n.h>
 
 #include "DasherInterfaceBase.h"
-#include <valarray>
 
 
 using namespace Dasher;

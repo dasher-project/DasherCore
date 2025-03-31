@@ -2,9 +2,8 @@
 #define __WordGeneratorBase_h__
 
 #include <string>
-#include <sstream>
 #include "Alphabet/AlphabetMap.h"
-#include "Alphabet/AlphIO.h"
+#include "AlphInfo.h"
 
 namespace Dasher {
 /**

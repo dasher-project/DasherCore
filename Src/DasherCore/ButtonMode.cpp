@@ -5,10 +5,10 @@
 #include "ButtonMode.h"
 
 #include <I18n.h>
+#include <cmath>
 
 #include "DasherScreen.h"
 #include "DasherInterfaceBase.h"
-#include <valarray>
 
 
 using namespace Dasher;
@@ -113,7 +113,7 @@ void CButtonMode::SetupBoxes()
       double dMaxSize;
 
       if(dRatio == 1.0) {
-        dMaxSize = iDasherY / iForwardBoxes;
+        dMaxSize = static_cast<double>(iDasherY) / static_cast<double>(iForwardBoxes);
       }
       else {
         if(bEven)

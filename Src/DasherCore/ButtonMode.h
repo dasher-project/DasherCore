@@ -5,7 +5,6 @@
 #ifndef __BUTTON_MODE_H__
 #define __BUTTON_MODE_H__
 
-#include "Event.h"
 #include "DasherButtons.h"
 
 namespace Dasher {

@@ -11,8 +11,6 @@
 
 #include <fstream>
 
-#include "FileUtils.h"
-
 bool AbstractParser::ParseFile(const std::string& strPath, bool bUser)
 {
 	std::ifstream in(strPath.c_str(), std::ios::binary);

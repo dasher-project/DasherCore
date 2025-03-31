@@ -1,11 +1,8 @@
 #pragma once
 
-#include "DasherModule.h"
-
 #include <string>
 #include <unordered_map>
 #include <vector>
-
 
 namespace Dasher {
     class CDasherInput;

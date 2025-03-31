@@ -21,6 +21,8 @@
 #ifndef __conversion_manager_h__
 #define __conversion_manager_h__
 
+#include <map>
+
 #include "DasherTypes.h"
 #include "LanguageModelling/LanguageModel.h" // Urgh - we really shouldn't need to know about language models here
 #include "DasherNode.h"

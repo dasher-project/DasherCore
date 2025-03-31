@@ -9,7 +9,6 @@
 #include "SettingsStore.h"
 
 #include <cstdlib>
-#include <iostream>
 #include <myassert.h>
 
 using namespace Dasher;

@@ -12,6 +12,7 @@
 #include "../../Common/NoClones.h"
 #include "../../Common/Allocators/PooledAlloc.h"
 
+#include "DasherTypes.h"
 #include "LanguageModel.h"
 #include "../SettingsStore.h"
 #include "stdlib.h"

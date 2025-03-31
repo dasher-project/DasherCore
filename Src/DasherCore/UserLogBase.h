@@ -4,7 +4,6 @@
 #include "DasherTypes.h"
 #include "UserLogTrial.h" // Don't want to include this, but needed for event type enum
 #include "Event.h"
-#include "SettingsStore.h"
 
 #include <string>
 #include <vector>

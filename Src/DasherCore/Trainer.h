@@ -1,9 +1,10 @@
 #ifndef __trainer_h__
 #define __trainer_h__
 
-#include "LanguageModelling/PPMPYLanguageModel.h"
 #include "Alphabet/AlphInfo.h"
 #include "AbstractXMLParser.h"
+#include "AlphabetMap.h"
+#include "LanguageModel.h"
 
 namespace Dasher {
   class CTrainer : public AbstractParser {

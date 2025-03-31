@@ -21,11 +21,6 @@
 #ifndef __Hashtable_h__
 #define __Hashtable_h__
 
-#include "LanguageModel.h"	
-
-using namespace Dasher;
-//using namespace std;
-
 namespace Dasher {
 
   class CHashTable { //class to store the hashtable used to find indices of nodes	 

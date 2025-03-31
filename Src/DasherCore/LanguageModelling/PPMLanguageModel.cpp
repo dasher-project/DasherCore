@@ -8,9 +8,6 @@
 
 #include "PPMLanguageModel.h"
 
-#include <stack>
-#include <sstream>
-#include <iostream>
 #include <cstring>
 #include <myassert.h>
 

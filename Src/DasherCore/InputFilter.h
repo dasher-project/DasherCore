@@ -6,6 +6,7 @@
 #include "ModuleManager.h"
 #include "UserLogBase.h"
 #include "DasherInput.h"
+#include "SettingsStore.h"
 
 namespace Dasher {
   class CDasherInterfaceBase;

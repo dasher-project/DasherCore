@@ -5,6 +5,7 @@
 #include <fstream>
 
 #include "WordGeneratorBase.h"
+#include "AbstractXMLParser.h"
 
 namespace Dasher {
   

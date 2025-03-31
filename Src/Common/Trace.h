@@ -25,7 +25,6 @@
 // removed by the compiler
 
 #include <stdarg.h>
-#include <stdio.h>
 
 void DasherTraceOutput(const char *pszFormat, ...);
 void DasherTraceOutputImpl(const char *pszFormat, va_list vargs);

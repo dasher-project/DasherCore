@@ -9,9 +9,7 @@
 #ifndef __FrameRate_h__
 #define __FrameRate_h__
 
-#include <cmath>
 #include "SettingsStore.h"
-#include "DasherModel.h"
 
 namespace Dasher {
 /// \ingroup Model

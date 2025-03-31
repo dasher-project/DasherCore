@@ -6,8 +6,9 @@
 
 #include <numeric>
 #include <cmath>
-#include <functional>
 #include <vector>
+#include <string>
+#include <sstream>
 
 // 1/size(v) * Sum_{i \elem v}((i-mean)^n)
 template<class T, class U>

@@ -9,15 +9,14 @@
 #ifndef __DictLanguageModel_h__
 #define __DictLanguageModel_h__
 
-#include "../../Common/NoClones.h"
 #include "../../Common/Allocators/PooledAlloc.h"
-#include "PPMLanguageModel.h"
 #include "../Alphabet/AlphInfo.h"
 #include "../Alphabet/AlphabetMap.h"
+#include "LanguageModel.h"
+#include "../SettingsStore.h"
 #include <vector>
 #include <map>
 #include <string>
-#include <stdio.h>
 
 //static char dumpTrieStr[40000];
 //const int maxcont =200;

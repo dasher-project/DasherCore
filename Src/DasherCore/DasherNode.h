@@ -22,7 +22,6 @@
 #define __DasherNode_h__
 
 #include "../Common/NoClones.h"
-#include "LanguageModelling/LanguageModel.h"
 //Includes needed for used classes
 #include "NodeManager.h"
 #include "Alphabet/AlphabetMap.h"
@@ -35,7 +34,6 @@ namespace Dasher {
   class CDasherInterfaceBase;
 }
 #include <deque>
-#include <iostream>
 #include <vector>
 
 /// \ingroup Model

@@ -13,12 +13,11 @@
 #ifndef __PPMPYLanguageModel_h__
 #define __PPMPYLanguageModel_h__
 
-#include "../../Common/NoClones.h"
-#include "../../Common/Allocators/PooledAlloc.h"
-
 #include "PPMLanguageModel.h"
+#include "DasherTypes.h"
 
 #include <vector>
+#include <utility>
 
 namespace Dasher {
 

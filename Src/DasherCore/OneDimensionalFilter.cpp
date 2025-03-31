@@ -1,5 +1,7 @@
 #include "OneDimensionalFilter.h"
 #include "CircleStartHandler.h"
+#include <algorithm>
+#include <cmath>
 
 using namespace Dasher;
 

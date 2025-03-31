@@ -1,5 +1,6 @@
 #include "ClickFilter.h"
 #include "DasherInterfaceBase.h"
+#include <algorithm>
 
 using namespace Dasher;
 

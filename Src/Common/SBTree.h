@@ -7,8 +7,6 @@
  *
  */
 
-#include <stdlib.h>
-
 class SBTree {
 public:
     SBTree(int iValue);
