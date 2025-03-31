@@ -5,6 +5,7 @@
 #include "ButtonMode.h"
 
 #include <I18n.h>
+#include <cmath>
 
 #include "DasherScreen.h"
 #include "DasherInterfaceBase.h"
