@@ -1,4 +1,4 @@
-// PPMPYLanguageModel.h
+
 //
 // Mandarin character - py prediction by a extension in PPM (subtrees attached to Symbol nodes)
 //

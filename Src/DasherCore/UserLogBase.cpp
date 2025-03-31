@@ -1,10 +1,6 @@
 /*
- *  UserLogBase.cpp
- *  Dasher
- *
  *  Created by Alan Lawrence on 28/03/2011.
  *  Copyright 2011 Cavendish Laboratory. All rights reserved.
- *
  */
 
 #include "UserLogBase.h"

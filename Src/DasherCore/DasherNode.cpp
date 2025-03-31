@@ -1,8 +1,6 @@
-// DasherNode.cpp
+
 //
 // Copyright (c) 2007 David Ward
-//
-// This file is part of Dasher.
 
 
 // #include "AlphabetManager.h" - doesnt seem to be required - pconlon

@@ -1,4 +1,4 @@
-// SocketInput.h
+
 //
 // (C) Copyright Seb Wills 2005
 //

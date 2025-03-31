@@ -1,10 +1,6 @@
 /*
- *  AbstractXMLParser.cpp
- *  Dasher
- *
  *  Created by Alan Lawrence on 17/03/2011.
  *  Copyright 2011 Cavendish Laboratory. All rights reserved.
- *
  */
 
 #include "AbstractXMLParser.h"

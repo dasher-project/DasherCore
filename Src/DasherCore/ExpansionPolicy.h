@@ -1,10 +1,8 @@
 /*
  *  ExpansionPolicy.h
- *  Dasher
  *
  *  Created by Alan Lawrence on 03/06/2009.
  *  Copyright 2009 Cavendish Laboratory. All rights reserved.
- *
  */
 
 #pragma once

@@ -1,10 +1,8 @@
 /*
  *  ConvertingAlphMgr.h
- *  Dasher
  *
  *  Created by Alan Lawrence on 06/08/2010.
  *  Copyright 2010 Cavendish Laboratory. All rights reserved.
- *
  */
 
 #ifndef __CONVERTING_ALPH_MGR_H__

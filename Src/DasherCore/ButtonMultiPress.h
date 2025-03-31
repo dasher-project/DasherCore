@@ -1,7 +1,3 @@
-// DynamicFilter.h
-
-
-
 #ifndef __ButtonMultiPress_h__
 #define __ButtonMultiPress_h__
 

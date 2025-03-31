@@ -1,10 +1,8 @@
 /*
  *  SBTree.h
- *  Dasher
  *
  *  Created by Alan Lawrence on 17/04/2009.
  *  Copyright 2009 Cavendish Laboratory. All rights reserved.
- *
  */
 
 class SBTree {

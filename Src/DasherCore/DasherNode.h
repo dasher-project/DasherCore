@@ -1,8 +1,6 @@
-// DasherNode.h
+
 //
 // Copyright (c) 2007 David Ward
-//
-// This file is part of Dasher.
 
 
 #ifndef __DasherNode_h__
