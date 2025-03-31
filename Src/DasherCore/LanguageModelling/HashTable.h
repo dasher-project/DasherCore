@@ -1,8 +1,3 @@
-
-//
-
-
-
 #pragma once
 
 namespace Dasher {

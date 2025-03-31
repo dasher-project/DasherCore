@@ -1,8 +1,3 @@
-
-//
-
-
-
 #include "DasherViewSquare.h"
 #include "DasherView.h"
 #include "DasherTypes.h"

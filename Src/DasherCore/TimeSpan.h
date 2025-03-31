@@ -1,4 +1,3 @@
-
 // Object that keeps track of a time span.
 // Span starts when the object is created, and
 // ends when someone asks it for its XML representation.

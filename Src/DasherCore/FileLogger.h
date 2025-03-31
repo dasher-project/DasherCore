@@ -1,5 +1,3 @@
-// FileLogger
-//
 // A very simple class that does logging to a file.
 //
 // Copyright 2004 by Keith Vertanen

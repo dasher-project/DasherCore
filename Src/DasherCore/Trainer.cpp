@@ -1,4 +1,3 @@
-
 #include "Trainer.h"
 
 #include <I18n.h>

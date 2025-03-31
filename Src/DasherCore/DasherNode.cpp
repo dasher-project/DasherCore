@@ -1,5 +1,3 @@
-
-//
 // Copyright (c) 2007 David Ward
 
 

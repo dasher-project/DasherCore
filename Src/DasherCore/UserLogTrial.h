@@ -1,4 +1,3 @@
-
 // Represent all the data about one trial by a user (ie one
 // input sequence using speech or normal Dasher).
 //

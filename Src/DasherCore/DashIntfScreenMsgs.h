@@ -1,5 +1,3 @@
-
-//
 // Created 2011 by Alan Lawrence
 
 #pragma once

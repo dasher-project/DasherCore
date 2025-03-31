@@ -1,7 +1,3 @@
-
-
-
-
 #include "DasherInterfaceBase.h"
 #include "Parameters.h"
 #include "ButtonMultiPress.h"

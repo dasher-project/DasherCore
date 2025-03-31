@@ -1,4 +1,3 @@
-// DasherButtons.cpp, build a set of boxes for Button Dasher.
 // Copyright 2005, Chris Ball and David MacKay.
 // Idea - should back off button always just undo the previous 'forwards' button?
 

@@ -1,4 +1,3 @@
-
 // ButtonMode.h 
 // Copyright 2009 by Alan Lawrence
 

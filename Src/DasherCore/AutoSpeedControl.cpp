@@ -1,4 +1,3 @@
-
 #include "AutoSpeedControl.h"
 
 #include <algorithm>

@@ -1,4 +1,3 @@
-
 // Handles logging of user activities such as what they write, how 
 // long they were writing, mouse positions, parameters, etc
 //

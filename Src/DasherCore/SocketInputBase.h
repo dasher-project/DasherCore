@@ -1,5 +1,3 @@
-
-//
 // (C) Copyright Seb Wills 2005
 //
 // Abstract base class for socket input: parent of non-abstract classes in each implementation (Windows, Linux, ...),

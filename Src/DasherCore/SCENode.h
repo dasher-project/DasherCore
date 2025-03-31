@@ -1,7 +1,3 @@
-
-
-
-
 #pragma once
 
 /*Common Node Definition for Chinese Pinyin (possibly also Japanese) 

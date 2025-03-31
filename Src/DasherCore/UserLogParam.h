@@ -1,4 +1,3 @@
-
 #pragma once
 
 // Class that stores a particular parameter
