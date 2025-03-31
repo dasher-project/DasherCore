@@ -16,6 +16,7 @@
 #include <vector>
 
 using namespace Dasher;
+using namespace std;
 
 
 CNodeManager* Dasher::CAlphBase::mgr() const
