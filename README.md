@@ -13,7 +13,7 @@ If you are looking for a frontend that acutally offers some of the functionality
 
 This library version can be build, simply by generating the required make files via CMake and then building with these. A viable workflow could look something like this:
 
-1. Clone the repository with all submodules: `git clone --recursive https://github.com/PapeCoding/DasherCore.git ./DasherCore`
+1. Clone the repository with all submodules: `git clone --recursive https://github.com/dasher-project/DasherCore.git ./DasherCore`
 2. Generate some project files with CMake:
   * `cd ./DasherCore && mkdir build && cd build`
   * `cmake ..`
