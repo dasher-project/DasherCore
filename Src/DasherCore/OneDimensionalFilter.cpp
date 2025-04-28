@@ -9,7 +9,7 @@ using namespace Dasher;
   : COneDimensionalFilter(pSettingsStore, pInterface, m_pDasherModel, 4, _("One Dimensional Mode")) {
 }*/
 
-CDasherScreen::point C1DCircleStartHandler::CircleCenter(CDasherView* pView)
+point C1DCircleStartHandler::CircleCenter(CDasherView* pView)
 {
     if (m_iScreenRadius==-1) {//if we need to recompute
         CCircleStartHandler::CircleCenter(pView); //that does the radius

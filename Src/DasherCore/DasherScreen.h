@@ -62,13 +62,6 @@ public:
 		return m_iHeight;
 	}
 
-	//! Structure defining a point on the screen 
-	typedef struct tagpoint
-	{
-		screenint x;
-		screenint y;
-	} point;
-
 	///Abstract class for objects representing strings that can be drawn on the screen.
 	/// Platform-specific instances are created by the MakeLabel(String) method, which
 	/// may then be passed to GetSize() and DrawText().

@@ -39,7 +39,7 @@ CCircleStartHandler::~CCircleStartHandler() {
     m_pSettingsStore->OnParameterChanged.Unsubscribe(this);
 }
 
-CDasherScreen::point CCircleStartHandler::CircleCenter(CDasherView *pView) {
+point CCircleStartHandler::CircleCenter(CDasherView *pView) {
   if (m_iScreenRadius!=-1) return m_screenCircleCenter;
 
   m_pView->Dasher2Screen(CDasherModel::ORIGIN_X, CDasherModel::ORIGIN_Y, m_screenCircleCenter.x, m_screenCircleCenter.y);
@@ -62,7 +62,7 @@ CDasherScreen::point CCircleStartHandler::CircleCenter(CDasherView *pView) {
 
 bool CCircleStartHandler::DecorateView(CDasherView *pView) {
   RegisterView(pView);
-  CDasherScreen::point ctr = CircleCenter(pView);
+  point ctr = CircleCenter(pView);
 
   const bool bAboutToChange = m_bInCircle && m_iEnterTime != std::numeric_limits<long>::max();
   if (m_pFilter->isPaused()) {
@@ -77,7 +77,7 @@ bool CCircleStartHandler::DecorateView(CDasherView *pView) {
 void CCircleStartHandler::Timer(unsigned long iTime, dasherint mouseX, dasherint mouseY,CDasherView *pView) {
   RegisterView(pView);
 
-  CDasherScreen::point ctr = CircleCenter(pView);
+  point ctr = CircleCenter(pView);
   screenint x,y;
   pView->Dasher2Screen(mouseX, mouseY, x, y);
   int dx=x-ctr.x, dy=y-ctr.y;

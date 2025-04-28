@@ -69,7 +69,7 @@ bool CCompassMode::DecorateView(CDasherView *pView, CDasherInput *pInput) {
   bool bFirst(true);
 
   while(iPos >= 0) {
-    CDasherScreen::point p[2];
+    point p[2];
 
     pView->Dasher2Screen(-100, iPos, p[0].x, p[0].y);
 

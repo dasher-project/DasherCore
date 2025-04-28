@@ -39,12 +39,12 @@ void CDasherView::ChangeScreen(CDasherScreen *NewScreen) {
 
 void CDasherView::DasherSpaceLine(myint x1, myint y1, myint x2, myint y2, int iWidth, const ColorPalette::Color& color) {
   if (!ClipLineToVisible(x1, y1, x2, y2)) return;
-  std::vector<CDasherScreen::point> vPoints;
-  CDasherScreen::point p;
+  std::vector<point> vPoints;
+  point p;
   Dasher2Screen(x1, y1, p.x, p.y);
   vPoints.push_back(p);
   DasherLine2Screen(x1,y1,x2,y2,vPoints);
-  CDasherScreen::point *pts = new CDasherScreen::point[vPoints.size()];
+  point *pts = new point[vPoints.size()];
   for (int i = static_cast<int>(vPoints.size()); i-->0; ) pts[i] = vPoints[i];
   Screen()->Polyline(pts, static_cast<int>(vPoints.size()), iWidth, color);
 }
@@ -89,7 +89,7 @@ bool CDasherView::ClipLineToVisible(myint &x1, myint &y1, myint &x2, myint &y2) 
 
 void CDasherView::DasherPolyline(myint *x, myint *y, int n, int iWidth, const ColorPalette::Color& color) {
 
-  CDasherScreen::point * ScreenPoints = new CDasherScreen::point[n];
+  point * ScreenPoints = new point[n];
 
   for(int i(0); i < n; ++i)
     Dasher2Screen(x[i], y[i], ScreenPoints[i].x, ScreenPoints[i].y);
@@ -102,7 +102,7 @@ void CDasherView::DasherPolyline(myint *x, myint *y, int n, int iWidth, const Co
 // Draw a polyline with an arrow on the end
 void CDasherView::DasherPolyarrow(myint *x, myint *y, int n, int iWidth, const ColorPalette::Color& color, double dArrowSizeFactor) {
 
-  CDasherScreen::point * ScreenPoints = new CDasherScreen::point[n+3];
+  point * ScreenPoints = new point[n+3];
 
   for(int i(0); i < n; ++i)
     Dasher2Screen(x[i], y[i], ScreenPoints[i].x, ScreenPoints[i].y);

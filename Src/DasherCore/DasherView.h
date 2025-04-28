@@ -220,8 +220,8 @@ protected:
 	/// \param x2 , y2 Dasher co-ordinates of end of line segment; also guaranteed within VisibleRegion.
 	/// \param vPoints vector to which to add screen points. Note that at the point that DasherLine2Screen is called,
 	/// the screen coordinates of the first point should already have been added to this vector; DasherLine2Screen
-	/// will then add exactly one CDasherScreen::point for each line segment required.
-	virtual void DasherLine2Screen(myint x1, myint y1, myint x2, myint y2, std::vector<CDasherScreen::point>& vPoints) =0;
+	/// will then add exactly one point for each line segment required.
+	virtual void DasherLine2Screen(myint x1, myint y1, myint x2, myint y2, std::vector<point>& vPoints) =0;
 
 	const ColorPalette* m_pColorPalette = nullptr;
 private:

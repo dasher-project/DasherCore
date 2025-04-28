@@ -24,10 +24,10 @@ protected:
   ///Radius of circle in screen coordinates (-1 = needs recomputing)
   int m_iScreenRadius;
   CDasherView *m_pView;
-  virtual CDasherScreen::point CircleCenter(CDasherView *pView);
+  virtual point CircleCenter(CDasherView *pView);
 private:
   ///Cached center of screen circle (needs recomputing if radius does)
-  CDasherScreen::point m_screenCircleCenter;
+  point m_screenCircleCenter;
   CSettingsStore* m_pSettingsStore;
 };
 }

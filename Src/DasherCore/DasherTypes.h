@@ -46,6 +46,15 @@ namespace Dasher
   // All screen co-ordinates are of type screenint
   typedef int32_t screenint;
 
+  //! Structure defining a point on the screen 
+	typedef struct point
+	{
+		screenint x = 0;
+		screenint y = 0;
+    point() = default;
+    point(screenint X, screenint Y) : x(X), y(Y) {}
+	} point;
+
   // Using a signed symbol type allows "Out of band" ie negative {{{
   // values to be used to flag non-symbol data. For example commands
   // in dasher nodes.

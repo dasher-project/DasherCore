@@ -62,7 +62,7 @@ CTwoPushDynamicFilter::~CTwoPushDynamicFilter()
 void GuideLine(CDasherView *pView, const myint iDasherY, NamedColor::knownColorName Colour)
 {
   myint iDasherX = -100;
-  CDasherScreen::point p[2];
+  point p[2];
   CDasherScreen *pScreen(pView->Screen());
   
   pView->Dasher2Screen(iDasherX, iDasherY, p[0].x, p[0].y);

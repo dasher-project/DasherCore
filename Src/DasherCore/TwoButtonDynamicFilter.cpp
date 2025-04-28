@@ -84,7 +84,7 @@ void CTwoButtonDynamicFilter::ComputeLagBits()
 bool CTwoButtonDynamicFilter::DecorateView(CDasherView *pView, CDasherInput *pInput) {
   CDasherScreen *pScreen(pView->Screen());
 
-  CDasherScreen::point p[2];
+  point p[2];
   
   myint iDasherX;
   myint iDasherY;

@@ -106,7 +106,7 @@ private:
 	/// dest - point (x2,y2) in screen coords
 	/// pts - vector into which to store points; on entry, last element should already be screen-coords of (x1,y1)
 	/// dXMul - multiply x coords (in dasher space) by this (i.e. aspect ratio), for ovals
-	void CircleTo(myint cy, myint r, myint y1, myint x1, myint y3, myint x3, CDasherScreen::point dest, std::vector<CDasherScreen::point>& pts, double dXMul);
+	void CircleTo(myint cy, myint r, myint y1, myint x1, myint y3, myint x3, point dest, std::vector<point>& pts, double dXMul);
 	void Circle(myint Range, myint y1, myint y2, const ColorPalette::Color& fillColor, const ColorPalette::Color& outlineColor, int lineWidth);
 	void Quadric(myint Range, myint lowY, myint highY, const ColorPalette::Color& fillColor, const ColorPalette::Color& outlineColor, int
                  lineWidth);
@@ -193,7 +193,7 @@ private:
     //Divides by SCALE_FACTOR, rounding away from 0
 	inline myint CustomIDivScaleFactor(myint iNumerator);
 
-	void DasherLine2Screen(myint x1, myint y1, myint x2, myint y2, std::vector<CDasherScreen::point>& vPoints) override;
+	void DasherLine2Screen(myint x1, myint y1, myint x2, myint y2, std::vector<point>& vPoints) override;
 
 	// Called on screen size or orientation changes
 	void SetScaleFactor();

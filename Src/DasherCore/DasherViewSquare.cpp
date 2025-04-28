@@ -364,7 +364,7 @@ void CDasherViewSquare::TruncateTri(myint x, myint y1, myint y2, myint midy1, my
 		}
 	}
 	// midy1,x1 is now start point
-	std::vector<CDasherScreen::point> pts(1);
+	std::vector<point> pts(1);
 	Dasher2Screen(x1, midy1, pts[0].x, pts[0].y);
 	DasherLine2Screen(x1, midy1, tempx1, y1, pts);
 	if (tempx1)
@@ -402,7 +402,7 @@ void CDasherViewSquare::TruncateTri(myint x, myint y1, myint y2, myint midy1, my
 	else
 		DASHER_ASSERT(pts.back().x == pts[0].x && pts.back().y == pts[0].y);
 
-	auto p_array = new CDasherScreen::point[pts.size()];
+	auto p_array = new point[pts.size()];
 	for (unsigned int i = 0; i < pts.size(); i++) p_array[i] = pts[i];
 	Screen()->Polygon(p_array, static_cast<int>(pts.size()), fillColor, outlineColor, lineWidth);
 	delete[] p_array;
@@ -412,11 +412,11 @@ void CDasherViewSquare::TruncateTri(myint x, myint y1, myint y2, myint midy1, my
 
 void CDasherViewSquare::Circle(myint Range, myint y1, myint y2, const ColorPalette::Color& fillColor, const ColorPalette::Color& outlineColor, int lineWidth)
 {
-	std::vector<CDasherScreen::point> pts;
+	std::vector<point> pts;
 	myint cy((y1 + y2) / 2), r(Range / 2), x1, x2;
 	const DasherCoordScreenRegion visibleRegion = VisibleRegion();
 
-	CDasherScreen::point p;
+	point p;
 	//run along bottom edge...
 	if (y1 < visibleRegion.minY)
 	{
@@ -459,17 +459,17 @@ void CDasherViewSquare::Circle(myint Range, myint y1, myint y2, const ColorPalet
 		Dasher2Screen(0, visibleRegion.maxX, p.x, p.y);
 		pts.push_back(p);
 	}
-	auto p_array = new CDasherScreen::point[pts.size()];
+	auto p_array = new point[pts.size()];
 	for (unsigned int i = 0; i < pts.size(); i++) p_array[i] = pts[i];
 	Screen()->Polygon(p_array, static_cast<int>(pts.size()), fillColor, outlineColor, lineWidth);
 	delete[] p_array;
 }
 
-void CDasherViewSquare::CircleTo(myint cy, myint r, myint y1, myint x1, myint y3, myint x3, CDasherScreen::point dest, std::vector<CDasherScreen::point>& pts, double dXMul)
+void CDasherViewSquare::CircleTo(myint cy, myint r, myint y1, myint x1, myint y3, myint x3, point dest, std::vector<point>& pts, double dXMul)
 {
 	myint y2((y1 + y3) / 2);
 	myint x2(static_cast<myint>(sqrt((sq(r) - sq(cy - y2)) * dXMul)));
-	CDasherScreen::point mid; //where midpoint of circle/arc should be
+	point mid; //where midpoint of circle/arc should be
 	Dasher2Screen(x2, y2, mid.x, mid.y); //(except "midpoint" measured along y axis)
 	int lmx = (pts.back().x + dest.x) / 2, lmy = (pts.back().y + dest.y) / 2; //midpoint of straight line
 	if (abs(dest.y - pts.back().y) < 2 || abs(mid.x - lmx) + abs(mid.y - lmy) < 2)
@@ -487,10 +487,10 @@ void CDasherViewSquare::CircleTo(myint cy, myint r, myint y1, myint x1, myint y3
 
 void CDasherViewSquare::DasherSpaceArc(myint cy, myint r, myint x1, myint y1, myint x2, myint y2, const ColorPalette::Color& color, int iLineWidth)
 {
-	CDasherScreen::point p;
+	point p;
 	//start point
 	Dasher2Screen(x1, y1, p.x, p.y);
-	std::vector<CDasherScreen::point> pts;
+	std::vector<point> pts;
 	pts.push_back(p);
 	//if circle goes behind crosshair and we want the point of max-x, force division into two sections with that point as boundary
 	if (r > CDasherModel::ORIGIN_X && ((y1 < cy) ^ (y2 < cy)))
@@ -502,7 +502,7 @@ void CDasherViewSquare::DasherSpaceArc(myint cy, myint r, myint x1, myint y1, my
 	}
 	Dasher2Screen(x2, y2, p.x, p.y);
 	CircleTo(cy, r, y1, x1, y2, x2, p, pts, 1.0);
-	auto p_array = new CDasherScreen::point[pts.size()];
+	auto p_array = new point[pts.size()];
 	for (unsigned int i = 0; i < pts.size(); i++) p_array[i] = pts[i];
 	Screen()->Polyline(p_array, static_cast<int>(pts.size()), iLineWidth, color);
 }
@@ -512,7 +512,7 @@ void CDasherViewSquare::Quadric(myint Range, myint lowY, myint highY, const Colo
 	static const double RR2 = 1.0 / sqrt(2.0);
 	const int midY = static_cast<int>((lowY + highY) / 2);
 #define NUM_STEPS 40
-	CDasherScreen::point p_array[2 * NUM_STEPS + 2];
+	point p_array[2 * NUM_STEPS + 2];
 	
 	const DasherCoordScreenRegion visibleRegion = VisibleRegion();
 	{
@@ -1194,7 +1194,7 @@ void CDasherViewSquare::Dasher2Polar(myint iDasherX, myint iDasherY, double& r, 
 	r = sqrt(x * x + y * y);
 }
 
-void CDasherViewSquare::DasherLine2Screen(myint x1, myint y1, myint x2, myint y2, std::vector<CDasherScreen::point>& vPoints)
+void CDasherViewSquare::DasherLine2Screen(myint x1, myint y1, myint x2, myint y2, std::vector<point>& vPoints)
 {
 	if (x1 != x2 && y1 != y2)
 	{
@@ -1221,7 +1221,7 @@ void CDasherViewSquare::DasherLine2Screen(myint x1, myint y1, myint x2, myint y2
 		if (m_pSettingsStore->GetLongParameter(LP_NONLINEAR_X) && (x1 > m_iXlogThres || x2 > m_iXlogThres))
 		{
 			//into logarithmic section
-			CDasherScreen::point pStart, pScreenMid, pEnd;
+			point pStart, pScreenMid, pEnd;
 			Dasher2Screen(x2, y2, pEnd.x, pEnd.y);
 			for (;;)
 			{
@@ -1231,7 +1231,7 @@ void CDasherViewSquare::DasherLine2Screen(myint x1, myint y1, myint x2, myint y2
 				pScreenMid.y = (pStart.y + pEnd.y) / 2;
 				//whereas a straight line _in_Dasher_space_ passes through pDasherMid:
 				myint xMid = (x1 + x2) / 2, yMid = (y1 + y2) / 2;
-				CDasherScreen::point pDasherMid;
+				point pDasherMid;
 				Dasher2Screen(xMid, yMid, pDasherMid.x, pDasherMid.y);
 
 				//since we know both endpoints are in the same section of the screen wrt. Y nonlinearity,
@@ -1259,7 +1259,7 @@ void CDasherViewSquare::DasherLine2Screen(myint x1, myint y1, myint x2, myint y2
 		//ok, not in x nonlinear section; fall through.
 	}
 
-	CDasherScreen::point p;
+	point p;
 	Dasher2Screen(x2, y2, p.x, p.y);
 	vPoints.push_back(p);
 }

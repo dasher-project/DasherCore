@@ -88,7 +88,7 @@ void CDasherButtons::Timer(unsigned long Time, CDasherView *pView, CDasherInput 
 void CDasherButtons::NewDrawGoTo(CDasherView *pView, myint iDasherMin, myint iDasherMax, bool bActive) {
    myint iHeight(iDasherMax - iDasherMin);
 
-   CDasherScreen::point p[4];
+   point p[4];
 
    pView->Dasher2Screen( 0, iDasherMin, p[0].x, p[0].y);
    pView->Dasher2Screen( iHeight, iDasherMin, p[1].x, p[1].y);

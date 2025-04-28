@@ -28,12 +28,12 @@ class COneDimensionalFilter : public CDefaultFilter {
 class C1DCircleStartHandler : public CCircleStartHandler {
 public:
   C1DCircleStartHandler(COneDimensionalFilter *f, CSettingsStore* pSettingsStore);
-  CDasherScreen::point CircleCenter(CDasherView *pView) override;
+  point CircleCenter(CDasherView *pView) override;
 
   void onPause() override;
 
 private:
-  CDasherScreen::point m_fwdCenter;
+  point m_fwdCenter;
   CSettingsStore* m_pSettingsStore;
 };
 }
