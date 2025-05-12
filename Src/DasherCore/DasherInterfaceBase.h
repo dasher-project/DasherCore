@@ -105,6 +105,8 @@ public:
 
   void GetPermittedValues(Parameter parameter, std::vector<std::string> &vList);
 
+  CColorIO* GetColorIO(){return m_ColorIO;}
+
   //@}
 
   /// Called when a parameter changes - but *after* components have been notified.

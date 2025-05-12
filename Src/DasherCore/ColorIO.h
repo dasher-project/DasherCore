@@ -17,6 +17,7 @@ namespace Dasher {
 	    CColorIO(CMessageDisplay *pMsgs);
         ~CColorIO() override;
         void GetKnownPalettes(std::vector<std::string>* ColourList) const;
+        const std::map<std::string, ColorPalette *>* GetKnownPalettes() const;
 
         const ColorPalette* FindPalette(const std::string& ColorPaletteName);
 

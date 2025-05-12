@@ -24,6 +24,10 @@ void CColorIO::GetKnownPalettes(std::vector<std::string>* ColourList) const {
 	}
 }
 
+const std::map<std::string, ColorPalette *>* CColorIO::GetKnownPalettes() const {
+	return &KnownPalettes;
+}
+
 const ColorPalette* CColorIO::FindPalette(const std::string& ColorPaletteName) {
 	if(ColorPaletteName.empty()){ // return Default if no colour scheme is specified
 		return HardcodedDefaultPalette;
