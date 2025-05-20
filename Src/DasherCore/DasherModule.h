@@ -37,8 +37,11 @@ public:
         return false;
     }
 
+    virtual const std::vector<Dasher::Settings::ModuleSetting>& getUISettings(){return UIList;};
 private:
     const char *m_szName;
+protected:
+    std::vector<Dasher::Settings::ModuleSetting> UIList;
 };
 /// @}
 

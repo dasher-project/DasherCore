@@ -2,6 +2,7 @@
 
 #include "DynamicFilter.h"
 #include "AutoSpeedControl.h"
+#include "ModuleSettings.h"
 #include "StartHandler.h"
 
 namespace Dasher {
@@ -23,6 +24,7 @@ class CDefaultFilter : public CDynamicFilter {
   void Activate() override;
   void Deactivate() override;
   bool GetSettings(SModuleSettings **, int *) override;
+
   void pause() override;
   //pauses, and calls the interface's Done() method
   void stop();

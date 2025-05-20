@@ -7,6 +7,8 @@
 #include "DasherInterfaceBase.h"
 
 #include "CircleStartHandler.h"
+#include "DasherTypes.h"
+#include "ModuleSettings.h"
 #include "TwoBoxStartHandler.h"
 
 using namespace Dasher;
