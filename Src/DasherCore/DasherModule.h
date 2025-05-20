@@ -21,6 +21,7 @@
 #pragma once
 
 #include "../Common/ModuleSettings.h"
+#include <vector>
 
 class CDasherModule;
 
