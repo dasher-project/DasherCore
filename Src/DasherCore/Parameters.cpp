@@ -70,14 +70,14 @@ namespace Dasher{
 		{LP_B                     , Parameter_Value{ "ButtonMenuBoxes"           , PARAM_LONG, Persistence::PERSISTENT, 4l    , "Number of boxes for button menu mode"}},
 		{LP_S                     , Parameter_Value{ "ButtonMenuSafety"          , PARAM_LONG, Persistence::PERSISTENT, 25l   , "Safety parameter for button mode, in percent."}},
 #ifdef TARGET_OS_IPHONE           	 
-		{LP_BUTTON_SCAN_TIME     , P arameter_Value{ "ButtonMenuScanTime"        , PARAM_LONG, Persistence::PERSISTENT, 600l  , "Scanning time in menu mode (0 = don't scan), in ms"}},
+		{LP_BUTTON_SCAN_TIME     , Parameter_Value{ "ButtonMenuScanTime"        , PARAM_LONG, Persistence::PERSISTENT, 600l  , "Scanning time in menu mode (0 = don't scan), in ms"}},
 #else                              
 		{LP_BUTTON_SCAN_TIME      , Parameter_Value{ "ButtonMenuScanTime"        , PARAM_LONG, Persistence::PERSISTENT, 0l    , "Scanning time in menu mode (0 = don't scan), in ms"}},
 #endif                             
 		{LP_R                     , Parameter_Value{ "ButtonModeNonuniformity"   , PARAM_LONG, Persistence::PERSISTENT, 0l    , "Button mode box non-uniformity"}},
 		{LP_RIGHTZOOM             , Parameter_Value{ "ButtonCompassModeRightZoom", PARAM_LONG, Persistence::PERSISTENT, 5120l , "Zoomfactor (*1024) for compass mode"}},
 #ifdef TARGET_OS_IPHONE           	 
-		{LP_NODE_BUDGET          , P arameter_Value{ "NodeBudget"                , PARAM_LONG, Persistence::PERSISTENT, 1000l , "Target (min) number of node objects to maintain"}},
+		{LP_NODE_BUDGET          , Parameter_Value{ "NodeBudget"                , PARAM_LONG, Persistence::PERSISTENT, 1000l , "Target (min) number of node objects to maintain"}},
 #else                              
 		{LP_NODE_BUDGET           , Parameter_Value{ "NodeBudget"                , PARAM_LONG, Persistence::PERSISTENT, 3000l , "Target (min) number of node objects to maintain"}},
 #endif                             
@@ -113,7 +113,7 @@ namespace Dasher{
 		{LP_DYNAMIC_SPEED_DEC     , Parameter_Value{ "DynamicSpeedDec"           , PARAM_LONG, Persistence::PERSISTENT, 8l    , "%age by which dynamic mode auto speed control decreases speed on reverse"}},
 		{LP_TAP_TIME              , Parameter_Value{ "TapTime"                   , PARAM_LONG, Persistence::PERSISTENT, 200l  , "Max length of a stylus 'tap' rather than hold (ms)"}},
 #ifdef TARGET_OS_IPHONE           	 
-		{LP_MARGIN_WIDTH         , P arameter_Value{ "MarginWidth"               , PARAM_LONG, Persistence::PERSISTENT, 500l  , "Width of RHS margin (in Dasher co-ords)"}},
+		{LP_MARGIN_WIDTH         , Parameter_Value{ "MarginWidth"               , PARAM_LONG, Persistence::PERSISTENT, 500l  , "Width of RHS margin (in Dasher co-ords)"}},
 #else                              
 		{LP_MARGIN_WIDTH          , Parameter_Value{ "MarginWidth"               , PARAM_LONG, Persistence::PERSISTENT, 300l  , "Width of RHS margin (in Dasher co-ords)"}},
 #endif                             
