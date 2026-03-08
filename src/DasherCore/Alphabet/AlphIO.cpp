@@ -245,7 +245,7 @@ void CAlphIO::ReadCharAttributes(pugi::xml_node xml_node, CAlphInfo::character& 
 	if(xml_node.type() == pugi::node_null) return;
 
 	alphabet_character.Display = xml_node.attribute("label").as_string();
-	alphabet_character.Text = xml_node.attribute("text").as_string(alphabet_character.Display.c_str());
+	alphabet_character.Text = xml_node.attribute("text").as_string("");
 
 	for(auto potentialActions : xml_node.children())
 	{
@@ -253,6 +253,9 @@ void CAlphIO::ReadCharAttributes(pugi::xml_node xml_node, CAlphInfo::character& 
 	    {
 			DoActions.push_back(new TextCharAction());
 	        UndoActions.push_back(new TextCharUndoAction());
+			if(alphabet_character.Text.empty() && !potentialActions.attribute("unicode").empty()){
+				alphabet_character.Text = static_cast<char>(potentialActions.attribute("unicode").as_int(0));
+			}
 	    }
 	    else if(std::strcmp(potentialActions.name(),"deleteTextAction") == 0 && !potentialActions.attribute("distance").empty())
 	    {
@@ -341,6 +344,7 @@ void CAlphIO::ReadCharAttributes(pugi::xml_node xml_node, CAlphInfo::character& 
 	    }
 	}
 
+	if(alphabet_character.Text.empty()) alphabet_character.Text = alphabet_character.Display; // make sure it has a value for training
 	alphabet_character.parentGroup = parentGroup;
 	alphabet_character.ColorGroupOffset = parentGroup->iNumChildNodes;
 	alphabet_character.fixedProbability = xml_node.attribute("fixedProbability").as_float(-1);
