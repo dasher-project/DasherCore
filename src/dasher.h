@@ -134,6 +134,74 @@ DASHER_API int dasher_color_get_red(int argb);
 DASHER_API int dasher_color_get_green(int argb);
 DASHER_API int dasher_color_get_blue(int argb);
 
+// ── Parameter introspection ───────────────────────────────────────────────
+//
+// The DasherCore engine has a self-describing parameter schema. Frontends
+// can use these functions to build settings UIs dynamically.
+//
+// Parameter types: 0=bool, 1=long, 2=string, -1=invalid
+// UI control types: 0=none, 1=switch, 2=slider, 3=step, 4=enum, 5=textField
+
+typedef struct dasher_parameter_info {
+    int key;                // BP_*/LP_*/SP_* enum value
+    const char* name;       // human-readable name (valid until next call)
+    const char* desc;       // human-readable description (valid until next call)
+    int type;               // parameter type (0=bool, 1=long, 2=string)
+    int ui_type;            // suggested UI control type
+    long min_val;           // minimum value (for numeric controls)
+    long max_val;           // maximum value (for numeric controls)
+    long step;              // step size (for step/slider controls)
+    int advanced;           // 1 if this is an advanced setting
+} dasher_parameter_info;
+
+// Returns the number of parameters in the schema.
+DASHER_API int dasher_get_parameter_count(void);
+
+// Fill out info for the parameter at the given index (0..count-1).
+// Returns 0 on success, -1 if index out of range.
+DASHER_API int dasher_get_parameter_info(int index, dasher_parameter_info* out);
+
+// Get the number of enum values for a parameter (only valid for enum-type).
+DASHER_API int dasher_get_parameter_enum_count(int key);
+
+// Get the display name and integer value for an enum entry.
+// name pointer is valid until the next API call.
+DASHER_API const char* dasher_get_parameter_enum_name(int key, int index);
+DASHER_API int dasher_get_parameter_enum_value(int key, int index);
+
+// Get permitted string values for a string parameter (e.g. alphabet list, palette list).
+// Returns the count; copies up to max_out pointers into out_names.
+// Pointers are valid until the next API call.
+DASHER_API int dasher_get_parameter_string_values(dasher_ctx* ctx, int key, const char** out_names, int max_out);
+
+// ── Colour palettes ──────────────────────────────────────────────────────
+
+// Get the number of available colour palettes.
+DASHER_API int dasher_get_palette_count(dasher_ctx* ctx);
+
+// Get the name of palette at index (0..count-1). Valid until next API call.
+DASHER_API const char* dasher_get_palette_name(dasher_ctx* ctx, int index);
+
+// Get 4 ARGB preview colours for a palette. out_colors must have room for 4 ints.
+// Returns 0 on success, -1 if index out of range.
+DASHER_API int dasher_get_palette_preview_colors(dasher_ctx* ctx, int index, int* out_colors);
+
+// Set the active colour palette by name.
+DASHER_API void dasher_set_palette(dasher_ctx* ctx, const char* palette_name);
+
+// ── Alphabets ─────────────────────────────────────────────────────────────
+
+// Get the number of available alphabets.
+DASHER_API int dasher_get_alphabet_count(dasher_ctx* ctx);
+
+// Get the name of alphabet at index (0..count-1). Valid until next API call.
+DASHER_API const char* dasher_get_alphabet_name(dasher_ctx* ctx, int index);
+
+// ── Persistence ───────────────────────────────────────────────────────────
+
+// Save current settings to disk.
+DASHER_API void dasher_save_settings(dasher_ctx* ctx);
+
 #ifdef __cplusplus
 }
 #endif

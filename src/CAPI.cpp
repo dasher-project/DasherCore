@@ -447,4 +447,156 @@ DASHER_API int dasher_color_get_blue(int argb) {
     return argb & 0xFF;
 }
 
+// ── Static schema data ────────────────────────────────────────────────────
+
+static std::vector<Dasher::Parameter> s_paramKeys;
+static std::string s_paramInfoName;
+static std::string s_paramInfoDesc;
+static std::vector<std::string> s_enumStrings;
+static std::vector<std::pair<std::string, int>> s_enumEntries;
+static std::vector<std::string> s_stringValues;
+
+static void ensureParamKeys() {
+    if (!s_paramKeys.empty()) return;
+    for (const auto& [key, val] : Dasher::Settings::parameter_defaults) {
+        s_paramKeys.push_back(key);
+    }
+    std::sort(s_paramKeys.begin(), s_paramKeys.end());
+}
+
+DASHER_API int dasher_get_parameter_count(void) {
+    return static_cast<int>(Dasher::Settings::parameter_defaults.size());
+}
+
+DASHER_API int dasher_get_parameter_info(int index, dasher_parameter_info* out) {
+    if (!out) return -1;
+    ensureParamKeys();
+    if (index < 0 || index >= static_cast<int>(s_paramKeys.size())) return -1;
+
+    auto key = s_paramKeys[index];
+    auto it = Dasher::Settings::parameter_defaults.find(key);
+    if (it == Dasher::Settings::parameter_defaults.end()) return -1;
+
+    const auto& val = it->second;
+    out->key = static_cast<int>(key);
+    s_paramInfoName = val.humanName.empty() ? val.storageName : val.humanName;
+    out->name = s_paramInfoName.c_str();
+    s_paramInfoDesc = val.humanDescription;
+    out->desc = s_paramInfoDesc.c_str();
+    out->type = static_cast<int>(val.type);
+    out->ui_type = static_cast<int>(val.suggestedUI);
+    out->min_val = val.min;
+    out->max_val = val.max;
+    out->step = val.step;
+    out->advanced = val.advancedSetting ? 1 : 0;
+    return 0;
+}
+
+DASHER_API int dasher_get_parameter_enum_count(int key) {
+    auto it = Dasher::Settings::parameter_defaults.find(static_cast<Dasher::Parameter>(key));
+    if (it == Dasher::Settings::parameter_defaults.end()) return 0;
+    return static_cast<int>(it->second.possibleValues.size());
+}
+
+DASHER_API const char* dasher_get_parameter_enum_name(int key, int index) {
+    auto it = Dasher::Settings::parameter_defaults.find(static_cast<Dasher::Parameter>(key));
+    if (it == Dasher::Settings::parameter_defaults.end()) return "";
+    int i = 0;
+    for (const auto& [name, value] : it->second.possibleValues) {
+        if (i == index) {
+            s_enumStrings.push_back(name);
+            return s_enumStrings.back().c_str();
+        }
+        i++;
+    }
+    return "";
+}
+
+DASHER_API int dasher_get_parameter_enum_value(int key, int index) {
+    auto it = Dasher::Settings::parameter_defaults.find(static_cast<Dasher::Parameter>(key));
+    if (it == Dasher::Settings::parameter_defaults.end()) return 0;
+    int i = 0;
+    for (const auto& [name, value] : it->second.possibleValues) {
+        if (i == index) return value;
+        i++;
+    }
+    return 0;
+}
+
+DASHER_API int dasher_get_parameter_string_values(dasher_ctx* ctx, int key, const char** out_names, int max_out) {
+    if (!out_names || max_out <= 0) return 0;
+    s_stringValues.clear();
+
+    if (ctx && ctx->intf) {
+        s_stringValues = ctx->intf->GetPermittedValues(static_cast<Dasher::Parameter>(key));
+    }
+
+    int count = static_cast<int>(s_stringValues.size());
+    if (count > max_out) count = max_out;
+    for (int i = 0; i < count; i++) {
+        out_names[i] = s_stringValues[i].c_str();
+    }
+    return count;
+}
+
+// ── Colour palettes ───────────────────────────────────────────────────────
+
+DASHER_API int dasher_get_palette_count(dasher_ctx* ctx) {
+    if (!ctx || !ctx->intf) return 0;
+    auto names = ctx->intf->GetPermittedValues(Dasher::SP_COLOUR_ID);
+    return static_cast<int>(names.size());
+}
+
+DASHER_API const char* dasher_get_palette_name(dasher_ctx* ctx, int index) {
+    if (!ctx || !ctx->intf) return "";
+    auto names = ctx->intf->GetPermittedValues(Dasher::SP_COLOUR_ID);
+    if (index < 0 || index >= static_cast<int>(names.size())) return "";
+    s_stringValues = std::move(names);
+    return s_stringValues[index].c_str();
+}
+
+DASHER_API int dasher_get_palette_preview_colors(dasher_ctx* ctx, int index, int* out_colors) {
+    if (!ctx || !ctx->intf || !out_colors) return -1;
+    auto colorIO = ctx->intf->GetColorIO();
+    if (!colorIO) return -1;
+    auto names = ctx->intf->GetPermittedValues(Dasher::SP_COLOUR_ID);
+    if (index < 0 || index >= static_cast<int>(names.size())) return -1;
+    const auto* palette = colorIO->FindPalette(names[index]);
+    if (!palette) return -1;
+    const auto& preview = palette->GetUIPreviewColors();
+    for (int i = 0; i < 4; i++) {
+        out_colors[i] = colorToARGB(preview[i]);
+    }
+    return 0;
+}
+
+DASHER_API void dasher_set_palette(dasher_ctx* ctx, const char* palette_name) {
+    if (!ctx || !ctx->intf || !palette_name) return;
+    if (ctx->mouseDown) { ctx->intf->KeyUp(nowMs(), Dasher::Keys::Primary_Input); ctx->mouseDown = false; }
+    ctx->intf->SetStringParameter(Dasher::SP_COLOUR_ID, std::string(palette_name));
+}
+
+// ── Alphabets ──────────────────────────────────────────────────────────────
+
+DASHER_API int dasher_get_alphabet_count(dasher_ctx* ctx) {
+    if (!ctx || !ctx->intf) return 0;
+    auto names = ctx->intf->GetPermittedValues(Dasher::SP_ALPHABET_ID);
+    return static_cast<int>(names.size());
+}
+
+DASHER_API const char* dasher_get_alphabet_name(dasher_ctx* ctx, int index) {
+    if (!ctx || !ctx->intf) return "";
+    auto names = ctx->intf->GetPermittedValues(Dasher::SP_ALPHABET_ID);
+    if (index < 0 || index >= static_cast<int>(names.size())) return "";
+    s_stringValues = std::move(names);
+    return s_stringValues[index].c_str();
+}
+
+// ── Persistence ───────────────────────────────────────────────────────────
+
+DASHER_API void dasher_save_settings(dasher_ctx* ctx) {
+    if (!ctx || !ctx->settings) return;
+    ctx->settings->Save();
+}
+
 } // extern "C"
