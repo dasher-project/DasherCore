@@ -57,7 +57,7 @@ CFileLogger::~CFileLogger()
 
 	for(const auto &[function_name, duration] : m_mapFunctionDuration)
 	{
-		Log("%-60s%20I64Ld%10.2f", eLogLevel::logNORMAL, function_name.c_str(), duration, static_cast<double>(duration) / max_duration  * 100.0);
+		Log("%-60s%20.2f%10.2f", eLogLevel::logNORMAL, function_name.c_str(), duration, static_cast<double>(duration) / max_duration  * 100.0);
 	}
 }
 
