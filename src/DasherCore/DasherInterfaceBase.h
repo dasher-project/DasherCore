@@ -365,9 +365,32 @@ public:
   /// required by the core. A derived class is created for each
   /// supported platform which implements these.
   // @{
-  
+
   // @}
-  
+
+  /// @name Core lifecycle
+  /// Main methods for controlling the Dasher core
+  // @{
+
+  ///
+  /// Finish initializing the DasherInterface; we can't do everything in the constructor,
+  /// because some initialization depends on virtual methods provided by subclasses.
+  /// Both Realize and ChangeScreen must be called after construction before other functions
+  /// will work, but they can be called in either order (as the SettingsStore is passed into
+  /// the c'tor).
+  /// \param ulTime timestamp, much as per NewFrame, used for initializing the RNG (i.e. srand).
+  /// (Is that too hacky?)
+  ///
+  void Realize(unsigned long ulTime);
+
+  /// Draw a new Dasher frame, regardless of whether we're paused etc.
+  /// \param iTime Current time in ms.
+  /// \param bForceRedraw Passing in true is equivalent to calling ScheduleRedraw() first,
+  /// and forces the nodes/canvas to be re-rendered (even if we haven't moved).
+  void NewFrame(unsigned long iTime, bool bForceRedraw);
+
+  // @}
+
   ///Gets a pointer to the game module. This is the correct way to determine
   /// whether game mode is currently on or off.
   /// \return pointer to current game module, if game mode on; or null, if off.
@@ -399,17 +422,6 @@ protected:
   /// @{
 
   ///
-  /// Finish initializing the DasherInterface; we can't do everything in the constructor,
-  /// because some initialization depends on virtual methods provided by subclasses.
-  /// Both Realize and ChangeScreen must be called after construction before other functions
-  /// will work, but they can be called in either order (as the SettingsStore is passed into
-  /// the c'tor).
-  /// \param ulTime timestamp, much as per NewFrame, used for initializing the RNG (i.e. srand).
-  /// (Is that too hacky?)
-  ///
-  void Realize(unsigned long ulTime);
-
-  ///
   /// Creates a default set of modules. Override in subclasses to create any
   /// extra/different modules specific to the platform (eg input device drivers)
   ///
@@ -422,12 +434,6 @@ protected:
   /// the edit box?). Note the view and model can be obtained by calling GetView()
   /// and reading m_pDasherModel, respectively
   virtual std::unique_ptr<CGameModule> CreateGameModule() = 0;
-
-  /// Draw a new Dasher frame, regardless of whether we're paused etc.
-  /// \param iTime Current time in ms.
-  /// \param bForceRedraw Passing in true is equivalent to calling ScheduleRedraw() first,
-  /// and forces the nodes/canvas to be re-rendered (even if we haven't moved).
-  void NewFrame(unsigned long iTime, bool bForceRedraw);
 
   ///Renders the current state of the nodes (optionally), decorations, etc. (Does not move around the nodes.)
   /// \param ulTime Time of rendering, for time-dependent decorations (e.g. messages)

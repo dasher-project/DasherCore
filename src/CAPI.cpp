@@ -171,13 +171,11 @@ struct dasher_ctx {
     std::unique_ptr<CommandScreen> screen;
     PointerInput *input = nullptr;
     Dasher::CDashIntfScreenMsgs *intf = nullptr;
-    Interface *intfImpl = nullptr;
     std::string editBuffer;
     std::string tlString;
     bool realized = false;
     bool mouseDown = false;
     std::string pendingAlphabet;
-    std::filesystem::path savedCwd;
 
     struct Interface : public Dasher::CDashIntfScreenMsgs {
         Interface(Dasher::CSettingsStore *s, dasher_ctx *owner)
@@ -189,9 +187,6 @@ struct dasher_ctx {
             m_owner->input = inp.get();
             GetModuleManager()->RegisterInputDeviceModule(std::move(inp), true);
         }
-
-        void DoRealize(unsigned long time) { Realize(time); }
-        void DoNewFrame(unsigned long time, bool force) { NewFrame(time, force); }
 
         unsigned int ctrlMove(bool, Dasher::EditDistance) override {
             return static_cast<unsigned int>(m_owner->editBuffer.size());
@@ -229,8 +224,7 @@ DASHER_API dasher_ctx* dasher_create(const char* data_dir) {
     auto *ctx = new dasher_ctx();
     std::string dir(data_dir);
 
-    ctx->savedCwd = std::filesystem::current_path();
-    std::filesystem::current_path(dir);
+    Dasher::FileUtils::SetDataDirectory(dir);
 
     std::string settingsPath = dir;
 #ifdef _WIN32
@@ -243,7 +237,6 @@ DASHER_API dasher_ctx* dasher_create(const char* data_dir) {
         ctx->settings = std::make_unique<Dasher::XmlSettingsStore>(settingsPath, nullptr);
         ctx->settings->Load();
         ctx->intf = new dasher_ctx::Interface(ctx->settings.get(), ctx);
-        ctx->intfImpl = static_cast<dasher_ctx::Interface*>(ctx->intf);
     } catch (...) {
         delete ctx->intf;
         delete ctx;
@@ -255,8 +248,6 @@ DASHER_API dasher_ctx* dasher_create(const char* data_dir) {
 
 DASHER_API void dasher_destroy(dasher_ctx* ctx) {
     if (!ctx) return;
-    if (!ctx->savedCwd.empty())
-        std::filesystem::current_path(ctx->savedCwd);
     delete ctx->intf;
     delete ctx;
 }
@@ -273,7 +264,7 @@ DASHER_API void dasher_set_screen_size(dasher_ctx* ctx, int width, int height) {
     }
 
     if (!ctx->realized) {
-        ctx->intfImpl->DoRealize(nowMs());
+        ctx->intf->Realize(nowMs());
         ctx->realized = true;
         if (!ctx->pendingAlphabet.empty()) {
             std::string pending = ctx->pendingAlphabet;
@@ -316,7 +307,7 @@ DASHER_API void dasher_frame(dasher_ctx* ctx, int64_t time_ms,
     if (!ctx || !ctx->intf || !ctx->screen || !ctx->realized) return;
 
     ctx->screen->BeginFrame();
-    ctx->intfImpl->DoNewFrame(static_cast<unsigned long>((time_ms > 0) ? time_ms : 0), true);
+    ctx->intf->NewFrame(static_cast<unsigned long>((time_ms > 0) ? time_ms : 0), true);
     ctx->screen->BuildStringPtrs();
 
     if (out_commands) *out_commands = const_cast<int*>(reinterpret_cast<const int*>(ctx->screen->GetCommands()));
