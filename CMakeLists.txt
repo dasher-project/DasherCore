@@ -82,4 +82,25 @@ if(BUILD_CAPI)
         LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
         ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
     )
+
+    # C API Tests
+    option(BUILD_TESTS "Build the C API unit tests" ON)
+    if(BUILD_TESTS)
+        add_executable(dasher_test
+            ${CMAKE_CURRENT_LIST_DIR}/tests/test_capi.cpp
+        )
+
+        target_include_directories(dasher_test PRIVATE
+            ${CMAKE_CURRENT_LIST_DIR}/src/
+        )
+
+        target_link_libraries(dasher_test PRIVATE dasher)
+
+        # Allow setting test data directory
+        if(TEST_DATA_DIR)
+            target_compile_definitions(dasher_test PRIVATE TEST_DATA_DIR="${TEST_DATA_DIR}")
+        endif()
+
+        add_test(NAME dasher_capi_tests COMMAND dasher_test)
+    endif()
 endif()
