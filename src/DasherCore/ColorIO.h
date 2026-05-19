@@ -30,6 +30,8 @@ namespace Dasher {
         static ColorPalette::Color GetAttributeAsColor(pugi::xml_attribute attribute, ColorPalette::Color defaultColor = ColorPalette::undefinedColor);
         static std::vector<ColorPalette::Color> GetAttributeAsColorList(pugi::xml_attribute attribute, ColorPalette::Color defaultColor = ColorPalette::undefinedColor);
 
+        bool ParseLegacy(pugi::xml_document& document);
+
 	    std::map <std::string, ColorPalette*> KnownPalettes;
 
         ColorPalette* HardcodedDefaultPalette;

@@ -68,9 +68,108 @@ std::vector<ColorPalette::Color> CColorIO::GetAttributeAsColorList(pugi::xml_att
 	return result;
 }
 
+bool CColorIO::ParseLegacy(pugi::xml_document& document)
+{
+    pugi::xml_node coloursRoot = document.document_element();
+    if(strcmp(coloursRoot.name(), "colours") != 0) return false;
+
+    for(pugi::xml_node paletteNode = coloursRoot.child("palette"); paletteNode;
+        paletteNode = paletteNode.next_sibling("palette"))
+    {
+        const char* paletteName = paletteNode.attribute("name").as_string();
+        if(!paletteName[0]) continue;
+
+        std::vector<ColorPalette::Color> colors;
+        for(pugi::xml_node c = paletteNode.child("colour"); c; c = c.next_sibling("colour"))
+        {
+            colors.emplace_back(
+                c.attribute("r").as_int(),
+                c.attribute("g").as_int(),
+                c.attribute("b").as_int(),
+                255);
+        }
+
+        auto safeColor = [&](int idx) -> ColorPalette::Color {
+            if(idx >= 0 && idx < (int)colors.size()) return colors[idx];
+            return ColorPalette::Color(0, 0, 0, 255);
+        };
+
+        std::unordered_map<NamedColor::knownColorName, ColorPalette::Color> NamedColors = {
+            {NamedColor::background,       safeColor(0)},
+            {NamedColor::inputLine,        safeColor(1)},
+            {NamedColor::inputPosition,    safeColor(2)},
+            {NamedColor::defaultOutline,   safeColor(3)},
+            {NamedColor::defaultLabel,     safeColor(4)},
+            {NamedColor::crosshair,        safeColor(5)},
+            {NamedColor::rootNode,         safeColor(7)},
+            {NamedColor::conversionNode,   safeColor(8)},
+        };
+
+        std::unordered_map<std::string, ColorPalette::GroupColorInfo> GroupColors;
+
+        // Space / paragraphSpace (index 9)
+        {
+            ColorPalette::GroupColorInfo spaceGroup;
+            spaceGroup.groupColor.first = safeColor(9);
+            spaceGroup.groupColor.second = safeColor(139);
+            spaceGroup.nodeColorSequence.push_back(safeColor(9));
+            spaceGroup.altNodeColorSequence.push_back(safeColor(139));
+            spaceGroup.nodeOutlineColorSequence = {NamedColors[NamedColor::defaultOutline]};
+            spaceGroup.nodeLabelColorSequence = {NamedColors[NamedColor::defaultLabel]};
+            spaceGroup.groupOutlineColor = {NamedColors[NamedColor::defaultOutline], ColorPalette::undefinedColor};
+            spaceGroup.groupLabelColor = {NamedColors[NamedColor::defaultLabel], ColorPalette::undefinedColor};
+            GroupColors["space"] = spaceGroup;
+            GroupColors["paragraphSpace"] = spaceGroup;
+        }
+
+        // Letter groups: 10-109, alt: 140-239
+        // Map all common colorInfoName values used by alphabets
+        {
+            ColorPalette::GroupColorInfo letterGroup;
+            for(int i = 10; i < 110 && i < (int)colors.size(); i++)
+                letterGroup.nodeColorSequence.push_back(safeColor(i));
+            for(int i = 140; i < 240 && i < (int)colors.size(); i++)
+                letterGroup.altNodeColorSequence.push_back(safeColor(i));
+            letterGroup.nodeOutlineColorSequence = {NamedColors[NamedColor::defaultOutline]};
+            letterGroup.nodeLabelColorSequence = {NamedColors[NamedColor::defaultLabel]};
+            letterGroup.groupOutlineColor = {NamedColors[NamedColor::defaultOutline], ColorPalette::undefinedColor};
+            letterGroup.groupLabelColor = {NamedColors[NamedColor::defaultLabel], ColorPalette::undefinedColor};
+
+            std::vector<std::string> letterGroupNames = {
+                "lowercase",
+                "lower case letters", "Lower case Latin letters",
+                "upper case letters", "Upper case Latin letters",
+                "numbers", "Numbers",
+                "punctuation", "Punctuation",
+                "ethiopic letters", "vowels etc", "vowel signs etc",
+                "vowel-like letters", "character modifiers?",
+                "hamza", "joiners",
+                "arabic-indic numbers", "ascii punctuation",
+            };
+            for(auto& name : letterGroupNames)
+                GroupColors[name] = letterGroup;
+        }
+
+        NamedColors[NamedColor::circleStarted] = safeColor(240);
+        NamedColors[NamedColor::circleWaiting] = safeColor(241);
+        NamedColors[NamedColor::circleStopped] = safeColor(242);
+
+        std::array<ColorPalette::Color, 4> uiColors = {
+            safeColor(10), safeColor(20), safeColor(30), safeColor(40)
+        };
+
+        KnownPalettes[paletteName] = new ColorPalette(
+            HardcodedDefaultPalette, HardcodedDefaultPalette->PaletteName,
+            NamedColors, GroupColors, uiColors, paletteName);
+    }
+    return true;
+}
+
 bool CColorIO::Parse(pugi::xml_document& document, const std::string, bool bUser)
 {
 	pugi::xml_node outer = document.document_element();
+
+	if(strcmp(outer.name(),"colours") == 0) return ParseLegacy(document);
 
 	if(strcmp(outer.name(),"colors") != 0 || outer.attribute("name").empty()) return false; // wrong type of root node or no name specified
 

@@ -32,7 +32,21 @@ static int clamp_int(int v, int lo, int hi) {
 }
 
 static int32_t colorToARGB(const Dasher::ColorPalette::Color &c) {
-    return (c.Alpha << 24) | (c.Red << 16) | (c.Green << 8) | c.Blue;
+    int a = c.Alpha, r = c.Red, g = c.Green, b = c.Blue;
+
+    if (a >= 0 && a <= 1 && r >= 0 && r <= 1 && g >= 0 && g <= 1 && b >= 0 && b <= 1) {
+        a = a * 255;
+        r = r * 255;
+        g = g * 255;
+        b = b * 255;
+    }
+
+    a = clamp_int(a, 0, 255);
+    r = clamp_int(r, 0, 255);
+    g = clamp_int(g, 0, 255);
+    b = clamp_int(b, 0, 255);
+
+    return (a << 24) | (r << 16) | (g << 8) | b;
 }
 
 // ── Command-buffer screen ──────────────────────────────────────────────────

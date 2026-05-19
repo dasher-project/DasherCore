@@ -183,6 +183,7 @@ void CDasherInterfaceBase::Realize(unsigned long ulTime) {
 
   m_ColorIO = std::make_unique<CColorIO>(this);
   Dasher::FileUtils::ScanFiles(m_ColorIO.get(), "color.*.xml");
+  Dasher::FileUtils::ScanFiles(m_ColorIO.get(), "colour.*.xml");
   m_ColorIO->RelinkParents();
 
   ChangeView();
