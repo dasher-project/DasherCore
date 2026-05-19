@@ -64,7 +64,7 @@ TEST(context_creation) {
     const char* data_dir = get_test_data_dir();
     printf("  Using data directory: %s\n", data_dir);
 
-    dasher_ctx* ctx = dasher_create(data_dir);
+    dasher_ctx* ctx = dasher_create(data_dir, nullptr, nullptr);
     ASSERT(ctx != nullptr);
 
     // Test that context is functional
@@ -84,7 +84,7 @@ TEST(context_creation) {
 
 TEST(screen_size) {
     const char* data_dir = get_test_data_dir();
-    dasher_ctx* ctx = dasher_create(data_dir);
+    dasher_ctx* ctx = dasher_create(data_dir, nullptr, nullptr);
     ASSERT(ctx != nullptr);
 
     // Set screen size
@@ -108,7 +108,7 @@ TEST(screen_size) {
 
 TEST(parameters) {
     const char* data_dir = get_test_data_dir();
-    dasher_ctx* ctx = dasher_create(data_dir);
+    dasher_ctx* ctx = dasher_create(data_dir, nullptr, nullptr);
     ASSERT(ctx != nullptr);
 
     // Test speed parameter
@@ -141,7 +141,7 @@ TEST(parameters) {
 
 TEST(output_text) {
     const char* data_dir = get_test_data_dir();
-    dasher_ctx* ctx = dasher_create(data_dir);
+    dasher_ctx* ctx = dasher_create(data_dir, nullptr, nullptr);
     ASSERT(ctx != nullptr);
 
     dasher_set_screen_size(ctx, 800, 600);
@@ -162,7 +162,7 @@ TEST(output_text) {
 
 TEST(alphabet) {
     const char* data_dir = get_test_data_dir();
-    dasher_ctx* ctx = dasher_create(data_dir);
+    dasher_ctx* ctx = dasher_create(data_dir, nullptr, nullptr);
     ASSERT(ctx != nullptr);
 
     // Get default alphabet
