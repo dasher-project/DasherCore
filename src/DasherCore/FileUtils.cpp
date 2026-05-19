@@ -5,6 +5,17 @@
 #include <filesystem>
 #include <fstream>
 
+namespace Dasher {
+
+// Static member initialization
+std::string FileUtils::s_dataDirectory;
+
+void FileUtils::SetDataDirectory(const std::string& dataDir) {
+	s_dataDirectory = dataDir;
+}
+
+}
+
 static bool IsFileWriteable(const std::filesystem::path &file_path)
 {
 	std::fstream file(file_path.string(), std::ios_base::app | std::fstream::out);
@@ -39,8 +50,17 @@ void Dasher::FileUtils::ScanFiles(AbstractParser* parser, const std::string& str
 	// Replace * with .* for actual regex matching
 	const std::regex pattern = std::regex(strPattern);
 
-	// Search in predefined directories for the files. Currently it is searched in {".", "./Data"} (relative to the working directory)
-	for(const std::filesystem::path& current_path : {std::filesystem::current_path(), std::filesystem::current_path() / "Data"})
+	// Search in predefined directories for the files. Uses data directory if set, otherwise current directory
+	std::vector<std::filesystem::path> search_paths;
+	if (!s_dataDirectory.empty()) {
+		search_paths.push_back(std::filesystem::path(s_dataDirectory));
+		search_paths.push_back(std::filesystem::path(s_dataDirectory) / "Data");
+	} else {
+		search_paths.push_back(std::filesystem::current_path());
+		search_paths.push_back(std::filesystem::current_path() / "Data");
+	}
+
+	for(const std::filesystem::path& current_path : search_paths)
 	{
 		if(!std::filesystem::exists(current_path)) continue;
 		for (const auto & entry : std::filesystem::directory_iterator(current_path))
