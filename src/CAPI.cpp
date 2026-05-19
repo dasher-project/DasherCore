@@ -398,4 +398,29 @@ DASHER_API void dasher_set_string_parameter(dasher_ctx* ctx, int key, const char
     ctx->intf->SetStringParameter(static_cast<Dasher::Parameter>(key), value);
 }
 
+// Color utility functions
+DASHER_API int dasher_color_argb(int alpha, int red, int green, int blue) {
+    return ((alpha & 0xFF) << 24) | ((red & 0xFF) << 16) | ((green & 0xFF) << 8) | (blue & 0xFF);
+}
+
+DASHER_API int dasher_color_rgb(int red, int green, int blue) {
+    return dasher_color_argb(255, red, green, blue);
+}
+
+DASHER_API int dasher_color_get_alpha(int argb) {
+    return (argb >> 24) & 0xFF;
+}
+
+DASHER_API int dasher_color_get_red(int argb) {
+    return (argb >> 16) & 0xFF;
+}
+
+DASHER_API int dasher_color_get_green(int argb) {
+    return (argb >> 8) & 0xFF;
+}
+
+DASHER_API int dasher_color_get_blue(int argb) {
+    return argb & 0xFF;
+}
+
 } // extern "C"

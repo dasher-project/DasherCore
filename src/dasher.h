@@ -112,6 +112,22 @@ DASHER_API void dasher_set_long_parameter(dasher_ctx* ctx, int key, long value);
 DASHER_API const char* dasher_get_string_parameter(dasher_ctx* ctx, int key);
 DASHER_API void dasher_set_string_parameter(dasher_ctx* ctx, int key, const char* value);
 
+// Color utility functions for working with ARGB colors used in draw commands.
+// ARGB format: (alpha << 24) | (red << 16) | (green << 8) | blue
+// All color components should be in range 0-255.
+
+// Create an ARGB color value from individual components.
+DASHER_API int dasher_color_argb(int alpha, int red, int green, int blue);
+
+// Create an opaque RGB color value (alpha = 255).
+DASHER_API int dasher_color_rgb(int red, int green, int blue);
+
+// Extract individual color components from an ARGB value.
+DASHER_API int dasher_color_get_alpha(int argb);
+DASHER_API int dasher_color_get_red(int argb);
+DASHER_API int dasher_color_get_green(int argb);
+DASHER_API int dasher_color_get_blue(int argb);
+
 #ifdef __cplusplus
 }
 #endif
