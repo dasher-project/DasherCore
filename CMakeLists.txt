@@ -51,3 +51,31 @@ target_link_libraries(DasherCore pugixml)
 
 source_group(TREE ${CMAKE_CURRENT_LIST_DIR}/src/ FILES ${HEADER_FILES} ${SOURCE_FILES})
 set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT DasherCore)
+
+###############################
+# C API shared library
+###############################
+
+option(BUILD_CAPI "Build the C API shared library (dasher.dll / libdasher.so)" ON)
+
+if(BUILD_CAPI)
+    add_library(dasher SHARED
+        ${CMAKE_CURRENT_LIST_DIR}/src/CAPI.cpp
+    )
+
+    target_include_directories(dasher PRIVATE
+        ${CMAKE_CURRENT_LIST_DIR}/src/
+    )
+
+    target_link_libraries(dasher PRIVATE DasherCore)
+
+    if(WIN32)
+        target_compile_definitions(dasher PRIVATE DASHER_BUILDING)
+    endif()
+
+    set_target_properties(dasher PROPERTIES
+        RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
+        LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
+        ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
+    )
+endif()
