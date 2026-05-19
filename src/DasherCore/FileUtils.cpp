@@ -48,22 +48,23 @@ void Dasher::FileUtils::ScanFiles(AbstractParser* parser, const std::string& str
 	}
 
 	// Replace * with .* for actual regex matching
+	// Note: pattern is interpreted as regex, so "alphabet.*.xml" matches "alphabet.English.xml"
 	const std::regex pattern = std::regex(strPattern);
 
-	// Search in predefined directories for the files. Uses data directory if set, otherwise current directory
+	// Search in the specified data directory (or current directory if not set)
+	// Uses recursive_directory_iterator to find files in subdirectories
 	std::vector<std::filesystem::path> search_paths;
 	if (!s_dataDirectory.empty()) {
 		search_paths.push_back(std::filesystem::path(s_dataDirectory));
-		search_paths.push_back(std::filesystem::path(s_dataDirectory) / "Data");
 	} else {
 		search_paths.push_back(std::filesystem::current_path());
-		search_paths.push_back(std::filesystem::current_path() / "Data");
 	}
 
 	for(const std::filesystem::path& current_path : search_paths)
 	{
 		if(!std::filesystem::exists(current_path)) continue;
-		for (const auto & entry : std::filesystem::directory_iterator(current_path))
+		// Use recursive_directory_iterator to search subdirectories
+		for (const auto & entry : std::filesystem::recursive_directory_iterator(current_path))
 		{
 			if (entry.is_regular_file() && std::regex_search(entry.path().filename().string(), pattern))
 			{
