@@ -57,6 +57,12 @@ DASHER_API void dasher_mouse_down(dasher_ctx* ctx);
 // Signal pointer release (pauses Dasher zooming).
 DASHER_API void dasher_mouse_up(dasher_ctx* ctx);
 
+// Send a key event (for switch access, keyboard, or button input).
+// key values: 0=Start/Stop, 1-4=Buttons, 100=Primary, 101=Secondary, 102=Tertiary.
+// pressed: 1 for key down, 0 for key up.
+// The active input filter determines how keys are interpreted.
+DASHER_API void dasher_key_event(dasher_ctx* ctx, int key, int pressed);
+
 // Advance one frame and get draw commands.
 //
 // Returns pointers into internal buffers — valid only until the next

@@ -310,6 +310,16 @@ DASHER_API void dasher_mouse_up(dasher_ctx* ctx) {
     ctx->intf->KeyUp(nowMs(), Dasher::Keys::Primary_Input);
 }
 
+DASHER_API void dasher_key_event(dasher_ctx* ctx, int key, int pressed) {
+    if (!ctx || !ctx->intf) return;
+    auto vk = static_cast<Dasher::Keys::VirtualKey>(key);
+    if (pressed) {
+        ctx->intf->KeyDown(nowMs(), vk);
+    } else {
+        ctx->intf->KeyUp(nowMs(), vk);
+    }
+}
+
 DASHER_API void dasher_frame(dasher_ctx* ctx, int64_t time_ms,
                               int** out_commands, int* out_command_count,
                               char*** out_strings, int* out_string_count) {
