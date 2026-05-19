@@ -37,9 +37,14 @@ extern "C" {
 typedef struct dasher_ctx dasher_ctx;
 
 // Create a new Dasher session.
-// data_dir must contain DasherCore's Data/ directory (alphabets, colours, training).
+// data_dir: path to DasherCore's Data/ directory (alphabets, colours, training).
+//   Must be readable. On mobile platforms this is the app bundle's read-only data.
+// user_dir: writable directory for settings and user data. If NULL, data_dir is used.
+// out_error: if not NULL, set to a human-readable error string on failure.
+//   Caller must NOT free the string. Valid until next API call.
 // Returns NULL on failure.
-DASHER_API dasher_ctx* dasher_create(const char* data_dir);
+DASHER_API dasher_ctx* dasher_create(const char* data_dir, const char* user_dir,
+                                      char** out_error);
 
 // Destroy a session and free all resources.
 DASHER_API void dasher_destroy(dasher_ctx* ctx);
@@ -152,6 +157,7 @@ typedef struct dasher_parameter_info {
     long max_val;           // maximum value (for numeric controls)
     long step;              // step size (for step/slider controls)
     int advanced;           // 1 if this is an advanced setting
+    const char* group;      // category group ("Input", "Language", "Appearance", "Speed", "Output")
 } dasher_parameter_info;
 
 // Returns the number of parameters in the schema.
@@ -181,6 +187,9 @@ DASHER_API int dasher_get_palette_count(dasher_ctx* ctx);
 
 // Get the name of palette at index (0..count-1). Valid until next API call.
 DASHER_API const char* dasher_get_palette_name(dasher_ctx* ctx, int index);
+
+// Get the name of the currently active palette. Valid until next API call.
+DASHER_API const char* dasher_get_current_palette(dasher_ctx* ctx);
 
 // Get 4 ARGB preview colours for a palette. out_colors must have room for 4 ints.
 // Returns 0 on success, -1 if index out of range.
