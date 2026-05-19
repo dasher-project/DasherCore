@@ -176,22 +176,8 @@ The C API includes its own `CommandScreen` (serialises draw calls into the `[op,
 
 Areas where DasherCore's C++ could be improved, noted during C API development:
 
-- **`Realize()` and `NewFrame()` are protected** — the C API works around this via a subclass `DoRealize()`/`DoNewFrame()` wrapper. These should be public (or at minimum `internal`/`friend`) since any embedding needs them.
-- **`std::filesystem` in `FileUtils`** — the built-in `FileUtils::ScanFiles` searches `{cwd, cwd/Data}`. This works but is fragile. A `data_dir` parameter would be cleaner (the C API works around it by calling `std::filesystem::current_path(data_dir)` before creating the engine).
-- **`ColorPalette::Color` is a complex struct** — the command buffer protocol uses flat `int32_t argb` values, which is much simpler for frontends. The internal `Color` struct with named fields, hex string constructors, and lerp methods is overengineered for a rendering protocol.
 - **Parameter enum is a single flat `enum Parameter`** — mixing `BP_*`, `LP_*`, `SP_*` in one enum loses type safety. A Rust port would use separate types.
 - **`CDasherScreen::Label` lifetime management** — labels are heap-allocated by `MakeLabel()` and the caller must delete them. A RAII or arena approach would prevent leaks.
-- **`FileLogger` / `UserLog` system** — pulls in Windows-specific headers (`WinCommon.h`) even when not on Windows. Should be behind a platform guard.
-- **No tests** — DasherCore has no unit test infrastructure. The C API makes this even more important since frontends need a contract they can verify.
-
-## Frontends
-
-| Platform | Repo | Status |
-|----------|------|--------|
-| Windows (Avalonia) | [Dasher-Windows](https://github.com/dasher-project/Dasher-Windows) | In development |
-| Android | [Dasher-Mobile](https://github.com/dasher-project/Dasher-Mobile) | Working (uses forked DasherCore) |
-| GTK/Linux | [Dasher-GTK](https://github.com/dasher-project/Dasher-GTK) | Working |
-| Web | [dasher-web](https://github.com/dasher-project/dasher-web) | In development |
 
 ## License
 
