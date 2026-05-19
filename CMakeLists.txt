@@ -20,6 +20,28 @@ set(PUGIXML_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/Thirdparty/pugixml" EXCLUDE_FROM_ALL)
 
 ###############################
+# Code Generation: Parameters.cpp from settings_manifest.json
+###############################
+
+set(PARAMETERS_MANIFEST "${CMAKE_CURRENT_LIST_DIR}/settings_manifest.json")
+set(PARAMETERS_GENERATOR "${CMAKE_CURRENT_LIST_DIR}/Scripts/generate_parameters.py")
+set(PARAMETERS_OUTPUT "${CMAKE_CURRENT_LIST_DIR}/src/DasherCore/Parameters.cpp")
+
+find_package(Python3 COMPONENTS Interpreter)
+
+if(Python3_Interpreter_FOUND)
+    add_custom_command(
+        OUTPUT ${PARAMETERS_OUTPUT}
+        COMMAND ${Python3_EXECUTABLE} ${PARAMETERS_GENERATOR}
+        DEPENDS ${PARAMETERS_MANIFEST} ${PARAMETERS_GENERATOR}
+        COMMENT "Generating Parameters.cpp from settings_manifest.json"
+        WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
+    )
+else()
+    message(WARNING "Python3 not found. Parameters.cpp will not be auto-regenerated from settings_manifest.json. Edit the JSON and run: python3 Scripts/generate_parameters.py")
+endif()
+
+###############################
 # Building Core Dasher Library
 ###############################
 
