@@ -44,6 +44,10 @@ ADD_library(DasherCore STATIC
 	${SOURCE_FILES}
 )
 
+set_target_properties(DasherCore PROPERTIES
+	POSITION_INDEPENDENT_CODE ON
+)
+
 target_include_directories(DasherCore PUBLIC ${CMAKE_CURRENT_LIST_DIR}/src/)
 
 add_dependencies(DasherCore pugixml)
