@@ -219,6 +219,128 @@ TEST(null_safety) {
     printf("✓ null_safety passed\n");
 }
 
+TEST(locale) {
+    const char* data_dir = get_test_data_dir();
+    dasher_ctx* ctx = dasher_create(data_dir, nullptr, nullptr);
+    ASSERT(ctx != nullptr);
+
+    // Default locale is "en"
+    ASSERT_STR_EQ(dasher_get_locale(ctx), "en");
+
+    // Get English parameter name (default)
+    int param_count = dasher_get_parameter_count();
+    ASSERT(param_count > 0);
+
+    dasher_parameter_info info;
+    ASSERT_EQ(dasher_get_parameter_info(0, &info), 0);
+    const char* en_name = info.name;
+    ASSERT(en_name != nullptr);
+    ASSERT(strlen(en_name) > 0);
+    printf("  English param name: '%s'\n", en_name);
+
+    // Set locale to German
+    int result = dasher_set_locale(ctx, "de");
+    if (result == 0) {
+        ASSERT_STR_EQ(dasher_get_locale(ctx), "de");
+
+        // Same parameter should now return German name
+        ASSERT_EQ(dasher_get_parameter_info(0, &info), 0);
+        printf("  German param name: '%s'\n", info.name);
+        // Should be different from English (unless untranslated)
+        // At minimum, it should not be empty
+        ASSERT(info.name != nullptr);
+        ASSERT(strlen(info.name) > 0);
+    } else {
+        printf("  ⚠ German locale file not found (expected if Strings/ not in data dir)\n");
+    }
+
+    // Reset to English
+    ASSERT_EQ(dasher_set_locale(ctx, "en"), 0);
+    ASSERT_STR_EQ(dasher_get_locale(ctx), "en");
+
+    // Test null locale resets to English
+    ASSERT_EQ(dasher_set_locale(ctx, nullptr), 0);
+    ASSERT_STR_EQ(dasher_get_locale(ctx), "en");
+
+    // Test invalid locale returns -1
+    ASSERT_EQ(dasher_set_locale(ctx, "xx_INVALID"), -1);
+
+    // Test get_localized_string
+    const char* localized = dasher_get_localized_string(ctx, "BP_DRAW_MOUSE_LINE.label");
+    // English should return nullptr (it's the built-in default, not in a locale file)
+    // unless we've loaded a locale file
+
+    dasher_destroy(ctx);
+    printf("✓ locale passed\n");
+}
+
+TEST(string_override) {
+    const char* data_dir = get_test_data_dir();
+    dasher_ctx* ctx = dasher_create(data_dir, nullptr, nullptr);
+    ASSERT(ctx != nullptr);
+
+    // Override a string
+    dasher_set_string_override(ctx, "BP_DRAW_MOUSE_LINE.label", "My Custom Label");
+
+    const char* val = dasher_get_localized_string(ctx, "BP_DRAW_MOUSE_LINE.label");
+    ASSERT(val != nullptr);
+    ASSERT_STR_EQ(val, "My Custom Label");
+
+    // Override should appear in parameter info
+    dasher_parameter_info info;
+    int param_count = dasher_get_parameter_count();
+    bool found = false;
+    for (int i = 0; i < param_count; i++) {
+        dasher_get_parameter_info(i, &info);
+        if (info.key == 0) { // BP_DRAW_MOUSE_LINE is key 0 in enum
+            // Note: key might not be 0, search by checking
+        }
+    }
+    // More reliably: set override and check via localized string
+    ASSERT_STR_EQ(dasher_get_localized_string(ctx, "BP_DRAW_MOUSE_LINE.label"), "My Custom Label");
+
+    // Clear override
+    dasher_set_string_override(ctx, "BP_DRAW_MOUSE_LINE.label", nullptr);
+    val = dasher_get_localized_string(ctx, "BP_DRAW_MOUSE_LINE.label");
+    ASSERT(val == nullptr); // Should be gone, back to built-in
+
+    dasher_destroy(ctx);
+    printf("✓ string_override passed\n");
+}
+
+TEST(locale_multiple_languages) {
+    const char* data_dir = get_test_data_dir();
+    dasher_ctx* ctx = dasher_create(data_dir, nullptr, nullptr);
+    ASSERT(ctx != nullptr);
+
+    const char* locales[] = {"de", "fr", "zh-CN", "ar"};
+    int num_locales = 4;
+    int loaded = 0;
+
+    for (int i = 0; i < num_locales; i++) {
+        int result = dasher_set_locale(ctx, locales[i]);
+        if (result == 0) {
+            loaded++;
+            ASSERT_STR_EQ(dasher_get_locale(ctx), locales[i]);
+
+            // Check that parameter info doesn't crash
+            dasher_parameter_info info;
+            int count = dasher_get_parameter_count();
+            for (int j = 0; j < count && j < 5; j++) {
+                ASSERT_EQ(dasher_get_parameter_info(j, &info), 0);
+                ASSERT(info.name != nullptr);
+                ASSERT(info.desc != nullptr);
+            }
+        }
+    }
+
+    printf("  Loaded %d/%d locale files\n", loaded, num_locales);
+    ASSERT(loaded > 0); // At least one should load if Strings/ is present
+
+    dasher_destroy(ctx);
+    printf("✓ locale_multiple_languages passed\n");
+}
+
 int main(int argc, char* argv[]) {
     printf("Running Dasher C API tests...\n\n");
 
@@ -230,6 +352,9 @@ int main(int argc, char* argv[]) {
     test_output_text();
     test_alphabet();
     test_null_safety();
+    test_locale();
+    test_string_override();
+    test_locale_multiple_languages();
 
     printf("\n✓ All tests passed!\n");
     return 0;

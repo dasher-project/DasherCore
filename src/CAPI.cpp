@@ -15,8 +15,11 @@
 #include <cmath>
 #include <cstring>
 #include <filesystem>
+#include <fstream>
 #include <memory>
+#include <sstream>
 #include <string>
+#include <unordered_map>
 #include <utility>
 #include <vector>
 
@@ -190,6 +193,8 @@ struct dasher_ctx {
     bool realized = false;
     bool mouseDown = false;
     std::string pendingAlphabet;
+    std::string dataDir;
+    std::string stringBuf;
 
     struct Interface : public Dasher::CDashIntfScreenMsgs {
         Interface(Dasher::CSettingsStore *s, dasher_ctx *owner)
@@ -233,6 +238,9 @@ struct dasher_ctx {
 extern "C" {
 
 static std::string s_errorString;
+static std::string s_localeCode = "en";
+static std::unordered_map<std::string, std::string> s_localeStrings;
+static std::unordered_map<std::string, std::string> s_overrideStrings;
 
 DASHER_API dasher_ctx* dasher_create(const char* data_dir, const char* user_dir,
                                       char** out_error) {
@@ -245,6 +253,7 @@ DASHER_API dasher_ctx* dasher_create(const char* data_dir, const char* user_dir,
 
     auto *ctx = new dasher_ctx();
     std::string dir(data_dir);
+    ctx->dataDir = dir;
     std::string writableDir = user_dir ? std::string(user_dir) : dir;
 
     Dasher::FileUtils::SetDataDirectory(dir);
@@ -569,9 +578,34 @@ DASHER_API int dasher_get_parameter_info(int index, dasher_parameter_info* out) 
 
     const auto& val = it->second;
     out->key = static_cast<int>(key);
-    s_paramInfoName = val.humanName.empty() ? val.storageName : val.humanName;
+    std::string keyStr = std::to_string(static_cast<int>(key));
+
+    std::string nameKey = val.enumKeyName + ".label";
+    auto nameIt = s_overrideStrings.find(nameKey);
+    if (nameIt != s_overrideStrings.end()) {
+        s_paramInfoName = nameIt->second;
+    } else {
+        nameIt = s_localeStrings.find(nameKey);
+        if (nameIt != s_localeStrings.end()) {
+            s_paramInfoName = nameIt->second;
+        } else {
+            s_paramInfoName = val.humanName.empty() ? val.storageName : val.humanName;
+        }
+    }
     out->name = s_paramInfoName.c_str();
-    s_paramInfoDesc = val.humanDescription;
+
+    std::string descKey = val.enumKeyName + ".description";
+    auto descIt = s_overrideStrings.find(descKey);
+    if (descIt != s_overrideStrings.end()) {
+        s_paramInfoDesc = descIt->second;
+    } else {
+        descIt = s_localeStrings.find(descKey);
+        if (descIt != s_localeStrings.end()) {
+            s_paramInfoDesc = descIt->second;
+        } else {
+            s_paramInfoDesc = val.humanDescription;
+        }
+    }
     out->desc = s_paramInfoDesc.c_str();
     out->type = static_cast<int>(val.type);
     out->ui_type = static_cast<int>(val.suggestedUI);
@@ -694,6 +728,121 @@ DASHER_API const char* dasher_get_alphabet_name(dasher_ctx* ctx, int index) {
 DASHER_API void dasher_save_settings(dasher_ctx* ctx) {
     if (!ctx || !ctx->settings) return;
     ctx->settings->Save();
+}
+
+// ── Localization ──────────────────────────────────────────────────────────
+
+static std::unordered_map<std::string, std::string> parseStringsJson(const std::string& content) {
+    std::unordered_map<std::string, std::string> result;
+    enum class State { Key, Colon, Value, Skip };
+    State state = State::Skip;
+    std::string key, value;
+    bool inString = false;
+    bool escape = false;
+    bool buildingKey = true;
+    int depth = 0;
+
+    for (size_t i = 0; i < content.size(); i++) {
+        char c = content[i];
+
+        if (escape) {
+            if (buildingKey) key += c;
+            else value += c;
+            escape = false;
+            continue;
+        }
+
+        if (c == '\\') {
+            escape = true;
+            continue;
+        }
+
+        if (c == '"') {
+            if (inString) {
+                inString = false;
+                if (buildingKey && depth == 1) {
+                    buildingKey = false;
+                } else if (!buildingKey && depth == 1) {
+                    result[key] = value;
+                    key.clear();
+                    value.clear();
+                    buildingKey = true;
+                }
+            } else {
+                inString = true;
+            }
+            continue;
+        }
+
+        if (inString) {
+            if (buildingKey) key += c;
+            else value += c;
+            continue;
+        }
+
+        if (c == '{') depth++;
+        else if (c == '}') depth--;
+    }
+
+    return result;
+}
+
+DASHER_API int dasher_set_locale(dasher_ctx* ctx, const char* locale) {
+    if (!ctx) return -1;
+
+    if (!locale || std::string(locale) == "en" || std::string(locale) == "") {
+        s_localeCode = "en";
+        s_localeStrings.clear();
+        return 0;
+    }
+
+    std::string localeStr(locale);
+    std::string path = ctx->dataDir;
+#ifdef _WIN32
+    path += "\\Strings\\strings_";
+#else
+    path += "/Strings/strings_";
+#endif
+    path += localeStr + ".json";
+
+    std::ifstream file(path);
+    if (!file.is_open()) return -1;
+
+    std::stringstream ss;
+    ss << file.rdbuf();
+    s_localeStrings = parseStringsJson(ss.str());
+    s_localeCode = localeStr;
+    return 0;
+}
+
+DASHER_API const char* dasher_get_locale(dasher_ctx* ctx) {
+    if (!ctx) return "en";
+    ctx->stringBuf = s_localeCode;
+    return ctx->stringBuf.c_str();
+}
+
+DASHER_API void dasher_set_string_override(dasher_ctx* ctx, const char* key, const char* value) {
+    if (!ctx || !key) return;
+    if (value) {
+        s_overrideStrings[key] = value;
+    } else {
+        s_overrideStrings.erase(key);
+    }
+}
+
+DASHER_API const char* dasher_get_localized_string(dasher_ctx* ctx, const char* key) {
+    if (!ctx || !key) return nullptr;
+    auto it = s_overrideStrings.find(key);
+    if (it != s_overrideStrings.end()) {
+        ctx->stringBuf = it->second;
+        return ctx->stringBuf.c_str();
+    }
+    it = s_localeStrings.find(key);
+    if (it != s_localeStrings.end()) {
+        ctx->stringBuf = it->second;
+        return ctx->stringBuf.c_str();
+    }
+    return nullptr;
 }
 
 } // extern "C"

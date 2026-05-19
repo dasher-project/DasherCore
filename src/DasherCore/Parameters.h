@@ -83,6 +83,7 @@ namespace Dasher
     // Values
     struct Parameter_Value {
 		std::string storageName; //short and containing no spaces for storage
+		std::string enumKeyName; //C++ enum constant name (e.g. "BP_DRAW_MOUSE_LINE") for locale lookups
 		Settings::ParameterType type = Settings::PARAM_INVALID;
 		Settings::Persistence persistence = Persistence::PERSISTENT;
 		std::variant<bool, long, std::string> value;
@@ -97,14 +98,14 @@ namespace Dasher
         int step = 1;
 		std::map<std::string, int> possibleValues; //used for enum values to display in dropdown menus
 
-		Parameter_Value(std::string storageName, Settings::ParameterType type, Persistence persistence, std::variant<bool, long, std::string> value, std::string humanDescription, std::string humanName = "", Settings::UIControlType suggestedUI = UIControlType::None, bool advancedSetting = false) :
-			storageName(storageName), type(type), persistence(persistence), value(value), humanDescription(humanDescription), humanName(humanName), suggestedUI(suggestedUI), advancedSetting(advancedSetting){}
+		Parameter_Value(std::string storageName, Settings::ParameterType type, Persistence persistence, std::variant<bool, long, std::string> value, std::string humanDescription, std::string humanName = "", Settings::UIControlType suggestedUI = UIControlType::None, bool advancedSetting = false, std::string enumKeyName = "") :
+			storageName(storageName), enumKeyName(enumKeyName), type(type), persistence(persistence), value(value), humanDescription(humanDescription), humanName(humanName), suggestedUI(suggestedUI), advancedSetting(advancedSetting){}
 
-		Parameter_Value(std::string storageName, Settings::ParameterType type, Persistence persistence, std::variant<bool, long, std::string> value, std::string humanDescription, std::string humanName, Settings::UIControlType suggestedUI, int min, int max, int divisor, int step, bool advancedSetting = false) :
-			storageName(storageName), type(type), persistence(persistence), value(value), humanDescription(humanDescription), humanName(humanName), suggestedUI(suggestedUI), min(min), max(max), divisor(divisor), step(step), advancedSetting(advancedSetting){}
+		Parameter_Value(std::string storageName, Settings::ParameterType type, Persistence persistence, std::variant<bool, long, std::string> value, std::string humanDescription, std::string humanName, Settings::UIControlType suggestedUI, int min, int max, int divisor, int step, bool advancedSetting = false, std::string enumKeyName = "") :
+			storageName(storageName), enumKeyName(enumKeyName), type(type), persistence(persistence), value(value), humanDescription(humanDescription), humanName(humanName), suggestedUI(suggestedUI), min(min), max(max), divisor(divisor), step(step), advancedSetting(advancedSetting){}
 
-		Parameter_Value(std::string storageName, Settings::ParameterType type, Persistence persistence, std::variant<bool, long, std::string> value, std::string humanDescription, std::string humanName, Settings::UIControlType suggestedUI, std::map<std::string, int> possibleValues, bool advancedSetting = false) :
-			storageName(storageName), type(type), persistence(persistence), value(value), humanDescription(humanDescription), humanName(humanName), suggestedUI(suggestedUI), possibleValues(possibleValues), advancedSetting(advancedSetting){}
+		Parameter_Value(std::string storageName, Settings::ParameterType type, Persistence persistence, std::variant<bool, long, std::string> value, std::string humanDescription, std::string humanName, Settings::UIControlType suggestedUI, std::map<std::string, int> possibleValues, bool advancedSetting = false, std::string enumKeyName = "") :
+			storageName(storageName), enumKeyName(enumKeyName), type(type), persistence(persistence), value(value), humanDescription(humanDescription), humanName(humanName), suggestedUI(suggestedUI), possibleValues(possibleValues), advancedSetting(advancedSetting){}
 			
 		// for sorting in UI
 		bool operator<(const Parameter_Value& other) const

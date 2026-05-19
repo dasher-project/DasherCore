@@ -211,6 +211,30 @@ DASHER_API const char* dasher_get_alphabet_name(dasher_ctx* ctx, int index);
 // Save current settings to disk.
 DASHER_API void dasher_save_settings(dasher_ctx* ctx);
 
+// ── Localization ──────────────────────────────────────────────────────────
+
+// Set the active locale for parameter names, descriptions, and enum labels.
+// Looks for strings_{locale}.json in the data_dir/Strings/ directory.
+// Pass NULL or "en" to reset to English (built-in defaults).
+// Returns 0 on success, -1 if locale file not found.
+DASHER_API int dasher_set_locale(dasher_ctx* ctx, const char* locale);
+
+// Get the currently active locale code (e.g. "en", "de", "fr").
+// Returned pointer is valid until the next API call.
+DASHER_API const char* dasher_get_locale(dasher_ctx* ctx);
+
+// Override a specific translatable string by key.
+// Keys are in the format "BP_DRAW_MOUSE_LINE.label",
+// "BP_DRAW_MOUSE_LINE.description", or "LP_GEOMETRY.enum.Old Style".
+// Overrides take precedence over locale file translations.
+// Pass NULL as value to clear an override.
+DASHER_API void dasher_set_string_override(dasher_ctx* ctx, const char* key, const char* value);
+
+// Get the localized string for a key (from override or locale file).
+// Returns NULL if no translation found.
+// Returned pointer is valid until the next API call.
+DASHER_API const char* dasher_get_localized_string(dasher_ctx* ctx, const char* key);
+
 #ifdef __cplusplus
 }
 #endif

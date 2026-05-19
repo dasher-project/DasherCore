@@ -122,7 +122,6 @@ def build_param_line(param, default_override=None):
     desc = escape_cpp_string(param.get("description", ""))
     label = escape_cpp_string(param.get("label", ""))
 
-    has_platform = "platformDefaults" in param
     has_enum_values = "enumValues" in param
     has_range = all(k in param for k in ("min", "max"))
 
@@ -136,7 +135,7 @@ def build_param_line(param, default_override=None):
         return (
             f'\t\t{{{key:28s}, Parameter_Value{{"{storage}", {ptype_cpp}, '
             f'Persistence::{persistence}, {default_val}, "{desc}", "{label}", '
-            f'{ui_str}, {{{pairs}}}}}}},'
+            f'{ui_str}, {{{pairs}}}, false, "{key}"}}}},'
         )
 
     if has_range:
@@ -145,7 +144,7 @@ def build_param_line(param, default_override=None):
         return (
             f'\t\t{{{key:28s}, Parameter_Value{{"{storage}", {ptype_cpp}, '
             f'Persistence::{persistence}, {default_val}, "{desc}", "{label}", '
-            f'{ui_str}, {param["min"]}, {param["max"]}, {param.get("divisor", 1)}, {param.get("step", 1)}}}}},'
+            f'{ui_str}, {param["min"]}, {param["max"]}, {param.get("divisor", 1)}, {param.get("step", 1)}, false, "{key}"}}}},'
         )
 
     ui = fmt_ui_type(param.get("uiType"))
@@ -153,12 +152,13 @@ def build_param_line(param, default_override=None):
         return (
             f'\t\t{{{key:28s}, Parameter_Value{{"{storage}", {ptype_cpp}, '
             f'Persistence::{persistence}, {default_val}, "{desc}", "{label}", '
-            f'{ui}}}}},'
+            f'{ui}, false, "{key}"}}}},'
         )
 
     return (
         f'\t\t{{{key:28s}, Parameter_Value{{"{storage}", {ptype_cpp}, '
-        f'Persistence::{persistence}, {default_val}, "{desc}", "{label}"}}}},'
+        f'Persistence::{persistence}, {default_val}, "{desc}", "{label}", '
+        f'Settings::UIControlType::None, false, "{key}"}}}},'
     )
 
 
