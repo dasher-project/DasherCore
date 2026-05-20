@@ -1252,7 +1252,7 @@
       "tier": "common",
       "group": "Language",
       "subgroup": "",
-      "uiType": "dropdown"
+      "uiType": "Enum"
     },
     {
       "key": "SP_ALPHABET_1",
@@ -1264,7 +1264,7 @@
       "tier": "expert",
       "group": "Language",
       "subgroup": "History",
-      "uiType": "dropdown"
+      "uiType": "Enum"
     },
     {
       "key": "SP_ALPHABET_2",
@@ -1276,7 +1276,7 @@
       "tier": "expert",
       "group": "Language",
       "subgroup": "History",
-      "uiType": "dropdown"
+      "uiType": "Enum"
     },
     {
       "key": "SP_ALPHABET_3",
@@ -1288,7 +1288,7 @@
       "tier": "expert",
       "group": "Language",
       "subgroup": "History",
-      "uiType": "dropdown"
+      "uiType": "Enum"
     },
     {
       "key": "SP_ALPHABET_4",
@@ -1300,7 +1300,7 @@
       "tier": "expert",
       "group": "Language",
       "subgroup": "History",
-      "uiType": "dropdown"
+      "uiType": "Enum"
     },
     {
       "key": "SP_COLOUR_ID",
@@ -1312,7 +1312,7 @@
       "tier": "common",
       "group": "Customization",
       "subgroup": "Themes",
-      "uiType": "dropdown"
+      "uiType": "Enum"
     },
     {
       "key": "SP_DASHER_FONT",
@@ -1324,7 +1324,7 @@
       "tier": "common",
       "group": "Customization",
       "subgroup": "Appearance",
-      "uiType": "dropdown"
+      "uiType": "Enum"
     },
     {
       "key": "SP_GAME_TEXT_FILE",
@@ -1336,7 +1336,7 @@
       "tier": "expert",
       "group": "Game Mode",
       "subgroup": "Help",
-      "uiType": "dropdown"
+      "uiType": "Enum"
     },
     {
       "key": "SP_INPUT_FILTER",
@@ -1351,7 +1351,7 @@
       "tier": "common",
       "group": "Input",
       "subgroup": "",
-      "uiType": "dropdown"
+      "uiType": "Enum"
     },
     {
       "key": "SP_INPUT_DEVICE",
@@ -1363,7 +1363,7 @@
       "tier": "common",
       "group": "Input",
       "subgroup": "",
-      "uiType": "dropdown"
+      "uiType": "Enum"
     },
     {
       "key": "SP_BUTTON_MAPPINGS",
@@ -1375,7 +1375,7 @@
       "tier": "expert",
       "group": "Input",
       "subgroup": "CButtonMode",
-      "uiType": "dropdown"
+      "uiType": "Enum"
     },
     {
       "key": "SP_JOYSTICK_XAXIS",
@@ -1387,7 +1387,7 @@
       "tier": "expert",
       "group": "Input",
       "subgroup": "CStylusFilter",
-      "uiType": "dropdown"
+      "uiType": "Enum"
     },
     {
       "key": "SP_JOYSTICK_YAXIS",
@@ -1399,7 +1399,7 @@
       "tier": "expert",
       "group": "Input",
       "subgroup": "CStylusFilter",
-      "uiType": "dropdown"
+      "uiType": "Enum"
     }
   ]
 }
