@@ -1251,7 +1251,8 @@
       "description": "AlphabetID.",
       "tier": "common",
       "group": "Language",
-      "subgroup": ""
+      "subgroup": "",
+      "uiType": "dropdown"
     },
     {
       "key": "SP_ALPHABET_1",
@@ -1262,7 +1263,8 @@
       "description": "Alphabet History 1.",
       "tier": "expert",
       "group": "Language",
-      "subgroup": "History"
+      "subgroup": "History",
+      "uiType": "dropdown"
     },
     {
       "key": "SP_ALPHABET_2",
@@ -1273,7 +1275,8 @@
       "description": "Alphabet History 2.",
       "tier": "expert",
       "group": "Language",
-      "subgroup": "History"
+      "subgroup": "History",
+      "uiType": "dropdown"
     },
     {
       "key": "SP_ALPHABET_3",
@@ -1284,7 +1287,8 @@
       "description": "Alphabet History 3.",
       "tier": "expert",
       "group": "Language",
-      "subgroup": "History"
+      "subgroup": "History",
+      "uiType": "dropdown"
     },
     {
       "key": "SP_ALPHABET_4",
@@ -1295,7 +1299,8 @@
       "description": "Alphabet History 4.",
       "tier": "expert",
       "group": "Language",
-      "subgroup": "History"
+      "subgroup": "History",
+      "uiType": "dropdown"
     },
     {
       "key": "SP_COLOUR_ID",
@@ -1306,7 +1311,8 @@
       "description": "ColourID.",
       "tier": "common",
       "group": "Customization",
-      "subgroup": "Themes"
+      "subgroup": "Themes",
+      "uiType": "dropdown"
     },
     {
       "key": "SP_DASHER_FONT",
@@ -1317,7 +1323,8 @@
       "description": "DasherFont.",
       "tier": "common",
       "group": "Customization",
-      "subgroup": "Appearance"
+      "subgroup": "Appearance",
+      "uiType": "dropdown"
     },
     {
       "key": "SP_GAME_TEXT_FILE",
@@ -1328,7 +1335,8 @@
       "description": "User-specified file with strings to practice writing.",
       "tier": "expert",
       "group": "Game Mode",
-      "subgroup": "Help"
+      "subgroup": "Help",
+      "uiType": "dropdown"
     },
     {
       "key": "SP_INPUT_FILTER",
@@ -1342,7 +1350,8 @@
       "description": "Input filter used to provide the current control mode.",
       "tier": "common",
       "group": "Input",
-      "subgroup": ""
+      "subgroup": "",
+      "uiType": "dropdown"
     },
     {
       "key": "SP_INPUT_DEVICE",
@@ -1353,7 +1362,8 @@
       "description": "Driver for the input device.",
       "tier": "common",
       "group": "Input",
-      "subgroup": ""
+      "subgroup": "",
+      "uiType": "dropdown"
     },
     {
       "key": "SP_BUTTON_MAPPINGS",
@@ -1364,7 +1374,8 @@
       "description": "Button assignments used in UI.",
       "tier": "expert",
       "group": "Input",
-      "subgroup": "CButtonMode"
+      "subgroup": "CButtonMode",
+      "uiType": "dropdown"
     },
     {
       "key": "SP_JOYSTICK_XAXIS",
@@ -1375,7 +1386,8 @@
       "description": "Joystick axis used for X-axis input.",
       "tier": "expert",
       "group": "Input",
-      "subgroup": "CStylusFilter"
+      "subgroup": "CStylusFilter",
+      "uiType": "dropdown"
     },
     {
       "key": "SP_JOYSTICK_YAXIS",
@@ -1386,7 +1398,8 @@
       "description": "Joystick axis used for Y-axis input.",
       "tier": "expert",
       "group": "Input",
-      "subgroup": "CStylusFilter"
+      "subgroup": "CStylusFilter",
+      "uiType": "dropdown"
     }
   ]
 }
