@@ -212,6 +212,22 @@ DASHER_API const char* dasher_get_alphabet_name(dasher_ctx* ctx, int index);
 // Save current settings to disk.
 DASHER_API void dasher_save_settings(dasher_ctx* ctx);
 
+// ── Output callbacks ───────────────────────────────────────────────────────
+//
+// Register a callback to receive output/delete events in real time.
+// This enables Direct Mode (text injection into other apps) and other
+// reactive behaviours without polling dasher_get_output_text().
+//
+// Event types:
+//   0 = text output   — text is the string being inserted
+//   1 = text delete   — text is the string being removed (backspace)
+//
+// The callback fires on the thread that calls dasher_frame().
+
+typedef void (*dasher_output_callback)(int event_type, const char* text, void* user_data);
+
+DASHER_API void dasher_set_output_callback(dasher_ctx* ctx, dasher_output_callback callback, void* user_data);
+
 // ── Localization ──────────────────────────────────────────────────────────
 
 // Set the active locale for parameter names, descriptions, and enum labels.

@@ -195,6 +195,8 @@ struct dasher_ctx {
     std::string pendingAlphabet;
     std::string dataDir;
     std::string stringBuf;
+    dasher_output_callback outputCb = nullptr;
+    void *outputCbUserData = nullptr;
 
     struct Interface : public Dasher::CDashIntfScreenMsgs {
         Interface(Dasher::CSettingsStore *s, dasher_ctx *owner)
@@ -215,11 +217,15 @@ struct dasher_ctx {
         }
         void editOutput(const std::string &strText, Dasher::CDasherNode *pCause) override {
             m_owner->editBuffer += strText;
+            if (m_owner->outputCb && !strText.empty())
+                m_owner->outputCb(0, strText.c_str(), m_owner->outputCbUserData);
             CDashIntfScreenMsgs::editOutput(strText, pCause);
         }
         void editDelete(const std::string &strText, Dasher::CDasherNode *pCause) override {
             if (!strText.empty() && m_owner->editBuffer.size() >= strText.size())
                 m_owner->editBuffer.erase(m_owner->editBuffer.size() - strText.size());
+            if (m_owner->outputCb && !strText.empty())
+                m_owner->outputCb(1, strText.c_str(), m_owner->outputCbUserData);
             CDashIntfScreenMsgs::editDelete(strText, pCause);
         }
         std::string GetContext(unsigned int start, unsigned int len) override {
@@ -791,6 +797,12 @@ DASHER_API const char* dasher_get_localized_string(dasher_ctx* ctx, const char* 
         return ctx->stringBuf.c_str();
     }
     return nullptr;
+}
+
+DASHER_API void dasher_set_output_callback(dasher_ctx* ctx, dasher_output_callback callback, void* user_data) {
+    if (!ctx) return;
+    ctx->outputCb = callback;
+    ctx->outputCbUserData = user_data;
 }
 
 } // extern "C"
