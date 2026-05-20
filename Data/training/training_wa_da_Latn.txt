@@ -1,0 +1,129 @@
+# Training text for da/Latn
+# Auto-generated from WorldAlphabets frequency data
+
+e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e 
+r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r 
+n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n 
+t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t 
+a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a 
+i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i 
+s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s 
+d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d 
+l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l 
+o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o 
+g g g g g g g g g g g g g g g g g g g g g g g g g g g g g g g g g g g g g g g 
+m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m 
+k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k 
+f f f f f f f f f f f f f f f f f f f f f f f f f 
+v v v v v v v v v v v v v v v v v v v v v v v 
+u u u u u u u u u u u u u u u u u u 
+b b b b b b b b b b b b b b b b b b 
+h h h h h h h h h h h h h h h h h 
+p p p p p p p p p p p p p p p 
+å å å å å å å 
+y y y y y y y 
+ø ø ø ø ø ø ø 
+æ æ æ æ æ æ æ 
+c c c c c c 
+j j j j j 
+w 
+z 
+x 
+q 
+a
+b
+c
+d
+e
+f
+g
+h
+i
+j
+k
+l
+m
+n
+o
+p
+q
+r
+s
+t
+u
+v
+w
+x
+y
+z
+æ
+ø
+å
+A
+B
+C
+D
+E
+F
+G
+H
+I
+J
+K
+L
+M
+N
+O
+P
+Q
+R
+S
+T
+U
+V
+W
+X
+Y
+Z
+Æ
+Ø
+Å
+0
+1
+2
+3
+4
+5
+6
+7
+8
+9
+A
+B
+C
+D
+E
+F
+G
+H
+I
+J
+K
+L
+M
+N
+O
+P
+Q
+R
+S
+T
+U
+V
+W
+X
+Y
+Z
+Æ
+Ø
+Å

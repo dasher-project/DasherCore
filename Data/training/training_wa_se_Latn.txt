@@ -1,0 +1,119 @@
+# Training text for se/Latn
+# Auto-generated from WorldAlphabets frequency data
+
+a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a 
+i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i 
+e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e 
+l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l 
+s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s 
+o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o 
+t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t 
+n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n 
+d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d 
+u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u 
+r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r 
+g g g g g g g g g g g g g g g g g g g g g g g g g g g g g g g g g g g g g g g g g 
+á á á á á á á á á á á á á á á á á á á á á á á á á á á á á á á á á á á á á á 
+v v v v v v v v v v v v v v v v v v v v v v v v v v v v v v v v v v 
+m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m 
+k k k k k k k k k k k k k k k k k k k k k k k k k k k k k 
+h h h h h h h h h h h h h h h h h h h h h h 
+j j j j j j j j j j j j j j j j j j j j j j 
+b b b b b b b b b b b b b b 
+p p p p p p p p p p 
+š š š š š š š š š š 
+č č č č č č 
+f f f f f 
+đ đ đ đ 
+c c c 
+ŋ 
+ž 
+ŧ 
+z 
+a
+á
+b
+c
+č
+d
+đ
+e
+f
+g
+h
+i
+j
+k
+l
+m
+n
+ŋ
+o
+p
+r
+s
+š
+t
+ŧ
+u
+v
+z
+ž
+A
+Á
+B
+C
+Č
+D
+Đ
+E
+F
+G
+H
+I
+J
+K
+L
+M
+N
+Ŋ
+O
+P
+R
+S
+Š
+T
+Ŧ
+U
+V
+Z
+Ž
+A
+Á
+B
+C
+Č
+D
+Đ
+E
+F
+G
+H
+I
+J
+K
+L
+M
+N
+Ŋ
+O
+P
+R
+S
+Š
+T
+Ŧ
+U
+V
+Z
+Ž

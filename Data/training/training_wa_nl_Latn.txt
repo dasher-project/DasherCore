@@ -1,0 +1,147 @@
+# Training text for nl/Latn
+# Auto-generated from WorldAlphabets frequency data
+
+e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e 
+n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n 
+a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a 
+i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i 
+r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r 
+t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t 
+o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o 
+d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d 
+s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s 
+l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l 
+g g g g g g g g g g g g g g g g g g g g g g g g g g g g 
+h h h h h h h h h h h h h h h h h h h h h h h h h h 
+v v v v v v v v v v v v v v v v v v v v v v v v 
+m m m m m m m m m m m m m m m m m m m m m m m 
+u u u u u u u u u u u u u u u u u u u u 
+k k k k k k k k k k k k k k k k k k k 
+c c c c c c c c c c c c c c c c c 
+p p p p p p p p p p p p p p p p p 
+b b b b b b b b b b b b b b b 
+w w w w w w w w w w w w w w 
+j j j j j j j j j j j j j 
+z z z z z z z z z 
+f f f f f f f f 
+y y 
+x 
+é 
+ë 
+q 
+á 
+ä 
+í 
+ï 
+ó 
+ö 
+ü 
+ú 
+a
+b
+c
+d
+e
+f
+g
+h
+i
+j
+k
+l
+m
+n
+o
+p
+q
+r
+s
+t
+u
+v
+w
+x
+y
+z
+á
+ä
+é
+ë
+í
+ï
+ó
+ö
+ú
+ü
+A
+B
+C
+D
+E
+F
+G
+H
+I
+J
+K
+L
+M
+N
+O
+P
+Q
+R
+S
+T
+U
+V
+W
+X
+Y
+Z
+Á
+Ä
+É
+Ë
+Í
+Ï
+Ó
+Ö
+Ú
+Ü
+A
+B
+C
+D
+E
+F
+G
+H
+I
+J
+K
+L
+M
+N
+O
+P
+Q
+R
+S
+T
+U
+V
+W
+X
+Y
+Z
+Á
+Ä
+É
+Ë
+Í
+Ï
+Ó
+Ö
+Ú
+Ü

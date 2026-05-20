@@ -1,0 +1,109 @@
+# Training text for mel/Latn
+# Auto-generated from WorldAlphabets frequency data
+
+a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a 
+e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e 
+n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n 
+i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i 
+u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u 
+k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k 
+l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l 
+m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m 
+s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s 
+t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t 
+g g g g g g g g g g g g g g g g g g g g g g g g g g g g g g g g g 
+r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r 
+p p p p p p p p p p p p p p p p p p p p p p p p p p p p p p 
+b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b 
+o o o o o o o o o o o o o o o o o o o o o o o o o o o o o 
+h h h h h h h h h h h h h h h h h h h h h h h h h 
+d d d d d d d d d d d d d d d d d d d d d d d d 
+j j j j j j j j j j j j j j j j j j j 
+y y y y y y y y y y y y y y y y 
+w w w w w w w w w w w 
+c c c c c 
+f 
+v 
+z 
+a
+b
+c
+d
+e
+f
+g
+h
+i
+j
+k
+l
+m
+n
+o
+p
+r
+s
+t
+u
+v
+w
+y
+z
+A
+B
+C
+D
+E
+F
+G
+H
+I
+J
+K
+L
+M
+N
+O
+P
+R
+S
+T
+U
+V
+W
+Y
+Z
+0
+1
+2
+3
+4
+5
+6
+7
+8
+9
+A
+B
+C
+D
+E
+F
+G
+H
+I
+J
+K
+L
+M
+N
+O
+P
+R
+S
+T
+U
+V
+W
+Y
+Z

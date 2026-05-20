@@ -1,0 +1,151 @@
+# Training text for oc/Latn
+# Auto-generated from WorldAlphabets frequency data
+
+a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a 
+e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e 
+n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n 
+s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s 
+i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i 
+r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r 
+l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l 
+t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t 
+o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o 
+d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d 
+u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u 
+c c c c c c c c c c c c c c c c c c c c c c c c c c c c c c c c c c c c c 
+m m m m m m m m m m m m m m m m m m m m m m m m m m m m m 
+p p p p p p p p p p p p p p p p p p p p p p p p p 
+g g g g g g g g g g g g g g g g 
+b b b b b b b b b b b 
+v v v v v v v v v v v 
+è è è è è è è è è è 
+f f f f f f f f f f 
+h h h h h h h h h 
+é é é é é é é 
+q q q q q q 
+ò ò ò ò ò 
+j j 
+x x 
+y y 
+à à 
+z 
+ç 
+í 
+k 
+á 
+w 
+ï 
+ó 
+ú 
+ü 
+a
+b
+c
+d
+e
+f
+g
+h
+i
+j
+k
+l
+m
+n
+o
+p
+q
+r
+s
+t
+u
+v
+w
+x
+y
+z
+à
+á
+ç
+è
+é
+í
+ï
+ò
+ó
+ú
+ü
+A
+B
+C
+D
+E
+F
+G
+H
+I
+J
+K
+L
+M
+N
+O
+P
+Q
+R
+S
+T
+U
+V
+W
+X
+Y
+Z
+À
+Á
+Ç
+È
+É
+Í
+Ï
+Ò
+Ó
+Ú
+Ü
+A
+B
+C
+D
+E
+F
+G
+H
+I
+J
+K
+L
+M
+N
+O
+P
+Q
+R
+S
+T
+U
+V
+W
+X
+Y
+Z
+À
+Á
+Ç
+È
+É
+Í
+Ï
+Ò
+Ó
+Ú
+Ü

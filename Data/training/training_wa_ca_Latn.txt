@@ -1,0 +1,157 @@
+# Training text for ca/Latn
+# Auto-generated from WorldAlphabets frequency data
+
+e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e 
+a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a 
+s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s 
+i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i 
+r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r 
+l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l 
+n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n 
+t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t 
+o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o 
+d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d 
+c c c c c c c c c c c c c c c c c c c c c c c c c c c c c c c c c c c c c c 
+u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u 
+m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m 
+p p p p p p p p p p p p p p p p p p p p p p p p p p p 
+v v v v v v v v v v v v v v v 
+b b b b b b b b b b b b b b b 
+g g g g g g g g g g g g g g 
+f f f f f f f f f f 
+h h h h h h h 
+q q q q q q q 
+ó ó ó ó ó 
+é é é é 
+x x x x 
+à à à à 
+y y y 
+í í í 
+j j 
+è è 
+ò ò 
+k 
+z 
+ç 
+ú 
+w 
+ï 
+ü 
+a
+b
+c
+d
+e
+f
+g
+h
+i
+j
+k
+l
+m
+n
+o
+p
+q
+r
+s
+t
+u
+v
+w
+x
+y
+z
+à
+ç
+è
+é
+í
+ï
+ò
+ó
+ú
+ü
+A
+B
+C
+D
+E
+F
+G
+H
+I
+J
+K
+L
+M
+N
+O
+P
+Q
+R
+S
+T
+U
+V
+W
+X
+Y
+Z
+À
+Ç
+È
+É
+Í
+Ï
+Ò
+Ó
+Ú
+Ü
+0
+1
+2
+3
+4
+5
+6
+7
+8
+9
+A
+B
+C
+D
+E
+F
+G
+H
+I
+J
+K
+L
+M
+N
+O
+P
+Q
+R
+S
+T
+U
+V
+W
+X
+Y
+Z
+À
+Ç
+È
+É
+Í
+Ï
+Ò
+Ó
+Ú
+Ü

@@ -1,0 +1,129 @@
+# Training text for vec/Latn
+# Auto-generated from WorldAlphabets frequency data
+
+e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e 
+a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a 
+i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i 
+o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o 
+n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n 
+r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r 
+t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t 
+s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s 
+l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l 
+d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d 
+c c c c c c c c c c c c c c c c c c c c c c c c c c c c c c c c c c c c c c 
+p p p p p p p p p p p p p p p p p p p p p p p p p p p 
+m m m m m m m m m m m m m m m m m m m m m m m 
+u u u u u u u u u u u u u u u u u u u u u u u 
+g g g g g g g g g g g g g g g g g g g 
+v v v v v v v v v v v v v v v v 
+x x x x x x x x x x x 
+f f f f f f f f f f f 
+b b b b b b b b b 
+h h h h h h h h h 
+à à à à à à à à à 
+z z z 
+è è 
+é é 
+ì ì 
+j j 
+ò 
+ó 
+ù 
+a
+à
+b
+c
+d
+e
+é
+è
+f
+g
+h
+i
+ì
+j
+l
+m
+n
+o
+ó
+ò
+p
+r
+s
+t
+u
+ù
+v
+x
+z
+A
+À
+B
+C
+D
+E
+É
+È
+F
+G
+H
+I
+Ì
+J
+L
+M
+N
+O
+Ó
+Ò
+P
+R
+S
+T
+U
+Ù
+V
+X
+Z
+0
+1
+2
+3
+4
+5
+6
+7
+8
+9
+A
+À
+B
+C
+D
+E
+É
+È
+F
+G
+H
+I
+Ì
+J
+L
+M
+N
+O
+Ó
+Ò
+P
+R
+S
+T
+U
+Ù
+V
+X
+Z

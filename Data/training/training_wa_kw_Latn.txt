@@ -1,0 +1,107 @@
+# Training text for kw/Latn
+# Auto-generated from WorldAlphabets frequency data
+
+a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a 
+n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n 
+e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e 
+s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s 
+y y y y y y y y y y y y y y y y y y y y y y y y y y y y y y y y y y y y y y y y y y y y y y y y y y 
+r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r 
+o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o 
+h h h h h h h h h h h h h h h h h h h h h h h h h h h h h h h h h h h h h h h h h h h h h h h h h 
+t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t 
+w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w 
+l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l 
+i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i 
+d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d 
+k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k 
+g g g g g g g g g g g g g g g g g g g g g g g g g 
+m m m m m m m m m m m m m m m m m m m m m m 
+u u u u u u u u u u u u u u u u u u u 
+v v v v v v v v v v v v v v v v v v 
+b b b b b b b b b b b b b b b b 
+p p p p p p p p p p p p p p 
+c c c c c c c 
+f f f f f f f 
+j j j 
+z 
+q 
+x 
+a
+b
+c
+d
+e
+f
+g
+h
+i
+j
+k
+l
+m
+n
+o
+p
+q
+r
+s
+t
+u
+v
+w
+x
+y
+z
+A
+B
+C
+D
+E
+F
+G
+H
+I
+J
+K
+L
+M
+N
+O
+P
+Q
+R
+S
+T
+U
+V
+W
+X
+Y
+Z
+A
+B
+C
+D
+E
+F
+G
+H
+I
+J
+K
+L
+M
+N
+O
+P
+Q
+R
+S
+T
+U
+V
+W
+X
+Y
+Z

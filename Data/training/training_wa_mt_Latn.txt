@@ -1,0 +1,135 @@
+# Training text for mt/Latn
+# Auto-generated from WorldAlphabets frequency data
+
+a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a 
+i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i 
+l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l 
+t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t 
+e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e 
+n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n 
+r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r 
+u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u 
+m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m 
+s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s 
+o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o 
+j j j j j j j j j j j j j j j j j j j j j j j j j j j j j 
+k k k k k k k k k k k k k k k k k k k k k k k k k k k k 
+d d d d d d d d d d d d d d d d d d d d d d d d d d 
+f f f f f f f f f f f f f f f f f f f f f f f 
+b b b b b b b b b b b b b b b b b b b b b 
+ħ ħ ħ ħ ħ ħ ħ ħ ħ ħ ħ ħ ħ ħ ħ ħ ħ ħ ħ ħ 
+p p p p p p p p p p p p p p p p p p 
+g g g g g g g g g g g g g g g g g 
+w w w w w w w w w w w w w w 
+h h h h h h h h h h h h 
+z z z z z z z z z z 
+ġ ġ ġ ġ ġ ġ ġ 
+ż ż ż ż ż ż ż 
+x x x x x x x 
+q q q q q q 
+v v v v v v 
+ċ ċ ċ ċ ċ 
+à 
+è 
+ò 
+ù 
+ì 
+a
+b
+ċ
+d
+f
+ġ
+g
+h
+ħ
+i
+e
+j
+k
+l
+m
+n
+o
+p
+q
+r
+s
+t
+u
+v
+w
+x
+à
+è
+ì
+ò
+ù
+ż
+z
+A
+B
+Ċ
+D
+F
+Ġ
+G
+H
+Ħ
+I
+E
+J
+K
+L
+M
+N
+O
+P
+Q
+R
+S
+T
+U
+V
+W
+X
+À
+È
+Ì
+Ò
+Ù
+Ż
+Z
+A
+B
+Ċ
+D
+F
+Ġ
+G
+H
+Ħ
+I
+E
+J
+K
+L
+M
+N
+O
+P
+Q
+R
+S
+T
+U
+V
+W
+X
+À
+È
+Ì
+Ò
+Ù
+Ż
+Z

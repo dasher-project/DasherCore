@@ -1,0 +1,111 @@
+# Training text for vo/Latn
+# Auto-generated from WorldAlphabets frequency data
+
+n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n 
+a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a 
+l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l 
+i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i 
+e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e 
+s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s 
+o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o 
+d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d 
+m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m 
+t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t 
+ä ä ä ä ä ä ä ä ä ä ä ä ä ä ä ä ä ä ä ä ä ä ä ä ä ä ä ä ä ä ä ä ä ä ä ä ä ä 
+b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b 
+ö ö ö ö ö ö ö ö ö ö ö ö ö ö ö ö ö ö ö ö ö ö ö ö ö ö 
+f f f f f f f f f f f f f f f f f f f f f f f f f 
+u u u u u u u u u u u u u u u u u u u u u u u u 
+p p p p p p p p p p p p p p p p p p p p p p 
+ü ü ü ü ü ü ü ü ü ü ü ü ü ü ü ü ü ü ü ü ü 
+k k k k k k k k k k k k k k k k k k k k 
+r r r r r r r r r r r r r r r r r r r 
+v v v v v v v v v v v v v 
+y y y y y y y y y y 
+c c c c c c c 
+g g g g g g 
+z z z z z 
+h h h h h 
+j j 
+x 
+a
+ä
+b
+c
+d
+e
+f
+g
+h
+i
+j
+k
+l
+m
+n
+o
+ö
+p
+r
+s
+t
+u
+ü
+v
+x
+y
+z
+A
+Ä
+B
+C
+D
+E
+F
+G
+H
+I
+J
+K
+L
+M
+N
+O
+Ö
+P
+R
+S
+T
+U
+Ü
+V
+X
+Y
+Z
+A
+Ä
+B
+C
+D
+E
+F
+G
+H
+I
+J
+K
+L
+M
+N
+O
+Ö
+P
+R
+S
+T
+U
+Ü
+V
+X
+Y
+Z

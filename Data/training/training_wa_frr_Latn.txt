@@ -1,0 +1,125 @@
+# Training text for frr/Latn
+# Auto-generated from WorldAlphabets frequency data
+
+e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e 
+a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a 
+n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n 
+i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i 
+t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t 
+r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r 
+s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s 
+u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u 
+o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o 
+d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d 
+l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l 
+k k k k k k k k k k k k k k k k k k k k k k k k k k k k 
+m m m m m m m m m m m m m m m m m m m m m m m m m m 
+h h h h h h h h h h h h h h h h h h h h h h h h h 
+f f f f f f f f f f f f f f f f f f f f f f f f f 
+g g g g g g g g g g g g g g g g g g g g 
+j j j j j j j j j j j j j j j j j j 
+w w w w w w w w w w w w w w w w w 
+b b b b b b b b b b b b b b b b 
+ö ö ö ö ö ö ö ö ö ö ö ö ö ö ö 
+ä ä ä ä ä ä ä ä ä ä ä ä ä ä ä 
+ü ü ü ü ü ü ü ü ü ü ü ü ü ü 
+c c c c c c c c c c c c c 
+p p p p p p p p p p p p 
+å å å å å å å å å 
+đ 
+ā 
+ē 
+a
+å
+ä
+ā
+b
+c
+d
+đ
+e
+ē
+f
+g
+h
+i
+j
+k
+l
+m
+n
+o
+ö
+p
+r
+s
+t
+u
+ü
+w
+A
+Å
+Ä
+Ā
+B
+C
+D
+Đ
+E
+Ē
+F
+G
+H
+I
+J
+K
+L
+M
+N
+O
+Ö
+P
+R
+S
+T
+U
+Ü
+W
+0
+1
+2
+3
+4
+5
+6
+7
+8
+9
+A
+Å
+Ä
+Ā
+B
+C
+D
+Đ
+E
+Ē
+F
+G
+H
+I
+J
+K
+L
+M
+N
+O
+Ö
+P
+R
+S
+T
+U
+Ü
+W

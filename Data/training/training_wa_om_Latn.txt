@@ -1,0 +1,107 @@
+# Training text for om/Latn
+# Auto-generated from WorldAlphabets frequency data
+
+a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a 
+i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i 
+e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e 
+n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n 
+t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t 
+o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o 
+r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r 
+u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u 
+s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s 
+m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m 
+d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d 
+k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k 
+h h h h h h h h h h h h h h h h h h h h h h h h h h h h h h h 
+l l l l l l l l l l l l l l l l l l l l l l l l l l l l l 
+b b b b b b b b b b b b b b b b b b b b b b b b b b b b 
+g g g g g g g g g g g g g g g g g g g g 
+f f f f f f f f f f f f f f f f f f f 
+y y y y y y y y y y y y y y y y y y y 
+c c c c c c c c c c c c 
+j j j j j j j j j j 
+q q q q q q q q 
+w w w w w w w w 
+p p p p p p p 
+v v 
+x 
+z 
+a
+b
+c
+d
+e
+f
+g
+h
+i
+j
+k
+l
+m
+n
+o
+p
+q
+r
+s
+t
+u
+v
+w
+x
+y
+z
+A
+B
+C
+D
+E
+F
+G
+H
+I
+J
+K
+L
+M
+N
+O
+P
+Q
+R
+S
+T
+U
+V
+W
+X
+Y
+Z
+A
+B
+C
+D
+E
+F
+G
+H
+I
+J
+K
+L
+M
+N
+O
+P
+Q
+R
+S
+T
+U
+V
+W
+X
+Y
+Z

@@ -1,0 +1,129 @@
+# Training text for vi/Latn
+# Auto-generated from WorldAlphabets frequency data
+
+n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n 
+h h h h h h h h h h h h h h h h h h h h h h h h h h h h h h h h h h h h h h h h h h h h h h h h h h 
+t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t 
+i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i 
+c c c c c c c c c c c c c c c c c c c c c c c c c c c c c c c c c c c c c c c c c c c c c c c c c c 
+g g g g g g g g g g g g g g g g g g g g g g g g g g g g g g g g g g g g g g g g g g g g g g g g g g 
+a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a 
+o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o 
+u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u 
+m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m 
+l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l 
+r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r 
+đ đ đ đ đ đ đ đ đ đ đ đ đ đ đ đ đ đ đ đ đ đ đ đ đ đ đ đ 
+s s s s s s s s s s s s s s s s s s s s s s s 
+e e e e e e e e e e e e e e e e e e e e e e 
+v v v v v v v v v v v v v v v v v v v v v 
+p p p p p p p p p p p p p p p p p p p 
+b b b b b b b b b b b b b b b b b b 
+y y y y y y y y y y y y y y y y y 
+ư ư ư ư ư ư ư ư ư ư ư ư ư ư ư ư ư 
+d d d d d d d d d d d d d d d 
+k k k k k k k k k k k k k k k 
+ô ô ô ô ô ô ô ô 
+â â â â â â â â 
+ê ê ê ê ê ê ê ê 
+q q q q q 
+ă ă ă ă ă 
+ơ ơ ơ 
+x x x 
+a
+ă
+â
+b
+c
+d
+đ
+e
+ê
+g
+h
+i
+k
+l
+m
+n
+o
+ô
+ơ
+p
+q
+r
+s
+t
+u
+ư
+v
+x
+y
+A
+Ă
+Â
+B
+C
+D
+Đ
+E
+Ê
+G
+H
+I
+K
+L
+M
+N
+O
+Ô
+Ơ
+P
+Q
+R
+S
+T
+U
+Ư
+V
+X
+Y
+0
+1
+2
+3
+4
+5
+6
+7
+8
+9
+A
+Ă
+Â
+B
+C
+D
+Đ
+E
+Ê
+G
+H
+I
+K
+L
+M
+N
+O
+Ô
+Ơ
+P
+Q
+R
+S
+T
+U
+Ư
+V
+X
+Y

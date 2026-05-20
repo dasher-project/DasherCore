@@ -1,0 +1,109 @@
+# Training text for ruc/Latn
+# Auto-generated from WorldAlphabets frequency data
+
+a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a 
+i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i 
+o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o 
+e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e 
+n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n 
+b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b 
+u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u 
+k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k 
+m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m 
+w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w 
+y y y y y y y y y y y y y y y y y y y y y y y y y y y y y y y y y y 
+s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s 
+l l l l l l l l l l l l l l l l l l l l l l l l l l l l l 
+g g g g g g g g g g g g g g g g g g g g g g g g g g g 
+r r r r r r r r r r r r r r r r r r r r r r r r 
+t t t t t t t t t t t t t t t t t t t 
+z z z z z z z z z z z z z 
+d d d d d d d d d d d d d 
+j j j j j j 
+f f f f 
+p p 
+h 
+v 
+c 
+a
+b
+c
+d
+e
+f
+g
+h
+i
+j
+k
+l
+m
+n
+o
+p
+r
+s
+t
+u
+v
+w
+y
+z
+A
+B
+C
+D
+E
+F
+G
+H
+I
+J
+K
+L
+M
+N
+O
+P
+R
+S
+T
+U
+V
+W
+Y
+Z
+0
+1
+2
+3
+4
+5
+6
+7
+8
+9
+A
+B
+C
+D
+E
+F
+G
+H
+I
+J
+K
+L
+M
+N
+O
+P
+R
+S
+T
+U
+V
+W
+Y
+Z

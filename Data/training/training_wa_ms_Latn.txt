@@ -1,0 +1,107 @@
+# Training text for ms/Latn
+# Auto-generated from WorldAlphabets frequency data
+
+a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a 
+n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n 
+e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e 
+i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i 
+r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r 
+t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t 
+u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u 
+k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k 
+s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s 
+d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d 
+m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m 
+l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l 
+g g g g g g g g g g g g g g g g g g g g g g g g g g g g g g g g g g g 
+p p p p p p p p p p p p p p p p p p p p p p p p p p p p p p 
+b b b b b b b b b b b b b b b b b b b b b b b b b b b b 
+h h h h h h h h h h h h h h h h h h h h h h h h h h h 
+o o o o o o o o o o o o o o o o o o o o o 
+y y y y y y y y y y y y y y y 
+j j j j j j j j j 
+c c c c c c c c 
+w w w w w 
+f f f 
+v v 
+z 
+x 
+q 
+a
+b
+c
+d
+e
+f
+g
+h
+i
+j
+k
+l
+m
+n
+o
+p
+q
+r
+s
+t
+u
+v
+w
+x
+y
+z
+A
+B
+C
+D
+E
+F
+G
+H
+I
+J
+K
+L
+M
+N
+O
+P
+Q
+R
+S
+T
+U
+V
+W
+X
+Y
+Z
+A
+B
+C
+D
+E
+F
+G
+H
+I
+J
+K
+L
+M
+N
+O
+P
+Q
+R
+S
+T
+U
+V
+W
+X
+Y
+Z

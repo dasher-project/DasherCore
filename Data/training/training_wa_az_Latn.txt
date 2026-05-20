@@ -1,0 +1,145 @@
+# Training text for az/Latn
+# Auto-generated from WorldAlphabets frequency data
+
+a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a 
+i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i 
+ə ə ə ə ə ə ə ə ə ə ə ə ə ə ə ə ə ə ə ə ə ə ə ə ə ə ə ə ə ə ə ə ə ə ə ə ə ə ə ə ə ə ə ə ə ə ə ə ə ə 
+n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n 
+r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r 
+l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l 
+d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d 
+s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s 
+m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m 
+ı ı ı ı ı ı ı ı ı ı ı ı ı ı ı ı ı ı ı ı ı ı ı ı ı ı ı ı ı ı ı ı ı ı ı 
+t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t 
+y y y y y y y y y y y y y y y y y y y y y y y y y y y y 
+u u u u u u u u u u u u u u u u u u u u u u u u u 
+b b b b b b b b b b b b b b b b b b b b b b b b 
+e e e e e e e e e e e e e e e e e e e e e e e 
+k k k k k k k k k k k k k k k k k k k k k k k 
+o o o o o o o o o o o o o o o o o o o o o o 
+ü ü ü ü ü ü ü ü ü ü ü ü ü ü ü ü ü 
+ş ş ş ş ş ş ş ş ş ş ş ş ş ş ş ş ş 
+q q q q q q q q q q q q q q q q 
+v v v v v v v v v v v v v v v 
+z z z z z z z z z z z z z 
+h h h h h h h h h h h h 
+c c c c c c c c c c 
+f f f f f f f f 
+x x x x x x x 
+ç ç ç ç ç ç ç 
+ö ö ö ö ö ö ö 
+g g g g g g 
+p p p p p p 
+ğ ğ ğ ğ 
+j 
+i̇ 
+a
+b
+c
+ç
+d
+e
+ə
+f
+g
+ğ
+h
+x
+i
+ı
+j
+k
+q
+l
+m
+n
+o
+ö
+p
+r
+s
+ş
+t
+u
+ü
+v
+y
+z
+i̇
+A
+B
+C
+Ç
+D
+E
+Ə
+F
+G
+Ğ
+H
+X
+I
+I
+J
+K
+Q
+L
+M
+N
+O
+Ö
+P
+R
+S
+Ş
+T
+U
+Ü
+V
+Y
+Z
+İ
+0
+1
+2
+3
+4
+5
+6
+7
+8
+9
+A
+B
+C
+Ç
+D
+E
+Ə
+F
+G
+Ğ
+H
+X
+I
+I
+J
+K
+Q
+L
+M
+N
+O
+Ö
+P
+R
+S
+Ş
+T
+U
+Ü
+V
+Y
+Z
+İ

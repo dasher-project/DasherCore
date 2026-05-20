@@ -1,0 +1,141 @@
+# Training text for ast/Latn
+# Auto-generated from WorldAlphabets frequency data
+
+e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e 
+a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a 
+n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n 
+s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s 
+o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o 
+i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i 
+l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l 
+r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r 
+u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u 
+t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t 
+d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d 
+c c c c c c c c c c c c c c c c c c c c c c c c c c c c c c c c c c c c c c c c c c c 
+m m m m m m m m m m m m m m m m m m m m m m m m m m m m 
+p p p p p p p p p p p p p p p p p p p p p p p p p 
+y y y y y y y y y y y y 
+b b b b b b b b b b b b 
+g g g g g g g g g g g 
+f f f f f f f f f f 
+v v v v v v v v v 
+ó ó ó ó ó ó ó ó 
+á á á á á á á 
+q q q q q q 
+x x x x x x 
+í í í í í í 
+h h h h h 
+é é é é 
+z z z 
+ñ ñ 
+ú 
+ü 
+ḷ 
+ḥ 
+a
+á
+b
+c
+d
+e
+é
+f
+g
+h
+ḥ
+i
+í
+l
+ḷ
+m
+n
+ñ
+o
+ó
+p
+q
+r
+s
+t
+u
+ú
+ü
+v
+x
+y
+z
+A
+Á
+B
+C
+D
+E
+É
+F
+G
+H
+Ḥ
+I
+Í
+L
+Ḷ
+M
+N
+Ñ
+O
+Ó
+P
+Q
+R
+S
+T
+U
+Ú
+Ü
+V
+X
+Y
+Z
+0
+1
+2
+3
+4
+5
+6
+7
+8
+9
+A
+Á
+B
+C
+D
+E
+É
+F
+G
+H
+Ḥ
+I
+Í
+L
+Ḷ
+M
+N
+Ñ
+O
+Ó
+P
+Q
+R
+S
+T
+U
+Ú
+Ü
+V
+X
+Y
+Z

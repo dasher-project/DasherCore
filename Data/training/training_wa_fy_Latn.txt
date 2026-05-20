@@ -1,0 +1,167 @@
+# Training text for fy/Latn
+# Auto-generated from WorldAlphabets frequency data
+
+e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e 
+n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n 
+a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a 
+i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i 
+r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r 
+t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t 
+s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s 
+d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d 
+o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o 
+l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l 
+k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k 
+f f f f f f f f f f f f f f f f f f f f f f f f f f 
+m m m m m m m m m m m m m m m m m m m m m m m m m 
+y y y y y y y y y y y y y y y y y y y y y y 
+h h h h h h h h h h h h h h h h h h h 
+g g g g g g g g g g g g g g g g g g 
+u u u u u u u u u u u u u u u u u u 
+w w w w w w w w w w w w w w w w w 
+b b b b b b b b b b b b b b b b 
+p p p p p p p p p p p p p p p 
+j j j j j j j j j j j j j j 
+c c c c c c c c c 
+û û û û 
+â â â 
+v v v 
+z z z 
+ê ê ê 
+ú ú 
+ô 
+é 
+ë 
+ï 
+ö 
+ü 
+à 
+á 
+ä 
+è 
+í 
+ó 
+ý 
+a
+b
+c
+d
+e
+f
+g
+h
+i
+j
+k
+l
+m
+n
+o
+p
+r
+s
+t
+u
+v
+w
+z
+y
+à
+á
+â
+ä
+è
+é
+ê
+ë
+í
+ï
+ó
+ô
+ö
+ú
+û
+ü
+ý
+A
+B
+C
+D
+E
+F
+G
+H
+I
+J
+K
+L
+M
+N
+O
+P
+R
+S
+T
+U
+V
+W
+Z
+Y
+À
+Á
+Â
+Ä
+È
+É
+Ê
+Ë
+Í
+Ï
+Ó
+Ô
+Ö
+Ú
+Û
+Ü
+Ý
+A
+B
+C
+D
+E
+F
+G
+H
+I
+J
+K
+L
+M
+N
+O
+P
+R
+S
+T
+U
+V
+W
+Z
+Y
+À
+Á
+Â
+Ä
+È
+É
+Ê
+Ë
+Í
+Ï
+Ó
+Ô
+Ö
+Ú
+Û
+Ü
+Ý

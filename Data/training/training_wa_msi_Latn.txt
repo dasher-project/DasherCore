@@ -1,0 +1,113 @@
+# Training text for msi/Latn
+# Auto-generated from WorldAlphabets frequency data
+
+a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a 
+n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n 
+e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e 
+i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i 
+u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u 
+m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m 
+k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k 
+r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r 
+t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t 
+s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s 
+g g g g g g g g g g g g g g g g g g g g g g g g g g g g g g g g g g g g g g 
+b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b 
+l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l 
+p p p p p p p p p p p p p p p p p p p p p p p p p p p p p p p p 
+d d d d d d d d d d d d d d d d d d d d d d d d d 
+h h h h h h h h h h h h h h h h h h h h h h h h 
+o o o o o o o o o o o o o o 
+j j j j j j j j j j j j j 
+y y y y y y y y y y y 
+c c c c c c c c 
+w w w w w 
+f f 
+v 
+z 
+q 
+a
+b
+c
+d
+e
+f
+g
+h
+i
+j
+k
+l
+m
+n
+o
+p
+q
+r
+s
+t
+u
+v
+w
+y
+z
+A
+B
+C
+D
+E
+F
+G
+H
+I
+J
+K
+L
+M
+N
+O
+P
+Q
+R
+S
+T
+U
+V
+W
+Y
+Z
+0
+1
+2
+3
+4
+5
+6
+7
+8
+9
+A
+B
+C
+D
+E
+F
+G
+H
+I
+J
+K
+L
+M
+N
+O
+P
+Q
+R
+S
+T
+U
+V
+W
+Y
+Z

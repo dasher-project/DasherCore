@@ -1,0 +1,141 @@
+# Training text for tob/Latn
+# Auto-generated from WorldAlphabets frequency data
+
+a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a 
+i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i 
+e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e 
+n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n 
+o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o 
+t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t 
+c c c c c c c c c c c c c c c c c c c c c c c c c c c c c c c c c c c c c c c c c c c c c c c c c c 
+u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u 
+q q q q q q q q q q q q q q q q q q q q q q q q q q q q q q q q q q q q q q q q q q q q q q q 
+x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x 
+l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l 
+h h h h h h h h h h h h h h h h h h h h h h h h h h h h h h h 
+s s s s s s s s s s s s s s s s s s s s s s s s s s s s 
+p p p p p p p p p p p p p p p p p p p p p p p 
+g g g g g g g g g g g g g g g g g g g g g g 
+m m m m m m m m m m m m m m m m m m m m m m 
+ñ ñ ñ ñ ñ ñ ñ ñ ñ ñ ñ ñ ñ 
+y y y y y y y y y 
+ý ý ý ý ý ý ý ý 
+r r r r r r r 
+d d d d d d d 
+v v v 
+j 
+b 
+z 
+ÿ 
+ỹ 
+f 
+í 
+ó 
+k 
+á 
+a
+b
+c
+d
+e
+f
+g
+h
+i
+j
+k
+l
+m
+n
+o
+p
+q
+r
+s
+t
+u
+v
+x
+y
+z
+á
+í
+ñ
+ó
+ý
+ÿ
+ỹ
+A
+B
+C
+D
+E
+F
+G
+H
+I
+J
+K
+L
+M
+N
+O
+P
+Q
+R
+S
+T
+U
+V
+X
+Y
+Z
+Á
+Í
+Ñ
+Ó
+Ý
+Ÿ
+Ỹ
+0
+1
+2
+3
+4
+5
+6
+7
+8
+9
+A
+B
+C
+D
+E
+F
+G
+H
+I
+J
+K
+L
+M
+N
+O
+P
+Q
+R
+S
+T
+U
+V
+X
+Y
+Z
+Á
+Í
+Ñ
+Ó
+Ý
+Ÿ
+Ỹ

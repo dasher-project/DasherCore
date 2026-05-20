@@ -1,0 +1,97 @@
+# Training text for tpi/Latn
+# Auto-generated from WorldAlphabets frequency data
+
+a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a 
+i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i 
+n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n 
+l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l 
+e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e 
+o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o 
+t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t 
+s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s 
+m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m 
+g g g g g g g g g g g g g g g g g g g g g g g g g g g g g g g g g g g g g g g g g g g g 
+p p p p p p p p p p p p p p p p p p p p p p p p p p p p p p p p p p p p p p p p p p 
+r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r 
+k k k k k k k k k k k k k k k k k k k k k k k k k k k 
+u u u u u u u u u u u u u u u u u u u u u u u u u 
+b b b b b b b b b b b b b b b b b b b b b 
+d d d d d d d d d d d d d d 
+w w w w w w w w w w w w w 
+h h h h h h h h h h 
+y y y y y y y 
+f f f f f 
+j j 
+a
+b
+d
+e
+f
+g
+h
+i
+j
+k
+l
+m
+n
+o
+p
+r
+s
+t
+u
+w
+y
+A
+B
+D
+E
+F
+G
+H
+I
+J
+K
+L
+M
+N
+O
+P
+R
+S
+T
+U
+W
+Y
+0
+1
+2
+3
+4
+5
+6
+7
+8
+9
+A
+B
+D
+E
+F
+G
+H
+I
+J
+K
+L
+M
+N
+O
+P
+R
+S
+T
+U
+W
+Y

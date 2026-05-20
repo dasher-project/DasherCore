@@ -1,0 +1,133 @@
+# Training text for de/Latn
+# Auto-generated from WorldAlphabets frequency data
+
+e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e 
+n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n 
+i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i 
+r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r 
+s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s 
+t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t 
+a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a 
+d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d 
+h h h h h h h h h h h h h h h h h h h h h h h h h h h h h h h h h h h h h h h h h 
+u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u 
+l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l 
+g g g g g g g g g g g g g g g g g g g g g g g g g g g g g g 
+o o o o o o o o o o o o o o o o o o o o o o o o o o o o 
+c c c c c c c c c c c c c c c c c c c c c c c c c c c 
+m m m m m m m m m m m m m m m m m m m m m m m m m m 
+b b b b b b b b b b b b b b b b b b b b b 
+f f f f f f f f f f f f f f f f f 
+k k k k k k k k k k k k k k 
+w w w w w w w w w w w w w w 
+z z z z z z z z z z z z 
+p p p p p p p p p p 
+v v v v v v v v v 
+ü ü ü ü ü 
+ä ä ä ä ä 
+ö ö 
+j j 
+y 
+ß 
+x 
+q 
+a
+ä
+b
+c
+d
+e
+f
+g
+h
+i
+j
+k
+l
+m
+n
+o
+ö
+p
+q
+r
+s
+ß
+t
+u
+ü
+v
+w
+x
+y
+z
+A
+Ä
+B
+C
+D
+E
+F
+G
+H
+I
+J
+K
+L
+M
+N
+O
+Ö
+P
+Q
+R
+S
+SS
+T
+U
+Ü
+V
+W
+X
+Y
+Z
+0
+1
+2
+3
+4
+5
+6
+7
+8
+9
+A
+Ä
+B
+C
+D
+E
+F
+G
+H
+I
+J
+K
+L
+M
+N
+O
+Ö
+P
+Q
+R
+S
+SS
+T
+U
+Ü
+V
+W
+X
+Y
+Z

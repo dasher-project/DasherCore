@@ -1,0 +1,119 @@
+# Training text for lb/Latn
+# Auto-generated from WorldAlphabets frequency data
+
+e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e 
+n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n 
+r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r 
+a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a 
+s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s 
+t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t 
+i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i 
+u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u 
+d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d 
+o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o 
+l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l 
+h h h h h h h h h h h h h h h h h h h h h h h h h h h h h h h h h h h h 
+m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m 
+g g g g g g g g g g g g g g g g g g g g g g g g g g g g g g g g 
+c c c c c c c c c c c c c c c c c c c c c c c c c c c c c 
+f f f f f f f f f f f f f f f 
+b b b b b b b b b b b b b b b 
+p p p p p p p p p p p p p p p 
+v v v v v v v v v v v v v v 
+k k k k k k k k k k k k k k 
+é é é é é é é é é é é é 
+w w w w w w w w w w w w 
+z z z z z z z z z z z 
+ë ë ë ë ë ë ë 
+ä ä ä ä ä ä 
+j j j 
+y y 
+x 
+q 
+a
+b
+c
+d
+e
+f
+g
+h
+i
+j
+k
+l
+m
+n
+o
+p
+q
+r
+s
+t
+u
+v
+w
+x
+y
+z
+ä
+é
+ë
+A
+B
+C
+D
+E
+F
+G
+H
+I
+J
+K
+L
+M
+N
+O
+P
+Q
+R
+S
+T
+U
+V
+W
+X
+Y
+Z
+Ä
+É
+Ë
+A
+B
+C
+D
+E
+F
+G
+H
+I
+J
+K
+L
+M
+N
+O
+P
+Q
+R
+S
+T
+U
+V
+W
+X
+Y
+Z
+Ä
+É
+Ë

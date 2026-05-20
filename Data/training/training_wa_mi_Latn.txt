@@ -1,0 +1,89 @@
+# Training text for mi/Latn
+# Auto-generated from WorldAlphabets frequency data
+
+a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a 
+e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e 
+t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t 
+i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i 
+o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o 
+n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n 
+k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k 
+h h h h h h h h h h h h h h h h h h h h h h h h h h h h h h h h h h h h h h h h h h h h h h h h h h 
+u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u 
+r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r 
+ā ā ā ā ā ā ā ā ā ā ā ā ā ā ā ā ā ā ā ā ā ā ā ā ā ā ā ā ā ā ā ā ā ā ā ā ā ā ā ā ā 
+w w w w w w w w w w w w w w w w w w w w w w w w w w w w 
+g g g g g g g g g g g g g g g g g g g g g g g g 
+m m m m m m m m m m m m m m m m m 
+p p p p p p p p p p p p p p p 
+ō ō ō ō ō ō 
+ū ū ū ū ū 
+ē ē ē ē 
+ī ī ī 
+a
+ā
+e
+ē
+h
+i
+ī
+k
+m
+n
+g
+o
+ō
+p
+r
+t
+u
+ū
+w
+A
+Ā
+E
+Ē
+H
+I
+Ī
+K
+M
+N
+G
+O
+Ō
+P
+R
+T
+U
+Ū
+W
+0
+1
+2
+3
+4
+5
+6
+7
+8
+9
+A
+Ā
+E
+Ē
+H
+I
+Ī
+K
+M
+N
+G
+O
+Ō
+P
+R
+T
+U
+Ū
+W

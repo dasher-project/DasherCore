@@ -1,0 +1,131 @@
+# Training text for rm/Latn
+# Auto-generated from WorldAlphabets frequency data
+
+a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a 
+i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i 
+e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e 
+n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n 
+s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s 
+l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l 
+r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r 
+t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t 
+u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u 
+d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d 
+c c c c c c c c c c c c c c c c c c c c c c c c c c c c c c c c c c c c c c c c c c 
+o o o o o o o o o o o o o o o o o o o o o o o o o o o o o 
+m m m m m m m m m m m m m m m m m m m m m m m m 
+p p p p p p p p p p p p p p p p p p p p p p p p 
+g g g g g g g g g g g g g g g g g g g g g g g 
+h h h h h h h h h h h h h h h h h h h h 
+v v v v v v v v v v v v v v v v v v v v 
+z z z z z z z z z z 
+f f f f f f f f f f 
+b b b b b b b b b 
+è è è è 
+q q q 
+à à 
+x 
+ì 
+j 
+k 
+y 
+w 
+é 
+ò 
+ù 
+a
+à
+b
+c
+d
+e
+é
+è
+f
+g
+h
+i
+ì
+j
+k
+l
+m
+n
+o
+ò
+p
+q
+r
+s
+t
+u
+ù
+v
+w
+x
+y
+z
+A
+À
+B
+C
+D
+E
+É
+È
+F
+G
+H
+I
+Ì
+J
+K
+L
+M
+N
+O
+Ò
+P
+Q
+R
+S
+T
+U
+Ù
+V
+W
+X
+Y
+Z
+A
+À
+B
+C
+D
+E
+É
+È
+F
+G
+H
+I
+Ì
+J
+K
+L
+M
+N
+O
+Ò
+P
+Q
+R
+S
+T
+U
+Ù
+V
+W
+X
+Y
+Z

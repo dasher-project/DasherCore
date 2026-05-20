@@ -1,0 +1,159 @@
+# Training text for pt/Latn
+# Auto-generated from WorldAlphabets frequency data
+
+a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a 
+e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e 
+o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o 
+s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s 
+i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i 
+r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r 
+d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d 
+n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n 
+t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t 
+m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m 
+u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u 
+c c c c c c c c c c c c c c c c c c c c c c c c c c c c c c c c c c c c c 
+l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l 
+p p p p p p p p p p p p p p p p p p p p p p p p p p p 
+g g g g g g g g g g g g g 
+v v v v v v v v v v v v 
+b b b b b b b b b b b 
+f f f f f f f f f f f 
+h h h h h h h h h 
+ã ã ã ã ã ã 
+q q q q q 
+é é é é é 
+ç ç ç ç ç 
+á á á 
+z z z 
+j j j 
+í í í 
+x x 
+ó ó 
+k k 
+y 
+ê 
+w 
+õ 
+ú 
+à 
+â 
+ô 
+ò 
+a
+b
+c
+d
+e
+f
+g
+h
+i
+j
+k
+l
+m
+n
+o
+p
+q
+r
+s
+t
+u
+v
+w
+x
+y
+z
+à
+á
+â
+ã
+ç
+é
+ê
+í
+ò
+ó
+ô
+õ
+ú
+A
+B
+C
+D
+E
+F
+G
+H
+I
+J
+K
+L
+M
+N
+O
+P
+Q
+R
+S
+T
+U
+V
+W
+X
+Y
+Z
+À
+Á
+Â
+Ã
+Ç
+É
+Ê
+Í
+Ò
+Ó
+Ô
+Õ
+Ú
+A
+B
+C
+D
+E
+F
+G
+H
+I
+J
+K
+L
+M
+N
+O
+P
+Q
+R
+S
+T
+U
+V
+W
+X
+Y
+Z
+À
+Á
+Â
+Ã
+Ç
+É
+Ê
+Í
+Ò
+Ó
+Ô
+Õ
+Ú

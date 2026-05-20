@@ -1,0 +1,75 @@
+# Training text for so/Latn
+# Auto-generated from WorldAlphabets frequency data
+
+d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d 
+n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n 
+y y y y y y y y y y y y y y y y y y y y y y y y y y y y y y y y y y y y y y y y y y y y y y y y y y 
+l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l 
+s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s 
+h h h h h h h h h h h h h h h h h h h h h h h h h h h h h h h h h h h h h h h h h h h h h h h h h h 
+k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k 
+r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r 
+m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m 
+g g g g g g g g g g g g g g g g g g g g g g g g g g g g g g g g g g g g g g g g g g g g g g g g g 
+b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b 
+w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w 
+x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x 
+t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t 
+c c c c c c c c c c c c c c c c c c c c c c c 
+q q q q q q q q q q q q q q q q q q 
+f f f f f f f f f f f f 
+j j j j j j j j j j j 
+b
+c
+d
+f
+g
+h
+j
+k
+l
+m
+n
+q
+r
+s
+t
+w
+x
+y
+B
+C
+D
+F
+G
+H
+J
+K
+L
+M
+N
+Q
+R
+S
+T
+W
+X
+Y
+B
+C
+D
+F
+G
+H
+J
+K
+L
+M
+N
+Q
+R
+S
+T
+W
+X
+Y

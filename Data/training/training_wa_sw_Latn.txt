@@ -1,0 +1,99 @@
+# Training text for sw/Latn
+# Auto-generated from WorldAlphabets frequency data
+
+a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a 
+i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i 
+n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n 
+k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k 
+u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u 
+m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m 
+e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e 
+w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w 
+o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o 
+l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l 
+t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t 
+h h h h h h h h h h h h h h h h h h h h h h h h h h h h h h h h 
+s s s s s s s s s s s s s s s s s s s s s s s s s s s s 
+y y y y y y y y y y y y y y y y y y y y y y y y y y y 
+r r r r r r r r r r r r r r r r r r r r r r 
+b b b b b b b b b b b b b b b b b b b 
+d d d d d d d d d d d d d d d d d d 
+z z z z z z z z z z z z z z z z 
+g g g g g g g g g g g g g g 
+j j j j j j j j j j j j 
+p p p p p p p p p p p 
+c c c c c c c c c 
+f f f f f f f f f 
+v v v v v v 
+a
+b
+c
+d
+e
+f
+g
+h
+i
+j
+k
+l
+m
+n
+o
+p
+r
+s
+t
+u
+v
+w
+y
+z
+A
+B
+C
+D
+E
+F
+G
+H
+I
+J
+K
+L
+M
+N
+O
+P
+R
+S
+T
+U
+V
+W
+Y
+Z
+A
+B
+C
+D
+E
+F
+G
+H
+I
+J
+K
+L
+M
+N
+O
+P
+R
+S
+T
+U
+V
+W
+Y
+Z

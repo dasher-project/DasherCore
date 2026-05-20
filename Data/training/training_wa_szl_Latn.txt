@@ -1,0 +1,149 @@
+# Training text for szl/Latn
+# Auto-generated from WorldAlphabets frequency data
+
+o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o 
+a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a 
+e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e 
+y y y y y y y y y y y y y y y y y y y y y y y y y y y y y y y y y y y y y y y y y y y y y y y y y y 
+n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n 
+r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r 
+i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i 
+w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w 
+j j j j j j j j j j j j j j j j j j j j j j j j j j j j j j j j j j j j j j j j j j j j 
+s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s 
+k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k 
+t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t 
+u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u 
+m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m 
+z z z z z z z z z z z z z z z z z z z z z z z z z z z z z z z z 
+d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d 
+l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l 
+c c c c c c c c c c c c c c c c c c c c c c c c c c c c c c 
+p p p p p p p p p p p p p p p p p p p p p p p p p p 
+g g g g g g g g g g g g g g g g g g g 
+b b b b b b b b b b b b b b b b 
+ń ń ń ń ń ń ń ń ń ń ń ń ń ń ń ń 
+h h h h h h h h h h h h h h 
+ś ś ś ś ś ś ś ś ś 
+ł ł ł ł ł ł ł 
+f f f f f f 
+ć ć ć ć ć 
+ź ź ź ź 
+ż ż ż 
+ō 
+ŏ 
+ô 
+ã 
+õ 
+a
+ã
+b
+c
+ć
+d
+e
+f
+g
+h
+i
+j
+k
+l
+ł
+m
+n
+ń
+o
+ŏ
+ô
+õ
+ō
+p
+r
+s
+ś
+t
+u
+w
+y
+z
+ź
+ż
+A
+Ã
+B
+C
+Ć
+D
+E
+F
+G
+H
+I
+J
+K
+L
+Ł
+M
+N
+Ń
+O
+Ŏ
+Ô
+Õ
+Ō
+P
+R
+S
+Ś
+T
+U
+W
+Y
+Z
+Ź
+Ż
+0
+1
+2
+3
+4
+5
+6
+7
+8
+9
+A
+Ã
+B
+C
+Ć
+D
+E
+F
+G
+H
+I
+J
+K
+L
+Ł
+M
+N
+Ń
+O
+Ŏ
+Ô
+Õ
+Ō
+P
+R
+S
+Ś
+T
+U
+W
+Y
+Z
+Ź
+Ż

@@ -1,0 +1,68 @@
+# Training text for tok/Latn
+# Auto-generated from WorldAlphabets frequency data
+
+a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a 
+i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i 
+n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n 
+l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l 
+e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e 
+o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o 
+t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t 
+m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m 
+k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k 
+p p p p p p p p p p p p p p p p p p p p p p p p p p p p p p p p p p p p p p p p p p p 
+s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s 
+u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u 
+w w w w w w w w w w w w w w w w w w w w w w w w w w w 
+j j j j j j j j j j j j j j j j j j j j 
+a
+e
+i
+j
+k
+l
+m
+n
+o
+p
+s
+t
+u
+w
+A
+E
+I
+J
+K
+L
+M
+N
+O
+P
+S
+T
+U
+W
+0
+1
+2
+3
+5
+6
+7
+8
+9
+A
+E
+I
+J
+K
+L
+M
+N
+O
+P
+S
+T
+U
+W

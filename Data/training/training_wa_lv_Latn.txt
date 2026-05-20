@@ -1,0 +1,135 @@
+# Training text for lv/Latn
+# Auto-generated from WorldAlphabets frequency data
+
+a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a 
+i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i 
+s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s 
+e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e 
+t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t 
+r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r 
+u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u 
+n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n 
+ā ā ā ā ā ā ā ā ā ā ā ā ā ā ā ā ā ā ā ā ā ā ā ā ā ā ā ā ā ā ā ā ā ā ā ā ā ā ā ā 
+o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o 
+k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k 
+l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l 
+m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m 
+d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d 
+p p p p p p p p p p p p p p p p p p p p p p p p p p p p p 
+v v v v v v v v v v v v v v v v v v v v v v v v v v v 
+j j j j j j j j j j j j j j j j j j j j j j j j 
+z z z z z z z z z z z z z z z z z z 
+ī ī ī ī ī ī ī ī ī ī ī ī ī ī ī ī ī 
+g g g g g g g g g g g g g g g g g 
+b b b b b b b b b b b b b b b b 
+ē ē ē ē ē ē ē ē ē ē ē ē ē ē ē ē 
+c c c c c c c c c c c 
+š š š š š š š š š 
+ņ ņ ņ ņ 
+f f f f 
+ļ ļ ļ ļ 
+ū ū ū 
+h h 
+ž ž 
+ķ 
+ģ 
+č 
+a
+ā
+b
+c
+č
+d
+e
+ē
+f
+g
+ģ
+h
+i
+ī
+j
+k
+ķ
+l
+ļ
+m
+n
+ņ
+o
+p
+r
+s
+š
+t
+u
+ū
+v
+z
+ž
+A
+Ā
+B
+C
+Č
+D
+E
+Ē
+F
+G
+Ģ
+H
+I
+Ī
+J
+K
+Ķ
+L
+Ļ
+M
+N
+Ņ
+O
+P
+R
+S
+Š
+T
+U
+Ū
+V
+Z
+Ž
+A
+Ā
+B
+C
+Č
+D
+E
+Ē
+F
+G
+Ģ
+H
+I
+Ī
+J
+K
+Ķ
+L
+Ļ
+M
+N
+Ņ
+O
+P
+R
+S
+Š
+T
+U
+Ū
+V
+Z
+Ž

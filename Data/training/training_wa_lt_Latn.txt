@@ -1,0 +1,131 @@
+# Training text for lt/Latn
+# Auto-generated from WorldAlphabets frequency data
+
+i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i 
+a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a 
+s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s 
+o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o 
+r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r 
+e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e 
+t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t 
+n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n 
+u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u 
+k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k 
+m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m 
+l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l 
+p p p p p p p p p p p p p p p p p p p p p p p p p p p 
+v v v v v v v v v v v v v v v v v v v v v v v v v v 
+d d d d d d d d d d d d d d d d d d d d d d d d d 
+j j j j j j j j j j j j j j j j j j j j j j j 
+g g g g g g g g g g g g g g g g g g 
+ė ė ė ė ė ė ė ė ė ė ė ė ė ė ė ė 
+b b b b b b b b b b b b b b 
+y y y y y y y y y y y y y y 
+ų ų ų ų ų ų ų ų ų ų ų ų 
+š š š š š š š š š š š 
+ž ž ž ž ž ž ž ž 
+c c c c c c 
+ą ą ą ą ą 
+į į į į 
+č č č č 
+ū ū ū ū 
+f f f 
+z z z 
+h h 
+ę 
+a
+ą
+b
+c
+č
+d
+e
+ę
+ė
+f
+g
+h
+i
+į
+y
+j
+k
+l
+m
+n
+o
+p
+r
+s
+š
+t
+u
+ų
+ū
+v
+z
+ž
+A
+Ą
+B
+C
+Č
+D
+E
+Ę
+Ė
+F
+G
+H
+I
+Į
+Y
+J
+K
+L
+M
+N
+O
+P
+R
+S
+Š
+T
+U
+Ų
+Ū
+V
+Z
+Ž
+A
+Ą
+B
+C
+Č
+D
+E
+Ę
+Ė
+F
+G
+H
+I
+Į
+Y
+J
+K
+L
+M
+N
+O
+P
+R
+S
+Š
+T
+U
+Ų
+Ū
+V
+Z
+Ž

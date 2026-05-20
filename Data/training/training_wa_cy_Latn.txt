@@ -1,0 +1,209 @@
+# Training text for cy/Latn
+# Auto-generated from WorldAlphabets frequency data
+
+a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a 
+d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d 
+n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n 
+e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e 
+y y y y y y y y y y y y y y y y y y y y y y y y y y y y y y y y y y y y y y y y y y y y y y y y y y 
+r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r 
+i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i 
+o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o 
+l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l 
+g g g g g g g g g g g g g g g g g g g g g g g g g g g g g g g g g g g g g 
+w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w 
+h h h h h h h h h h h h h h h h h h h h h h h h h h h h h h h h h h h 
+f f f f f f f f f f f f f f f f f f f f f f f f f f f f f f f f 
+s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s 
+t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t 
+c c c c c c c c c c c c c c c c c c c c c c c c c c c c 
+u u u u u u u u u u u u u u u u u u u u u u u u u 
+m m m m m m m m m m m m m m m m m m m m m m m m 
+b b b b b b b b b b b b b b b 
+p p p p p p p p p 
+ô 
+j 
+â 
+ŵ 
+ŷ 
+é 
+ê 
+á 
+î 
+ï 
+ö 
+à 
+ä 
+è 
+ë 
+ì 
+í 
+ò 
+ó 
+ù 
+ú 
+û 
+ü 
+ý 
+ÿ 
+ẁ 
+ẃ 
+ẅ 
+ỳ 
+a
+b
+c
+d
+e
+f
+g
+i
+j
+l
+m
+n
+o
+p
+à
+á
+â
+ä
+è
+é
+ê
+ë
+ì
+í
+î
+ï
+ò
+ó
+ô
+ö
+ù
+ú
+û
+ü
+ý
+ÿ
+ŵ
+ŷ
+ẁ
+ẃ
+ẅ
+ỳ
+r
+s
+t
+h
+u
+w
+y
+A
+B
+C
+D
+E
+F
+G
+I
+J
+L
+M
+N
+O
+P
+À
+Á
+Â
+Ä
+È
+É
+Ê
+Ë
+Ì
+Í
+Î
+Ï
+Ò
+Ó
+Ô
+Ö
+Ù
+Ú
+Û
+Ü
+Ý
+Ÿ
+Ŵ
+Ŷ
+Ẁ
+Ẃ
+Ẅ
+Ỳ
+R
+S
+T
+H
+U
+W
+Y
+0
+1
+2
+3
+4
+5
+6
+7
+8
+9
+A
+B
+C
+D
+E
+F
+G
+I
+J
+L
+M
+N
+O
+P
+À
+Á
+Â
+Ä
+È
+É
+Ê
+Ë
+Ì
+Í
+Î
+Ï
+Ò
+Ó
+Ô
+Ö
+Ù
+Ú
+Û
+Ü
+Ý
+Ÿ
+Ŵ
+Ŷ
+Ẁ
+Ẃ
+Ẅ
+Ỳ
+R
+S
+T
+H
+U
+W
+Y

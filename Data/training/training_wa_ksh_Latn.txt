@@ -1,0 +1,147 @@
+# Training text for ksh/Latn
+# Auto-generated from WorldAlphabets frequency data
+
+e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e 
+n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n 
+d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d 
+a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a 
+r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r 
+s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s 
+t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t 
+o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o 
+h h h h h h h h h h h h h h h h h h h h h h h h h h h h h h h h h h h h h h h h h h h h h h h h 
+i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i 
+l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l 
+m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m 
+u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u 
+c c c c c c c c c c c c c c c c c c c c c c c c c c c c c 
+ä ä ä ä ä ä ä ä ä ä ä ä ä ä ä ä ä ä ä ä ä ä ä ä ä 
+j j j j j j j j j j j j j j j j j j j j j j j 
+ö ö ö ö ö ö ö ö ö ö ö ö ö ö ö ö ö ö ö ö ö ö 
+v v v v v v v v v v v v v v v v v v v v v v 
+k k k k k k k k k k k k k k k k k k 
+w w w w w w w w w w w w w w w w w 
+b b b b b b b b b b b b b b b 
+p p p p p p p p p p p p p p 
+g g g g g g g g g g g g 
+f f f f f f f f f f f f 
+z z z z z z z z z z z 
+ü ü ü ü ü ü ü 
+y 
+ë 
+x 
+ė 
+q 
+ů 
+ss 
+œ 
+å 
+æ 
+a
+å
+ä
+æ
+b
+c
+d
+e
+ë
+ė
+f
+g
+h
+i
+j
+k
+l
+m
+n
+o
+ö
+œ
+p
+q
+r
+s
+ss
+t
+u
+ů
+ü
+v
+w
+x
+y
+z
+A
+Å
+Ä
+Æ
+B
+C
+D
+E
+Ë
+Ė
+F
+G
+H
+I
+J
+K
+L
+M
+N
+O
+Ö
+Œ
+P
+Q
+R
+S
+SS
+T
+U
+Ů
+Ü
+V
+W
+X
+Y
+Z
+A
+Å
+Ä
+Æ
+B
+C
+D
+E
+Ë
+Ė
+F
+G
+H
+I
+J
+K
+L
+M
+N
+O
+Ö
+Œ
+P
+Q
+R
+S
+SS
+T
+U
+Ů
+Ü
+V
+W
+X
+Y
+Z

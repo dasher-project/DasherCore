@@ -1,0 +1,111 @@
+# Training text for to/Latn
+# Auto-generated from WorldAlphabets frequency data
+
+a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a 
+o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o 
+e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e 
+i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i 
+ʻ ʻ ʻ ʻ ʻ ʻ ʻ ʻ ʻ ʻ ʻ ʻ ʻ ʻ ʻ ʻ ʻ ʻ ʻ ʻ ʻ ʻ ʻ ʻ ʻ ʻ ʻ ʻ ʻ ʻ ʻ ʻ ʻ ʻ ʻ ʻ ʻ ʻ ʻ ʻ ʻ ʻ ʻ ʻ ʻ ʻ ʻ ʻ ʻ ʻ 
+u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u 
+t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t 
+k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k 
+n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n 
+h h h h h h h h h h h h h h h h h h h h h h h h h h h h h h h h h h h h h h h h h h h h h h h h h h 
+l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l 
+m m m m m m m m m m m m m m m m m m m m m m m m m m m m m 
+f f f f f f f f f f f f f f f f f f f f f f f f f f f 
+s s s s s s s s s s s s s s s s s s s s s s s s s 
+g g g g g g g g g g g g g g g g g g g g g g g 
+p p p p p p p p p p p p p p p p p p p p 
+v v v v v v v v v 
+ā ā ā ā ā ā 
+ē ē 
+ō 
+á 
+ī 
+ū 
+í 
+ú 
+ó 
+é 
+a
+e
+f
+h
+i
+k
+l
+m
+n
+g
+o
+p
+s
+t
+u
+v
+á
+é
+í
+ó
+ú
+ā
+ē
+ī
+ō
+ū
+ʻ
+A
+E
+F
+H
+I
+K
+L
+M
+N
+G
+O
+P
+S
+T
+U
+V
+Á
+É
+Í
+Ó
+Ú
+Ā
+Ē
+Ī
+Ō
+Ū
+ʻ
+A
+E
+F
+H
+I
+K
+L
+M
+N
+G
+O
+P
+S
+T
+U
+V
+Á
+É
+Í
+Ó
+Ú
+Ā
+Ē
+Ī
+Ō
+Ū
+ʻ

@@ -1,0 +1,131 @@
+# Training text for is/Latn
+# Auto-generated from WorldAlphabets frequency data
+
+a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a 
+r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r 
+n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n 
+i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i 
+e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e 
+s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s 
+t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t 
+u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u 
+l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l 
+g g g g g g g g g g g g g g g g g g g g g g g g g g g g g g g g g g g g g 
+m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m 
+ð ð ð ð ð ð ð ð ð ð ð ð ð ð ð ð ð ð ð ð ð ð ð ð ð ð ð ð ð ð ð ð ð ð ð ð 
+k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k 
+f f f f f f f f f f f f f f f f f f f f f f f f f f f f f 
+o o o o o o o o o o o o o o o o o o o o o o o o o 
+v v v v v v v v v v v v v v v v v v v v v 
+h h h h h h h h h h h h h h h h h h h h 
+d d d d d d d d d d d d d d d d d d d 
+í í í í í í í í í í í í í í í í í 
+á á á á á á á á á á á á á á á á 
+j j j j j j j j j j j 
+b b b b b b b b b b b 
+ó ó ó ó ó ó ó ó ó ó ó 
+þ þ þ þ þ þ þ þ þ þ þ 
+p p p p p p p p p 
+y y y y y y y y y 
+ö ö ö ö ö ö ö ö 
+æ æ æ æ æ æ æ 
+ú ú ú ú ú 
+é é é 
+ý ý 
+x 
+a
+á
+b
+d
+ð
+e
+é
+f
+g
+h
+i
+í
+j
+k
+l
+m
+n
+o
+ó
+p
+r
+s
+t
+u
+ú
+v
+x
+y
+ý
+þ
+æ
+ö
+A
+Á
+B
+D
+Ð
+E
+É
+F
+G
+H
+I
+Í
+J
+K
+L
+M
+N
+O
+Ó
+P
+R
+S
+T
+U
+Ú
+V
+X
+Y
+Ý
+Þ
+Æ
+Ö
+A
+Á
+B
+D
+Ð
+E
+É
+F
+G
+H
+I
+Í
+J
+K
+L
+M
+N
+O
+Ó
+P
+R
+S
+T
+U
+Ú
+V
+X
+Y
+Ý
+Þ
+Æ
+Ö

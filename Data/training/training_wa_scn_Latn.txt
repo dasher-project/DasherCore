@@ -1,0 +1,145 @@
+# Training text for scn/Latn
+# Auto-generated from WorldAlphabets frequency data
+
+i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i 
+a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a 
+u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u 
+n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n 
+t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t 
+r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r 
+c c c c c c c c c c c c c c c c c c c c c c c c c c c c c c c c c c c c c c c c c c c c c c c c c c 
+s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s 
+l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l 
+d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d 
+e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e 
+p p p p p p p p p p p p p p p p p p p p p p p p p p p p p 
+m m m m m m m m m m m m m m m m m m m m m m m m m m m m 
+o o o o o o o o o o o o o o o o o o o o o o o o o 
+g g g g g g g g g g g g g g g g g g 
+v v v v v v v v v v v v v v 
+z z z z z z z z z z z z z 
+f f f f f f f f f f f 
+b b b b b b b b b b 
+h h h h h h h h h h 
+è è è è è è 
+ì ì ì ì ì 
+à à à à 
+â â â 
+ò ò ò 
+ô ô 
+û û 
+ù ù 
+q 
+j 
+î 
+ê 
+ḍ 
+a
+à
+â
+b
+c
+d
+ḍ
+e
+è
+ê
+f
+g
+h
+i
+ì
+î
+j
+l
+m
+n
+o
+ò
+ô
+p
+q
+r
+s
+t
+u
+ù
+û
+v
+z
+A
+À
+Â
+B
+C
+D
+Ḍ
+E
+È
+Ê
+F
+G
+H
+I
+Ì
+Î
+J
+L
+M
+N
+O
+Ò
+Ô
+P
+Q
+R
+S
+T
+U
+Ù
+Û
+V
+Z
+0
+1
+2
+3
+4
+5
+6
+7
+8
+9
+A
+À
+Â
+B
+C
+D
+Ḍ
+E
+È
+Ê
+F
+G
+H
+I
+Ì
+Î
+J
+L
+M
+N
+O
+Ò
+Ô
+P
+Q
+R
+S
+T
+U
+Ù
+Û
+V
+Z

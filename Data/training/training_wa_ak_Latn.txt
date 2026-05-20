@@ -1,0 +1,101 @@
+# Training text for ak/Latn
+# Auto-generated from WorldAlphabets frequency data
+
+a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a 
+n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n 
+e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e 
+o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o 
+i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i 
+m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m 
+s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s 
+u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u 
+w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w 
+r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r 
+k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k 
+ɔ ɔ ɔ ɔ ɔ ɔ ɔ ɔ ɔ ɔ ɔ ɔ ɔ ɔ ɔ ɔ ɔ ɔ ɔ ɔ ɔ ɔ ɔ ɔ ɔ ɔ ɔ ɔ ɔ ɔ ɔ ɔ ɔ 
+y y y y y y y y y y y y y y y y y y y y y y y y y y y y y y y y 
+ɛ ɛ ɛ ɛ ɛ ɛ ɛ ɛ ɛ ɛ ɛ ɛ ɛ ɛ ɛ ɛ ɛ ɛ ɛ ɛ ɛ ɛ ɛ ɛ ɛ ɛ ɛ ɛ 
+h h h h h h h h h h h h h h h h h h h h h h h h h h 
+b b b b b b b b b b b b b b b b b b b b b b b b b 
+t t t t t t t t t t t t t t t t t t t t t t t t t 
+d d d d d d d d d d d d d d d d d d d d d d d d 
+f f f f f f f f f f f f f f f f f f f f 
+p p p p p p p p p p p p p 
+g g g g g g g g g g g g 
+l l l l l l l l l l 
+a
+b
+d
+e
+ɛ
+f
+g
+h
+i
+k
+l
+m
+n
+o
+ɔ
+p
+r
+s
+t
+u
+w
+y
+A
+B
+D
+E
+Ɛ
+F
+G
+H
+I
+K
+L
+M
+N
+O
+Ɔ
+P
+R
+S
+T
+U
+W
+Y
+0
+1
+2
+3
+4
+5
+6
+7
+8
+9
+A
+B
+D
+E
+Ɛ
+F
+G
+H
+I
+K
+L
+M
+N
+O
+Ɔ
+P
+R
+S
+T
+U
+W
+Y

@@ -1,0 +1,127 @@
+# Training text for ro/Latn
+# Auto-generated from WorldAlphabets frequency data
+
+e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e 
+i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i 
+a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a 
+r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r 
+n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n n 
+t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t t 
+u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u u 
+l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l 
+o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o 
+c c c c c c c c c c c c c c c c c c c c c c c c c c c c c c c c c c c c c c c c c c c c c c c 
+s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s 
+d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d 
+p p p p p p p p p p p p p p p p p p p p p p p p p p p p p 
+m m m m m m m m m m m m m m m m m m m m m m m m m m m m 
+ă ă ă ă ă ă ă ă ă ă ă ă ă ă ă ă ă ă ă ă ă ă 
+f f f f f f f f f f f f 
+v v v v v v v v v v 
+î î î î î î î î î î 
+b b b b b b b b b b 
+g g g g g g g g g g 
+ș ș ș ș ș ș ș ș ș ș 
+ț ț ț ț ț ț ț ț ț 
+z z z z z z z 
+h h h h h 
+â â â â 
+j j 
+x x 
+k 
+y 
+w 
+q 
+a
+ă
+â
+b
+c
+d
+e
+f
+g
+h
+i
+î
+j
+k
+l
+m
+n
+o
+p
+q
+r
+s
+ș
+t
+ț
+u
+v
+w
+x
+y
+z
+A
+Ă
+Â
+B
+C
+D
+E
+F
+G
+H
+I
+Î
+J
+K
+L
+M
+N
+O
+P
+Q
+R
+S
+Ș
+T
+Ț
+U
+V
+W
+X
+Y
+Z
+A
+Ă
+Â
+B
+C
+D
+E
+F
+G
+H
+I
+Î
+J
+K
+L
+M
+N
+O
+P
+Q
+R
+S
+Ș
+T
+Ț
+U
+V
+W
+X
+Y
+Z
