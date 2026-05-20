@@ -60,3 +60,9 @@ Thumbs.db
 # Backup files
 CMakeLists.txt.capi
 do_build.cmd
+
+# Runtime settings files
+Data/dasher_settings.xml
+*.settings.xml
+dasher_settings.xml
+dasher.log

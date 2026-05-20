@@ -9,7 +9,8 @@
       "description": "When enabled, a line is drawn from the center of the screen to the current mouse position.",
       "uiType": "Switch",
       "tier": "common",
-      "subgroup": "CDefaultFilter"
+      "subgroup": "Mouse Line",
+      "group": "Customization"
     },
     {
       "key": "BP_DRAW_MOUSE",
@@ -20,7 +21,8 @@
       "description": "Displays a visual indicator at the current mouse position on the Dasher canvas.",
       "uiType": "Switch",
       "tier": "common",
-      "subgroup": "CDefaultFilter"
+      "subgroup": "Mouse Line",
+      "group": "Customization"
     },
     {
       "key": "BP_CURVE_MOUSE_LINE",
@@ -31,8 +33,9 @@
       "description": "If 'Draw Mouse Line' is active, this makes the line follow a curved path that accounts for Dasher's non-linear coordinate space.",
       "uiType": "Switch",
       "tier": "advanced",
-      "subgroup": "CClickFilter",
-      "dependsOn": "BP_DRAW_MOUSE_LINE"
+      "subgroup": "Mouse Line",
+      "dependsOn": "BP_DRAW_MOUSE_LINE",
+      "group": "Customization"
     },
     {
       "key": "BP_START_MOUSE",
@@ -43,7 +46,8 @@
       "description": "Enables starting and stopping the Dasher motion by moving the mouse.",
       "uiType": "Switch",
       "tier": "common",
-      "subgroup": "CDefaultFilter"
+      "subgroup": "Control",
+      "group": "Input"
     },
     {
       "key": "BP_START_SPACE",
@@ -54,7 +58,8 @@
       "description": "Enables using the spacebar to start and stop the Dasher motion.",
       "uiType": "Switch",
       "tier": "common",
-      "subgroup": "CDefaultFilter"
+      "subgroup": "Control",
+      "group": "Input"
     },
     {
       "key": "BP_PALETTE_CHANGE",
@@ -63,7 +68,9 @@
       "default": false,
       "label": "Auto Palette Switch",
       "description": "Switch from color palette in setting automatically to the one provided in the alphabet.",
-      "tier": "advanced"
+      "tier": "advanced",
+      "group": "Customization",
+      "subgroup": "Themes"
     },
     {
       "key": "BP_TURBO_MODE",
@@ -74,7 +81,8 @@
       "description": "Boost speed when holding key1 or right mouse button.",
       "uiType": "Switch",
       "tier": "advanced",
-      "subgroup": "CDefaultFilter"
+      "subgroup": "CDynamicFilter",
+      "group": "Input"
     },
     {
       "key": "BP_SMOOTH_PRESS_MODE",
@@ -85,7 +93,8 @@
       "description": "Use Press-Input in the Smoothing-Input-Filter.",
       "uiType": "Switch",
       "tier": "advanced",
-      "subgroup": "CSmoothingFilter"
+      "subgroup": "CSmoothingFilter",
+      "group": "Input"
     },
     {
       "key": "BP_SMOOTH_DRAW_MOUSE",
@@ -96,7 +105,8 @@
       "description": "If enabled, the mouse indicator will show the smoothed position, not the raw input.",
       "uiType": "Switch",
       "tier": "common",
-      "subgroup": "CSmoothingFilter"
+      "subgroup": "CSmoothingFilter",
+      "group": "Input"
     },
     {
       "key": "BP_SMOOTH_DRAW_MOUSE_LINE",
@@ -107,7 +117,8 @@
       "description": "If enabled, the drawn mouse line will also be smoothed, showing the filtered input path.",
       "uiType": "Switch",
       "tier": "common",
-      "subgroup": "CSmoothingFilter"
+      "subgroup": "CSmoothingFilter",
+      "group": "Input"
     },
     {
       "key": "BP_SMOOTH_ONLY_FORWARD",
@@ -118,7 +129,8 @@
       "description": "If enabled, input smoothing is only applied when moving forward (zooming in), not when reversing.",
       "uiType": "Switch",
       "tier": "advanced",
-      "subgroup": "CSmoothingFilter"
+      "subgroup": "CSmoothingFilter",
+      "group": "Input"
     },
     {
       "key": "BP_EXACT_DYNAMICS",
@@ -129,7 +141,8 @@
       "description": "Enables a more precise, but potentially less smooth, physics model for movement.",
       "uiType": "Switch",
       "tier": "advanced",
-      "subgroup": "CDynamicFilter"
+      "subgroup": "CDynamicFilter",
+      "group": "Input"
     },
     {
       "key": "BP_AUTOCALIBRATE",
@@ -140,7 +153,8 @@
       "description": "Automatically adjusts the 'straight-ahead' point based on the user's average pointer position.",
       "uiType": "Switch",
       "tier": "common",
-      "subgroup": "CDefaultFilter"
+      "subgroup": "CDefaultFilter",
+      "group": "Input"
     },
     {
       "key": "BP_REMAP_XTREME",
@@ -151,7 +165,8 @@
       "description": "Distorts geometry to provide more space for navigating at extreme up/down angles.",
       "uiType": "Switch",
       "tier": "advanced",
-      "subgroup": "CDefaultFilter"
+      "subgroup": "CDefaultFilter",
+      "group": "Input"
     },
     {
       "key": "BP_AUTO_SPEEDCONTROL",
@@ -162,7 +177,8 @@
       "description": "Automatically adjusts the maximum writing speed based on user performance.",
       "uiType": "Switch",
       "tier": "common",
-      "subgroup": "CDynamicButtons"
+      "subgroup": "CDefaultFilter",
+      "group": "Input"
     },
     {
       "key": "BP_LM_ADAPTIVE",
@@ -171,7 +187,9 @@
       "default": true,
       "label": "Adaptive Language Model",
       "description": "Whether language model should learn as you enter text.",
-      "tier": "advanced"
+      "tier": "advanced",
+      "group": "Language",
+      "subgroup": "Learning"
     },
     {
       "key": "BP_NONLINEAR_Y",
@@ -180,7 +198,9 @@
       "default": true,
       "label": "Nonlinear Y-Axis",
       "description": "Apply nonlinearities to Y axis (i.e. compress top & bottom).",
-      "tier": "expert"
+      "tier": "expert",
+      "group": "Input",
+      "subgroup": "CDefaultFilter"
     },
     {
       "key": "BP_STOP_OUTSIDE",
@@ -191,19 +211,23 @@
       "description": "Automatically stops Dasher motion if the mouse cursor leaves the canvas area.",
       "uiType": "Switch",
       "tier": "common",
-      "subgroup": "CDefaultFilter"
+      "subgroup": "Control",
+      "group": "Input"
     },
     {
       "key": "BP_BACKOFF_BUTTON",
       "storageName": "BackoffButton",
       "type": "bool",
       "default": true,
-      "platformDefaults": { "ios": false },
+      "platformDefaults": {
+        "ios": false
+      },
       "label": "Back-off on Release",
       "description": "If enabled, releasing a button will cause Dasher to slightly zoom out, making it easier to correct mistakes.",
       "uiType": "Switch",
       "tier": "common",
-      "subgroup": "CDynamicButtons"
+      "subgroup": "CButtonMode",
+      "group": "Input"
     },
     {
       "key": "BP_TWOBUTTON_REVERSE",
@@ -214,7 +238,8 @@
       "description": "When enabled, the second button in a two-button setup will trigger a reverse/zoom-out action.",
       "uiType": "Switch",
       "tier": "common",
-      "subgroup": "CTwoButtonDynamicFilter"
+      "subgroup": "CTwoButtonDynamicFilter",
+      "group": "Input"
     },
     {
       "key": "BP_2B_INVERT_DOUBLE",
@@ -225,7 +250,8 @@
       "description": "Inverts the function of a double press on the second button.",
       "uiType": "Switch",
       "tier": "advanced",
-      "subgroup": "CTwoButtonDynamicFilter"
+      "subgroup": "CTwoButtonDynamicFilter",
+      "group": "Input"
     },
     {
       "key": "BP_SLOW_START",
@@ -236,7 +262,8 @@
       "description": "When enabled, Dasher will gradually accelerate to the desired speed from a standstill.",
       "uiType": "Switch",
       "tier": "common",
-      "subgroup": "CDynamicFilter"
+      "subgroup": "Control",
+      "group": "Input"
     },
     {
       "key": "BP_COPY_ALL_ON_STOP",
@@ -245,7 +272,9 @@
       "default": false,
       "label": "Copy on Stop",
       "description": "Copy all text to clipboard whenever we stop.",
-      "tier": "advanced"
+      "tier": "advanced",
+      "group": "Output",
+      "subgroup": "Clipboard"
     },
     {
       "key": "BP_SPEAK_ALL_ON_STOP",
@@ -254,7 +283,9 @@
       "default": false,
       "label": "Speak on Stop",
       "description": "Speak all text whenever we stop.",
-      "tier": "advanced"
+      "tier": "advanced",
+      "group": "Output",
+      "subgroup": "Speech"
     },
     {
       "key": "BP_SPEAK_WORDS",
@@ -263,7 +294,9 @@
       "default": false,
       "label": "Speak Words",
       "description": "Speak words as they are written.",
-      "tier": "advanced"
+      "tier": "advanced",
+      "group": "Output",
+      "subgroup": "Speech"
     },
     {
       "key": "BP_GAME_HELP_DRAW_PATH",
@@ -272,7 +305,9 @@
       "default": true,
       "label": "Draw Help Path",
       "description": "When we give help, show the shortest path to the target sentence.",
-      "tier": "expert"
+      "tier": "expert",
+      "group": "Game Mode",
+      "subgroup": "Help"
     },
     {
       "key": "BP_TWO_PUSH_RELEASE_TIME",
@@ -283,7 +318,8 @@
       "description": "Toggles timing behavior upon button release in two-push mode.",
       "uiType": "Switch",
       "tier": "advanced",
-      "subgroup": "CTwoPushDynamicFilter"
+      "subgroup": "CTwoPushDynamicFilter",
+      "group": "Input"
     },
     {
       "key": "BP_SIMULATE_TRANSPARENCY",
@@ -292,9 +328,10 @@
       "default": false,
       "label": "Simulate Transparency",
       "description": "Enable the internal color mixing and thus the need to support alpha blending in the renderer.",
-      "tier": "expert"
+      "tier": "expert",
+      "group": "Customization",
+      "subgroup": "Appearance"
     },
-
     {
       "key": "LP_ORIENTATION",
       "storageName": "ScreenOrientation",
@@ -302,7 +339,9 @@
       "default": -2,
       "label": "Screen Orientation",
       "description": "Screen Orientation.",
-      "tier": "expert"
+      "tier": "expert",
+      "group": "Customization",
+      "subgroup": "Layout"
     },
     {
       "key": "LP_MAX_BITRATE",
@@ -317,7 +356,8 @@
       "divisor": 1,
       "step": 1,
       "tier": "common",
-      "subgroup": "CDynamicButtons"
+      "subgroup": "Speed",
+      "group": "Output"
     },
     {
       "key": "LP_FRAMERATE",
@@ -328,7 +368,8 @@
       "label": "Demo Framerate",
       "description": "The target framerate for running automated demos.",
       "tier": "expert",
-      "subgroup": "CDemoFilter"
+      "subgroup": "Speed",
+      "group": "Output"
     },
     {
       "key": "LP_LANGUAGE_MODEL_ID",
@@ -337,7 +378,9 @@
       "default": 0,
       "label": "Language Model",
       "description": "LanguageModelID.",
-      "tier": "expert"
+      "tier": "expert",
+      "group": "Language",
+      "subgroup": "Learning"
     },
     {
       "key": "LP_DASHER_FONTSIZE",
@@ -346,7 +389,9 @@
       "default": 22,
       "label": "Dasher Font Size",
       "description": "Font size reached at crosshair (in points).",
-      "tier": "common"
+      "tier": "common",
+      "group": "Customization",
+      "subgroup": "Appearance"
     },
     {
       "key": "LP_MESSAGE_FONTSIZE",
@@ -355,7 +400,9 @@
       "default": 14,
       "label": "Message Font Size",
       "description": "Size of font for messages (in points).",
-      "tier": "expert"
+      "tier": "expert",
+      "group": "Customization",
+      "subgroup": "Appearance"
     },
     {
       "key": "LP_SHAPE_TYPE",
@@ -364,7 +411,9 @@
       "enumDefault": "static_cast<long>(Options::OVERLAPPING_RECTANGLE)",
       "label": "Node Shape",
       "description": "Shapes to render in (see Options::Rendering_Shape_Types).",
-      "tier": "expert"
+      "tier": "expert",
+      "group": "Customization",
+      "subgroup": "Appearance"
     },
     {
       "key": "LP_START_MODE",
@@ -375,12 +424,22 @@
       "description": "Movement Starting Mode.",
       "uiType": "Enum",
       "tier": "advanced",
-      "subgroup": "CDefaultFilter",
+      "subgroup": "Control",
       "enumValues": [
-        { "label": "None", "cppExpr": "Options::StartMode::none" },
-        { "label": "Circle Start", "cppExpr": "Options::StartMode::circle_start" },
-        { "label": "Mouse Position Start", "cppExpr": "Options::StartMode::mouse_pos_start" }
-      ]
+        {
+          "label": "None",
+          "cppExpr": "Options::StartMode::none"
+        },
+        {
+          "label": "Circle Start",
+          "cppExpr": "Options::StartMode::circle_start"
+        },
+        {
+          "label": "Mouse Position Start",
+          "cppExpr": "Options::StartMode::mouse_pos_start"
+        }
+      ],
+      "group": "Input"
     },
     {
       "key": "LP_UNIFORM",
@@ -389,7 +448,9 @@
       "default": 50,
       "label": "Uniform Probability",
       "description": "Uniform probability weight (×1000). Higher values make less-probable symbols larger.",
-      "tier": "advanced"
+      "tier": "advanced",
+      "group": "Input",
+      "subgroup": "Advanced"
     },
     {
       "key": "LP_MOUSEPOSDIST",
@@ -398,7 +459,9 @@
       "default": 50,
       "label": "Mouse Position Distance",
       "description": "MousePositionBoxDistance.",
-      "tier": "expert"
+      "tier": "expert",
+      "group": "Input",
+      "subgroup": "CDefaultFilter"
     },
     {
       "key": "LP_PY_PROB_SORT_THRES",
@@ -407,7 +470,9 @@
       "default": 85,
       "label": "Pinyin Sort Threshold",
       "description": "Sort converted syms in descending probability order up to this percentage.",
-      "tier": "expert"
+      "tier": "expert",
+      "group": "Input",
+      "subgroup": "CDefaultFilter"
     },
     {
       "key": "LP_MESSAGE_TIME",
@@ -416,7 +481,9 @@
       "default": 2500,
       "label": "Message Display Time",
       "description": "Time for which non-modal messages are displayed, in ms.",
-      "tier": "expert"
+      "tier": "expert",
+      "group": "Output",
+      "subgroup": "Display"
     },
     {
       "key": "LP_LM_MAX_ORDER",
@@ -425,7 +492,9 @@
       "default": 5,
       "label": "Max N-gram Order",
       "description": "Maximum n-gram order for the language model.",
-      "tier": "advanced"
+      "tier": "advanced",
+      "group": "Language",
+      "subgroup": "Learning"
     },
     {
       "key": "LP_LM_EXCLUSION",
@@ -434,7 +503,9 @@
       "default": 0,
       "label": "Language Model Exclusion",
       "description": "LMExclusion.",
-      "tier": "expert"
+      "tier": "expert",
+      "group": "Language",
+      "subgroup": "Advanced"
     },
     {
       "key": "LP_LM_UPDATE_EXCLUSION",
@@ -443,7 +514,9 @@
       "default": 1,
       "label": "LM Update Exclusion",
       "description": "LMUpdateExclusion.",
-      "tier": "expert"
+      "tier": "expert",
+      "group": "Language",
+      "subgroup": "Advanced"
     },
     {
       "key": "LP_LM_ALPHA",
@@ -452,7 +525,9 @@
       "default": 49,
       "label": "LM Alpha",
       "description": "Language model alpha blending parameter.",
-      "tier": "expert"
+      "tier": "expert",
+      "group": "Language",
+      "subgroup": "Advanced"
     },
     {
       "key": "LP_LM_BETA",
@@ -461,7 +536,9 @@
       "default": 77,
       "label": "LM Beta",
       "description": "Language model beta parameter.",
-      "tier": "expert"
+      "tier": "expert",
+      "group": "Language",
+      "subgroup": "Advanced"
     },
     {
       "key": "LP_LM_MIXTURE",
@@ -470,7 +547,9 @@
       "default": 50,
       "label": "LM Mixture",
       "description": "Language model mixture parameter.",
-      "tier": "expert"
+      "tier": "expert",
+      "group": "Language",
+      "subgroup": "Advanced"
     },
     {
       "key": "LP_LINE_WIDTH",
@@ -485,7 +564,8 @@
       "divisor": 1,
       "step": 1,
       "tier": "advanced",
-      "subgroup": "CClickFilter"
+      "subgroup": "Mouse Line",
+      "group": "Customization"
     },
     {
       "key": "LP_GEOMETRY",
@@ -496,13 +576,26 @@
       "description": "Changes the geometric projection used to display the Dasher world.",
       "uiType": "Enum",
       "tier": "advanced",
-      "subgroup": "CDefaultFilter",
+      "subgroup": "Layout",
       "enumValues": [
-        { "label": "Old Style", "cppExpr": "Options::ScreenGeometry::old_style" },
-        { "label": "Square No Crosshair", "cppExpr": "Options::ScreenGeometry::square_no_xhair" },
-        { "label": "Squish", "cppExpr": "Options::ScreenGeometry::squish" },
-        { "label": "Squish and Log", "cppExpr": "Options::ScreenGeometry::squish_and_log" }
-      ]
+        {
+          "label": "Old Style",
+          "cppExpr": "Options::ScreenGeometry::old_style"
+        },
+        {
+          "label": "Square No Crosshair",
+          "cppExpr": "Options::ScreenGeometry::square_no_xhair"
+        },
+        {
+          "label": "Squish",
+          "cppExpr": "Options::ScreenGeometry::squish"
+        },
+        {
+          "label": "Squish and Log",
+          "cppExpr": "Options::ScreenGeometry::squish_and_log"
+        }
+      ],
+      "group": "Customization"
     },
     {
       "key": "LP_LM_WORD_ALPHA",
@@ -511,7 +604,9 @@
       "default": 50,
       "label": "Word Alpha",
       "description": "Alpha value for word-based model.",
-      "tier": "expert"
+      "tier": "expert",
+      "group": "Language",
+      "subgroup": "Advanced"
     },
     {
       "key": "LP_USER_LOG_LEVEL_MASK",
@@ -520,7 +615,9 @@
       "default": 0,
       "label": "User Log Level",
       "description": "Controls level of user logging, 0 = none, 1 = short, 2 = detailed, 3 = both.",
-      "tier": "expert"
+      "tier": "expert",
+      "group": "Output",
+      "subgroup": "Logging"
     },
     {
       "key": "LP_ZOOMSTEPS",
@@ -535,7 +632,8 @@
       "divisor": 1,
       "step": 1,
       "tier": "advanced",
-      "subgroup": "CStaticFilter"
+      "subgroup": "Appearance",
+      "group": "Customization"
     },
     {
       "key": "LP_B",
@@ -550,7 +648,8 @@
       "divisor": 1,
       "step": 1,
       "tier": "advanced",
-      "subgroup": "CButtonMode"
+      "subgroup": "Advanced",
+      "group": "Input"
     },
     {
       "key": "LP_S",
@@ -565,14 +664,17 @@
       "divisor": 1,
       "step": 1,
       "tier": "advanced",
-      "subgroup": "CButtonMode"
+      "subgroup": "Advanced",
+      "group": "Input"
     },
     {
       "key": "LP_BUTTON_SCAN_TIME",
       "storageName": "ButtonMenuScanTime",
       "type": "long",
       "default": 0,
-      "platformDefaults": { "ios": 600 },
+      "platformDefaults": {
+        "ios": 600
+      },
       "label": "Scan Time",
       "description": "In modes that automatically scan options, this sets the time in milliseconds to wait at each step.",
       "uiType": "Step",
@@ -581,7 +683,8 @@
       "divisor": 1,
       "step": 100,
       "tier": "common",
-      "subgroup": "CDasherButtons"
+      "subgroup": "CButtonMode",
+      "group": "Input"
     },
     {
       "key": "LP_R",
@@ -596,7 +699,8 @@
       "divisor": 1,
       "step": 10,
       "tier": "advanced",
-      "subgroup": "CButtonMode"
+      "subgroup": "Advanced",
+      "group": "Input"
     },
     {
       "key": "LP_RIGHTZOOM",
@@ -611,17 +715,22 @@
       "divisor": 1024,
       "step": 1024,
       "tier": "advanced",
-      "subgroup": "CCompassMode"
+      "subgroup": "Advanced",
+      "group": "Input"
     },
     {
       "key": "LP_NODE_BUDGET",
       "storageName": "NodeBudget",
       "type": "long",
       "default": 3000,
-      "platformDefaults": { "ios": 1000 },
+      "platformDefaults": {
+        "ios": 1000
+      },
       "label": "Node Budget",
       "description": "Target (min) number of node objects to maintain.",
-      "tier": "expert"
+      "tier": "expert",
+      "group": "Input",
+      "subgroup": "Advanced"
     },
     {
       "key": "LP_OUTLINE_WIDTH",
@@ -630,7 +739,9 @@
       "default": 0,
       "label": "Outline Width",
       "description": "Absolute value is line width to draw boxes (fill iff >=0).",
-      "tier": "expert"
+      "tier": "expert",
+      "group": "Customization",
+      "subgroup": "Appearance"
     },
     {
       "key": "LP_TEXT_PADDING",
@@ -639,7 +750,9 @@
       "default": 0,
       "label": "Text Padding",
       "description": "Pixel distance to inset the letters into the boxes.",
-      "tier": "expert"
+      "tier": "expert",
+      "group": "Customization",
+      "subgroup": "Appearance"
     },
     {
       "key": "LP_MIN_NODE_SIZE",
@@ -648,7 +761,9 @@
       "default": 50,
       "label": "Min Node Size",
       "description": "Minimum size of node (in dasher coords) to draw.",
-      "tier": "expert"
+      "tier": "expert",
+      "group": "Customization",
+      "subgroup": "Appearance"
     },
     {
       "key": "LP_NONLINEAR_X",
@@ -657,7 +772,9 @@
       "default": 5,
       "label": "Nonlinear X-Axis",
       "description": "Nonlinear compression of X-axis (0 = none, higher = more extreme).",
-      "tier": "expert"
+      "tier": "expert",
+      "group": "Input",
+      "subgroup": "CDefaultFilter"
     },
     {
       "key": "LP_AUTOSPEED_SENSITIVITY",
@@ -666,7 +783,9 @@
       "default": 100,
       "label": "Auto-Speed Sensitivity",
       "description": "Sensitivity of automatic speed control (percent).",
-      "tier": "advanced"
+      "tier": "advanced",
+      "group": "Input",
+      "subgroup": "CDefaultFilter"
     },
     {
       "key": "LP_SOCKET_PORT",
@@ -675,7 +794,9 @@
       "default": 20320,
       "label": "Socket Port",
       "description": "UDP/TCP socket to use for network socket input.",
-      "tier": "expert"
+      "tier": "expert",
+      "group": "Input",
+      "subgroup": "CSocket"
     },
     {
       "key": "LP_SOCKET_INPUT_X_MIN",
@@ -684,7 +805,9 @@
       "default": 0,
       "label": "Socket X Min",
       "description": "Bottom of range of X values expected from network input.",
-      "tier": "expert"
+      "tier": "expert",
+      "group": "Input",
+      "subgroup": "CSocket"
     },
     {
       "key": "LP_SOCKET_INPUT_X_MAX",
@@ -693,7 +816,9 @@
       "default": 1000,
       "label": "Socket X Max",
       "description": "Top of range of X values expected from network input.",
-      "tier": "expert"
+      "tier": "expert",
+      "group": "Input",
+      "subgroup": "CSocket"
     },
     {
       "key": "LP_SOCKET_INPUT_Y_MIN",
@@ -702,7 +827,9 @@
       "default": 0,
       "label": "Socket Y Min",
       "description": "Bottom of range of Y values expected from network input.",
-      "tier": "expert"
+      "tier": "expert",
+      "group": "Input",
+      "subgroup": "CSocket"
     },
     {
       "key": "LP_SOCKET_INPUT_Y_MAX",
@@ -711,7 +838,9 @@
       "default": 1000,
       "label": "Socket Y Max",
       "description": "Top of range of Y values expected from network input.",
-      "tier": "expert"
+      "tier": "expert",
+      "group": "Input",
+      "subgroup": "CSocket"
     },
     {
       "key": "LP_CIRCLE_PERCENT",
@@ -720,7 +849,9 @@
       "default": 10,
       "label": "Circle Start Size",
       "description": "Percentage of nominal vertical range to use for radius of start circle.",
-      "tier": "advanced"
+      "tier": "advanced",
+      "group": "Input",
+      "subgroup": "CDefaultFilter"
     },
     {
       "key": "LP_TWO_BUTTON_OFFSET",
@@ -735,7 +866,8 @@
       "divisor": 2048,
       "step": 100,
       "tier": "advanced",
-      "subgroup": "CTwoButtonDynamicFilter"
+      "subgroup": "CTwoButtonDynamicFilter",
+      "group": "Input"
     },
     {
       "key": "LP_HOLD_TIME",
@@ -750,7 +882,8 @@
       "divisor": 1000,
       "step": 10,
       "tier": "common",
-      "subgroup": "CButtonMultiPress"
+      "subgroup": "CButtonMode",
+      "group": "Input"
     },
     {
       "key": "LP_MULTIPRESS_TIME",
@@ -765,7 +898,8 @@
       "divisor": 1000,
       "step": 100,
       "tier": "common",
-      "subgroup": "CButtonMultiPress"
+      "subgroup": "CButtonMultiPress",
+      "group": "Input"
     },
     {
       "key": "LP_SLOW_START_TIME",
@@ -780,8 +914,9 @@
       "divisor": 1000,
       "step": 100,
       "tier": "common",
-      "subgroup": "CDynamicFilter",
-      "dependsOn": "BP_SLOW_START"
+      "subgroup": "Control",
+      "dependsOn": "BP_SLOW_START",
+      "group": "Input"
     },
     {
       "key": "LP_SMOOTH_TAU",
@@ -796,7 +931,8 @@
       "divisor": 1,
       "step": 1,
       "tier": "common",
-      "subgroup": "CSmoothingFilter"
+      "subgroup": "CSmoothingFilter",
+      "group": "Input"
     },
     {
       "key": "LP_TWO_PUSH_OUTER",
@@ -811,7 +947,8 @@
       "divisor": 2048,
       "step": 128,
       "tier": "advanced",
-      "subgroup": "CTwoPushDynamicFilter"
+      "subgroup": "CTwoPushDynamicFilter",
+      "group": "Input"
     },
     {
       "key": "LP_TWO_PUSH_LONG",
@@ -826,7 +963,8 @@
       "divisor": 2048,
       "step": 128,
       "tier": "common",
-      "subgroup": "CTwoPushDynamicFilter"
+      "subgroup": "CTwoPushDynamicFilter",
+      "group": "Input"
     },
     {
       "key": "LP_TWO_PUSH_SHORT",
@@ -841,7 +979,8 @@
       "divisor": 100,
       "step": 1,
       "tier": "common",
-      "subgroup": "CTwoPushDynamicFilter"
+      "subgroup": "CTwoPushDynamicFilter",
+      "group": "Input"
     },
     {
       "key": "LP_TWO_PUSH_TOLERANCE",
@@ -856,7 +995,8 @@
       "divisor": 1,
       "step": 10,
       "tier": "advanced",
-      "subgroup": "CTwoPushDynamicFilter"
+      "subgroup": "CTwoPushDynamicFilter",
+      "group": "Input"
     },
     {
       "key": "LP_DYNAMIC_BUTTON_LAG",
@@ -871,7 +1011,8 @@
       "divisor": 1,
       "step": 25,
       "tier": "common",
-      "subgroup": "CTwoPushDynamicFilter"
+      "subgroup": "CDynamicButtons",
+      "group": "Input"
     },
     {
       "key": "LP_STATIC1B_TIME",
@@ -886,7 +1027,8 @@
       "divisor": 1,
       "step": 100,
       "tier": "common",
-      "subgroup": "COneButtonFilter"
+      "subgroup": "CStaticFilter",
+      "group": "Input"
     },
     {
       "key": "LP_STATIC1B_ZOOM",
@@ -901,7 +1043,8 @@
       "divisor": 1,
       "step": 1,
       "tier": "advanced",
-      "subgroup": "COneButtonFilter"
+      "subgroup": "CStaticFilter",
+      "group": "Input"
     },
     {
       "key": "LP_DEMO_SPRING",
@@ -916,7 +1059,8 @@
       "divisor": 1,
       "step": 1,
       "tier": "expert",
-      "subgroup": "CDemoFilter"
+      "subgroup": "CDemoFilter",
+      "group": "Input"
     },
     {
       "key": "LP_DEMO_NOISE_MEM",
@@ -931,7 +1075,8 @@
       "divisor": 1,
       "step": 1,
       "tier": "expert",
-      "subgroup": "CDemoFilter"
+      "subgroup": "CDemoFilter",
+      "group": "Input"
     },
     {
       "key": "LP_DEMO_NOISE_MAG",
@@ -946,7 +1091,8 @@
       "divisor": 1,
       "step": 1,
       "tier": "expert",
-      "subgroup": "CDemoFilter"
+      "subgroup": "CDemoFilter",
+      "group": "Input"
     },
     {
       "key": "LP_MAXZOOM",
@@ -961,7 +1107,8 @@
       "divisor": 10,
       "step": 1,
       "tier": "advanced",
-      "subgroup": "CClickFilter"
+      "subgroup": "CDefaultFilter",
+      "group": "Input"
     },
     {
       "key": "LP_DYNAMIC_SPEED_INC",
@@ -976,7 +1123,8 @@
       "divisor": 1,
       "step": 1,
       "tier": "advanced",
-      "subgroup": "CDynamicButtons"
+      "subgroup": "CDynamicFilter",
+      "group": "Input"
     },
     {
       "key": "LP_DYNAMIC_SPEED_FREQ",
@@ -991,7 +1139,8 @@
       "divisor": 1,
       "step": 1,
       "tier": "advanced",
-      "subgroup": "CDynamicButtons"
+      "subgroup": "CDynamicFilter",
+      "group": "Input"
     },
     {
       "key": "LP_DYNAMIC_SPEED_DEC",
@@ -1006,7 +1155,8 @@
       "divisor": 1,
       "step": 1,
       "tier": "advanced",
-      "subgroup": "CDynamicButtons"
+      "subgroup": "CDynamicFilter",
+      "group": "Input"
     },
     {
       "key": "LP_TAP_TIME",
@@ -1021,17 +1171,22 @@
       "divisor": 1,
       "step": 25,
       "tier": "common",
-      "subgroup": "CStylusFilter"
+      "subgroup": "CStylusFilter",
+      "group": "Input"
     },
     {
       "key": "LP_MARGIN_WIDTH",
       "storageName": "MarginWidth",
       "type": "long",
       "default": 300,
-      "platformDefaults": { "ios": 500 },
+      "platformDefaults": {
+        "ios": 500
+      },
       "label": "Margin Width",
       "description": "Width of RHS margin (in Dasher co-ords).",
-      "tier": "expert"
+      "tier": "expert",
+      "group": "Customization",
+      "subgroup": "Appearance"
     },
     {
       "key": "LP_TARGET_OFFSET",
@@ -1046,7 +1201,8 @@
       "divisor": 400,
       "step": 1,
       "tier": "advanced",
-      "subgroup": "CDefaultFilter"
+      "subgroup": "CDefaultFilter",
+      "group": "Input"
     },
     {
       "key": "LP_X_LIMIT_SPEED",
@@ -1061,7 +1217,8 @@
       "divisor": 1536,
       "step": 1,
       "tier": "advanced",
-      "subgroup": "CDynamicFilter"
+      "subgroup": "Advanced",
+      "group": "Input"
     },
     {
       "key": "LP_GAME_HELP_DIST",
@@ -1070,7 +1227,9 @@
       "default": 1920,
       "label": "Game Help Distance",
       "description": "Distance of sentence from center to decide user needs help.",
-      "tier": "expert"
+      "tier": "expert",
+      "group": "Game Mode",
+      "subgroup": "Help"
     },
     {
       "key": "LP_GAME_HELP_TIME",
@@ -1079,9 +1238,10 @@
       "default": 0,
       "label": "Game Help Time",
       "description": "Time for which user must need help before help drawn.",
-      "tier": "expert"
+      "tier": "expert",
+      "group": "Game Mode",
+      "subgroup": "Help"
     },
-
     {
       "key": "SP_ALPHABET_ID",
       "storageName": "AlphabetID",
@@ -1089,7 +1249,9 @@
       "default": "",
       "label": "Alphabet",
       "description": "AlphabetID.",
-      "tier": "common"
+      "tier": "common",
+      "group": "Language",
+      "subgroup": ""
     },
     {
       "key": "SP_ALPHABET_1",
@@ -1098,7 +1260,9 @@
       "default": "",
       "label": "Alphabet History 1",
       "description": "Alphabet History 1.",
-      "tier": "expert"
+      "tier": "expert",
+      "group": "Language",
+      "subgroup": "History"
     },
     {
       "key": "SP_ALPHABET_2",
@@ -1107,7 +1271,9 @@
       "default": "",
       "label": "Alphabet History 2",
       "description": "Alphabet History 2.",
-      "tier": "expert"
+      "tier": "expert",
+      "group": "Language",
+      "subgroup": "History"
     },
     {
       "key": "SP_ALPHABET_3",
@@ -1116,7 +1282,9 @@
       "default": "",
       "label": "Alphabet History 3",
       "description": "Alphabet History 3.",
-      "tier": "expert"
+      "tier": "expert",
+      "group": "Language",
+      "subgroup": "History"
     },
     {
       "key": "SP_ALPHABET_4",
@@ -1125,7 +1293,9 @@
       "default": "",
       "label": "Alphabet History 4",
       "description": "Alphabet History 4.",
-      "tier": "expert"
+      "tier": "expert",
+      "group": "Language",
+      "subgroup": "History"
     },
     {
       "key": "SP_COLOUR_ID",
@@ -1134,7 +1304,9 @@
       "default": "Default",
       "label": "Color Palette",
       "description": "ColourID.",
-      "tier": "common"
+      "tier": "common",
+      "group": "Customization",
+      "subgroup": "Themes"
     },
     {
       "key": "SP_DASHER_FONT",
@@ -1143,7 +1315,9 @@
       "default": "",
       "label": "Dasher Font",
       "description": "DasherFont.",
-      "tier": "common"
+      "tier": "common",
+      "group": "Customization",
+      "subgroup": "Appearance"
     },
     {
       "key": "SP_GAME_TEXT_FILE",
@@ -1152,17 +1326,23 @@
       "default": "",
       "label": "Game Text File",
       "description": "User-specified file with strings to practice writing.",
-      "tier": "expert"
+      "tier": "expert",
+      "group": "Game Mode",
+      "subgroup": "Help"
     },
     {
       "key": "SP_INPUT_FILTER",
       "storageName": "InputFilter",
       "type": "string",
       "default": "Normal Control",
-      "platformDefaults": { "ios": "Stylus Control" },
+      "platformDefaults": {
+        "ios": "Stylus Control"
+      },
       "label": "Input Filter",
       "description": "Input filter used to provide the current control mode.",
-      "tier": "common"
+      "tier": "common",
+      "group": "Input",
+      "subgroup": ""
     },
     {
       "key": "SP_INPUT_DEVICE",
@@ -1171,7 +1351,9 @@
       "default": "Mouse Input",
       "label": "Input Device",
       "description": "Driver for the input device.",
-      "tier": "common"
+      "tier": "common",
+      "group": "Input",
+      "subgroup": ""
     },
     {
       "key": "SP_BUTTON_MAPPINGS",
@@ -1180,7 +1362,9 @@
       "default": "",
       "label": "Button Mappings",
       "description": "Button assignments used in UI.",
-      "tier": "expert"
+      "tier": "expert",
+      "group": "Input",
+      "subgroup": "CButtonMode"
     },
     {
       "key": "SP_JOYSTICK_XAXIS",
@@ -1189,7 +1373,9 @@
       "default": "",
       "label": "Joystick X Axis",
       "description": "Joystick axis used for X-axis input.",
-      "tier": "expert"
+      "tier": "expert",
+      "group": "Input",
+      "subgroup": "CStylusFilter"
     },
     {
       "key": "SP_JOYSTICK_YAXIS",
@@ -1198,7 +1384,9 @@
       "default": "",
       "label": "Joystick Y Axis",
       "description": "Joystick axis used for Y-axis input.",
-      "tier": "expert"
+      "tier": "expert",
+      "group": "Input",
+      "subgroup": "CStylusFilter"
     }
   ]
 }
