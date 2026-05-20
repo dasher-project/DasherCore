@@ -288,6 +288,35 @@ Areas where DasherCore's C++ could be improved, noted during C API development:
 - **Parameter enum is a single flat `enum Parameter`** — mixing `BP_*`, `LP_*`, `SP_*` in one enum loses type safety. A Rust port would use separate types.
 - **`CDasherScreen::Label` lifetime management** — labels are heap-allocated by `MakeLabel()` and the caller must delete them. A RAII or arena approach would prevent leaks.
 
+### Training Data
+
+Training files in `Data/training/` are generated from the **KeithAAC multilingual AAC text datasets** by Keith Vertanen:
+
+> **Multilingual Text For Augmentative And Alternative Communication (AAC)**  
+> https://osf.io/bnfdv/wiki?wiki=7pgfj  
+> This material is based upon work supported by the National Science Foundation under Grant No. 1750193.
+
+The repository contains automatically translated versions of four conversational datasets:
+
+| Dataset | Description |
+|---------|-------------|
+| **COMM2** | Statements and questions written in response to ten everyday communication situations |
+| **Turk** | Six-turn dialogues about different topics |
+| **Imagine** | Messages written by people asked to imagine using a scanning-style AAC interface |
+| **DailyDialog** | Multi-turn dialogues about different topics (first 20% of original dataset) |
+
+Translation was performed in July 2025 using Google's LLM translation API into 33 languages. For COMM2, Turk, and Imagine, Llama4 Maverick was used to correct spelling/grammar errors and produce additional variants.
+
+**Licensing:**
+- COMM2, Turk, and Imagine datasets: **CC BY 4.0**
+- DailyDialog dataset: **CC BY-NC-SA 4.0** (retains original authors' license)
+
+Training files are generated via `Scripts/generate_training.py`, which extracts real conversational utterances from these datasets for each language.
+
+### Alphabets
+
+Alphabet XML files in `Data/alphabets/autoConverted/` are generated from the **WorldAlphabets** project using `Scripts/generate_training.py`. WorldAlphabets provides character sets, keyboard layouts, and frequency data for 344 languages.
+
 ## License
 
 Dasher was originally built by Inference Group and released under GPL. This version is licensed under the MIT License.
