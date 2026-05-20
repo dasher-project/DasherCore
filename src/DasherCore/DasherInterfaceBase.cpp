@@ -739,7 +739,7 @@ std::vector<std::string> CDasherInterfaceBase::GetPermittedValues(Parameter para
 
   if (result.empty()) {
     auto it = Settings::parameter_defaults.find(parameter);
-    if (it != Settings::parameter_defaults.end() && it->second.type == PARAM_STRING) {
+    if (it != Settings::parameter_defaults.end() && it->second.type == Settings::PARAM_STRING) {
       std::string current = m_pSettingsStore->GetStringParameter(parameter);
       if (!current.empty()) {
         result.push_back(current);
