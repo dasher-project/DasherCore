@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE alphabet SYSTEM "../alphabet.dtd">
-<alphabet name="Osage (WorldAlphabets)" orientation="LR" trainingFilename="training_wa_osa_Osge.txt" colorsName="Default">
+<alphabet name="Osage (WorldAlphabets)" orientation="LR" trainingFilename="" colorsName="Default">
   <group name="Lower case" colorInfoName="lower case">
     <node label="𐓘">
       <textCharAction />

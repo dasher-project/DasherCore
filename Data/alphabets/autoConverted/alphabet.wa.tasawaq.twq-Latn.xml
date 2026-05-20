@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE alphabet SYSTEM "../alphabet.dtd">
-<alphabet name="Tasawaq (WorldAlphabets)" orientation="LR" trainingFilename="training_wa_twq_Latn.txt" colorsName="Default">
+<alphabet name="Tasawaq (WorldAlphabets)" orientation="LR" trainingFilename="" colorsName="Default">
   <group name="Lower case" colorInfoName="lower case">
     <node label="a">
       <textCharAction />

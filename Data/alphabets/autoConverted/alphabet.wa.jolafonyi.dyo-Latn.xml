@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE alphabet SYSTEM "../alphabet.dtd">
-<alphabet name="Jola-Fonyi (WorldAlphabets)" orientation="LR" trainingFilename="training_wa_dyo_Latn.txt" colorsName="Default">
+<alphabet name="Jola-Fonyi (WorldAlphabets)" orientation="LR" trainingFilename="" colorsName="Default">
   <group name="Lower case" colorInfoName="lower case">
     <node label="a">
       <textCharAction />

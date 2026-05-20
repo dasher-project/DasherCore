@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE alphabet SYSTEM "../alphabet.dtd">
-<alphabet name="Geez (WorldAlphabets)" orientation="LR" trainingFilename="training_wa_gez_Ethi.txt" colorsName="Default">
+<alphabet name="Geez (WorldAlphabets)" orientation="LR" trainingFilename="" colorsName="Default">
   <group name="Lower case" colorInfoName="lower case">
     <node label="ሀ">
       <textCharAction />

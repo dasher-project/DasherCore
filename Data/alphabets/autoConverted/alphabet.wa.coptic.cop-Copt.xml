@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE alphabet SYSTEM "../alphabet.dtd">
-<alphabet name="Coptic (WorldAlphabets)" orientation="LR" trainingFilename="training_wa_cop_Copt.txt" colorsName="Default">
+<alphabet name="Coptic (WorldAlphabets)" orientation="LR" trainingFilename="" colorsName="Default">
   <group name="Lower case" colorInfoName="lower case">
     <node label="ⲁ">
       <textCharAction />

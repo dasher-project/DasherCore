@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE alphabet SYSTEM "../alphabet.dtd">
-<alphabet name="Lisu (WorldAlphabets)" orientation="LR" trainingFilename="training_wa_lis_Lisu.txt" colorsName="Default">
+<alphabet name="Lisu (WorldAlphabets)" orientation="LR" trainingFilename="" colorsName="Default">
   <group name="Lower case" colorInfoName="lower case">
     <node label="ꓐ">
       <textCharAction />

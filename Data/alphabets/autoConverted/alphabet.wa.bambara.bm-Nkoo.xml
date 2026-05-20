@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE alphabet SYSTEM "../alphabet.dtd">
-<alphabet name="Bambara (WorldAlphabets)" orientation="RL" trainingFilename="training_wa_bm_Nkoo.txt" colorsName="Default">
+<alphabet name="Bambara (WorldAlphabets)" orientation="RL" trainingFilename="" colorsName="Default">
   <group name="Lower case" colorInfoName="lower case">
     <node label="ߊ">
       <textCharAction />

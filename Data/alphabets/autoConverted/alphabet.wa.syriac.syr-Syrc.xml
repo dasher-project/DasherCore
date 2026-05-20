@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE alphabet SYSTEM "../alphabet.dtd">
-<alphabet name="Syriac (WorldAlphabets)" orientation="RL" trainingFilename="training_wa_syr_Syrc.txt" colorsName="Default">
+<alphabet name="Syriac (WorldAlphabets)" orientation="RL" trainingFilename="" colorsName="Default">
   <group name="Lower case" colorInfoName="lower case">
     <node label="ܐ">
       <textCharAction />
