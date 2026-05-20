@@ -737,10 +737,13 @@ std::vector<std::string> CDasherInterfaceBase::GetPermittedValues(Parameter para
     default: break;
   }
 
-  if (parameter >= SP_USER_1) {
-    std::string current = GetStringParameter(parameter);
-    if (!current.empty() && std::find(result.begin(), result.end(), current) == result.end()) {
-      result.push_back(current);
+  if (result.empty()) {
+    auto it = Settings::parameter_defaults.find(parameter);
+    if (it != Settings::parameter_defaults.end() && it->second.type == PARAM_STRING) {
+      std::string current = m_pSettingsStore->GetStringParameter(parameter);
+      if (!current.empty()) {
+        result.push_back(current);
+      }
     }
   }
 
