@@ -419,7 +419,12 @@ DASHER_API void dasher_set_speed_percent(dasher_ctx* ctx, int percent) {
 
 DASHER_API int dasher_get_bool_parameter(dasher_ctx* ctx, int key) {
     if (!ctx || !ctx->intf) return 0;
-    return ctx->intf->GetBoolParameter(static_cast<Dasher::Parameter>(key)) ? 1 : 0;
+    try {
+        return ctx->intf->GetBoolParameter(static_cast<Dasher::Parameter>(key)) ? 1 : 0;
+    } catch (const std::bad_variant_access&) {
+        fprintf(stderr, "DASHER: bad_variant_access in get_bool_parameter key=%d\n", key);
+        return 0;
+    }
 }
 
 DASHER_API void dasher_set_bool_parameter(dasher_ctx* ctx, int key, int value) {
@@ -429,7 +434,12 @@ DASHER_API void dasher_set_bool_parameter(dasher_ctx* ctx, int key, int value) {
 
 DASHER_API long dasher_get_long_parameter(dasher_ctx* ctx, int key) {
     if (!ctx || !ctx->intf) return 0;
-    return ctx->intf->GetLongParameter(static_cast<Dasher::Parameter>(key));
+    try {
+        return ctx->intf->GetLongParameter(static_cast<Dasher::Parameter>(key));
+    } catch (const std::bad_variant_access&) {
+        fprintf(stderr, "DASHER: bad_variant_access in get_long_parameter key=%d\n", key);
+        return 0;
+    }
 }
 
 DASHER_API void dasher_set_long_parameter(dasher_ctx* ctx, int key, long value) {
@@ -439,7 +449,12 @@ DASHER_API void dasher_set_long_parameter(dasher_ctx* ctx, int key, long value) 
 
 DASHER_API const char* dasher_get_string_parameter(dasher_ctx* ctx, int key) {
     if (!ctx || !ctx->intf) return "";
-    ctx->tlString = ctx->intf->GetStringParameter(static_cast<Dasher::Parameter>(key));
+    try {
+        ctx->tlString = ctx->intf->GetStringParameter(static_cast<Dasher::Parameter>(key));
+    } catch (const std::bad_variant_access&) {
+        fprintf(stderr, "DASHER: bad_variant_access in get_string_parameter key=%d\n", key);
+        ctx->tlString = "";
+    }
     return ctx->tlString.c_str();
 }
 
