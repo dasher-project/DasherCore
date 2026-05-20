@@ -158,6 +158,7 @@ typedef struct dasher_parameter_info {
     long step;              // step size (for step/slider controls)
     int advanced;           // 1 if this is an advanced setting
     const char* group;      // category group ("Input", "Language", "Appearance", "Speed", "Output")
+    const char* subgroup;   // input filter class (e.g. "CSmoothingFilter") for contextual UI
 } dasher_parameter_info;
 
 // Returns the number of parameters in the schema.

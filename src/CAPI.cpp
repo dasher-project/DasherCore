@@ -479,6 +479,7 @@ static std::vector<Dasher::Parameter> s_paramKeys;
 static std::string s_paramInfoName;
 static std::string s_paramInfoDesc;
 static std::string s_paramInfoGroup;
+static std::string s_paramInfoSubgroup;
 static std::vector<std::string> s_enumStrings;
 static std::vector<std::pair<std::string, int>> s_enumEntries;
 static std::vector<std::string> s_stringValues;
@@ -614,6 +615,8 @@ DASHER_API int dasher_get_parameter_info(int index, dasher_parameter_info* out) 
     out->step = val.step;
     out->advanced = val.advancedSetting ? 1 : 0;
     out->group = parameterGroup(key);
+    s_paramInfoSubgroup = val.subgroup;
+    out->subgroup = s_paramInfoSubgroup.c_str();
     return 0;
 }
 
