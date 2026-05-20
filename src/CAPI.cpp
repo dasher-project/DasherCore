@@ -507,77 +507,6 @@ static void ensureParamKeys() {
     std::sort(s_paramKeys.begin(), s_paramKeys.end());
 }
 
-static const char* parameterGroup(Dasher::Parameter key) {
-    switch (key) {
-        case Dasher::BP_DRAW_MOUSE_LINE: case Dasher::BP_DRAW_MOUSE:
-        case Dasher::BP_CURVE_MOUSE_LINE: case Dasher::BP_START_MOUSE:
-        case Dasher::BP_START_SPACE: case Dasher::BP_STOP_OUTSIDE:
-        case Dasher::BP_AUTOCALIBRATE: case Dasher::BP_REMAP_XTREME:
-        case Dasher::LP_START_MODE: case Dasher::LP_ORIENTATION:
-        case Dasher::SP_INPUT_FILTER: case Dasher::SP_INPUT_DEVICE:
-            return "Input";
-
-        case Dasher::SP_ALPHABET_ID: case Dasher::LP_LANGUAGE_MODEL_ID:
-        case Dasher::BP_LM_ADAPTIVE: case Dasher::LP_LM_ALPHA:
-        case Dasher::LP_LM_BETA: case Dasher::LP_LM_MAX_ORDER:
-        case Dasher::LP_LM_EXCLUSION: case Dasher::LP_LM_UPDATE_EXCLUSION:
-        case Dasher::LP_LM_MIXTURE: case Dasher::LP_LM_WORD_ALPHA:
-        case Dasher::LP_UNIFORM:
-            return "Language";
-
-        case Dasher::SP_COLOUR_ID: case Dasher::BP_PALETTE_CHANGE:
-        case Dasher::LP_DASHER_FONTSIZE: case Dasher::LP_MESSAGE_FONTSIZE:
-        case Dasher::LP_SHAPE_TYPE: case Dasher::LP_GEOMETRY:
-        case Dasher::LP_LINE_WIDTH: case Dasher::LP_OUTLINE_WIDTH:
-        case Dasher::LP_TEXT_PADDING: case Dasher::LP_NODE_BUDGET:
-        case Dasher::LP_MIN_NODE_SIZE: case Dasher::LP_NONLINEAR_X:
-        case Dasher::BP_NONLINEAR_Y: case Dasher::BP_SIMULATE_TRANSPARENCY:
-        case Dasher::SP_DASHER_FONT:
-            return "Appearance";
-
-        case Dasher::LP_MAX_BITRATE: case Dasher::BP_AUTO_SPEEDCONTROL:
-        case Dasher::BP_SLOW_START: case Dasher::LP_SLOW_START_TIME:
-        case Dasher::LP_AUTOSPEED_SENSITIVITY: case Dasher::LP_DYNAMIC_SPEED_INC:
-        case Dasher::LP_DYNAMIC_SPEED_FREQ: case Dasher::LP_DYNAMIC_SPEED_DEC:
-        case Dasher::LP_TAP_TIME: case Dasher::LP_X_LIMIT_SPEED:
-        case Dasher::LP_MARGIN_WIDTH: case Dasher::LP_TARGET_OFFSET:
-            return "Speed";
-
-        case Dasher::BP_SPEAK_ALL_ON_STOP: case Dasher::BP_SPEAK_WORDS:
-        case Dasher::BP_COPY_ALL_ON_STOP: case Dasher::LP_MESSAGE_TIME:
-            return "Output";
-
-        case Dasher::BP_SMOOTH_PRESS_MODE: case Dasher::BP_SMOOTH_ONLY_FORWARD:
-        case Dasher::BP_SMOOTH_DRAW_MOUSE: case Dasher::BP_SMOOTH_DRAW_MOUSE_LINE:
-        case Dasher::LP_SMOOTH_TAU: case Dasher::BP_EXACT_DYNAMICS:
-        case Dasher::BP_TURBO_MODE: case Dasher::BP_BACKOFF_BUTTON:
-        case Dasher::BP_TWOBUTTON_REVERSE: case Dasher::BP_2B_INVERT_DOUBLE:
-        case Dasher::LP_ZOOMSTEPS: case Dasher::LP_B: case Dasher::LP_S:
-        case Dasher::LP_BUTTON_SCAN_TIME: case Dasher::LP_R: case Dasher::LP_RIGHTZOOM:
-        case Dasher::LP_TWO_BUTTON_OFFSET: case Dasher::LP_HOLD_TIME:
-        case Dasher::LP_MULTIPRESS_TIME: case Dasher::LP_TWO_PUSH_OUTER:
-        case Dasher::LP_TWO_PUSH_LONG: case Dasher::LP_TWO_PUSH_SHORT:
-        case Dasher::LP_TWO_PUSH_TOLERANCE: case Dasher::LP_DYNAMIC_BUTTON_LAG:
-        case Dasher::LP_STATIC1B_TIME: case Dasher::LP_STATIC1B_ZOOM:
-        case Dasher::LP_MAXZOOM: case Dasher::LP_CIRCLE_PERCENT:
-        case Dasher::BP_TWO_PUSH_RELEASE_TIME: case Dasher::BP_GAME_HELP_DRAW_PATH:
-        case Dasher::LP_GAME_HELP_DIST: case Dasher::LP_GAME_HELP_TIME:
-        case Dasher::LP_MOUSEPOSDIST: case Dasher::LP_PY_PROB_SORT_THRES:
-        case Dasher::SP_BUTTON_MAPPINGS: case Dasher::SP_JOYSTICK_XAXIS:
-        case Dasher::SP_JOYSTICK_YAXIS: case Dasher::SP_GAME_TEXT_FILE:
-        case Dasher::LP_SOCKET_PORT: case Dasher::LP_SOCKET_INPUT_X_MIN:
-        case Dasher::LP_SOCKET_INPUT_X_MAX: case Dasher::LP_SOCKET_INPUT_Y_MIN:
-        case Dasher::LP_SOCKET_INPUT_Y_MAX: case Dasher::LP_USER_LOG_LEVEL_MASK:
-        case Dasher::LP_DEMO_SPRING: case Dasher::LP_DEMO_NOISE_MEM:
-        case Dasher::LP_DEMO_NOISE_MAG: case Dasher::LP_FRAMERATE:
-        case Dasher::SP_ALPHABET_1: case Dasher::SP_ALPHABET_2:
-        case Dasher::SP_ALPHABET_3: case Dasher::SP_ALPHABET_4:
-            return "Advanced";
-
-        default:
-            return "Other";
-    }
-}
 
 DASHER_API int dasher_get_parameter_count(void) {
     return static_cast<int>(Dasher::Settings::parameter_defaults.size());
@@ -629,7 +558,8 @@ DASHER_API int dasher_get_parameter_info(int index, dasher_parameter_info* out) 
     out->max_val = val.max;
     out->step = val.step;
     out->advanced = val.advancedSetting ? 1 : 0;
-    out->group = parameterGroup(key);
+    s_paramInfoGroup = val.group;
+    out->group = s_paramInfoGroup.c_str();
     s_paramInfoSubgroup = val.subgroup;
     out->subgroup = s_paramInfoSubgroup.c_str();
     return 0;
