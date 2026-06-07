@@ -187,7 +187,8 @@ CAlphInfo *CAlphIO::CreateDefault() {
 
 	std::string Chars = "abcdefghijklmnopqrstuvwxyz";
 	Default->m_vCharacters.resize(Chars.size());
-	//fill in structs for characters in Chars...
+	Default->m_vCharacterDoActions.resize(Chars.size());
+	Default->m_vCharacterUndoActions.resize(Chars.size());
 	for(int i = 0; i < Chars.size(); i++) {
 		Default->m_vCharacters[i].Text = Chars[i];
 		Default->m_vCharacters[i].Display = Chars[i];

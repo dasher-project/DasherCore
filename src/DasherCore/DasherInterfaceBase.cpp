@@ -721,12 +721,10 @@ std::vector<std::string> CDasherInterfaceBase::GetPermittedValues(Parameter para
 
   switch (parameter) {
     case SP_ALPHABET_ID:
-      DASHER_ASSERT(m_AlphIO != NULL);
-      m_AlphIO->GetAlphabets(&result);
+      if (m_AlphIO) m_AlphIO->GetAlphabets(&result);
       break;
     case SP_COLOUR_ID:
-      DASHER_ASSERT(m_ColourIO != NULL);
-      m_ColorIO->GetKnownPalettes(&result);
+      if (m_ColorIO) m_ColorIO->GetKnownPalettes(&result);
       break;
     case SP_INPUT_FILTER:
       m_pModuleManager->ListInputMethodModules(result);

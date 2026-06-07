@@ -698,7 +698,9 @@ void CSymbolNode::UntrainSymbol()
 
 void CSymbolNode::Do() {
     TrainSymbol();
-    const std::vector<Action*>& uA = m_pMgr->GetAlphabet()->GetCharDoActions(iSymbol);
+    const auto* alph = m_pMgr->GetAlphabet();
+    if (!alph) return;
+    const std::vector<Action*>& uA = alph->GetCharDoActions(iSymbol);
     for(Action* a : uA)
     {
         a->Broadcast(GetInterface(), GetInterface()->GetActionManager(), this);
@@ -712,7 +714,9 @@ SymbolProb CSymbolNode::GetSymbolProb() const {
 
 void CSymbolNode::Undo() {
     UntrainSymbol();
-    const std::vector<Action*>& uA = m_pMgr->GetAlphabet()->GetCharUndoActions(iSymbol);
+    const auto* alph = m_pMgr->GetAlphabet();
+    if (!alph) return;
+    const std::vector<Action*>& uA = alph->GetCharUndoActions(iSymbol);
     for(Action* a : uA)
     {
         a->Broadcast(GetInterface(), GetInterface()->GetActionManager(), this);
