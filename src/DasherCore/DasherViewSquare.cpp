@@ -586,6 +586,12 @@ void CDasherViewSquare::DisjointRender(CDasherNode* pRender, myint y1, myint y2,
                                        CTextString* pPrevText, CExpansionPolicy& policy, double dMaxCost,
                                        CDasherNode*& pOutput)
 {
+	static int renderCount = 0;
+	if (renderCount < 3) {
+		fprintf(stderr, "[Dasher game] DisjointRender offset=%d NF_GAME=%d children=%d Range=%lld\n",
+			pRender->offset(), pRender->GetFlag(CDasherNode::NF_GAME)?1:0, pRender->ChildCount(), (long long)(y2-y1));
+		renderCount++;
+	}
 	DASHER_ASSERT_VALIDPTR_RW(pRender);
 	
 	// Set the NF_SUPER flag if this node entirely frames the visual
@@ -979,6 +985,12 @@ void CDasherViewSquare::NewRender(CDasherNode* pCurrentNode, myint y1, myint y2,
 		myint newy2 = y1 + (Range * pChild->Hbnd()) / CDasherModel::NORMALIZATION;
 		if (pChild->GetFlag(CDasherNode::NF_GAME))
 		{
+			static int gameBroadcasts2 = 0;
+			if (gameBroadcasts2 < 5) {
+				fprintf(stderr, "[Dasher game] Broadcasting OnGameNodeDraw(path2) for child offset=%d y1=%lld y2=%lld listeners=%zu\n",
+					pChild->offset(), (long long)newy1, (long long)newy2, OnGameNodeDraw.DebugListenerCount());
+				gameBroadcasts2++;
+			}
 			OnGameNodeDraw.Broadcast(pChild, newy1, newy2);
 		}
 		if (newy1 <= visibleRegion.maxY && newy2 >= visibleRegion.minY)
