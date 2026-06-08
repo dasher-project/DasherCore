@@ -73,8 +73,8 @@ public:
   const std::string & GetPalette() const {return PreferredColors;}
 
   //Determine that this character denotes a word gap
-  bool SymbolIsSpaceCharacter(symbol s) const {return std::isspace(m_vCharacters[s-1].Text[0]);}
-  bool SymbolPrintsNewLineCharacter(symbol s) const {return m_vCharacters[s-1].Text == "\n";}
+  bool SymbolIsSpaceCharacter(symbol s) const {return s > 0 && s <= (symbol)m_vCharacters.size() && std::isspace(m_vCharacters[s-1].Text[0]);}
+  bool SymbolPrintsNewLineCharacter(symbol s) const {return s > 0 && s <= (symbol)m_vCharacters.size() && m_vCharacters[s-1].Text == "\n";}
 
   const std::vector<Action*>& GetCharDoActions(symbol s) const {return m_vCharacterDoActions[s-1];}
   const std::vector<Action*>& GetCharUndoActions(symbol s) const {return m_vCharacterUndoActions[s-1];}
