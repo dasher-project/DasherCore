@@ -8,19 +8,27 @@ CWordGeneratorBase::CWordGeneratorBase(const CAlphInfo *pAlph, const CAlphabetMa
 
 void CWordGeneratorBase::GetSymbols(std::vector<symbol> &into) {
     into.clear();
-    while(into.empty()) {
+    for (;;) {
         std::string s(GetLine());
-        if (s.empty()) break; //no more lines, so no more symbols...
+        if (s.empty()) break;
         std::stringstream line(s);
         CAlphabetMap::SymbolStream ss(line);
-
-        for (symbol sym = sym=ss.next(m_pAlphMap); sym != -1; sym=ss.next(m_pAlphMap)) {
-            if(sym != 0 && m_pAlph->SymbolIsSpaceCharacter(into.back()))
-            {
-                into.push_back(sym);
+        for (symbol sym; (sym = ss.next(m_pAlphMap)) != -1;) {
+            if (!into.empty()) {
+                symbol lastSym = into.back();
+                if (sym == 0 && lastSym == m_pAlph->GetSpaceSymbol()) continue;
+                if (lastSym == 0) {
+                    into.pop_back();
+                    if (sym != 0 && sym != m_pAlph->GetSpaceSymbol())
+                        into.push_back(m_pAlph->GetSpaceSymbol());
+                }
             }
+            into.push_back(sym);
         }
-        //didn't find any usable symbols in line! repeat...
+        if (!into.empty()) {
+            if (into.back() == 0) into.pop_back();
+            if (!into.empty()) break;
+        }
     }
 }
 
