@@ -22,6 +22,9 @@
 
 using namespace Dasher;
 
+const std::string CAlphInfo::s_emptyStr;
+const std::string CAlphInfo::s_emptyDisplay;
+
 CAlphInfo::CAlphInfo() {
   //Members of SGroupInfo:
     pChild=nullptr;

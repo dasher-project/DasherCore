@@ -83,21 +83,26 @@ public:
   //symbol GetEndConversionSymbol() const;
 
   /// return display string for i'th symbol
-  const std::string & GetDisplayText(symbol i) const {return m_vCharacters[i-1].Display;}
+  static const std::string s_emptyStr;
+  static const std::string s_emptyDisplay;
 
-  /// return text for edit box for i'th symbol
-  const std::string & GetText(symbol i) const {return m_vCharacters[i-1].Text;}
-  const double GetSymbolFixedProbability(symbol i) const {return m_vCharacters[i-1].fixedProbability;}
-  const double GetSymbolSpeedMultiplier(symbol i) const {return m_vCharacters[i-1].speedFactor;}
+  bool validSymbol(symbol i) const {return i > 0 && i <= (symbol)m_vCharacters.size();}
+
+  const std::string & GetDisplayText(symbol i) const {return validSymbol(i) ? m_vCharacters[i-1].Display : s_emptyDisplay;}
+
+  const std::string & GetText(symbol i) const {return validSymbol(i) ? m_vCharacters[i-1].Text : s_emptyStr;}
+  const double GetSymbolFixedProbability(symbol i) const {return validSymbol(i) ? m_vCharacters[i-1].fixedProbability : 0.0;}
+  const double GetSymbolSpeedMultiplier(symbol i) const {return validSymbol(i) ? m_vCharacters[i-1].speedFactor : 1.0;}
 
   int getColorGroupOffset(symbol i) const
   {
-      return m_vCharacters[i-1].ColorGroupOffset;
+      return validSymbol(i) ? m_vCharacters[i-1].ColorGroupOffset : 0;
   };
 
   std::string& getColorGroup(symbol i) const
   {
-      return m_vCharacters[i-1].parentGroup->colorGroup;
+      static std::string empty;
+      return validSymbol(i) ? m_vCharacters[i-1].parentGroup->colorGroup : empty;
   };
 
   const std::string &GetDefaultContext() const {return m_strDefaultContext;}
