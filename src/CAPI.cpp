@@ -197,6 +197,8 @@ struct dasher_ctx {
     std::string stringBuf;
     dasher_output_callback outputCb = nullptr;
     void *outputCbUserData = nullptr;
+    dasher_message_callback messageCb = nullptr;
+    void *messageCbUserData = nullptr;
 
     struct Interface : public Dasher::CDashIntfScreenMsgs {
         Interface(Dasher::CSettingsStore *s, dasher_ctx *owner)
@@ -207,6 +209,12 @@ struct dasher_ctx {
             auto inp = std::make_unique<PointerInput>();
             m_owner->input = inp.get();
             GetModuleManager()->RegisterInputDeviceModule(std::move(inp), true);
+        }
+
+        void Message(const std::string &strText, bool bInterrupt) override {
+            if (m_owner->messageCb && !strText.empty())
+                m_owner->messageCb(bInterrupt ? 1 : 0, strText.c_str(), m_owner->messageCbUserData);
+            CDashIntfScreenMsgs::Message(strText, bInterrupt);
         }
 
         unsigned int ctrlMove(bool, Dasher::EditDistance) override {
@@ -822,6 +830,12 @@ DASHER_API void dasher_set_output_callback(dasher_ctx* ctx, dasher_output_callba
     if (!ctx) return;
     ctx->outputCb = callback;
     ctx->outputCbUserData = user_data;
+}
+
+DASHER_API void dasher_set_message_callback(dasher_ctx* ctx, dasher_message_callback callback, void* user_data) {
+    if (!ctx) return;
+    ctx->messageCb = callback;
+    ctx->messageCbUserData = user_data;
 }
 
 } // extern "C"

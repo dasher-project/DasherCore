@@ -239,6 +239,23 @@ typedef void (*dasher_output_callback)(int event_type, const char* text, void* u
 
 DASHER_API void dasher_set_output_callback(dasher_ctx* ctx, dasher_output_callback callback, void* user_data);
 
+// ── Message callback ───────────────────────────────────────────────────────
+//
+// Register a callback to receive engine messages (warnings, errors, info).
+// These are the same messages that appear as yellow/white text on the canvas.
+// Frontends can use this to display messages in native UI (alerts, toasts, etc).
+//
+// Message types:
+//   0 = informational  — non-modal, user can continue writing
+//   1 = warning        — modal, text entry is paused until dismissed
+//
+// The callback fires on the thread that calls dasher_frame() or any API method
+// that triggers a message (e.g. dasher_enter_game_mode).
+
+typedef void (*dasher_message_callback)(int message_type, const char* text, void* user_data);
+
+DASHER_API void dasher_set_message_callback(dasher_ctx* ctx, dasher_message_callback callback, void* user_data);
+
 // ── Localization ──────────────────────────────────────────────────────────
 
 // Set the active locale for parameter names, descriptions, and enum labels.
