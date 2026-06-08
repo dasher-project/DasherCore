@@ -254,6 +254,28 @@ void CAlphIO::ReadCharAttributes(pugi::xml_node xml_node, CAlphInfo::character& 
 	    {
 			DoActions.push_back(new TextCharAction());
 	        UndoActions.push_back(new TextCharUndoAction());
+	        if (xml_node.attribute("text").empty() && !potentialActions.attribute("unicode").empty()) {
+	            int codepoint = potentialActions.attribute("unicode").as_int(-1);
+	            if (codepoint > 0) {
+	                std::string utf8;
+	                if (codepoint < 0x80) {
+	                    utf8 += static_cast<char>(codepoint);
+	                } else if (codepoint < 0x800) {
+	                    utf8 += static_cast<char>(0xC0 | (codepoint >> 6));
+	                    utf8 += static_cast<char>(0x80 | (codepoint & 0x3F));
+	                } else if (codepoint < 0x10000) {
+	                    utf8 += static_cast<char>(0xE0 | (codepoint >> 12));
+	                    utf8 += static_cast<char>(0x80 | ((codepoint >> 6) & 0x3F));
+	                    utf8 += static_cast<char>(0x80 | (codepoint & 0x3F));
+	                } else {
+	                    utf8 += static_cast<char>(0xF0 | (codepoint >> 18));
+	                    utf8 += static_cast<char>(0x80 | ((codepoint >> 12) & 0x3F));
+	                    utf8 += static_cast<char>(0x80 | ((codepoint >> 6) & 0x3F));
+	                    utf8 += static_cast<char>(0x80 | (codepoint & 0x3F));
+	                }
+	                alphabet_character.Text = utf8;
+	            }
+	        }
 	    }
 	    else if(std::strcmp(potentialActions.name(),"deleteTextAction") == 0 && !potentialActions.attribute("distance").empty())
 	    {

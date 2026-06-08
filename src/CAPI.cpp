@@ -717,13 +717,8 @@ static std::string s_gameTextBuf;
 static std::string symbolsToText(const Dasher::CAlphInfo *alph, const std::vector<Dasher::symbol> &syms, int count) {
     std::string result;
     for (int i = 0; i < count && i < (int)syms.size(); i++) {
-        const auto &txt = alph->GetText(syms[i]);
-        result += txt;
-        if (syms[i] == 0) {
-            fprintf(stderr, "[Dasher game] WARNING: symbol %d is 0 (unknown), text='%s'\n", i, txt.c_str());
-        }
+        result += alph->GetText(syms[i]);
     }
-    fprintf(stderr, "[Dasher game] symbolsToText: %d syms, result='%s'\n", count, result.c_str());
     return result;
 }
 
