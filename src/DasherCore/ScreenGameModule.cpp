@@ -45,6 +45,7 @@ void CScreenGameModule::ChunkGenerated() {
 }
 
 void CScreenGameModule::DrawText(CDasherView *pView) {
+  if (!m_bCanvasTextEnabled) return;
   const unsigned int uFontSize(m_pSettingsStore->GetLongParameter(LP_MESSAGE_FONTSIZE));
   //Assume left-to-right orientation...too many issues for other orientations!
   CDasherScreen *pScreen(pView->Screen());

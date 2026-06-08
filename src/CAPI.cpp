@@ -706,13 +706,24 @@ DASHER_API int dasher_game_mode_active(dasher_ctx* ctx) {
     return ctx->intf->GetGameModule() ? 1 : 0;
 }
 
+DASHER_API void dasher_game_set_canvas_text(dasher_ctx* ctx, int enabled) {
+    if (!ctx || !ctx->intf) return;
+    auto *gm = ctx->intf->GetGameModule();
+    if (gm) gm->SetCanvasTextEnabled(enabled != 0);
+}
+
 static std::string s_gameTextBuf;
 
 static std::string symbolsToText(const Dasher::CAlphInfo *alph, const std::vector<Dasher::symbol> &syms, int count) {
     std::string result;
     for (int i = 0; i < count && i < (int)syms.size(); i++) {
-        result += alph->GetText(syms[i]);
+        const auto &txt = alph->GetText(syms[i]);
+        result += txt;
+        if (syms[i] == 0) {
+            fprintf(stderr, "[Dasher game] WARNING: symbol %d is 0 (unknown), text='%s'\n", i, txt.c_str());
+        }
     }
+    fprintf(stderr, "[Dasher game] symbolsToText: %d syms, result='%s'\n", count, result.c_str());
     return result;
 }
 

@@ -70,6 +70,8 @@ class CGameModule {
   int GetLastCorrectSym() const {return m_iLastSym;}
   const std::string &GetWrongText() const {return m_strWrong;}
   const CAlphInfo *GetAlphabet() const {return m_pAlph;}
+  void SetCanvasTextEnabled(bool enabled) {m_bCanvasTextEnabled = enabled;}
+  bool IsCanvasTextEnabled() const {return m_bCanvasTextEnabled;}
 
 protected:
   ///Called after each successful call to GenerateChunk. Subclasses may override
@@ -94,6 +96,7 @@ protected:
   
   ///Any text wrongly entered since the last on-target character
   std::string m_strWrong;
+  bool m_bCanvasTextEnabled = true;
   const std::vector<symbol> &targetSyms() {return m_vTargetSymbols;}
   int lastCorrectSym() {return m_iLastSym;}
   const CAlphInfo *m_pAlph;

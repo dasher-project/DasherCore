@@ -218,6 +218,11 @@ DASHER_API void dasher_leave_game_mode(dasher_ctx* ctx);
 // Check if game mode is currently active. Returns 1 if on, 0 if off.
 DASHER_API int dasher_game_mode_active(dasher_ctx* ctx);
 
+// Enable or disable canvas text rendering in game mode.
+// Pass 0 to suppress the on-canvas target/wrong text (when the platform
+// renders its own game UI). Pass 1 to re-enable.
+DASHER_API void dasher_game_set_canvas_text(dasher_ctx* ctx, int enabled);
+
 // Get the game mode target text (the sentence the user should type).
 // Returned pointer is valid until the next API call. Returns "" if not in game mode.
 DASHER_API const char* dasher_game_get_target_text(dasher_ctx* ctx);
