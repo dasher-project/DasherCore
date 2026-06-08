@@ -106,6 +106,8 @@ void CGameModule::HandleGameNodeDraw(CDasherNode*, myint y1, myint y2) {
   // we want the coordinates of the smallest (innermost) one about which we are told
   if (y1 > m_y1) m_y1 = y1;
   if (y2 < m_y2) m_y2 = y2;
+  fprintf(stderr, "[Dasher game] HandleGameNodeDraw y1=%lld y2=%lld => m_y1=%lld m_y2=%lld\n",
+      (long long)y1, (long long)y2, (long long)m_y1, (long long)m_y2);
 }
 
 void CGameModule::HandleViewChange(CDasherView *pView) {
@@ -149,6 +151,12 @@ void CGameModule::DecorateView(unsigned long lTime, CDasherView *pView, CDasherM
     m_dSentenceStartNats = pModel->GetNats();
   
   const myint iNewTarget((m_y1+m_y2)/2);
+  static int frameCount = 0;
+  if (++frameCount <= 5) {
+    fprintf(stderr, "[Dasher game] DecorateView frame %d: m_y1=%lld m_y2=%lld iNewTarget=%lld ORIGIN_Y=%lld HELP_DIST=%lld\n",
+        frameCount, (long long)m_y1, (long long)m_y2, (long long)iNewTarget,
+        (long long)CDasherModel::ORIGIN_Y, (long long)m_pSettingsStore->GetLongParameter(LP_GAME_HELP_DIST));
+  }
   m_vTargetY.push_back(iNewTarget);
   bool bDrawHelper;
   
