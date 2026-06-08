@@ -17,7 +17,7 @@ static SModuleSettings gameSets[] = {
 
 CGameModule::CGameModule(CSettingsStore* pSettingsStore, Dasher::CDasherInterfaceBase *pInterface, CDasherView *pView, CDasherModel *pModel) 
 : m_pSettingsStore(pSettingsStore), m_pInterface(pInterface),
-m_pView(pView), m_iLastSym(-1), m_pModel(pModel),
+m_pView(nullptr), m_iLastSym(-1), m_pModel(pModel),
 m_y1(std::numeric_limits<myint>::min()), m_y2(std::numeric_limits<myint>::max()),
 m_iTargetY(CDasherModel::ORIGIN_Y), m_uHelpStart(std::numeric_limits<unsigned long>::max()),
 m_ulTotalTime(0), m_dTotalNats(0.0), m_uiTotalSyms(0), m_iFontSize(36)
@@ -96,11 +96,8 @@ void CGameModule::HandleEditEvent(CEditEvent::EditEventType type, const std::str
 //Node populated...
 void CGameModule::HandleNodePopulated(CDasherNode *pNode) {
   if (pNode->GetFlag(CDasherNode::NF_GAME) //if on game path, look for next/child node on path...
-      && pNode->offset()+1 < m_vTargetSymbols.size()) {
-    fprintf(stderr, "[Dasher game] HandleNodePopulated: offset=%d searching for sym[%zu]=%d\n",
-        pNode->offset(), (size_t)(pNode->offset()+1), m_vTargetSymbols[pNode->offset()+1]);
+      && pNode->offset()+1 < m_vTargetSymbols.size())
     pNode->GameSearchChildren(m_vTargetSymbols[pNode->offset()+1]);
-  }
 }
 
 
@@ -109,9 +106,6 @@ void CGameModule::HandleGameNodeDraw(CDasherNode*, myint y1, myint y2) {
   // we want the coordinates of the smallest (innermost) one about which we are told
   if (y1 > m_y1) m_y1 = y1;
   if (y2 < m_y2) m_y2 = y2;
-  static int drawCount = 0;
-  if (drawCount++ < 5)
-    fprintf(stderr, "[Dasher game] HandleGameNodeDraw y1=%lld y2=%lld\n", (long long)y1, (long long)y2);
 }
 
 void CGameModule::HandleViewChange(CDasherView *pView) {
