@@ -304,6 +304,7 @@ void CDasherInterfaceBase::EnterGameMode() {
     m_pGameModule = CreateGameModule();
     //m_pNCManager->updateControl();
     m_pGameModule->SetWordGenerator(m_pNCManager->GetAlphabet(), pWords);
+    fprintf(stderr, "[Dasher game] EnterGameMode: forcing SetOffset(%d, true)\n", m_pDasherModel->GetOffset());
     SetOffset(m_pDasherModel->GetOffset(), true);
   } else {
     ///TRANSLATORS: %s is the name of the alphabet; the string "GameTextFile"
