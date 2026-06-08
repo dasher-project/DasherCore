@@ -9,6 +9,8 @@
 #include "DasherCore/XmlSettingsStore.h"
 #include "DasherCore/FileUtils.h"
 #include "DasherCore/ColorPalette.h"
+#include "DasherCore/GameModule.h"
+#include "DasherCore/Alphabet/AlphInfo.h"
 
 #include <algorithm>
 #include <chrono>
