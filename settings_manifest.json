@@ -339,9 +339,16 @@
       "default": -2,
       "label": "Screen Orientation",
       "description": "Screen Orientation.",
+      "uiType": "Enum",
       "tier": "expert",
       "group": "Customization",
-      "subgroup": "Layout"
+      "subgroup": "Layout",
+      "enumValues": [
+        {"label": "Automatic", "cppExpr": "-2"},
+        {"label": "Normal", "cppExpr": "0"},
+        {"label": "Left-Handed", "cppExpr": "1"},
+        {"label": "Right-Handed", "cppExpr": "2"}
+      ]
     },
     {
       "key": "LP_MAX_BITRATE",
@@ -367,6 +374,11 @@
       "persistence": "EPHEMERAL",
       "label": "Demo Framerate",
       "description": "The target framerate for running automated demos.",
+      "uiType": "Step",
+      "min": 100,
+      "max": 10000,
+      "divisor": 1,
+      "step": 100,
       "tier": "expert",
       "subgroup": "Speed",
       "group": "Output"
@@ -378,9 +390,16 @@
       "default": 0,
       "label": "Language Model",
       "description": "LanguageModelID.",
+      "uiType": "Enum",
       "tier": "expert",
       "group": "Language",
-      "subgroup": "Learning"
+      "subgroup": "Learning",
+      "enumValues": [
+        {"label": "PPM", "cppExpr": "0"},
+        {"label": "Word", "cppExpr": "2"},
+        {"label": "Mixture", "cppExpr": "3"},
+        {"label": "CTW", "cppExpr": "4"}
+      ]
     },
     {
       "key": "LP_DASHER_FONTSIZE",
@@ -421,9 +440,19 @@
       "enumDefault": "static_cast<long>(Options::OVERLAPPING_RECTANGLE)",
       "label": "Node Shape",
       "description": "Shapes to render in (see Options::Rendering_Shape_Types).",
+      "uiType": "Enum",
       "tier": "expert",
       "group": "Customization",
-      "subgroup": "Appearance"
+      "subgroup": "Appearance",
+      "enumValues": [
+        {"label": "Disjoint Rectangles", "cppExpr": "static_cast<long>(Options::DISJOINT_RECTANGLE)"},
+        {"label": "Overlapping Rectangles", "cppExpr": "static_cast<long>(Options::OVERLAPPING_RECTANGLE)"},
+        {"label": "Triangles", "cppExpr": "static_cast<long>(Options::TRIANGLE)"},
+        {"label": "Truncated Triangles", "cppExpr": "static_cast<long>(Options::TRUNCATED_TRIANGLE)"},
+        {"label": "Quadric", "cppExpr": "static_cast<long>(Options::QUADRIC)"},
+        {"label": "Circle", "cppExpr": "static_cast<long>(Options::CIRCLE)"},
+        {"label": "Cube", "cppExpr": "static_cast<long>(Options::CUBE)"}
+      ]
     },
     {
       "key": "LP_START_MODE",
@@ -474,6 +503,11 @@
       "default": 50,
       "label": "Mouse Position Distance",
       "description": "MousePositionBoxDistance.",
+      "uiType": "Step",
+      "min": 0,
+      "max": 500,
+      "divisor": 1,
+      "step": 10,
       "tier": "expert",
       "group": "Input",
       "subgroup": "CDefaultFilter"
@@ -485,6 +519,11 @@
       "default": 85,
       "label": "Pinyin Sort Threshold",
       "description": "Sort converted syms in descending probability order up to this percentage.",
+      "uiType": "Slider",
+      "min": 0,
+      "max": 100,
+      "divisor": 1,
+      "step": 5,
       "tier": "expert",
       "group": "Input",
       "subgroup": "CDefaultFilter"
@@ -528,6 +567,11 @@
       "default": 0,
       "label": "Language Model Exclusion",
       "description": "LMExclusion.",
+      "uiType": "Step",
+      "min": 0,
+      "max": 100,
+      "divisor": 1,
+      "step": 1,
       "tier": "expert",
       "group": "Language",
       "subgroup": "Advanced"
@@ -539,6 +583,11 @@
       "default": 1,
       "label": "LM Update Exclusion",
       "description": "LMUpdateExclusion.",
+      "uiType": "Step",
+      "min": 0,
+      "max": 100,
+      "divisor": 1,
+      "step": 1,
       "tier": "expert",
       "group": "Language",
       "subgroup": "Advanced"
@@ -660,9 +709,16 @@
       "default": 0,
       "label": "User Log Level",
       "description": "Controls level of user logging, 0 = none, 1 = short, 2 = detailed, 3 = both.",
+      "uiType": "Enum",
       "tier": "expert",
       "group": "Output",
-      "subgroup": "Logging"
+      "subgroup": "Logging",
+      "enumValues": [
+        {"label": "None", "cppExpr": "0"},
+        {"label": "Short", "cppExpr": "1"},
+        {"label": "Detailed", "cppExpr": "2"},
+        {"label": "Both", "cppExpr": "3"}
+      ]
     },
     {
       "key": "LP_ZOOMSTEPS",
@@ -773,6 +829,11 @@
       },
       "label": "Node Budget",
       "description": "Target (min) number of node objects to maintain.",
+      "uiType": "Step",
+      "min": 100,
+      "max": 10000,
+      "divisor": 1,
+      "step": 100,
       "tier": "expert",
       "group": "Input",
       "subgroup": "Advanced"
@@ -784,6 +845,11 @@
       "default": 0,
       "label": "Outline Width",
       "description": "Absolute value is line width to draw boxes (fill iff >=0).",
+      "uiType": "Step",
+      "min": -10,
+      "max": 100,
+      "divisor": 1,
+      "step": 1,
       "tier": "expert",
       "group": "Customization",
       "subgroup": "Appearance"
@@ -795,6 +861,11 @@
       "default": 0,
       "label": "Text Padding",
       "description": "Pixel distance to inset the letters into the boxes.",
+      "uiType": "Step",
+      "min": 0,
+      "max": 50,
+      "divisor": 1,
+      "step": 1,
       "tier": "expert",
       "group": "Customization",
       "subgroup": "Appearance"
@@ -806,6 +877,11 @@
       "default": 50,
       "label": "Min Node Size",
       "description": "Minimum size of node (in dasher coords) to draw.",
+      "uiType": "Slider",
+      "min": 10,
+      "max": 500,
+      "divisor": 1,
+      "step": 5,
       "tier": "expert",
       "group": "Customization",
       "subgroup": "Appearance"
@@ -817,6 +893,11 @@
       "default": 5,
       "label": "Nonlinear X-Axis",
       "description": "Nonlinear compression of X-axis (0 = none, higher = more extreme).",
+      "uiType": "Slider",
+      "min": 0,
+      "max": 50,
+      "divisor": 1,
+      "step": 1,
       "tier": "expert",
       "group": "Input",
       "subgroup": "CDefaultFilter"
@@ -828,6 +909,11 @@
       "default": 100,
       "label": "Auto-Speed Sensitivity",
       "description": "Sensitivity of automatic speed control (percent).",
+      "uiType": "Slider",
+      "min": 0,
+      "max": 200,
+      "divisor": 1,
+      "step": 5,
       "tier": "advanced",
       "group": "Input",
       "subgroup": "CDefaultFilter"
@@ -839,6 +925,11 @@
       "default": 20320,
       "label": "Socket Port",
       "description": "UDP/TCP socket to use for network socket input.",
+      "uiType": "Step",
+      "min": 1024,
+      "max": 65535,
+      "divisor": 1,
+      "step": 1,
       "tier": "expert",
       "group": "Input",
       "subgroup": "CSocket"
@@ -850,6 +941,11 @@
       "default": 0,
       "label": "Socket X Min",
       "description": "Bottom of range of X values expected from network input.",
+      "uiType": "Step",
+      "min": -10000,
+      "max": 10000,
+      "divisor": 1,
+      "step": 100,
       "tier": "expert",
       "group": "Input",
       "subgroup": "CSocket"
@@ -861,6 +957,11 @@
       "default": 1000,
       "label": "Socket X Max",
       "description": "Top of range of X values expected from network input.",
+      "uiType": "Step",
+      "min": -10000,
+      "max": 10000,
+      "divisor": 1,
+      "step": 100,
       "tier": "expert",
       "group": "Input",
       "subgroup": "CSocket"
@@ -872,6 +973,11 @@
       "default": 0,
       "label": "Socket Y Min",
       "description": "Bottom of range of Y values expected from network input.",
+      "uiType": "Step",
+      "min": -10000,
+      "max": 10000,
+      "divisor": 1,
+      "step": 100,
       "tier": "expert",
       "group": "Input",
       "subgroup": "CSocket"
@@ -883,6 +989,11 @@
       "default": 1000,
       "label": "Socket Y Max",
       "description": "Top of range of Y values expected from network input.",
+      "uiType": "Step",
+      "min": -10000,
+      "max": 10000,
+      "divisor": 1,
+      "step": 100,
       "tier": "expert",
       "group": "Input",
       "subgroup": "CSocket"
@@ -894,6 +1005,11 @@
       "default": 10,
       "label": "Circle Start Size",
       "description": "Percentage of nominal vertical range to use for radius of start circle.",
+      "uiType": "Slider",
+      "min": 1,
+      "max": 50,
+      "divisor": 1,
+      "step": 1,
       "tier": "advanced",
       "group": "Input",
       "subgroup": "CDefaultFilter"
@@ -1229,6 +1345,11 @@
       },
       "label": "Margin Width",
       "description": "Width of RHS margin (in Dasher co-ords).",
+      "uiType": "Slider",
+      "min": 0,
+      "max": 2048,
+      "divisor": 1,
+      "step": 10,
       "tier": "expert",
       "group": "Customization",
       "subgroup": "Appearance"
