@@ -678,8 +678,6 @@ void CDasherViewSquare::DisjointRender(CDasherNode* pRender, myint y1, myint y2,
 				{
 					OnGameNodeDraw.Broadcast(pChild, newy1, newy2);
 				}
-					OnGameNodeDraw.Broadcast(pChild, newy1, newy2);
-				}
 				//switch to "render just one child" mode if all others are off the screen,
 				//and if this _won't_ cause us to avoid rendering a game node...
 				if (newy1 < visibleRegion.minY && newy2 > visibleRegion.maxY && (!pRender->GetFlag(CDasherNode::NF_GAME) || pChild->GetFlag(CDasherNode::NF_GAME)))
