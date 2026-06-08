@@ -207,6 +207,17 @@ DASHER_API int dasher_get_alphabet_count(dasher_ctx* ctx);
 // Get the name of alphabet at index (0..count-1). Valid until next API call.
 DASHER_API const char* dasher_get_alphabet_name(dasher_ctx* ctx, int index);
 
+// ── Game Mode ──────────────────────────────────────────────────────────────
+
+// Enter game mode. Returns 0 on success, -1 if no game text available.
+DASHER_API int dasher_enter_game_mode(dasher_ctx* ctx);
+
+// Leave game mode.
+DASHER_API void dasher_leave_game_mode(dasher_ctx* ctx);
+
+// Check if game mode is currently active. Returns 1 if on, 0 if off.
+DASHER_API int dasher_game_mode_active(dasher_ctx* ctx);
+
 // ── Persistence ───────────────────────────────────────────────────────────
 
 // Save current settings to disk.

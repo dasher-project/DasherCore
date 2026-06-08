@@ -677,6 +677,25 @@ DASHER_API const char* dasher_get_alphabet_name(dasher_ctx* ctx, int index) {
     return s_stringValues[index].c_str();
 }
 
+// ── Game Mode ───────────────────────────────────────────────────────────────
+
+DASHER_API int dasher_enter_game_mode(dasher_ctx* ctx) {
+    if (!ctx || !ctx->intf) return -1;
+    if (ctx->intf->GetGameModule()) return 0;
+    ctx->intf->EnterGameMode();
+    return ctx->intf->GetGameModule() ? 0 : -1;
+}
+
+DASHER_API void dasher_leave_game_mode(dasher_ctx* ctx) {
+    if (!ctx || !ctx->intf) return;
+    if (ctx->intf->GetGameModule()) ctx->intf->LeaveGameMode();
+}
+
+DASHER_API int dasher_game_mode_active(dasher_ctx* ctx) {
+    if (!ctx || !ctx->intf) return 0;
+    return ctx->intf->GetGameModule() ? 1 : 0;
+}
+
 // ── Persistence ───────────────────────────────────────────────────────────
 
 DASHER_API void dasher_save_settings(dasher_ctx* ctx) {
