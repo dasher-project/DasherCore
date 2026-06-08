@@ -42,6 +42,11 @@ void CScreenGameModule::ChunkGenerated() {
   delete m_pLabTarget; m_pLabTarget = NULL;
   delete m_pLabWrong; m_pLabWrong = NULL;
   m_iFirstSym = m_iLastSym = 0;
+  m_strEntered.clear();
+  m_strTarget.clear();
+  for (size_t i = 0; i < targetSyms().size(); i++) {
+    m_strTarget += m_pAlph->GetText(targetSyms()[i]);
+  }
 }
 
 void CScreenGameModule::DrawText(CDasherView *pView) {
