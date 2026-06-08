@@ -218,6 +218,22 @@ DASHER_API void dasher_leave_game_mode(dasher_ctx* ctx);
 // Check if game mode is currently active. Returns 1 if on, 0 if off.
 DASHER_API int dasher_game_mode_active(dasher_ctx* ctx);
 
+// Get the game mode target text (the sentence the user should type).
+// Returned pointer is valid until the next API call. Returns "" if not in game mode.
+DASHER_API const char* dasher_game_get_target_text(dasher_ctx* ctx);
+
+// Get the number of correct symbols typed so far in the current game chunk.
+// Returns -1 if not in game mode.
+DASHER_API int dasher_game_get_correct_count(dasher_ctx* ctx);
+
+// Get the total number of symbols in the current target text.
+// Returns -1 if not in game mode.
+DASHER_API int dasher_game_get_target_length(dasher_ctx* ctx);
+
+// Get any wrong text entered since the last correct symbol.
+// Returned pointer is valid until the next API call. Returns "" if not in game mode.
+DASHER_API const char* dasher_game_get_wrong_text(dasher_ctx* ctx);
+
 // ── Persistence ───────────────────────────────────────────────────────────
 
 // Save current settings to disk.

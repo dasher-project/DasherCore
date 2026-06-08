@@ -66,6 +66,11 @@ class CGameModule {
   /// displayed to the user each time (s)he enters Game Mode.
   bool GetSettings(SModuleSettings **sets, int *count);
 
+  const std::vector<symbol> &GetTargetSymbols() const {return m_vTargetSymbols;}
+  int GetLastCorrectSym() const {return m_iLastSym;}
+  const std::string &GetWrongText() const {return m_strWrong;}
+  const CAlphInfo *GetAlphabet() const {return m_pAlph;}
+
 protected:
   ///Called after each successful call to GenerateChunk. Subclasses may override
   /// to do any necessary extra processing given the new chunk. Default does nothing.

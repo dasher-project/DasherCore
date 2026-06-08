@@ -704,6 +704,47 @@ DASHER_API int dasher_game_mode_active(dasher_ctx* ctx) {
     return ctx->intf->GetGameModule() ? 1 : 0;
 }
 
+static std::string s_gameTextBuf;
+
+static std::string symbolsToText(const Dasher::CAlphInfo *alph, const std::vector<Dasher::symbol> &syms, int count) {
+    std::string result;
+    for (int i = 0; i < count && i < (int)syms.size(); i++) {
+        result += alph->GetText(syms[i]);
+    }
+    return result;
+}
+
+DASHER_API const char* dasher_game_get_target_text(dasher_ctx* ctx) {
+    if (!ctx || !ctx->intf) return "";
+    auto *gm = ctx->intf->GetGameModule();
+    if (!gm) return "";
+    const auto &syms = gm->GetTargetSymbols();
+    s_gameTextBuf = symbolsToText(gm->GetAlphabet(), syms, (int)syms.size());
+    return s_gameTextBuf.c_str();
+}
+
+DASHER_API int dasher_game_get_correct_count(dasher_ctx* ctx) {
+    if (!ctx || !ctx->intf) return -1;
+    auto *gm = ctx->intf->GetGameModule();
+    if (!gm) return -1;
+    return gm->GetLastCorrectSym() + 1;
+}
+
+DASHER_API int dasher_game_get_target_length(dasher_ctx* ctx) {
+    if (!ctx || !ctx->intf) return -1;
+    auto *gm = ctx->intf->GetGameModule();
+    if (!gm) return -1;
+    return (int)gm->GetTargetSymbols().size();
+}
+
+DASHER_API const char* dasher_game_get_wrong_text(dasher_ctx* ctx) {
+    if (!ctx || !ctx->intf) return "";
+    auto *gm = ctx->intf->GetGameModule();
+    if (!gm) return "";
+    s_gameTextBuf = gm->GetWrongText();
+    return s_gameTextBuf.c_str();
+}
+
 // ── Persistence ───────────────────────────────────────────────────────────
 
 DASHER_API void dasher_save_settings(dasher_ctx* ctx) {
