@@ -676,6 +676,12 @@ void CDasherViewSquare::DisjointRender(CDasherNode* pRender, myint y1, myint y2,
 
 				if (pChild->GetFlag(CDasherNode::NF_GAME))
 				{
+					static int gameBroadcasts = 0;
+					if (gameBroadcasts < 5) {
+						fprintf(stderr, "[Dasher game] Broadcasting OnGameNodeDraw for child offset=%d y1=%lld y2=%lld listeners=%zu\n",
+							pChild->offset(), (long long)newy1, (long long)newy2, OnGameNodeDraw.DebugListenerCount());
+						gameBroadcasts++;
+					}
 					OnGameNodeDraw.Broadcast(pChild, newy1, newy2);
 				}
 				//switch to "render just one child" mode if all others are off the screen,

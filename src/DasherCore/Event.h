@@ -58,6 +58,8 @@ public:
 
     void Clear(){Listeners.clear();}
 
+    size_t DebugListenerCount() const {return Listeners.size();}
+
     void Broadcast(Args... i)
     {
         for(auto& [key, value] : Listeners)
