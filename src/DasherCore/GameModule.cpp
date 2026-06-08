@@ -95,12 +95,6 @@ void CGameModule::HandleEditEvent(CEditEvent::EditEventType type, const std::str
 
 //Node populated...
 void CGameModule::HandleNodePopulated(CDasherNode *pNode) {
-  static int count = 0;
-  if (count < 10) {
-    fprintf(stderr, "[Dasher game] HandleNodePopulated offset=%d NF_GAME=%d targetSize=%zu\n",
-        pNode->offset(), pNode->GetFlag(CDasherNode::NF_GAME) ? 1 : 0, m_vTargetSymbols.size());
-    count++;
-  }
   if (pNode->GetFlag(CDasherNode::NF_GAME) //if on game path, look for next/child node on path...
       && pNode->offset()+1 < m_vTargetSymbols.size())
     pNode->GameSearchChildren(m_vTargetSymbols[pNode->offset()+1]);
@@ -112,8 +106,6 @@ void CGameModule::HandleGameNodeDraw(CDasherNode*, myint y1, myint y2) {
   // we want the coordinates of the smallest (innermost) one about which we are told
   if (y1 > m_y1) m_y1 = y1;
   if (y2 < m_y2) m_y2 = y2;
-  fprintf(stderr, "[Dasher game] HandleGameNodeDraw y1=%lld y2=%lld => m_y1=%lld m_y2=%lld\n",
-      (long long)y1, (long long)y2, (long long)m_y1, (long long)m_y2);
 }
 
 void CGameModule::HandleViewChange(CDasherView *pView) {
@@ -157,12 +149,6 @@ void CGameModule::DecorateView(unsigned long lTime, CDasherView *pView, CDasherM
     m_dSentenceStartNats = pModel->GetNats();
   
   const myint iNewTarget((m_y1+m_y2)/2);
-  static int frameCount = 0;
-  if (++frameCount <= 5) {
-    fprintf(stderr, "[Dasher game] DecorateView frame %d: m_y1=%lld m_y2=%lld iNewTarget=%lld ORIGIN_Y=%lld HELP_DIST=%lld\n",
-        frameCount, (long long)m_y1, (long long)m_y2, (long long)iNewTarget,
-        (long long)CDasherModel::ORIGIN_Y, (long long)m_pSettingsStore->GetLongParameter(LP_GAME_HELP_DIST));
-  }
   m_vTargetY.push_back(iNewTarget);
   bool bDrawHelper;
   
