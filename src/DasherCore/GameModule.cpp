@@ -95,6 +95,12 @@ void CGameModule::HandleEditEvent(CEditEvent::EditEventType type, const std::str
 
 //Node populated...
 void CGameModule::HandleNodePopulated(CDasherNode *pNode) {
+  static int count = 0;
+  if (count < 10) {
+    fprintf(stderr, "[Dasher game] HandleNodePopulated offset=%d NF_GAME=%d targetSize=%zu\n",
+        pNode->offset(), pNode->GetFlag(CDasherNode::NF_GAME) ? 1 : 0, m_vTargetSymbols.size());
+    count++;
+  }
   if (pNode->GetFlag(CDasherNode::NF_GAME) //if on game path, look for next/child node on path...
       && pNode->offset()+1 < m_vTargetSymbols.size())
     pNode->GameSearchChildren(m_vTargetSymbols[pNode->offset()+1]);
