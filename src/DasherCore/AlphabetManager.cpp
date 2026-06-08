@@ -233,6 +233,16 @@ CWordGeneratorBase *CAlphabetManager::GetGameWords() {
     /// setting (this message displayed only if the user has provided a value)
     m_pInterface->FormatMessage("Note: GameTextFile setting specifies game sentences file '%s' but this does not exist", gtf.c_str());
   }
+  std::string trainFile = m_pAlphabet->GetTrainingFile();
+  if (!trainFile.empty()) {
+    std::string gamemodeFile = trainFile;
+    size_t pos = gamemodeFile.find("training_");
+    if (pos != std::string::npos) {
+      gamemodeFile.replace(pos, 9, "gamemode_");
+    }
+    Dasher::FileUtils::ScanFiles(pGen, gamemodeFile);
+  }
+  if (pGen->HasLines()) return pGen;
   pGen->setAcceptUser(false);
   Dasher::FileUtils::ScanFiles(pGen, m_pAlphabet->GetTrainingFile());
   if (pGen->HasLines()) return pGen;
