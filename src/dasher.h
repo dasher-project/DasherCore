@@ -93,6 +93,7 @@ DASHER_API void dasher_frame(dasher_ctx* ctx, int64_t time_ms,
 // Returned pointer is valid until the next API call on this context.
 DASHER_API const char* dasher_get_output_text(dasher_ctx* ctx);
 DASHER_API void dasher_reset_output_text(dasher_ctx* ctx);
+DASHER_API void dasher_reset(dasher_ctx* ctx);
 
 // Get/set current alphabet (e.g. "English with limited punctuation").
 // Returned pointer is valid until the next API call on this context.

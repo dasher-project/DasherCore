@@ -395,6 +395,12 @@ DASHER_API void dasher_reset_output_text(dasher_ctx* ctx) {
     ctx->editBuffer.clear();
 }
 
+DASHER_API void dasher_reset(dasher_ctx* ctx) {
+    if (!ctx || !ctx->intf) return;
+    ctx->editBuffer.clear();
+    ctx->intf->SetOffset(0, true);
+}
+
 DASHER_API const char* dasher_get_alphabet_id(dasher_ctx* ctx) {
     if (!ctx || !ctx->intf) return "";
     ctx->tlString = ctx->intf->GetStringParameter(Dasher::SP_ALPHABET_ID);
