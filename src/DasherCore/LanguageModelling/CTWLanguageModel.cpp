@@ -401,7 +401,7 @@ void CCTWLanguageModel::GetProbs(Context context, std::vector<unsigned int> &Pro
 	delete [] Index;
 
 	// Copy the intervals associated with the actual symbols to the vector Probs.
-	Probs.assign((Interval.end()-(1ULL<NrPhases)), (Interval.end()-(1ULL<<NrPhases)+iNumSymbols));
+	Probs.assign((Interval.end()-(1ULL<<NrPhases)), (Interval.end()-(1ULL<<NrPhases)+iNumSymbols));
 	pLeft +=Probs[0]; //symbol 0 is a special dummy symbol, should get prob. 0
 	Probs[0] = 0;
 
