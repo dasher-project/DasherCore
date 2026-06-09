@@ -103,6 +103,14 @@ DASHER_API void dasher_set_alphabet_id(dasher_ctx* ctx, const char* alphabet_id)
 DASHER_API int dasher_get_language_model_id(dasher_ctx* ctx);
 DASHER_API void dasher_set_language_model_id(dasher_ctx* ctx, int model_id);
 
+// Get available language models (from LMRegistry).
+// Models are registered at startup; external LMs (KenLM, ONNX, etc.)
+// can be added by calling registerLM before dasher_create.
+DASHER_API int dasher_get_language_model_count(void);
+DASHER_API int dasher_get_language_model_id_at(int index);
+DASHER_API const char* dasher_get_language_model_name(int id);
+DASHER_API const char* dasher_get_language_model_description(int id);
+
 // Get/set speed as a percentage (100 = default, range 20-400).
 DASHER_API int dasher_get_speed_percent(dasher_ctx* ctx);
 DASHER_API void dasher_set_speed_percent(dasher_ctx* ctx, int percent);

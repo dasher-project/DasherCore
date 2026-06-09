@@ -11,6 +11,7 @@
 #include "DasherCore/ColorPalette.h"
 #include "DasherCore/GameModule.h"
 #include "DasherCore/Alphabet/AlphInfo.h"
+#include "DasherCore/LanguageModelling/LMRegistry.h"
 
 #include <algorithm>
 #include <chrono>
@@ -416,6 +417,32 @@ DASHER_API int dasher_get_language_model_id(dasher_ctx* ctx) {
 DASHER_API void dasher_set_language_model_id(dasher_ctx* ctx, int model_id) {
     if (!ctx || !ctx->intf) return;
     ctx->intf->SetLongParameter(Dasher::LP_LANGUAGE_MODEL_ID, static_cast<long>(model_id));
+}
+
+DASHER_API int dasher_get_language_model_count(void) {
+    return Dasher::LMRegistry::instance().count();
+}
+
+DASHER_API int dasher_get_language_model_id_at(int index) {
+    const auto& all = Dasher::LMRegistry::instance().all();
+    if (index < 0 || index >= static_cast<int>(all.size())) return -1;
+    return all[index].id;
+}
+
+DASHER_API const char* dasher_get_language_model_name(int id) {
+    static std::string s_buf;
+    auto* desc = Dasher::LMRegistry::instance().get(id);
+    if (!desc) return "Unknown";
+    s_buf = desc->name;
+    return s_buf.c_str();
+}
+
+DASHER_API const char* dasher_get_language_model_description(int id) {
+    static std::string s_buf;
+    auto* desc = Dasher::LMRegistry::instance().get(id);
+    if (!desc) return "";
+    s_buf = desc->description;
+    return s_buf.c_str();
 }
 
 DASHER_API int dasher_get_speed_percent(dasher_ctx* ctx) {

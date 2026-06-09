@@ -29,6 +29,7 @@
 #include "LanguageModelling/WordLanguageModel.h"
 #include "LanguageModelling/MixtureLanguageModel.h"
 #include "LanguageModelling/CTWLanguageModel.h"
+#include "LanguageModelling/LMRegistry.h"
 #include "FileWordGenerator.h"
 
 #include <vector>
@@ -120,24 +121,10 @@ void CAlphabetManager::InitMap() {
 }
 
 void CAlphabetManager::CreateLanguageModel() {
-  // FIXME - return to using enum here
-  switch (m_pSettingsStore->GetLongParameter(LP_LANGUAGE_MODEL_ID)) {
-    default:
-      // If there is a bogus value for the language model ID, we'll default
-      // to our trusty old PPM language model.
-    case 0:
-      m_pLanguageModel = new CPPMLanguageModel(m_pSettingsStore, m_pAlphabet->iEnd-1);
-      break;
-    case 2:
-      m_pLanguageModel = new CWordLanguageModel(m_pSettingsStore, m_pAlphabet, &m_map);
-      break;
-    case 3:
-      m_pLanguageModel = new CMixtureLanguageModel(m_pSettingsStore, m_pAlphabet, &m_map);
-      break;
-    case 4:
-      m_pLanguageModel = new CCTWLanguageModel(m_pAlphabet->iEnd-1);
-      break;
-  }
+  const int lmId = m_pSettingsStore->GetLongParameter(LP_LANGUAGE_MODEL_ID);
+  CLanguageModel* lm = LMRegistry::instance().create(
+    lmId, m_pSettingsStore, m_pAlphabet, &m_map, m_pAlphabet->iEnd - 1);
+  m_pLanguageModel = lm ? lm : new CPPMLanguageModel(m_pSettingsStore, m_pAlphabet->iEnd - 1);
 }
 
 CTrainer *CAlphabetManager::GetTrainer() {
