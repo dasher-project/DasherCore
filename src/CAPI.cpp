@@ -445,6 +445,27 @@ DASHER_API const char* dasher_get_language_model_description(int id) {
     return s_buf.c_str();
 }
 
+DASHER_API int dasher_get_language_model_param_count(int id) {
+    auto* desc = Dasher::LMRegistry::instance().get(id);
+    if (!desc) return 0;
+    return static_cast<int>(desc->paramKeys.size());
+}
+
+DASHER_API int dasher_get_language_model_param_key(int id, int index) {
+    auto* desc = Dasher::LMRegistry::instance().get(id);
+    if (!desc || index < 0 || index >= static_cast<int>(desc->paramKeys.size())) return -1;
+    return desc->paramKeys[index];
+}
+
+DASHER_API int dasher_find_parameter_key(const char* enum_key_name) {
+    if (!enum_key_name) return -1;
+    std::string target(enum_key_name);
+    for (const auto& [key, val] : Dasher::Settings::parameter_defaults) {
+        if (val.enumKeyName == target) return static_cast<int>(key);
+    }
+    return -1;
+}
+
 DASHER_API int dasher_get_speed_percent(dasher_ctx* ctx) {
     if (!ctx || !ctx->intf) return 100;
     const double base = 160.0;

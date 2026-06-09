@@ -30,6 +30,7 @@ namespace Dasher {
     std::string description;
     bool needsAlphabetMap;
     bool needsAlphInfo;
+    std::vector<int> paramKeys;
 
     using FactoryFn = std::function<CLanguageModel*(
       CSettingsStore*, const CAlphInfo*, const CAlphabetMap*, int)>;

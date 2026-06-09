@@ -12,6 +12,7 @@
 #include "DictLanguageModel.h"
 #include "../SettingsStore.h"
 #include "../Alphabet/AlphInfo.h"
+#include "../Parameters.h"
 
 using namespace Dasher;
 
@@ -69,21 +70,25 @@ struct StaticInit {
     auto& reg = LMRegistry::instance();
 
     reg.registerLM({0, "PPM", "Prediction by Partial Match", false, false,
+      {LP_LM_ALPHA, LP_LM_BETA, LP_LM_MAX_ORDER, LP_LM_EXCLUSION, LP_LM_UPDATE_EXCLUSION},
       [](CSettingsStore* s, const CAlphInfo*, const CAlphabetMap*, int n) -> CLanguageModel* {
         return new CPPMLanguageModel(s, n);
       }});
 
     reg.registerLM({2, "Word", "Word-level language model", true, true,
+      {LP_LM_WORD_ALPHA, LP_LM_MAX_ORDER},
       [](CSettingsStore* s, const CAlphInfo* a, const CAlphabetMap* m, int) -> CLanguageModel* {
         return new CWordLanguageModel(s, a, m);
       }});
 
     reg.registerLM({3, "Mixture", "PPM + Dictionary mixture", true, true,
+      {LP_LM_ALPHA, LP_LM_BETA, LP_LM_MAX_ORDER, LP_LM_MIXTURE, LP_LM_WORD_ALPHA, LP_LM_EXCLUSION, LP_LM_UPDATE_EXCLUSION},
       [](CSettingsStore* s, const CAlphInfo* a, const CAlphabetMap* m, int) -> CLanguageModel* {
         return new CMixtureLanguageModel(s, a, m);
       }});
 
     reg.registerLM({4, "CTW", "Context Tree Weighting", false, false,
+      {LP_LM_MAX_ORDER},
       [](CSettingsStore*, const CAlphInfo*, const CAlphabetMap*, int n) -> CLanguageModel* {
         return new CCTWLanguageModel(n);
       }});

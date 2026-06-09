@@ -111,6 +111,15 @@ DASHER_API int dasher_get_language_model_id_at(int index);
 DASHER_API const char* dasher_get_language_model_name(int id);
 DASHER_API const char* dasher_get_language_model_description(int id);
 
+// Get the parameter keys relevant to a specific language model.
+// Used by frontends to show/hide LM-specific settings (alpha, beta, etc).
+DASHER_API int dasher_get_language_model_param_count(int id);
+DASHER_API int dasher_get_language_model_param_key(int id, int index);
+
+// Look up a parameter key by its enum name (e.g. "LP_LANGUAGE_MODEL_ID").
+// Returns -1 if not found.
+DASHER_API int dasher_find_parameter_key(const char* enum_key_name);
+
 // Get/set speed as a percentage (100 = default, range 20-400).
 DASHER_API int dasher_get_speed_percent(dasher_ctx* ctx);
 DASHER_API void dasher_set_speed_percent(dasher_ctx* ctx, int percent);
