@@ -217,7 +217,8 @@ struct dasher_ctx {
         void Message(const std::string &strText, bool bInterrupt) override {
             if (m_owner->messageCb && !strText.empty())
                 m_owner->messageCb(bInterrupt ? 1 : 0, strText.c_str(), m_owner->messageCbUserData);
-            CDashIntfScreenMsgs::Message(strText, bInterrupt);
+            if (!m_owner->messageCb)
+                CDashIntfScreenMsgs::Message(strText, bInterrupt);
         }
 
         unsigned int ctrlMove(bool, Dasher::EditDistance) override {
