@@ -25,6 +25,7 @@ struct LMDescriptor {
     std::string description;   // Human-readable description
     bool needsAlphabetMap;     // True if factory needs CAlphabetMap*
     bool needsAlphInfo;        // True if factory needs CAlphInfo*
+    std::vector<int> paramKeys; // LP_*/BP_* keys relevant to this LM
     FactoryFn factory;         // Lambda: (settings, alphInfo, alphMap, numSyms) -> CLanguageModel*
 };
 ```
