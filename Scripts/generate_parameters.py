@@ -106,7 +106,13 @@ def fmt_platform_value(param, platform):
     return ""
 
 
+def fmt_advanced(param):
+    tier = param.get("tier", "common")
+    return "true" if tier in ("expert", "advanced") else "false"
+
+
 def fmt_ui_type(ui_type):
+
     if ui_type and ui_type != "None":
         return f'Settings::UIControlType::{ui_type}'
     return None
@@ -123,6 +129,7 @@ def build_param_line(param, default_override=None):
     label = escape_cpp_string(param.get("label", ""))
     subgroup = param.get("subgroup", "")
     group = param.get("group", "")
+    advanced = fmt_advanced(param)
 
     has_enum_values = "enumValues" in param
     has_range = all(k in param for k in ("min", "max"))
@@ -137,7 +144,7 @@ def build_param_line(param, default_override=None):
         return (
             f'\t\t{{{key:28s}, Parameter_Value{{"{storage}", {ptype_cpp}, '
             f'Persistence::{persistence}, {default_val}, "{desc}", "{label}", '
-            f'{ui_str}, {{{pairs}}}, false, "{key}", "{subgroup}", "{group}"}}}},'
+            f'{ui_str}, {{{pairs}}}, {advanced}, "{key}", "{subgroup}", "{group}"}}}},'
         )
 
     if has_range:
@@ -146,7 +153,7 @@ def build_param_line(param, default_override=None):
         return (
             f'\t\t{{{key:28s}, Parameter_Value{{"{storage}", {ptype_cpp}, '
             f'Persistence::{persistence}, {default_val}, "{desc}", "{label}", '
-            f'{ui_str}, {param["min"]}, {param["max"]}, {param.get("divisor", 1)}, {param.get("step", 1)}, false, "{key}", "{subgroup}", "{group}"}}}},'
+            f'{ui_str}, {param["min"]}, {param["max"]}, {param.get("divisor", 1)}, {param.get("step", 1)}, {advanced}, "{key}", "{subgroup}", "{group}"}}}},'
         )
 
     ui = fmt_ui_type(param.get("uiType"))
@@ -154,13 +161,13 @@ def build_param_line(param, default_override=None):
         return (
             f'\t\t{{{key:28s}, Parameter_Value{{"{storage}", {ptype_cpp}, '
             f'Persistence::{persistence}, {default_val}, "{desc}", "{label}", '
-            f'{ui}, false, "{key}", "{subgroup}", "{group}"}}}},'
+            f'{ui}, {advanced}, "{key}", "{subgroup}", "{group}"}}}},'
         )
 
     return (
         f'\t\t{{{key:28s}, Parameter_Value{{"{storage}", {ptype_cpp}, '
         f'Persistence::{persistence}, {default_val}, "{desc}", "{label}", '
-        f'Settings::UIControlType::None, false, "{key}", "{subgroup}", "{group}"}}}},'
+        f'Settings::UIControlType::None, {advanced}, "{key}", "{subgroup}", "{group}"}}}},'
     )
 
 
