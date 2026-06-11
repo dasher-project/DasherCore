@@ -97,6 +97,7 @@ if(BUILD_CAPI)
 
     if(WIN32)
         target_compile_definitions(dasher PRIVATE DASHER_BUILDING)
+        target_compile_options(dasher PRIVATE /EHa)
     endif()
 
     set_target_properties(dasher PROPERTIES
