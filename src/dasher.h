@@ -295,6 +295,20 @@ typedef void (*dasher_message_callback)(int message_type, const char* text, void
 
 DASHER_API void dasher_set_message_callback(dasher_ctx* ctx, dasher_message_callback callback, void* user_data);
 
+// ── Speech callback ─────────────────────────────────────────────────────────
+//
+// Register a callback for DasherCore's built-in speech features.
+// When SupportsSpeech() returns true, DasherCore will call this to:
+//   - Speak on stop (BP_SPEAK_ALL_ON_STOP)
+//   - Speak words on space (BP_SPEAK_WORDS)
+//   - Alphabet TTS actions (fixedTTS, repeatTTS, contextTTS, stopTTS)
+//
+// interrupt: 1 to interrupt current speech, 0 to queue
+
+typedef void (*dasher_speak_callback)(const char* text, int interrupt, void* user_data);
+
+DASHER_API void dasher_set_speak_callback(dasher_ctx* ctx, dasher_speak_callback callback, void* user_data);
+
 // ── Localization ──────────────────────────────────────────────────────────
 
 // Set the active locale for parameter names, descriptions, and enum labels.

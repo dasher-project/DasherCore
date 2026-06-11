@@ -16,9 +16,11 @@
 #include <algorithm>
 #include <chrono>
 #include <cmath>
+#include <cstdio>
 #include <cstring>
 #include <filesystem>
 #include <fstream>
+#include <locale.h>
 #include <memory>
 #include <sstream>
 #include <string>
@@ -202,6 +204,8 @@ struct dasher_ctx {
     void *outputCbUserData = nullptr;
     dasher_message_callback messageCb = nullptr;
     void *messageCbUserData = nullptr;
+    dasher_speak_callback speakCb = nullptr;
+    void *speakCbUserData = nullptr;
 
     struct Interface : public Dasher::CDashIntfScreenMsgs {
         Interface(Dasher::CSettingsStore *s, dasher_ctx *owner)
@@ -247,6 +251,15 @@ struct dasher_ctx {
         std::string GetAllContext() override { return m_owner->editBuffer; }
         int GetAllContextLenght() override { return static_cast<int>(m_owner->editBuffer.size()); }
 
+        bool SupportsSpeech() override {
+            return m_owner->speakCb != nullptr;
+        }
+
+        void Speak(const std::string &text, bool bInterrupt) override {
+            if (m_owner->speakCb && !text.empty())
+                m_owner->speakCb(text.c_str(), bInterrupt ? 1 : 0, m_owner->speakCbUserData);
+        }
+
         dasher_ctx *m_owner;
     };
 };
@@ -268,6 +281,10 @@ DASHER_API dasher_ctx* dasher_create(const char* data_dir, const char* user_dir,
         if (out_error) *out_error = s_errorString.data();
         return nullptr;
     }
+
+#ifdef _WIN32
+    setlocale(LC_CTYPE, ".UTF8");
+#endif
 
     auto *ctx = new dasher_ctx();
     std::string dir(data_dir);
@@ -322,8 +339,14 @@ DASHER_API void dasher_set_screen_size(dasher_ctx* ctx, int width, int height) {
     }
 
     if (!ctx->realized) {
-        ctx->intf->Realize(nowMs());
+        try {
+            ctx->intf->Realize(nowMs());
+        } catch (...) {}
         ctx->realized = true;
+
+        // Force Normal Control filter for continuous mouse input
+        ctx->intf->SetStringParameter(Dasher::SP_INPUT_FILTER, "Normal Control");
+
         if (!ctx->pendingAlphabet.empty()) {
             std::string pending = ctx->pendingAlphabet;
             ctx->pendingAlphabet.clear();
@@ -522,8 +545,7 @@ DASHER_API const char* dasher_get_string_parameter(dasher_ctx* ctx, int key) {
     if (!ctx || !ctx->intf) return "";
     try {
         ctx->tlString = ctx->intf->GetStringParameter(static_cast<Dasher::Parameter>(key));
-    } catch (const std::bad_variant_access&) {
-        fprintf(stderr, "DASHER: bad_variant_access in get_string_parameter key=%d\n", key);
+    } catch (...) {
         ctx->tlString = "";
     }
     return ctx->tlString.c_str();
@@ -940,6 +962,12 @@ DASHER_API void dasher_set_message_callback(dasher_ctx* ctx, dasher_message_call
     if (!ctx) return;
     ctx->messageCb = callback;
     ctx->messageCbUserData = user_data;
+}
+
+DASHER_API void dasher_set_speak_callback(dasher_ctx* ctx, dasher_speak_callback callback, void* user_data) {
+    if (!ctx) return;
+    ctx->speakCb = callback;
+    ctx->speakCbUserData = user_data;
 }
 
 } // extern "C"
