@@ -34,6 +34,7 @@
 # Build directories
 build/
 Build/
+build_*/
 out/
 
 # Build logs

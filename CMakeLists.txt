@@ -13,6 +13,81 @@ if(${DASHER_HAVE_OWN_FILEUTILS})
 endif()
 
 ###############################
+# KenLM Language Model Support
+###############################
+
+option(DASHER_USE_KENLM "Enable KenLM n-gram language model support" OFF)
+
+if(DASHER_USE_KENLM)
+	set(KENLM_ROOT "${CMAKE_CURRENT_LIST_DIR}/Thirdparty/kenlm")
+	set(KENLM_MAX_ORDER 12 CACHE STRING "Maximum supported KenLM ngram order")
+
+	set(KENLM_DOUBLE_CONV_SRC
+		${KENLM_ROOT}/util/double-conversion/bignum.cc
+		${KENLM_ROOT}/util/double-conversion/bignum-dtoa.cc
+		${KENLM_ROOT}/util/double-conversion/cached-powers.cc
+		${KENLM_ROOT}/util/double-conversion/double-to-string.cc
+		${KENLM_ROOT}/util/double-conversion/fast-dtoa.cc
+		${KENLM_ROOT}/util/double-conversion/fixed-dtoa.cc
+		${KENLM_ROOT}/util/double-conversion/string-to-double.cc
+		${KENLM_ROOT}/util/double-conversion/strtod.cc
+	)
+
+	set(KENLM_UTIL_SRC
+		${KENLM_ROOT}/util/bit_packing.cc
+		${KENLM_ROOT}/util/ersatz_progress.cc
+		${KENLM_ROOT}/util/exception.cc
+		${KENLM_ROOT}/util/file.cc
+		${KENLM_ROOT}/util/file_piece.cc
+		${KENLM_ROOT}/util/float_to_string.cc
+		${KENLM_ROOT}/util/integer_to_string.cc
+		${KENLM_ROOT}/util/mmap.cc
+		${KENLM_ROOT}/util/murmur_hash.cc
+		${KENLM_ROOT}/util/parallel_read.cc
+		${KENLM_ROOT}/util/pool.cc
+		${KENLM_ROOT}/util/read_compressed.cc
+		${KENLM_ROOT}/util/scoped.cc
+		${KENLM_ROOT}/util/spaces.cc
+		${KENLM_ROOT}/util/string_piece.cc
+		${KENLM_ROOT}/util/usage.cc
+	)
+
+	set(KENLM_LM_SRC
+		${KENLM_ROOT}/lm/bhiksha.cc
+		${KENLM_ROOT}/lm/binary_format.cc
+		${KENLM_ROOT}/lm/config.cc
+		${KENLM_ROOT}/lm/lm_exception.cc
+		${KENLM_ROOT}/lm/model.cc
+		${KENLM_ROOT}/lm/quantize.cc
+		${KENLM_ROOT}/lm/read_arpa.cc
+		${KENLM_ROOT}/lm/search_hashed.cc
+		${KENLM_ROOT}/lm/search_trie.cc
+		${KENLM_ROOT}/lm/sizes.cc
+		${KENLM_ROOT}/lm/trie.cc
+		${KENLM_ROOT}/lm/trie_sort.cc
+		${KENLM_ROOT}/lm/value_build.cc
+		${KENLM_ROOT}/lm/virtual_interface.cc
+		${KENLM_ROOT}/lm/vocab.cc
+	)
+
+	add_library(kenlm_query STATIC
+		${KENLM_DOUBLE_CONV_SRC}
+		${KENLM_UTIL_SRC}
+		${KENLM_LM_SRC}
+	)
+
+	target_include_directories(kenlm_query PUBLIC ${KENLM_ROOT})
+	target_compile_definitions(kenlm_query PUBLIC
+		KENLM_MAX_ORDER=${KENLM_MAX_ORDER}
+		NDEBUG
+	)
+	target_compile_options(kenlm_query PRIVATE -fPIC)
+
+	find_package(Threads REQUIRED)
+	target_link_libraries(kenlm_query PUBLIC Threads::Threads)
+endif()
+
+###############################
 # Building pugixml Library
 ###############################
 
@@ -74,6 +149,12 @@ target_include_directories(DasherCore PUBLIC ${CMAKE_CURRENT_LIST_DIR}/src/)
 
 add_dependencies(DasherCore pugixml)
 target_link_libraries(DasherCore pugixml)
+
+if(DASHER_USE_KENLM)
+	target_compile_definitions(DasherCore PUBLIC DASHER_USE_KENLM)
+	target_include_directories(DasherCore PUBLIC ${KENLM_ROOT})
+	target_link_libraries(DasherCore kenlm_query)
+endif()
 
 source_group(TREE ${CMAKE_CURRENT_LIST_DIR}/src/ FILES ${HEADER_FILES} ${SOURCE_FILES})
 set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT DasherCore)

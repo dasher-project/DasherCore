@@ -38,8 +38,9 @@ struct LMDescriptor {
 | 2 | Word | `CWordLanguageModel` | Word-level model. |
 | 3 | Mixture | `CMixtureLanguageModel` | PPM + Dictionary blend. |
 | 4 | CTW | `CCTWLanguageModel` | Context Tree Weighting. |
+| 5 | KenLM | `CKenLMLanguageModel` | Pre-trained KenLM character n-gram model. Requires `DASHER_USE_KENLM` cmake option and a `.binary` model file. |
 
-Note: ID 1 is unused (historical). IDs 5+ are available for external LMs.
+Note: ID 1 is unused (historical). IDs 6+ are available for external LMs.
 
 ## Adding a New Language Model
 
@@ -107,6 +108,34 @@ dasher_set_language_model_id(ctx, 5);
 
 Registration of new LMs via C API is not yet supported — you must use the C++ API (Option B) or compile into DasherCore (Option A).
 
+## KenLM Support
+
+When built with `-DDASHER_USE_KENLM=ON -DKENLM_ROOT=/path/to/kenlm`, DasherCore includes a KenLM character-level language model (ID 5). This requires:
+
+1. **A pre-trained KenLM binary model file** placed in the Dasher data directory as `kenlm_<AlphabetID>.binary` or `kenlm.binary`
+2. The model must be trained on character-level text (characters separated by spaces)
+3. KenLM models are read-only — `LearnSymbol()` advances context but does not update the model
+
+If no model file is found for the current alphabet, the registry returns `nullptr` and Dasher falls back to PPM.
+
+### Training a Model
+
+```bash
+# Prepare character-level training text (space-separated characters, one sentence per line)
+python3 -c "
+import json
+with open('corpus.json') as f:
+    data = json.load(f)
+for d in data:
+    for t in d.get('turns', []):
+        print(' '.join(t['turn']))
+" > train_chars.txt
+
+# Train with lmplz (from KenLM build)
+lmplz -o 6 < train_chars.txt > model.arpa
+build_binary model.arpa kenlm.binary
+```
+
 ## C API Reference
 
 | Function | Description |
@@ -135,13 +164,14 @@ for i in 0..<count {
 
 ## File-based LMs
 
-Some LMs (like KenLM) load from a binary model file. The recommended pattern is:
+KenLM (ID 5) loads from a binary model file. The registry factory:
 
-1. The factory function checks for a model file (e.g. `kenlm_<AlphabetID>.binary`)
-2. If no file found, fall back to PPM (ID 0)
-3. The frontend provides a file picker for importing model files
+1. Searches for `kenlm_<AlphabetID>.binary` in the data directory
+2. Falls back to `kenlm.binary`
+3. Returns `nullptr` (triggers PPM fallback) if no file found
+4. Validates the model loaded successfully via `IsLoaded()`
 
-This is what Dasher-Mobile does — see `third_party/DasherCore/src/DasherCore/AlphabetManager.cpp` in the Dasher-Mobile repo.
+The frontend can provide a file picker for importing model files.
 
 ## Special Cases
 

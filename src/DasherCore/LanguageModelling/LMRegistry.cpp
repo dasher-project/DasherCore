@@ -10,6 +10,12 @@
 #include "MixtureLanguageModel.h"
 #include "CTWLanguageModel.h"
 #include "DictLanguageModel.h"
+#ifdef DASHER_USE_KENLM
+#include "KenLMLanguageModel.h"
+#include "../Alphabet/AlphInfo.h"
+#include "../FileUtils.h"
+#include <fstream>
+#endif
 #include "../SettingsStore.h"
 #include "../Alphabet/AlphInfo.h"
 #include "../Parameters.h"
@@ -92,6 +98,35 @@ struct StaticInit {
       [](CSettingsStore*, const CAlphInfo*, const CAlphabetMap*, int n) -> CLanguageModel* {
         return new CCTWLanguageModel(n);
       }});
+
+#ifdef DASHER_USE_KENLM
+    reg.registerLM({5, "KenLM", "KenLM character n-gram model (pre-trained)", true, true,
+      {LP_UNIFORM},
+      [](CSettingsStore*, const CAlphInfo* a, const CAlphabetMap*, int n) -> CLanguageModel* {
+        std::string modelPath;
+        const std::string baseName = "kenlm_" + a->GetID();
+        const std::string genericName = "kenlm";
+        const char *exts[] = {".binary", ".bin"};
+        bool found = false;
+        for (const auto &base : {baseName, genericName}) {
+          for (const auto &ext : exts) {
+            std::string candidate = Dasher::FileUtils::GetFullFilenamePath(base + ext);
+            std::ifstream probe(candidate, std::ios::binary);
+            if (probe.is_open()) {
+              modelPath = candidate;
+              found = true;
+              break;
+            }
+          }
+          if (found) break;
+        }
+        if (!found) return nullptr;
+        auto *klm = new CKenLMLanguageModel(a, modelPath, n);
+        if (klm->IsLoaded()) return klm;
+        delete klm;
+        return nullptr;
+      }});
+#endif
   }
 };
 

@@ -398,7 +398,8 @@
         {"label": "PPM", "cppExpr": "0"},
         {"label": "Word", "cppExpr": "2"},
         {"label": "Mixture", "cppExpr": "3"},
-        {"label": "CTW", "cppExpr": "4"}
+        {"label": "CTW", "cppExpr": "4"},
+        {"label": "KenLM", "cppExpr": "5"}
       ]
     },
     {
