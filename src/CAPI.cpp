@@ -11,6 +11,10 @@
 #include "DasherCore/ColorPalette.h"
 #include "DasherCore/GameModule.h"
 #include "DasherCore/Alphabet/AlphInfo.h"
+#include "DasherCore/Alphabet/AlphIO.h"
+#include "DasherCore/DasherModel.h"
+#include "DasherCore/DasherNode.h"
+#include "DasherCore/NodeCreationManager.h"
 #include "DasherCore/LanguageModelling/LMRegistry.h"
 
 #include <algorithm>
@@ -39,7 +43,7 @@ static int clamp_int(int v, int lo, int hi) {
     return v;
 }
 
-static int32_t colorToARGB(const Dasher::ColorPalette::Color &c) {
+static int32_t colorToARGB(const Dasher::ColorPalette::Color& c) {
     int a = c.Alpha, r = c.Red, g = c.Green, b = c.Blue;
 
     if (a >= 0 && a <= 1 && r >= 0 && r <= 1 && g >= 0 && g <= 1 && b >= 0 && b <= 1) {
@@ -60,7 +64,7 @@ static int32_t colorToARGB(const Dasher::ColorPalette::Color &c) {
 // ── Command-buffer screen ──────────────────────────────────────────────────
 
 class CommandScreen final : public Dasher::CDasherScreen {
-public:
+  public:
     CommandScreen(int width, int height)
         : CDasherScreen(static_cast<Dasher::screenint>(width), static_cast<Dasher::screenint>(height)) {}
 
@@ -81,59 +85,64 @@ public:
             m_stringPtrs[i] = m_strings[i].data();
     }
 
-    const int32_t *GetCommands() const { return m_commands.data(); }
+    const int32_t* GetCommands() const { return m_commands.data(); }
     int GetCommandCount() const { return static_cast<int>(m_commands.size()); }
-    char *const *GetStringPtrs() const { return m_stringPtrs.data(); }
+    char* const* GetStringPtrs() const { return m_stringPtrs.data(); }
     int GetStringCount() const { return static_cast<int>(m_strings.size()); }
 
-    std::pair<Dasher::screenint, Dasher::screenint> TextSize(Label *label, unsigned int iFontSize) override {
+    std::pair<Dasher::screenint, Dasher::screenint> TextSize(Label* label, unsigned int iFontSize) override {
         if (!label) return std::make_pair(Dasher::screenint(0), Dasher::screenint(0));
-        return std::make_pair(
-            static_cast<Dasher::screenint>(label->m_strText.size() * iFontSize / 2),
-            static_cast<Dasher::screenint>(iFontSize));
+        return std::make_pair(static_cast<Dasher::screenint>(label->m_strText.size() * iFontSize / 2),
+                              static_cast<Dasher::screenint>(iFontSize));
     }
 
-    void DrawString(Label *label, Dasher::screenint x, Dasher::screenint y, unsigned int iFontSize, const Dasher::ColorPalette::Color &color) override {
+    void DrawString(Label* label, Dasher::screenint x, Dasher::screenint y, unsigned int iFontSize,
+                    const Dasher::ColorPalette::Color& color) override {
         if (!label || label->m_strText.empty() || iFontSize == 0) return;
         int idx = static_cast<int>(m_strings.size());
         m_strings.push_back(label->m_strText);
         push(5, x, y, static_cast<int>(iFontSize), idx, colorToARGB(color));
     }
 
-    void DrawRectangle(Dasher::screenint x1, Dasher::screenint y1, Dasher::screenint x2, Dasher::screenint y2, const Dasher::ColorPalette::Color &color, const Dasher::ColorPalette::Color &outlineColor, int iThickness) override {
+    void DrawRectangle(Dasher::screenint x1, Dasher::screenint y1, Dasher::screenint x2, Dasher::screenint y2,
+                       const Dasher::ColorPalette::Color& color, const Dasher::ColorPalette::Color& outlineColor,
+                       int iThickness) override {
         if (!color.isFullyTransparent()) push(4, x1, y1, x2, y2, colorToARGB(color));
         if (iThickness > 0 && !outlineColor.isFullyTransparent()) push(3, x1, y1, x2, y2, colorToARGB(outlineColor));
     }
 
-    void DrawCircle(Dasher::screenint cx, Dasher::screenint cy, Dasher::screenint r, const Dasher::ColorPalette::Color &fillColor, const Dasher::ColorPalette::Color &lineColor, int iLineWidth) override {
+    void DrawCircle(Dasher::screenint cx, Dasher::screenint cy, Dasher::screenint r,
+                    const Dasher::ColorPalette::Color& fillColor, const Dasher::ColorPalette::Color& lineColor,
+                    int iLineWidth) override {
         if (!fillColor.isFullyTransparent()) push(1, cx, cy, r, 1, colorToARGB(fillColor));
         if (iLineWidth > 0 && !lineColor.isFullyTransparent()) push(1, cx, cy, r, 0, colorToARGB(lineColor));
     }
 
-    void Polyline(Dasher::point *Points, int Number, int iWidth, const Dasher::ColorPalette::Color &color) override {
+    void Polyline(Dasher::point* Points, int Number, int iWidth, const Dasher::ColorPalette::Color& color) override {
         if (!Points || Number < 2 || color.isFullyTransparent()) return;
         for (int i = 1; i < Number; ++i)
-            push(2, Points[i-1].x, Points[i-1].y, Points[i].x, Points[i].y, colorToARGB(color));
+            push(2, Points[i - 1].x, Points[i - 1].y, Points[i].x, Points[i].y, colorToARGB(color));
     }
 
-    void Polygon(Dasher::point *Points, int Number, const Dasher::ColorPalette::Color &fillColor, const Dasher::ColorPalette::Color &outlineColor, int lineWidth) override {
+    void Polygon(Dasher::point* Points, int Number, const Dasher::ColorPalette::Color& fillColor,
+                 const Dasher::ColorPalette::Color& outlineColor, int lineWidth) override {
         if (!Points || Number < 2) return;
         if (!fillColor.isFullyTransparent()) {
             for (int i = 1; i < Number; ++i)
-                push(2, Points[i-1].x, Points[i-1].y, Points[i].x, Points[i].y, colorToARGB(fillColor));
-            push(2, Points[Number-1].x, Points[Number-1].y, Points[0].x, Points[0].y, colorToARGB(fillColor));
+                push(2, Points[i - 1].x, Points[i - 1].y, Points[i].x, Points[i].y, colorToARGB(fillColor));
+            push(2, Points[Number - 1].x, Points[Number - 1].y, Points[0].x, Points[0].y, colorToARGB(fillColor));
         }
         if (lineWidth > 0 && !outlineColor.isFullyTransparent()) {
             for (int i = 1; i < Number; ++i)
-                push(2, Points[i-1].x, Points[i-1].y, Points[i].x, Points[i].y, colorToARGB(outlineColor));
-            push(2, Points[Number-1].x, Points[Number-1].y, Points[0].x, Points[0].y, colorToARGB(outlineColor));
+                push(2, Points[i - 1].x, Points[i - 1].y, Points[i].x, Points[i].y, colorToARGB(outlineColor));
+            push(2, Points[Number - 1].x, Points[Number - 1].y, Points[0].x, Points[0].y, colorToARGB(outlineColor));
         }
     }
 
     void Display() override {}
     bool IsPointVisible(Dasher::screenint, Dasher::screenint) override { return true; }
 
-private:
+  private:
     void push(int op, int a, int b, int c, int d, int32_t colour) {
         m_commands.push_back(op);
         m_commands.push_back(a);
@@ -145,19 +154,22 @@ private:
 
     std::vector<int32_t> m_commands;
     std::vector<std::string> m_strings;
-    std::vector<char *> m_stringPtrs;
+    std::vector<char*> m_stringPtrs;
 };
 
 // ── Pointer input ─────────────────────────────────────────────────────────
 
 class PointerInput : public Dasher::CScreenCoordInput {
-public:
+  public:
     PointerInput() : CScreenCoordInput("Pointer Input") {}
 
     void SetBounds(int w, int h) {
         m_width = (w > 0) ? w : 1;
         m_height = (h > 0) ? h : 1;
-        if (!m_hasPos) { m_x = m_width / 2; m_y = m_height / 2; }
+        if (!m_hasPos) {
+            m_x = m_width / 2;
+            m_y = m_height / 2;
+        }
     }
 
     void SetPosition(float x, float y) {
@@ -166,13 +178,13 @@ public:
         m_y = clamp_int(lround_int(static_cast<double>(y)), 0, m_height - 1);
     }
 
-    bool GetScreenCoords(Dasher::screenint &iX, Dasher::screenint &iY, Dasher::CDasherView *) override {
+    bool GetScreenCoords(Dasher::screenint& iX, Dasher::screenint& iY, Dasher::CDasherView*) override {
         iX = static_cast<Dasher::screenint>(m_x);
         iY = static_cast<Dasher::screenint>(m_y);
         return true;
     }
 
-private:
+  private:
     int m_width = 1, m_height = 1, m_x = 0, m_y = 0;
     bool m_hasPos = false;
 };
@@ -181,8 +193,8 @@ private:
 
 static unsigned long nowMs() {
     return static_cast<unsigned long>(
-        std::chrono::duration_cast<std::chrono::milliseconds>(
-            std::chrono::steady_clock::now().time_since_epoch()).count());
+        std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now().time_since_epoch())
+            .count());
 }
 
 // ── Session context ───────────────────────────────────────────────────────
@@ -191,25 +203,25 @@ struct dasher_ctx {
     struct Interface;
     std::unique_ptr<Dasher::XmlSettingsStore> settings;
     std::unique_ptr<CommandScreen> screen;
-    PointerInput *input = nullptr;
-    Dasher::CDashIntfScreenMsgs *intf = nullptr;
+    PointerInput* input = nullptr;
+    Dasher::CDashIntfScreenMsgs* intf = nullptr;
     std::string editBuffer;
     std::string tlString;
     bool realized = false;
     bool mouseDown = false;
     std::string pendingAlphabet;
     std::string dataDir;
+    std::string userDir;
     std::string stringBuf;
     dasher_output_callback outputCb = nullptr;
-    void *outputCbUserData = nullptr;
+    void* outputCbUserData = nullptr;
     dasher_message_callback messageCb = nullptr;
-    void *messageCbUserData = nullptr;
+    void* messageCbUserData = nullptr;
     dasher_speak_callback speakCb = nullptr;
-    void *speakCbUserData = nullptr;
+    void* speakCbUserData = nullptr;
 
     struct Interface : public Dasher::CDashIntfScreenMsgs {
-        Interface(Dasher::CSettingsStore *s, dasher_ctx *owner)
-            : CDashIntfScreenMsgs(s), m_owner(owner) {}
+        Interface(Dasher::CSettingsStore* s, dasher_ctx* owner) : CDashIntfScreenMsgs(s), m_owner(owner) {}
 
         void CreateModules() override {
             CDashIntfScreenMsgs::CreateModules();
@@ -218,11 +230,10 @@ struct dasher_ctx {
             GetModuleManager()->RegisterInputDeviceModule(std::move(inp), true);
         }
 
-        void Message(const std::string &strText, bool bInterrupt) override {
+        void Message(const std::string& strText, bool bInterrupt) override {
             if (m_owner->messageCb && !strText.empty())
                 m_owner->messageCb(bInterrupt ? 1 : 0, strText.c_str(), m_owner->messageCbUserData);
-            if (!m_owner->messageCb)
-                CDashIntfScreenMsgs::Message(strText, bInterrupt);
+            if (!m_owner->messageCb) CDashIntfScreenMsgs::Message(strText, bInterrupt);
         }
 
         unsigned int ctrlMove(bool, Dasher::EditDistance) override {
@@ -231,17 +242,15 @@ struct dasher_ctx {
         unsigned int ctrlDelete(bool, Dasher::EditDistance) override {
             return static_cast<unsigned int>(m_owner->editBuffer.size());
         }
-        void editOutput(const std::string &strText, Dasher::CDasherNode *pCause) override {
+        void editOutput(const std::string& strText, Dasher::CDasherNode* pCause) override {
             m_owner->editBuffer += strText;
-            if (m_owner->outputCb && !strText.empty())
-                m_owner->outputCb(0, strText.c_str(), m_owner->outputCbUserData);
+            if (m_owner->outputCb && !strText.empty()) m_owner->outputCb(0, strText.c_str(), m_owner->outputCbUserData);
             CDashIntfScreenMsgs::editOutput(strText, pCause);
         }
-        void editDelete(const std::string &strText, Dasher::CDasherNode *pCause) override {
+        void editDelete(const std::string& strText, Dasher::CDasherNode* pCause) override {
             if (!strText.empty() && m_owner->editBuffer.size() >= strText.size())
                 m_owner->editBuffer.erase(m_owner->editBuffer.size() - strText.size());
-            if (m_owner->outputCb && !strText.empty())
-                m_owner->outputCb(1, strText.c_str(), m_owner->outputCbUserData);
+            if (m_owner->outputCb && !strText.empty()) m_owner->outputCb(1, strText.c_str(), m_owner->outputCbUserData);
             CDashIntfScreenMsgs::editDelete(strText, pCause);
         }
         std::string GetContext(unsigned int start, unsigned int len) override {
@@ -251,16 +260,14 @@ struct dasher_ctx {
         std::string GetAllContext() override { return m_owner->editBuffer; }
         int GetAllContextLenght() override { return static_cast<int>(m_owner->editBuffer.size()); }
 
-        bool SupportsSpeech() override {
-            return m_owner->speakCb != nullptr;
-        }
+        bool SupportsSpeech() override { return m_owner->speakCb != nullptr; }
 
-        void Speak(const std::string &text, bool bInterrupt) override {
+        void Speak(const std::string& text, bool bInterrupt) override {
             if (m_owner->speakCb && !text.empty())
                 m_owner->speakCb(text.c_str(), bInterrupt ? 1 : 0, m_owner->speakCbUserData);
         }
 
-        dasher_ctx *m_owner;
+        dasher_ctx* m_owner;
     };
 };
 
@@ -273,8 +280,7 @@ static std::string s_localeCode = "en";
 static std::unordered_map<std::string, std::string> s_localeStrings;
 static std::unordered_map<std::string, std::string> s_overrideStrings;
 
-DASHER_API dasher_ctx* dasher_create(const char* data_dir, const char* user_dir,
-                                      char** out_error) {
+DASHER_API dasher_ctx* dasher_create(const char* data_dir, const char* user_dir, char** out_error) {
     if (out_error) *out_error = nullptr;
     if (!data_dir) {
         s_errorString = "data_dir is NULL";
@@ -286,9 +292,10 @@ DASHER_API dasher_ctx* dasher_create(const char* data_dir, const char* user_dir,
     setlocale(LC_CTYPE, ".UTF8");
 #endif
 
-    auto *ctx = new dasher_ctx();
+    auto* ctx = new dasher_ctx();
     std::string dir(data_dir);
     ctx->dataDir = dir;
+    ctx->userDir = user_dir ? std::string(user_dir) : dir;
     std::string writableDir = user_dir ? std::string(user_dir) : dir;
 
     Dasher::FileUtils::SetDataDirectory(dir);
@@ -346,7 +353,8 @@ DASHER_API void dasher_set_screen_size(dasher_ctx* ctx, int width, int height) {
     if (!ctx->realized) {
         try {
             ctx->intf->Realize(nowMs());
-        } catch (...) {}
+        } catch (...) {
+        }
         ctx->realized = true;
 
         // Force Normal Control filter for continuous mouse input
@@ -392,9 +400,8 @@ DASHER_API void dasher_key_event(dasher_ctx* ctx, int key, int pressed) {
     }
 }
 
-DASHER_API void dasher_frame(dasher_ctx* ctx, int64_t time_ms,
-                              int** out_commands, int* out_command_count,
-                              char*** out_strings, int* out_string_count) {
+DASHER_API void dasher_frame(dasher_ctx* ctx, int64_t time_ms, int** out_commands, int* out_command_count,
+                             char*** out_strings, int* out_string_count) {
     if (out_commands) *out_commands = nullptr;
     if (out_command_count) *out_command_count = 0;
     if (out_strings) *out_strings = nullptr;
@@ -438,9 +445,15 @@ DASHER_API const char* dasher_get_alphabet_id(dasher_ctx* ctx) {
 DASHER_API void dasher_set_alphabet_id(dasher_ctx* ctx, const char* alphabet_id) {
     if (!ctx || !ctx->intf || !alphabet_id) return;
     ctx->editBuffer.clear();
-    if (!ctx->realized) { ctx->pendingAlphabet = alphabet_id; return; }
+    if (!ctx->realized) {
+        ctx->pendingAlphabet = alphabet_id;
+        return;
+    }
     if (ctx->intf->GetStringParameter(Dasher::SP_ALPHABET_ID) == alphabet_id) return;
-    if (ctx->mouseDown) { ctx->intf->KeyUp(nowMs(), Dasher::Keys::Primary_Input); ctx->mouseDown = false; }
+    if (ctx->mouseDown) {
+        ctx->intf->KeyUp(nowMs(), Dasher::Keys::Primary_Input);
+        ctx->mouseDown = false;
+    }
     ctx->intf->SetStringParameter(Dasher::SP_ALPHABET_ID, alphabet_id);
 }
 
@@ -605,7 +618,6 @@ static void ensureParamKeys() {
     std::sort(s_paramKeys.begin(), s_paramKeys.end());
 }
 
-
 DASHER_API int dasher_get_parameter_count(void) {
     return static_cast<int>(Dasher::Settings::parameter_defaults.size());
 }
@@ -749,7 +761,10 @@ DASHER_API int dasher_get_palette_preview_colors(dasher_ctx* ctx, int index, int
 
 DASHER_API void dasher_set_palette(dasher_ctx* ctx, const char* palette_name) {
     if (!ctx || !ctx->intf || !palette_name) return;
-    if (ctx->mouseDown) { ctx->intf->KeyUp(nowMs(), Dasher::Keys::Primary_Input); ctx->mouseDown = false; }
+    if (ctx->mouseDown) {
+        ctx->intf->KeyUp(nowMs(), Dasher::Keys::Primary_Input);
+        ctx->mouseDown = false;
+    }
     ctx->intf->SetStringParameter(Dasher::SP_COLOUR_ID, std::string(palette_name));
 }
 
@@ -790,13 +805,13 @@ DASHER_API int dasher_game_mode_active(dasher_ctx* ctx) {
 
 DASHER_API void dasher_game_set_canvas_text(dasher_ctx* ctx, int enabled) {
     if (!ctx || !ctx->intf) return;
-    auto *gm = ctx->intf->GetGameModule();
+    auto* gm = ctx->intf->GetGameModule();
     if (gm) gm->SetCanvasTextEnabled(enabled != 0);
 }
 
 static std::string s_gameTextBuf;
 
-static std::string symbolsToText(const Dasher::CAlphInfo *alph, const std::vector<Dasher::symbol> &syms, int count) {
+static std::string symbolsToText(const Dasher::CAlphInfo* alph, const std::vector<Dasher::symbol>& syms, int count) {
     std::string result;
     for (int i = 0; i < count && i < (int)syms.size(); i++) {
         result += alph->GetText(syms[i]);
@@ -806,30 +821,30 @@ static std::string symbolsToText(const Dasher::CAlphInfo *alph, const std::vecto
 
 DASHER_API const char* dasher_game_get_target_text(dasher_ctx* ctx) {
     if (!ctx || !ctx->intf) return "";
-    auto *gm = ctx->intf->GetGameModule();
+    auto* gm = ctx->intf->GetGameModule();
     if (!gm) return "";
-    const auto &syms = gm->GetTargetSymbols();
+    const auto& syms = gm->GetTargetSymbols();
     s_gameTextBuf = symbolsToText(gm->GetAlphabet(), syms, (int)syms.size());
     return s_gameTextBuf.c_str();
 }
 
 DASHER_API int dasher_game_get_correct_count(dasher_ctx* ctx) {
     if (!ctx || !ctx->intf) return -1;
-    auto *gm = ctx->intf->GetGameModule();
+    auto* gm = ctx->intf->GetGameModule();
     if (!gm) return -1;
     return gm->GetLastCorrectSym() + 1;
 }
 
 DASHER_API int dasher_game_get_target_length(dasher_ctx* ctx) {
     if (!ctx || !ctx->intf) return -1;
-    auto *gm = ctx->intf->GetGameModule();
+    auto* gm = ctx->intf->GetGameModule();
     if (!gm) return -1;
     return (int)gm->GetTargetSymbols().size();
 }
 
 DASHER_API const char* dasher_game_get_wrong_text(dasher_ctx* ctx) {
     if (!ctx || !ctx->intf) return "";
-    auto *gm = ctx->intf->GetGameModule();
+    auto* gm = ctx->intf->GetGameModule();
     if (!gm) return "";
     s_gameTextBuf = gm->GetWrongText();
     return s_gameTextBuf.c_str();
@@ -858,8 +873,10 @@ static std::unordered_map<std::string, std::string> parseStringsJson(const std::
         char c = content[i];
 
         if (escape) {
-            if (buildingKey) key += c;
-            else value += c;
+            if (buildingKey)
+                key += c;
+            else
+                value += c;
             escape = false;
             continue;
         }
@@ -887,13 +904,17 @@ static std::unordered_map<std::string, std::string> parseStringsJson(const std::
         }
 
         if (inString) {
-            if (buildingKey) key += c;
-            else value += c;
+            if (buildingKey)
+                key += c;
+            else
+                value += c;
             continue;
         }
 
-        if (c == '{') depth++;
-        else if (c == '}') depth--;
+        if (c == '{')
+            depth++;
+        else if (c == '}')
+            depth--;
     }
 
     return result;
@@ -973,6 +994,113 @@ DASHER_API void dasher_set_speak_callback(dasher_ctx* ctx, dasher_speak_callback
     if (!ctx) return;
     ctx->speakCb = callback;
     ctx->speakCbUserData = user_data;
+}
+
+// ── Test / diagnostic hooks ────────────────────────────────────────────────
+
+DASHER_API int dasher_get_probabilities(dasher_ctx* ctx, int* out_lbnds, int* out_hbnds, int max_out) {
+    if (!ctx || !ctx->intf || !ctx->realized) return -1;
+    auto* model = ctx->intf->GetModel();
+    if (!model) return -1;
+    auto* node = model->Get_node_under_crosshair();
+    if (!node) return -1;
+    const auto& children = node->GetChildren();
+    int count = 0;
+    for (auto* child : children) {
+        if (count >= max_out) break;
+        if (out_lbnds) out_lbnds[count] = (int)child->Lbnd();
+        if (out_hbnds) out_hbnds[count] = (int)child->Hbnd();
+        count++;
+    }
+    return count;
+}
+
+DASHER_API int dasher_screen_to_dasher(dasher_ctx* ctx, int sx, int sy, long long* out_dx, long long* out_dy) {
+    if (!ctx || !ctx->intf || !ctx->realized) return -1;
+    auto* view = ctx->intf->GetView();
+    if (!view) return -1;
+    Dasher::myint dx = 0, dy = 0;
+    view->Screen2Dasher(static_cast<Dasher::screenint>(sx), static_cast<Dasher::screenint>(sy), dx, dy);
+    if (out_dx) *out_dx = static_cast<long long>(dx);
+    if (out_dy) *out_dy = static_cast<long long>(dy);
+    return 0;
+}
+
+DASHER_API int dasher_dasher_to_screen(dasher_ctx* ctx, long long dx, long long dy, int* out_sx, int* out_sy) {
+    if (!ctx || !ctx->intf || !ctx->realized) return -1;
+    auto* view = ctx->intf->GetView();
+    if (!view) return -1;
+    Dasher::screenint sx = 0, sy = 0;
+    view->Dasher2Screen(static_cast<Dasher::myint>(dx), static_cast<Dasher::myint>(dy), sx, sy);
+    if (out_sx) *out_sx = static_cast<int>(sx);
+    if (out_sy) *out_sy = static_cast<int>(sy);
+    return 0;
+}
+
+DASHER_API int dasher_get_root_child_count(dasher_ctx* ctx) {
+    if (!ctx || !ctx->intf || !ctx->realized) return -1;
+    auto* model = ctx->intf->GetModel();
+    if (!model) return -1;
+    auto* node = model->Get_node_under_crosshair();
+    if (!node) return -1;
+    return static_cast<int>(node->ChildCount());
+}
+
+DASHER_API int dasher_get_root_child_bounds(dasher_ctx* ctx, int index, long long* out_lbnd, long long* out_hbnd) {
+    if (!ctx || !ctx->intf || !ctx->realized) return -1;
+    auto* model = ctx->intf->GetModel();
+    if (!model) return -1;
+    auto* node = model->Get_node_under_crosshair();
+    if (!node) return -1;
+    const auto& children = node->GetChildren();
+    if (index < 0 || index >= static_cast<int>(children.size())) return -1;
+    auto* child = children[index];
+    if (out_lbnd) *out_lbnd = static_cast<long long>(child->Lbnd());
+    if (out_hbnd) *out_hbnd = static_cast<long long>(child->Hbnd());
+    return 0;
+}
+
+DASHER_API int dasher_get_alphabet_symbol_count(dasher_ctx* ctx) {
+    if (!ctx || !ctx->intf) return -1;
+    auto* alph = ctx->intf->GetActiveAlphabet();
+    if (!alph) return -1;
+    return alph->iEnd;
+}
+
+DASHER_API int dasher_get_alphabet_symbol_text(dasher_ctx* ctx, int index, char* out_text, int max_len) {
+    if (!ctx || !ctx->intf || !out_text || max_len <= 0) return -1;
+    auto* alph = ctx->intf->GetActiveAlphabet();
+    if (!alph) return -1;
+    if (index < 0 || index >= alph->iEnd) return -1;
+    std::string text = alph->GetText(index);
+    if (text.empty()) return -1;
+    int len = std::min((int)text.size(), max_len - 1);
+    std::memcpy(out_text, text.c_str(), len);
+    out_text[len] = '\0';
+    return 0;
+}
+
+DASHER_API int dasher_import_training_text(dasher_ctx* ctx, const char* text) {
+    if (!ctx || !ctx->intf || !text) return -1;
+    try {
+        // Write text to a temp file since ImportTrainingText expects a path
+        std::string tmpfile = ctx->userDir + "/.dasher_training_tmp.txt";
+        std::ofstream out(tmpfile);
+        if (!out) return -1;
+        out << text;
+        out.close();
+        ctx->intf->ImportTrainingText(tmpfile);
+        return 0;
+    } catch (...) {
+        return -1;
+    }
+}
+
+DASHER_API int dasher_get_offset(dasher_ctx* ctx) {
+    if (!ctx || !ctx->intf || !ctx->realized) return -1;
+    auto* model = ctx->intf->GetModel();
+    if (!model) return -1;
+    return model->GetOffset();
 }
 
 } // extern "C"

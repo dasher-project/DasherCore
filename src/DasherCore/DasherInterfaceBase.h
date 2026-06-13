@@ -323,6 +323,8 @@ public:
   const CAlphInfo *GetActiveAlphabet();
   CModuleManager* GetModuleManager(){return m_pModuleManager.get();}
   CActionManager* GetActionManager(){return m_pActionManager.get();}
+  CDasherModel *GetModel() {return m_pDasherModel.get();}
+  CDasherView *GetView() {return m_pDasherView.get();}
 
   void StartShutdown();
 
@@ -462,8 +464,6 @@ protected:
   /// co-ordinates - the latter might occur if e.g. running default filter
   /// but with the mouse precisely over the crosshair)
   virtual void onUnpause(unsigned long lTime);
-  
-  CDasherView *GetView() {return m_pDasherView.get();}
   
   std::unique_ptr<CDasherModel> m_pDasherModel;
   ///Framerate monitor; created in constructor, req'd for DynamicFilter subclasses

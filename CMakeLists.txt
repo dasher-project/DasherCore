@@ -53,6 +53,13 @@ file(GLOB_RECURSE HEADER_FILES CONFIGURE_DEPENDS
 
 file(GLOB_RECURSE SOURCE_FILES CONFIGURE_DEPENDS
     ${CMAKE_CURRENT_LIST_DIR}/src/**/*.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/**/*.c
+)
+
+# Exclude standalone UTF test harnesses that don't compile as library code
+list(REMOVE_ITEM SOURCE_FILES
+    "${CMAKE_CURRENT_LIST_DIR}/src/DasherCore/Common/Unicode/harness.c"
+    "${CMAKE_CURRENT_LIST_DIR}/src/DasherCore/Common/Unicode/original_harness.c"
 )
 
 # Still in the library but not actively used anymore. Also not supported on all platforms
@@ -125,6 +132,15 @@ if(BUILD_CAPI)
             add_test(NAME ${name} COMMAND ${name})
         endfunction()
 
+        # Variant for tests that need internal DasherCore symbols (e.g. ConvertUTF)
+        function(dasher_add_test_internal name source)
+            add_executable(${name} ${CMAKE_CURRENT_LIST_DIR}/tests/${source})
+            target_include_directories(${name} PRIVATE ${CMAKE_CURRENT_LIST_DIR}/src/ ${CMAKE_CURRENT_LIST_DIR}/tests/)
+            target_link_libraries(${name} PRIVATE DasherCore pugixml)
+            target_compile_definitions(${name} PRIVATE TEST_DATA_DIR="${TEST_DATA_DIR}")
+            add_test(NAME ${name} COMMAND ${name})
+        endfunction()
+
         dasher_add_test(dasher_capi_tests test_capi.cpp)
         dasher_add_test(dasher_interaction_tests test_interaction.cpp)
         dasher_add_test(dasher_low_memory_tests test_low_memory.cpp)
@@ -134,5 +150,17 @@ if(BUILD_CAPI)
         dasher_add_test(dasher_multilingual_tests test_multilingual.cpp)
         dasher_add_test(dasher_draw_command_tests test_draw_commands.cpp)
         dasher_add_test(dasher_lifecycle_tests test_lifecycle.cpp)
+        dasher_add_test(dasher_ppm_golden_tests test_ppm_golden.cpp)
+        dasher_add_test(dasher_coordinates_tests test_coordinates.cpp)
+        dasher_add_test(dasher_draw_snapshot_tests test_draw_snapshots.cpp)
+        dasher_add_test(dasher_settings_xml_tests test_settings_xml.cpp)
+        dasher_add_test(dasher_alphabet_xml_tests test_alphabet_xml.cpp)
+        dasher_add_test(dasher_ppm_serialization_tests test_ppm_serialization.cpp)
+        dasher_add_test(dasher_alphabet_map_tests test_alphabet_map.cpp)
+        dasher_add_test(dasher_color_math_tests test_color_math.cpp)
+        dasher_add_test_internal(dasher_utf_conversion_tests test_utf_conversion.cpp)
+        dasher_add_test(dasher_deterministic_tests test_deterministic.cpp)
+        dasher_add_test(dasher_training_tests test_training.cpp)
+        dasher_add_test(dasher_node_tree_tests test_node_tree.cpp)
     endif()
 endif()

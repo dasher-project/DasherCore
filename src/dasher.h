@@ -339,6 +339,59 @@ DASHER_API void dasher_set_string_override(dasher_ctx* ctx, const char* key, con
 // Returned pointer is valid until the next API call.
 DASHER_API const char* dasher_get_localized_string(dasher_ctx* ctx, const char* key);
 
+// ── Test / diagnostic hooks ────────────────────────────────────────────────
+//
+// These functions expose internal engine state for testing and golden-output
+// validation. They are NOT intended for use in production frontends — the data
+// structures they expose may change between versions. Frontends should use the
+// public API above. These exist so that a rewrite (e.g. Rust) can be validated
+// against the exact same engine state.
+
+// Get the probability distribution of the node under the crosshair.
+// Returns the number of children written. Each child gets two entries in
+// out_lbnds/out_hbnds: cumulative lower/upper probability bound, normalized
+// to 65536 (=1<<16). The probability of child i is hbnds[i]-lbnds[i].
+// Returns -1 if the engine is not realized.
+DASHER_API int dasher_get_probabilities(dasher_ctx* ctx,
+                                         int* out_lbnds, int* out_hbnds, int max_out);
+
+// Convert screen pixel coordinates to Dasher internal coordinates.
+// Returns 0 on success, -1 if not realized.
+DASHER_API int dasher_screen_to_dasher(dasher_ctx* ctx, int sx, int sy,
+                                        long long* out_dx, long long* out_dy);
+
+// Convert Dasher internal coordinates to screen pixel coordinates.
+// Returns 0 on success, -1 if not realized.
+DASHER_API int dasher_dasher_to_screen(dasher_ctx* ctx, long long dx, long long dy,
+                                        int* out_sx, int* out_sy);
+
+// Get the number of children of the node currently under the crosshair.
+// Returns -1 if not realized.
+DASHER_API int dasher_get_root_child_count(dasher_ctx* ctx);
+
+// Get probability bounds for a specific child of the crosshair node.
+// Returns 0 on success, -1 if index out of range or not realized.
+DASHER_API int dasher_get_root_child_bounds(dasher_ctx* ctx, int index,
+                                              long long* out_lbnd, long long* out_hbnd);
+
+// Get the number of symbols in the active alphabet.
+// Returns -1 if not realized.
+DASHER_API int dasher_get_alphabet_symbol_count(dasher_ctx* ctx);
+
+// Get the display text for an alphabet symbol at the given index.
+// Returns 0 on success, -1 if out of range. out_text is NUL-terminated.
+DASHER_API int dasher_get_alphabet_symbol_text(dasher_ctx* ctx, int index,
+                                                 char* out_text, int max_len);
+
+// Import custom training text into the language model.
+// This enables deterministic testing with known training data.
+// Returns 0 on success, -1 on failure.
+DASHER_API int dasher_import_training_text(dasher_ctx* ctx, const char* text);
+
+// Get the current Dasher offset (character position in the output).
+// Returns -1 if not realized.
+DASHER_API int dasher_get_offset(dasher_ctx* ctx);
+
 #ifdef __cplusplus
 }
 #endif
