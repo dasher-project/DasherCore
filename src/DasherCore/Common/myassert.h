@@ -15,7 +15,7 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Dasher; if not, write to the Free Software 
+// along with Dasher; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #pragma once
@@ -33,7 +33,7 @@
 #include <crtdbg.h>
 #define DASHER_ASSERT(expr) _ASSERT(expr)
 
-#else 
+#else
 
 // POSIX platforms (eg Linux)
 #include <cassert>
@@ -56,15 +56,14 @@
 // DASHER_ASSERT_VALIDPTR_R(p) asserts that a pointer is valid for read
 
 #if _MSC_VER >= 1300
-#define DASHER_ASSERT_VALIDPTR_RW(p)	DASHER_ASSERT(_CrtIsValidPointer(p, sizeof(p), 1))
-#define DASHER_ASSERT_VALIDPTR_R(p)		DASHER_ASSERT(_CrtIsValidPointer(p, sizeof(p), 0))
+#define DASHER_ASSERT_VALIDPTR_RW(p) DASHER_ASSERT(_CrtIsValidPointer(p, sizeof(p), 1))
+#define DASHER_ASSERT_VALIDPTR_R(p) DASHER_ASSERT(_CrtIsValidPointer(p, sizeof(p), 0))
 #else
 
-        // Please implement any platform-specific pointer checking
+// Please implement any platform-specific pointer checking
 
-        // Simple check that the pointer is non-null
-#define DASHER_ASSERT_VALIDPTR_RW(p)	DASHER_ASSERT(p!=NULL)
-#define DASHER_ASSERT_VALIDPTR_R(p)		DASHER_ASSERT(p!=NULL)
+// Simple check that the pointer is non-null
+#define DASHER_ASSERT_VALIDPTR_RW(p) DASHER_ASSERT(p != NULL)
+#define DASHER_ASSERT_VALIDPTR_R(p) DASHER_ASSERT(p != NULL)
 
 #endif
-

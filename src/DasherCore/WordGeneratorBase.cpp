@@ -3,10 +3,10 @@
 
 using namespace Dasher;
 
-CWordGeneratorBase::CWordGeneratorBase(const CAlphInfo *pAlph, const CAlphabetMap *pAlphMap) : m_pAlph(pAlph), m_pAlphMap(pAlphMap) {
-}
+CWordGeneratorBase::CWordGeneratorBase(const CAlphInfo* pAlph, const CAlphabetMap* pAlphMap)
+    : m_pAlph(pAlph), m_pAlphMap(pAlphMap) {}
 
-void CWordGeneratorBase::GetSymbols(std::vector<symbol> &into) {
+void CWordGeneratorBase::GetSymbols(std::vector<symbol>& into) {
     into.clear();
     for (;;) {
         std::string s(GetLine());
@@ -23,4 +23,3 @@ void CWordGeneratorBase::GetSymbols(std::vector<symbol> &into) {
         }
     }
 }
-

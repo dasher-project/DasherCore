@@ -20,11 +20,11 @@
 
 namespace Dasher {
 
-  class CSettingsStore;
-  class CAlphInfo;
-  class CAlphabetMap;
+class CSettingsStore;
+class CAlphInfo;
+class CAlphabetMap;
 
-  struct LMDescriptor {
+struct LMDescriptor {
     int id;
     std::string name;
     std::string description;
@@ -32,22 +32,18 @@ namespace Dasher {
     bool needsAlphInfo;
     std::vector<int> paramKeys;
 
-    using FactoryFn = std::function<CLanguageModel*(
-      CSettingsStore*, const CAlphInfo*, const CAlphabetMap*, int)>;
+    using FactoryFn = std::function<CLanguageModel*(CSettingsStore*, const CAlphInfo*, const CAlphabetMap*, int)>;
 
     FactoryFn factory;
-  };
+};
 
-  class LMRegistry {
+class LMRegistry {
   public:
     static LMRegistry& instance();
 
     void registerLM(const LMDescriptor& descriptor);
 
-    CLanguageModel* create(int id,
-                           CSettingsStore* settings,
-                           const CAlphInfo* alphInfo,
-                           const CAlphabetMap* alphMap,
+    CLanguageModel* create(int id, CSettingsStore* settings, const CAlphInfo* alphInfo, const CAlphabetMap* alphMap,
                            int numSyms) const;
 
     const LMDescriptor* get(int id) const;
@@ -60,6 +56,6 @@ namespace Dasher {
     LMRegistry() = default;
     std::map<int, LMDescriptor> m_registry;
     std::vector<LMDescriptor> m_ordered;
-  };
+};
 
-}
+} // namespace Dasher

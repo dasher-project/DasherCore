@@ -8,7 +8,14 @@
 #include <unistd.h>
 
 #define TEST(name) void test_##name()
-#define ASSERT(condition) do { if (!(condition)) { printf("FAILED: %s\n", #condition); fflush(stdout); exit(1); } } while(0)
+#define ASSERT(condition)                                                                                              \
+    do {                                                                                                               \
+        if (!(condition)) {                                                                                            \
+            printf("FAILED: %s\n", #condition);                                                                        \
+            fflush(stdout);                                                                                            \
+            exit(1);                                                                                                   \
+        }                                                                                                              \
+    } while (0)
 #define ASSERT_EQ(a, b) ASSERT((a) == (b))
 #define ASSERT_NEQ(a, b) ASSERT((a) != (b))
 #define ASSERT_STR_EQ(a, b) ASSERT(strcmp((a), (b)) == 0)

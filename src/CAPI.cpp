@@ -863,6 +863,7 @@ static std::unordered_map<std::string, std::string> parseStringsJson(const std::
     std::unordered_map<std::string, std::string> result;
     enum class State { Key, Colon, Value, Skip };
     State state = State::Skip;
+    (void)state;
     std::string key, value;
     bool inString = false;
     bool escape = false;

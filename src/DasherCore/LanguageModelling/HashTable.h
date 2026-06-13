@@ -15,22 +15,20 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Dasher; if not, write to the Free Software 
+// along with Dasher; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #pragma once
 
 namespace Dasher {
 
-  class CHashTable { //class to store the hashtable used to find indices of nodes	 
-	public:
-		CHashTable(){}		
-		static int GetHashOffSet(int c){
-			return Tperm[c];
-		}	 
-		private: 
-			static const unsigned int Tperm[256];				
-  };
+class CHashTable { // class to store the hashtable used to find indices of nodes
+  public:
+    CHashTable() {}
+    static int GetHashOffSet(int c) { return Tperm[c]; }
 
-} // end namespace 
+  private:
+    static const unsigned int Tperm[256];
+};
 
+} // namespace Dasher

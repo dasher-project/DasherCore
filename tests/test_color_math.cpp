@@ -31,7 +31,7 @@ TEST(color_alpha_zero) {
 
 TEST(color_black) {
     int c = dasher_color_rgb(0, 0, 0);
-    ASSERT_EQ(c, 0xFF000000);
+    ASSERT_EQ(c, (int)0xFF000000);
     ASSERT_EQ(dasher_color_get_alpha(c), 255);
     ASSERT_EQ(dasher_color_get_red(c), 0);
     ASSERT_EQ(dasher_color_get_green(c), 0);
@@ -41,7 +41,7 @@ TEST(color_black) {
 
 TEST(color_white) {
     int c = dasher_color_rgb(255, 255, 255);
-    ASSERT_EQ(c, 0xFFFFFFFF);
+    ASSERT_EQ(c, (int)0xFFFFFFFF);
     ASSERT_EQ(dasher_color_get_alpha(c), 255);
     ASSERT_EQ(dasher_color_get_red(c), 255);
     ASSERT_EQ(dasher_color_get_green(c), 255);

@@ -82,11 +82,7 @@ TEST(low_memory_alphabet_switch) {
     printf("  Initial alphabet count: %d\n", initial_count);
 
     // Try switching to a different alphabet
-    const char* alphabets[] = {
-        "English without punctuation",
-        "English lower case",
-        "English with limited punctuation"
-    };
+    const char* alphabets[] = {"English without punctuation", "English lower case", "English with limited punctuation"};
 
     for (int i = 0; i < 3; i++) {
         dasher_set_alphabet_id(ctx, alphabets[i]);

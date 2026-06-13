@@ -19,7 +19,10 @@ TEST(lifecycle_create_destroy_recreate) {
         ASSERT(ctx != nullptr);
         dasher_set_screen_size(ctx, 800, 600);
 
-        int* cmds; int cmd_count; char** strs; int str_count;
+        int* cmds;
+        int cmd_count;
+        char** strs;
+        int str_count;
         dasher_frame(ctx, 1000, &cmds, &cmd_count, &strs, &str_count);
         ASSERT(cmd_count > 0);
 
@@ -43,8 +46,7 @@ TEST(lifecycle_multiple_contexts) {
     dasher_set_speed_percent(ctx2, 200);
 
     ASSERT_NEQ(dasher_get_speed_percent(ctx1), dasher_get_speed_percent(ctx2));
-    printf("  ctx1 speed: %d, ctx2 speed: %d\n",
-           dasher_get_speed_percent(ctx1), dasher_get_speed_percent(ctx2));
+    printf("  ctx1 speed: %d, ctx2 speed: %d\n", dasher_get_speed_percent(ctx1), dasher_get_speed_percent(ctx2));
 
     dasher_destroy(ctx1);
     dasher_destroy(ctx2);
@@ -90,7 +92,10 @@ TEST(lifecycle_screen_resize) {
     run_frames(ctx, 5, 1000);
 
     dasher_set_screen_size(ctx, 400, 300);
-    int* cmds; int cmd_count; char** strs; int str_count;
+    int* cmds;
+    int cmd_count;
+    char** strs;
+    int str_count;
     dasher_frame(ctx, 2000, &cmds, &cmd_count, &strs, &str_count);
     ASSERT(cmd_count > 0);
     printf("  After resize to 400x300: %d commands\n", cmd_count);
@@ -177,14 +182,17 @@ TEST(lifecycle_output_callback_userdata) {
     ASSERT(ctx != nullptr);
     dasher_set_screen_size(ctx, 800, 600);
 
-    dasher_set_output_callback(ctx, [](int event_type, const char* text, void* user_data) {
-        CallbackData* d = static_cast<CallbackData*>(user_data);
-        if (event_type == 0 && text) {
-            d->event_count++;
-            strncpy(d->last_text, text, 63);
-            d->last_text[63] = '\0';
-        }
-    }, &data);
+    dasher_set_output_callback(
+        ctx,
+        [](int event_type, const char* text, void* user_data) {
+            CallbackData* d = static_cast<CallbackData*>(user_data);
+            if (event_type == 0 && text) {
+                d->event_count++;
+                strncpy(d->last_text, text, 63);
+                d->last_text[63] = '\0';
+            }
+        },
+        &data);
 
     dasher_set_speed_percent(ctx, 300);
     dasher_mouse_move(ctx, 700.0f, 300.0f);
@@ -203,21 +211,27 @@ TEST(lifecycle_output_callback_userdata) {
 }
 
 TEST(lifecycle_message_callback_userdata) {
-    struct MsgData { int count; char last_msg[256]; };
+    struct MsgData {
+        int count;
+        char last_msg[256];
+    };
     MsgData msg = {0, ""};
 
     dasher_ctx* ctx = create_isolated_context();
     ASSERT(ctx != nullptr);
     dasher_set_screen_size(ctx, 800, 600);
 
-    dasher_set_message_callback(ctx, [](int type, const char* text, void* user_data) {
-        MsgData* d = static_cast<MsgData*>(user_data);
-        d->count++;
-        if (text) {
-            strncpy(d->last_msg, text, 255);
-            d->last_msg[255] = '\0';
-        }
-    }, &msg);
+    dasher_set_message_callback(
+        ctx,
+        [](int type, const char* text, void* user_data) {
+            MsgData* d = static_cast<MsgData*>(user_data);
+            d->count++;
+            if (text) {
+                strncpy(d->last_msg, text, 255);
+                d->last_msg[255] = '\0';
+            }
+        },
+        &msg);
 
     dasher_set_alphabet_id(ctx, "Nonexistent Alphabet");
     run_frames(ctx, 5, 1000);
@@ -268,21 +282,27 @@ TEST(lifecycle_reset_clears_state) {
 }
 
 TEST(lifecycle_speak_callback_registration) {
-    struct SpeakData { int count; char last_text[256]; };
+    struct SpeakData {
+        int count;
+        char last_text[256];
+    };
     SpeakData data = {0, ""};
 
     dasher_ctx* ctx = create_isolated_context();
     ASSERT(ctx != nullptr);
     dasher_set_screen_size(ctx, 800, 600);
 
-    dasher_set_speak_callback(ctx, [](const char* text, int interrupt, void* user_data) {
-        SpeakData* d = static_cast<SpeakData*>(user_data);
-        d->count++;
-        if (text) {
-            strncpy(d->last_text, text, 255);
-            d->last_text[255] = '\0';
-        }
-    }, &data);
+    dasher_set_speak_callback(
+        ctx,
+        [](const char* text, int interrupt, void* user_data) {
+            SpeakData* d = static_cast<SpeakData*>(user_data);
+            d->count++;
+            if (text) {
+                strncpy(d->last_text, text, 255);
+                d->last_text[255] = '\0';
+            }
+        },
+        &data);
 
     int speak_words_key = dasher_find_parameter_key("BP_SPEAK_WORDS");
     if (speak_words_key >= 0) {

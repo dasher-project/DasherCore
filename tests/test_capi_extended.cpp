@@ -158,12 +158,15 @@ TEST(message_callback) {
     static int msg_count = 0;
     msg_count = 0;
 
-    dasher_set_message_callback(ctx, [](int message_type, const char* text, void*) {
-        if (text) {
-            printf("  Message (type=%d): '%s'\n", message_type, text);
-            msg_count++;
-        }
-    }, nullptr);
+    dasher_set_message_callback(
+        ctx,
+        [](int message_type, const char* text, void*) {
+            if (text) {
+                printf("  Message (type=%d): '%s'\n", message_type, text);
+                msg_count++;
+            }
+        },
+        nullptr);
 
     // Trigger something that might produce a message (e.g., setting an invalid alphabet)
     dasher_set_screen_size(ctx, 800, 600);
@@ -187,7 +190,10 @@ TEST(reset) {
     dasher_mouse_down(ctx);
     for (int i = 0; i < 500; i++) {
         dasher_mouse_move(ctx, 700.0f, 280.0f);
-        int* cmds = nullptr; int cmd_cnt = 0; char** strs = nullptr; int str_cnt = 0;
+        int* cmds = nullptr;
+        int cmd_cnt = 0;
+        char** strs = nullptr;
+        int str_cnt = 0;
         dasher_frame(ctx, 1000 + i * 20, &cmds, &cmd_cnt, &strs, &str_cnt);
     }
     dasher_mouse_up(ctx);

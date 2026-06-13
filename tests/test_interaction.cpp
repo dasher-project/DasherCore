@@ -50,12 +50,15 @@ TEST(interaction_callback_fires) {
     callback_count = 0;
     output_buf[0] = '\0';
 
-    dasher_set_output_callback(ctx, [](int event_type, const char* text, void*) {
-        if (event_type == 0 && text) {
-            strncat(output_buf, text, sizeof(output_buf) - strlen(output_buf) - 1);
-            callback_count++;
-        }
-    }, nullptr);
+    dasher_set_output_callback(
+        ctx,
+        [](int event_type, const char* text, void*) {
+            if (event_type == 0 && text) {
+                strncat(output_buf, text, sizeof(output_buf) - strlen(output_buf) - 1);
+                callback_count++;
+            }
+        },
+        nullptr);
 
     dasher_set_screen_size(ctx, 800, 600);
     dasher_set_speed_percent(ctx, 300);

@@ -9,17 +9,14 @@
 
 /// \ingroup Logging
 /// \{
-class CSimpleTimer
-{
-public:
-  CSimpleTimer();
-  ~CSimpleTimer();
+class CSimpleTimer {
+  public:
+    CSimpleTimer();
+    ~CSimpleTimer();
 
- double GetElapsed() const;
+    double GetElapsed() const;
 
-private:
-  std::chrono::steady_clock::time_point start;
+  private:
+    std::chrono::steady_clock::time_point start;
 };
 /// \}
-
-

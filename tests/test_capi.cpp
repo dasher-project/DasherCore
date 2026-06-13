@@ -6,14 +6,14 @@
 TEST(color_utilities) {
     // Test basic color creation
     int white = dasher_color_rgb(255, 255, 255);
-    ASSERT_EQ(white, 0xFFFFFFFF);
+    ASSERT_EQ(white, (int)0xFFFFFFFF);
 
     int black = dasher_color_rgb(0, 0, 0);
-    ASSERT_EQ(black, 0xFF000000);
+    ASSERT_EQ(black, (int)0xFF000000);
 
     // Test with alpha
     int semi_red = dasher_color_argb(128, 255, 0, 0);
-    ASSERT_EQ(semi_red, 0x80FF0000);
+    ASSERT_EQ(semi_red, (int)0x80FF0000);
 
     // Test component extraction
     ASSERT_EQ(dasher_color_get_alpha(0x12345678), 0x12);
@@ -48,6 +48,7 @@ TEST(context_creation) {
 
 TEST(screen_size) {
     const char* data_dir = get_test_data_dir();
+    (void)data_dir;
     dasher_ctx* ctx = create_isolated_context();
     ASSERT(ctx != nullptr);
 
@@ -72,6 +73,7 @@ TEST(screen_size) {
 
 TEST(parameters) {
     const char* data_dir = get_test_data_dir();
+    (void)data_dir;
     dasher_ctx* ctx = create_isolated_context();
     ASSERT(ctx != nullptr);
 
@@ -105,6 +107,7 @@ TEST(parameters) {
 
 TEST(output_text) {
     const char* data_dir = get_test_data_dir();
+    (void)data_dir;
     dasher_ctx* ctx = create_isolated_context();
     ASSERT(ctx != nullptr);
 
@@ -185,6 +188,7 @@ TEST(null_safety) {
 
 TEST(locale) {
     const char* data_dir = get_test_data_dir();
+    (void)data_dir;
     dasher_ctx* ctx = create_isolated_context();
     ASSERT(ctx != nullptr);
 
@@ -231,8 +235,7 @@ TEST(locale) {
 
     // Test get_localized_string
     const char* localized = dasher_get_localized_string(ctx, "BP_DRAW_MOUSE_LINE.label");
-    // English should return nullptr (it's the built-in default, not in a locale file)
-    // unless we've loaded a locale file
+    (void)localized;
 
     dasher_destroy(ctx);
     printf("✓ locale passed\n");
@@ -240,6 +243,7 @@ TEST(locale) {
 
 TEST(string_override) {
     const char* data_dir = get_test_data_dir();
+    (void)data_dir;
     dasher_ctx* ctx = create_isolated_context();
     ASSERT(ctx != nullptr);
 
@@ -254,6 +258,7 @@ TEST(string_override) {
     dasher_parameter_info info;
     int param_count = dasher_get_parameter_count();
     bool found = false;
+    (void)found;
     for (int i = 0; i < param_count; i++) {
         dasher_get_parameter_info(i, &info);
         if (info.key == 0) { // BP_DRAW_MOUSE_LINE is key 0 in enum
@@ -274,6 +279,7 @@ TEST(string_override) {
 
 TEST(locale_multiple_languages) {
     const char* data_dir = get_test_data_dir();
+    (void)data_dir;
     dasher_ctx* ctx = create_isolated_context();
     ASSERT(ctx != nullptr);
 

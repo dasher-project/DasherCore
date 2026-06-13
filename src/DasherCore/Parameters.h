@@ -7,130 +7,210 @@
 
 // All parameters go into the enums here
 // They are unique across the different types
-namespace Dasher
-{
-	enum Parameter{ 
-		BP_DRAW_MOUSE_LINE, BP_DRAW_MOUSE, BP_CURVE_MOUSE_LINE,
-		BP_START_MOUSE,
-		BP_START_SPACE, BP_SMOOTH_PRESS_MODE, BP_SMOOTH_ONLY_FORWARD, BP_SMOOTH_DRAW_MOUSE, BP_SMOOTH_DRAW_MOUSE_LINE,
-		BP_PALETTE_CHANGE, BP_TURBO_MODE, BP_EXACT_DYNAMICS,
-		BP_AUTOCALIBRATE, BP_REMAP_XTREME,
-		BP_AUTO_SPEEDCONTROL,
-		BP_LM_ADAPTIVE, BP_NONLINEAR_Y,
-		BP_STOP_OUTSIDE, BP_BACKOFF_BUTTON,
-		BP_TWOBUTTON_REVERSE, BP_2B_INVERT_DOUBLE, BP_SLOW_START,
-		BP_COPY_ALL_ON_STOP, BP_SPEAK_ALL_ON_STOP, BP_SPEAK_WORDS,
-		BP_GAME_HELP_DRAW_PATH, BP_TWO_PUSH_RELEASE_TIME,
-		BP_SIMULATE_TRANSPARENCY,
-		END_OF_BPS,
+namespace Dasher {
+enum Parameter {
+    BP_DRAW_MOUSE_LINE,
+    BP_DRAW_MOUSE,
+    BP_CURVE_MOUSE_LINE,
+    BP_START_MOUSE,
+    BP_START_SPACE,
+    BP_SMOOTH_PRESS_MODE,
+    BP_SMOOTH_ONLY_FORWARD,
+    BP_SMOOTH_DRAW_MOUSE,
+    BP_SMOOTH_DRAW_MOUSE_LINE,
+    BP_PALETTE_CHANGE,
+    BP_TURBO_MODE,
+    BP_EXACT_DYNAMICS,
+    BP_AUTOCALIBRATE,
+    BP_REMAP_XTREME,
+    BP_AUTO_SPEEDCONTROL,
+    BP_LM_ADAPTIVE,
+    BP_NONLINEAR_Y,
+    BP_STOP_OUTSIDE,
+    BP_BACKOFF_BUTTON,
+    BP_TWOBUTTON_REVERSE,
+    BP_2B_INVERT_DOUBLE,
+    BP_SLOW_START,
+    BP_COPY_ALL_ON_STOP,
+    BP_SPEAK_ALL_ON_STOP,
+    BP_SPEAK_WORDS,
+    BP_GAME_HELP_DRAW_PATH,
+    BP_TWO_PUSH_RELEASE_TIME,
+    BP_SIMULATE_TRANSPARENCY,
+    END_OF_BPS,
 
-		LP_ORIENTATION, LP_MAX_BITRATE, LP_FRAMERATE,
-		LP_LANGUAGE_MODEL_ID, LP_DASHER_FONTSIZE, LP_MESSAGE_FONTSIZE, LP_SHAPE_TYPE, LP_START_MODE,
-		LP_UNIFORM, LP_MOUSEPOSDIST, LP_PY_PROB_SORT_THRES, LP_MESSAGE_TIME,
-		LP_LM_MAX_ORDER, LP_LM_EXCLUSION,
-		LP_LM_UPDATE_EXCLUSION, LP_LM_ALPHA, LP_LM_BETA,
-		LP_LM_MIXTURE, LP_LINE_WIDTH, LP_GEOMETRY,
-		LP_LM_WORD_ALPHA, LP_USER_LOG_LEVEL_MASK, 
-		LP_ZOOMSTEPS, LP_B, LP_S, LP_BUTTON_SCAN_TIME, LP_R, LP_RIGHTZOOM,
-		LP_NODE_BUDGET, LP_OUTLINE_WIDTH, LP_TEXT_PADDING, LP_MIN_NODE_SIZE, LP_NONLINEAR_X,
-		LP_AUTOSPEED_SENSITIVITY, LP_SOCKET_PORT, LP_SOCKET_INPUT_X_MIN, LP_SOCKET_INPUT_X_MAX,
-		LP_SOCKET_INPUT_Y_MIN, LP_SOCKET_INPUT_Y_MAX,
-		LP_CIRCLE_PERCENT, LP_TWO_BUTTON_OFFSET, LP_HOLD_TIME, LP_MULTIPRESS_TIME,
-		LP_SLOW_START_TIME, LP_SMOOTH_TAU,
-		LP_TWO_PUSH_OUTER, LP_TWO_PUSH_LONG, LP_TWO_PUSH_SHORT, LP_TWO_PUSH_TOLERANCE,
-		LP_DYNAMIC_BUTTON_LAG, LP_STATIC1B_TIME, LP_STATIC1B_ZOOM,
-		LP_DEMO_SPRING, LP_DEMO_NOISE_MEM, LP_DEMO_NOISE_MAG, LP_MAXZOOM, 
-		LP_DYNAMIC_SPEED_INC, LP_DYNAMIC_SPEED_FREQ, LP_DYNAMIC_SPEED_DEC,
-		LP_TAP_TIME, LP_MARGIN_WIDTH, LP_TARGET_OFFSET, LP_X_LIMIT_SPEED,
-		LP_GAME_HELP_DIST, LP_GAME_HELP_TIME,
-		END_OF_LPS,
+    LP_ORIENTATION,
+    LP_MAX_BITRATE,
+    LP_FRAMERATE,
+    LP_LANGUAGE_MODEL_ID,
+    LP_DASHER_FONTSIZE,
+    LP_MESSAGE_FONTSIZE,
+    LP_SHAPE_TYPE,
+    LP_START_MODE,
+    LP_UNIFORM,
+    LP_MOUSEPOSDIST,
+    LP_PY_PROB_SORT_THRES,
+    LP_MESSAGE_TIME,
+    LP_LM_MAX_ORDER,
+    LP_LM_EXCLUSION,
+    LP_LM_UPDATE_EXCLUSION,
+    LP_LM_ALPHA,
+    LP_LM_BETA,
+    LP_LM_MIXTURE,
+    LP_LINE_WIDTH,
+    LP_GEOMETRY,
+    LP_LM_WORD_ALPHA,
+    LP_USER_LOG_LEVEL_MASK,
+    LP_ZOOMSTEPS,
+    LP_B,
+    LP_S,
+    LP_BUTTON_SCAN_TIME,
+    LP_R,
+    LP_RIGHTZOOM,
+    LP_NODE_BUDGET,
+    LP_OUTLINE_WIDTH,
+    LP_TEXT_PADDING,
+    LP_MIN_NODE_SIZE,
+    LP_NONLINEAR_X,
+    LP_AUTOSPEED_SENSITIVITY,
+    LP_SOCKET_PORT,
+    LP_SOCKET_INPUT_X_MIN,
+    LP_SOCKET_INPUT_X_MAX,
+    LP_SOCKET_INPUT_Y_MIN,
+    LP_SOCKET_INPUT_Y_MAX,
+    LP_CIRCLE_PERCENT,
+    LP_TWO_BUTTON_OFFSET,
+    LP_HOLD_TIME,
+    LP_MULTIPRESS_TIME,
+    LP_SLOW_START_TIME,
+    LP_SMOOTH_TAU,
+    LP_TWO_PUSH_OUTER,
+    LP_TWO_PUSH_LONG,
+    LP_TWO_PUSH_SHORT,
+    LP_TWO_PUSH_TOLERANCE,
+    LP_DYNAMIC_BUTTON_LAG,
+    LP_STATIC1B_TIME,
+    LP_STATIC1B_ZOOM,
+    LP_DEMO_SPRING,
+    LP_DEMO_NOISE_MEM,
+    LP_DEMO_NOISE_MAG,
+    LP_MAXZOOM,
+    LP_DYNAMIC_SPEED_INC,
+    LP_DYNAMIC_SPEED_FREQ,
+    LP_DYNAMIC_SPEED_DEC,
+    LP_TAP_TIME,
+    LP_MARGIN_WIDTH,
+    LP_TARGET_OFFSET,
+    LP_X_LIMIT_SPEED,
+    LP_GAME_HELP_DIST,
+    LP_GAME_HELP_TIME,
+    END_OF_LPS,
 
-		SP_ALPHABET_ID, SP_ALPHABET_1, SP_ALPHABET_2, SP_ALPHABET_3, SP_ALPHABET_4, 
-		SP_COLOUR_ID, SP_DASHER_FONT, SP_GAME_TEXT_FILE,
-		SP_INPUT_FILTER, SP_INPUT_DEVICE,
-		SP_BUTTON_MAPPINGS, SP_JOYSTICK_XAXIS, SP_JOYSTICK_YAXIS,
-		END_OF_SPS,
-		PM_INVALID
-	};
+    SP_ALPHABET_ID,
+    SP_ALPHABET_1,
+    SP_ALPHABET_2,
+    SP_ALPHABET_3,
+    SP_ALPHABET_4,
+    SP_COLOUR_ID,
+    SP_DASHER_FONT,
+    SP_GAME_TEXT_FILE,
+    SP_INPUT_FILTER,
+    SP_INPUT_DEVICE,
+    SP_BUTTON_MAPPINGS,
+    SP_JOYSTICK_XAXIS,
+    SP_JOYSTICK_YAXIS,
+    END_OF_SPS,
+    PM_INVALID
+};
 
-  ///Namespace containing all static (i.e. fixed/constant) data about
-  /// settings, that is _not_ dependent on the storage mechanism,
-  /// the SettingsStore in use, or platform-specific details.
-  /// (Except, some defaults are #ifdef'd according to platform).
-  /// This data does NOT change at runtime.
-  namespace Settings {
-	enum class Persistence { PERSISTENT, EPHEMERAL };
+/// Namespace containing all static (i.e. fixed/constant) data about
+///  settings, that is _not_ dependent on the storage mechanism,
+///  the SettingsStore in use, or platform-specific details.
+///  (Except, some defaults are #ifdef'd according to platform).
+///  This data does NOT change at runtime.
+namespace Settings {
+enum class Persistence { PERSISTENT, EPHEMERAL };
 
-  	// Types that are parameters can be
-    enum ParameterType {
-      PARAM_BOOL,
-      PARAM_LONG,
-      PARAM_STRING,
-      PARAM_INVALID
-    };
+// Types that are parameters can be
+enum ParameterType { PARAM_BOOL, PARAM_LONG, PARAM_STRING, PARAM_INVALID };
 
-	// Suggestion for UIControl
-	enum UIControlType
-	{
-		Switch, // Boolean switch or check mark
-		TextField, // Free input text field
-		Slider, // Slider type input
-		Enum, // Dropdown or select type
-		Step, // SpinButton (like textfield, but for numbers with a [+] and [-] button)
-		None
-	};
+// Suggestion for UIControl
+enum UIControlType {
+    Switch,    // Boolean switch or check mark
+    TextField, // Free input text field
+    Slider,    // Slider type input
+    Enum,      // Dropdown or select type
+    Step,      // SpinButton (like textfield, but for numbers with a [+] and [-] button)
+    None
+};
 
-    // Values
-    struct Parameter_Value {
-		std::string storageName;
-		std::string enumKeyName;
-		std::string subgroup;
-		std::string group;
-		Settings::ParameterType type = Settings::PARAM_INVALID;
-		Settings::Persistence persistence = Persistence::PERSISTENT;
-		std::variant<bool, long, std::string> value;
-        std::string humanDescription;
-        std::string humanName;
-		Settings::UIControlType suggestedUI = UIControlType::None;
-		bool advancedSetting = false;
-		int min = 0;
-        int max = 0;
-        int divisor = 1;
-        int step = 1;
-		std::map<std::string, int> possibleValues;
+// Values
+struct Parameter_Value {
+    std::string storageName;
+    std::string enumKeyName;
+    std::string subgroup;
+    std::string group;
+    Settings::ParameterType type = Settings::PARAM_INVALID;
+    Settings::Persistence persistence = Persistence::PERSISTENT;
+    std::variant<bool, long, std::string> value;
+    std::string humanDescription;
+    std::string humanName;
+    Settings::UIControlType suggestedUI = UIControlType::None;
+    bool advancedSetting = false;
+    int min = 0;
+    int max = 0;
+    int divisor = 1;
+    int step = 1;
+    std::map<std::string, int> possibleValues;
 
-		Parameter_Value(std::string storageName, Settings::ParameterType type, Persistence persistence, std::variant<bool, long, std::string> value, std::string humanDescription, std::string humanName = "", Settings::UIControlType suggestedUI = UIControlType::None, bool advancedSetting = false, std::string enumKeyName = "", std::string subgroup = "", std::string group = "") :
-			storageName(storageName), enumKeyName(enumKeyName), subgroup(subgroup), group(group), type(type), persistence(persistence), value(value), humanDescription(humanDescription), humanName(humanName), suggestedUI(suggestedUI), advancedSetting(advancedSetting){}
+    Parameter_Value(std::string storageName, Settings::ParameterType type, Persistence persistence,
+                    std::variant<bool, long, std::string> value, std::string humanDescription,
+                    std::string humanName = "", Settings::UIControlType suggestedUI = UIControlType::None,
+                    bool advancedSetting = false, std::string enumKeyName = "", std::string subgroup = "",
+                    std::string group = "")
+        : storageName(storageName), enumKeyName(enumKeyName), subgroup(subgroup), group(group), type(type),
+          persistence(persistence), value(value), humanDescription(humanDescription), humanName(humanName),
+          suggestedUI(suggestedUI), advancedSetting(advancedSetting) {}
 
-		Parameter_Value(std::string storageName, Settings::ParameterType type, Persistence persistence, std::variant<bool, long, std::string> value, std::string humanDescription, std::string humanName, Settings::UIControlType suggestedUI, int min, int max, int divisor, int step, bool advancedSetting = false, std::string enumKeyName = "", std::string subgroup = "", std::string group = "") :
-			storageName(storageName), enumKeyName(enumKeyName), subgroup(subgroup), group(group), type(type), persistence(persistence), value(value), humanDescription(humanDescription), humanName(humanName), suggestedUI(suggestedUI), min(min), max(max), divisor(divisor), step(step), advancedSetting(advancedSetting){}
+    Parameter_Value(std::string storageName, Settings::ParameterType type, Persistence persistence,
+                    std::variant<bool, long, std::string> value, std::string humanDescription, std::string humanName,
+                    Settings::UIControlType suggestedUI, int min, int max, int divisor, int step,
+                    bool advancedSetting = false, std::string enumKeyName = "", std::string subgroup = "",
+                    std::string group = "")
+        : storageName(storageName), enumKeyName(enumKeyName), subgroup(subgroup), group(group), type(type),
+          persistence(persistence), value(value), humanDescription(humanDescription), humanName(humanName),
+          suggestedUI(suggestedUI), advancedSetting(advancedSetting), min(min), max(max), divisor(divisor), step(step) {
+    }
 
-		Parameter_Value(std::string storageName, Settings::ParameterType type, Persistence persistence, std::variant<bool, long, std::string> value, std::string humanDescription, std::string humanName, Settings::UIControlType suggestedUI, std::map<std::string, int> possibleValues, bool advancedSetting = false, std::string enumKeyName = "", std::string subgroup = "", std::string group = "") :
-			storageName(storageName), enumKeyName(enumKeyName), subgroup(subgroup), group(group), type(type), persistence(persistence), value(value), humanDescription(humanDescription), humanName(humanName), suggestedUI(suggestedUI), possibleValues(possibleValues), advancedSetting(advancedSetting){}
-			
-		// for sorting in UI
-		bool operator<(const Parameter_Value& other) const
-		{
-			return humanName < other.humanName;
-		}
-	};
+    Parameter_Value(std::string storageName, Settings::ParameterType type, Persistence persistence,
+                    std::variant<bool, long, std::string> value, std::string humanDescription, std::string humanName,
+                    Settings::UIControlType suggestedUI, std::map<std::string, int> possibleValues,
+                    bool advancedSetting = false, std::string enumKeyName = "", std::string subgroup = "",
+                    std::string group = "")
+        : storageName(storageName), enumKeyName(enumKeyName), subgroup(subgroup), group(group), type(type),
+          persistence(persistence), value(value), humanDescription(humanDescription), humanName(humanName),
+          suggestedUI(suggestedUI), advancedSetting(advancedSetting), possibleValues(possibleValues) {}
 
-    extern const std::unordered_map<Parameter, const Parameter_Value> parameter_defaults;
-    
-    ///Get the type of a parameter by its key.
-    /// \param iParameter one of the BP_*, LP_* or SP_* enum constants
-    /// \return PARAM_BOOL, PARAM_LONG or PARAM_STRING, respectively; or
-    /// PARAM_INVALID if iParameter is not known (present in the parameter_defaults map
-    ParameterType GetParameterType(Parameter iParameter);
-    
-    ///Gets the regName member of the struct for a parameter (of any of the 3 types).
-    /// This is appropriate for use as a key for storing the setting value into e.g. a registry.
-    /// Note - returns a string not a reference to one, because the table stores only a char*.
-    /// \param iParameter one of the BP_*, LP_* or SP_* enum constants
-    /// \return the regName member of the corresponding bp_table, lp_table,
-    /// or sp_table struct.
-    std::string GetParameterName(Parameter iParameter);
+    // for sorting in UI
+    bool operator<(const Parameter_Value& other) const { return humanName < other.humanName; }
+};
 
-    std::pair<Parameter, ParameterType> GetParameter(const std::string& parameterName);
-  }
-}
+extern const std::unordered_map<Parameter, const Parameter_Value> parameter_defaults;
+
+/// Get the type of a parameter by its key.
+///  \param iParameter one of the BP_*, LP_* or SP_* enum constants
+///  \return PARAM_BOOL, PARAM_LONG or PARAM_STRING, respectively; or
+///  PARAM_INVALID if iParameter is not known (present in the parameter_defaults map
+ParameterType GetParameterType(Parameter iParameter);
+
+/// Gets the regName member of the struct for a parameter (of any of the 3 types).
+///  This is appropriate for use as a key for storing the setting value into e.g. a registry.
+///  Note - returns a string not a reference to one, because the table stores only a char*.
+///  \param iParameter one of the BP_*, LP_* or SP_* enum constants
+///  \return the regName member of the corresponding bp_table, lp_table,
+///  or sp_table struct.
+std::string GetParameterName(Parameter iParameter);
+
+std::pair<Parameter, ParameterType> GetParameter(const std::string& parameterName);
+} // namespace Settings
+} // namespace Dasher

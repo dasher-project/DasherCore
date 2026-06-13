@@ -22,83 +22,73 @@
 // style output.  GCC supports variadic macros, but Visual Studio doesn't yet.
 //
 
-enum class eLogLevel
-{
-    logDEBUG = 0,
-    logNORMAL = 1,
-    logCRITICAL = 2
-};
+enum class eLogLevel { logDEBUG = 0, logNORMAL = 1, logCRITICAL = 2 };
 
 // Bit mask options that are used when we construct object
-enum eFileLoggerOptions
-{
-    logFunctionEntryExit    = 1,
-    logTimeStamp            = 2,
-    logDateStamp            = 4,
-    logDeleteOldFile        = 8,
-    logFunctionTiming       = 16,
-    logOutputScreen         = 32
+enum eFileLoggerOptions {
+    logFunctionEntryExit = 1,
+    logTimeStamp = 2,
+    logDateStamp = 4,
+    logDeleteOldFile = 8,
+    logFunctionTiming = 16,
+    logOutputScreen = 32
 };
 /// \ingroup Logging
 /// @{
-class CFileLogger
-{
-public:
+class CFileLogger {
+  public:
     CFileLogger(const std::string& strFilenamePath, eLogLevel level, int optionsMask);
     ~CFileLogger();
 
-
-    void Log(const char* szText, eLogLevel iLogLevel = eLogLevel::logNORMAL, ...);         // Logs a string to our file if it meets or exceeds our logging level
-    void LogDebug(const char* szText, ...);                                     // Logs debug level messages
-    void LogNormal(const char* szText, ...);                                    // Logs normal level messages    
-    void LogCritical(const char* szText, ...);                                  // Logs critical level messages
+    void Log(const char* szText, eLogLevel iLogLevel = eLogLevel::logNORMAL,
+             ...);                             // Logs a string to our file if it meets or exceeds our logging level
+    void LogDebug(const char* szText, ...);    // Logs debug level messages
+    void LogNormal(const char* szText, ...);   // Logs normal level messages
+    void LogCritical(const char* szText, ...); // Logs critical level messages
 
     // Versions that exists so we can pass in STD strings
-    void Log(const std::string strText, eLogLevel iLogLevel = eLogLevel::logNORMAL, ...);        // Logs a string to our file if it meets or exceeds our logging level
-    
+    void Log(const std::string strText, eLogLevel iLogLevel = eLogLevel::logNORMAL,
+             ...); // Logs a string to our file if it meets or exceeds our logging level
+
     void SetFilename(const std::string& strFilename);
     void SetLogLevel(const eLogLevel newLevel);
     void SetFunctionLogging(bool functionLogging);
 
-    void LogFunctionEntry(const std::string& strFunctionName);                  // Used by FunctionLogger to log entry to a function
-    void LogFunctionExit(const std::string& strFunctionName);                   // Used by FunctionLogger to log exit from a function
-    void LogFunctionTicks(const std::string& strFunctionName, double duration); // Used by FunctionLogger to log how long was spent in a function
+    void LogFunctionEntry(const std::string& strFunctionName); // Used by FunctionLogger to log entry to a function
+    void LogFunctionExit(const std::string& strFunctionName);  // Used by FunctionLogger to log exit from a function
+    void LogFunctionTicks(const std::string& strFunctionName,
+                          double duration); // Used by FunctionLogger to log how long was spent in a function
     bool GetFunctionTiming();
 
-private:
+  private:
     void Log(const char* szText, va_list args);
 
-    std::string     m_strFilenamePath = "";          // Filename and path of our output file	
-    eLogLevel       m_iLogLevel;                // What level of logging this object should write
-    bool            m_bFunctionLogging = false;         // Whether we will log function entry/exit 
-    bool            m_bTimeStamp = false;               // Whether we log the time
-    bool            m_bDateStamp = false;               // Whether we log the date
-    bool            m_bFunctionTiming = false;          // Whether our FunctionLogger objects should do performance timing
-    bool            m_bDeleteOldFile = false;           // Should we delete a previous instance of the log file
-    bool            m_bOutputScreen = false;            // Should we output to stdout as well as the file
-    int             m_iFunctionIndentLevel = 0;     // How many nested calls to FunctionLogger we have
+    std::string m_strFilenamePath = ""; // Filename and path of our output file
+    eLogLevel m_iLogLevel;              // What level of logging this object should write
+    bool m_bFunctionLogging = false;    // Whether we will log function entry/exit
+    bool m_bTimeStamp = false;          // Whether we log the time
+    bool m_bDateStamp = false;          // Whether we log the date
+    bool m_bFunctionTiming = false;     // Whether our FunctionLogger objects should do performance timing
+    bool m_bDeleteOldFile = false;      // Should we delete a previous instance of the log file
+    bool m_bOutputScreen = false;       // Should we output to stdout as well as the file
+    int m_iFunctionIndentLevel = 0;     // How many nested calls to FunctionLogger we have
 
-    std::string     GetIndentedString(const std::string& strText);
-    std::string     GetTimeDateStamp();
+    std::string GetIndentedString(const std::string& strText);
+    std::string GetTimeDateStamp();
 
-
-    std::map<std::string, double> m_mapFunctionDuration;     // Keeps track of how many ticks spent in each of our functions (who create a CFunctionLogger object)
-
-
+    std::map<std::string, double> m_mapFunctionDuration; // Keeps track of how many ticks spent in each of our functions
+                                                         // (who create a CFunctionLogger object)
 };
 
-// Helper class, you can create CFunctionLogger objects at 
+// Helper class, you can create CFunctionLogger objects at
 // the top of a function and it will log its entry and exit.
-class CFunctionLogger
-{
-public:
+class CFunctionLogger {
+  public:
     CFunctionLogger(const std::string& strFunctionName, CFileLogger* pLogger);
     ~CFunctionLogger();
 
-private:
-    std::string                             m_strFunctionName;          // Name of the function this object is logging
-    CFileLogger*                            m_pLogger;                  // Pointer to the logging object to use 
-    std::chrono::steady_clock::time_point   m_startTime;                // Timestamp at start of timing
-    
-
+  private:
+    std::string m_strFunctionName;                     // Name of the function this object is logging
+    CFileLogger* m_pLogger;                            // Pointer to the logging object to use
+    std::chrono::steady_clock::time_point m_startTime; // Timestamp at start of timing
 };

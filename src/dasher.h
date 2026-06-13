@@ -24,9 +24,9 @@
 #include <stdint.h>
 
 #ifdef _WIN32
-#  define DASHER_API __declspec(dllexport)
+#define DASHER_API __declspec(dllexport)
 #else
-#  define DASHER_API __attribute__((visibility("default")))
+#define DASHER_API __attribute__((visibility("default")))
 #endif
 
 #ifdef __cplusplus
@@ -43,8 +43,7 @@ typedef struct dasher_ctx dasher_ctx;
 // out_error: if not NULL, set to a human-readable error string on failure.
 //   Caller must NOT free the string. Valid until next API call.
 // Returns NULL on failure.
-DASHER_API dasher_ctx* dasher_create(const char* data_dir, const char* user_dir,
-                                      char** out_error);
+DASHER_API dasher_ctx* dasher_create(const char* data_dir, const char* user_dir, char** out_error);
 
 // Destroy a session and free all resources.
 DASHER_API void dasher_destroy(dasher_ctx* ctx);
@@ -91,9 +90,8 @@ DASHER_API void dasher_key_event(dasher_ctx* ctx, int key, int pressed);
 // For opcode 5, d is an index into the strings array.
 //
 // argb format: (alpha << 24) | (red << 16) | (green << 8) | blue
-DASHER_API void dasher_frame(dasher_ctx* ctx, int64_t time_ms,
-                              int** out_commands, int* out_command_count,
-                              char*** out_strings, int* out_string_count);
+DASHER_API void dasher_frame(dasher_ctx* ctx, int64_t time_ms, int** out_commands, int* out_command_count,
+                             char*** out_strings, int* out_string_count);
 
 // Get/set output text (characters entered so far).
 // Returned pointer is valid until the next API call on this context.
@@ -172,17 +170,17 @@ DASHER_API int dasher_color_get_blue(int argb);
 // UI control types: 0=none, 1=switch, 2=slider, 3=step, 4=enum, 5=textField
 
 typedef struct dasher_parameter_info {
-    int key;                // BP_*/LP_*/SP_* enum value
-    const char* name;       // human-readable name (valid until next call)
-    const char* desc;       // human-readable description (valid until next call)
-    int type;               // parameter type (0=bool, 1=long, 2=string)
-    int ui_type;            // suggested UI control type
-    long min_val;           // minimum value (for numeric controls)
-    long max_val;           // maximum value (for numeric controls)
-    long step;              // step size (for step/slider controls)
-    int advanced;           // 1 if this is an advanced setting
-    const char* group;      // category group ("Input", "Language", "Appearance", "Speed", "Output")
-    const char* subgroup;   // input filter class (e.g. "CSmoothingFilter") for contextual UI
+    int key;              // BP_*/LP_*/SP_* enum value
+    const char* name;     // human-readable name (valid until next call)
+    const char* desc;     // human-readable description (valid until next call)
+    int type;             // parameter type (0=bool, 1=long, 2=string)
+    int ui_type;          // suggested UI control type
+    long min_val;         // minimum value (for numeric controls)
+    long max_val;         // maximum value (for numeric controls)
+    long step;            // step size (for step/slider controls)
+    int advanced;         // 1 if this is an advanced setting
+    const char* group;    // category group ("Input", "Language", "Appearance", "Speed", "Output")
+    const char* subgroup; // input filter class (e.g. "CSmoothingFilter") for contextual UI
 } dasher_parameter_info;
 
 // Returns the number of parameters in the schema.
@@ -352,18 +350,15 @@ DASHER_API const char* dasher_get_localized_string(dasher_ctx* ctx, const char* 
 // out_lbnds/out_hbnds: cumulative lower/upper probability bound, normalized
 // to 65536 (=1<<16). The probability of child i is hbnds[i]-lbnds[i].
 // Returns -1 if the engine is not realized.
-DASHER_API int dasher_get_probabilities(dasher_ctx* ctx,
-                                         int* out_lbnds, int* out_hbnds, int max_out);
+DASHER_API int dasher_get_probabilities(dasher_ctx* ctx, int* out_lbnds, int* out_hbnds, int max_out);
 
 // Convert screen pixel coordinates to Dasher internal coordinates.
 // Returns 0 on success, -1 if not realized.
-DASHER_API int dasher_screen_to_dasher(dasher_ctx* ctx, int sx, int sy,
-                                        long long* out_dx, long long* out_dy);
+DASHER_API int dasher_screen_to_dasher(dasher_ctx* ctx, int sx, int sy, long long* out_dx, long long* out_dy);
 
 // Convert Dasher internal coordinates to screen pixel coordinates.
 // Returns 0 on success, -1 if not realized.
-DASHER_API int dasher_dasher_to_screen(dasher_ctx* ctx, long long dx, long long dy,
-                                        int* out_sx, int* out_sy);
+DASHER_API int dasher_dasher_to_screen(dasher_ctx* ctx, long long dx, long long dy, int* out_sx, int* out_sy);
 
 // Get the number of children of the node currently under the crosshair.
 // Returns -1 if not realized.
@@ -371,8 +366,7 @@ DASHER_API int dasher_get_root_child_count(dasher_ctx* ctx);
 
 // Get probability bounds for a specific child of the crosshair node.
 // Returns 0 on success, -1 if index out of range or not realized.
-DASHER_API int dasher_get_root_child_bounds(dasher_ctx* ctx, int index,
-                                              long long* out_lbnd, long long* out_hbnd);
+DASHER_API int dasher_get_root_child_bounds(dasher_ctx* ctx, int index, long long* out_lbnd, long long* out_hbnd);
 
 // Get the number of symbols in the active alphabet.
 // Returns -1 if not realized.
@@ -380,8 +374,7 @@ DASHER_API int dasher_get_alphabet_symbol_count(dasher_ctx* ctx);
 
 // Get the display text for an alphabet symbol at the given index.
 // Returns 0 on success, -1 if out of range. out_text is NUL-terminated.
-DASHER_API int dasher_get_alphabet_symbol_text(dasher_ctx* ctx, int index,
-                                                 char* out_text, int max_len);
+DASHER_API int dasher_get_alphabet_symbol_text(dasher_ctx* ctx, int index, char* out_text, int max_len);
 
 // Import custom training text into the language model.
 // This enables deterministic testing with known training data.

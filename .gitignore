@@ -33,8 +33,12 @@
 
 # Build directories
 build/
+build-sanitize/
 Build/
 out/
+
+# Test artifacts
+Testing/
 
 # Build logs
 build_log.txt

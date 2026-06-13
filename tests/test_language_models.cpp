@@ -104,8 +104,7 @@ TEST(lm_parameters_accessible) {
     int max_order_key = dasher_find_parameter_key("LP_LM_MAX_ORDER");
     int exclusion_key = dasher_find_parameter_key("LP_LM_EXCLUSION");
 
-    printf("  alpha=%d beta=%d max_order=%d exclusion=%d\n",
-           alpha_key, beta_key, max_order_key, exclusion_key);
+    printf("  alpha=%d beta=%d max_order=%d exclusion=%d\n", alpha_key, beta_key, max_order_key, exclusion_key);
     ASSERT(alpha_key >= 0);
     ASSERT(beta_key >= 0);
     ASSERT(max_order_key >= 0);

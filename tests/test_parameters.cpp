@@ -25,18 +25,33 @@ TEST(param_schema_out_of_range) {
 }
 
 TEST(param_find_all_known_keys) {
-    const char* known_keys[] = {
-        "BP_DRAW_MOUSE_LINE", "BP_START_MOUSE", "BP_LM_ADAPTIVE",
-        "BP_GAME_HELP_DRAW_PATH", "BP_SPEAK_WORDS", "BP_COPY_ALL_ON_STOP",
-        "BP_AUTO_SPEEDCONTROL", "BP_NONLINEAR_Y", "BP_TURBO_MODE",
-        "LP_ORIENTATION", "LP_MAX_BITRATE", "LP_LANGUAGE_MODEL_ID",
-        "LP_LM_MAX_ORDER", "LP_LM_ALPHA", "LP_LM_BETA",
-        "LP_NODE_BUDGET", "LP_UNIFORM", "LP_DASHER_FONTSIZE",
-        "LP_GEOMETRY", "LP_LINE_WIDTH",
-        "SP_ALPHABET_ID", "SP_COLOUR_ID", "SP_DASHER_FONT",
-        "SP_INPUT_FILTER", "SP_INPUT_DEVICE", "SP_GAME_TEXT_FILE",
-        nullptr
-    };
+    const char* known_keys[] = {"BP_DRAW_MOUSE_LINE",
+                                "BP_START_MOUSE",
+                                "BP_LM_ADAPTIVE",
+                                "BP_GAME_HELP_DRAW_PATH",
+                                "BP_SPEAK_WORDS",
+                                "BP_COPY_ALL_ON_STOP",
+                                "BP_AUTO_SPEEDCONTROL",
+                                "BP_NONLINEAR_Y",
+                                "BP_TURBO_MODE",
+                                "LP_ORIENTATION",
+                                "LP_MAX_BITRATE",
+                                "LP_LANGUAGE_MODEL_ID",
+                                "LP_LM_MAX_ORDER",
+                                "LP_LM_ALPHA",
+                                "LP_LM_BETA",
+                                "LP_NODE_BUDGET",
+                                "LP_UNIFORM",
+                                "LP_DASHER_FONTSIZE",
+                                "LP_GEOMETRY",
+                                "LP_LINE_WIDTH",
+                                "SP_ALPHABET_ID",
+                                "SP_COLOUR_ID",
+                                "SP_DASHER_FONT",
+                                "SP_INPUT_FILTER",
+                                "SP_INPUT_DEVICE",
+                                "SP_GAME_TEXT_FILE",
+                                nullptr};
 
     for (int i = 0; known_keys[i]; i++) {
         int key = dasher_find_parameter_key(known_keys[i]);
@@ -160,9 +175,15 @@ TEST(param_type_consistency) {
         dasher_parameter_info info;
         dasher_get_parameter_info(i, &info);
         switch (info.type) {
-            case 0: bool_count++; break;
-            case 1: long_count++; break;
-            case 2: string_count++; break;
+        case 0:
+            bool_count++;
+            break;
+        case 1:
+            long_count++;
+            break;
+        case 2:
+            string_count++;
+            break;
         }
     }
     printf("  Types: bool=%d long=%d string=%d\n", bool_count, long_count, string_count);
@@ -174,19 +195,33 @@ TEST(param_type_consistency) {
 
 TEST(param_groups_are_valid) {
     int count = dasher_get_parameter_count();
-    const char* valid_groups[] = {"Input", "Language", "Appearance", "Speed", "Output",
-                                   "Alphabet", "Alphabet History 1", "Alphabet History 2",
-                                   "Alphabet History 3", "Alphabet History 4",
-                                   "Advanced", "Other", "History",
-                                   "Customization", "Game Mode", ""};
-    int num_groups = sizeof(valid_groups)/sizeof(valid_groups[0]);
+    const char* valid_groups[] = {"Input",
+                                  "Language",
+                                  "Appearance",
+                                  "Speed",
+                                  "Output",
+                                  "Alphabet",
+                                  "Alphabet History 1",
+                                  "Alphabet History 2",
+                                  "Alphabet History 3",
+                                  "Alphabet History 4",
+                                  "Advanced",
+                                  "Other",
+                                  "History",
+                                  "Customization",
+                                  "Game Mode",
+                                  ""};
+    int num_groups = sizeof(valid_groups) / sizeof(valid_groups[0]);
 
     for (int i = 0; i < count; i++) {
         dasher_parameter_info info;
         dasher_get_parameter_info(i, &info);
         bool found = false;
         for (int g = 0; g < num_groups; g++) {
-            if (strcmp(info.group, valid_groups[g]) == 0) { found = true; break; }
+            if (strcmp(info.group, valid_groups[g]) == 0) {
+                found = true;
+                break;
+            }
         }
         if (!found) {
             printf("  Unknown group '%s' for param '%s' (key=%d)\n", info.group, info.name, info.key);
@@ -202,6 +237,7 @@ TEST(param_persistence_roundtrip) {
     mkdir(shared_dir, 0755);
 
     int speed_key = dasher_find_parameter_key("LP_MAX_BITRATE");
+    (void)speed_key;
     int bool_key = dasher_find_parameter_key("BP_COPY_ALL_ON_STOP");
 
     dasher_ctx* ctx1 = dasher_create(TEST_DATA_DIR, shared_dir, nullptr);

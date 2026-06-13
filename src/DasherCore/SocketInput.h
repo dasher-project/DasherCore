@@ -14,50 +14,44 @@
 #include <iostream>
 #include <pthread.h>
 
-#define GCC_VERSION (__GNUC__ * 10000 \
-                     + __GNUC_MINOR__ * 100 \
-                     + __GNUC_PATCHLEVEL__)
-
-
+#define GCC_VERSION (__GNUC__ * 10000 + __GNUC_MINOR__ * 100 + __GNUC_PATCHLEVEL__)
 
 namespace Dasher {
-  class CSocketInput;
+class CSocketInput;
 #if GCC_VERSION >= 40100
-  void *ThreadLauncherStub(void *_myClass);
+void* ThreadLauncherStub(void* _myClass);
 #endif
-  
+
 /// \ingroup Input
 /// \{
-class CSocketInput:public CSocketInputBase {
+class CSocketInput : public CSocketInputBase {
 
-  // This non-member launcher stub function is required because pthreads can't launch a non-static member method.
-  friend void *ThreadLauncherStub(void *_myClass) {
-    CSocketInput *myClass = (CSocketInput *) _myClass;
+    // This non-member launcher stub function is required because pthreads can't launch a non-static member method.
+    friend void* ThreadLauncherStub(void* _myClass) {
+        CSocketInput* myClass = (CSocketInput*)_myClass;
 
-    pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS, NULL);     // kill this thread immediately if another thread cancels it
-    // don't know how this interacts with recv blocking
+        pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS,
+                              NULL); // kill this thread immediately if another thread cancels it
+        // don't know how this interacts with recv blocking
 
-    myClass->ReadForever();
+        myClass->ReadForever();
 
-    return NULL;
-  }
+        return NULL;
+    }
 
-public:
+  public:
+    CSocketInput(CSettingsUser* pCreator, CMessageDisplay* pMsgs);
+    ~CSocketInput();
 
-  CSocketInput(CSettingsUser *pCreator, CMessageDisplay *pMsgs);
-  ~CSocketInput();
+  private:
+    pthread_t readerThread;
 
-private:
+    bool LaunchReaderThread();
 
-  pthread_t readerThread;
+    void CancelReaderThread();
 
-  bool LaunchReaderThread();
-
-  void CancelReaderThread();
-
-  // TODO: should probably override ReportErrnoError() to popup a Gtk error message
-
+    // TODO: should probably override ReportErrnoError() to popup a Gtk error message
 };
-}
+} // namespace Dasher
 /// \}
 #endif

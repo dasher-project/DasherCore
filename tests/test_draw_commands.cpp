@@ -1,7 +1,7 @@
 // Draw command tests: validate opcode structure, bounds, strings, rendering
 #include "test_common.h"
 
-static void run_frames(dasher_ctx* ctx, int count, int64_t start_ms) {
+[[maybe_unused]] static void run_frames(dasher_ctx* ctx, int count, int64_t start_ms) {
     int* commands = nullptr;
     int cmd_count = 0;
     char** strings = nullptr;
@@ -11,9 +11,11 @@ static void run_frames(dasher_ctx* ctx, int count, int64_t start_ms) {
     }
 }
 
-static void get_frame(dasher_ctx* ctx, int64_t time,
-                      int** cmds, int* cmd_count, char*** strs, int* str_count) {
-    *cmds = nullptr; *cmd_count = 0; *strs = nullptr; *str_count = 0;
+static void get_frame(dasher_ctx* ctx, int64_t time, int** cmds, int* cmd_count, char*** strs, int* str_count) {
+    *cmds = nullptr;
+    *cmd_count = 0;
+    *strs = nullptr;
+    *str_count = 0;
     dasher_frame(ctx, time, cmds, cmd_count, strs, str_count);
 }
 
@@ -22,7 +24,10 @@ TEST(draw_command_alignment) {
     ASSERT(ctx != nullptr);
     dasher_set_screen_size(ctx, 800, 600);
 
-    int* cmds; int cmd_count; char** strs; int str_count;
+    int* cmds;
+    int cmd_count;
+    char** strs;
+    int str_count;
     get_frame(ctx, 1000, &cmds, &cmd_count, &strs, &str_count);
 
     ASSERT(cmds != nullptr);
@@ -45,7 +50,10 @@ TEST(draw_opcodes_in_range) {
 
     for (int frame = 0; frame < 50; frame++) {
         dasher_mouse_move(ctx, 700.0f, 290.0f);
-        int* cmds; int cmd_count; char** strs; int str_count;
+        int* cmds;
+        int cmd_count;
+        char** strs;
+        int str_count;
         get_frame(ctx, 1000 + frame * 16, &cmds, &cmd_count, &strs, &str_count);
 
         int ops = cmd_count / 6;
@@ -65,7 +73,10 @@ TEST(draw_first_command_is_clear) {
     ASSERT(ctx != nullptr);
     dasher_set_screen_size(ctx, 800, 600);
 
-    int* cmds; int cmd_count; char** strs; int str_count;
+    int* cmds;
+    int cmd_count;
+    char** strs;
+    int str_count;
     get_frame(ctx, 1000, &cmds, &cmd_count, &strs, &str_count);
 
     int first_op = cmds[0];
@@ -92,7 +103,10 @@ TEST(draw_text_string_indices_valid) {
     bool found_text_op = false;
     for (int frame = 0; frame < 100; frame++) {
         dasher_mouse_move(ctx, 700.0f, 285.0f);
-        int* cmds; int cmd_count; char** strs; int str_count;
+        int* cmds;
+        int cmd_count;
+        char** strs;
+        int str_count;
         get_frame(ctx, 1000 + frame * 16, &cmds, &cmd_count, &strs, &str_count);
 
         int ops = cmd_count / 6;
@@ -127,7 +141,10 @@ TEST(draw_coordinates_in_bounds) {
 
     for (int frame = 0; frame < 30; frame++) {
         dasher_mouse_move(ctx, 400.0f, 290.0f);
-        int* cmds; int cmd_count; char** strs; int str_count;
+        int* cmds;
+        int cmd_count;
+        char** strs;
+        int str_count;
         get_frame(ctx, 1000 + frame * 16, &cmds, &cmd_count, &strs, &str_count);
 
         int ops = cmd_count / 6;
@@ -138,18 +155,21 @@ TEST(draw_coordinates_in_bounds) {
             int b = cmds[base + 2];
             int c = cmds[base + 3];
             int d = cmds[base + 4];
+            (void)a;
+            (void)b;
+            (void)d;
 
             switch (op) {
-                case 1:
-                    ASSERT(c > 0);
-                    break;
-                case 2:
-                case 3:
-                case 4:
-                    break;
-                case 5:
-                    ASSERT(c > 0);
-                    break;
+            case 1:
+                ASSERT(c > 0);
+                break;
+            case 2:
+            case 3:
+            case 4:
+                break;
+            case 5:
+                ASSERT(c > 0);
+                break;
             }
         }
     }
@@ -165,7 +185,10 @@ TEST(draw_multiple_frames_consistent) {
     dasher_set_screen_size(ctx, 800, 600);
 
     for (int frame = 0; frame < 200; frame++) {
-        int* cmds; int cmd_count; char** strs; int str_count;
+        int* cmds;
+        int cmd_count;
+        char** strs;
+        int str_count;
         get_frame(ctx, 1000 + frame * 16, &cmds, &cmd_count, &strs, &str_count);
 
         ASSERT(cmd_count >= 0);
@@ -191,7 +214,10 @@ TEST(draw_colors_have_alpha) {
     bool found_nonzero_alpha = false;
     for (int frame = 0; frame < 50; frame++) {
         dasher_mouse_move(ctx, 700.0f, 290.0f);
-        int* cmds; int cmd_count; char** strs; int str_count;
+        int* cmds;
+        int cmd_count;
+        char** strs;
+        int str_count;
         get_frame(ctx, 1000 + frame * 16, &cmds, &cmd_count, &strs, &str_count);
 
         int ops = cmd_count / 6;
@@ -213,13 +239,19 @@ TEST(draw_no_mouse_produces_idle_frame) {
     ASSERT(ctx != nullptr);
     dasher_set_screen_size(ctx, 800, 600);
 
-    int* cmds; int cmd_count; char** strs; int str_count;
+    int* cmds;
+    int cmd_count;
+    char** strs;
+    int str_count;
     get_frame(ctx, 1000, &cmds, &cmd_count, &strs, &str_count);
 
     ASSERT(cmd_count > 0);
     ASSERT_EQ(cmds[0], 0);
 
-    int* cmds2; int cmd_count2; char** strs2; int str_count2;
+    int* cmds2;
+    int cmd_count2;
+    char** strs2;
+    int str_count2;
     get_frame(ctx, 1016, &cmds2, &cmd_count2, &strs2, &str_count2);
 
     ASSERT(cmd_count2 > 0);

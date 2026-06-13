@@ -8,55 +8,49 @@
 #include <string>
 
 namespace Dasher {
-  class CDasherNode;
-  class CDasherInterfaceBase;
-  class CDasherScreen;
-  class CControlBoxIO;
-}
+class CDasherNode;
+class CDasherInterfaceBase;
+class CDasherScreen;
+class CControlBoxIO;
+} // namespace Dasher
 
-//TODO why is CNodeCreationManager _not_ in namespace Dasher?!?!
+// TODO why is CNodeCreationManager _not_ in namespace Dasher?!?!
 /// \ingroup Model
 /// @{
 class CNodeCreationManager {
- public:
-  CNodeCreationManager(Dasher::CSettingsStore* pSettingsStore,
-                       Dasher::CDasherInterfaceBase *pInterface,
-                       const Dasher::CAlphIO *pAlphIO);
-  ~CNodeCreationManager();
-  
-  ///Tells us the screen on which all created node labels must be rendered
-  void ChangeScreen(Dasher::CDasherScreen *pScreen);
-  
-  void HandleParameterChange(Dasher::Parameter parameter) {}
-  ///
-  /// Get a root node of a particular type
-  ///
+  public:
+    CNodeCreationManager(Dasher::CSettingsStore* pSettingsStore, Dasher::CDasherInterfaceBase* pInterface,
+                         const Dasher::CAlphIO* pAlphIO);
+    ~CNodeCreationManager();
 
-  Dasher::CAlphabetManager *GetAlphabetManager() {return m_pAlphabetManager;}
-    
-  ///
-  /// Get a reference to the current alphabet
-  ///
+    /// Tells us the screen on which all created node labels must be rendered
+    void ChangeScreen(Dasher::CDasherScreen* pScreen);
 
-  const Dasher::CAlphInfo *GetAlphabet() const {
-    return m_pAlphabetManager->GetAlphabet();
-  }
+    void HandleParameterChange(Dasher::Parameter parameter) {}
+    ///
+    /// Get a root node of a particular type
+    ///
 
-  void ImportTrainingText(const std::string &strPath);
+    Dasher::CAlphabetManager* GetAlphabetManager() { return m_pAlphabetManager; }
 
-private:
-  Dasher::CTrainer *m_pTrainer;
-  
-  Dasher::CDasherInterfaceBase *m_pInterface;
-  
-  Dasher::CAlphabetManager *m_pAlphabetManager;
-  
-  
-  
-  ///Screen to use to create node labels
-  Dasher::CDasherScreen *m_pScreen;
+    ///
+    /// Get a reference to the current alphabet
+    ///
 
-  Dasher::CSettingsStore* m_pSettingsStore;
+    const Dasher::CAlphInfo* GetAlphabet() const { return m_pAlphabetManager->GetAlphabet(); }
+
+    void ImportTrainingText(const std::string& strPath);
+
+  private:
+    Dasher::CTrainer* m_pTrainer;
+
+    Dasher::CDasherInterfaceBase* m_pInterface;
+
+    Dasher::CAlphabetManager* m_pAlphabetManager;
+
+    /// Screen to use to create node labels
+    Dasher::CDasherScreen* m_pScreen;
+
+    Dasher::CSettingsStore* m_pSettingsStore;
 };
 /// @}
-

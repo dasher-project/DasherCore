@@ -8,9 +8,8 @@
 // The warning just means that VC++ is unable to produce certain debug
 // information - there is nothing wrong with the code. IAM 08/2002
 #ifdef _MSC_VER
-#pragma warning(disable:4786)
-#pragma warning(disable:4018)
+#pragma warning(disable : 4786)
+#pragma warning(disable : 4018)
 
-#pragma warning(disable:4996)   // warning C4996: 'fopen' was declared deprecated
+#pragma warning(disable : 4996) // warning C4996: 'fopen' was declared deprecated
 #endif
-

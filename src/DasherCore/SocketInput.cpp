@@ -14,27 +14,25 @@
 
 using namespace Dasher;
 
-CSocketInput::CSocketInput(CSettingsUser *pCreator, CMessageDisplay *pMsgs)
-:CSocketInputBase(pCreator, pMsgs) {
-}
+CSocketInput::CSocketInput(CSettingsUser* pCreator, CMessageDisplay* pMsgs) : CSocketInputBase(pCreator, pMsgs) {}
 
 CSocketInput::~CSocketInput() {
-  StopListening();
+    StopListening();
 }
 
 // private methods:
 
 bool CSocketInput::LaunchReaderThread() {
-  if (pthread_create(&readerThread, NULL, ThreadLauncherStub, this) == 0) {
-    return true;
-  } else {
-    //TODO should probably pop up a Gtk error message and think about how to do i18n:
-    cerr << _("Dasher socket input: failed to launch reader thread.") << endl;
-    return false;
-  }
+    if (pthread_create(&readerThread, NULL, ThreadLauncherStub, this) == 0) {
+        return true;
+    } else {
+        // TODO should probably pop up a Gtk error message and think about how to do i18n:
+        cerr << _("Dasher socket input: failed to launch reader thread.") << endl;
+        return false;
+    }
 }
 
 void CSocketInput::CancelReaderThread() {
-  pthread_cancel(readerThread);
+    pthread_cancel(readerThread);
 }
 #endif

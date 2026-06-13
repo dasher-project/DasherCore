@@ -15,12 +15,12 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Dasher; if not, write to the Free Software 
+// along with Dasher; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #pragma once
 
-/*Common Node Definition for Chinese Pinyin (possibly also Japanese) 
+/*Common Node Definition for Chinese Pinyin (possibly also Japanese)
   Conversion Library and Dasher ConversionManager*/
 
 #include <vector>
@@ -28,50 +28,44 @@
 /// \ingroup Model
 /// \{
 class SCENode {
- public:
-  SCENode();
+  public:
+    SCENode();
 
-  ~SCENode();
+    ~SCENode();
 
-  void Ref() {
-    ++m_iRefCount;
-  };
+    void Ref() { ++m_iRefCount; };
 
-  void Unref() {
-    --m_iRefCount;
-    
-    if(m_iRefCount == 0) {
-      delete this;
+    void Unref() {
+        --m_iRefCount;
+
+        if (m_iRefCount == 0) {
+            delete this;
+        }
+    };
+
+    const std::vector<SCENode*>& GetChildren() const { return m_vChildren; }
+    void AddChild(SCENode* pChild) {
+        m_vChildren.push_back(pChild);
+        pChild->Ref();
     }
-  };
-  
-  const std::vector<SCENode *> &GetChildren() const {
-    return m_vChildren;
-  }
-  void AddChild(SCENode *pChild) {
-    m_vChildren.push_back(pChild);
-    pChild->Ref();
-  }
 
-  char *pszConversion;
+    char* pszConversion;
 
-  //int IsHeadAndCandNum;
-  //int CandIndex;
-  int Symbol;
-  //unsigned int SumPYProbStore;
-  
-  //int IsComplete;
-  //int AcCharCount;  /*accumulative character count*/
-  
-  int NodeSize;
-  
-  //unsigned int HZFreq;
-  //float HZProb;
- private:
-  int m_iRefCount;
+    // int IsHeadAndCandNum;
+    // int CandIndex;
+    int Symbol;
+    // unsigned int SumPYProbStore;
 
-  std::vector<SCENode *> m_vChildren;
+    // int IsComplete;
+    // int AcCharCount;  /*accumulative character count*/
+
+    int NodeSize;
+
+    // unsigned int HZFreq;
+    // float HZProb;
+  private:
+    int m_iRefCount;
+
+    std::vector<SCENode*> m_vChildren;
 };
 /// \}
-
-

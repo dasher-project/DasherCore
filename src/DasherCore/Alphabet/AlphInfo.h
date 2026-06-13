@@ -20,7 +20,6 @@
 
 #pragma once
 
-
 #include "DasherCore/DasherTypes.h"
 #include "GroupInfo.h"
 
@@ -30,9 +29,9 @@
 #include "DasherCore/Actions.h"
 
 namespace Dasher {
-  class CAlphInfo;
-  class CAlphIO;
-}
+class CAlphInfo;
+class CAlphIO;
+} // namespace Dasher
 
 /// \ingroup Alphabet
 /// @{
@@ -59,115 +58,112 @@ namespace Dasher {
 /// - this is for consistency with SGroupInfo, preserving that iEnd is one more
 /// than the highest valid index.
 class Dasher::CAlphInfo : public SGroupInfo {
-public:
-  ///Format a character ready to write to a training file, by doubling
-  /// up any escape character (context-switch / conversion-start)
-  std::string escape(const std::string &ch) const;
-  
-  const std::string &GetID() const {return AlphID;}
+  public:
+    /// Format a character ready to write to a training file, by doubling
+    ///  up any escape character (context-switch / conversion-start)
+    std::string escape(const std::string& ch) const;
 
-  Options::ScreenOrientations GetOrientation() const {return Orientation;}
+    const std::string& GetID() const { return AlphID; }
 
-  const std::string & GetTrainingFile() const {return TrainingFile;}
+    Options::ScreenOrientations GetOrientation() const { return Orientation; }
 
-  const std::string & GetPalette() const {return PreferredColors;}
+    const std::string& GetTrainingFile() const { return TrainingFile; }
 
-  //Determine that this character denotes a word gap
-  bool SymbolIsSpaceCharacter(symbol s) const {return s > 0 && s <= (symbol)m_vCharacters.size() && std::isspace(m_vCharacters[s-1].Text[0]);}
-  bool SymbolPrintsNewLineCharacter(symbol s) const {return s > 0 && s <= (symbol)m_vCharacters.size() && m_vCharacters[s-1].Text == "\n";}
+    const std::string& GetPalette() const { return PreferredColors; }
 
-  const std::vector<Action*>& GetCharDoActions(symbol s) const {return m_vCharacterDoActions[s-1];}
-  const std::vector<Action*>& GetCharUndoActions(symbol s) const {return m_vCharacterUndoActions[s-1];}
+    // Determine that this character denotes a word gap
+    bool SymbolIsSpaceCharacter(symbol s) const {
+        return s > 0 && s <= (symbol)m_vCharacters.size() && std::isspace(m_vCharacters[s - 1].Text[0]);
+    }
+    bool SymbolPrintsNewLineCharacter(symbol s) const {
+        return s > 0 && s <= (symbol)m_vCharacters.size() && m_vCharacters[s - 1].Text == "\n";
+    }
 
-  //symbol GetStartConversionSymbol() const;
-  //symbol GetEndConversionSymbol() const;
+    const std::vector<Action*>& GetCharDoActions(symbol s) const { return m_vCharacterDoActions[s - 1]; }
+    const std::vector<Action*>& GetCharUndoActions(symbol s) const { return m_vCharacterUndoActions[s - 1]; }
 
-  /// return display string for i'th symbol
-  static const std::string s_emptyStr;
-  static const std::string s_emptyDisplay;
+    // symbol GetStartConversionSymbol() const;
+    // symbol GetEndConversionSymbol() const;
 
-  bool validSymbol(symbol i) const {return i > 0 && i <= (symbol)m_vCharacters.size();}
+    /// return display string for i'th symbol
+    static const std::string s_emptyStr;
+    static const std::string s_emptyDisplay;
 
-  const std::string & GetDisplayText(symbol i) const {return validSymbol(i) ? m_vCharacters[i-1].Display : s_emptyDisplay;}
+    bool validSymbol(symbol i) const { return i > 0 && i <= (symbol)m_vCharacters.size(); }
 
-  const std::string & GetText(symbol i) const {return validSymbol(i) ? m_vCharacters[i-1].Text : s_emptyStr;}
-  const double GetSymbolFixedProbability(symbol i) const {return validSymbol(i) ? m_vCharacters[i-1].fixedProbability : 0.0;}
-  const double GetSymbolSpeedMultiplier(symbol i) const {return validSymbol(i) ? m_vCharacters[i-1].speedFactor : 1.0;}
+    const std::string& GetDisplayText(symbol i) const {
+        return validSymbol(i) ? m_vCharacters[i - 1].Display : s_emptyDisplay;
+    }
 
-  int getColorGroupOffset(symbol i) const
-  {
-      return validSymbol(i) ? m_vCharacters[i-1].ColorGroupOffset : 0;
-  };
+    const std::string& GetText(symbol i) const { return validSymbol(i) ? m_vCharacters[i - 1].Text : s_emptyStr; }
+    double GetSymbolFixedProbability(symbol i) const {
+        return validSymbol(i) ? m_vCharacters[i - 1].fixedProbability : 0.0;
+    }
+    double GetSymbolSpeedMultiplier(symbol i) const { return validSymbol(i) ? m_vCharacters[i - 1].speedFactor : 1.0; }
 
-  std::string& getColorGroup(symbol i) const
-  {
-      static std::string empty;
-      return validSymbol(i) ? m_vCharacters[i-1].parentGroup->colorGroup : empty;
-  };
+    int getColorGroupOffset(symbol i) const { return validSymbol(i) ? m_vCharacters[i - 1].ColorGroupOffset : 0; };
 
-  const std::string &GetDefaultContext() const {return m_strDefaultContext;}
+    std::string& getColorGroup(symbol i) const {
+        static std::string empty;
+        return validSymbol(i) ? m_vCharacters[i - 1].parentGroup->colorGroup : empty;
+    };
 
-  ///A single unicode character to use as an escape sequence in training files
-  ///to indicate context-switching commands; 0-length => don't use context-switching commands.
-  /// Defaults to § if not specified in alphabet.
-  const std::string &GetContextEscapeChar() const {return m_strCtxChar;}
+    const std::string& GetDefaultContext() const { return m_strDefaultContext; }
 
-  ///0 = normal alphabet, contains symbols to output
-  ///1 = Japanese (defunct)
-  ///2 = Mandarin: symbols are merely phonemes, and match up (via displaytext)
-  /// with groups in a second alphabet, identified by strConversionTarget,
-  /// which contains actual output symbols possibly including duplicates;
-  /// all this handled by MandarinAlphMgr (+MandarinTrainer, PPMPYLanguageModel).
-  enum alphabetConversion
-  {
-      None = 0,
-      Mandarin = 2,
-      RoutingContextInsensitive = 3,
-      RoutingContextSensitive = 4
-  };
-  alphabetConversion m_iConversionID;
+    /// A single unicode character to use as an escape sequence in training files
+    /// to indicate context-switching commands; 0-length => don't use context-switching commands.
+    ///  Defaults to § if not specified in alphabet.
+    const std::string& GetContextEscapeChar() const { return m_strCtxChar; }
 
-  ///Single-unicode characters used in the training file to delimit the name of a group
-  /// containing the next symbol, in order to disambiguate which group (=route, pronunciation)
-  /// was used to produce the symbol in this case (see MandarinTrainer).
-  /// Only used if m_iConversionID==2, 3 or 4. Default to "<" and ">"
-  std::string m_strConversionTrainStart = "<";
-  std::string m_strConversionTrainStop = ">";
+    /// 0 = normal alphabet, contains symbols to output
+    /// 1 = Japanese (defunct)
+    /// 2 = Mandarin: symbols are merely phonemes, and match up (via displaytext)
+    ///  with groups in a second alphabet, identified by strConversionTarget,
+    ///  which contains actual output symbols possibly including duplicates;
+    ///  all this handled by MandarinAlphMgr (+MandarinTrainer, PPMPYLanguageModel).
+    enum alphabetConversion { None = 0, Mandarin = 2, RoutingContextInsensitive = 3, RoutingContextSensitive = 4 };
+    alphabetConversion m_iConversionID;
 
-  ~CAlphInfo();
+    /// Single-unicode characters used in the training file to delimit the name of a group
+    ///  containing the next symbol, in order to disambiguate which group (=route, pronunciation)
+    ///  was used to produce the symbol in this case (see MandarinTrainer).
+    ///  Only used if m_iConversionID==2, 3 or 4. Default to "<" and ">"
+    std::string m_strConversionTrainStart = "<";
+    std::string m_strConversionTrainStop = ">";
 
-private:
-  friend class CAlphIO;
-  CAlphInfo();
-  // Basic information
-  std::string AlphID;
+    ~CAlphInfo();
 
-  // Complete description of the alphabet:
-  std::string TrainingFile;
-  std::string PreferredColors;
-  Options::ScreenOrientations Orientation;
+  private:
+    friend class CAlphIO;
+    CAlphInfo();
+    // Basic information
+    std::string AlphID;
 
-  std::string m_strDefaultContext;
-  std::string m_strCtxChar;
+    // Complete description of the alphabet:
+    std::string TrainingFile;
+    std::string PreferredColors;
+    Options::ScreenOrientations Orientation;
 
-protected:
-  struct character {
-    character() = default;
+    std::string m_strDefaultContext;
+    std::string m_strCtxChar;
 
-    std::string Display;
-    std::string Text;
-    SGroupInfo* parentGroup = nullptr;
-    int ColorGroupOffset = -1; //Offset within group
-    float fixedProbability = -1; //fixed probability, resulting in fixed size later on. Currently not supported but parsed already.
-    float speedFactor = -1; //allows for slowdown in this box
-  };
-  std::vector<character> m_vCharacters;
-  std::vector<std::vector<Action*>> m_vCharacterDoActions = {};
-  std::vector<std::vector<Action*>> m_vCharacterUndoActions = {};
+  protected:
+    struct character {
+        character() = default;
 
-  void copyCharacterFrom(const CAlphInfo *other, int idx);
+        std::string Display;
+        std::string Text;
+        SGroupInfo* parentGroup = nullptr;
+        int ColorGroupOffset = -1; // Offset within group
+        float fixedProbability =
+            -1; // fixed probability, resulting in fixed size later on. Currently not supported but parsed already.
+        float speedFactor = -1; // allows for slowdown in this box
+    };
+    std::vector<character> m_vCharacters;
+    std::vector<std::vector<Action*>> m_vCharacterDoActions = {};
+    std::vector<std::vector<Action*>> m_vCharacterUndoActions = {};
+
+    void copyCharacterFrom(const CAlphInfo* other, int idx);
 };
 
-
 /// @}
-

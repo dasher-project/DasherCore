@@ -11,7 +11,7 @@ static void run_frames(dasher_ctx* ctx, int count) {
         dasher_frame(ctx, 1000 + i * 20, &c, &cc, &s, &sc);
 }
 
-static int sum_probabilities(dasher_ctx* ctx) {
+[[maybe_unused]] static int sum_probabilities(dasher_ctx* ctx) {
     int lbnds[256], hbnds[256];
     int n = dasher_get_probabilities(ctx, lbnds, hbnds, 256);
     if (n <= 0) return -1;
