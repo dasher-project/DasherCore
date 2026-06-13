@@ -327,6 +327,11 @@ DASHER_API void dasher_destroy(dasher_ctx* ctx) {
     delete ctx;
 }
 
+DASHER_API void dasher_set_low_memory_mode(dasher_ctx* ctx, int enabled) {
+    if (!ctx || !ctx->intf) return;
+    ctx->intf->SetLowMemoryMode(enabled != 0);
+}
+
 DASHER_API void dasher_set_screen_size(dasher_ctx* ctx, int width, int height) {
     if (!ctx || !ctx->intf || width <= 0 || height <= 0) return;
 

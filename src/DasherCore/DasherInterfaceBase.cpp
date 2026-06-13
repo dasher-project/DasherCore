@@ -49,6 +49,15 @@
 #include <memory>
 #include <sstream>
 #include <algorithm>
+#include <cctype>
+
+static std::string alphabetIdToFilename(const std::string &alphId) {
+    std::string lower = alphId;
+    std::transform(lower.begin(), lower.end(), lower.begin(),
+                   [](unsigned char c) { return std::tolower(c); });
+    std::replace(lower.begin(), lower.end(), ' ', '.');
+    return "alphabet." + lower + ".xml";
+}
 
 // Declare our global file logging object
 
@@ -179,7 +188,18 @@ void CDasherInterfaceBase::Realize(unsigned long ulTime) {
   srand(ulTime);
  
   m_AlphIO = std::make_unique<CAlphIO>(this);
-  Dasher::FileUtils::ScanFiles(m_AlphIO.get(), "alphabet.*.xml");
+  if (m_bLowMemoryMode) {
+    // Load only the selected alphabet (or default) to save ~5-10MB
+    std::string alphId = m_pSettingsStore->GetStringParameter(SP_ALPHABET_ID);
+    if (alphId.empty())
+      alphId = "English with limited punctuation";
+    Dasher::FileUtils::ScanFiles(m_AlphIO.get(), alphabetIdToFilename(alphId));
+    // If the specific file wasn't found, fall back to the default
+    if (!m_AlphIO->GetInfo(alphId))
+      Dasher::FileUtils::ScanFiles(m_AlphIO.get(), alphabetIdToFilename("English with limited punctuation"));
+  } else {
+    Dasher::FileUtils::ScanFiles(m_AlphIO.get(), "alphabet.*.xml");
+  }
 
   m_ColorIO = std::make_unique<CColorIO>(this);
   Dasher::FileUtils::ScanFiles(m_ColorIO.get(), "color.*.xml");
@@ -536,6 +556,14 @@ void CDasherInterfaceBase::ChangeAlphabet() {
     return;
   }
 
+  // In low-memory mode, load the requested alphabet on demand
+  if (m_bLowMemoryMode && m_AlphIO) {
+    std::string alphId = m_pSettingsStore->GetStringParameter(SP_ALPHABET_ID);
+    if (!m_AlphIO->GetInfo(alphId)) {
+      Dasher::FileUtils::ScanFiles(m_AlphIO.get(), alphabetIdToFilename(alphId));
+    }
+  }
+
   if (m_pNCManager) WriteTrainFileFull(); //can't/don't before creating first NCManager
 
   // Send a lock event
@@ -699,6 +727,9 @@ void CDasherInterfaceBase::CreateInputFilter() {
 
 void CDasherInterfaceBase::CreateModules() {
   GetModuleManager()->RegisterInputMethodModule(std::make_unique<CDefaultFilter>(m_pSettingsStore, this, m_pFramerate.get(), _("Normal Control")), true);
+
+  if (m_bLowMemoryMode) return;
+
   GetModuleManager()->RegisterInputMethodModule(std::make_unique<CPressFilter>(m_pSettingsStore, this, m_pFramerate.get(), _("Press Mode")));
   GetModuleManager()->RegisterInputMethodModule(std::make_unique<CSmoothingFilter>(m_pSettingsStore, this, m_pFramerate.get(), _("Smoothing Mode")));
   GetModuleManager()->RegisterInputMethodModule(std::make_unique<COneDimensionalFilter>(m_pSettingsStore, this, m_pFramerate.get()));

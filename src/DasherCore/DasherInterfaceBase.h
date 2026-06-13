@@ -99,6 +99,12 @@ public:
 
   void ResetParameter(Parameter parameter);
 
+  /// Enables low-memory mode: loads only the selected alphabet and
+  /// creates only the default input filter. For memory-constrained
+  /// environments like iOS keyboard extensions.
+  /// Must be called before Realize().
+  void SetLowMemoryMode(bool enabled) { m_bLowMemoryMode = enabled; }
+
   ///
   /// Obtain the permitted values for a string parameter - used to
   /// geneate preferences dialogues etc.
@@ -422,6 +428,8 @@ protected:
   /// @{
 
   ///
+
+  ///
   /// Creates a default set of modules. Override in subclasses to create any
   /// extra/different modules specific to the platform (eg input device drivers)
   ///
@@ -521,6 +529,9 @@ private:
   
   ///Whether we moved anywhere in the last call to NewFrame.
   bool m_bLastMoved = false;
+
+  ///Low-memory mode flag: load only selected alphabet + minimal modules.
+  bool m_bLowMemoryMode = false;
 
   /// @}
 };

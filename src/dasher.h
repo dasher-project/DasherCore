@@ -49,6 +49,12 @@ DASHER_API dasher_ctx* dasher_create(const char* data_dir, const char* user_dir,
 // Destroy a session and free all resources.
 DASHER_API void dasher_destroy(dasher_ctx* ctx);
 
+// Enable low-memory mode for memory-constrained environments (e.g. iOS
+// keyboard extensions with ~77MB jetsam limit). Loads only the selected
+// alphabet and creates only the default input filter. Must be called
+// before dasher_set_screen_size().
+DASHER_API void dasher_set_low_memory_mode(dasher_ctx* ctx, int enabled);
+
 // Tell Dasher the canvas dimensions. Call on init and when the window resizes.
 DASHER_API void dasher_set_screen_size(dasher_ctx* ctx, int width, int height);
 
