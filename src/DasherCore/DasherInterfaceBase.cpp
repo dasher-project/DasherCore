@@ -89,9 +89,12 @@ CDasherInterfaceBase::CDasherInterfaceBase(CSettingsStore *pSettingsStore) :
     });
 
   // Global logging object we can use from anywhere
-  m_pGlobalApplicationLog = std::make_unique<CFileLogger>("dasher.log",
-                              g_iLogLevel,
-                              g_iLogOptions);
+  // Skip in low-memory mode (keyboard extensions) to avoid sandbox write violations
+  if (!m_bLowMemoryMode) {
+    m_pGlobalApplicationLog = std::make_unique<CFileLogger>("dasher.log",
+                                g_iLogLevel,
+                                g_iLogOptions);
+  }
 
   //Register for all events that we are "responsible" for
   GetActionManager()->OnCharEntered.Subscribe(this, [this](CSymbolNode* Trigger, TextCharAction*)
