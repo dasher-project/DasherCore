@@ -5,7 +5,17 @@
 #include <cstdlib>
 #include <cstring>
 #include <sys/stat.h>
+
+#ifdef _WIN32
+#include <direct.h>
+#include <process.h>
+#define dasher_mkdir(path) _mkdir(path)
+#define dasher_getpid() _getpid()
+#else
 #include <unistd.h>
+#define dasher_mkdir(path) mkdir(path, 0755)
+#define dasher_getpid() getpid()
+#endif
 
 #define TEST(name) void test_##name()
 #define ASSERT(condition)                                                                                              \
@@ -31,8 +41,8 @@ inline const char* get_test_data_dir() {
 inline dasher_ctx* create_isolated_context() {
     static int counter = 0;
     char tmpdir[256];
-    snprintf(tmpdir, sizeof(tmpdir), "/tmp/dasher_test_%d_%d", getpid(), counter++);
-    mkdir(tmpdir, 0755);
+    snprintf(tmpdir, sizeof(tmpdir), "/tmp/dasher_test_%d_%d", dasher_getpid(), counter++);
+    dasher_mkdir(tmpdir);
     return dasher_create(TEST_DATA_DIR, tmpdir, nullptr);
 }
 

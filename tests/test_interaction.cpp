@@ -1,6 +1,7 @@
 // Interaction loop tests: verify that mouse input produces text output
 #include "test_common.h"
 #include <chrono>
+#include <cmath>
 
 static void run_frames(dasher_ctx* ctx, int count, int64_t start_ms) {
     int* commands = nullptr;
