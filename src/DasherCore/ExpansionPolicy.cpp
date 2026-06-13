@@ -133,9 +133,9 @@ bool AmortizedPolicy::apply() {
 
 void AmortizedPolicy::trim() {
     if (sExpand.size() <= m_iMaxExpands) return;
-    // ok - repeatedly find a pivot element, and place it dividing all elements into
-    // those more than it (in lower indices) and those less than it (in higher indices),
-    //  until we have separated off the <m_iMaxExpands> elements with greatest benefit
+        // ok - repeatedly find a pivot element, and place it dividing all elements into
+        // those more than it (in lower indices) and those less than it (in higher indices),
+        //  until we have separated off the <m_iMaxExpands> elements with greatest benefit
 #ifdef DEBUG_TRIM
     vector<pair<double, CDasherNode*>> backup = sExpand; // yep, copy the lot
 #endif

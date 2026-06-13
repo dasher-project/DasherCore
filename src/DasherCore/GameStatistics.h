@@ -40,15 +40,15 @@ std::string ComputeStats(const std::vector<T>& v) {
 
 template <class A, class B, class T>
 struct MemberSumDiffNthPower {
-    MemberSumDiffNthPower(A T::* pm, B x, int n) : m_mean(x), m_pm(pm), m_n(n) {}
+    MemberSumDiffNthPower(A T::*pm, B x, int n) : m_mean(x), m_pm(pm), m_n(n) {}
     B operator()(B sum, T current) { return sum + std::pow(current.*m_pm - m_mean, m_n); }
     B m_mean;
-    A T::* m_pm;
+    A T::*m_pm;
     int m_n;
 };
 
 template <class T, class Iter_T, class A, class B>
-B MemberNthMoment(int n, Iter_T first, Iter_T last, A T::* pmember, B mean) {
+B MemberNthMoment(int n, Iter_T first, Iter_T last, A T::*pmember, B mean) {
     size_t cnt = last - first;
     return std::accumulate(first, last, B(), MemberSumDiffNthPower<A, B, T>(pmember, mean, n)) / cnt;
 }
