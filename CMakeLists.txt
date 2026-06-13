@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.12)
 
 project("DasherCore")
 
+enable_testing()
+
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 add_compile_definitions(HAVE_ROUND _CRT_SECURE_NO_WARNINGS)
@@ -109,21 +111,23 @@ if(BUILD_CAPI)
     # C API Tests
     option(BUILD_TESTS "Build the C API unit tests" ON)
     if(BUILD_TESTS)
-        add_executable(dasher_test
-            ${CMAKE_CURRENT_LIST_DIR}/tests/test_capi.cpp
-        )
-
-        target_include_directories(dasher_test PRIVATE
-            ${CMAKE_CURRENT_LIST_DIR}/src/
-        )
-
-        target_link_libraries(dasher_test PRIVATE dasher)
-
-        # Allow setting test data directory
-        if(TEST_DATA_DIR)
-            target_compile_definitions(dasher_test PRIVATE TEST_DATA_DIR="${TEST_DATA_DIR}")
+        # Default test data directory (project root, so both Data/ and Strings/ are accessible)
+        if(NOT DEFINED TEST_DATA_DIR)
+            set(TEST_DATA_DIR "${CMAKE_CURRENT_LIST_DIR}")
         endif()
 
-        add_test(NAME dasher_capi_tests COMMAND dasher_test)
+        # Helper function for adding a test executable
+        function(dasher_add_test name source)
+            add_executable(${name} ${CMAKE_CURRENT_LIST_DIR}/tests/${source})
+            target_include_directories(${name} PRIVATE ${CMAKE_CURRENT_LIST_DIR}/src/ ${CMAKE_CURRENT_LIST_DIR}/tests/)
+            target_link_libraries(${name} PRIVATE dasher)
+            target_compile_definitions(${name} PRIVATE TEST_DATA_DIR="${TEST_DATA_DIR}")
+            add_test(NAME ${name} COMMAND ${name})
+        endfunction()
+
+        dasher_add_test(dasher_capi_tests test_capi.cpp)
+        dasher_add_test(dasher_interaction_tests test_interaction.cpp)
+        dasher_add_test(dasher_low_memory_tests test_low_memory.cpp)
+        dasher_add_test(dasher_extended_tests test_capi_extended.cpp)
     endif()
 endif()

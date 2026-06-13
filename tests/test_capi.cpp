@@ -1,43 +1,7 @@
 // Basic tests for the Dasher C API
 // These tests provide a contract that frontends can verify
 
-#include "dasher.h"
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <cassert>
-
-// Simple test framework
-#define TEST(name) void test_##name()
-#define ASSERT(condition) do { if (!(condition)) { printf("FAILED: %s\n", #condition); exit(1); } } while(0)
-#define ASSERT_EQ(a, b) ASSERT((a) == (b))
-#define ASSERT_NEQ(a, b) ASSERT((a) != (b))
-#define ASSERT_STR_EQ(a, b) ASSERT(strcmp((a), (b)) == 0)
-
-// Test data directory - should point to a directory with Dasher Data/
-const char* get_test_data_dir() {
-#ifdef TEST_DATA_DIR
-    return TEST_DATA_DIR;
-#else
-    // Try multiple possible locations for the Data directory
-    const char* possible_paths[] = {
-        "./Data",
-        "../Data",
-        "../../Data",
-        "./build/Data",
-        NULL
-    };
-
-    // Simple file existence check
-    for (int i = 0; possible_paths[i] != NULL; i++) {
-        // Check if alphabets directory exists (good indicator of valid data dir)
-        const char* path = possible_paths[i];
-        return path; // For simplicity, return first option (real apps would check existence)
-    }
-
-    return "./Data"; // Fallback
-#endif
-}
+#include "test_common.h"
 
 TEST(color_utilities) {
     // Test basic color creation
@@ -64,7 +28,7 @@ TEST(context_creation) {
     const char* data_dir = get_test_data_dir();
     printf("  Using data directory: %s\n", data_dir);
 
-    dasher_ctx* ctx = dasher_create(data_dir, nullptr, nullptr);
+    dasher_ctx* ctx = create_isolated_context();
     ASSERT(ctx != nullptr);
 
     // Test that context is functional
@@ -84,7 +48,7 @@ TEST(context_creation) {
 
 TEST(screen_size) {
     const char* data_dir = get_test_data_dir();
-    dasher_ctx* ctx = dasher_create(data_dir, nullptr, nullptr);
+    dasher_ctx* ctx = create_isolated_context();
     ASSERT(ctx != nullptr);
 
     // Set screen size
@@ -108,7 +72,7 @@ TEST(screen_size) {
 
 TEST(parameters) {
     const char* data_dir = get_test_data_dir();
-    dasher_ctx* ctx = dasher_create(data_dir, nullptr, nullptr);
+    dasher_ctx* ctx = create_isolated_context();
     ASSERT(ctx != nullptr);
 
     // Test speed parameter
@@ -141,7 +105,7 @@ TEST(parameters) {
 
 TEST(output_text) {
     const char* data_dir = get_test_data_dir();
-    dasher_ctx* ctx = dasher_create(data_dir, nullptr, nullptr);
+    dasher_ctx* ctx = create_isolated_context();
     ASSERT(ctx != nullptr);
 
     dasher_set_screen_size(ctx, 800, 600);
@@ -161,9 +125,9 @@ TEST(output_text) {
 }
 
 TEST(alphabet) {
-    const char* data_dir = get_test_data_dir();
-    dasher_ctx* ctx = dasher_create(data_dir, nullptr, nullptr);
+    dasher_ctx* ctx = create_isolated_context();
     ASSERT(ctx != nullptr);
+    dasher_set_screen_size(ctx, 800, 600);
 
     // Get default alphabet
     const char* alphabet = dasher_get_alphabet_id(ctx);
@@ -221,7 +185,7 @@ TEST(null_safety) {
 
 TEST(locale) {
     const char* data_dir = get_test_data_dir();
-    dasher_ctx* ctx = dasher_create(data_dir, nullptr, nullptr);
+    dasher_ctx* ctx = create_isolated_context();
     ASSERT(ctx != nullptr);
 
     // Default locale is "en"
@@ -276,7 +240,7 @@ TEST(locale) {
 
 TEST(string_override) {
     const char* data_dir = get_test_data_dir();
-    dasher_ctx* ctx = dasher_create(data_dir, nullptr, nullptr);
+    dasher_ctx* ctx = create_isolated_context();
     ASSERT(ctx != nullptr);
 
     // Override a string
@@ -310,7 +274,7 @@ TEST(string_override) {
 
 TEST(locale_multiple_languages) {
     const char* data_dir = get_test_data_dir();
-    dasher_ctx* ctx = dasher_create(data_dir, nullptr, nullptr);
+    dasher_ctx* ctx = create_isolated_context();
     ASSERT(ctx != nullptr);
 
     const char* locales[] = {"de", "fr", "zh-CN", "ar"};
