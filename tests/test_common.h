@@ -8,7 +8,7 @@
 #include <unistd.h>
 
 #define TEST(name) void test_##name()
-#define ASSERT(condition) do { if (!(condition)) { printf("FAILED: %s\n", #condition); exit(1); } } while(0)
+#define ASSERT(condition) do { if (!(condition)) { printf("FAILED: %s\n", #condition); fflush(stdout); exit(1); } } while(0)
 #define ASSERT_EQ(a, b) ASSERT((a) == (b))
 #define ASSERT_NEQ(a, b) ASSERT((a) != (b))
 #define ASSERT_STR_EQ(a, b) ASSERT(strcmp((a), (b)) == 0)
@@ -28,3 +28,8 @@ inline dasher_ctx* create_isolated_context() {
     mkdir(tmpdir, 0755);
     return dasher_create(TEST_DATA_DIR, tmpdir, nullptr);
 }
+
+struct StdoutUnbuffered {
+    StdoutUnbuffered() { setvbuf(stdout, NULL, _IONBF, 0); }
+};
+static StdoutUnbuffered g_unbuffer;
