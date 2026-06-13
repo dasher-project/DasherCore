@@ -1,0 +1,42 @@
+---
+# DasherCore clang-tidy configuration
+#
+# Focused on safety, modernization, and catching real bugs.
+# Run with: cmake -DDASHER_ENABLE_CLANG_TIDY=ON ..
+# Or standalone: clang-tidy -p build/ src/CAPI.cpp
+
+Checks: >
+  -*,
+  bugprone-*,
+  cert-*,
+  clang-analyzer-*,
+  cppcoreguidelines-pro-type-cstyle-cast,
+  cppcoreguidelines-pro-type-static-cast-downcast,
+  cppcoreguidelines-slicing,
+  modernize-*,
+  performance-*,
+  readability-*,
+  -bugprone-easily-swappable-parameters,
+  -modernize-use-trailing-return-type,
+  -modernize-use-nodiscard,
+  -readability-magic-numbers,
+  -readability-identifier-length,
+  -readability-function-cognitive-complexity,
+  -readability-named-parameter,
+  -readability-else-after-return,
+  -cppcoreguidelines-avoid-magic-numbers,
+  -readability-math-missing-parentheses,
+  -readability-braces-around-statements,
+  -bugprone-narrowing-conversions,
+
+WarningsAsErrors: ''
+
+HeaderFilterRegex: '.*DasherCore/.*\.h$|.*dasher\.h$'
+
+CheckOptions:
+  - key:   readability-inconsistent-declaration-parameter-name.Strict
+    value: '1'
+  - key:   modernize-use-override.IgnoreDestructors
+    value: '1'
+  - key:   performance-unnecessary-value-param.AllowedTypes
+    value: 'std::string;std::function'

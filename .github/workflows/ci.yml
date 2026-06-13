@@ -1,0 +1,127 @@
+name: CI
+
+on:
+  push:
+    branches: [main, feature-CAPI]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  # ── Build + Test (matrix) ──────────────────────────────────────────────
+  build-test:
+    name: Build + Test (${{ matrix.os }} / ${{ matrix.compiler }} / ${{ matrix.build_type }})
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        build_type: [Release, Debug]
+        compiler: [gcc, clang, cl]
+        exclude:
+          - { os: windows-latest, compiler: gcc }
+          - { os: windows-latest, compiler: clang }
+          - { os: ubuntu-latest, compiler: cl }
+          - { os: macos-latest, compiler: cl }
+        include:
+          - { os: ubuntu-latest, compiler: gcc, c: gcc, cpp: g++ }
+          - { os: ubuntu-latest, compiler: clang, c: clang, cpp: clang++ }
+          - { os: windows-latest, compiler: cl, c: cl, cpp: cl }
+          - { os: macos-latest, compiler: clang, c: clang, cpp: clang++ }
+          - { os: macos-latest, compiler: gcc, c: gcc, cpp: g++ }
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Configure CMake
+        run: >
+          cmake -B build
+          -DCMAKE_CXX_COMPILER=${{ matrix.cpp }}
+          -DCMAKE_C_COMPILER=${{ matrix.c }}
+          -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
+          -DBUILD_TESTS=ON
+          -DBUILD_CAPI=ON
+          -S .
+
+      - name: Build
+        run: cmake --build build --config ${{ matrix.build_type }} --parallel
+
+      - name: Test
+        working-directory: build
+        run: ctest -C ${{ matrix.build_type }} --output-on-failure
+
+      - name: Upload test artifacts on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-${{ matrix.os }}-${{ matrix.compiler }}-${{ matrix.build_type }}
+          path: build/Testing/Temporary/LastTest.log
+          retention-days: 7
+
+  # ── Sanitize (ASan + UBSan) ────────────────────────────────────────────
+  sanitize:
+    name: Sanitize (ASan + UBSan)
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Configure
+        run: cmake -B build -DCMAKE_BUILD_TYPE=Debug -DDASHER_SANITIZE=ON -DBUILD_TESTS=ON -S .
+
+      - name: Build
+        run: cmake --build build --parallel
+
+      - name: Test
+        working-directory: build
+        env:
+          ASAN_OPTIONS: detect_leaks=1:halt_on_error=1:print_stacktrace=1
+          UBSAN_OPTIONS: halt_on_error=1:print_stacktrace=1
+        run: ctest --output-on-failure --timeout 300
+
+  # ── Static Analysis (clang-tidy) ──────────────────────────────────────
+  analyze:
+    name: Static Analysis (clang-tidy)
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install clang-tidy
+        run: sudo apt-get update && sudo apt-get install -y clang-tidy
+
+      - name: Configure
+        run: cmake -B build -DCMAKE_BUILD_TYPE=Debug -DDASHER_ENABLE_CLANG_TIDY=ON -DBUILD_TESTS=OFF -S .
+
+      - name: Build (runs clang-tidy)
+        run: cmake --build build --parallel 2>&1 | tee clang-tidy-output.txt
+
+      - name: Check for warnings
+        run: |
+          if grep -q "warning:" clang-tidy-output.txt; then
+            echo "::error::clang-tidy found issues"
+            grep "warning:" clang-tidy-output.txt || true
+            exit 1
+          fi
+
+  # ── Format Check ───────────────────────────────────────────────────────
+  format-check:
+    name: Format Check (clang-format)
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install clang-format
+        run: sudo apt-get update && sudo apt-get install -y clang-format
+
+      - name: Check formatting
+        run: |
+          FILES=$(find src/ tests/ -name '*.cpp' -o -name '*.h' -o -name '*.c' | grep -v Thirdparty)
+          clang-format --dry-run --Werror $FILES

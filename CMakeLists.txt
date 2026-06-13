@@ -9,6 +9,67 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 add_compile_definitions(HAVE_ROUND _CRT_SECURE_NO_WARNINGS)
 set(CMAKE_SUPPRESS_REGENERATION true)
 
+###############################
+# Compiler Warning Flags
+###############################
+
+# GCC / Clang
+add_compile_options(
+    $<$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>>:-Wall>
+    $<$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>>:-Wextra>
+    $<$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>>:-Wshadow>
+    $<$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>>:-Wnon-virtual-dtor>
+)
+
+# MSVC
+add_compile_options(
+    $<$<CXX_COMPILER_ID:MSVC>:/W4>
+    $<$<CXX_COMPILER_ID:MSVC>:/permissive->
+)
+
+###############################
+# Optional: Treat warnings as errors
+###############################
+
+option(DASHER_WERROR "Treat compiler warnings as errors" OFF)
+if(DASHER_WERROR)
+    add_compile_options(
+        $<$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>>:-Werror>
+        $<$<CXX_COMPILER_ID:MSVC>:/WX>
+    )
+endif()
+
+###############################
+# Optional: Sanitizers (ASan + UBSan)
+###############################
+
+option(DASHER_SANITIZE "Enable AddressSanitizer + UndefinedBehaviorSanitizer" OFF)
+if(DASHER_SANITIZE)
+    add_compile_options(
+        $<$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>>:-fsanitize=address,undefined>
+        $<$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>>:-fno-omit-frame-pointer>
+        $<$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>>:-g>
+    )
+    add_link_options(
+        $<$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>>:-fsanitize=address,undefined>
+    )
+endif()
+
+###############################
+# Optional: clang-tidy
+###############################
+
+option(DASHER_ENABLE_CLANG_TIDY "Run clang-tidy during build" OFF)
+if(DASHER_ENABLE_CLANG_TIDY)
+    find_program(CLANG_TIDY_EXE NAMES clang-tidy)
+    if(CLANG_TIDY_EXE)
+        message(STATUS "clang-tidy found: ${CLANG_TIDY_EXE}")
+        set(CMAKE_CXX_CLANG_TIDY "${CLANG_TIDY_EXE};--config-file=${CMAKE_CURRENT_LIST_DIR}/.clang-tidy")
+    else()
+        message(WARNING "DASHER_ENABLE_CLANG_TIDY is ON but clang-tidy not found")
+    endif()
+endif()
+
 option(DASHER_HAVE_OWN_FILEUTILS "Set to true if you provide your own FileUtils implementation" OFF)
 if(${DASHER_HAVE_OWN_FILEUTILS})
 	add_compile_definitions(HAVE_OWN_FILEUTILS)
