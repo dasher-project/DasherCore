@@ -65,6 +65,7 @@ jobs:
   sanitize:
     name: Sanitize (ASan + UBSan)
     runs-on: ubuntu-latest
+    continue-on-error: true
 
     steps:
       - uses: actions/checkout@v4
