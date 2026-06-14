@@ -56,7 +56,6 @@ CAlphabetManager::CAlphabetManager(CSettingsStore* pSettingsStore, CDasherInterf
                 std::vector<std::string> newHistory;
                 newHistory.push_back(m_pSettingsStore->GetStringParameter(SP_ALPHABET_ID));
                 std::string v;
-                std::string v;
                 v = m_pSettingsStore->GetStringParameter(SP_ALPHABET_1);
                 if (v != value) newHistory.push_back(v);
                 v = m_pSettingsStore->GetStringParameter(SP_ALPHABET_2);
