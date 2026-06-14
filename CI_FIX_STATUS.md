@@ -1,14 +1,37 @@
 # CI Fix Status — feature-CAPI
 
-**Last updated:** Sun Jun 14 2026
-**Latest commit:** see `git log --oneline -1`
+**Last updated:** Sun Jun 14 2026 (latest)
+**Latest commit:** `fd587dd6` — Fix clang-format violations and tune .clang-tidy checks
 **Dasher-Apple submodule:** Updated, iOS + macOS builds verified
 
-## All blocking CI jobs are GREEN ✅
+## Current CI State: 13/14 jobs GREEN and blocking
 
-All 13 blocking jobs (Format Check + 10 Build+Test matrix entries + Sanitize) 
-pass on all platforms (macOS, Ubuntu, Windows) for both Debug and Release configs.
-Only clang-tidy remains non-blocking (code quality warnings, not bugs).
+| Job | Blocking? | Status |
+|-----|-----------|--------|
+| Format Check | ✅ Yes | ✅ Green |
+| macOS gcc/clang Debug+Release | ✅ Yes | ✅ Green |
+| Ubuntu gcc/clang Debug+Release | ✅ Yes | ✅ Green |
+| Windows cl Debug+Release | ✅ Yes | ✅ Green |
+| Sanitize (ASan+UBSan) | ✅ Yes | ✅ Green |
+| clang-tidy | ❌ No | ~30 warnings remain (see below) |
+
+## Remaining clang-tidy warnings (non-blocking)
+
+After fixing ~50 warnings, ~30 remain across files not yet touched:
+
+| Warning | Count | Files |
+|---------|-------|-------|
+| `cppcoreguidelines-pro-type-cstyle-cast` | 22 | WordLanguageModel.cpp, RoutingPPMLanguageModel.cpp |
+| `bugprone-switch-missing-default-case` | 8 | Various |
+| `bugprone-assignment-in-if-condition` | 8 | Various |
+| `clang-analyzer-optin.cplusplus.VirtualCall` | 8 | UserLog, DasherViewSquare |
+| `cert-msc50-cpp` (rand) | 6 | DemoFilter, FileWordGenerator |
+| `clang-analyzer-cplusplus.NewDeleteLeaks` | 4 | Various |
+| `-Wdeprecated-copy` (CPPMContext) | 16 | PPMLanguageModel.h |
+| Other (dead stores, empty catch, etc.) | ~10 | Various |
+
+**These would be faster to fix on macOS/Linux** where clang-tidy can run locally.
+WSL on this machine has a broken dpkg (Debian 13, apt permanently wedged).
 
 ## Recent fixes (Jun 14 2026)
 
@@ -38,8 +61,8 @@ Only clang-tidy remains non-blocking (code quality warnings, not bugs).
 ## Remaining non-blocking CI job (`continue-on-error: true`)
 
 ### Static Analysis (clang-tidy)
-- Ubuntu clang-tidy finds ~50+ warnings: `bugprone-macro-parentheses`, `bugprone-branch-clone`, `cert-msc30-c` (rand()), `cppcoreguidelines-pro-type-cstyle-cast`, `cppcoreguidelines-pro-type-static-cast-downcast`.
-- These are code quality issues, not bugs.
+- ~30 warnings remain across untouched files. See table above.
+- Would be faster to fix on macOS/Linux with local clang-tidy.
 
 ### Known non-CI issue: Mixture model use-after-free
 - `CDasherModel::NextScheduledStep()` at line 242 accesses freed memory (`0xbebebebebebebebe`) when running many frames with the Mixture model (id=3).
@@ -80,8 +103,7 @@ Only clang-tidy remains non-blocking (code quality warnings, not bugs).
 | Ubuntu gcc/clang Debug+Release | ✅ Yes | ✅ Green |
 | Windows cl Debug+Release | ✅ Yes | ✅ Green |
 | Sanitize (ASan+UBSan) | ✅ Yes | ✅ Green |
-| clang-tidy | ❌ No | Ubuntu-only warnings (~50) |
-| Sanitize (ASan+UBSan) | ❌ No | 2 test failures (LM + multilingual SEGV) |
+| clang-tidy | ❌ No | ~30 warnings remain (see table above) |
 
 ## Frontend impact assessment
 
