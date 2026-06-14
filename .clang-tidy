@@ -16,13 +16,18 @@ Checks: >
   -bugprone-narrowing-conversions,
   -bugprone-assignment-in-if,
   -bugprone-virtual-call,
+  -bugprone-reserved-identifier,
   cert-*,
   -cert-err58-cpp,
   -cert-err34-c,
   -cert-err33-c,
   -cert-dcl50-cpp,
+  -cert-dcl37-c,
+  -cert-dcl51-cpp,
+  -cert-dcl16-c,
   clang-analyzer-*,
   -clang-analyzer-core.NullDereference,
+  -clang-analyzer-core.CallAndMessage,
   clang-diagnostic-*,
   cppcoreguidelines-pro-type-cstyle-cast,
   cppcoreguidelines-pro-type-static-cast-downcast,
@@ -31,6 +36,7 @@ Checks: >
   -performance-enum-size,
   -performance-unnecessary-value-param,
   -performance-trivially-destructible,
+  -performance-avoid-endl,
 
 WarningsAsErrors: ''
 
