@@ -12,6 +12,7 @@ jobs:
     name: Build + Test (${{ matrix.os }} / ${{ matrix.compiler }} / ${{ matrix.build_type }})
     runs-on: ${{ matrix.os }}
     continue-on-error: ${{ matrix.os == 'windows-latest' }}
+    timeout-minutes: 30
 
     strategy:
       fail-fast: false
@@ -51,7 +52,7 @@ jobs:
 
       - name: Test
         working-directory: build
-        run: ctest -C ${{ matrix.build_type }} --output-on-failure
+        run: ctest -C ${{ matrix.build_type }} --output-on-failure --timeout 120
 
       - name: Upload test artifacts on failure
         if: failure()
