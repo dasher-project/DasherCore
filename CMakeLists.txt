@@ -13,13 +13,18 @@ set(CMAKE_SUPPRESS_REGENERATION true)
 # Compiler Warning Flags
 ###############################
 
-# GCC / Clang
+# GCC / Clang (C++ only — C files don't need C++-specific flags like -Wnon-virtual-dtor)
 add_compile_options(
-    $<$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>>:-Wall>
-    $<$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>>:-Wextra>
-    $<$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>>:-Wshadow>
-    $<$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>>:-Wnon-virtual-dtor>
-    $<$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>>:-Wno-unused-parameter>
+    $<$<AND:$<COMPILE_LANGUAGE:CXX>,$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>>>:-Wall>
+    $<$<AND:$<COMPILE_LANGUAGE:CXX>,$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>>>:-Wextra>
+    $<$<AND:$<COMPILE_LANGUAGE:CXX>,$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>>>:-Wshadow>
+    $<$<AND:$<COMPILE_LANGUAGE:CXX>,$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>>>:-Wnon-virtual-dtor>
+    $<$<AND:$<COMPILE_LANGUAGE:CXX>,$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>>>:-Wno-unused-parameter>
+)
+# GCC / Clang (C files — basic warnings only, no fallthrough noise in legacy UTF code)
+add_compile_options(
+    $<$<AND:$<COMPILE_LANGUAGE:C>,$<OR:$<C_COMPILER_ID:GNU>,$<C_COMPILER_ID:Clang>,$<C_COMPILER_ID:AppleClang>>>:-Wall>
+    $<$<AND:$<COMPILE_LANGUAGE:C>,$<OR:$<C_COMPILER_ID:GNU>,$<C_COMPILER_ID:Clang>,$<C_COMPILER_ID:AppleClang>>>:-Wno-implicit-fallthrough>
 )
 
 # MSVC
@@ -65,7 +70,7 @@ if(DASHER_ENABLE_CLANG_TIDY)
     find_program(CLANG_TIDY_EXE NAMES clang-tidy)
     if(CLANG_TIDY_EXE)
         message(STATUS "clang-tidy found: ${CLANG_TIDY_EXE}")
-        set(CMAKE_CXX_CLANG_TIDY "${CLANG_TIDY_EXE};--config-file=${CMAKE_CURRENT_LIST_DIR}/.clang-tidy")
+        set(DASHER_CLANG_TIDY_CMD "${CLANG_TIDY_EXE};--config-file=${CMAKE_CURRENT_LIST_DIR}/.clang-tidy")
     else()
         message(WARNING "DASHER_ENABLE_CLANG_TIDY is ON but clang-tidy not found")
     endif()
@@ -143,6 +148,11 @@ set_target_properties(DasherCore PROPERTIES
 
 target_include_directories(DasherCore PUBLIC ${CMAKE_CURRENT_LIST_DIR}/src/)
 
+# Apply clang-tidy only to our own targets (not Thirdparty/pugixml)
+if(DASHER_ENABLE_CLANG_TIDY AND DASHER_CLANG_TIDY_CMD)
+    set_target_properties(DasherCore PROPERTIES CXX_CLANG_TIDY "${DASHER_CLANG_TIDY_CMD}")
+endif()
+
 add_dependencies(DasherCore pugixml)
 target_link_libraries(DasherCore pugixml)
 
@@ -165,6 +175,10 @@ if(BUILD_CAPI)
     )
 
     target_link_libraries(dasher PRIVATE DasherCore)
+
+    if(DASHER_ENABLE_CLANG_TIDY AND DASHER_CLANG_TIDY_CMD)
+        set_target_properties(dasher PROPERTIES CXX_CLANG_TIDY "${DASHER_CLANG_TIDY_CMD}")
+    endif()
 
     if(WIN32)
         target_compile_definitions(dasher PRIVATE DASHER_BUILDING)

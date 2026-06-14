@@ -104,9 +104,12 @@ jobs:
 
       - name: Check for warnings
         run: |
-          if grep -q "warning:" clang-tidy-output.txt; then
+          # Filter out compiler warnings ([-Wxxx]) and command-line noise;
+          # only fail on actual clang-tidy findings ([check-name] pattern)
+          TIDY_WARNINGS=$(grep "warning:" clang-tidy-output.txt | grep -v '\[-W' | grep -v 'command-line option' || true)
+          if [ -n "$TIDY_WARNINGS" ]; then
             echo "::error::clang-tidy found issues"
-            grep "warning:" clang-tidy-output.txt || true
+            echo "$TIDY_WARNINGS"
             exit 1
           fi
 

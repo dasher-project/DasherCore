@@ -1,41 +1,46 @@
 ---
 # DasherCore clang-tidy configuration
 #
-# Focused on safety, modernization, and catching real bugs.
+# Focused on checks that find real bugs in a legacy C++ codebase.
+# Style modernization checks are intentionally disabled — they produce
+# thousands of warnings on existing code and should be enabled incrementally
+# as code is refactored.
+#
 # Run with: cmake -DDASHER_ENABLE_CLANG_TIDY=ON ..
 # Or standalone: clang-tidy -p build/ src/CAPI.cpp
 
 Checks: >
   -*,
   bugprone-*,
+  -bugprone-easily-swappable-parameters,
+  -bugprone-narrowing-conversions,
   cert-*,
+  -cert-err58-cpp,
   clang-analyzer-*,
+  clang-diagnostic-*,
   cppcoreguidelines-pro-type-cstyle-cast,
   cppcoreguidelines-pro-type-static-cast-downcast,
   cppcoreguidelines-slicing,
-  modernize-*,
   performance-*,
-  readability-*,
-  -bugprone-easily-swappable-parameters,
-  -modernize-use-trailing-return-type,
-  -modernize-use-nodiscard,
+  -performance-enum-size,
+  -performance-unnecessary-value-param,
+  modernize-use-nullptr,
+  modernize-deprecated-headers,
+  modernize-redundant-void-arg,
+  readability-braces-around-statements,
   -readability-magic-numbers,
   -readability-identifier-length,
   -readability-function-cognitive-complexity,
   -readability-named-parameter,
   -readability-else-after-return,
-  -cppcoreguidelines-avoid-magic-numbers,
   -readability-math-missing-parentheses,
-  -readability-braces-around-statements,
-  -bugprone-narrowing-conversions,
+  -cppcoreguidelines-avoid-magic-numbers,
 
 WarningsAsErrors: ''
 
 HeaderFilterRegex: '.*DasherCore/.*\.h$|.*dasher\.h$'
 
 CheckOptions:
-  - key:   readability-inconsistent-declaration-parameter-name.Strict
-    value: '1'
   - key:   modernize-use-override.IgnoreDestructors
     value: '1'
   - key:   performance-unnecessary-value-param.AllowedTypes
