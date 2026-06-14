@@ -1058,7 +1058,7 @@ void CDasherViewSquare::ComputeScaleFactor() {
         dScaleFactorX = dScaleFactorY;
         break;
     case Options::ScreenGeometry::squish:
-    case Options::ScreenGeometry::squish_and_log:
+    case Options::ScreenGeometry::squish_and_log: {
         // 2 or 3 => squish x (so xhair always visible)
         const double dDesiredXPerPixel((CDasherModel::MAX_Y + iMarginWidth) / dPixelsX),
             dMinXPerPixel((CDasherModel::ORIGIN_X + iMarginWidth) / dPixelsX);
@@ -1077,6 +1077,7 @@ void CDasherViewSquare::ComputeScaleFactor() {
         dScaleFactorX = 0.9 / dDasherXPerPixel;
 
         break;
+    }
     default:
         break;
     }
