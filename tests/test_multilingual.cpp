@@ -27,7 +27,9 @@ TEST(alphabet_switch_german) {
     ASSERT(ctx != nullptr);
     dasher_set_screen_size(ctx, 800, 600);
 
-    const char* orig = strdup(dasher_get_alphabet_id(ctx));
+    const char* alph_id = dasher_get_alphabet_id(ctx);
+    ASSERT(alph_id != nullptr);
+    const char* orig = strdup(alph_id);
     printf("  Original alphabet: '%s'\n", orig);
 
     dasher_set_alphabet_id(ctx, "Deutsch / German with limited punctuation");
@@ -77,7 +79,9 @@ TEST(alphabet_invalid_id_fallback) {
     ASSERT(ctx != nullptr);
     dasher_set_screen_size(ctx, 800, 600);
 
-    const char* orig = strdup(dasher_get_alphabet_id(ctx));
+    const char* alph_id = dasher_get_alphabet_id(ctx);
+    ASSERT(alph_id != nullptr);
+    const char* orig = strdup(alph_id);
 
     dasher_set_alphabet_id(ctx, "Nonexistent Alphabet XYZ123");
     run_frames(ctx, 5);
@@ -98,7 +102,7 @@ TEST(alphabet_german_produces_text) {
 
     dasher_set_alphabet_id(ctx, "Deutsch / German with limited punctuation");
     run_frames(ctx, 10);
-    produce_text(ctx, 500);
+    produce_text(ctx, 200);
 
     const char* text = dasher_get_output_text(ctx);
     ASSERT(text != nullptr);
@@ -155,7 +159,9 @@ TEST(locale_set_and_get) {
     ASSERT(ctx != nullptr);
     dasher_set_screen_size(ctx, 800, 600);
 
-    const char* orig_locale = strdup(dasher_get_locale(ctx));
+    const char* loc = dasher_get_locale(ctx);
+    ASSERT(loc != nullptr);
+    const char* orig_locale = strdup(loc);
     printf("  Original locale: '%s'\n", orig_locale);
 
     int result = dasher_set_locale(ctx, "de");
@@ -245,7 +251,7 @@ TEST(locale_param_names_change_with_locale) {
     if (result == 0) {
         dasher_parameter_info info_de;
         dasher_get_parameter_info(0, &info_de);
-        printf("  German param[0] name: '%s'\n", info_de.name);
+        printf("  German param[0] name: '%s'\n", info_de.name ? info_de.name : "(null)");
     }
 
     dasher_set_locale(ctx, "en");

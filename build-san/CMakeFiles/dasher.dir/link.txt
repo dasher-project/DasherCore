@@ -1,0 +1,1 @@
+/usr/bin/c++ -g -arch arm64 -dynamiclib -Wl,-headerpad_max_install_names -fsanitize=address,undefined -o bin/libdasher.dylib -install_name @rpath/libdasher.dylib CMakeFiles/dasher.dir/src/CAPI.cpp.o  libDasherCore.a Thirdparty/pugixml/libpugixml.a
