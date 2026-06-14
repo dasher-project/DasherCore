@@ -90,7 +90,7 @@ jobs:
   analyze:
     name: Static Analysis (clang-tidy)
     runs-on: ubuntu-latest
-    continue-on-error: true
+    continue-on-error: false
 
     steps:
       - uses: actions/checkout@v4

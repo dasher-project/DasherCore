@@ -1,10 +1,10 @@
 # CI Fix Status — feature-CAPI
 
 **Last updated:** Sun Jun 14 2026 (latest)
-**Latest commit:** `fd587dd6` — Fix clang-format violations and tune .clang-tidy checks
+**Latest commit:** `ddb7d21b` — Fix remaining clang-tidy warnings
 **Dasher-Apple submodule:** Updated, iOS + macOS builds verified
 
-## Current CI State: 13/14 jobs GREEN and blocking
+## Current CI State: ALL 14/14 jobs GREEN and blocking
 
 | Job | Blocking? | Status |
 |-----|-----------|--------|
@@ -13,25 +13,9 @@
 | Ubuntu gcc/clang Debug+Release | ✅ Yes | ✅ Green |
 | Windows cl Debug+Release | ✅ Yes | ✅ Green |
 | Sanitize (ASan+UBSan) | ✅ Yes | ✅ Green |
-| clang-tidy | ❌ No | ~30 warnings remain (see below) |
+| clang-tidy | ✅ Yes | ✅ Green (0 warnings) |
 
-## Remaining clang-tidy warnings (non-blocking)
-
-After fixing ~50 warnings, ~30 remain across files not yet touched:
-
-| Warning | Count | Files |
-|---------|-------|-------|
-| `cppcoreguidelines-pro-type-cstyle-cast` | 22 | WordLanguageModel.cpp, RoutingPPMLanguageModel.cpp |
-| `bugprone-switch-missing-default-case` | 8 | Various |
-| `bugprone-assignment-in-if-condition` | 8 | Various |
-| `clang-analyzer-optin.cplusplus.VirtualCall` | 8 | UserLog, DasherViewSquare |
-| `cert-msc50-cpp` (rand) | 6 | DemoFilter, FileWordGenerator |
-| `clang-analyzer-cplusplus.NewDeleteLeaks` | 4 | Various |
-| `-Wdeprecated-copy` (CPPMContext) | 16 | PPMLanguageModel.h |
-| Other (dead stores, empty catch, etc.) | ~10 | Various |
-
-**These would be faster to fix on macOS/Linux** where clang-tidy can run locally.
-WSL on this machine has a broken dpkg (Debian 13, apt permanently wedged).
+All clang-tidy warnings fixed (0 warnings). CI job is now blocking.
 
 ## Recent fixes (Jun 14 2026)
 
@@ -60,9 +44,7 @@ WSL on this machine has a broken dpkg (Debian 13, apt permanently wedged).
 
 ## Remaining non-blocking CI job (`continue-on-error: true`)
 
-### Static Analysis (clang-tidy)
-- ~30 warnings remain across untouched files. See table above.
-- Would be faster to fix on macOS/Linux with local clang-tidy.
+### None — all CI jobs are now blocking and green.
 
 ### Known non-CI issue: Mixture model use-after-free
 - `CDasherModel::NextScheduledStep()` at line 242 accesses freed memory (`0xbebebebebebebebe`) when running many frames with the Mixture model (id=3).
@@ -89,7 +71,7 @@ WSL on this machine has a broken dpkg (Debian 13, apt permanently wedged).
 | LM test SegFault fix (replace frame-processing test) | All platforms CI ✅ |
 | All 21 tests pass | macOS ✅, Ubuntu ✅, Windows CI ✅ |
 | clang-format clean | macOS ✅ |
-| clang-tidy clean | macOS ✅ |
+| clang-tidy clean | macOS ✅, Ubuntu CI ✅ (0 warnings) |
 | ASan + UBSan (no overflow/UAF) | Ubuntu CI ✅ |
 | DasherApp iOS build | macOS ✅ |
 | DasherMac build | macOS ✅ |
@@ -103,7 +85,7 @@ WSL on this machine has a broken dpkg (Debian 13, apt permanently wedged).
 | Ubuntu gcc/clang Debug+Release | ✅ Yes | ✅ Green |
 | Windows cl Debug+Release | ✅ Yes | ✅ Green |
 | Sanitize (ASan+UBSan) | ✅ Yes | ✅ Green |
-| clang-tidy | ❌ No | ~30 warnings remain (see table above) |
+| clang-tidy | ✅ Yes | ✅ Green (0 warnings) |
 
 ## Frontend impact assessment
 
