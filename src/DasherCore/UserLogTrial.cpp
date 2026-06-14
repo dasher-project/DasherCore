@@ -284,19 +284,17 @@ void CUserLogTrial::Done() {
 
 void CUserLogTrial::AddMouseLocation(int iX, int iY, float dNats) {
 
-    CUserLocation* pLocation = NULL;
-
-    pLocation = new CUserLocation(iX, iY, dNats); // NOLINT(clang-analyzer-cplusplus.NewDeleteLeaks)
+    CUserLocation* pLocation = new CUserLocation(iX, iY, dNats);
 
     if (pLocation != NULL) {
-        // m_vectorMouseLocations.push_back(location);
-
         NavCycle* pCycle = GetCurrentNavCycle();
 
         if (pCycle != NULL)
             pCycle->vectorMouseLocations.push_back(pLocation);
-        else
+        else {
             m_pGlobalFileLogger->LogNormal("CUserLogTrial::AddLocation, cycle was NULL!");
+            delete pLocation;
+        }
     } else
         m_pGlobalFileLogger->LogNormal("CUserLogTrial::AddLocation, location was NULL!");
 }
@@ -311,32 +309,34 @@ void CUserLogTrial::AddMouseLocationNormalized(int iX, int iY, bool bStoreIntege
         (m_sCanvasCoordinates.top == 0))
         m_pGlobalFileLogger->LogNormal("CUserLogTrial::AddMouseLocationNormalized, called before AddCanvasSize()?");
 
-    pLocation = new CUserLocation(iX, iY, m_sCanvasCoordinates.top,
-                                  m_sCanvasCoordinates.left, // NOLINT(clang-analyzer-cplusplus.NewDeleteLeaks)
+    pLocation = new CUserLocation(iX, iY, m_sCanvasCoordinates.top, m_sCanvasCoordinates.left,
                                   m_sCanvasCoordinates.bottom, m_sCanvasCoordinates.right, bStoreIntegerRep, dNats);
 
     if (pLocation != NULL) {
-        // m_vectorMouseLocations.push_back(location);
         NavCycle* pCycle = GetCurrentNavCycle();
 
         if (pCycle != NULL)
             pCycle->vectorMouseLocations.push_back(pLocation);
-        else
+        else {
             m_pGlobalFileLogger->LogNormal("CUserLogTrial::AddMouseLocationNormalized, cycle was NULL!");
+            delete pLocation;
+        }
     } else
         m_pGlobalFileLogger->LogNormal("CUserLogTrial::AddLocation, location was NULL!");
 }
 
 void CUserLogTrial::AddKeyDown(Dasher::Keys::VirtualKey Key, int iType, int iEffect) {
-    CUserButton* pButton = new CUserButton(Key, iType, iEffect); // NOLINT(clang-analyzer-cplusplus.NewDeleteLeaks)
+    CUserButton* pButton = new CUserButton(Key, iType, iEffect);
 
     if (pButton) {
         NavCycle* pCycle = GetCurrentNavCycle();
 
         if (pCycle)
             pCycle->vectorButtons.push_back(pButton);
-        else
+        else {
             m_pGlobalFileLogger->LogNormal("CUserLogTrial::AddLocation, cycle was NULL!");
+            delete pButton;
+        }
     } else
         m_pGlobalFileLogger->LogNormal("CUserLogTrial::AddLocation, location was NULL!");
 }

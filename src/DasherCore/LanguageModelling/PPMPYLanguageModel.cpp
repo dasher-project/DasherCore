@@ -13,6 +13,8 @@
 #include "PPMPYLanguageModel.h"
 #include "LanguageModel.h"
 #include "PPMLanguageModel.h"
+
+#include <algorithm>
 #include "DasherCore/DasherTypes.h"
 #include "DasherCore/Common/myassert.h"
 
@@ -195,6 +197,7 @@ void CPPMPYLanguageModel::GetPartProbs(Context context, std::vector<std::pair<sy
     int beta = m_pSettingsStore->GetLongParameter(LP_LM_BETA);
 
     int* vCounts = new int[vChildren.size()]; // num occurrences of symbol at same index in vChildren
+    std::fill(vCounts, vCounts + vChildren.size(), 0);
 
     // new code
     for (CPPMnode* pTemp = ppmcontext->head; pTemp; pTemp = pTemp->vine) {

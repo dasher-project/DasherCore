@@ -267,7 +267,7 @@ bool CDasherModel::NextScheduledStep() {
                 break;
             }
             ++it;
-            DASHER_ASSERT(it != m_Root->GetChildren().end()); // must find a child!
+            if (it == m_Root->GetChildren().end()) return false; // no child covers crosshair
         }
     }
 

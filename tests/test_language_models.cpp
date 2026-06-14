@@ -176,6 +176,24 @@ TEST(lm_switching_does_not_crash) {
     printf("v lm_switching_does_not_crash passed\n");
 }
 
+TEST(lm_mixture_produces_text) {
+    // Verify that the Mixture model (id=3) can run frames without crashing.
+    // Previously this triggered a use-after-free in NextScheduledStep when
+    // no child covered the crosshair (out-of-bounds iterator dereference).
+    dasher_ctx* ctx = create_isolated_context();
+    ASSERT(ctx != nullptr);
+    dasher_set_screen_size(ctx, 800, 600);
+    dasher_set_language_model_id(ctx, 3);
+    produce_text(ctx, 200);
+
+    const char* text = dasher_get_output_text(ctx);
+    ASSERT(text != nullptr);
+    printf("  Mixture output: '%s'\n", text);
+
+    dasher_destroy(ctx);
+    printf("v lm_mixture_produces_text passed\n");
+}
+
 int main() {
     printf("Running Dasher language model tests...\n\n");
 
@@ -188,6 +206,7 @@ int main() {
     test_lm_param_keys_are_valid();
     test_lm_mixture_model_id();
     test_lm_switching_does_not_crash();
+    test_lm_mixture_produces_text();
 
     printf("\nAll language model tests passed!\n");
     return 0;
