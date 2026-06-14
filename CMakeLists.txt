@@ -9,6 +9,10 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 add_compile_definitions(HAVE_ROUND _CRT_SECURE_NO_WARNINGS)
 set(CMAKE_SUPPRESS_REGENERATION true)
 
+# Put all executables and shared libraries in the same directory so that
+# the dasher.dll is found by test executables at runtime on Windows.
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+
 ###############################
 # Compiler Warning Flags
 ###############################

@@ -84,8 +84,7 @@ CDictLanguageModel::CDictLanguageModel(CSettingsStore* pSettingsStore, const CAl
 
     std::string CurrentWord;
 
-    while (!DictFile.eof()) {
-        DictFile >> CurrentWord;
+    while (DictFile >> CurrentWord) {
 
         CurrentWord = CurrentWord + " ";
 
