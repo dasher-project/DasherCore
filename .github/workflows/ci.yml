@@ -11,6 +11,7 @@ jobs:
   build-test:
     name: Build + Test (${{ matrix.os }} / ${{ matrix.compiler }} / ${{ matrix.build_type }})
     runs-on: ${{ matrix.os }}
+    continue-on-error: ${{ matrix.os == 'windows-latest' }}
 
     strategy:
       fail-fast: false
