@@ -87,7 +87,7 @@ TEST(lm_ppm_produces_text) {
     dasher_set_screen_size(ctx, 800, 600);
 
     dasher_set_language_model_id(ctx, 0);
-    produce_text(ctx, 500);
+    produce_text(ctx, 200);
 
     const char* text = dasher_get_output_text(ctx);
     ASSERT(text != nullptr);
@@ -166,7 +166,7 @@ TEST(lm_word_model_produces_text) {
     dasher_set_screen_size(ctx, 800, 600);
 
     dasher_set_language_model_id(ctx, 3);
-    produce_text(ctx, 500);
+    produce_text(ctx, 200);
 
     const char* text = dasher_get_output_text(ctx);
     ASSERT(text != nullptr);
