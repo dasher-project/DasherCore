@@ -1,12 +1,11 @@
 // Settings XML serialization tests: verify complete round-trip persistence
 #include "test_common.h"
-#include <sys/stat.h>
 
 TEST(settings_all_bool_persistent_survive_reload) {
     static int counter = 0;
     char dir[256];
-    snprintf(dir, sizeof(dir), "/tmp/dasher_setbool_%d_%d", getpid(), counter++);
-    mkdir(dir, 0755);
+    snprintf(dir, sizeof(dir), "%s/dasher_setbool_%d_%d", dasher_temp_dir(), dasher_getpid(), counter++);
+    dasher_mkdir(dir);
 
     int param_count = dasher_get_parameter_count();
     int bool_keys[64];
@@ -44,8 +43,8 @@ TEST(settings_all_bool_persistent_survive_reload) {
 TEST(settings_speed_survives_reload) {
     static int counter = 0;
     char dir[256];
-    snprintf(dir, sizeof(dir), "/tmp/dasher_setspeed_%d_%d", getpid(), counter++);
-    mkdir(dir, 0755);
+    snprintf(dir, sizeof(dir), "%s/dasher_setspeed_%d_%d", dasher_temp_dir(), dasher_getpid(), counter++);
+    dasher_mkdir(dir);
 
     dasher_ctx* ctx1 = dasher_create(TEST_DATA_DIR, dir, nullptr);
     ASSERT(ctx1);
@@ -66,8 +65,8 @@ TEST(settings_speed_survives_reload) {
 TEST(settings_alphabet_survives_reload) {
     static int counter = 0;
     char dir[256];
-    snprintf(dir, sizeof(dir), "/tmp/dasher_setalpha_%d_%d", getpid(), counter++);
-    mkdir(dir, 0755);
+    snprintf(dir, sizeof(dir), "%s/dasher_setalpha_%d_%d", dasher_temp_dir(), dasher_getpid(), counter++);
+    dasher_mkdir(dir);
 
     int alph_key = dasher_find_parameter_key("SP_ALPHABET_ID");
     ASSERT(alph_key >= 0);
@@ -93,8 +92,8 @@ TEST(settings_alphabet_survives_reload) {
 TEST(settings_color_palette_survives_reload) {
     static int counter = 0;
     char dir[256];
-    snprintf(dir, sizeof(dir), "/tmp/dasher_setcolor_%d_%d", getpid(), counter++);
-    mkdir(dir, 0755);
+    snprintf(dir, sizeof(dir), "%s/dasher_setcolor_%d_%d", dasher_temp_dir(), dasher_getpid(), counter++);
+    dasher_mkdir(dir);
 
     int color_key = dasher_find_parameter_key("SP_COLOUR_ID");
     ASSERT(color_key >= 0);
@@ -118,8 +117,8 @@ TEST(settings_color_palette_survives_reload) {
 TEST(settings_orientation_survives_reload) {
     static int counter = 0;
     char dir[256];
-    snprintf(dir, sizeof(dir), "/tmp/dasher_setorient_%d_%d", getpid(), counter++);
-    mkdir(dir, 0755);
+    snprintf(dir, sizeof(dir), "%s/dasher_setorient_%d_%d", dasher_temp_dir(), dasher_getpid(), counter++);
+    dasher_mkdir(dir);
 
     int orient_key = dasher_find_parameter_key("LP_ORIENTATION");
     ASSERT(orient_key >= 0);
@@ -146,8 +145,8 @@ TEST(settings_orientation_survives_reload) {
 TEST(settings_lm_max_order_survives_reload) {
     static int counter = 0;
     char dir[256];
-    snprintf(dir, sizeof(dir), "/tmp/dasher_setlmorder_%d_%d", getpid(), counter++);
-    mkdir(dir, 0755);
+    snprintf(dir, sizeof(dir), "%s/dasher_setlmorder_%d_%d", dasher_temp_dir(), dasher_getpid(), counter++);
+    dasher_mkdir(dir);
 
     int order_key = dasher_find_parameter_key("LP_LM_MAX_ORDER");
     ASSERT(order_key >= 0);
@@ -171,8 +170,8 @@ TEST(settings_lm_max_order_survives_reload) {
 TEST(settings_empty_file_uses_defaults) {
     static int counter = 0;
     char dir[256];
-    snprintf(dir, sizeof(dir), "/tmp/dasher_empty_%d_%d", getpid(), counter++);
-    mkdir(dir, 0755);
+    snprintf(dir, sizeof(dir), "%s/dasher_empty_%d_%d", dasher_temp_dir(), dasher_getpid(), counter++);
+    dasher_mkdir(dir);
 
     dasher_ctx* ctx = dasher_create(TEST_DATA_DIR, dir, nullptr);
     ASSERT(ctx);

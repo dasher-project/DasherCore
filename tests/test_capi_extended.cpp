@@ -213,8 +213,9 @@ TEST(reset) {
 TEST(save_settings) {
     static int save_test_counter = 0;
     char shared_dir[256];
-    snprintf(shared_dir, sizeof(shared_dir), "/tmp/dasher_save_test_%d_%d", getpid(), save_test_counter++);
-    mkdir(shared_dir, 0755);
+    snprintf(shared_dir, sizeof(shared_dir), "%s/dasher_save_test_%d_%d", dasher_temp_dir(), dasher_getpid(),
+             save_test_counter++);
+    dasher_mkdir(shared_dir);
 
     dasher_ctx* ctx = dasher_create(TEST_DATA_DIR, shared_dir, nullptr);
     ASSERT(ctx != nullptr);

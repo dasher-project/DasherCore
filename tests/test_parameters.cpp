@@ -233,8 +233,9 @@ TEST(param_groups_are_valid) {
 TEST(param_persistence_roundtrip) {
     static int persist_counter = 0;
     char shared_dir[256];
-    snprintf(shared_dir, sizeof(shared_dir), "/tmp/dasher_persist_test_%d_%d", getpid(), persist_counter++);
-    mkdir(shared_dir, 0755);
+    snprintf(shared_dir, sizeof(shared_dir), "%s/dasher_persist_test_%d_%d", dasher_temp_dir(), dasher_getpid(),
+             persist_counter++);
+    dasher_mkdir(shared_dir);
 
     int speed_key = dasher_find_parameter_key("LP_MAX_BITRATE");
     (void)speed_key;

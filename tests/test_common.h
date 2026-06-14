@@ -11,10 +11,17 @@
 #include <process.h>
 #define dasher_mkdir(path) _mkdir(path)
 #define dasher_getpid() _getpid()
+static inline const char* dasher_temp_dir() {
+    const char* t = getenv("TEMP");
+    return t ? t : ".";
+}
 #else
 #include <unistd.h>
 #define dasher_mkdir(path) mkdir(path, 0755)
 #define dasher_getpid() getpid()
+static inline const char* dasher_temp_dir() {
+    return "/tmp";
+}
 #endif
 
 #define TEST(name) void test_##name()
@@ -41,7 +48,7 @@ inline const char* get_test_data_dir() {
 inline dasher_ctx* create_isolated_context() {
     static int counter = 0;
     char tmpdir[256];
-    snprintf(tmpdir, sizeof(tmpdir), "/tmp/dasher_test_%d_%d", dasher_getpid(), counter++);
+    snprintf(tmpdir, sizeof(tmpdir), "%s/dasher_test_%d_%d", dasher_temp_dir(), dasher_getpid(), counter++);
     dasher_mkdir(tmpdir);
     return dasher_create(TEST_DATA_DIR, tmpdir, nullptr);
 }
