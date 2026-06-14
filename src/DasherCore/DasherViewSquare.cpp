@@ -1077,15 +1077,14 @@ void CDasherViewSquare::ComputeScaleFactor() {
         dScaleFactorX = 0.9 / dDasherXPerPixel;
 
         break;
+    default:
+        break;
     }
-default:
-    break;
-}
-iScaleFactorX = static_cast<myint>(dScaleFactorX * SCALE_FACTOR);
-iScaleFactorY = static_cast<myint>(dScaleFactorY * SCALE_FACTOR);
+    iScaleFactorX = static_cast<myint>(dScaleFactorX * SCALE_FACTOR);
+    iScaleFactorY = static_cast<myint>(dScaleFactorY * SCALE_FACTOR);
 
-// notify listeners that coordinates have changed...
-OnGeometryChanged.Broadcast();
+    // notify listeners that coordinates have changed...
+    OnGeometryChanged.Broadcast();
 }
 
 inline myint CDasherViewSquare::CustomIDivScaleFactor(myint iNumerator) {
