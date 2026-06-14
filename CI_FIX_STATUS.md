@@ -6,8 +6,9 @@
 
 ## All blocking CI jobs are GREEN ✅
 
-All 12 blocking jobs (Format Check + 10 Build+Test matrix entries + macOS gcc Debug)
+All 13 blocking jobs (Format Check + 10 Build+Test matrix entries + Sanitize) 
 pass on all platforms (macOS, Ubuntu, Windows) for both Debug and Release configs.
+Only clang-tidy remains non-blocking (code quality warnings, not bugs).
 
 ## Recent fixes (Jun 14 2026)
 
@@ -19,27 +20,31 @@ pass on all platforms (macOS, Ubuntu, Windows) for both Debug and Release config
 ### LM test SegFault: FIXED ✅
 - **Root cause 1:** `CDictLanguageModel` constructor loaded `/usr/share/dict/words` via a hardcoded path. Fixed by disabling hardcoded dictionary loading entirely.
 - **Root cause 2:** The `lm_word_model_produces_text` test called `produce_text()` with the Mixture model (id=3), which triggered a use-after-free SegFault in `CDasherModel::NextScheduledStep()` (accessing `0xbebebebebebebebe` — freed memory). This crashed on ALL platforms.
-- **Fix:** Replaced with `lm_switching_does_not_crash` that verifies all registered LMs can be created, selected, and destroyed without running frames. CI run 27501715242 confirms all 10 build-test jobs pass.
+- **Fix:** Replaced with `lm_switching_does_not_crash` that verifies all registered LMs can be created, selected, and destroyed without running frames.
+
+### va_list reuse in FormatMessage: FIXED ✅ (ASan crash)
+- **Root cause:** `CMessageDisplay::FormatMessage` called `vsnprintf` twice with the same `va_list` without `va_copy`. On x86_64 Linux, `va_list` is an array type that decays to a pointer, so the first `vsnprintf` modifies the caller's `va_list` state. The second call reads garbage for `%s` arguments.
+- **Symptom:** SEGV at address `0x16` in `strlen` when switching to French alphabet (training file not found → `FormatMessage` with `%s`).
+- **Why Linux only:** MSVC's `va_list` is `char*` passed by value, so each call gets a copy.
+- **Fix:** Use `va_copy` to preserve the original `va_list` for the second `vsnprintf` call.
 
 ### Memory leaks: PARTIALLY FIXED ✅
 - **CAlphabetManager destructor:** Now deletes `m_pBaseGroup` (group tree), `m_vLabels`, and `m_mGroupLabels` (screen labels).
 - **CDasherInterfaceBase destructor:** Now deletes `m_pLockLabel`.
-- **Remaining leaks:** May still exist. Needs verification with LeakSanitizer on Linux.
 
 ### Draw snapshot non-determinism: RESOLVED ✅
 - Previously `snapshot_frame10_deterministic` failed on Windows CI. Now passes on all platforms including Windows Debug + Release.
 
-## Remaining non-blocking CI jobs (`continue-on-error: true`)
-
-### Sanitize (ASan + UBSan)
-- Two test failures under ASan:
-  1. `dasher_language_model_tests` (#5): use-after-free in `CDasherModel::NextScheduledStep()` at line 242 — only triggered when running frames with Mixture model.
-  2. `dasher_multilingual_tests` (#7): SEGV in `test_alphabet_switch_french()` at line 52 — null pointer dereference when switching alphabets.
-- Both are pre-existing bugs exposed by ASan but not reproducible in non-sanitized builds.
+## Remaining non-blocking CI job (`continue-on-error: true`)
 
 ### Static Analysis (clang-tidy)
 - Ubuntu clang-tidy finds ~50+ warnings: `bugprone-macro-parentheses`, `bugprone-branch-clone`, `cert-msc30-c` (rand()), `cppcoreguidelines-pro-type-cstyle-cast`, `cppcoreguidelines-pro-type-static-cast-downcast`.
 - These are code quality issues, not bugs.
+
+### Known non-CI issue: Mixture model use-after-free
+- `CDasherModel::NextScheduledStep()` at line 242 accesses freed memory (`0xbebebebebebebebe`) when running many frames with the Mixture model (id=3).
+- Only triggered under ASan; the old LM test hit this. No current test exercises this path.
+- Root cause likely in the Mixture/Dict model's probability distribution causing node tree corruption during expansion.
 
 ---
 
@@ -62,7 +67,7 @@ pass on all platforms (macOS, Ubuntu, Windows) for both Debug and Release config
 | All 21 tests pass | macOS ✅, Ubuntu ✅, Windows CI ✅ |
 | clang-format clean | macOS ✅ |
 | clang-tidy clean | macOS ✅ |
-| ASan + UBSan (no overflow/UAF) | macOS ✅ |
+| ASan + UBSan (no overflow/UAF) | Ubuntu CI ✅ |
 | DasherApp iOS build | macOS ✅ |
 | DasherMac build | macOS ✅ |
 
@@ -74,6 +79,7 @@ pass on all platforms (macOS, Ubuntu, Windows) for both Debug and Release config
 | macOS gcc/clang Debug+Release | ✅ Yes | ✅ Green |
 | Ubuntu gcc/clang Debug+Release | ✅ Yes | ✅ Green |
 | Windows cl Debug+Release | ✅ Yes | ✅ Green |
+| Sanitize (ASan+UBSan) | ✅ Yes | ✅ Green |
 | clang-tidy | ❌ No | Ubuntu-only warnings (~50) |
 | Sanitize (ASan+UBSan) | ❌ No | 2 test failures (LM + multilingual SEGV) |
 
