@@ -13,7 +13,7 @@ These are real bugs we've made non-blocking. They need to be fixed.
 - **Where:** Detected in `dasher_capi_tests` on Linux CI. ASan leak detection doesn't work on macOS.
 - **How hidden:** Sanitize CI job is `continue-on-error: true` with `detect_leaks=1:halt_on_error=0` (reports but doesn't block)
 - **Impact:** Every `dasher_create()`/`dasher_destroy()` cycle leaks memory. In the keyboard extension (which creates/destroys contexts), this could contribute to jetsam pressure.
-- **To fix:** Run tests under LeakSanitizer on Linux (or valgrind), identify which allocations aren't freed, add cleanup to `CDasherInterfaceBase::~CDasherInterfaceBase()` and related destructors.
+- **To fix:** Run `debug-linux.sh` in WSL2 (see below), review leak stack traces, add cleanup to destructors.
 - **Ownership analysis:** Most members use `unique_ptr` (auto-cleaned). Raw pointers `m_pInput`, `m_pInputFilter` are non-owning (owned by ModuleManager). `m_pSettingsStore` is borrowed (owned by `dasher_ctx::settings`). Leaks are likely in objects created during initialization that aren't tracked by any smart pointer — possibly in language model creation, alphabet loading, or node tree allocation.
 
 ### 2. Null-pointer SEGV in multilingual test on Linux (PARTIALLY FIXED)
@@ -26,7 +26,7 @@ These are real bugs we've made non-blocking. They need to be fixed.
 - **What:** `dasher_language_model_tests` hangs indefinitely on Ubuntu CI. Passes in ~7s on macOS. Reduced frames from 500→200 but still hangs.
 - **Likely cause:** LM switching (`dasher_set_language_model_id(ctx, 3)` for word model) may fail silently on Linux if the word model dictionary isn't found, causing an infinite loop in frame processing.
 - **How hidden:** Ubuntu CI jobs are `continue-on-error: true`
-- **To fix:** Run on Linux with debug output between test functions to identify which one hangs. Check if word/mixture model data files are present on Linux.
+- **To fix:** Run `debug-linux.sh` in WSL2 (see below) — the script adds a 30s timeout and captures output to identify which function hangs.
 
 ### 4. clang-tidy warnings on Ubuntu (HIDDEN)
 - **What:** Ubuntu's clang-tidy finds ~50+ warnings that macOS doesn't: `bugprone-macro-parentheses`, `bugprone-branch-clone`, `cert-msc30-c` (rand()), `cppcoreguidelines-pro-type-cstyle-cast`.
@@ -36,7 +36,80 @@ These are real bugs we've made non-blocking. They need to be fixed.
 ### 5. Windows MSVC build failures (HIDDEN)
 - **What:** MSVC `/W4` + `/permissive-` produces errors that GCC/Clang don't.
 - **How hidden:** Windows CI jobs are `continue-on-error: true`
-- **To fix:** Needs a Windows machine. See details below.
+- **To fix:** See "What needs doing on Windows" below.
+
+---
+
+## 🔧 Fixing Linux issues on WSL2 (recommended)
+
+WSL2 on Windows gives a real Ubuntu kernel with full ASan/valgrind support.
+A diagnostic script (`debug-linux.sh`) is included in the repo.
+
+### One-time WSL2 setup
+```bash
+# In PowerShell (admin):
+wsl --install -d Ubuntu-24.04
+# Restart, set up Ubuntu user/password
+
+# In WSL2 Ubuntu shell:
+sudo apt-get update
+sudo apt-get install -y build-essential cmake clang clang-tidy valgrind git
+git clone https://github.com/dasher-project/DasherCore.git
+cd DasherCore
+git checkout feature-CAPI
+git submodule update --init --recursive
+```
+
+### Run the diagnostic script
+```bash
+# From the DasherCore repo root:
+bash debug-linux.sh
+```
+
+This script will:
+1. Install build dependencies
+2. Build DasherCore + tests (normal and sanitizer versions)
+3. Run all tests (normal build)
+4. Run ASan leak detection on capi, multilingual, and lifecycle tests
+5. Run valgrind on capi tests (slower but more detailed leak traces)
+6. Run LM test with 30s timeout to catch the hang
+7. Run multilingual test under ASan to catch the SEGV
+
+**All results saved to `debug-output/` directory.** Key files:
+- `leaks-asan-capi.txt` — ASan leak report with stack traces
+- `leaks-valgrind-capi.txt` — Valgrind leak report with allocation paths
+- `lm-test-output.txt` — Shows which test function hangs
+- `multilingual-asan.txt` — SEGV stack trace
+
+### Quick manual commands (if you prefer to debug interactively)
+```bash
+# Build
+cmake -B build -DBUILD_TESTS=ON -DBUILD_CAPI=ON -S .
+cmake --build build -j$(nproc)
+
+# Find leaks with stack traces
+ASAN_OPTIONS=detect_leaks=1:halt_on_error=0 ./build/dasher_capi_tests 2>&1 | grep -A10 "LeakSanitizer"
+
+# Find which LM test function hangs
+timeout 30 ./build/dasher_language_model_tests
+
+# Reproduce the multilingual crash
+ASAN_OPTIONS=detect_leaks=0:halt_on_error=1 ./build/dasher_multilingual_tests
+
+# Valgrind (slowest but most detailed)
+valgrind --leak-check=full --show-leak-kinds=all ./build/dasher_capi_tests
+```
+
+### After fixing: re-enable CI blocking
+Once all Linux issues are fixed, edit `.github/workflows/ci.yml`:
+```yaml
+# Remove continue-on-error from:
+#   - build-test (Ubuntu)
+#   - sanitize
+#   - analyze (clang-tidy)
+```
+
+---
 
 ## What IS fixed and verified
 
@@ -77,41 +150,10 @@ All source changes are **backward compatible**:
 **GTK frontend** (`Src/Gtk2/` in upstream): Compiles without modification.
 **Windows frontend**: Same — backward compatible changes only.
 
-## What needs doing on Linux
+## What needs doing on Windows (native MSVC)
 
-### Setup
-```bash
-# Option A: Docker on macOS
-docker run -it -v $(pwd):/work ubuntu:24.04 bash
-apt-get update && apt-get install -y build-essential cmake clang clang-tidy
-
-# Option B: Native Linux or VM
-```
-
-### Fix memory leaks
-```bash
-cmake -B build -DCMAKE_BUILD_TYPE=Debug -DDASHER_SANITIZE=ON -DBUILD_TESTS=ON -S .
-cmake --build build -j$(nproc)
-cd build
-ASAN_OPTIONS=detect_leaks=1:halt_on_error=0 ctest --output-on-failure --timeout 120
-# Review leak report — each leak shows allocation stack trace
-```
-
-### Fix LM test hang
-```bash
-# Add diagnostic flush between test functions in test_language_models.cpp:
-#   fflush(stdout);
-# Then run with timeout to see which function hangs:
-timeout 30 ./build/dasher_language_model_tests
-```
-
-### Fix multilingual SEGV
-```bash
-ASAN_OPTIONS=detect_leaks=0:halt_on_error=1 ./build/dasher_multilingual_tests
-# The null guards in test code may have fixed this — verify on Linux
-```
-
-## What needs doing on Windows
+WSL2 fixes the Linux issues above. For Windows MSVC build, use native Windows
+(not WSL — need real MSVC compiler):
 
 ```cmd
 cmake -B build -DBUILD_TESTS=ON -DBUILD_CAPI=ON -S .
@@ -124,6 +166,7 @@ Known MSVC issues to fix:
 - C4458: shadow warnings
 - C4127: conditional expression is constant (assert macros)
 - Test data paths (forward vs backward slashes)
+- `dasher_temp_dir()` uses `%TEMP%` — verify it works on Windows
 
 ## How to verify locally (macOS)
 
