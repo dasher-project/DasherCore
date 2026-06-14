@@ -216,8 +216,7 @@ void CPPMPYLanguageModel::GetPartProbs(Context context, std::vector<std::pair<sy
                  it++, k++) {
                 if (vCounts[k]) {
                     unsigned int p =
-                        static_cast<myint>(size_of_slice) * (100 * vCounts[j] - beta) /
-                        (100 * iTotal + alpha); // NOLINT(clang-analyzer-core.UndefinedBinaryOperatorResult)
+                        static_cast<myint>(size_of_slice) * (100 * vCounts[k] - beta) / (100 * iTotal + alpha);
                     it->second += p;
                     iToSpend -= p;
                 }

@@ -66,6 +66,7 @@ class CDictLanguageModel : public CLanguageModel {
             order = input.order;
             word_order = input.word_order;
         }
+        CDictContext& operator=(const CDictContext&) = default;
         CDictContext(CDictnode* _head = 0, int _order = 0)
             : head(_head), order(_order), word_head(_head),
               word_order(0) {}; // FIXME - doesn't work if we're trying to create a non-empty context

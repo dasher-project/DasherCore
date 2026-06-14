@@ -109,6 +109,7 @@ void CDynamicButtons::ButtonEvent(unsigned long iTime, Keys::VirtualKey Key, int
                 break;
             }
             // else - any non-special button - fall through
+            [[fallthrough]];
         default: // or, Any special kind of event - long, double, triple, ...
             ActionButton(iTime, Key, iType, pModel);
         }

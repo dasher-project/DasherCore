@@ -71,6 +71,7 @@ class CWordLanguageModel : public CLanguageModel {
             order = input.order;
             word_order = input.word_order;
         }
+        CWordContext& operator=(const CWordContext&) = default;
 
         CWordContext(CWordnode* _head = 0, int _order = 0)
             : head(_head), order(_order), word_head(_head),

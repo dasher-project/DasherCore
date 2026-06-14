@@ -150,7 +150,8 @@ symbol CRoutingPPMLanguageModel::GetBestRoute(Context ctx) {
         const int size_of_slice(iToSpend);
         for (std::map<symbol, unsigned short int>::const_iterator it = node->m_routes.begin();
              it != node->m_routes.end(); it++) {
-            unsigned int p = size_of_slice * (100 * it->second - beta) / (100 * iTotal + alpha);
+            unsigned int p =
+                static_cast<unsigned int>(size_of_slice) * (100 * it->second - beta) / (100 * iTotal + alpha);
             iToSpend -= p;
             probs[it->first] += p;
         }

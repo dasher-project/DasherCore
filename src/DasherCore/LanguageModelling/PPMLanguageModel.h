@@ -103,6 +103,7 @@ class CAbstractPPM : public CLanguageModel, private NoClones {
             head = input.head;
             order = input.order;
         }
+        CPPMContext& operator=(const CPPMContext&) = default;
         CPPMContext(CPPMnode* _head = 0, int _order = 0) : head(_head), order(_order) {};
         ~CPPMContext() {};
         void dump();
