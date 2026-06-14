@@ -79,7 +79,6 @@ class CDictLanguageModel : public CLanguageModel {
         int word_order;
     };
 
-    const CAlphabetMap* m_pAlphMap;
     const CAlphInfo* m_pAlph;
 
     CDictnode* AddSymbolToNode(CDictnode* pNode, symbol sym, int* update);
@@ -129,22 +128,22 @@ inline CDictLanguageModel::CDictnode::CDictnode() {
 inline CLanguageModel::Context CDictLanguageModel::CreateEmptyContext() {
     CDictContext* pCont = m_ContextAlloc.Alloc();
     *pCont = *m_rootcontext;
-    return (Context)pCont;
+    return reinterpret_cast<Context>(pCont);
 }
 
 ///////////////////////////////////////////////////////////////////
 
 inline CLanguageModel::Context CDictLanguageModel::CloneContext(Context Copy) {
     CDictContext* pCont = m_ContextAlloc.Alloc();
-    CDictContext* pCopy = (CDictContext*)Copy;
+    CDictContext* pCopy = reinterpret_cast<CDictContext*>(Copy);
     *pCont = *pCopy;
-    return (Context)pCont;
+    return reinterpret_cast<Context>(pCont);
 }
 
 ///////////////////////////////////////////////////////////////////
 
 inline void CDictLanguageModel::ReleaseContext(Context release) {
-    m_ContextAlloc.Free((CDictContext*)release);
+    m_ContextAlloc.Free(reinterpret_cast<CDictContext*>(release));
 }
 
 ///////////////////////////////////////////////////////////////////

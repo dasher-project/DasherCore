@@ -21,11 +21,11 @@ point C1DCircleStartHandler::CircleCenter(CDasherView* pView) {
         CCircleStartHandler::CircleCenter(pView); // that does the radius
         const myint rad(static_cast<myint>(m_pSettingsStore->GetLongParameter(LP_CIRCLE_PERCENT)) *
                         CDasherModel::ORIGIN_Y / 100); //~~rad/2 in dasher-coords
-        m_pView->Dasher2Screen(CDasherModel::ORIGIN_X - static_cast<COneDimensionalFilter*>(m_pFilter)->forwardmax +
+        m_pView->Dasher2Screen(CDasherModel::ORIGIN_X - dynamic_cast<COneDimensionalFilter*>(m_pFilter)->forwardmax +
                                    rad,
                                CDasherModel::ORIGIN_Y, m_fwdCenter.x, m_fwdCenter.y);
     }
-    if (!static_cast<COneDimensionalFilter*>(m_pFilter)->isPaused()) return CCircleStartHandler::CircleCenter(pView);
+    if (!dynamic_cast<COneDimensionalFilter*>(m_pFilter)->isPaused()) return CCircleStartHandler::CircleCenter(pView);
     // paused. put start circle at center of 1D transform, rather than center of screen
     //  but keep the same m_iScreenRadius, in pixels - so recompute if necessary:
     return m_fwdCenter;

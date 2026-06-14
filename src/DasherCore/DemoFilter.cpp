@@ -61,8 +61,8 @@ void CDemoFilter::Deactivate() {
 
 std::pair<double, double> GaussianRand() // Is there a random number class already?
 {
-    double u1 = (double(rand()) + 1) / (double(RAND_MAX) + 1.0);
-    double u2 = (double(rand()) + 1) / (double(RAND_MAX) + 1.0);
+    double u1 = (double(rand()) + 1) / (double(RAND_MAX) + 1.0); // NOLINT(cert-msc30-c)
+    double u2 = (double(rand()) + 1) / (double(RAND_MAX) + 1.0); // NOLINT(cert-msc30-c)
     double g1 = sqrt(-2.0 * log(u1)) * cos(6.283185307 * u2);
     double g2 = sqrt(-2.0 * log(u1)) * sin(6.283185307 * u2);
     //  std::cout << u1 << " : " << u2 << " : " << g1 << std::endl;

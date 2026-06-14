@@ -63,7 +63,7 @@
 // Please implement any platform-specific pointer checking
 
 // Simple check that the pointer is non-null
-#define DASHER_ASSERT_VALIDPTR_RW(p) DASHER_ASSERT(p != NULL)
-#define DASHER_ASSERT_VALIDPTR_R(p) DASHER_ASSERT(p != NULL)
+#define DASHER_ASSERT_VALIDPTR_RW(p) DASHER_ASSERT((p) != NULL)
+#define DASHER_ASSERT_VALIDPTR_R(p) DASHER_ASSERT((p) != NULL)
 
 #endif

@@ -84,13 +84,11 @@ class CAbstractPPM : public CLanguageModel, private NoClones {
             nxt();
             return *this;
         } // prefix
-        ChildIterator operator++(int) {
+        const ChildIterator operator++(int) {
             ChildIterator temp(*this);
             nxt();
             return temp;
         }
-        // operator CPPMnode *() {return node;} //implicit conversion
-        // operator bool();                     //implicit conversion 2
         ChildIterator(CPPMnode* const* ppChild, CPPMnode* const* ppStop) : m_ppChild(ppChild), m_ppStop(ppStop) {
             nxt();
         }
@@ -216,23 +214,23 @@ inline CLanguageModel::Context CAbstractPPM::CreateEmptyContext() {
 
     m_setContexts.insert(pCont);
 
-    return (Context)pCont;
+    return reinterpret_cast<Context>(pCont);
 }
 
 inline CLanguageModel::Context CAbstractPPM::CloneContext(Context Copy) {
     CPPMContext* pCont = m_ContextAlloc.Alloc();
-    CPPMContext* pCopy = (CPPMContext*)Copy;
+    CPPMContext* pCopy = reinterpret_cast<CPPMContext*>(Copy);
     *pCont = *pCopy;
 
     m_setContexts.insert(pCont);
 
-    return (Context)pCont;
+    return reinterpret_cast<Context>(pCont);
 }
 
 inline void CAbstractPPM::ReleaseContext(Context release) {
 
-    m_setContexts.erase(m_setContexts.find((CPPMContext*)release));
+    m_setContexts.erase(m_setContexts.find(reinterpret_cast<CPPMContext*>(release)));
 
-    m_ContextAlloc.Free((CPPMContext*)release);
+    m_ContextAlloc.Free(reinterpret_cast<CPPMContext*>(release));
 }
 } // end namespace Dasher

@@ -144,7 +144,7 @@ void CDasherNode::DeleteChildren() {
         delete (child);
     }
     Children().clear();
-    SetFlag(NF_ALLCHILDREN, false);
+    SetFlag(NF_ALLCHILDREN, false); // NOLINT(clang-analyzer-optin.cplusplus.VirtualCall)
     onlyChildRendered = nullptr;
 }
 

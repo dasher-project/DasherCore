@@ -349,7 +349,7 @@ void CDasherModel::ScheduleOneStep(dasherint y1, dasherint y2, int nSteps, int l
     //       with approx sqrt on y2-y1
     // this is pretty good going forwards, but reverses faster than the ideal, on the order of 2*
 
-    if (targetRange < 2 * limX) {
+    if (targetRange < 2 * static_cast<dasherint>(limX)) {
 #ifdef DEBUG_DYNAMICS
         {
             const dasherint Rw = R2 - R1, rw = r2 - r1;
@@ -371,7 +371,7 @@ void CDasherModel::ScheduleOneStep(dasherint y1, dasherint y2, int nSteps, int l
         //  = (MAX_Y-(2*limX))/(2*limX) / ((MAX_Y-targetRange)/targetRange)
         //  = (MAX_Y-(2*limX)) / (2*limX) * targetRange / (MAX_Y-targetRange)
         {
-            const dasherint n = targetRange * (MAX_Y - 2 * limX), d = (MAX_Y - targetRange) * 2 * limX;
+            const dasherint n = targetRange * (MAX_Y - 2 * static_cast<dasherint>(limX)), d = (MAX_Y - targetRange) * 2 * static_cast<dasherint>(limX);
             bool bOver = std::max(llabs(m1), llabs(m2)) > std::numeric_limits<dasherint>::max() / n;
             if (bOver) {
                 // std::cout << "Overflow in max-speed-limit " << m1 << "," << m2 << " =wd> " << ((m1*n)/d) << "," <<
@@ -386,7 +386,7 @@ void CDasherModel::ScheduleOneStep(dasherint y1, dasherint y2, int nSteps, int l
             }
         }
         // then make the stepping function, which follows, behave as if we were at limX:
-        targetRange = 2 * limX;
+        targetRange = 2 * static_cast<dasherint>(limX);
     }
 
 #ifndef DEBUG_DYNAMICS
@@ -420,7 +420,7 @@ else // conditional - only do one of exact/approx
             //  apsq parts rw to 64*(nSteps-1) parts Rw
             //  (no need to compute target width)
             dasherint apsq = mysqrt(targetRange);
-            dasherint denom = 64 * (nSteps - 1) + apsq;
+            dasherint denom = 64 * static_cast<dasherint>(nSteps - 1) + apsq;
 
             // so new width nw = (64*(nSteps-1)*Rw + apsq*rw)/denom
             // = Rw*(64*(nSteps-1) + apsq*MAX_Y/targetRange)/denom

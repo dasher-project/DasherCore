@@ -48,7 +48,7 @@ static SModuleSettings sSettings[] = {
 };
 
 void CTwoPushDynamicFilter::GetUISettings(std::vector<Dasher::Parameter>& List) {
-    CInputFilter::GetUISettings(List);
+    CInputFilter::GetUISettings(List); // NOLINT(bugprone-parent-virtual-call)
     AddSettings(List, {BP_TWO_PUSH_RELEASE_TIME, LP_TWO_PUSH_OUTER, LP_DYNAMIC_BUTTON_LAG, LP_TWO_PUSH_TOLERANCE,
                        LP_TWO_PUSH_SHORT, LP_TWO_PUSH_LONG});
 }

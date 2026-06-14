@@ -138,7 +138,7 @@ class CMandarinAlphMgr : public CAlphabetManager {
     ///  correct training text and for rebuilding.
     class CMandSym : public CSymbolNode {
       public:
-        CMandarinAlphMgr* mgr() const { return static_cast<CMandarinAlphMgr*>(CSymbolNode::mgr()); }
+        CMandarinAlphMgr* mgr() const { return dynamic_cast<CMandarinAlphMgr*>(CSymbolNode::mgr()); }
         /// Symbol constructor: display text from (CH)Alphabet, colour as superclass = from GetColour
         CMandSym(int iOffset, CMandarinAlphMgr* pMgr, symbol iSymbol, symbol pyParent);
         CDasherNode* RebuildSymbol(CAlphNode* pParent, symbol iSymbol);
@@ -164,7 +164,7 @@ class CMandarinAlphMgr : public CAlphabetManager {
       public:
         /// \param pySym symbol in pinyin alphabet; must have >1 possible chinese conversion.
         CConvRoot(int iOffset, CMandarinAlphMgr* pMgr, symbol pySym);
-        CMandarinAlphMgr* mgr() const override { return static_cast<CMandarinAlphMgr*>(CAlphBase::mgr()); }
+        CMandarinAlphMgr* mgr() const override { return dynamic_cast<CMandarinAlphMgr*>(CAlphBase::mgr()); }
         void PopulateChildren() override;
         void PopulateChildrenWithExisting(CMandSym* existing);
         int ExpectedNumChildren() override;

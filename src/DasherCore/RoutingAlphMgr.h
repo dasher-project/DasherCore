@@ -74,7 +74,7 @@ class CRoutingAlphMgr : public CAlphabetManager {
         CRoutedSym(int iOffset, CDasherScreen::Label* pLabel, CRoutingAlphMgr* pMgr, symbol iSymbol);
 
       protected:
-        CRoutingAlphMgr* mgr() const { return static_cast<CRoutingAlphMgr*>(m_pMgr); }
+        CRoutingAlphMgr* mgr() const { return dynamic_cast<CRoutingAlphMgr*>(m_pMgr); }
     };
     /// Override to provide different defaults! Otherwise as GetColour,
     ///  this uses the character data in the alphabet anyway.

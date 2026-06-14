@@ -34,7 +34,7 @@ CDynamicButtons::CDynamicButtons(CSettingsStore* pSettingsStore, CDasherInterfac
     : CDynamicFilter(pSettingsStore, pInterface, pFramerate, szName), m_pModel(NULL) {
     m_bDecorationChanged = true;
     m_bKeyDown = false;
-    pause();
+    pause(); // NOLINT(clang-analyzer-optin.cplusplus.VirtualCall)
 }
 
 void CDynamicButtons::Timer(unsigned long iTime, CDasherView* pDasherView, CDasherInput* pInput, CDasherModel* pModel,

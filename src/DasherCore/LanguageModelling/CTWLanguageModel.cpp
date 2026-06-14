@@ -72,7 +72,7 @@ CCTWLanguageModel::~CCTWLanguageModel() { // destructor
 
 // **** Implementation of help functions *****
 // To get the 'phase' bit in byte
-#define ByteBit(byte, Phase) ((byte >> ((NrPhases - 1) - Phase)) & 1)
+#define ByteBit(byte, Phase) (((byte) >> ((NrPhases - 1) - (Phase))) & 1)
 
 // To find the index of the RootNode for a byte and a phase.
 inline int CCTWLanguageModel::MapIndex(int b, int f) {
@@ -123,12 +123,8 @@ void CCTWLanguageModel::UpdatePath(
     // The deepest index can be a leaf, a failed node, or a not-placed node
     const int DeepestIndex = index[ValidDepth];
 
-    if (DeepestIndex == MaxNrNodes) // node didn't exist yet, both probs. equal
+    if (DeepestIndex == MaxNrNodes || DeepestIndex == MaxNrNodes + 1) // node didn't exist yet, or couldn't be placed; both probs. equal
     {
-        GammaZero = MaxValue;
-        GammaOne = MaxValue;
-    } else if (DeepestIndex == MaxNrNodes + 1) // node couldn't be placed
-    {                                          // could do more fancy things here
         GammaZero = MaxValue;
         GammaOne = MaxValue;
     } else { // node has to be a leaf
@@ -259,7 +255,6 @@ int CCTWLanguageModel::FindPath(
                     break;        // to escape loop and continue with next character
                 } else            // can't create a new node
                 {
-                    found = false;
                     index[i + 1] = MaxNrNodes + 1; // to indicate node could not be placed
                     return (i + 1);                // +i since i=0 is the rootnode, always valid
                 }
@@ -280,7 +275,7 @@ int CCTWLanguageModel::FindPath(
 void CCTWLanguageModel::EnterSymbol(
     Context CurContext,
     int Symbol) { // add Symbol to the front of Context. If there are more than MaxDepth symbols, pop the last one
-    CCTWLanguageModel::CCTWContext& Context = *(CCTWLanguageModel::CCTWContext*)(CurContext);
+    CCTWLanguageModel::CCTWContext& Context = *reinterpret_cast<CCTWLanguageModel::CCTWContext*>(CurContext);
     if (Context.Full == true) Context.Context.pop_back();
 
     Context.Context.push_front(Symbol);
@@ -289,7 +284,7 @@ void CCTWLanguageModel::EnterSymbol(
 }
 
 void CCTWLanguageModel::LearnSymbol(Context CurContext, int Symbol) {
-    CCTWLanguageModel::CCTWContext& Context = *(CCTWLanguageModel::CCTWContext*)(CurContext);
+    CCTWLanguageModel::CCTWContext& Context = *reinterpret_cast<CCTWLanguageModel::CCTWContext*>(CurContext);
 
     if (Context.Full == true) // context is complete, update the tree
     {                         // find indices of the tree nodes corresponding to the context
@@ -319,7 +314,7 @@ void CCTWLanguageModel::GetProbs(Context context, std::vector<unsigned int>& Pro
 
     CCTWLanguageModel* self = const_cast<CCTWLanguageModel*>(this);
 
-    CCTWContext* CTWContext = (CCTWContext*)(context);
+    CCTWContext* CTWContext = reinterpret_cast<CCTWContext*>(context);
     CCTWContext LocalContext(*CTWContext);
 
     int iNumSymbols = GetSize();
@@ -464,7 +459,7 @@ bool CCTWLanguageModel::ReadFromFile(std::string strFilename, std::string Alphab
         bytesRead = fread(&GenericHeader.szMagic, sizeof(GenericHeader.szMagic[0]), sizeof(GenericHeader.szMagic) - 1,
                           InputFile); // Magic string is written without null-char
         if (bytesRead < (sizeof(GenericHeader.szMagic) - 1) ||
-            memcmp(GenericHeader.szMagic, "%DLF", bytesRead)) { // magic strings not equal
+            memcmp(GenericHeader.szMagic, "%DLF", bytesRead) != 0) { // magic strings not equal
             return false;
         }
 
@@ -506,7 +501,7 @@ bool CCTWLanguageModel::ReadFromFile(std::string strFilename, std::string Alphab
         ReadAlphabetName[GenericHeader.iHeaderSize - sizeof(SLMFileHeader)] =
             '\0'; // write the terminating 0 and read it in as well
 
-        if (strcmp(ReadAlphabetName, AlphabetName.c_str())) { // header indicates stored model uses a different alphabet
+        if (strcmp(ReadAlphabetName, AlphabetName.c_str()) != 0) { // header indicates stored model uses a different alphabet
             delete[] ReadAlphabetName;
             return false;
         }
@@ -537,19 +532,19 @@ bool CCTWLanguageModel::ReadFromFile(std::string strFilename, std::string Alphab
 
 inline CLanguageModel::Context CCTWLanguageModel::CreateEmptyContext() {
     CCTWContext* pCont = new CCTWContext;
-    return (Context)pCont;
+    return reinterpret_cast<Context>(pCont);
 }
 
 inline CLanguageModel::Context CCTWLanguageModel::CloneContext(Context Copy) {
     CCTWContext* pCont = new CCTWContext;
-    CCTWContext* pCopy = (CCTWContext*)Copy;
+    CCTWContext* pCopy = reinterpret_cast<CCTWContext*>(Copy);
 
     pCont->Full = pCopy->Full;
     pCont->Context.assign(pCopy->Context.begin(), pCopy->Context.end());
 
-    return (Context)pCont;
+    return reinterpret_cast<Context>(pCont);
 }
 
 inline void CCTWLanguageModel::ReleaseContext(Context release) {
-    delete (CCTWContext*)release;
+    delete reinterpret_cast<CCTWContext*>(release);
 }

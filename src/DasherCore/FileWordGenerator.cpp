@@ -56,7 +56,7 @@ std::string CFileWordGenerator::GetLine() {
         // no error has occurred, but we've reached the end of file. So reset state as we're about to seek...
         m_sFileHandle.clear();
     }
-    int i = rand() % m_vLineIndices.size();
+    int i = rand() % m_vLineIndices.size(); // NOLINT(cert-msc30-c)
     m_sFileHandle.seekg(m_vLineIndices[i]);
     m_vLineIndices.erase(m_vLineIndices.begin() + i);
     // TODO: call DashIntf::Message, and return "", instead?

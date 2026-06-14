@@ -162,7 +162,7 @@ void CPPMPYLanguageModel::GetPartProbs(Context context, std::vector<std::pair<sy
     //  std::cout<<"Norms is "<<norm<<std::endl;
     //  std::cout<<"iUniform is "<<iUniform<<std::endl;
 
-    const CPPMContext* ppmcontext = (const CPPMContext*)(context);
+    const CPPMContext* ppmcontext = reinterpret_cast<const CPPMContext*>(context);
 
     //  DASHER_ASSERT(m_setContexts.count(ppmcontext) > 0);
 
@@ -274,7 +274,7 @@ void CPPMPYLanguageModel::GetPartProbs(Context context, std::vector<std::pair<sy
 //  by an explicit cast to PPMPYLanguageModel whenever MandarinDasher was activated. Renaming
 //  to GetProbs causes the normal (virtual) call to come straight here without any special-casing...
 void CPPMPYLanguageModel::GetProbs(Context context, std::vector<unsigned int>& probs, int norm, int iUniform) const {
-    const CPPMContext* ppmcontext = (const CPPMContext*)(context);
+    const CPPMContext* ppmcontext = reinterpret_cast<const CPPMContext*>(context);
 
     //  std::cout<<"PPMCONTEXT symbol: "<<ppmcontext->head->symbol<<std::endl;
     /*
@@ -319,7 +319,7 @@ void CPPMPYLanguageModel::GetProbs(Context context, std::vector<unsigned int>& p
 
     for (CPPMnode* pTemp = ppmcontext->head; pTemp; pTemp = pTemp->vine) {
         int iTotal = 0;
-        const std::map<symbol, unsigned short int>& pychild(static_cast<CPPMPYnode*>(pTemp)->pychild);
+        const std::map<symbol, unsigned short int>& pychild(dynamic_cast<CPPMPYnode*>(pTemp)->pychild);
 
         for (std::map<symbol, unsigned short int>::const_iterator it = pychild.begin(); it != pychild.end(); it++) {
             if (!(exclusions[it->first] && doExclusion)) iTotal += it->second;
@@ -390,7 +390,7 @@ void CPPMPYLanguageModel::LearnPYSymbol(Context c, int pysym) {
     if (pysym == 0) return;
 
     DASHER_ASSERT(pysym > 0 && pysym <= m_iNumPYsyms);
-    CPPMPYLanguageModel::CPPMContext& context = *(CPPMContext*)(c);
+    CPPMPYLanguageModel::CPPMContext& context = *reinterpret_cast<CPPMContext*>(c);
 
     //  std::cout<<"py learn context : "<<context.head->symbol<<std::endl;
     /*   CPPMPYnode * pNode = m_pRoot->child;
@@ -403,7 +403,7 @@ void CPPMPYLanguageModel::LearnPYSymbol(Context c, int pysym) {
     */
 
     for (CPPMnode* pNode = context.head; pNode; pNode = pNode->vine) {
-        if (static_cast<CPPMPYnode*>(pNode)->pychild[pysym]++) {
+        if (dynamic_cast<CPPMPYnode*>(pNode)->pychild[pysym]++) {
             // count non-zero before increment, i.e. sym already present
             if (bUpdateExclusion) break;
         }

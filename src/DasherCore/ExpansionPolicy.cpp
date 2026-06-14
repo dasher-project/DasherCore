@@ -122,7 +122,7 @@ AmortizedPolicy::AmortizedPolicy(CDasherModel* pModel, unsigned int iNodeBudget,
 
 double AmortizedPolicy::pushNode(CDasherNode* node, int iMin, int iMax, bool bExpand, double dParentCost) {
     double dRes = BudgettingPolicy::pushNode(node, iMin, iMax, bExpand, dParentCost);
-    if (bExpand && sExpand.size() > 2 * m_iMaxExpands) trim();
+    if (bExpand && sExpand.size() > 2 * static_cast<size_t>(m_iMaxExpands)) trim();
     return dRes;
 }
 

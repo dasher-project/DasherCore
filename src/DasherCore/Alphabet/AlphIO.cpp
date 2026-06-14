@@ -145,7 +145,7 @@ bool Dasher::CAlphIO::Parse(pugi::xml_document& document, const std::string, boo
 void CAlphIO::GetAlphabets(std::vector<std::string>* AlphabetList) const {
     AlphabetList->clear();
 
-    for (auto [AlphabetID, Alphabet] : Alphabets) {
+    for (const auto& [AlphabetID, Alphabet] : Alphabets) {
         AlphabetList->push_back(Alphabet->AlphID);
     }
 }
@@ -308,10 +308,8 @@ void CAlphIO::ReadCharAttributes(pugi::xml_node xml_node, CAlphInfo::character& 
             KeyboardAction::pressType p;
 
             if (!potentialActions.attribute("key").empty()) keycodes = potentialActions.attribute("key").as_string();
-            p = KeyboardAction::KEY_PRESS_RELEASE;
             if (!potentialActions.attribute("press").empty())
                 keycodes = potentialActions.attribute("press").as_string();
-            p = KeyboardAction::KEY_PRESS;
             if (!potentialActions.attribute("release").empty())
                 keycodes = potentialActions.attribute("release").as_string();
             p = KeyboardAction::KEY_RELEASE;
@@ -319,10 +317,8 @@ void CAlphIO::ReadCharAttributes(pugi::xml_node xml_node, CAlphInfo::character& 
 
             if (!potentialActions.attribute("undoKey").empty())
                 keycodes = potentialActions.attribute("undoKey").as_string();
-            p = KeyboardAction::KEY_PRESS_RELEASE;
             if (!potentialActions.attribute("undoPress").empty())
                 keycodes = potentialActions.attribute("undoPress").as_string();
-            p = KeyboardAction::KEY_PRESS;
             if (!potentialActions.attribute("undoRelease").empty())
                 keycodes = potentialActions.attribute("undoRelease").as_string();
             p = KeyboardAction::KEY_RELEASE;
@@ -388,7 +384,7 @@ void CAlphIO::ReverseChildList(SGroupInfo*& pList) {
 }
 
 CAlphIO::~CAlphIO() {
-    for (auto [AlphabetID, Alphabet] : Alphabets) {
+    for (const auto& [AlphabetID, Alphabet] : Alphabets) {
         delete Alphabet;
     }
 }

@@ -78,19 +78,19 @@ bool XmlSettingsStore::Save() {
 
     pugi::xml_node settings = doc.append_child("settings");
 
-    for (auto [name, value] : long_settings_) {
+    for (const auto& [name, value] : long_settings_) {
         pugi::xml_node long_node = settings.append_child("long");
         long_node.append_attribute("name") = name.c_str();
         long_node.append_attribute("value") = value;
     }
 
-    for (auto [name, value] : boolean_settings_) {
+    for (const auto& [name, value] : boolean_settings_) {
         pugi::xml_node bool_node = settings.append_child("bool");
         bool_node.append_attribute("name") = name.c_str();
         bool_node.append_attribute("value") = value;
     }
 
-    for (auto [name, value] : string_settings_) {
+    for (const auto& [name, value] : string_settings_) {
         pugi::xml_node string_node = settings.append_child("string");
         string_node.append_attribute("name") = name.c_str();
         string_node.append_attribute("value") = value.c_str();

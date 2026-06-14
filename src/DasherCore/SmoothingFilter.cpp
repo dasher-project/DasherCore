@@ -17,7 +17,7 @@ void Dasher::CSmoothingFilter::KeyDown(unsigned long iTime, Keys::VirtualKey Key
     if (m_pSettingsStore->GetBoolParameter(BP_SMOOTH_PRESS_MODE)) {
         CPressFilter::KeyDown(iTime, Key, pDasherView, pInput, pModel);
     } else {
-        CDefaultFilter::KeyDown(iTime, Key, pDasherView, pInput, pModel);
+        CDefaultFilter::KeyDown(iTime, Key, pDasherView, pInput, pModel); // NOLINT(bugprone-parent-virtual-call)
     }
 }
 
@@ -26,7 +26,7 @@ void Dasher::CSmoothingFilter::KeyUp(unsigned long iTime, Keys::VirtualKey Key, 
     if (m_pSettingsStore->GetBoolParameter(BP_SMOOTH_PRESS_MODE)) {
         CPressFilter::KeyUp(iTime, Key, pView, pInput, pModel);
     } else {
-        CDefaultFilter::KeyUp(iTime, Key, pView, pInput, pModel);
+        CDefaultFilter::KeyUp(iTime, Key, pView, pInput, pModel); // NOLINT(bugprone-parent-virtual-call)
     }
 }
 

@@ -150,21 +150,21 @@ inline CWordLanguageModel::CWordnode::CWordnode() {
 ///////////////////////////////////////////////////////////////////
 
 inline CLanguageModel::Context CWordLanguageModel::CreateEmptyContext() {
-    return CloneContext((Context)m_rootcontext);
+    return CloneContext(reinterpret_cast<Context>(m_rootcontext));
 }
 
 ///////////////////////////////////////////////////////////////////
 
 inline CLanguageModel::Context CWordLanguageModel::CloneContext(Context Copy) {
     CWordContext* pCont = m_ContextAlloc.Alloc();
-    CWordContext* pCopy = (CWordContext*)Copy;
+    CWordContext* pCopy = reinterpret_cast<CWordContext*>(Copy);
     *pCont = *pCopy;
 
     // Create a clone of the spelling context
 
     pCont->oSpellingContext = pCont->m_pSpellingModel->CloneContext(pCopy->oSpellingContext);
 
-    return (Context)pCont;
+    return reinterpret_cast<Context>(pCont);
 }
 
 ///////////////////////////////////////////////////////////////////

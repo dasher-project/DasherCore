@@ -72,7 +72,7 @@ CDictLanguageModel::CDictnode* CDictLanguageModel::AddSymbolToNode(CDictnode* pN
 
 CDictLanguageModel::CDictLanguageModel(CSettingsStore* pSettingsStore, const CAlphInfo* pAlph,
                                        const CAlphabetMap* pAlphMap)
-    : CLanguageModel(pAlph->iEnd - 1), m_pSettingsStore(pSettingsStore), m_pAlphMap(pAlphMap), m_pAlph(pAlph),
+    : CLanguageModel(pAlph->iEnd - 1), m_pSettingsStore(pSettingsStore), m_pAlph(pAlph),
       NodesAllocated(0), max_order(0), m_NodeAlloc(8192), m_ContextAlloc(1024) {
     m_pRoot = m_NodeAlloc.Alloc();
     m_pRoot->sbl = -1;
@@ -137,7 +137,7 @@ int CDictLanguageModel::lookup_word_const(const std::string& w) const {
 
 void CDictLanguageModel::GetProbs(Context context, std::vector<unsigned int>& probs, int norm, int iUniform) const {
 
-    const CDictLanguageModel::CDictContext* wordcontext = (const CDictContext*)(context);
+    const CDictLanguageModel::CDictContext* wordcontext = reinterpret_cast<const CDictContext*>(context);
 
     int iNumSymbols = GetSize();
 
@@ -211,7 +211,7 @@ void CDictLanguageModel::GetProbs(Context context, std::vector<unsigned int>& pr
     //      DASHER_TRACEOUTPUT("valid %s",str2.str().c_str());
 
     for (i = 0; i < iNumSymbols; i++) {
-        if (!(doExclusion && exclusions[i])) {
+        if (!(doExclusion && exclusions[i]) && symbolsleft > 0) {
             unsigned int p = size_of_slice / symbolsleft;
             probs[i] += p;
             iToSpend -= p;
@@ -449,7 +449,7 @@ void CDictLanguageModel::CollapseContext(CDictLanguageModel::CDictContext& conte
 }
 
 void CDictLanguageModel::MyLearnSymbol(Context c, int Symbol) {
-    CDictContext& context = *(CDictContext*)(c);
+    CDictContext& context = *reinterpret_cast<CDictContext*>(c);
     AddSymbol(context, Symbol);
 }
 
@@ -505,7 +505,7 @@ void CDictLanguageModel::AddSymbol(CDictLanguageModel::CDictContext& context, sy
 
 void CDictLanguageModel::EnterSymbol(Context c, int Symbol) {
 
-    CDictContext& context = *(CDictContext*)(c);
+    CDictContext& context = *reinterpret_cast<CDictContext*>(c);
 
     // Add the symbol to the current word string
 
