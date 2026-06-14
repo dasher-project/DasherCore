@@ -7,7 +7,11 @@ void CMessageDisplay::FormatMessage(const char* format, va_list args) {
 
     std::string lineToPrint;
 
-    int length = vsnprintf(nullptr, 0, format, args);
+    va_list args_copy;
+    va_copy(args_copy, args);
+    int length = vsnprintf(nullptr, 0, format, args_copy);
+    va_end(args_copy);
+
     lineToPrint.resize(length);
     vsnprintf(&lineToPrint[0], length + 1, format, args);
 
