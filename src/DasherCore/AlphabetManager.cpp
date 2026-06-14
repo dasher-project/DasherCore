@@ -241,6 +241,20 @@ const CAlphInfo* CAlphabetManager::GetAlphabet() const {
 CAlphabetManager::~CAlphabetManager() {
     // the alphabet belongs to the AlphIO, and may be reused later
     delete m_pLanguageModel;
+
+    // Clean up screen labels created by MakeLabels() before deleting the
+    // group tree, since m_mGroupLabels uses SGroupInfo* keys into that tree.
+    for (CDasherScreen::Label* label : m_vLabels)
+        delete label;
+    m_vLabels.clear();
+    for (auto& [grp, label] : m_mGroupLabels)
+        delete label;
+    m_mGroupLabels.clear();
+
+    // SGroupInfo's destructor recursively deletes children and siblings.
+    delete m_pBaseGroup;
+    m_pBaseGroup = nullptr;
+
     m_pSettingsStore->OnPreParameterChange.Unsubscribe(this);
 }
 

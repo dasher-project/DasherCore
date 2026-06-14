@@ -232,6 +232,9 @@ CDasherInterfaceBase::~CDasherInterfaceBase() {
     // //WriteTrainFileFull();???
     m_pDasherModel.reset(); // Needs to explicitly be deleted as else a crash occurs on close
 
+    // Clean up cached lock label (created by Redraw when locked)
+    delete m_pLockLabel;
+
     // When we destruct on shutdown, we'll output any detailed log file
     if (m_pUserLog) m_pUserLog->OutputFile();
 }
