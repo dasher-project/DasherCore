@@ -70,3 +70,7 @@ Data/dasher_settings.xml
 *.settings.xml
 dasher_settings.xml
 dasher.log
+build-san/
+build-tidy/
+build-san/
+build-tidy/

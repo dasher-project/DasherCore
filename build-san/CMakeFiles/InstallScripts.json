@@ -1,8 +1,0 @@
-{
-	"InstallScripts" : 
-	[
-		"/Users/willwade/GitHub/DasherProjects/Dasher-Apple/DasherCore/build-san/cmake_install.cmake",
-		"/Users/willwade/GitHub/DasherProjects/Dasher-Apple/DasherCore/build-san/Thirdparty/pugixml/cmake_install.cmake"
-	],
-	"Parallel" : false
-}

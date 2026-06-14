@@ -1,1 +1,0 @@
-/usr/bin/c++ -g -arch arm64 -Wl,-search_paths_first -Wl,-headerpad_max_install_names -fsanitize=address,undefined CMakeFiles/dasher_low_memory_tests.dir/tests/test_low_memory.cpp.o -o dasher_low_memory_tests  -Wl,-rpath,/Users/willwade/GitHub/DasherProjects/Dasher-Apple/DasherCore/build-san/bin bin/libdasher.dylib

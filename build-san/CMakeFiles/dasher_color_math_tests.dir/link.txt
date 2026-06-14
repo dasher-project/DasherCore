@@ -1,1 +1,0 @@
-/usr/bin/c++ -g -arch arm64 -Wl,-search_paths_first -Wl,-headerpad_max_install_names -fsanitize=address,undefined CMakeFiles/dasher_color_math_tests.dir/tests/test_color_math.cpp.o -o dasher_color_math_tests  -Wl,-rpath,/Users/willwade/GitHub/DasherProjects/Dasher-Apple/DasherCore/build-san/bin bin/libdasher.dylib
