@@ -242,7 +242,7 @@ CDasherInterfaceBase::~CDasherInterfaceBase() {
 void CDasherInterfaceBase::HandleParameterChange(Parameter parameter) {
     switch (parameter) {
 
-    case LP_OUTLINE_WIDTH:
+    case LP_OUTLINE_WIDTH: // NOLINT(bugprone-branch-clone)
         ScheduleRedraw();
         break;
     case BP_DRAW_MOUSE:
@@ -270,7 +270,7 @@ void CDasherInterfaceBase::HandleParameterChange(Parameter parameter) {
     case LP_LANGUAGE_MODEL_ID:
         CreateNCManager();
         break;
-    case LP_LINE_WIDTH:
+    case LP_LINE_WIDTH: // NOLINT(bugprone-branch-clone)
         ScheduleRedraw();
         break;
     case LP_DASHER_FONTSIZE:

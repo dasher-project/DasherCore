@@ -255,7 +255,7 @@ void CMandarinAlphMgr::CMandarinTrainer::Train(CAlphabetMap::SymbolStream& syms)
                             "you want to enter these symbols:");
 #endif
         const size_t buflen = strlen(msg) + GetDesc().length() + 10;
-        char* buf(new char[buflen]);
+        char* buf(new char[buflen]); // NOLINT(clang-analyzer-cplusplus.NewDeleteLeaks)
         snprintf(buf, buflen, msg, GetDesc().c_str(), unannotated.size());
         std::ostringstream withChars;
         withChars << msg;
@@ -494,7 +494,7 @@ CDasherNode* CMandarinAlphMgr::CMandSym::RebuildSymbol(CAlphNode* pParent, symbo
         pConv->PopulateChildrenWithExisting(this);
         return pConv;
     }
-    return CAlphBase::RebuildSymbol(pParent, iSymbol);
+    return CAlphBase::RebuildSymbol(pParent, iSymbol); // NOLINT(bugprone-parent-virtual-call)
 }
 
 bool CMandarinAlphMgr::CMandSym::isInGroup(const SGroupInfo* pGroup) {
@@ -526,7 +526,7 @@ void CMandarinAlphMgr::CMandSym::RebuildForwardsFromAncestor(CAlphNode* pNewNode
                 for (std::vector<std::pair<symbol, unsigned int>>::iterator c_it = vChineseProbs.begin();;) {
                     if (c_it->first == iSymbol) {
                         // found P(this chinese sym | pinyin). Compute overall...
-                        thisProb = c_it->second * vPinyinProbs[*p_it];
+                        thisProb = static_cast<long>(c_it->second) * vPinyinProbs[*p_it];
                         break;
                     }
                     c_it++;

@@ -461,6 +461,7 @@ bool CCTWLanguageModel::ReadFromFile(std::string strFilename, std::string Alphab
                           InputFile); // Magic string is written without null-char
         if (bytesRead < (sizeof(GenericHeader.szMagic) - 1) ||
             memcmp(GenericHeader.szMagic, "%DLF", bytesRead) != 0) { // magic strings not equal
+            fclose(InputFile);
             return false;
         }
 

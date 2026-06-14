@@ -183,7 +183,7 @@ int CWordLanguageModel::lookup_word_const(const std::string& w) const {
 void CWordLanguageModel::GetProbs(Context context, std::vector<unsigned int>& probs, int norm, int iUniform) const {
     // Got rid of const below
 
-    CWordLanguageModel::CWordContext* wordcontext = (CWordContext*)(context);
+    CWordLanguageModel::CWordContext* wordcontext = reinterpret_cast<CWordContext*>(context);
 
     // Make sure that the probability vector has the right length
 
@@ -494,7 +494,7 @@ void CWordLanguageModel::CollapseContext(CWordLanguageModel::CWordContext& conte
 }
 
 void CWordLanguageModel::LearnSymbol(Context c, int Symbol) {
-    CWordContext& context = *(CWordContext*)(c);
+    CWordContext& context = *reinterpret_cast<CWordContext*>(c);
     AddSymbol(context, Symbol, true);
 }
 
@@ -574,6 +574,6 @@ void CWordLanguageModel::AddSymbol(CWordLanguageModel::CWordContext& context, sy
 void CWordLanguageModel::EnterSymbol(Context c, int Symbol) {
     // Same as AddSymbol but without learning in CollapseContext
 
-    CWordContext& context = *(CWordContext*)(c);
+    CWordContext& context = *reinterpret_cast<CWordContext*>(c);
     AddSymbol(context, Symbol, false);
 }

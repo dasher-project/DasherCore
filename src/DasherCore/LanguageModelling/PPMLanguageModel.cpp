@@ -25,14 +25,14 @@ CAbstractPPM::CAbstractPPM(CSettingsStore* pSettingsStore, int iNumSyms, CPPMnod
 }
 
 bool CAbstractPPM::isValidContext(const Context context) const {
-    return m_setContexts.count((const CPPMContext*)context) > 0;
+    return m_setContexts.count(reinterpret_cast<const CPPMContext*>(context)) > 0;
 }
 
 /////////////////////////////////////////////////////////////////////
 // Get the probability distribution at the context
 
 void CPPMLanguageModel::GetProbs(Context context, std::vector<unsigned int>& probs, int norm, int iUniform) const {
-    const CPPMContext* ppmcontext = (const CPPMContext*)(context);
+    const CPPMContext* ppmcontext = reinterpret_cast<const CPPMContext*>(context);
 
     DASHER_ASSERT(isValidContext(context));
 
@@ -136,7 +136,7 @@ void CAbstractPPM::EnterSymbol(Context c, int Symbol) {
 
     DASHER_ASSERT(Symbol >= 0 && Symbol < GetSize());
 
-    CPPMContext& context = *(CPPMContext*)(c);
+    CPPMContext& context = *reinterpret_cast<CPPMContext*>(c);
 
     while (context.head) {
 
@@ -175,7 +175,7 @@ void CAbstractPPM::LearnSymbol(Context c, int Symbol) {
     if (Symbol == 0) return;
 
     DASHER_ASSERT(Symbol >= 0 && Symbol < GetSize());
-    CPPMContext& context = *(CPPMContext*)(c);
+    CPPMContext& context = *reinterpret_cast<CPPMContext*>(c);
 
     CPPMnode* n = AddSymbolToNode(context.head, Symbol);
     DASHER_ASSERT(n == context.head->find_symbol(Symbol));
@@ -388,9 +388,9 @@ void CAbstractPPM::CPPMnode::AddChild(CPPMnode* pNewChild, int numSymbols) {
             newNumElems = m_iNumChildSlots;
         }
         m_ppChildren = new CPPMnode*[newNumElems]; // null terminator
-        memset(m_ppChildren, 0, sizeof(CPPMnode*) * newNumElems);
+        memset(reinterpret_cast<void*>(m_ppChildren), 0, sizeof(CPPMnode*) * newNumElems);
         if (oldSlots == 1)
-            AddChild((CPPMnode*)oldChildren, numSymbols);
+            AddChild(reinterpret_cast<CPPMnode*>(oldChildren), numSymbols);
         else {
             while (oldSlots-- > 0)
                 if (oldChildren[oldSlots]) AddChild(oldChildren[oldSlots], numSymbols);

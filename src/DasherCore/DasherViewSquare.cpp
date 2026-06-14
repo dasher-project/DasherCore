@@ -44,7 +44,7 @@ CDasherViewSquare::CDasherViewSquare(CSettingsStore* pSettingsStore, CDasherScre
                                      Options::ScreenOrientations orient)
     : CDasherView(DasherScreen, orient), m_pSettingsStore(pSettingsStore) {
     // Note, nonlinearity parameters set in SetScaleFactor
-    ScreenResized(DasherScreen);
+    ScreenResized(DasherScreen); // NOLINT(clang-analyzer-optin.cplusplus.VirtualCall)
 
     m_pSettingsStore->OnParameterChanged.Subscribe(this, [this](const Parameter parameter) {
         if (parameter == LP_MARGIN_WIDTH || parameter == BP_NONLINEAR_Y || parameter == LP_NONLINEAR_X ||
@@ -553,6 +553,8 @@ bool CDasherViewSquare::IsSpaceAroundNode(myint y1, myint y2) const {
         const myint maxYDiff(std::max(visibleRegion.maxY - iMidY, iMidY - visibleRegion.minY) * 2);
         return maxYDiff * maxYDiff + visibleRegion.maxX * visibleRegion.maxX > maxX * maxX;
     }
+    default:
+        break;
     }
     /* NOTREACHED */
     return false;
@@ -717,7 +719,8 @@ void CDasherViewSquare::DasherDrawCube(myint iDasherMaxX, myint iDasherMinY, myi
     Dasher2Screen(iDasherMaxX, iDasherMinY, iScreenMaxX, iScreenMinY);
     Dasher2Screen(iDasherMinX, iDasherMaxY, iScreenMinX, iScreenMaxY);
 
-    if (iScreenMaxX < iScreenMinX) std::swap(iScreenMaxX, iScreenMinX);
+    if (iScreenMaxX < iScreenMinX)
+        std::swap(iScreenMaxX, iScreenMinX); // NOLINT(clang-analyzer-core.UndefinedBinaryOperatorResult)
     if (iScreenMaxY < iScreenMinY) std::swap(iScreenMaxY, iScreenMinY);
 
     if (parentScreenBounds) {
@@ -774,6 +777,8 @@ bool CDasherViewSquare::CoversCrosshair(myint Range, myint y1, myint y2) {
             const myint y_dist(CDasherModel::ORIGIN_Y - (y1 + y2) / 2);
             return CDasherModel::ORIGIN_X * CDasherModel::ORIGIN_X + y_dist * y_dist * 4 < Range * Range;
         }
+        default:
+            break;
         }
     }
     return false;
@@ -1073,11 +1078,14 @@ void CDasherViewSquare::ComputeScaleFactor() {
 
         break;
     }
-    iScaleFactorX = static_cast<myint>(dScaleFactorX * SCALE_FACTOR);
-    iScaleFactorY = static_cast<myint>(dScaleFactorY * SCALE_FACTOR);
+default:
+    break;
+}
+iScaleFactorX = static_cast<myint>(dScaleFactorX * SCALE_FACTOR);
+iScaleFactorY = static_cast<myint>(dScaleFactorY * SCALE_FACTOR);
 
-    // notify listeners that coordinates have changed...
-    OnGeometryChanged.Broadcast();
+// notify listeners that coordinates have changed...
+OnGeometryChanged.Broadcast();
 }
 
 inline myint CDasherViewSquare::CustomIDivScaleFactor(myint iNumerator) {

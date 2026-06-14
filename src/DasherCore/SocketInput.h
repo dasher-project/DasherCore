@@ -28,10 +28,11 @@ class CSocketInput : public CSocketInputBase {
 
     // This non-member launcher stub function is required because pthreads can't launch a non-static member method.
     friend void* ThreadLauncherStub(void* _myClass) {
-        CSocketInput* myClass = (CSocketInput*)_myClass;
+        CSocketInput* myClass = reinterpret_cast<CSocketInput*>(_myClass);
 
-        pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS,
-                              NULL); // kill this thread immediately if another thread cancels it
+        pthread_setcanceltype(
+            PTHREAD_CANCEL_ASYNCHRONOUS,
+            NULL); // NOLINT(cert-pos47-c) // kill this thread immediately if another thread cancels it
         // don't know how this interacts with recv blocking
 
         myClass->ReadForever();

@@ -26,7 +26,7 @@ CRoutingPPMLanguageModel::CRoutingPPMLanguageModel(CSettingsStore* pSettingsStor
 
 void CRoutingPPMLanguageModel::GetProbs(Context context, std::vector<unsigned int>& probs, int norm,
                                         int iUniform) const {
-    const CPPMContext* ppmcontext = (const CPPMContext*)(context);
+    const CPPMContext* ppmcontext = reinterpret_cast<const CPPMContext*>(context);
 
     const int iNumSymbols(static_cast<int>(m_pBaseSyms->size())); // i.e., the #routes - so loop from i=1 to
                                                                   // <iNumSymbols
@@ -99,7 +99,8 @@ void CRoutingPPMLanguageModel::GetProbs(Context context, std::vector<unsigned in
                 unsigned int size_of_slice = baseProbs[pNode->sym];
                 for (std::map<symbol, unsigned short int>::const_iterator it2 = pNode->m_routes.begin();
                      it2 != pNode->m_routes.end(); it2++) {
-                    unsigned int p = size_of_slice * (100 * it2->second - beta) / (100 * iTotal + alpha);
+                    unsigned int p =
+                        size_of_slice * (static_cast<unsigned long>(100) * it2->second - beta) / (100 * iTotal + alpha);
                     probs[it2->first] += p;
                     baseProbs[pNode->sym] -= p;
                 }
@@ -130,7 +131,7 @@ void CRoutingPPMLanguageModel::GetProbs(Context context, std::vector<unsigned in
 /////////////////////////////////////////////////////////////////////
 
 symbol CRoutingPPMLanguageModel::GetBestRoute(Context ctx) {
-    const CPPMContext* context = (const CPPMContext*)ctx;
+    const CPPMContext* context = reinterpret_cast<const CPPMContext*>(ctx);
     DASHER_ASSERT(context->head && context->head != m_pRoot);
 
     std::map<symbol, unsigned int> probs; // of the routes leading to this base sym
@@ -183,7 +184,7 @@ void CRoutingPPMLanguageModel::LearnSymbol(Context ctx, int sym) {
     // ctx now updated, points to node for learnt base sym
     DASHER_ASSERT((*m_pRoutes)[base].size());
     if ((*m_pRoutes)[base].size() == 1) return; // no need to store, saves computation if we don't
-    for (CPPMnode* node = ((CPPMContext*)ctx)->head; node != m_pRoot; node = node->vine) {
+    for (CPPMnode* node = reinterpret_cast<CPPMContext*>(ctx)->head; node != m_pRoot; node = node->vine) {
         if (node->vine != m_pRoot && !m_bRoutesContextSensitive)
             continue;
         else if (static_cast<CRoutingPPMnode*>(node)->m_routes[sym]++) // returns old value, i.e. 0 if not present

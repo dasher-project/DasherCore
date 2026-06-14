@@ -14,6 +14,7 @@ class CCannaConversionHelper : public Dasher::CConversionManager {
 
     virtual bool Convert(const std::string& strSource, SCENode** pRoot);
 
+    using CConversionManager::AssignSizes;
     virtual void AssignSizes(SCENode** pStart, Dasher::CLanguageModel::Context context, long normalization, int uniform,
                              int iNChildren);
 
@@ -59,6 +60,8 @@ class CCannaConversionHelper : public Dasher::CConversionManager {
             // Invalid (as far as we're concerned) - return 0;
             iCode = 0;
             break;
+        default:
+            break;
         }
 
         return iCode;
@@ -78,7 +81,7 @@ class CCannaConversionHelper : public Dasher::CConversionManager {
         state = 0;
         for (i = 0; str[i] != '\0'; i++) {
             if ((state == 0) && (JMS1(str[i])))
-                state = 1; // 0 -> 1
+                state = 1; // 0 -> 1 // NOLINT(bugprone-branch-clone)
             else if ((state == 1) && (JMS2(str[i])))
                 state = 2; // 1 -> 2
             else if ((state == 2) && (JMS1(str[i])))
@@ -103,12 +106,12 @@ class CCannaConversionHelper : public Dasher::CConversionManager {
 
         if (strChar.size() == 0) return false;
 
-        char* pQuery = (char*)strChar.c_str();
+        char* pQuery = const_cast<char*>(strChar.c_str());
 
-        unsigned char* buf = (unsigned char*)malloc(sizeof(unsigned char) * BUFSIZE);
+        unsigned char* buf = static_cast<unsigned char*>(malloc(sizeof(unsigned char) * BUFSIZE));
 
-        char* inbuf = (char*)pQuery;
-        char* outbuf = (char*)buf;
+        char* inbuf = reinterpret_cast<char*>(pQuery);
+        char* outbuf = reinterpret_cast<char*>(buf);
         size_t inbytesleft = strChar.length();
         size_t outbytesleft = BUFSIZE;
 
@@ -116,15 +119,15 @@ class CCannaConversionHelper : public Dasher::CConversionManager {
         // iconv(cd, &inbuf, &inbytesleft, &outbuf, &outbytesleft);
         iconv(this->icon, &inbuf, &inbytesleft, &outbuf, &outbytesleft);
 
-        const std::string strSJIS = (char*)buf;
+        const std::string strSJIS = reinterpret_cast<char*>(buf);
 
         *outbuf = '\0';
-        inbuf = (char*)buf;
+        inbuf = reinterpret_cast<char*>(buf);
         // iconv_close(cd);
 
         int iCode = 0;
 
-        if (strSJIS.size() == 2) iCode = jmscode((char*)buf);
+        if (strSJIS.size() == 2) iCode = jmscode(reinterpret_cast<char*>(buf));
 
         return iCode;
     }

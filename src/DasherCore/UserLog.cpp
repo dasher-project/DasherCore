@@ -50,7 +50,7 @@ CUserLog::CUserLog(CSettingsStore* pSettingsStore, CDasherInterfaceBase* pInterf
 
     if ((m_bSimple) && (m_pSimpleLogger != NULL)) m_pSimpleLogger->LogDebug("start, %s", GetVersionInfo().c_str());
 
-    SetOuputFilename();
+    SetOuputFilename(); // NOLINT(clang-analyzer-optin.cplusplus.VirtualCall)
     m_pApplicationSpan = new CTimeSpan("Application", true);
 
     if (m_pApplicationSpan == NULL)
@@ -309,7 +309,7 @@ void CUserLog::NewTrial() {
 
         if (pTrial->HasWritingOccured()) {
             // Create a new pTrial if the existing one has already been used
-            pTrial = AddTrial();
+            AddTrial();
         }
     }
 }
@@ -323,7 +323,7 @@ void CUserLog::AddParam(const std::string& strName, double dValue, int iOptionMa
 // Overloaded version that converts a int to a string
 void CUserLog::AddParam(const std::string& strName, int iValue, int iOptionMask) {
     snprintf(m_szTempBuffer, TEMP_BUFFER_SIZE, "%d", iValue);
-    AddParam(strName, m_szTempBuffer, iOptionMask);
+    AddParam(strName, m_szTempBuffer, iOptionMask); // NOLINT(clang-analyzer-optin.cplusplus.VirtualCall)
 }
 
 // Adds a general parameter to our XML.  This lets various Dasher components
@@ -343,7 +343,6 @@ void CUserLog::AddParam(const std::string& strName, const std::string& strValue,
     if (iOptionMask & userLogParamOutputToSimple) bOutputToSimple = true;
     if (iOptionMask & userLogParamTrackMultiple) bTrackMultiple = true;
     if (iOptionMask & userLogParamTrackInTrial) bTrackInTrial = true;
-    if (iOptionMask & userLogParamForceInTrial) bForceInTrial = true;
     if (iOptionMask & userLogParamShortInCycle) bShortInCycle = true;
 
     // See if we want to immediately output this name/value pair to
@@ -889,17 +888,19 @@ void CUserLog::UpdateParam(Parameter parameter, int iOptionMask) {
         // Convert bool to a integer
         int iValue = 0;
         if (m_pSettingsStore->GetBoolParameter(parameter)) iValue = 1;
-        AddParam(strParamName, iValue, iOptionMask);
+        AddParam(strParamName, iValue, iOptionMask); // NOLINT(clang-analyzer-optin.cplusplus.VirtualCall)
         return;
         break;
     }
     case (PARAM_LONG): {
-        AddParam(strParamName, (int)m_pSettingsStore->GetLongParameter(parameter), iOptionMask);
+        AddParam(strParamName, (int)m_pSettingsStore->GetLongParameter(parameter),
+                 iOptionMask); // NOLINT(clang-analyzer-optin.cplusplus.VirtualCall)
         return;
         break;
     }
     case (PARAM_STRING): {
-        AddParam(strParamName, m_pSettingsStore->GetStringParameter(parameter), iOptionMask);
+        AddParam(strParamName, m_pSettingsStore->GetStringParameter(parameter),
+                 iOptionMask); // NOLINT(clang-analyzer-optin.cplusplus.VirtualCall)
         return;
         break;
     }

@@ -275,7 +275,7 @@ void CConversionManager::BuildTree(CConvNode* pRoot) {
     for (CDasherNode* pNode = pRoot->Parent(); pNode && pNode->mgr() == this; pNode = pNode->Parent()) {
 
         // TODO: Need to make this the edit text rather than the display text
-        strCurrentString = m_pAlphabet->GetText(pNode->GetAlphSymbol()) + strCurrentString;
+        strCurrentString.insert(0, m_pAlphabet->GetText(pNode->GetAlphSymbol()));
     }
     // Handle/store the result.
     SCENode* pStartTemp;
@@ -299,6 +299,8 @@ void CConversionManager::CConvNode::SetFlag(int iFlag, bool bValue) {
 
             if (s != -1) mgr()->m_pLanguageModel->LearnSymbol(mgr()->m_iLearnContext, s);
         }
+        break;
+    default:
         break;
     }
 }

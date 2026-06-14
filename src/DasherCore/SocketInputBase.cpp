@@ -108,7 +108,8 @@ bool Dasher::CSocketInputBase::StartListening() {
 
     SocketDebugMsg("Socket input: binding to socket and starting to listen.");
 
-    if ((sock = socket(PF_INET, SOCK_DGRAM, 0)) == -1) {
+    sock = socket(PF_INET, SOCK_DGRAM, 0);
+    if (sock == -1) {
         // TODO This is not a very good error message even in English...???
         m_pMsgs->Message(_("Error creating socket"), true);
         return false;
@@ -117,7 +118,7 @@ bool Dasher::CSocketInputBase::StartListening() {
     name.sin_family = AF_INET;
     name.sin_port = htons(port);
     name.sin_addr.s_addr = htonl(INADDR_ANY);
-    if (::bind(sock, (struct sockaddr*)&name, sizeof(name)) < 0) {
+    if (::bind(sock, reinterpret_cast<struct sockaddr*>(&name), sizeof(name)) < 0) {
         ReportErrnoError(_("Error binding to socket - already in use?"));
         DASHER_SOCKET_CLOSE_FUNCTION(sock);
         sock = -1;
@@ -194,7 +195,8 @@ void CSocketInputBase::ReadForever() {
     int numbytes;
     while (sock >= 0) {
         SocketDebugMsg("Reading from socket...");
-        if ((numbytes = recv(sock, buffer, sizeof(buffer) - 1, 0)) == -1) {
+        numbytes = recv(sock, buffer, sizeof(buffer) - 1, 0);
+        if (numbytes == -1) {
             m_pMsgs->Message(_("Socket input: Error reading from socket"), false);
             continue;
         }

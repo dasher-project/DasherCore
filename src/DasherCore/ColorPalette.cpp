@@ -74,8 +74,8 @@ const ColorPalette::Color& ColorPalette::GetAltColor(const std::vector<Color>& N
 
 const ColorPalette::Color& ColorPalette::GetAltColor(const Color& NormalColor, const Color& AltColor,
                                                      bool useAlt) const {
-    if (useAlt && AltColor != undefinedColor) return AltColor;
-    if (NormalColor != undefinedColor) return NormalColor;
+    if (useAlt && AltColor != undefinedColor) return AltColor; // NOLINT(bugprone-return-const-ref-from-parameter)
+    if (NormalColor != undefinedColor) return NormalColor;     // NOLINT(bugprone-return-const-ref-from-parameter)
     return undefinedColor;
 }
 

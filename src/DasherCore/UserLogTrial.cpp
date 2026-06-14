@@ -286,7 +286,7 @@ void CUserLogTrial::AddMouseLocation(int iX, int iY, float dNats) {
 
     CUserLocation* pLocation = NULL;
 
-    pLocation = new CUserLocation(iX, iY, dNats);
+    pLocation = new CUserLocation(iX, iY, dNats); // NOLINT(clang-analyzer-cplusplus.NewDeleteLeaks)
 
     if (pLocation != NULL) {
         // m_vectorMouseLocations.push_back(location);
@@ -311,7 +311,8 @@ void CUserLogTrial::AddMouseLocationNormalized(int iX, int iY, bool bStoreIntege
         (m_sCanvasCoordinates.top == 0))
         m_pGlobalFileLogger->LogNormal("CUserLogTrial::AddMouseLocationNormalized, called before AddCanvasSize()?");
 
-    pLocation = new CUserLocation(iX, iY, m_sCanvasCoordinates.top, m_sCanvasCoordinates.left,
+    pLocation = new CUserLocation(iX, iY, m_sCanvasCoordinates.top,
+                                  m_sCanvasCoordinates.left, // NOLINT(clang-analyzer-cplusplus.NewDeleteLeaks)
                                   m_sCanvasCoordinates.bottom, m_sCanvasCoordinates.right, bStoreIntegerRep, dNats);
 
     if (pLocation != NULL) {
@@ -327,7 +328,7 @@ void CUserLogTrial::AddMouseLocationNormalized(int iX, int iY, bool bStoreIntege
 }
 
 void CUserLogTrial::AddKeyDown(Dasher::Keys::VirtualKey Key, int iType, int iEffect) {
-    CUserButton* pButton = new CUserButton(Key, iType, iEffect);
+    CUserButton* pButton = new CUserButton(Key, iType, iEffect); // NOLINT(clang-analyzer-cplusplus.NewDeleteLeaks)
 
     if (pButton) {
         NavCycle* pCycle = GetCurrentNavCycle();
