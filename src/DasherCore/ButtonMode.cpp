@@ -200,10 +200,12 @@ void CButtonMode::KeyDown(unsigned long iTime, Keys::VirtualKey Key, CDasherView
                 if (iDasherY < m_pBoxes[i].iDisplayBottom && iDasherY > m_pBoxes[i].iDisplayTop &&
                     iDasherX < (m_pBoxes[i].iDisplayBottom - m_pBoxes[i].iDisplayTop)) {
                     // user has clicked in box! Simulate press of appropriate (direct-mode) button...
-                    CDasherButtons::KeyDown(
-                        iTime, (i == m_iNumBoxes - 1) ? Keys::Button_1
-                                                      : static_cast<Keys::VirtualKey>(i + 2), // NOLINT(clang-analyzer-optin.core.EnumCastOutOfRange)
-                        pView, pInput, pModel);
+                    CDasherButtons::KeyDown(iTime,
+                                            (i == m_iNumBoxes - 1)
+                                                ? Keys::Button_1
+                                                : static_cast<Keys::VirtualKey>(
+                                                      i + 2), // NOLINT(clang-analyzer-optin.core.EnumCastOutOfRange)
+                                            pView, pInput, pModel);
                     return;
                 }
             }

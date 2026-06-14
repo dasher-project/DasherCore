@@ -181,8 +181,7 @@ class CConversionManager : public CNodeManager {
             for (int j = 0; j < 3; j++)
                 if (parentClr == colourStore[i][j]) which = i;
 
-        if (which == 0)
-            return colourStore[1][childIndex % 3];
+        if (which == 0) return colourStore[1][childIndex % 3];
         return colourStore[0][childIndex % 3];
     };
 

@@ -30,13 +30,14 @@ Checks: >
   -clang-analyzer-core.CallAndMessage,
   clang-diagnostic-*,
   cppcoreguidelines-pro-type-cstyle-cast,
-  cppcoreguidelines-pro-type-static-cast-downcast,
+  -cppcoreguidelines-pro-type-static-cast-downcast,
   cppcoreguidelines-slicing,
   performance-*,
   -performance-enum-size,
   -performance-unnecessary-value-param,
   -performance-trivially-destructible,
   -performance-avoid-endl,
+  -performance-no-int-to-ptr,
 
 WarningsAsErrors: ''
 

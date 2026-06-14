@@ -371,7 +371,8 @@ void CDasherModel::ScheduleOneStep(dasherint y1, dasherint y2, int nSteps, int l
         //  = (MAX_Y-(2*limX))/(2*limX) / ((MAX_Y-targetRange)/targetRange)
         //  = (MAX_Y-(2*limX)) / (2*limX) * targetRange / (MAX_Y-targetRange)
         {
-            const dasherint n = targetRange * (MAX_Y - 2 * static_cast<dasherint>(limX)), d = (MAX_Y - targetRange) * 2 * static_cast<dasherint>(limX);
+            const dasherint n = targetRange * (MAX_Y - 2 * static_cast<dasherint>(limX)),
+                            d = (MAX_Y - targetRange) * 2 * static_cast<dasherint>(limX);
             bool bOver = std::max(llabs(m1), llabs(m2)) > std::numeric_limits<dasherint>::max() / n;
             if (bOver) {
                 // std::cout << "Overflow in max-speed-limit " << m1 << "," << m2 << " =wd> " << ((m1*n)/d) << "," <<

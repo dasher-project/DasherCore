@@ -123,7 +123,8 @@ void CCTWLanguageModel::UpdatePath(
     // The deepest index can be a leaf, a failed node, or a not-placed node
     const int DeepestIndex = index[ValidDepth];
 
-    if (DeepestIndex == MaxNrNodes || DeepestIndex == MaxNrNodes + 1) // node didn't exist yet, or couldn't be placed; both probs. equal
+    if (DeepestIndex == MaxNrNodes ||
+        DeepestIndex == MaxNrNodes + 1) // node didn't exist yet, or couldn't be placed; both probs. equal
     {
         GammaZero = MaxValue;
         GammaOne = MaxValue;
@@ -501,7 +502,8 @@ bool CCTWLanguageModel::ReadFromFile(std::string strFilename, std::string Alphab
         ReadAlphabetName[GenericHeader.iHeaderSize - sizeof(SLMFileHeader)] =
             '\0'; // write the terminating 0 and read it in as well
 
-        if (strcmp(ReadAlphabetName, AlphabetName.c_str()) != 0) { // header indicates stored model uses a different alphabet
+        if (strcmp(ReadAlphabetName, AlphabetName.c_str()) !=
+            0) { // header indicates stored model uses a different alphabet
             delete[] ReadAlphabetName;
             return false;
         }
