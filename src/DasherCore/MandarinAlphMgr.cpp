@@ -255,10 +255,11 @@ void CMandarinAlphMgr::CMandarinTrainer::Train(CAlphabetMap::SymbolStream& syms)
                             "you want to enter these symbols:");
 #endif
         const size_t buflen = strlen(msg) + GetDesc().length() + 10;
-        char* buf(new char[buflen]); // NOLINT(clang-analyzer-cplusplus.NewDeleteLeaks)
+        char* buf(new char[buflen]);
         snprintf(buf, buflen, msg, GetDesc().c_str(), unannotated.size());
         std::ostringstream withChars;
-        withChars << msg;
+        withChars << buf;
+        delete[] buf;
         for (std::set<symbol>::iterator it = unannotated.begin(); it != unannotated.end(); it++)
             withChars << " " << m_pInfo->GetDisplayText(*it);
         m_pMsgs->Message(withChars.str(), true);

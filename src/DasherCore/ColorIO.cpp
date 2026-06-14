@@ -11,6 +11,8 @@ CColorIO::CColorIO(CMessageDisplay* pMsgs) : AbstractXMLParser(pMsgs) {
 }
 
 CColorIO::~CColorIO() {
+    for (auto& [name, palette] : KnownPalettes)
+        delete palette;
     KnownPalettes.clear();
     delete HardcodedDefaultPalette;
 }
@@ -150,6 +152,8 @@ bool CColorIO::ParseLegacy(pugi::xml_document& document) {
 
         std::array<ColorPalette::Color, 4> uiColors = {safeColor(10), safeColor(20), safeColor(30), safeColor(40)};
 
+        auto it = KnownPalettes.find(paletteName);
+        if (it != KnownPalettes.end()) delete it->second;
         KnownPalettes[paletteName] = new ColorPalette(HardcodedDefaultPalette, HardcodedDefaultPalette->PaletteName,
                                                       NamedColors, GroupColors, uiColors, paletteName);
     }
@@ -225,6 +229,8 @@ bool CColorIO::Parse(pugi::xml_document& document, const std::string, bool bUser
     std::copy_n(std::make_move_iterator(UIPreviewColors.begin()), uiColorsArray.size(), uiColorsArray.begin());
 
     //"HardcodedDefault" is the parent for now, later on the parents get relinked by looking up the parentNames
+    auto it2 = KnownPalettes.find(colorSchemeName);
+    if (it2 != KnownPalettes.end()) delete it2->second;
     KnownPalettes[colorSchemeName] =
         new ColorPalette(HardcodedDefaultPalette, parentName, NamedColors, GroupColors, uiColorsArray, colorSchemeName);
 
@@ -249,6 +255,7 @@ void CColorIO::RelinkParents() {
                     allVisited += s + "->";
                 allVisited += current->ParentPalette->PaletteName;
                 m_pMsgs->FormatMessage("Found cycle while parsing color-scheme parenting: %s", allVisited.c_str());
+                delete KnownPalettes[current->ParentPalette->PaletteName];
                 KnownPalettes.erase(current->ParentPalette->PaletteName);
                 RelinkParents(); // relink as now a palette was removed
                 return;

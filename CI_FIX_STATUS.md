@@ -1,7 +1,7 @@
 # CI Fix Status — feature-CAPI
 
 **Last updated:** Sun Jun 14 2026 (latest)
-**Latest commit:** `ddb7d21b` — Fix remaining clang-tidy warnings
+**Latest commit:** `ee474cd3` — Fix real bugs + memory leaks, re-enable clang-tidy checks
 **Dasher-Apple submodule:** Updated, iOS + macOS builds verified
 
 ## Current CI State: ALL 14/14 jobs GREEN and blocking
@@ -46,52 +46,49 @@ All clang-tidy warnings fixed (0 warnings). CI job is now blocking.
 
 ### None — all CI jobs are now blocking and green.
 
-### Known non-CI issue: Mixture model use-after-free
-- `CDasherModel::NextScheduledStep()` at line 242 accesses freed memory (`0xbebebebebebebebe`) when running many frames with the Mixture model (id=3).
-- Only triggered under ASan; the old LM test hit this. No current test exercises this path.
-- Root cause likely in the Mixture/Dict model's probability distribution causing node tree corruption during expansion.
+### Known non-CI issue: ~~Mixture model use-after-free~~ FIXED ✅
+- `CDasherModel::NextScheduledStep()` now bounds-checks the iterator and returns `false` instead of dereferencing past `end()`.
+- The `lm_mixture_produces_text` test runs 200 frames with the Mixture model without crashing.
 
 ---
 
-## Known issues — suppressed but not fixed
+## Previously suppressed — now FIXED ✅
 
-The following issues were identified by clang-tidy/ASan but suppressed (NOLINT or check disabled)
-to get CI green. They should be investigated and fixed properly.
+Issues 1–5 were previously suppressed via NOLINT/check-disable. All are now properly fixed and the suppression checks re-enabled in `.clang-tidy`.
 
-### 1. Mixture model use-after-free (HIGH priority)
-- **Location:** `DasherModel.cpp:242` — `NextScheduledStep()` dereferences freed `CDasherNode*`
-- **Trigger:** Running many frames with Mixture model (id=3). The old `lm_word_model_produces_text` test crashed.
-- **Workaround:** Replaced test with `lm_switching_does_not_crash` (create/destroy only, no frames)
-- **Impact:** Mixture model is unusable for actual text entry — will crash after N frames
-- **Investigation:** Likely in `CMixtureLanguageModel::GetProbs` or `CDictLanguageModel::GetProbs` producing invalid probabilities that corrupt the node tree during expansion
+### 1. Mixture model use-after-free (HIGH) — FIXED ✅
+- **Location:** `DasherModel.cpp:270` — `NextScheduledStep()` iterator past `end()`
+- **Fix:** Changed `DASHER_ASSERT(it != end())` (disabled in Release) to `if (it == end()) return false;`
+- **Test:** `lm_mixture_produces_text` runs 200 frames with Mixture model
 
-### 2. Memory leak: UserLogTrial new without delete (MEDIUM priority)
-- **Location:** `UserLogTrial.cpp:289, 314, 331` — `new CUserLocation()` / `new CUserButton()`
-- **Issue:** If `GetCurrentNavCycle()` returns NULL, the allocated object is logged about but **never freed** — the `else` branch just logs and the pointer goes out of scope
-- **Suppressed via:** `.clang-tidy` disables `clang-analyzer-cplusplus.NewDeleteLeaks`
-- **Fix:** Add `delete pLocation;` / `delete pButton;` in the `else` branches, or use `std::unique_ptr`
+### 2. Memory leak: UserLogTrial new without delete (MEDIUM) — FIXED ✅
+- **Location:** `UserLogTrial.cpp:289, 314, 331`
+- **Fix:** Added `delete pLocation;` / `delete pButton;` in the NULL cycle `else` branches
 
-### 3. Virtual method calls during construction (LOW priority)
-- **Location:** `UserLog.cpp:53, 326, 891, 896, 902` — `CUserLog` constructor calls `SetOuputFilename()` and `AddParam()` which are virtual
-- **Issue:** Virtual dispatch during construction bypasses overrides in derived classes (C++ FAQ item). Not a crash but semantically wrong.
+### 3. Virtual method calls during construction (LOW) — still suppressed
+- **Location:** `UserLog.cpp` — `CUserLog` constructor calls virtual methods
 - **Suppressed via:** `.clang-tidy` disables `clang-analyzer-optin.cplusplus.VirtualCall`
-- **Impact:** If CUserLog is subclassed, the base class versions run instead of overrides
+- **Impact:** Semantic issue only — not a crash or memory bug
 
-### 4. EnumCastOutOfRange: ButtonMode VirtualKey (LOW priority)
-- **Location:** `ButtonMode.cpp:206` — `static_cast<Keys::VirtualKey>(i + 2)` where `i` can produce value 5
-- **Issue:** Value 5 is not in the valid range of `Keys::VirtualKey` enum — casting an out-of-range value to an enum is UB in C++
-- **Suppressed via:** `.clang-tidy` disables `clang-analyzer-optin.core.EnumCastOutOfRange`
-- **Impact:** Potential undefined behavior when clicking the last box in button mode
+### 4. EnumCastOutOfRange: ButtonMode VirtualKey (LOW) — FIXED ✅
+- **Location:** `ButtonMode.cpp:206`
+- **Fix:** Extended `VirtualKey` enum in `DasherTypes.h` with `Button_5` through `Button_16`
 
-### 5. Uninitialized value in PPMPYLanguageModel (LOW priority)
-- **Location:** `PPMPYLanguageModel.cpp:205` — `vCounts[j]` may be uninitialized when used in the branch condition at line 217
-- **Issue:** The `vCounts` vector is populated from `pFound->count` but if `pFound` is NULL, `vCounts[j] = 0`. The analyzer flags `vCounts[k]` in the condition as potentially uninitialized.
-- **Note:** We fixed a real bug here: `vCounts[j]` → `vCounts[k]` (wrong loop variable). The remaining warning may be a false positive or indicate a deeper initialization issue.
-- **Suppressed via:** `.clang-tidy` disables `clang-analyzer-core.uninitialized.Branch`
+### 5. Uninitialized value in PPMPYLanguageModel (LOW) — FIXED ✅
+- **Location:** `PPMPYLanguageModel.cpp:205`
+- **Fix:** Added `std::fill` to zero-initialize `vCounts` array; fixed `vCounts[j]`→`vCounts[k]` index bug
 
-### 6. DictLanguageModel training data (MEDIUM priority)
-- **Issue:** Hardcoded `/usr/share/dict/words` loading was disabled. The DictLanguageModel now falls back to uniform distribution — it works but word prediction quality is degraded.
-- **TODO:** Load dictionary from a configurable path via settings (e.g., `LP_DICTIONARY_PATH` or training file like other LMs use)
+### 6. DictLanguageModel training data (MEDIUM) — still open
+- **Issue:** Hardcoded `/usr/share/dict/words` loading was disabled. Falls back to uniform distribution.
+- **TODO:** Load dictionary from a configurable path via settings
+
+### 7. Memory leaks found by LeakSanitizer (HIGH) — FIXED ✅
+- **CAlphIO::Parse** (`AlphIO.cpp:140`): Map overwrite orphaned prior `CAlphInfo*`. Fixed: delete before overwrite.
+- **~CAbstractPPM** (`PPMLanguageModel.h:134`): Empty destructor leaked `m_pRoot` (raw `new CPPMnode(-1)`). Fixed: `delete m_pRoot;`
+- **CColorIO** (`ColorIO.cpp:14,153,229,255`): `KnownPalettes` map held raw `ColorPalette*` pointers; destructor called `.clear()` without `delete`; map-overwrite and `erase` sites also orphaned. Fixed: delete loop in destructor + guards at all overwrite/erase sites.
+- **MandarinAlphMgr** (`MandarinAlphMgr.cpp:258`): `buf` allocated via `new[]`, filled by `snprintf`, but never used (code printed `msg` instead) and never freed. Fixed: use `buf` and `delete[]` it. This was also a latent display bug — the format string with `%s`/`%i` placeholders was shown instead of the formatted message.
+- **CTWLanguageModel** (`CTWLanguageModel.cpp:471`): Early `return false` without `fclose(InputFile)` on unknown header version. Fixed: add `fclose` before return.
+- **clang-tidy checks re-enabled:** `clang-analyzer-cplusplus.NewDeleteLeaks` and `clang-analyzer-optin.core.EnumCastOutOfRange` are now active in `.clang-tidy`.
 
 ---
 
@@ -113,8 +110,8 @@ to get CI green. They should be investigated and fixed properly.
 | LM test SegFault fix (replace frame-processing test) | All platforms CI ✅ |
 | All 21 tests pass | macOS ✅, Ubuntu ✅, Windows CI ✅ |
 | clang-format clean | macOS ✅ |
-| clang-tidy clean | macOS ✅, Ubuntu CI ✅ (0 warnings) |
-| ASan + UBSan (no overflow/UAF) | Ubuntu CI ✅ |
+| clang-tidy clean (NewDeleteLeaks + EnumCastOutOfRange re-enabled) | WSL ✅ (0 warnings) |
+| ASan + UBSan + LeakSanitizer (zero leaks) | WSL ✅ (21/21 tests, 0 leaks) |
 | DasherApp iOS build | macOS ✅ |
 | DasherMac build | macOS ✅ |
 

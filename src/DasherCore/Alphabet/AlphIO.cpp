@@ -137,6 +137,8 @@ bool Dasher::CAlphIO::Parse(pugi::xml_document& document, const std::string, boo
     // child groups were added (to linked list) in reverse order. Put them in (iStart/iEnd) order...
     ReverseChildList(CurrentAlphabet->pChild);
 
+    auto it = Alphabets.find(CurrentAlphabet->AlphID);
+    if (it != Alphabets.end()) delete it->second;
     Alphabets[CurrentAlphabet->AlphID] = CurrentAlphabet;
 
     return true;

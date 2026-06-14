@@ -468,6 +468,7 @@ bool CCTWLanguageModel::ReadFromFile(std::string strFilename, std::string Alphab
         bytesRead = fread(&GenericHeader.iHeaderVersion, sizeof(GenericHeader.iHeaderVersion), 1, InputFile);
         if (bytesRead < sizeof(GenericHeader.iHeaderVersion) ||
             GenericHeader.iHeaderVersion != 1) { // unknown header version
+            fclose(InputFile);
             return false;
         }
 

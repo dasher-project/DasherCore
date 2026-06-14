@@ -131,7 +131,7 @@ class CAbstractPPM : public CLanguageModel, private NoClones {
 
   public:
     virtual bool eq(CAbstractPPM* other);
-    virtual ~CAbstractPPM() {};
+    virtual ~CAbstractPPM() { delete m_pRoot; };
 
     Context CreateEmptyContext();
     void ReleaseContext(Context context);
