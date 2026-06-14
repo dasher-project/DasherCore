@@ -353,7 +353,7 @@ DASHER_API void dasher_set_screen_size(dasher_ctx* ctx, int width, int height) {
     if (!ctx->realized) {
         try {
             ctx->intf->Realize(nowMs());
-        } catch (...) {
+        } catch (...) { // NOLINT(bugprone-empty-catch)
         }
         ctx->realized = true;
 
@@ -633,7 +633,6 @@ DASHER_API int dasher_get_parameter_info(int index, dasher_parameter_info* out) 
 
     const auto& val = it->second;
     out->key = static_cast<int>(key);
-    std::string keyStr = std::to_string(static_cast<int>(key));
 
     std::string nameKey = val.enumKeyName + ".label";
     auto nameIt = s_overrideStrings.find(nameKey);

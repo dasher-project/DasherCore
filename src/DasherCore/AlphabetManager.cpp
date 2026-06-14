@@ -56,10 +56,15 @@ CAlphabetManager::CAlphabetManager(CSettingsStore* pSettingsStore, CDasherInterf
                 std::vector<std::string> newHistory;
                 newHistory.push_back(m_pSettingsStore->GetStringParameter(SP_ALPHABET_ID));
                 std::string v;
-                if ((v = m_pSettingsStore->GetStringParameter(SP_ALPHABET_1)) != value) newHistory.push_back(v);
-                if ((v = m_pSettingsStore->GetStringParameter(SP_ALPHABET_2)) != value) newHistory.push_back(v);
-                if ((v = m_pSettingsStore->GetStringParameter(SP_ALPHABET_3)) != value) newHistory.push_back(v);
-                if ((v = m_pSettingsStore->GetStringParameter(SP_ALPHABET_4)) != value) newHistory.push_back(v);
+                std::string v;
+                v = m_pSettingsStore->GetStringParameter(SP_ALPHABET_1);
+                if (v != value) newHistory.push_back(v);
+                v = m_pSettingsStore->GetStringParameter(SP_ALPHABET_2);
+                if (v != value) newHistory.push_back(v);
+                v = m_pSettingsStore->GetStringParameter(SP_ALPHABET_3);
+                if (v != value) newHistory.push_back(v);
+                v = m_pSettingsStore->GetStringParameter(SP_ALPHABET_4);
+                if (v != value) newHistory.push_back(v);
 
                 // Fill empty slots.
                 while (newHistory.size() < 4)
@@ -423,7 +428,7 @@ void CAlphabetManager::GetProbs(vector<unsigned int>* pProbInfo, CLanguageModel:
     //  as then iNorm - control_space == iNorm...
     const unsigned int iUniformAdd =
         max(1ul, ((iNorm * m_pSettingsStore->GetLongParameter(LP_UNIFORM)) / 1000) / iSymbols);
-    const unsigned long iNonUniformNorm = iNorm - iSymbols * iUniformAdd;
+    const unsigned long iNonUniformNorm = iNorm - static_cast<unsigned long>(iSymbols) * iUniformAdd;
     //  m_pLanguageModel->GetProbs(context, Probs, iNorm, ((iNorm * uniform) / 1000));
 
     // ACL used to test explicitly for MandarinDasher and if so called GetPYProbs instead
