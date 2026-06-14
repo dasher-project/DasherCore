@@ -80,27 +80,12 @@ CDictLanguageModel::CDictLanguageModel(CSettingsStore* pSettingsStore, const CAl
 
     nextid = 8192; // Start of indices for words - may need to increase this for *really* large alphabets
 
-    std::ifstream DictFile("/usr/share/dict/words"); // FIXME - hardcoded paths == bad
-
-    std::string CurrentWord;
-
-    while (DictFile >> CurrentWord) {
-
-        CurrentWord = CurrentWord + " ";
-
-        //      std::cout << CurrentWord << std::endl;
-
-        Context TempContext(CreateEmptyContext());
-
-        //      std::cout << m_pAlphabet << std::endl;
-
-        std::vector<symbol> Symbols;
-        m_pAlphMap->GetSymbols(Symbols, CurrentWord);
-
-        for (std::vector<symbol>::iterator it(Symbols.begin()); it != Symbols.end(); ++it) {
-            MyLearnSymbol(TempContext, *it);
-        }
-    }
+    // Dictionary loading is disabled. The original hardcoded path
+    // "/usr/share/dict/words" is Unix-only and loads 470K+ words on Ubuntu,
+    // causing severe performance issues and crashes. The model still
+    // functions without a pre-loaded dictionary — it just falls back to
+    // uniform distribution for predictions.
+    // TODO: Load dictionary from a configurable path via settings.
 }
 
 CDictLanguageModel::~CDictLanguageModel() {
