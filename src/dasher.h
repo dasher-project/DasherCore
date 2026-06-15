@@ -313,6 +313,27 @@ typedef void (*dasher_speak_callback)(const char* text, int interrupt, void* use
 
 DASHER_API void dasher_set_speak_callback(dasher_ctx* ctx, dasher_speak_callback callback, void* user_data);
 
+// ── Parameter change callback ───────────────────────────────────────────────
+//
+// Register a callback that fires whenever a DasherCore parameter changes.
+// This includes changes made by the engine itself (e.g. AutoSpeedControl
+// adjusting LP_MAX_BITRATE) as well as user-initiated changes.
+//
+// The callback receives the parameter key (same indices used by
+// dasher_get_long_parameter / dasher_set_bool_parameter etc.).
+// Use dasher_get_parameter_info() to look up the parameter name.
+//
+// The callback fires on the thread that calls dasher_frame() or any
+// API method that changes a parameter.
+//
+// Key constants:
+//   LP_MAX_BITRATE = dasher_find_parameter_key("LP_MAX_BITRATE")
+//   BP_AUTO_SPEEDCONTROL = 14
+
+typedef void (*dasher_parameter_callback)(int parameter_key, void* user_data);
+
+DASHER_API void dasher_set_parameter_callback(dasher_ctx* ctx, dasher_parameter_callback callback, void* user_data);
+
 // ── Localization ──────────────────────────────────────────────────────────
 
 // Set the active locale for parameter names, descriptions, and enum labels.

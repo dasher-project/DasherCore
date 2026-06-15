@@ -219,9 +219,16 @@ struct dasher_ctx {
     void* messageCbUserData = nullptr;
     dasher_speak_callback speakCb = nullptr;
     void* speakCbUserData = nullptr;
+    dasher_parameter_callback paramCb = nullptr;
+    void* paramCbUserData = nullptr;
 
     struct Interface : public Dasher::CDashIntfScreenMsgs {
-        Interface(Dasher::CSettingsStore* s, dasher_ctx* owner) : CDashIntfScreenMsgs(s), m_owner(owner) {}
+        Interface(Dasher::CSettingsStore* s, dasher_ctx* owner) : CDashIntfScreenMsgs(s), m_owner(owner) {
+            s->OnParameterChanged.Subscribe(this, [this](Dasher::Parameter param) {
+                if (m_owner->paramCb)
+                    m_owner->paramCb(static_cast<int>(param), m_owner->paramCbUserData);
+            });
+        }
 
         void CreateModules() override {
             CDashIntfScreenMsgs::CreateModules();
@@ -994,6 +1001,12 @@ DASHER_API void dasher_set_speak_callback(dasher_ctx* ctx, dasher_speak_callback
     if (!ctx) return;
     ctx->speakCb = callback;
     ctx->speakCbUserData = user_data;
+}
+
+DASHER_API void dasher_set_parameter_callback(dasher_ctx* ctx, dasher_parameter_callback callback, void* user_data) {
+    if (!ctx) return;
+    ctx->paramCb = callback;
+    ctx->paramCbUserData = user_data;
 }
 
 // ── Test / diagnostic hooks ────────────────────────────────────────────────
