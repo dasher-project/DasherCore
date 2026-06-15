@@ -224,12 +224,11 @@ struct dasher_ctx {
 
     struct Interface : public Dasher::CDashIntfScreenMsgs {
         Interface(Dasher::CSettingsStore* s, dasher_ctx* owner) : CDashIntfScreenMsgs(s), m_owner(owner) {
-            s->OnParameterChanged.Subscribe(this, [this](Dasher::Parameter param) {
-                if (m_owner->paramCb)
-                    m_owner->paramCb(static_cast<int>(param), m_owner->paramCbUserData);
+            s->OnParameterChanged.Subscribe(m_owner, [this](Dasher::Parameter param) {
+                if (m_owner->paramCb) m_owner->paramCb(static_cast<int>(param), m_owner->paramCbUserData);
             });
         }
-
+        ~Interface() { m_pSettingsStore->OnParameterChanged.Unsubscribe(m_owner); }
         void CreateModules() override {
             CDashIntfScreenMsgs::CreateModules();
             auto inp = std::make_unique<PointerInput>();
