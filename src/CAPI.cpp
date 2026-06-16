@@ -99,8 +99,8 @@ constexpr const char* kWordSeps = " \t\v\f\r\n";
 constexpr const char* kSentenceSeps = ".?!\r\n";
 constexpr const char* kParagraphSeps = "\r\n";
 
-void getRange(const std::string& buf, bool bForwards, Dasher::EditDistance dist,
-              size_t& ioStart, size_t& ioEnd) {
+void getRange(const std::string& buf, bool bForwards, Dasher::EditDistance dist, size_t& ioStart,
+              size_t& ioEnd) {
     switch (dist) {
     case Dasher::EDIT_CHAR:
         if (bForwards) {
