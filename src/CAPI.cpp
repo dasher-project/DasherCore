@@ -400,17 +400,15 @@ struct dasher_ctx {
             return static_cast<unsigned int>(m_owner->cursorPos);
         }
         void editOutput(const std::string& strText, Dasher::CDasherNode* pCause) override {
-            m_owner->editBuffer.insert(m_owner->cursorPos, strText);
-            m_owner->cursorPos += strText.size();
+            m_owner->editBuffer += strText;
+            m_owner->cursorPos = m_owner->editBuffer.size();
             if (m_owner->outputCb && !strText.empty()) m_owner->outputCb(0, strText.c_str(), m_owner->outputCbUserData);
             CDashIntfScreenMsgs::editOutput(strText, pCause);
         }
         void editDelete(const std::string& strText, Dasher::CDasherNode* pCause) override {
-            if (!strText.empty() && m_owner->editBuffer.size() >= strText.size() &&
-                m_owner->cursorPos >= strText.size()) {
-                m_owner->cursorPos -= strText.size();
-                m_owner->editBuffer.erase(m_owner->cursorPos, strText.size());
-            }
+            if (!strText.empty() && m_owner->editBuffer.size() >= strText.size())
+                m_owner->editBuffer.erase(m_owner->editBuffer.size() - strText.size());
+            m_owner->cursorPos = m_owner->editBuffer.size();
             if (m_owner->outputCb && !strText.empty()) m_owner->outputCb(1, strText.c_str(), m_owner->outputCbUserData);
             CDashIntfScreenMsgs::editDelete(strText, pCause);
         }
@@ -607,11 +605,13 @@ DASHER_API const char* dasher_get_output_text(dasher_ctx* ctx) {
 DASHER_API void dasher_reset_output_text(dasher_ctx* ctx) {
     if (!ctx) return;
     ctx->editBuffer.clear();
+    ctx->cursorPos = 0;
 }
 
 DASHER_API void dasher_reset(dasher_ctx* ctx) {
     if (!ctx || !ctx->intf) return;
     ctx->editBuffer.clear();
+    ctx->cursorPos = 0;
     ctx->intf->SetOffset(0, true);
 }
 
