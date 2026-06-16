@@ -311,6 +311,64 @@ TEST(locale_multiple_languages) {
     printf("✓ locale_multiple_languages passed\n");
 }
 
+TEST(clipboard_callback) {
+    dasher_ctx* ctx = create_isolated_context();
+    ASSERT(ctx != nullptr);
+    dasher_set_screen_size(ctx, 800, 600);
+
+    // Clipboard callback should be receivable
+    static const char* lastClipText = nullptr;
+    static int clipCallCount = 0;
+    lastClipText = nullptr;
+    clipCallCount = 0;
+
+    auto cb = [](const char* text, void* user_data) {
+        (void)user_data;
+        lastClipText = text;
+        clipCallCount++;
+    };
+
+    dasher_set_clipboard_callback(ctx, cb, nullptr);
+
+    // We can't easily trigger a copy from the test without a running engine frame loop,
+    // but we can verify the callback registration doesn't crash and SupportsClipboard
+    // is now true (indirectly verified by no segfault).
+    // A real copy would happen via alphabet copyToClipboardAction during dasher_frame.
+    ASSERT(clipCallCount == 0);
+
+    // Unregister
+    dasher_set_clipboard_callback(ctx, nullptr, nullptr);
+
+    dasher_destroy(ctx);
+    printf("✓ clipboard_callback passed\n");
+}
+
+TEST(output_text_reset) {
+    dasher_ctx* ctx = create_isolated_context();
+    ASSERT(ctx != nullptr);
+    dasher_set_screen_size(ctx, 800, 600);
+
+    // Initially empty
+    const char* text = dasher_get_output_text(ctx);
+    ASSERT(text != nullptr);
+    ASSERT_EQ((int)strlen(text), 0);
+
+    // Reset should keep it empty
+    dasher_reset_output_text(ctx);
+    text = dasher_get_output_text(ctx);
+    ASSERT(text != nullptr);
+    ASSERT_EQ((int)strlen(text), 0);
+
+    // Full reset
+    dasher_reset(ctx);
+    text = dasher_get_output_text(ctx);
+    ASSERT(text != nullptr);
+    ASSERT_EQ((int)strlen(text), 0);
+
+    dasher_destroy(ctx);
+    printf("✓ output_text_reset passed\n");
+}
+
 int main(int argc, char* argv[]) {
     printf("Running Dasher C API tests...\n\n");
 
@@ -325,6 +383,8 @@ int main(int argc, char* argv[]) {
     test_locale();
     test_string_override();
     test_locale_multiple_languages();
+    test_clipboard_callback();
+    test_output_text_reset();
 
     printf("\n✓ All tests passed!\n");
     return 0;
