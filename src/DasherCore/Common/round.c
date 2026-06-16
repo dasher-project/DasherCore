@@ -6,11 +6,11 @@
  * the behaviour is the same: round(1.5)=2.
  */
 double round(double dVal) {
-  double dF = floor(dVal);
-  double dC = ceil(dVal);
+    double dF = floor(dVal);
+    double dC = ceil(dVal);
 
-  if(dVal - dF < dC - dVal)
-    return dF;
-  else
-    return dC;
+    if (dVal - dF < dC - dVal)
+        return dF;
+    else
+        return dC;
 }

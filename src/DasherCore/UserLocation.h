@@ -14,42 +14,40 @@
 
 class CUserLocation;
 
-typedef std::vector<CUserLocation>               VECTOR_USER_LOCATION;
-typedef std::vector<CUserLocation>::iterator     VECTOR_USER_LOCATION_ITER;
-typedef std::vector<CUserLocation*>              VECTOR_USER_LOCATION_PTR;
-typedef std::vector<CUserLocation*>::iterator    VECTOR_USER_LOCATION_PTR_ITER;
+typedef std::vector<CUserLocation> VECTOR_USER_LOCATION;
+typedef std::vector<CUserLocation>::iterator VECTOR_USER_LOCATION_ITER;
+typedef std::vector<CUserLocation*> VECTOR_USER_LOCATION_PTR;
+typedef std::vector<CUserLocation*>::iterator VECTOR_USER_LOCATION_PTR_ITER;
 
 /// \ingroup Logging
 /// @{
-class CUserLocation
-{
-public:
-  CUserLocation(int iX, int iY, float dNats);
-  CUserLocation(float iX, float iY, float dNats);
-  CUserLocation(int iX1, int iY1, float iX2, float iY2, float dNats);
-  CUserLocation(int iX, int iY, int iTop, int iLeft, int iBottom, int iRight, bool bStoreIntegerRep, float dNats);
-  ~CUserLocation();
+class CUserLocation {
+  public:
+    CUserLocation(int iX, int iY, float dNats);
+    CUserLocation(float iX, float iY, float dNats);
+    CUserLocation(int iX1, int iY1, float iX2, float iY2, float dNats);
+    CUserLocation(int iX, int iY, int iTop, int iLeft, int iBottom, int iRight, bool bStoreIntegerRep, float dNats);
+    ~CUserLocation();
 
-  std::string              GetXML(const std::string& strPrefix = "");
-  static double       ComputeNormalizedX(int iX, int iLeft, int iRight);
-  static double       ComputeNormalizedY(int iY, int iTop, int iBottom);
+    std::string GetXML(const std::string& strPrefix = "");
+    static double ComputeNormalizedX(int iX, int iLeft, int iRight);
+    static double ComputeNormalizedY(int iY, int iTop, int iBottom);
 
-  // Used when we want to post-process a XML log file:
-  CUserLocation(const std::string& strXML);
-  std::string              GetTabMouseXY(bool bReturnNormalized);
-  void                GetMouseGridLocation(int iGridSize, int* pRow, int* pCol);
+    // Used when we want to post-process a XML log file:
+    CUserLocation(const std::string& strXML);
+    std::string GetTabMouseXY(bool bReturnNormalized);
+    void GetMouseGridLocation(int iGridSize, int* pRow, int* pCol);
 
-private:
-  std::string              m_strTime;
-  int                 m_iLocationX;
-  int                 m_iLocationY;
-  float               m_dNormalizedLocationX;
-  float               m_dNormalizedLocationY;
-  bool                m_bHasNormalized;           // Are we storing a normalized representation?
-  bool                m_bHasInteger;              // Are we storing an integer representation?
-  float               m_dNats;
+  private:
+    std::string m_strTime;
+    int m_iLocationX;
+    int m_iLocationY;
+    float m_dNormalizedLocationX;
+    float m_dNormalizedLocationY;
+    bool m_bHasNormalized; // Are we storing a normalized representation?
+    bool m_bHasInteger;    // Are we storing an integer representation?
+    float m_dNats;
 
-  void                InitMemeberVars();
+    void InitMemeberVars();
 };
 /// @}
-

@@ -15,18 +15,18 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Dasher; if not, write to the Free Software 
+// along with Dasher; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "SCENode.h"
 
 SCENode::SCENode() {
-  m_iRefCount = 1;
+    m_iRefCount = 1;
 }
 
 SCENode::~SCENode() {
-  // TODO: Delete string?
+    // TODO: Delete string?
 
-  for (std::vector<SCENode *>::iterator it = m_vChildren.begin(); it!=m_vChildren.end(); it++)
-    (*it)->Unref();
+    for (std::vector<SCENode*>::iterator it = m_vChildren.begin(); it != m_vChildren.end(); it++)
+        (*it)->Unref();
 }

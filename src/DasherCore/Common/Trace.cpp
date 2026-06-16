@@ -9,7 +9,7 @@
 // Track memory leaks on Windows to the line that new'd the memory
 #ifdef _WIN32
 #ifdef _DEBUG
-#define DEBUG_NEW new( _NORMAL_BLOCK, THIS_FILE, __LINE__ )
+#define DEBUG_NEW new (_NORMAL_BLOCK, THIS_FILE, __LINE__)
 #define new DEBUG_NEW
 #undef THIS_FILE
 static char THIS_FILE[] = __FILE__;
@@ -19,6 +19,6 @@ static char THIS_FILE[] = __FILE__;
 // Customize behaviour of Trace here
 
 // Send Trace to stdout
-void DasherTraceOutputImpl(const char *pszFormat, va_list vargs) {
-  vfprintf(stdout, pszFormat, vargs);
+void DasherTraceOutputImpl(const char* pszFormat, va_list vargs) {
+    vfprintf(stdout, pszFormat, vargs);
 }

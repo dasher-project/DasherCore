@@ -3,8 +3,7 @@
 // (C) Copyright Seb Wills 2005
 //
 // Abstract base class for socket input: parent of non-abstract classes in each implementation (Windows, Linux, ...),
-#ifndef _WIN32 
-
+#ifndef _WIN32
 
 #pragma once
 
@@ -14,122 +13,109 @@
 
 #include <iostream>
 
-#define DASHER_SOCKET_INPUT_MAX_COORDINATE_COUNT 2      // just X and Y for now
+#define DASHER_SOCKET_INPUT_MAX_COORDINATE_COUNT 2 // just X and Y for now
 #define DASHER_SOCKET_INPUT_MAX_COORDINATE_LABEL_LENGTH 128
 
 namespace Dasher {
-  class CSocketInputBase;
-  
+class CSocketInputBase;
+
 /// \ingroup Input
 /// \{
 class CSocketInputBase : public CScreenCoordInput, public CSettingsUserObserver {
 
-public:
+  public:
+    CSocketInputBase(CSettingsUser* pCreator, CMessageDisplay* pMsgs);
 
-  CSocketInputBase(CSettingsUser *pCreator, CMessageDisplay *pMsgs);
+    virtual ~CSocketInputBase();
 
-  virtual ~CSocketInputBase();
+    virtual void HandleEvent(Parameter parameter);
 
-  virtual void HandleEvent(Parameter parameter);
+    virtual void SetDebug(bool _debug);
 
-  virtual void SetDebug(bool _debug);
+    virtual bool StartListening();
 
-  virtual bool StartListening();
+    virtual void StopListening();
 
-  virtual void StopListening();
+    virtual bool isListening() { return readerRunning; }
 
-  virtual bool isListening() {
-    return readerRunning;
-  }
+    virtual void SetReaderPort(int port);
 
-  virtual void SetReaderPort(int port);
+    virtual int GetPort() { return port; }
 
-  virtual int GetPort() {
-    return port;
-  }
-
-  void SetCoordinateCount(int _coordinateCount) {
-    DASHER_ASSERT(_coordinateCount <= DASHER_SOCKET_INPUT_MAX_COORDINATE_COUNT);
-    coordinateCount = _coordinateCount;
-  }
-
-  /// Gets the last coordinates received; if only one coordinate is being read, this is put
-  /// into iDasherY (and iDasherX set to 0).
-  bool GetScreenCoords(screenint &iScreenX, screenint &iScreenY, CDasherView *pView) {
-
-    //update max values for reader thread...(note any changes here won't be incorporated
-    // until values are next received over socket, but never mind)
-    dasherMaxCoordinateValues[0] = pView->Screen()->GetWidth();
-    dasherMaxCoordinateValues[1] = pView->Screen()->GetHeight();
-
-    if (coordinateCount==1) {
-      iScreenX = 0;
-      iScreenY = dasherCoordinates[0];
-    } else if (coordinateCount==2) {
-      iScreenX = dasherCoordinates[0];
-      iScreenY = dasherCoordinates[1];
-    } else {
-      //Aiieee, we're receiving >2 coords? Don't know what to do...
-      return false;
+    void SetCoordinateCount(int _coordinateCount) {
+        DASHER_ASSERT(_coordinateCount <= DASHER_SOCKET_INPUT_MAX_COORDINATE_COUNT);
+        coordinateCount = _coordinateCount;
     }
-    return true;
-  };
 
-  void Activate() {
-    StartListening();
-  };
+    /// Gets the last coordinates received; if only one coordinate is being read, this is put
+    /// into iDasherY (and iDasherX set to 0).
+    bool GetScreenCoords(screenint& iScreenX, screenint& iScreenY, CDasherView* pView) {
 
-  void Deactivate() {
-    StopListening();
-  };
+        // update max values for reader thread...(note any changes here won't be incorporated
+        //  until values are next received over socket, but never mind)
+        dasherMaxCoordinateValues[0] = pView->Screen()->GetWidth();
+        dasherMaxCoordinateValues[1] = pView->Screen()->GetHeight();
 
-  // Defines the label used in the input stream for a particular coordinate.
-  // We make our own copy of the label, in our own buffer. This should ensure thread-safety.
-  // Even if this method is called while our other thread is doing a strcmp on the label,
-  // the buffer will always be null-terminated somewhere (even if the last byte of the buffer, which is
-  // never overwritten), so won't segfault.
-  virtual void SetCoordinateLabel(int iWhichCoordinate, const char *Label);
+        if (coordinateCount == 1) {
+            iScreenX = 0;
+            iScreenY = dasherCoordinates[0];
+        } else if (coordinateCount == 2) {
+            iScreenX = dasherCoordinates[0];
+            iScreenY = dasherCoordinates[1];
+        } else {
+            // Aiieee, we're receiving >2 coords? Don't know what to do...
+            return false;
+        }
+        return true;
+    };
 
-  virtual void SetRawRange(int iWhich, double dMin, double dMax);
+    void Activate() { StartListening(); };
 
-  bool GetSettings(SModuleSettings **pSettings, int *iCount);
+    void Deactivate() { StopListening(); };
 
-protected:
+    // Defines the label used in the input stream for a particular coordinate.
+    // We make our own copy of the label, in our own buffer. This should ensure thread-safety.
+    // Even if this method is called while our other thread is doing a strcmp on the label,
+    // the buffer will always be null-terminated somewhere (even if the last byte of the buffer, which is
+    // never overwritten), so won't segfault.
+    virtual void SetCoordinateLabel(int iWhichCoordinate, const char* Label);
 
-  myint dasherCoordinates[DASHER_SOCKET_INPUT_MAX_COORDINATE_COUNT];
-  myint dasherMaxCoordinateValues[DASHER_SOCKET_INPUT_MAX_COORDINATE_COUNT];
-  double rawMinValues[DASHER_SOCKET_INPUT_MAX_COORDINATE_COUNT];
-  double rawMaxValues[DASHER_SOCKET_INPUT_MAX_COORDINATE_COUNT];
-  int coordinateCount;
-  char coordinateNames[DASHER_SOCKET_INPUT_MAX_COORDINATE_COUNT][DASHER_SOCKET_INPUT_MAX_COORDINATE_LABEL_LENGTH + 1];
+    virtual void SetRawRange(int iWhich, double dMin, double dMax);
 
-  int port;
-  bool debug_socket_input;
+    bool GetSettings(SModuleSettings** pSettings, int* iCount);
 
-  int sock;
+  protected:
+    myint dasherCoordinates[DASHER_SOCKET_INPUT_MAX_COORDINATE_COUNT];
+    myint dasherMaxCoordinateValues[DASHER_SOCKET_INPUT_MAX_COORDINATE_COUNT];
+    double rawMinValues[DASHER_SOCKET_INPUT_MAX_COORDINATE_COUNT];
+    double rawMaxValues[DASHER_SOCKET_INPUT_MAX_COORDINATE_COUNT];
+    int coordinateCount;
+    char coordinateNames[DASHER_SOCKET_INPUT_MAX_COORDINATE_COUNT][DASHER_SOCKET_INPUT_MAX_COORDINATE_LABEL_LENGTH + 1];
 
-  char buffer[4096];
+    int port;
+    bool debug_socket_input;
 
-  bool readerRunning;
+    int sock;
 
-  virtual bool LaunchReaderThread() =0;
+    char buffer[4096];
 
-  virtual void CancelReaderThread() =0;
+    bool readerRunning;
 
-  virtual void ReadForever();
+    virtual bool LaunchReaderThread() = 0;
 
-  virtual void ParseMessage(char *message);
+    virtual void CancelReaderThread() = 0;
 
-  //Reports an error by appending an error message obtained from strerror(errno) onto the provided prefix
-  void ReportErrnoError(const std::string &prefix);
+    virtual void ReadForever();
 
-  virtual void SocketDebugMsg(const char *pszFormat, ...);
-  
-  CMessageDisplay *const m_pMsgs;
+    virtual void ParseMessage(char* message);
 
+    // Reports an error by appending an error message obtained from strerror(errno) onto the provided prefix
+    void ReportErrnoError(const std::string& prefix);
+
+    virtual void SocketDebugMsg(const char* pszFormat, ...);
+
+    CMessageDisplay* const m_pMsgs;
 };
-}
+} // namespace Dasher
 /// \}
 #endif
-
-

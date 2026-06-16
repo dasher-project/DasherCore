@@ -15,7 +15,7 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Dasher; if not, write to the Free Software 
+// along with Dasher; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #pragma once
@@ -26,36 +26,36 @@ namespace Dasher {
 /// \ingroup InputFilter
 /// @{
 class CTwoButtonDynamicFilter : public CButtonMultiPress {
- public:
-  CTwoButtonDynamicFilter(CSettingsStore* pSettingsStore, CDasherInterfaceBase *pInterface, CFrameRate *pFramerate);
-  virtual ~CTwoButtonDynamicFilter();
- 
+  public:
+    CTwoButtonDynamicFilter(CSettingsStore* pSettingsStore, CDasherInterfaceBase* pInterface, CFrameRate* pFramerate);
+    virtual ~CTwoButtonDynamicFilter();
 
-  // Inherited methods
-  bool DecorateView(CDasherView *pView, CDasherInput *pInput) override;
+    // Inherited methods
+    bool DecorateView(CDasherView* pView, CDasherInput* pInput) override;
 
-  bool GetSettings(SModuleSettings **pSettings, int *iCount) override;
-  virtual void GetUISettings(std::vector<Dasher::Parameter>& List) override;
+    bool GetSettings(SModuleSettings** pSettings, int* iCount) override;
+    virtual void GetUISettings(std::vector<Dasher::Parameter>& List) override;
 
-  bool GetMinWidth(int &iMinWidth) override;
+    bool GetMinWidth(int& iMinWidth) override;
 
-  
- protected:
-  //override to inspect x,y coords of mouse clicks/taps
-  void KeyDown(unsigned long Time, Keys::VirtualKey Key, CDasherView *pDasherView, CDasherInput *pInput, CDasherModel *pModel) override;
-  void KeyUp(unsigned long Time, Keys::VirtualKey Key, CDasherView *pDasherView, CDasherInput *pInput, CDasherModel *pModel) override;
-	
- private:
-  unsigned int maxClickCount() override {return m_pSettingsStore->GetBoolParameter(BP_2B_INVERT_DOUBLE) ? 3 : 2;}
-  void TimerImpl(unsigned long Time, CDasherView *m_pDasherView, CDasherModel *m_pDasherModel, CExpansionPolicy **pol) override;
-  void ActionButton(unsigned long iTime, Keys::VirtualKey Key, int iType, CDasherModel* pModel) override;
-  virtual void ComputeLagBits();
+  protected:
+    // override to inspect x,y coords of mouse clicks/taps
+    void KeyDown(unsigned long Time, Keys::VirtualKey Key, CDasherView* pDasherView, CDasherInput* pInput,
+                 CDasherModel* pModel) override;
+    void KeyUp(unsigned long Time, Keys::VirtualKey Key, CDasherView* pDasherView, CDasherInput* pInput,
+               CDasherModel* pModel) override;
 
-  double m_dLagBits;
-  ///id of physical key, whose pressing we have emulated, in response
-  /// to a mouse down event on one or other half of the canvas...
-  Keys::VirtualKey m_iMouseButton;
+  private:
+    unsigned int maxClickCount() override { return m_pSettingsStore->GetBoolParameter(BP_2B_INVERT_DOUBLE) ? 3 : 2; }
+    void TimerImpl(unsigned long Time, CDasherView* m_pDasherView, CDasherModel* m_pDasherModel,
+                   CExpansionPolicy** pol) override;
+    void ActionButton(unsigned long iTime, Keys::VirtualKey Key, int iType, CDasherModel* pModel) override;
+    virtual void ComputeLagBits();
+
+    double m_dLagBits;
+    /// id of physical key, whose pressing we have emulated, in response
+    ///  to a mouse down event on one or other half of the canvas...
+    Keys::VirtualKey m_iMouseButton;
 };
-}
+} // namespace Dasher
 /// @}
-

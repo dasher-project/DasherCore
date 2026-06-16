@@ -1,0 +1,107 @@
+{
+    "version": 3,
+    "cmakeMinimumRequired": {
+        "major": 3,
+        "minor": 21,
+        "patch": 0
+    },
+    "configurePresets": [
+        {
+            "name": "default",
+            "displayName": "Default (Debug)",
+            "binaryDir": "${sourceDir}/build",
+            "cacheVariables": {
+                "BUILD_TESTS": "ON",
+                "BUILD_CAPI": "ON"
+            }
+        },
+        {
+            "name": "debug",
+            "displayName": "Debug",
+            "inherits": "default",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug"
+            }
+        },
+        {
+            "name": "release",
+            "displayName": "Release",
+            "inherits": "default",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release"
+            }
+        },
+        {
+            "name": "sanitize",
+            "displayName": "Sanitize (ASan + UBSan)",
+            "inherits": "default",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug",
+                "DASHER_SANITIZE": "ON"
+            }
+        },
+        {
+            "name": "analyze",
+            "displayName": "Static Analysis (clang-tidy)",
+            "inherits": "default",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug",
+                "DASHER_ENABLE_CLANG_TIDY": "ON"
+            }
+        },
+        {
+            "name": "strict",
+            "displayName": "Strict (warnings as errors)",
+            "inherits": "default",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release",
+                "DASHER_WERROR": "ON"
+            }
+        }
+    ],
+    "buildPresets": [
+        {
+            "name": "debug",
+            "configurePreset": "debug"
+        },
+        {
+            "name": "release",
+            "configurePreset": "release"
+        },
+        {
+            "name": "sanitize",
+            "configurePreset": "sanitize"
+        },
+        {
+            "name": "analyze",
+            "configurePreset": "analyze"
+        },
+        {
+            "name": "strict",
+            "configurePreset": "strict"
+        }
+    ],
+    "testPresets": [
+        {
+            "name": "debug",
+            "configurePreset": "debug",
+            "output": {
+                "outputOnFailure": true
+            }
+        },
+        {
+            "name": "release",
+            "configurePreset": "release",
+            "output": {
+                "outputOnFailure": true
+            }
+        },
+        {
+            "name": "sanitize",
+            "configurePreset": "sanitize",
+            "output": {
+                "outputOnFailure": true
+            }
+        }
+    ]
+}

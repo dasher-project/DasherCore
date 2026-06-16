@@ -18,103 +18,102 @@
 #include <map>
 #include <string>
 
-//static char dumpTrieStr[40000];
-//const int maxcont =200;
+// static char dumpTrieStr[40000];
+// const int maxcont =200;
 
 namespace Dasher {
 
-  /// \ingroup LM
-  /// \{
+/// \ingroup LM
+/// \{
 
-  ///
-  /// Language model using words
-  ///
-  class CWordLanguageModel:public CLanguageModel {
+///
+/// Language model using words
+///
+class CWordLanguageModel : public CLanguageModel {
   public:
-    CWordLanguageModel(CSettingsStore *pSettingsStore, const CAlphInfo *pAlph, const CAlphabetMap *pAlphMap);
-      virtual ~ CWordLanguageModel();
+    CWordLanguageModel(CSettingsStore* pSettingsStore, const CAlphInfo* pAlph, const CAlphabetMap* pAlphMap);
+    virtual ~CWordLanguageModel();
 
     Context CreateEmptyContext();
     void ReleaseContext(Context context);
     Context CloneContext(Context context);
 
-    virtual void GetProbs(Context Context, std::vector < unsigned int >&Probs, int iNorm, int iUniform) const;
+    virtual void GetProbs(Context Context, std::vector<unsigned int>& Probs, int iNorm, int iUniform) const;
 
     virtual void EnterSymbol(Context context, int Symbol);
     virtual void LearnSymbol(Context context, int Symbol);
+
   protected:
     CSettingsStore* m_pSettingsStore;
+
   private:
-    
-      class CWordnode {
-    public:
-      CWordnode * find_symbol(int sym)const;
-      CWordnode *child;
-      CWordnode *next;
-      CWordnode *vine;
-      unsigned int count;
-      int sbl;
+    class CWordnode {
+      public:
+        CWordnode* find_symbol(int sym) const;
+        CWordnode* child;
+        CWordnode* next;
+        CWordnode* vine;
+        unsigned int count;
+        int sbl;
 
         CWordnode(int sym);
         CWordnode();
 
-      void RecursiveDump(std::ofstream & file);
+        void RecursiveDump(std::ofstream& file);
     };
-
-
 
     class CWordContext {
-    public:
-      CWordContext(CWordContext const &input) {
-        head = input.head;
-        word_head = input.word_head;
-        current_word = input.current_word;
-        order = input.order;
-        word_order = input.word_order;
-      } 
-      
-      CWordContext(CWordnode * _head = 0, int _order = 0): head(_head), order(_order), word_head(_head), word_order(0)
-	{};                        // FIXME - doesn't work if we're trying to create a non-empty context
-      ~CWordContext() {
-      };
-      void dump();
-      CWordnode *head;
-      int order;
+      public:
+        CWordContext(CWordContext const& input) {
+            head = input.head;
+            word_head = input.word_head;
+            current_word = input.current_word;
+            order = input.order;
+            word_order = input.word_order;
+        }
+        CWordContext& operator=(const CWordContext&) = default;
 
-      std::string current_word;
-      CWordnode *word_head;
-      int word_order;
+        CWordContext(CWordnode* _head = 0, int _order = 0)
+            : head(_head), order(_order), word_head(_head),
+              word_order(0) {}; // FIXME - doesn't work if we're trying to create a non-empty context
+        ~CWordContext() {};
+        void dump();
+        CWordnode* head;
+        int order;
 
-      std::vector < unsigned int >oSpellingProbs;
-      int m_iSpellingNorm;
-      double m_dSpellingFactor;
+        std::string current_word;
+        CWordnode* word_head;
+        int word_order;
 
-      /// Pointer to the letter based model - note that we don't
-      /// actually own this, so don't delete it
+        std::vector<unsigned int> oSpellingProbs;
+        int m_iSpellingNorm;
+        double m_dSpellingFactor;
 
-      CPPMLanguageModel *m_pSpellingModel;
+        /// Pointer to the letter based model - note that we don't
+        /// actually own this, so don't delete it
 
-      ///
-      /// The corresponding context in the spelling model
+        CPPMLanguageModel* m_pSpellingModel;
 
-      CPPMLanguageModel::Context oSpellingContext;
+        ///
+        /// The corresponding context in the spelling model
 
+        CPPMLanguageModel::Context oSpellingContext;
     };
 
-    CWordnode *AddSymbolToNode(CWordnode * pNode, symbol sym, int *update, bool bLearn);
+    CWordnode* AddSymbolToNode(CWordnode* pNode, symbol sym, int* update, bool bLearn);
 
-    void AddSymbol(CWordContext & context, symbol sym, bool bLearn);
+    void AddSymbol(CWordContext& context, symbol sym, bool bLearn);
 
-    void CollapseContext(CWordContext & context, bool bLearn);
+    void CollapseContext(CWordContext& context, bool bLearn);
 
-    int lookup_word(const std::string & w);
-    int lookup_word_const(const std::string & w) const;
-        
-    CWordContext *m_rootcontext;
-    CWordnode *m_pRoot;
+    int lookup_word(const std::string& w);
+    int lookup_word_const(const std::string& w) const;
+
+    CWordContext* m_rootcontext;
+    CWordnode* m_pRoot;
     const CAlphInfo* m_pAlphInfo;
 
-    std::map < std::string, int >dict;  // Dictionary
+    std::map<std::string, int> dict; // Dictionary
     int nextid;
     int iWordStart;
 
@@ -124,64 +123,62 @@ namespace Dasher {
 
     int max_order;
 
-    CPPMLanguageModel *pSpellingModel;  // Use this to predict the spellings of new words
+    CPPMLanguageModel* pSpellingModel; // Use this to predict the spellings of new words
 
-
-    mutable CSimplePooledAlloc < CWordnode > m_NodeAlloc;
-    CPooledAlloc < CWordContext > m_ContextAlloc;
-  };
-  /// \}
-
-////////////////////////////////////////////////////////////////////////
-// Inline functions 
-////////////////////////////////////////////////////////////////////////
+    mutable CSimplePooledAlloc<CWordnode> m_NodeAlloc;
+    CPooledAlloc<CWordContext> m_ContextAlloc;
+};
+/// \}
 
 ////////////////////////////////////////////////////////////////////////
+// Inline functions
+////////////////////////////////////////////////////////////////////////
 
-  inline Dasher::CWordLanguageModel::CWordnode::CWordnode(symbol sym):sbl(sym) {
+////////////////////////////////////////////////////////////////////////
+
+inline Dasher::CWordLanguageModel::CWordnode::CWordnode(symbol sym) : sbl(sym) {
     child = next = vine = 0;
     count = 1;
-  }
+}
 
 ////////////////////////////////////////////////////////////////////////
 
-  inline CWordLanguageModel::CWordnode::CWordnode() {
+inline CWordLanguageModel::CWordnode::CWordnode() {
     child = next = vine = 0;
     count = 1;
-  }
+}
 
 ///////////////////////////////////////////////////////////////////
 
-  inline CLanguageModel::Context CWordLanguageModel::CreateEmptyContext() {
-    return CloneContext((Context)m_rootcontext);
-  }
+inline CLanguageModel::Context CWordLanguageModel::CreateEmptyContext() {
+    return CloneContext(reinterpret_cast<Context>(m_rootcontext));
+}
 
 ///////////////////////////////////////////////////////////////////
 
-  inline CLanguageModel::Context CWordLanguageModel::CloneContext(Context Copy) {
-    CWordContext *pCont = m_ContextAlloc.Alloc();
-    CWordContext *pCopy = (CWordContext *) Copy;
+inline CLanguageModel::Context CWordLanguageModel::CloneContext(Context Copy) {
+    CWordContext* pCont = m_ContextAlloc.Alloc();
+    CWordContext* pCopy = reinterpret_cast<CWordContext*>(Copy);
     *pCont = *pCopy;
 
     // Create a clone of the spelling context
 
     pCont->oSpellingContext = pCont->m_pSpellingModel->CloneContext(pCopy->oSpellingContext);
 
-    return (Context) pCont;
-  }
+    return reinterpret_cast<Context>(pCont);
+}
 
 ///////////////////////////////////////////////////////////////////
 
-  inline void CWordLanguageModel::ReleaseContext(Context release) {
+inline void CWordLanguageModel::ReleaseContext(Context release) {
     // Urgh!
-    CWordContext *pCont(reinterpret_cast<CWordContext *>(release));
-    
+    CWordContext* pCont(reinterpret_cast<CWordContext*>(release));
+
     pCont->m_pSpellingModel->ReleaseContext(pCont->oSpellingContext);
 
     m_ContextAlloc.Free(pCont);
-  }
+}
 
 ///////////////////////////////////////////////////////////////////
 
-}                               // end namespace Dasher
-
+} // end namespace Dasher

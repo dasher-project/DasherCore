@@ -1,0 +1,53 @@
+---
+# DasherCore clang-tidy configuration
+#
+# Focused on checks that find real bugs in a legacy C++ codebase.
+# Style modernization checks are intentionally disabled — they produce
+# thousands of warnings on existing code and should be enabled incrementally
+# as code is refactored.
+#
+# Run with: cmake -DDASHER_ENABLE_CLANG_TIDY=ON ..
+# Or standalone: clang-tidy -p build/ src/CAPI.cpp
+
+Checks: >
+  -*,
+  bugprone-*,
+  -bugprone-easily-swappable-parameters,
+  -bugprone-narrowing-conversions,
+  -bugprone-assignment-in-if,
+  -bugprone-virtual-call,
+  -bugprone-reserved-identifier,
+  cert-*,
+  -cert-err58-cpp,
+  -cert-err34-c,
+  -cert-err33-c,
+  -cert-dcl50-cpp,
+  -cert-dcl37-c,
+  -cert-dcl51-cpp,
+  -cert-dcl16-c,
+  clang-analyzer-*,
+  -clang-analyzer-core.NullDereference,
+  -clang-analyzer-core.CallAndMessage,
+  -clang-analyzer-core.UndefinedBinaryOperatorResult,
+  -clang-analyzer-core.uninitialized.Branch,
+  -clang-analyzer-optin.cplusplus.VirtualCall,
+  clang-diagnostic-*,
+  cppcoreguidelines-pro-type-cstyle-cast,
+  -cppcoreguidelines-pro-type-static-cast-downcast,
+  cppcoreguidelines-slicing,
+  performance-*,
+  -performance-enum-size,
+  -performance-unnecessary-value-param,
+  -performance-trivially-destructible,
+  -performance-avoid-endl,
+  -performance-no-int-to-ptr,
+
+WarningsAsErrors: ''
+
+HeaderFilterRegex: '.*DasherCore/.*\.h$|.*dasher\.h$'
+
+CheckOptions:
+  - key:   modernize-use-override.IgnoreDestructors
+    value: '1'
+  - key:   performance-unnecessary-value-param.AllowedTypes
+    value: 'std::string;std::function'

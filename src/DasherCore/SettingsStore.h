@@ -37,85 +37,86 @@ namespace Dasher {
 /// in American English and encodable in ASCII. However,
 /// string Values may contain special characters where appropriate.
 class CSettingsStore {
-public:
+  public:
+    CSettingsStore();
 
-  CSettingsStore();
+    virtual ~CSettingsStore() = default;
 
-  virtual ~CSettingsStore() = default;
+    // New functions for event driven interface
 
-  // New functions for event driven interface
+    template <typename T>
+    void SetParameter(Parameter parameter, T value);
+    void SetBoolParameter(Parameter parameter, bool bValue);
+    void SetLongParameter(Parameter parameter, long lValue);
+    void SetStringParameter(Parameter parameter, const std::string sValue);
 
-    template<typename T> void SetParameter(Parameter parameter, T value);
-  void SetBoolParameter(Parameter parameter, bool bValue);
-  void SetLongParameter(Parameter parameter, long lValue);
-  void SetStringParameter(Parameter parameter, const std::string sValue);
+    template <typename T>
+    const T& GetParameter(Parameter parameter) const;
+    bool GetBoolParameter(Parameter parameter) const;
+    long GetLongParameter(Parameter parameter) const;
+    const std::string& GetStringParameter(Parameter parameter) const;
 
-    template<typename T> const T& GetParameter(Parameter parameter) const;
-  bool GetBoolParameter(Parameter parameter) const;
-  long GetLongParameter(Parameter parameter) const;
-  const std::string &GetStringParameter(Parameter parameter) const;
+    void ResetParameter(Parameter parameter);
 
-  void ResetParameter(Parameter parameter);
+    const char* ClSet(const std::string& strKey, const std::string& strValue);
 
-  const char *ClSet(const std::string &strKey, const std::string &strValue);
-
-  // TODO: just load the application parameters by default?
-  void AddParameters(const std::unordered_map<Parameter, const Settings::Parameter_Value> table);
+    // TODO: just load the application parameters by default?
+    void AddParameters(const std::unordered_map<Parameter, const Settings::Parameter_Value> table);
 
     Event<Parameter, std::variant<bool, long, std::string>> OnPreParameterChange;
     Event<Parameter> OnParameterChanged;
-    
-  virtual bool IsParameterSaved(const std::string & Key) { return false; }; // avoid undef sub-classes error
 
-protected:
-    ///Loads all (persistent) prefs from disk, using+storing default values when no
-    /// existing value stored; non-persistent prefs are reinitialized from defaults.
+    virtual bool IsParameterSaved(const std::string& Key) { return false; }; // avoid undef sub-classes error
+
+  protected:
+    /// Loads all (persistent) prefs from disk, using+storing default values when no
+    ///  existing value stored; non-persistent prefs are reinitialized from defaults.
     void LoadPersistent();
-    
-private:
-  // Platform Specific settings file management
 
-  // LoadSetting changes Value only if it succeeds in loading the setting,
-  // in which case it also returns true. Failure is indicated by returning false.
-  //! Load a setting with a boolean value
-  //
-  //! Load a setting with a boolean value. Return true if successful
-  //! \param Key Name of the setting
-  //! \param Value Value of the setting
-  virtual bool LoadSetting(const std::string & Key, bool * Value);
+  private:
+    // Platform Specific settings file management
 
-  //! Load a setting with a long value
-  //
-  //! Load a setting with a long value. Return true if successful
-  //! \param Key Name of the setting
-  //! \param Value Value of the setting
-  virtual bool LoadSetting(const std::string & Key, long *Value);
+    // LoadSetting changes Value only if it succeeds in loading the setting,
+    // in which case it also returns true. Failure is indicated by returning false.
+    //! Load a setting with a boolean value
+    //
+    //! Load a setting with a boolean value. Return true if successful
+    //! \param Key Name of the setting
+    //! \param Value Value of the setting
+    virtual bool LoadSetting(const std::string& Key, bool* Value);
 
-  //! Load a setting with a string value
-  //
-  //! Load a setting with a string value. Return true if successful
-  //! \param Key Name of the setting
-  //! \param Value Value of the setting, UTF8 encoded
-  virtual bool LoadSetting(const std::string & Key, std::string * Value);
+    //! Load a setting with a long value
+    //
+    //! Load a setting with a long value. Return true if successful
+    //! \param Key Name of the setting
+    //! \param Value Value of the setting
+    virtual bool LoadSetting(const std::string& Key, long* Value);
 
-  //! Save a setting with a boolean value
-  //
-  //! \param Key Name of the setting
-  //! \param Value Value of the setting
-  virtual void SaveSetting(const std::string & Key, bool Value);
+    //! Load a setting with a string value
+    //
+    //! Load a setting with a string value. Return true if successful
+    //! \param Key Name of the setting
+    //! \param Value Value of the setting, UTF8 encoded
+    virtual bool LoadSetting(const std::string& Key, std::string* Value);
 
-  //! Save a setting with a long value
-  //
-  //! \param Key Name of the setting
-  //! \param Value Value of the setting
-  virtual void SaveSetting(const std::string & Key, long Value);
+    //! Save a setting with a boolean value
+    //
+    //! \param Key Name of the setting
+    //! \param Value Value of the setting
+    virtual void SaveSetting(const std::string& Key, bool Value);
 
-  //! Save a setting with a string value
-  //
-  //! \param Key Name of the setting
-  //! \param Value Value of the setting, UTF8 encoded
-  virtual void SaveSetting(const std::string & Key, const std::string & Value);
+    //! Save a setting with a long value
+    //
+    //! \param Key Name of the setting
+    //! \param Value Value of the setting
+    virtual void SaveSetting(const std::string& Key, long Value);
 
-  std::unordered_map<Parameter, Settings::Parameter_Value> parameters_;
+    //! Save a setting with a string value
+    //
+    //! \param Key Name of the setting
+    //! \param Value Value of the setting, UTF8 encoded
+    virtual void SaveSetting(const std::string& Key, const std::string& Value);
+
+    std::unordered_map<Parameter, Settings::Parameter_Value> parameters_;
 };
-}
+} // namespace Dasher

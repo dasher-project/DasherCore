@@ -27,11 +27,9 @@ If we don't need a copy feature it really isn't worth the hassle.
 }}} */
 
 class NoClones {
-protected:                     // Default constructor doesn't need to be public, but can't be private.
-  NoClones() {
-  };                            // Lots of compiler complaints without default constructor.
-private:
-  NoClones(const NoClones &);
-  NoClones & operator=(const NoClones &);
+  protected:       // Default constructor doesn't need to be public, but can't be private.
+    NoClones() {}; // Lots of compiler complaints without default constructor.
+  private:
+    NoClones(const NoClones&);
+    NoClones& operator=(const NoClones&);
 };
-

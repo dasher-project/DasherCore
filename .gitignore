@@ -31,16 +31,46 @@
 *.out
 *.app
 
-# Build Files
-Build
+# Build directories
+build/
+build-sanitize/
+Build/
+out/
 
-# Eclipse
+# Test artifacts
+Testing/
+
+# Build logs
+build_log.txt
+
+# IDE
 .autotools
 .cproject
 .project
-
 .gradle/
-.idea
-
-# Visual Studio Code
+.idea/
 .ionide/
+.vs/
+.vscode/
+*.user
+*.suo
+*.sln
+*.vcxproj*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Backup files
+CMakeLists.txt.capi
+do_build.cmd
+
+# Runtime settings files
+Data/dasher_settings.xml
+*.settings.xml
+dasher_settings.xml
+dasher.log
+build-san/
+build-tidy/
+build-san/
+build-tidy/

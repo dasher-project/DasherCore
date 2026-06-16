@@ -7,26 +7,24 @@
  *
  */
 
- #pragma once
+#pragma once
 
 class SBTree {
-public:
+  public:
     SBTree(int iValue);
     ~SBTree();
-	
+
     void Add(int iValue);
     SBTree* Delete(int iValue);
-	
-    int GetCount() {
-		return m_iCount;
-    };
-	
+
+    int GetCount() { return m_iCount; };
+
     int GetOffset(int iOffset);
-		
-private:
-	void SetRightMost(SBTree* pNewTree);
+
+  private:
+    void SetRightMost(SBTree* pNewTree);
     int m_iValue;
-    SBTree *m_pLeft;
-    SBTree *m_pRight;
+    SBTree* m_pLeft;
+    SBTree* m_pRight;
     int m_iCount;
 };

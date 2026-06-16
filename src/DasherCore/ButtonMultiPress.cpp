@@ -24,73 +24,75 @@
 
 using namespace Dasher;
 
-CButtonMultiPress::CButtonMultiPress(CSettingsStore* pSettingsStore, CDasherInterfaceBase *pInterface, CFrameRate *pFramerate, const char *szName)
-  : CDynamicButtons(pSettingsStore, pInterface, pFramerate, szName) {
-}
+CButtonMultiPress::CButtonMultiPress(CSettingsStore* pSettingsStore, CDasherInterfaceBase* pInterface,
+                                     CFrameRate* pFramerate, const char* szName)
+    : CDynamicButtons(pSettingsStore, pInterface, pFramerate, szName) {}
 
 void CButtonMultiPress::GetUISettings(std::vector<Dasher::Parameter>& List) {
     CDynamicButtons::GetUISettings(List);
     AddSettings(List, {LP_HOLD_TIME, LP_MULTIPRESS_TIME});
 }
 
-void CButtonMultiPress::Timer(unsigned long iTime, CDasherView *pView, CDasherInput *pInput, CDasherModel *pModel, CExpansionPolicy **pol) {
-  if(m_bKeyDown && !m_bKeyHandled && ((iTime - m_iKeyDownTime) > static_cast<unsigned long>(m_pSettingsStore->GetLongParameter(LP_HOLD_TIME)))) {
-    ButtonEvent(iTime, m_iHeldId, 1, pModel);
-    m_bKeyHandled = true;
-  }
-  CDynamicButtons::Timer(iTime,pView,pInput,pModel,pol);
-}
-
-void CButtonMultiPress::KeyDown(unsigned long iTime, Keys::VirtualKey Key, CDasherView *pView, CDasherInput *pInput, CDasherModel *pModel) {
-
-  if (m_bKeyDown) return;
-
-  // Check for multiple clicks
-  if(Key == m_iQueueId && !m_deQueueTimes.empty()) {
-    if ( (iTime - m_deQueueTimes.back()) > static_cast<unsigned long>(m_pSettingsStore->GetLongParameter(LP_MULTIPRESS_TIME)))
-      m_deQueueTimes.clear(); //and fall through to record+process normally, below
-    else
-    {
-      //previous presses should not be treated as such....
-      RevertPresses(static_cast<int>(m_deQueueTimes.size()));
-      //...but should be combined with this one into a new event (type = #presses)
-      ButtonEvent(iTime, Key, static_cast<int>(m_deQueueTimes.size())+1, pModel);
-      if (m_deQueueTimes.size() >= maxClickCount() - 1)
-	m_deQueueTimes.clear(); //final press
-      else //may still be more presses to come
-	m_deQueueTimes.push_back(iTime);
-      return; //we've called Event ourselves, so finished.
+void CButtonMultiPress::Timer(unsigned long iTime, CDasherView* pView, CDasherInput* pInput, CDasherModel* pModel,
+                              CExpansionPolicy** pol) {
+    if (m_bKeyDown && !m_bKeyHandled &&
+        ((iTime - m_iKeyDownTime) > static_cast<unsigned long>(m_pSettingsStore->GetLongParameter(LP_HOLD_TIME)))) {
+        ButtonEvent(iTime, m_iHeldId, 1, pModel);
+        m_bKeyHandled = true;
     }
-  } else {
-    m_deQueueTimes.clear(); //clear record of previous, different, button
-    m_iQueueId = Key;
-  }
-
-  // Record press...
-  m_deQueueTimes.push_back(iTime);
-  // ... and process normally; if it changes the state, pause()/reverse()'ll clear the queue
-  CDynamicButtons::KeyDown(iTime, Key, pView, pInput, pModel);
-  
-  // Store the key down time so that long presses can be determined
-  // TODO: This is going to cause problems if multiple buttons are
-  // held down at once
-  m_iKeyDownTime = iTime;
-  
-  m_bKeyHandled = false;
+    CDynamicButtons::Timer(iTime, pView, pInput, pModel, pol);
 }
 
+void CButtonMultiPress::KeyDown(unsigned long iTime, Keys::VirtualKey Key, CDasherView* pView, CDasherInput* pInput,
+                                CDasherModel* pModel) {
+
+    if (m_bKeyDown) return;
+
+    // Check for multiple clicks
+    if (Key == m_iQueueId && !m_deQueueTimes.empty()) {
+        if ((iTime - m_deQueueTimes.back()) >
+            static_cast<unsigned long>(m_pSettingsStore->GetLongParameter(LP_MULTIPRESS_TIME)))
+            m_deQueueTimes.clear(); // and fall through to record+process normally, below
+        else {
+            // previous presses should not be treated as such....
+            RevertPresses(static_cast<int>(m_deQueueTimes.size()));
+            //...but should be combined with this one into a new event (type = #presses)
+            ButtonEvent(iTime, Key, static_cast<int>(m_deQueueTimes.size()) + 1, pModel);
+            if (m_deQueueTimes.size() >= maxClickCount() - 1)
+                m_deQueueTimes.clear(); // final press
+            else                        // may still be more presses to come
+                m_deQueueTimes.push_back(iTime);
+            return; // we've called Event ourselves, so finished.
+        }
+    } else {
+        m_deQueueTimes.clear(); // clear record of previous, different, button
+        m_iQueueId = Key;
+    }
+
+    // Record press...
+    m_deQueueTimes.push_back(iTime);
+    // ... and process normally; if it changes the state, pause()/reverse()'ll clear the queue
+    CDynamicButtons::KeyDown(iTime, Key, pView, pInput, pModel);
+
+    // Store the key down time so that long presses can be determined
+    // TODO: This is going to cause problems if multiple buttons are
+    // held down at once
+    m_iKeyDownTime = iTime;
+
+    m_bKeyHandled = false;
+}
 
 void CButtonMultiPress::pause() {
-  CDynamicButtons::pause();
-  m_deQueueTimes.clear();
+    CDynamicButtons::pause();
+    m_deQueueTimes.clear();
 }
 
 void CButtonMultiPress::reverse(unsigned long iTime) {
-  CDynamicButtons::reverse(iTime);
-  m_deQueueTimes.clear();
+    CDynamicButtons::reverse(iTime);
+    m_deQueueTimes.clear();
 }
 
 void CButtonMultiPress::run(unsigned long iTime) {
-  if (!isRunning()) m_deQueueTimes.clear();
-  CDynamicButtons::run(iTime);
+    if (!isRunning()) m_deQueueTimes.clear();
+    CDynamicButtons::run(iTime);
 }

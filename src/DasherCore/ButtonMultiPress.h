@@ -27,34 +27,36 @@ namespace Dasher {
 /// @{
 /// DynamicButtons filter which detects long and multiple presses - the latter of the
 /// same button, up to maxClickCount() consecutive presses,
-/// with a gap of up to LP_MULTIPRESS_TIME ms between the start of _each_pair_ of 
+/// with a gap of up to LP_MULTIPRESS_TIME ms between the start of _each_pair_ of
 /// presses. Long- and multi-presses are passed onto the standard ButtonEvent method,
 /// with iType 1 or to the number of presses, respectively, for subclasses to decide how to respond.
 class CButtonMultiPress : public CDynamicButtons {
- public:
-  CButtonMultiPress(CSettingsStore* pSettingsStore, CDasherInterfaceBase *pInterface, CFrameRate *pFramerate, const char *szName);
+  public:
+    CButtonMultiPress(CSettingsStore* pSettingsStore, CDasherInterfaceBase* pInterface, CFrameRate* pFramerate,
+                      const char* szName);
 
-  void Timer(unsigned long iTime, CDasherView *pView, CDasherInput *pInput, CDasherModel *pModel, CExpansionPolicy **pol) override;
-  void KeyDown(unsigned long iTime, Keys::VirtualKey Key, CDasherView *pView, CDasherInput *pInput, CDasherModel *pModel) override;
+    void Timer(unsigned long iTime, CDasherView* pView, CDasherInput* pInput, CDasherModel* pModel,
+               CExpansionPolicy** pol) override;
+    void KeyDown(unsigned long iTime, Keys::VirtualKey Key, CDasherView* pView, CDasherInput* pInput,
+                 CDasherModel* pModel) override;
 
-  void pause() override;
-  virtual void GetUISettings(std::vector<Dasher::Parameter>& List) override;
+    void pause() override;
+    virtual void GetUISettings(std::vector<Dasher::Parameter>& List) override;
 
- protected:
-  virtual unsigned int maxClickCount()=0;
-  void reverse(unsigned long iTime) override;
-  void run(unsigned long iTime) override;
+  protected:
+    virtual unsigned int maxClickCount() = 0;
+    void reverse(unsigned long iTime) override;
+    void run(unsigned long iTime) override;
 
- private:
-  virtual void RevertPresses(int iCount) {};
+  private:
+    virtual void RevertPresses(int iCount) {};
 
-  Keys::VirtualKey m_iQueueId;
-  std::deque<unsigned long> m_deQueueTimes;
+    Keys::VirtualKey m_iQueueId;
+    std::deque<unsigned long> m_deQueueTimes;
 
-  ///Whether a long-press has been handled (in Timer) - as the key
-  /// may still be down (and the press becoming ever-longer)!
-  bool m_bKeyHandled;
-  unsigned long m_iKeyDownTime;
- };
-}
-
+    /// Whether a long-press has been handled (in Timer) - as the key
+    ///  may still be down (and the press becoming ever-longer)!
+    bool m_bKeyHandled;
+    unsigned long m_iKeyDownTime;
+};
+} // namespace Dasher

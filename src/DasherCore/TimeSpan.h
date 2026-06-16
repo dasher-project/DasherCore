@@ -15,39 +15,36 @@
 
 class CTimeSpan;
 
-typedef std::vector<CTimeSpan>    VECTOR_TIME_SPAN;
-typedef std::vector<CTimeSpan*>   VECTOR_TIME_SPAN_PTR;
+typedef std::vector<CTimeSpan> VECTOR_TIME_SPAN;
+typedef std::vector<CTimeSpan*> VECTOR_TIME_SPAN_PTR;
 
 /// \ingroup Logging
 /// @{
-class CTimeSpan
-{
-public:
-  CTimeSpan(const std::string& strName, bool bAddDate);
-  CTimeSpan(const std::string& strName, const std::string& strXML);
+class CTimeSpan {
+  public:
+    CTimeSpan(const std::string& strName, bool bAddDate);
+    CTimeSpan(const std::string& strName, const std::string& strXML);
 
-  ~CTimeSpan();
+    ~CTimeSpan();
 
-  void                Stop();
-  std::string              GetXML(const std::string& strPrefix = "", bool bSinglePointInTime = false);
+    void Stop();
+    std::string GetXML(const std::string& strPrefix = "", bool bSinglePointInTime = false);
 
-  void                Continue();
-  bool                IsStopped();
-  double              GetElapsed();
+    void Continue();
+    bool IsStopped();
+    double GetElapsed();
 
-  static std::string       GetTimeStamp();
-  static std::string       GetDateStamp();
+    static std::string GetTimeStamp();
+    static std::string GetDateStamp();
 
-private:
-  std::string              m_strName;
-  std::string              m_strStartTime;
-  std::string              m_strEndTime;
-  double              m_dElapsed;
-  CSimpleTimer*       m_pTimer;
-  std::string              m_strStartDate;
+  private:
+    std::string m_strName;
+    std::string m_strStartTime;
+    std::string m_strEndTime;
+    double m_dElapsed;
+    CSimpleTimer* m_pTimer;
+    std::string m_strStartDate;
 
-  void                InitMemberVars();
-
+    void InitMemberVars();
 };
 /// @}
-
