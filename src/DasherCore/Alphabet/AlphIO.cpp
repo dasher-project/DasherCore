@@ -283,9 +283,7 @@ void CAlphIO::ReadCharAttributes(pugi::xml_node xml_node, CAlphInfo::character& 
                    !potentialActions.attribute("text").empty()) {
             DoActions.push_back(new FixedSpeechAction(potentialActions.attribute("text").as_string()));
         } else if (std::strcmp(potentialActions.name(), "contextTTSAction") == 0) {
-            DoActions.push_back(new ContextSpeechAction(TextAction::Repeat));
-        } else if (std::strcmp(potentialActions.name(), "contextTTSAction") == 0) {
-            const std::string context = potentialActions.attribute("context").as_string();
+            const std::string context = potentialActions.attribute("context").as_string("all");
             const std::pair<bool, EditDistance> c = parseDistance(context);
             DoActions.push_back(new ContextSpeechAction(TextAction::Distance, c.second));
         } else if (std::strcmp(potentialActions.name(), "stopTTSAction") == 0) {

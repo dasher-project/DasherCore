@@ -73,39 +73,15 @@
     <node label="¶" text="&#10;"><textCharAction /></node>
     <node label="␣" text=" "><textCharAction /></node>
   </group>
-  <group name="Editing" colorInfoName="editing">
+  <group name="Editing" colorInfoName="editing" fixedProbability="0.1">
     <node label="⌫"><deleteTextAction distance="last char" /></node>
     <node label="⌦"><deleteTextAction distance="next char" /></node>
     <node label="⌫W"><deleteTextAction distance="last word" /></node>
-    <node label="⌦W"><deleteTextAction distance="next word" /></node>
-    <node label="⌫S"><deleteTextAction distance="last sentence" /></node>
-    <node label="⌦S"><deleteTextAction distance="next sentence" /></node>
-    <node label="⌫¶"><deleteTextAction distance="last paragraph" /></node>
-    <node label="⌦¶"><deleteTextAction distance="next paragraph" /></node>
     <node label="⎚"><deleteTextAction distance="all" /></node>
-  </group>
-  <group name="Move" colorInfoName="move">
-    <node label="⇦"><moveCursorAction distance="last char" /></node>
-    <node label="⇨"><moveCursorAction distance="next char" /></node>
-    <node label="⇦W"><moveCursorAction distance="last word" /></node>
-    <node label="⇨W"><moveCursorAction distance="next word" /></node>
-    <node label="⇦S"><moveCursorAction distance="last sentence" /></node>
-    <node label="⇨S"><moveCursorAction distance="next sentence" /></node>
-    <node label="⇦¶"><moveCursorAction distance="last paragraph" /></node>
-    <node label="⇨¶"><moveCursorAction distance="next paragraph" /></node>
-  </group>
-  <group name="Copy" colorInfoName="copy">
+    <node label="⇦"><moveCursorAction distance="last word" /></node>
+    <node label="⇨"><moveCursorAction distance="next word" /></node>
     <node label="📋"><copyToClipboardAction context="all" /></node>
-    <node label="📋W"><copyToClipboardAction context="word" /></node>
-    <node label="📋S"><copyToClipboardAction context="sentence" /></node>
-    <node label="📋¶"><copyToClipboardAction context="paragraph" /></node>
-  </group>
-  <group name="Speak" colorInfoName="speak">
     <node label="🗣"><contextTTSAction context="all" /></node>
-    <node label="🗣W"><contextTTSAction context="word" /></node>
-    <node label="🗣S"><contextTTSAction context="sentence" /></node>
-    <node label="🗣¶"><contextTTSAction context="paragraph" /></node>
     <node label="⏹"><stopTTSAction /></node>
-    <node label="⏸"><stopDasherAction /></node>
   </group>
 </alphabet>
