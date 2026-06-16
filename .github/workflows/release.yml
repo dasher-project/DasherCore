@@ -89,12 +89,19 @@ jobs:
               -name 'libpugixml.a' \) -exec cp -L {} stage/lib/ \;
 
           # Self-contained C API header (only depends on <stdint.h>)
-          cp Src/dasher.h stage/include/
+          cp src/dasher.h stage/include/
 
           echo "Staged files:"
           find stage -type f | sort
 
-          ( cd stage && zip -r "../${{ matrix.artifact }}-${VER}.zip" . )
+          # zip is absent on windows runners; 7z (7-Zip) is preinstalled.
+          cd stage
+          ZIP_NAME="../${{ matrix.artifact }}-${VER}.zip"
+          if [ "$RUNNER_OS" = "Windows" ]; then
+            7z a -tzip "$ZIP_NAME" .
+          else
+            zip -r "$ZIP_NAME" .
+          fi
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
@@ -155,8 +162,8 @@ jobs:
           mkdir -p stage-wasm
           WEB=dasher-web/wasm-build
           em++ -O3 -DNDEBUG -fwasm-exceptions \
-              Src/CAPI.cpp \
-              -I Src \
+              src/CAPI.cpp \
+              -I src \
               -I Thirdparty/pugixml/src \
               build-wasm/libDasherCore.a \
               build-wasm/Thirdparty/pugixml/libpugixml.a \
