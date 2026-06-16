@@ -14,7 +14,7 @@
 <!ATTLIST group label CDATA #IMPLIED>
 
 <!-- Single symbols -->
-<!ELEMENT node (textCharAction*|deleteTextAction*|moveCursorAction*|fixedTTSAction*|contextTTSAction*|repeatTTSAction*|stopTTSAction*|pauseDasherAction*|atspiAction*|keyboardAction*)>
+<!ELEMENT node (textCharAction*|deleteTextAction*|moveCursorAction*|fixedTTSAction*|contextTTSAction*|repeatTTSAction*|stopTTSAction*|pauseDasherAction*|stopDasherAction*|copyToClipboardAction*|atspiAction*|keyboardAction*|socketOutputAction*|changeSettingAction*)>
 <!ATTLIST node label CDATA #REQUIRED>
 <!ATTLIST node text CDATA #IMPLIED> <!-- represents the text that is output and also used for training, defaults to the same value as label -->
 <!ATTLIST node fixedProbability CDATA #IMPLIED>
@@ -46,6 +46,12 @@
 <!-- Dasher-internal: -->
 <!ELEMENT pauseDasherAction EMPTY> <!-- Stops any currently ongoing TTS -->
 <!ATTLIST pauseDasherAction time CDATA #IMPLIED> <!-- Pauses Dasher for the given time, or stops forever if time is unspecified -->
+
+<!ELEMENT stopDasherAction EMPTY> <!-- Stops Dasher and pauses input -->
+
+<!-- Clipboard: -->
+<!ELEMENT copyToClipboardAction EMPTY>
+<!ATTLIST copyToClipboardAction context CDATA "all"> <!-- Can be "all", "new", "word", "sentence", "paragraph" -->
 
 <!-- System/application control: -->
 
