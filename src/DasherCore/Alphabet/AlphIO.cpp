@@ -282,12 +282,7 @@ void CAlphIO::ReadCharAttributes(pugi::xml_node xml_node, CAlphInfo::character& 
         } else if (std::strcmp(potentialActions.name(), "fixedTTSAction") == 0 &&
                    !potentialActions.attribute("text").empty()) {
             DoActions.push_back(new FixedSpeechAction(potentialActions.attribute("text").as_string()));
-        } else if (std::strcmp(potentialActions.name(), "moveCursorAction") == 0 &&
-                   !potentialActions.attribute("distance").empty()) {
-            const std::string distance = potentialActions.attribute("context").as_string();
-            const std::pair<bool, EditDistance> d = parseDistance(distance);
-            DoActions.push_back(new ContextSpeechAction(TextAction::Distance, d.second));
-        } else if (std::strcmp(potentialActions.name(), "repeatTTSAction") == 0) {
+        } else if (std::strcmp(potentialActions.name(), "contextTTSAction") == 0) {
             DoActions.push_back(new ContextSpeechAction(TextAction::Repeat));
         } else if (std::strcmp(potentialActions.name(), "contextTTSAction") == 0) {
             const std::string context = potentialActions.attribute("context").as_string();
@@ -295,6 +290,16 @@ void CAlphIO::ReadCharAttributes(pugi::xml_node xml_node, CAlphInfo::character& 
             DoActions.push_back(new ContextSpeechAction(TextAction::Distance, c.second));
         } else if (std::strcmp(potentialActions.name(), "stopTTSAction") == 0) {
             DoActions.push_back(new SpeakCancelAction());
+        } else if (std::strcmp(potentialActions.name(), "copyToClipboardAction") == 0) {
+            const std::string context = potentialActions.attribute("context").as_string("all");
+            if (context == "new")
+                DoActions.push_back(new CopyAction(TextAction::NewText));
+            else {
+                const std::pair<bool, EditDistance> c = parseDistance(context);
+                DoActions.push_back(new CopyAction(TextAction::Distance, c.second));
+            }
+        } else if (std::strcmp(potentialActions.name(), "stopDasherAction") == 0) {
+            DoActions.push_back(new StopDasherAction());
         } else if (std::strcmp(potentialActions.name(), "pauseDasherAction") == 0) {
             DoActions.push_back(
                 new PauseDasherAction(static_cast<long>(potentialActions.attribute("time").as_llong(-1))));

@@ -313,6 +313,19 @@ typedef void (*dasher_speak_callback)(const char* text, int interrupt, void* use
 
 DASHER_API void dasher_set_speak_callback(dasher_ctx* ctx, dasher_speak_callback callback, void* user_data);
 
+// ── Clipboard callback ───────────────────────────────────────────────────────
+//
+// Register a callback for DasherCore's clipboard features.
+// When SupportsClipboard() returns true, DasherCore will call this to:
+//   - Copy on stop (BP_COPY_ALL_ON_STOP)
+//   - Copy actions from alphabet nodes (copyToClipboardAction)
+//
+// The callback fires on the thread that calls dasher_frame().
+
+typedef void (*dasher_clipboard_callback)(const char* text, void* user_data);
+
+DASHER_API void dasher_set_clipboard_callback(dasher_ctx* ctx, dasher_clipboard_callback callback, void* user_data);
+
 // ── Parameter change callback ───────────────────────────────────────────────
 //
 // Register a callback that fires whenever a DasherCore parameter changes.
