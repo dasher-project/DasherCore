@@ -28,12 +28,22 @@
 
 namespace {
 size_t utf8CharLen(const std::string& s, size_t pos) {
-    if (pos >= s.size()) return 0;
+    if (pos >= s.size()) {
+        return 0;
+    }
     const auto c = static_cast<unsigned char>(s[pos]);
-    if (c < 0x80) return 1;
-    if (c < 0xC0) return 1; // continuation byte
-    if (c < 0xE0) return 2;
-    if (c < 0xF0) return 3;
+    if (c < 0x80) {
+        return 1;
+    }
+    if (c < 0xC0) {
+        return 1; // continuation byte
+    }
+    if (c < 0xE0) {
+        return 2;
+    }
+    if (c < 0xF0) {
+        return 3;
+    }
     return 4;
 }
 
@@ -43,29 +53,45 @@ size_t nextChar(const std::string& s, size_t pos) {
 }
 
 size_t prevChar(const std::string& s, size_t pos) {
-    if (pos == 0) return 0;
+    if (pos == 0) {
+        return 0;
+    }
     size_t p = pos - 1;
-    while (p > 0 && (static_cast<unsigned char>(s[p]) & 0xC0) == 0x80) --p;
+    while (p > 0 && (static_cast<unsigned char>(s[p]) & 0xC0) == 0x80) {
+        --p;
+    }
     return p;
 }
 
-bool isSep(char c, const char* seps) { return std::strchr(seps, c) != nullptr; }
+bool isSep(char c, const char* seps) {
+    return std::strchr(seps, c) != nullptr;
+}
 
 // Forward search: skip non-separators, then skip separators
 size_t findAfter(const std::string& s, size_t pos, const char* seps) {
     size_t p = pos;
-    while (p < s.size() && !isSep(s[p], seps)) p = nextChar(s, p);
-    while (p < s.size() && isSep(s[p], seps)) p = nextChar(s, p);
+    while (p < s.size() && !isSep(s[p], seps)) {
+        p = nextChar(s, p);
+    }
+    while (p < s.size() && isSep(s[p], seps)) {
+        p = nextChar(s, p);
+    }
     return p;
 }
 
 // Backward search: skip separators, then skip non-separators
 size_t findBefore(const std::string& s, size_t pos, const char* seps) {
     size_t p = pos;
-    while (p > 0 && isSep(s[p], seps)) p = prevChar(s, p);
-    while (p > 0 && !isSep(s[p], seps)) p = prevChar(s, p);
+    while (p > 0 && isSep(s[p], seps)) {
+        p = prevChar(s, p);
+    }
+    while (p > 0 && !isSep(s[p], seps)) {
+        p = prevChar(s, p);
+    }
     // if we landed on a separator, advance one
-    if (p < s.size() && isSep(s[p], seps)) p = nextChar(s, p);
+    if (p < s.size() && isSep(s[p], seps)) {
+        p = nextChar(s, p);
+    }
     return p;
 }
 
@@ -73,34 +99,45 @@ constexpr const char* kWordSeps = " \t\v\f\r\n";
 constexpr const char* kSentenceSeps = ".?!\r\n";
 constexpr const char* kParagraphSeps = "\r\n";
 
-void getRange(const std::string& buf, bool bForwards, Dasher::EditDistance dist,
-              size_t& ioStart, size_t& ioEnd) {
+void getRange(const std::string& buf, bool bForwards, Dasher::EditDistance dist, size_t& ioStart,
+              size_t& ioEnd) {
     switch (dist) {
     case Dasher::EDIT_CHAR:
-        if (bForwards) ioEnd = std::min(nextChar(buf, ioEnd), buf.size());
-        else ioStart = prevChar(buf, ioStart);
+        if (bForwards) {
+            ioEnd = std::min(nextChar(buf, ioEnd), buf.size());
+        } else {
+            ioStart = prevChar(buf, ioStart);
+        }
         break;
     case Dasher::EDIT_WORD:
-        if (bForwards) ioEnd = findAfter(buf, ioEnd, kWordSeps);
-        else ioStart = findBefore(buf, ioEnd > 0 ? ioEnd - 1 : 0, kWordSeps);
+        if (bForwards) {
+            ioEnd = findAfter(buf, ioEnd, kWordSeps);
+        } else {
+            ioStart = findBefore(buf, ioEnd > 0 ? ioEnd - 1 : 0, kWordSeps);
+        }
         break;
     case Dasher::EDIT_SENTENCE:
-        if (bForwards) ioEnd = findAfter(buf, ioEnd, kSentenceSeps);
-        else ioStart = findBefore(buf, ioEnd > 0 ? ioEnd - 1 : 0, kSentenceSeps);
+        if (bForwards) {
+            ioEnd = findAfter(buf, ioEnd, kSentenceSeps);
+        } else {
+            ioStart = findBefore(buf, ioEnd > 0 ? ioEnd - 1 : 0, kSentenceSeps);
+        }
         break;
     case Dasher::EDIT_PARAGRAPH:
     case Dasher::EDIT_LINE:
-        if (bForwards) ioEnd = findAfter(buf, ioEnd, kParagraphSeps);
-        else ioStart = findBefore(buf, ioEnd > 0 ? ioEnd - 1 : 0, kParagraphSeps);
+        if (bForwards) {
+            ioEnd = findAfter(buf, ioEnd, kParagraphSeps);
+        } else {
+            ioStart = findBefore(buf, ioEnd > 0 ? ioEnd - 1 : 0, kParagraphSeps);
+        }
         break;
     case Dasher::EDIT_FILE:
     case Dasher::EDIT_ALL:
-        if (bForwards) ioEnd = buf.size();
-        else ioStart = 0;
-        break;
-    default:
-        if (bForwards) ioEnd = buf.size();
-        else ioStart = 0;
+        if (bForwards) {
+            ioEnd = buf.size();
+        } else {
+            ioStart = 0;
+        }
         break;
     }
 }
@@ -327,7 +364,8 @@ struct dasher_ctx {
             if (!m_owner->messageCb) CDashIntfScreenMsgs::Message(strText, bInterrupt);
         }
 
-        unsigned int ctrlOffsetAfterMove(unsigned int offsetBefore, bool bForwards, Dasher::EditDistance dist) override {
+        unsigned int ctrlOffsetAfterMove(unsigned int offsetBefore, bool bForwards,
+                                         Dasher::EditDistance dist) override {
             size_t start = offsetBefore, end = offsetBefore;
             getRange(m_owner->editBuffer, bForwards, dist, start, end);
             return static_cast<unsigned int>(bForwards ? end : start);
@@ -343,14 +381,19 @@ struct dasher_ctx {
         unsigned int ctrlDelete(bool bForwards, Dasher::EditDistance dist) override {
             size_t start = m_owner->cursorPos, end = m_owner->cursorPos;
             getRange(m_owner->editBuffer, bForwards, dist, start, end);
-            if (start == end) return static_cast<unsigned int>(m_owner->cursorPos);
+            if (start == end) {
+                return static_cast<unsigned int>(m_owner->cursorPos);
+            }
 
-            const std::string deleted = m_owner->editBuffer.substr(std::min(start, end), std::abs(static_cast<long>(end) - static_cast<long>(start)));
-            m_owner->editBuffer.erase(std::min(start, end), std::abs(static_cast<long>(end) - static_cast<long>(start)));
-            m_owner->cursorPos = std::min(start, end);
+            const auto len = static_cast<size_t>(std::abs(static_cast<long>(end) - static_cast<long>(start)));
+            const auto pos = std::min(start, end);
+            const std::string deleted = m_owner->editBuffer.substr(pos, len);
+            m_owner->editBuffer.erase(pos, len);
+            m_owner->cursorPos = pos;
 
-            if (m_owner->outputCb && !deleted.empty())
+            if (m_owner->outputCb && !deleted.empty()) {
                 m_owner->outputCb(1, deleted.c_str(), m_owner->outputCbUserData);
+            }
 
             return static_cast<unsigned int>(m_owner->cursorPos);
         }
@@ -386,8 +429,9 @@ struct dasher_ctx {
         bool SupportsClipboard() override { return m_owner->clipboardCb != nullptr; }
 
         void CopyToClipboard(const std::string& text) override {
-            if (m_owner->clipboardCb && !text.empty())
+            if (m_owner->clipboardCb && !text.empty()) {
                 m_owner->clipboardCb(text.c_str(), m_owner->clipboardCbUserData);
+            }
         }
 
         std::string GetTextAroundCursor(Dasher::EditDistance dist) override {
