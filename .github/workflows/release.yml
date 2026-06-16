@@ -1,0 +1,246 @@
+name: Release
+
+# Builds platform binaries + WASM on a version tag and attaches them to a
+# GitHub Release so downstream frontends (Swift / C# / Rust / web) can consume
+# DasherCore without a local toolchain.
+#
+# Assets produced per tag (e.g. v1.2.3):
+#   dasher-windows-x64-v1.2.3.zip      dasher.dll + dasher.lib (import)
+#   dasher-linux-x64-v1.2.3.zip        libdasher.so
+#   dasher-macos-arm64-v1.2.3.zip      libdasher.dylib
+#   dasher-macos-x86_64-v1.2.3.zip     libdasher.dylib
+#   dasher-wasm-v1.2.3.zip             dasher.js + dasher.wasm + dasher.data
+#   dasher-data-v1.2.3.zip             full Data/ + Strings/ for runtime use
+#
+# Every native zip also contains:
+#   lib/      DasherCore static lib + pugixml static lib (for static linking)
+#   include/dasher.h
+#
+# Triggers:
+#   - push tag v*        -> full pipeline + publish a Release
+#   - workflow_dispatch  -> run the pipeline (artifacts visible in the run,
+#                           but no Release is published unless triggered on a tag)
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  # ── Native shared + static libraries ───────────────────────────────────
+  build-native:
+    name: Build (${{ matrix.artifact }})
+    # Build jobs run on both triggers so the pipeline can be exercised via
+    # workflow_dispatch. The release-publish job (below) is tag-gated.
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # macos-13 = Intel, macos-14 = Apple Silicon -> separate arch zips
+          - { os: windows-latest, artifact: dasher-windows-x64 }
+          - { os: ubuntu-latest,  artifact: dasher-linux-x64 }
+          - { os: macos-13,       artifact: dasher-macos-x86_64 }
+          - { os: macos-14,       artifact: dasher-macos-arm64 }
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Configure CMake
+        # BUILD_CAPI=ON -> shared lib (dasher.dll / libdasher.so / libdasher.dylib)
+        # BUILD_TESTS=OFF -> skip the 153-test suite (covered by ci.yml)
+        run: >
+          cmake -S . -B build
+          -DCMAKE_BUILD_TYPE=Release
+          -DBUILD_CAPI=ON
+          -DBUILD_TESTS=OFF
+
+      - name: Build
+        run: cmake --build build --config Release --parallel
+
+      - name: Stage artifacts
+        shell: bash
+        run: |
+          set -euo pipefail
+          VER="${GITHUB_REF_NAME:-snapshot}"
+          mkdir -p stage/lib stage/include
+
+          # C API shared library (+ Windows import library)
+          find build -type f \( \
+              -name 'dasher.dll'      -o \
+              -name 'dasher.lib'      -o \
+              -name 'libdasher.so*'   -o \
+              -name 'libdasher.dylib' \) -exec cp -L {} stage/lib/ \;
+
+          # DasherCore static lib (for devs who want to static-link)
+          find build -type f \( \
+              -name 'DasherCore.lib' -o \
+              -name 'libDasherCore.a' \) -exec cp -L {} stage/lib/ \;
+
+          # pugixml static lib (transitive dependency of the static core)
+          find build -type f \( \
+              -name 'pugixml.lib'   -o \
+              -name 'libpugixml.a' \) -exec cp -L {} stage/lib/ \;
+
+          # Self-contained C API header (only depends on <stdint.h>)
+          cp Src/dasher.h stage/include/
+
+          echo "Staged files:"
+          find stage -type f | sort
+
+          ( cd stage && zip -r "../${{ matrix.artifact }}-${VER}.zip" . )
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact }}
+          path: ${{ matrix.artifact }}-*.zip
+          if-no-files-found: error
+
+  # ── WebAssembly build (mirrors dasher-web/wasm-build/build.sh) ─────────
+  # Produces dasher.js + dasher.wasm + dasher.data (preloaded virtual FS).
+  # Uses dasher-web's exports.json + curated data-bundle, which are kept in
+  # sync with this repo. To fully self-contain, vendor those two into DasherCore
+  # and drop the dasher-web checkout below.
+  build-wasm:
+    name: Build (wasm)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Checkout dasher-web (exports.json + data-bundle + wrapper)
+        uses: actions/checkout@v4
+        with:
+          repository: dasher-project/dasher-web
+          path: dasher-web
+          # Pin to a known-good ref if you want reproducible WASM data bundles:
+          # ref: <commit-or-tag>
+
+      - name: Setup Emscripten
+        uses: mymindstorm/setup-emsdk@v14
+        with:
+          version: latest
+
+      - name: Verify emcc
+        run: emcc --version
+
+      - name: Install Ninja
+        run: sudo apt-get update && sudo apt-get install -y ninja-build
+
+      - name: Build DasherCore static library (emscripten)
+        # Mirrors dasher-web/wasm-build/build.sh: build only the static core,
+        # then link CAPI.cpp directly with em++ (full control over exports).
+        run: |
+          set -euo pipefail
+          emcmake cmake -S . -B build-wasm \
+              -DCMAKE_BUILD_TYPE=Release \
+              -DBUILD_CAPI=OFF \
+              -DBUILD_TESTS=OFF \
+              -GNinja
+          cmake --build build-wasm --target DasherCore -j
+
+      - name: Link WebAssembly module
+        run: |
+          set -euo pipefail
+          mkdir -p stage-wasm
+          WEB=dasher-web/wasm-build
+          em++ -O3 -DNDEBUG -fwasm-exceptions \
+              Src/CAPI.cpp \
+              -I Src \
+              -I Thirdparty/pugixml/src \
+              build-wasm/libDasherCore.a \
+              build-wasm/Thirdparty/pugixml/libpugixml.a \
+              -o stage-wasm/dasher.js \
+              -s MODULARIZE=1 \
+              -s EXPORT_NAME=createDasherModule \
+              -s EXPORT_ES6=1 \
+              -s ENVIRONMENT=web \
+              -s EXPORTED_FUNCTIONS=@"${WEB}/exports.json" \
+              -s "EXPORTED_RUNTIME_METHODS=['getValue','setValue','UTF8ToString','stringToUTF8','lengthBytesUTF8','cwrap','ccall','FS','addFunction','removeFunction']" \
+              -s ALLOW_MEMORY_GROWTH=1 \
+              -s INITIAL_MEMORY=64MB \
+              -s MAXIMUM_MEMORY=512MB \
+              -s FORCE_FILESYSTEM=1 \
+              -s ALLOW_TABLE_GROWTH=1 \
+              --preload-file "${WEB}/data-bundle@/data"
+
+          # Include the JS wrapper + exports manifest so consumers have the
+          # full, proven integration surface that dasher-web ships.
+          cp "${WEB}/dasher-wasm-wrapper.js" stage-wasm/ || true
+          cp "${WEB}/exports.json" stage-wasm/ || true
+
+          echo "WASM outputs:"
+          ls -lh stage-wasm/
+
+          VER="${GITHUB_REF_NAME:-snapshot}"
+          ( cd stage-wasm && zip -r "../dasher-wasm-${VER}.zip" . )
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: dasher-wasm
+          path: dasher-wasm-*.zip
+          if-no-files-found: error
+
+  # ── Runtime data (full alphabet/training/strings bundle) ───────────────
+  # Separate asset so native devs can grab the engine's runtime data without
+  # cloning the repo. This is the *full* data set; the WASM build ships a
+  # curated subset (dasher-web/data-bundle) to keep the .data file small.
+  build-data:
+    name: Build (data bundle)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Package runtime data
+        run: |
+          set -euo pipefail
+          VER="${GITHUB_REF_NAME:-snapshot}"
+          mkdir -p stage
+          cp -r Data stage/Data
+          cp -r Strings stage/Strings
+          ( cd stage && zip -r "../dasher-data-${VER}.zip" . )
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: dasher-data
+          path: dasher-data-*.zip
+          if-no-files-found: error
+
+  # ── Publish GitHub Release (tag push only) ─────────────────────────────
+  release:
+    name: Publish Release
+    needs: [build-native, build-wasm, build-data]
+    if: startsWith(github.ref, 'refs/tags/')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # required to create the Release + upload assets
+
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: assets
+          merge-multiple: true
+
+      - name: Inspect assets
+        run: ls -lh assets/
+
+      - name: Create / update Release
+        uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true
+          files: assets/*
