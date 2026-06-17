@@ -59,7 +59,7 @@ TEST(draw_opcodes_in_range) {
         int ops = cmd_count / 6;
         for (int i = 0; i < ops; i++) {
             int opcode = cmds[i * 6];
-            ASSERT(opcode >= 0 && opcode <= 5);
+            ASSERT(opcode >= 0 && opcode <= 6);
         }
     }
 
@@ -166,6 +166,7 @@ TEST(draw_coordinates_in_bounds) {
             case 2:
             case 3:
             case 4:
+            case 6:
                 break;
             case 5:
                 ASSERT(c > 0);
