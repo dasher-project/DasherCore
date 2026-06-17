@@ -242,6 +242,8 @@ class CommandScreen final : public Dasher::CDasherScreen {
 
     void Polyline(Dasher::point* Points, int Number, int iWidth, const Dasher::ColorPalette::Color& color) override {
         if (!Points || Number < 2 || color.isFullyTransparent()) return;
+        // Opcode 6: set line width for subsequent line segments
+        push(6, iWidth, 0, 0, 0, 0);
         for (int i = 1; i < Number; ++i)
             push(2, Points[i - 1].x, Points[i - 1].y, Points[i].x, Points[i].y, colorToARGB(color));
     }
