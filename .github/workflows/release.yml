@@ -28,6 +28,12 @@ on:
 permissions:
   contents: read
 
+# Opt all jobs into the Node.js 24 action runtime. The actions/* v5 majors
+# still ship a node20 entry point, so without this GitHub warns on every
+# upload/download-artifact step. Flip the runner default early.
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: 'true'
+
 jobs:
   # ── Native shared + static libraries ───────────────────────────────────
   build-native:
