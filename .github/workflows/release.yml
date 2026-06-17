@@ -48,7 +48,7 @@ jobs:
           - { os: macos-14,       artifact: dasher-macos-arm64 }
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           submodules: recursive
 
@@ -104,7 +104,7 @@ jobs:
           fi
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: ${{ matrix.artifact }}
           path: ${{ matrix.artifact }}-*.zip
@@ -121,12 +121,12 @@ jobs:
     timeout-minutes: 30
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           submodules: recursive
 
       - name: Checkout dasher-web (exports.json + data-bundle + wrapper)
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           repository: dasher-project/dasher-web
           path: dasher-web
@@ -134,7 +134,7 @@ jobs:
           # ref: <commit-or-tag>
 
       - name: Setup Emscripten
-        uses: mymindstorm/setup-emsdk@v14
+        uses: emscripten-core/setup-emsdk@v16
         with:
           version: latest
 
@@ -193,7 +193,7 @@ jobs:
           ( cd stage-wasm && zip -r "../dasher-wasm-${VER}.zip" . )
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: dasher-wasm
           path: dasher-wasm-*.zip
@@ -209,7 +209,7 @@ jobs:
     timeout-minutes: 10
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Package runtime data
         run: |
@@ -221,7 +221,7 @@ jobs:
           ( cd stage && zip -r "../dasher-data-${VER}.zip" . )
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: dasher-data
           path: dasher-data-*.zip
@@ -238,7 +238,7 @@ jobs:
 
     steps:
       - name: Download all artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           path: assets
           merge-multiple: true
@@ -247,7 +247,7 @@ jobs:
         run: ls -lh assets/
 
       - name: Create / update Release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           generate_release_notes: true
           files: assets/*
