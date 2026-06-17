@@ -15,6 +15,7 @@
 #include "DasherCore/DasherModel.h"
 #include "DasherCore/DasherNode.h"
 #include "DasherCore/NodeCreationManager.h"
+#include "DasherCore/ControlManager.h"
 #include "DasherCore/LanguageModelling/LMRegistry.h"
 
 #include <algorithm>
@@ -346,6 +347,13 @@ struct dasher_ctx {
     dasher_parameter_callback paramCb = nullptr;
     void* paramCbUserData = nullptr;
 
+    struct CustomActionEntry {
+        std::string name;
+        dasher_action_callback callback;
+        void* userData;
+    };
+    std::vector<CustomActionEntry> customActions;
+
     struct Interface : public Dasher::CDashIntfScreenMsgs {
         Interface(Dasher::CSettingsStore* s, dasher_ctx* owner) : CDashIntfScreenMsgs(s), m_owner(owner) {
             s->OnParameterChanged.Subscribe(m_owner, [this](Dasher::Parameter param) {
@@ -447,6 +455,30 @@ struct dasher_ctx {
         }
 
         dasher_ctx* m_owner;
+
+        std::vector<std::pair<std::string, Dasher::CustomActionCallback>> GetPendingCustomActions() override {
+            std::vector<std::pair<std::string, Dasher::CustomActionCallback>> result;
+            for (auto& entry : m_owner->customActions) {
+                auto cb = entry.callback;
+                auto ud = entry.userData;
+                result.emplace_back(entry.name,
+                    [cb, ud](const std::string& name, const std::map<std::string, std::string>& attrs) {
+                        if (!cb) return;
+                        std::vector<std::string> keys, values;
+                        for (const auto& [k, v] : attrs) {
+                            keys.push_back(k);
+                            values.push_back(v);
+                        }
+                        std::vector<const char*> keyPtrs, valPtrs;
+                        keyPtrs.reserve(keys.size());
+                        valPtrs.reserve(values.size());
+                        for (auto& k : keys) keyPtrs.push_back(k.c_str());
+                        for (auto& v : values) valPtrs.push_back(v.c_str());
+                        cb(name.c_str(), static_cast<int>(keyPtrs.size()), keyPtrs.data(), valPtrs.data(), ud);
+                    });
+            }
+            return result;
+        }
     };
 };
 
@@ -1292,6 +1324,37 @@ DASHER_API int dasher_get_offset(dasher_ctx* ctx) {
     auto* model = ctx->intf->GetModel();
     if (!model) return -1;
     return model->GetOffset();
+}
+
+// ── Custom actions ─────────────────────────────────────────────────────────
+
+DASHER_API void dasher_register_action(dasher_ctx* ctx, const char* name, dasher_action_callback callback,
+                                       void* user_data) {
+    if (!ctx || !name || !callback) return;
+    ctx->customActions.push_back({std::string(name), callback, user_data});
+
+    // If control manager already exists, register directly for immediate use
+    if (ctx->intf) {
+        auto* cm = ctx->intf->GetControlManager();
+        if (cm) {
+            auto cb = callback;
+            auto ud = user_data;
+            cm->GetActionRegistry()->registerCustomAction(std::string(name),
+                [cb, ud](const std::string& actionName, const std::map<std::string, std::string>& attrs) {
+                    std::vector<std::string> keys, values;
+                    for (const auto& [k, v] : attrs) {
+                        keys.push_back(k);
+                        values.push_back(v);
+                    }
+                    std::vector<const char*> keyPtrs, valPtrs;
+                    keyPtrs.reserve(keys.size());
+                    valPtrs.reserve(values.size());
+                    for (auto& k : keys) keyPtrs.push_back(k.c_str());
+                    for (auto& v : values) valPtrs.push_back(v.c_str());
+                    cb(actionName.c_str(), static_cast<int>(keyPtrs.size()), keyPtrs.data(), valPtrs.data(), ud);
+                });
+        }
+    }
 }
 
 } // extern "C"

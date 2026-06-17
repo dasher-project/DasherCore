@@ -419,12 +419,8 @@ int CAlphNode::ExpectedNumChildren() {
 void CAlphabetManager::GetProbs(vector<unsigned int>* pProbInfo, CLanguageModel::Context context) {
     const unsigned int iSymbols = m_pBaseGroup->iEnd - 1;
 
-    // TODO - sort out size of control node - for the timebeing I'll fix the control node at 5%
-    // TODO: New method (see commented code) has been removed as it wasn' working.
-
-    const unsigned long iNorm(CDasherModel::NORMALIZATION);
-    // the case for control mode on, generalizes to handle control mode off also,
-    //  as then iNorm - control_space == iNorm...
+    // Use alphabet normalization budget (NORMALIZATION minus control node space if active)
+    const unsigned long iNorm(m_pNCManager->GetAlphNodeNormalization());
     const unsigned int iUniformAdd =
         max(1ul, ((iNorm * m_pSettingsStore->GetLongParameter(LP_UNIFORM)) / 1000) / iSymbols);
     const unsigned long iNonUniformNorm = iNorm - static_cast<unsigned long>(iSymbols) * iUniformAdd;
@@ -646,6 +642,10 @@ void CAlphabetManager::IterateChildGroups(CAlphNode* pParent, const SGroupInfo* 
         pNewChild->Reparent(pParent, iLbnd, iHbnd);
     }
 
+    // Add control node as extra sibling at base group level
+    if (pParentGroup == m_pBaseGroup)
+        m_pNCManager->AddExtras(pParent);
+
     pParent->SetFlag(CDasherNode::NF_ALLCHILDREN, true);
 }
 
@@ -710,9 +710,9 @@ void CSymbolNode::Do() {
     TrainSymbol();
     const auto* alph = m_pMgr->GetAlphabet();
     if (!alph) return;
-    const std::vector<Action*>& uA = alph->GetCharDoActions(iSymbol);
-    for (Action* a : uA) {
-        a->Broadcast(GetInterface(), GetInterface()->GetActionManager(), this);
+    const auto& uA = alph->GetCharDoActions(iSymbol);
+    for (auto* a : uA) {
+        a->execute(GetInterface());
     }
 }
 
@@ -725,9 +725,9 @@ void CSymbolNode::Undo() {
     UntrainSymbol();
     const auto* alph = m_pMgr->GetAlphabet();
     if (!alph) return;
-    const std::vector<Action*>& uA = alph->GetCharUndoActions(iSymbol);
-    for (Action* a : uA) {
-        a->Broadcast(GetInterface(), GetInterface()->GetActionManager(), this);
+    const auto& uA = alph->GetCharUndoActions(iSymbol);
+    for (auto* a : uA) {
+        a->execute(GetInterface());
     }
 }
 

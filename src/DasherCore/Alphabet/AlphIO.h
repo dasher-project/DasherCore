@@ -58,7 +58,7 @@ class Dasher::CAlphIO : public AbstractXMLParser {
     CreateDefault(); // Give the user an English alphabet rather than nothing if anything goes horribly wrong.
 
     void ReadCharAttributes(pugi::xml_node xml_node, CAlphInfo::character& alphabet_character, SGroupInfo* parentGroup,
-                            std::vector<Action*>& DoActions, std::vector<Action*>& UndoActions);
+                            std::vector<ControlAction*>& DoActions, std::vector<ControlAction*>& UndoActions);
     SGroupInfo* ParseGroupRecursive(pugi::xml_node& group_node, CAlphInfo* CurrentAlphabet,
                                     SGroupInfo* previous_sibling, std::vector<SGroupInfo*> ancestors);
     void ReverseChildList(SGroupInfo*& pList);

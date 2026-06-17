@@ -19,6 +19,7 @@
 // Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "AlphIO.h"
+#include "DasherCore/ControlManager.h"
 
 #include <string>
 #include <cstring>
@@ -235,8 +236,8 @@ inline std::vector<std::vector<unsigned short>> parseKeyArray(const std::string&
 }
 
 void CAlphIO::ReadCharAttributes(pugi::xml_node xml_node, CAlphInfo::character& alphabet_character,
-                                 SGroupInfo* parentGroup, std::vector<Action*>& DoActions,
-                                 std::vector<Action*>& UndoActions) {
+                                 SGroupInfo* parentGroup, std::vector<ControlAction*>& DoActions,
+                                 std::vector<ControlAction*>& UndoActions) {
 
     if (xml_node.type() == pugi::node_null) return;
 
@@ -244,9 +245,11 @@ void CAlphIO::ReadCharAttributes(pugi::xml_node xml_node, CAlphInfo::character& 
     alphabet_character.Text = xml_node.attribute("text").as_string(alphabet_character.Display.c_str());
 
     for (auto potentialActions : xml_node.children()) {
-        if (std::strcmp(potentialActions.name(), "textCharAction") == 0) {
-            DoActions.push_back(new TextCharAction());
-            UndoActions.push_back(new TextCharUndoAction());
+        const char* actionName = potentialActions.name();
+
+        if (std::strcmp(actionName, "textCharAction") == 0) {
+            DoActions.push_back(new TextOutputAction(alphabet_character.Text));
+            UndoActions.push_back(new TextDeleteAction(alphabet_character.Text));
             if (xml_node.attribute("text").empty() && !potentialActions.attribute("unicode").empty()) {
                 int codepoint = potentialActions.attribute("unicode").as_int(-1);
                 if (codepoint > 0) {
@@ -267,52 +270,58 @@ void CAlphIO::ReadCharAttributes(pugi::xml_node xml_node, CAlphInfo::character& 
                         utf8 += static_cast<char>(0x80 | (codepoint & 0x3F));
                     }
                     alphabet_character.Text = utf8;
+                    // Re-create actions with the resolved text
+                    delete DoActions.back();
+                    DoActions.back() = new TextOutputAction(alphabet_character.Text);
+                    delete UndoActions.back();
+                    UndoActions.back() = new TextDeleteAction(alphabet_character.Text);
                 }
             }
-        } else if (std::strcmp(potentialActions.name(), "deleteTextAction") == 0 &&
+        } else if (std::strcmp(actionName, "deleteTextAction") == 0 &&
                    !potentialActions.attribute("distance").empty()) {
             const std::string distance = potentialActions.attribute("distance").as_string();
             const std::pair<bool, EditDistance> d = parseDistance(distance);
             DoActions.push_back(new DeleteAction(d.first, d.second));
-        } else if (std::strcmp(potentialActions.name(), "moveCursorAction") == 0 &&
+        } else if (std::strcmp(actionName, "moveCursorAction") == 0 &&
                    !potentialActions.attribute("distance").empty()) {
             const std::string distance = potentialActions.attribute("distance").as_string();
             const std::pair<bool, EditDistance> d = parseDistance(distance);
             DoActions.push_back(new MoveAction(d.first, d.second));
-        } else if (std::strcmp(potentialActions.name(), "fixedTTSAction") == 0 &&
+        } else if (std::strcmp(actionName, "fixedTTSAction") == 0 &&
                    !potentialActions.attribute("text").empty()) {
-            DoActions.push_back(new FixedSpeechAction(potentialActions.attribute("text").as_string()));
-        } else if (std::strcmp(potentialActions.name(), "contextTTSAction") == 0) {
-            DoActions.push_back(new ContextSpeechAction(TextAction::Repeat));
-        } else if (std::strcmp(potentialActions.name(), "contextTTSAction") == 0) {
-            const std::string context = potentialActions.attribute("context").as_string();
-            const std::pair<bool, EditDistance> c = parseDistance(context);
-            DoActions.push_back(new ContextSpeechAction(TextAction::Distance, c.second));
-        } else if (std::strcmp(potentialActions.name(), "stopTTSAction") == 0) {
+            DoActions.push_back(new FixedSpeakAction(potentialActions.attribute("text").as_string()));
+        } else if (std::strcmp(actionName, "contextTTSAction") == 0) {
+            if (potentialActions.attribute("context").empty()) {
+                DoActions.push_back(new SpeakAction(TextActionBase::Repeat, EDIT_NONE));
+            } else {
+                const std::string context = potentialActions.attribute("context").as_string();
+                const std::pair<bool, EditDistance> c = parseDistance(context);
+                DoActions.push_back(new SpeakAction(TextActionBase::Distance, c.second));
+            }
+        } else if (std::strcmp(actionName, "stopTTSAction") == 0) {
             DoActions.push_back(new SpeakCancelAction());
-        } else if (std::strcmp(potentialActions.name(), "copyToClipboardAction") == 0) {
+        } else if (std::strcmp(actionName, "copyToClipboardAction") == 0) {
             const std::string context = potentialActions.attribute("context").as_string("all");
             if (context == "new")
-                DoActions.push_back(new CopyAction(TextAction::NewText));
+                DoActions.push_back(new CopyAction(TextActionBase::NewText, EDIT_NONE));
             else {
                 const std::pair<bool, EditDistance> c = parseDistance(context);
-                DoActions.push_back(new CopyAction(TextAction::Distance, c.second));
+                DoActions.push_back(new CopyAction(TextActionBase::Distance, c.second));
             }
-        } else if (std::strcmp(potentialActions.name(), "stopDasherAction") == 0) {
-            DoActions.push_back(new StopDasherAction());
-        } else if (std::strcmp(potentialActions.name(), "pauseDasherAction") == 0) {
-            DoActions.push_back(
-                new PauseDasherAction(static_cast<long>(potentialActions.attribute("time").as_llong(-1))));
-        } else if (std::strcmp(potentialActions.name(), "atspiAction") == 0) {
+        } else if (std::strcmp(actionName, "stopDasherAction") == 0) {
+            DoActions.push_back(new StopAction());
+        } else if (std::strcmp(actionName, "pauseDasherAction") == 0) {
+            DoActions.push_back(new PauseAction());
+        } else if (std::strcmp(actionName, "atspiAction") == 0) {
             if (!potentialActions.attribute("action").empty())
                 DoActions.push_back(new ATSPIAction(potentialActions.attribute("action").as_string()));
             if (!potentialActions.attribute("undoAction").empty())
-                UndoActions.push_back(new ATSPIAction(potentialActions.attribute("undoAction ").as_string()));
-        } else if (std::strcmp(potentialActions.name(), "keyboardAction") == 0 &&
+                UndoActions.push_back(new ATSPIAction(potentialActions.attribute("undoAction").as_string()));
+        } else if (std::strcmp(actionName, "keyboardAction") == 0 &&
                    (!potentialActions.attribute("key").empty() || !potentialActions.attribute("press").empty() ||
                     !potentialActions.attribute("release").empty())) {
             std::string keycodes;
-            KeyboardAction::pressType p;
+            KeyboardAction::PressType p;
 
             if (!potentialActions.attribute("key").empty()) keycodes = potentialActions.attribute("key").as_string();
             if (!potentialActions.attribute("press").empty())
@@ -330,7 +339,7 @@ void CAlphIO::ReadCharAttributes(pugi::xml_node xml_node, CAlphInfo::character& 
                 keycodes = potentialActions.attribute("undoRelease").as_string();
             p = KeyboardAction::KEY_RELEASE;
             UndoActions.push_back(new KeyboardAction(p, parseKeyArray(keycodes)));
-        } else if (std::strcmp(potentialActions.name(), "socketOutputAction") == 0) {
+        } else if (std::strcmp(actionName, "socketOutputAction") == 0) {
             const bool suppressNewLine = potentialActions.attribute("suppressNewline").as_bool(false);
             if (!potentialActions.attribute("doString").empty())
                 DoActions.push_back(new SocketOutputAction(potentialActions.attribute("socketName").as_string(""),
@@ -340,30 +349,30 @@ void CAlphIO::ReadCharAttributes(pugi::xml_node xml_node, CAlphInfo::character& 
                 UndoActions.push_back(new SocketOutputAction(potentialActions.attribute("socketName").as_string(""),
                                                              potentialActions.attribute("undoString").as_string(""),
                                                              suppressNewLine));
-        } else if (std::strcmp(potentialActions.name(), "changeSettingAction") == 0 &&
+        } else if (std::strcmp(actionName, "changeSettingAction") == 0 &&
                    !potentialActions.attribute("settingsName").empty()) {
             const std::pair<Parameter, Settings::ParameterType> param =
                 Settings::GetParameter(potentialActions.attribute("settingsName").as_string());
             if (!potentialActions.attribute("doValue").empty()) {
                 if (param.second == Settings::PARAM_STRING)
-                    DoActions.push_back(new ChangeSettingsAction(
+                    DoActions.push_back(new ChangeSettingAction(
                         param.first, std::string(potentialActions.attribute("doValue").as_string())));
                 if (param.second == Settings::PARAM_BOOL)
                     DoActions.push_back(
-                        new ChangeSettingsAction(param.first, potentialActions.attribute("doValue").as_bool()));
+                        new ChangeSettingAction(param.first, potentialActions.attribute("doValue").as_bool()));
                 if (param.second == Settings::PARAM_LONG)
-                    DoActions.push_back(new ChangeSettingsAction(
+                    DoActions.push_back(new ChangeSettingAction(
                         param.first, static_cast<long>(potentialActions.attribute("doValue").as_llong())));
             }
             if (!potentialActions.attribute("undoValue").empty()) {
                 if (param.second == Settings::PARAM_STRING)
-                    UndoActions.push_back(new ChangeSettingsAction(
+                    UndoActions.push_back(new ChangeSettingAction(
                         param.first, std::string(potentialActions.attribute("undoValue").as_string())));
                 if (param.second == Settings::PARAM_BOOL)
                     UndoActions.push_back(
-                        new ChangeSettingsAction(param.first, potentialActions.attribute("undoValue").as_bool()));
+                        new ChangeSettingAction(param.first, potentialActions.attribute("undoValue").as_bool()));
                 if (param.second == Settings::PARAM_LONG)
-                    UndoActions.push_back(new ChangeSettingsAction(
+                    UndoActions.push_back(new ChangeSettingAction(
                         param.first, static_cast<long>(potentialActions.attribute("undoValue").as_llong())));
             }
         }
