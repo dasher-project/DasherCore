@@ -193,8 +193,7 @@ TEST(capi_register_action_after_realize) {
     dasher_frame(ctx, 1000, &commands, &cmd_count, &strings, &str_count);
 
     // Register custom action after realization — should not crash
-    dasher_register_action(
-        ctx, "late_action", [](const char*, int, const char**, const char**, void*) {}, nullptr);
+    dasher_register_action(ctx, "late_action", [](const char*, int, const char**, const char**, void*) {}, nullptr);
 
     // Should be able to run more frames without issues
     dasher_frame(ctx, 2000, &commands, &cmd_count, &strings, &str_count);
