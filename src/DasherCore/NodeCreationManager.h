@@ -53,6 +53,9 @@ class CNodeCreationManager {
     /// as an extra sibling at the base group level.
     void AddExtras(Dasher::CDasherNode* pParent);
 
+    /// Create or destroy the control manager based on BP_CONTROL_MODE.
+    void CreateControlBox();
+
   private:
     Dasher::CTrainer* m_pTrainer;
     Dasher::CDasherInterfaceBase* m_pInterface;
@@ -65,8 +68,5 @@ class CNodeCreationManager {
     /// Screen to use to create node labels
     Dasher::CDasherScreen* m_pScreen;
     Dasher::CSettingsStore* m_pSettingsStore;
-
-    /// Create or destroy the control manager based on BP_CONTROL_MODE.
-    void CreateControlBox();
 };
 /// @}

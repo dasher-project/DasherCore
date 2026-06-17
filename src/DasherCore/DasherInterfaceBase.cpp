@@ -243,8 +243,10 @@ void CDasherInterfaceBase::HandleParameterChange(Parameter parameter) {
             new AmortizedPolicy(m_pDasherModel.get(), m_pSettingsStore->GetLongParameter(LP_NODE_BUDGET)));
         break;
     case BP_CONTROL_MODE:
-        // Control box was rebuilt by NCManager; rebuild node tree to pick up
-        // the changed normalization (alphabet vs. control probability space).
+        // Rebuild control box first (deletes old CControlManager/templates),
+        // then rebuild node tree — order is critical to avoid dangling
+        // template pointers in live CContNodes during AddExtras().
+        m_pNCManager->CreateControlBox();
         SetOffset(m_pDasherModel->GetOffset(), true);
         ScheduleRedraw();
         break;

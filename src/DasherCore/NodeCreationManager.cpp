@@ -145,9 +145,9 @@ void CNodeCreationManager::ImportTrainingText(const std::string& strPath) {
 }
 
 void CNodeCreationManager::HandleParameterChange(Dasher::Parameter parameter) {
-    if (parameter == Dasher::BP_CONTROL_MODE) {
-        CreateControlBox();
-    }
+    // BP_CONTROL_MODE is handled by CDasherInterfaceBase calling
+    // CreateControlBox() explicitly before SetOffset(), to ensure the
+    // control manager state is updated before the node tree is rebuilt.
 }
 
 void CNodeCreationManager::CreateControlBox() {
