@@ -184,3 +184,4 @@ Before requesting review, verify:
 - [ ] C API functions catch all exceptions
 - [ ] New features have tests
 - [ ] Code is clang-format clean (run `clang-format -i src/your_file.cpp`)
+- [ ] Commits are signed off (DCO) — `git commit -s`
