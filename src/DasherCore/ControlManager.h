@@ -317,8 +317,12 @@ class CContNode : public CDasherNode {
     int ExpectedNumChildren() override;
     void Do() override;
 
-    const ColorPalette::Color& getLabelColor(const ColorPalette*) override { return ColorPalette::noColor; }
-    const ColorPalette::Color& getOutlineColor(const ColorPalette*) override { return ColorPalette::noColor; }
+    const ColorPalette::Color& getLabelColor(const ColorPalette* palette) override {
+        return palette ? palette->GetNamedColor(NamedColor::defaultLabel) : ColorPalette::noColor;
+    }
+    const ColorPalette::Color& getOutlineColor(const ColorPalette* palette) override {
+        return palette ? palette->GetNamedColor(NamedColor::defaultOutline) : ColorPalette::noColor;
+    }
     const ColorPalette::Color& getNodeColor(const ColorPalette*) override;
 
     NodeTemplate* templateNode() const { return m_pTemplate; }
