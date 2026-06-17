@@ -8,7 +8,6 @@ name: Release
 #   dasher-windows-x64-v1.2.3.zip      dasher.dll + dasher.lib (import)
 #   dasher-linux-x64-v1.2.3.zip        libdasher.so
 #   dasher-macos-arm64-v1.2.3.zip      libdasher.dylib
-#   dasher-macos-x86_64-v1.2.3.zip     libdasher.dylib
 #   dasher-wasm-v1.2.3.zip             dasher.js + dasher.wasm + dasher.data
 #   dasher-data-v1.2.3.zip             full Data/ + Strings/ for runtime use
 #
@@ -41,10 +40,11 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          # macos-13 = Intel, macos-14 = Apple Silicon -> separate arch zips
+          # macOS Intel (macos-13) runners are heavily deprecated/backlogged on
+          # GitHub Actions — shipping arm64 only. Intel Mac users can build
+          # from source or run the arm64 build under Rosetta.
           - { os: windows-latest, artifact: dasher-windows-x64 }
           - { os: ubuntu-latest,  artifact: dasher-linux-x64 }
-          - { os: macos-13,       artifact: dasher-macos-x86_64 }
           - { os: macos-14,       artifact: dasher-macos-arm64 }
 
     steps:
