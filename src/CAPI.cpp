@@ -461,8 +461,8 @@ struct dasher_ctx {
             for (auto& entry : m_owner->customActions) {
                 auto cb = entry.callback;
                 auto ud = entry.userData;
-                result.emplace_back(entry.name,
-                    [cb, ud](const std::string& name, const std::map<std::string, std::string>& attrs) {
+                result.emplace_back(
+                    entry.name, [cb, ud](const std::string& name, const std::map<std::string, std::string>& attrs) {
                         if (!cb) return;
                         std::vector<std::string> keys, values;
                         for (const auto& [k, v] : attrs) {
@@ -472,8 +472,10 @@ struct dasher_ctx {
                         std::vector<const char*> keyPtrs, valPtrs;
                         keyPtrs.reserve(keys.size());
                         valPtrs.reserve(values.size());
-                        for (auto& k : keys) keyPtrs.push_back(k.c_str());
-                        for (auto& v : values) valPtrs.push_back(v.c_str());
+                        for (auto& k : keys)
+                            keyPtrs.push_back(k.c_str());
+                        for (auto& v : values)
+                            valPtrs.push_back(v.c_str());
                         cb(name.c_str(), static_cast<int>(keyPtrs.size()), keyPtrs.data(), valPtrs.data(), ud);
                     });
             }
@@ -1339,7 +1341,8 @@ DASHER_API void dasher_register_action(dasher_ctx* ctx, const char* name, dasher
         if (cm) {
             auto cb = callback;
             auto ud = user_data;
-            cm->GetActionRegistry()->registerCustomAction(std::string(name),
+            cm->GetActionRegistry()->registerCustomAction(
+                std::string(name),
                 [cb, ud](const std::string& actionName, const std::map<std::string, std::string>& attrs) {
                     std::vector<std::string> keys, values;
                     for (const auto& [k, v] : attrs) {
@@ -1349,8 +1352,10 @@ DASHER_API void dasher_register_action(dasher_ctx* ctx, const char* name, dasher
                     std::vector<const char*> keyPtrs, valPtrs;
                     keyPtrs.reserve(keys.size());
                     valPtrs.reserve(values.size());
-                    for (auto& k : keys) keyPtrs.push_back(k.c_str());
-                    for (auto& v : values) valPtrs.push_back(v.c_str());
+                    for (auto& k : keys)
+                        keyPtrs.push_back(k.c_str());
+                    for (auto& v : values)
+                        valPtrs.push_back(v.c_str());
                     cb(actionName.c_str(), static_cast<int>(keyPtrs.size()), keyPtrs.data(), valPtrs.data(), ud);
                 });
         }

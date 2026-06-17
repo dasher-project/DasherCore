@@ -61,29 +61,29 @@ class ControlAction {
     virtual ~ControlAction() = default;
 
     /// Called when the node containing this action is entered.
-    virtual void execute(CDasherInterfaceBase *intf) = 0;
+    virtual void execute(CDasherInterfaceBase* intf) = 0;
 
     /// Compute the new text offset after this action runs.
     /// Default: offset unchanged.
-    virtual int calculateNewOffset(CDasherInterfaceBase *intf, int offsetBefore);
+    virtual int calculateNewOffset(CDasherInterfaceBase* intf, int offsetBefore);
 };
 
 /// Factory function type: creates a ControlAction from XML key-value attributes.
-using ActionFactory = std::function<ControlAction *(const std::map<std::string, std::string> &)>;
+using ActionFactory = std::function<ControlAction*(const std::map<std::string, std::string>&)>;
 
 /// Type for custom action callbacks registered by frontends.
 /// Receives the action name and all XML attributes.
 using CustomActionCallback =
-    std::function<void(const std::string &name, const std::map<std::string, std::string> &attrs)>;
+    std::function<void(const std::string& name, const std::map<std::string, std::string>& attrs)>;
 
 /// Wraps a frontend-registered custom action into a ControlAction.
 class CustomAction : public ControlAction {
   public:
-    CustomAction(const std::string &name, const std::map<std::string, std::string> &attrs,
+    CustomAction(const std::string& name, const std::map<std::string, std::string>& attrs,
                  CustomActionCallback callback)
         : m_name(name), m_attrs(attrs), m_callback(std::move(callback)) {}
 
-    void execute(CDasherInterfaceBase *intf) override;
+    void execute(CDasherInterfaceBase* intf) override;
 
   private:
     std::string m_name;
@@ -98,17 +98,17 @@ class ActionRegistry {
     ActionRegistry() = default;
 
     /// Register a factory for a named action type.
-    void registerFactory(const std::string &name, ActionFactory factory);
+    void registerFactory(const std::string& name, ActionFactory factory);
 
     /// Register a custom action from the C API.
-    void registerCustomAction(const std::string &name, CustomActionCallback callback);
+    void registerCustomAction(const std::string& name, CustomActionCallback callback);
 
     /// Create an action instance from XML name + attributes.
     /// Returns nullptr if the name is not registered.
-    ControlAction *create(const std::string &name, const std::map<std::string, std::string> &attrs) const;
+    ControlAction* create(const std::string& name, const std::map<std::string, std::string>& attrs) const;
 
     /// Check if a name is registered.
-    bool hasAction(const std::string &name) const;
+    bool hasAction(const std::string& name) const;
 
   private:
     struct FactoryEntry {
@@ -124,13 +124,13 @@ class ActionRegistry {
 /// Stop Dasher and trigger on-stop behaviour.
 class StopAction : public ControlAction {
   public:
-    void execute(CDasherInterfaceBase *intf) override;
+    void execute(CDasherInterfaceBase* intf) override;
 };
 
 /// Pause Dasher motion.
 class PauseAction : public ControlAction {
   public:
-    void execute(CDasherInterfaceBase *intf) override;
+    void execute(CDasherInterfaceBase* intf) override;
 };
 
 /// Move the cursor forward or backward by a given distance.
@@ -138,8 +138,8 @@ class MoveAction : public ControlAction {
   public:
     MoveAction(bool bForwards, EditDistance dist) : m_bForwards(bForwards), m_dist(dist) {}
 
-    int calculateNewOffset(CDasherInterfaceBase *intf, int offsetBefore) override;
-    void execute(CDasherInterfaceBase *intf) override;
+    int calculateNewOffset(CDasherInterfaceBase* intf, int offsetBefore) override;
+    void execute(CDasherInterfaceBase* intf) override;
 
   private:
     bool m_bForwards;
@@ -151,8 +151,8 @@ class DeleteAction : public ControlAction {
   public:
     DeleteAction(bool bForwards, EditDistance dist) : m_bForwards(bForwards), m_dist(dist) {}
 
-    int calculateNewOffset(CDasherInterfaceBase *intf, int offsetBefore) override;
-    void execute(CDasherInterfaceBase *intf) override;
+    int calculateNewOffset(CDasherInterfaceBase* intf, int offsetBefore) override;
+    void execute(CDasherInterfaceBase* intf) override;
 
   private:
     bool m_bForwards;
@@ -167,7 +167,7 @@ class TextActionBase : public ControlAction {
     TextActionBase(ActionContext context, EditDistance dist) : m_context(context), m_dist(dist) {}
 
   protected:
-    std::string getText(CDasherInterfaceBase *intf);
+    std::string getText(CDasherInterfaceBase* intf);
 
     ActionContext m_context;
     EditDistance m_dist;
@@ -179,27 +179,27 @@ class TextActionBase : public ControlAction {
 class SpeakAction : public TextActionBase {
   public:
     using TextActionBase::TextActionBase;
-    void execute(CDasherInterfaceBase *intf) override;
+    void execute(CDasherInterfaceBase* intf) override;
 };
 
 /// Cancel ongoing speech.
 class SpeakCancelAction : public ControlAction {
   public:
-    void execute(CDasherInterfaceBase *intf) override;
+    void execute(CDasherInterfaceBase* intf) override;
 };
 
 /// Copy text to clipboard based on context mode.
 class CopyAction : public TextActionBase {
   public:
     using TextActionBase::TextActionBase;
-    void execute(CDasherInterfaceBase *intf) override;
+    void execute(CDasherInterfaceBase* intf) override;
 };
 
 /// Output a fixed text character (the default behaviour for alphabet symbols).
 class TextOutputAction : public ControlAction {
   public:
     TextOutputAction(std::string text) : m_text(std::move(text)) {}
-    void execute(CDasherInterfaceBase *intf) override;
+    void execute(CDasherInterfaceBase* intf) override;
 
   private:
     std::string m_text;
@@ -209,7 +209,7 @@ class TextOutputAction : public ControlAction {
 class TextDeleteAction : public ControlAction {
   public:
     TextDeleteAction(std::string text) : m_text(std::move(text)) {}
-    void execute(CDasherInterfaceBase *intf) override;
+    void execute(CDasherInterfaceBase* intf) override;
 
   private:
     std::string m_text;
@@ -219,7 +219,7 @@ class TextDeleteAction : public ControlAction {
 class FixedSpeakAction : public ControlAction {
   public:
     FixedSpeakAction(std::string text) : m_text(std::move(text)) {}
-    void execute(CDasherInterfaceBase *intf) override;
+    void execute(CDasherInterfaceBase* intf) override;
 
   private:
     std::string m_text;
@@ -231,7 +231,7 @@ class ChangeSettingAction : public ControlAction {
     ChangeSettingAction(Parameter setting, std::variant<bool, long, std::string> newValue)
         : m_parameter(setting), m_newValue(std::move(newValue)) {}
 
-    void execute(CDasherInterfaceBase *intf) override;
+    void execute(CDasherInterfaceBase* intf) override;
 
   private:
     Parameter m_parameter;
@@ -246,7 +246,7 @@ class KeyboardAction : public ControlAction {
     KeyboardAction(PressType type, std::vector<std::vector<unsigned short>> keycodes)
         : m_type(type), m_keycodes(std::move(keycodes)) {}
 
-    void execute(CDasherInterfaceBase *intf) override;
+    void execute(CDasherInterfaceBase* intf) override;
 
   private:
     PressType m_type;
@@ -259,7 +259,7 @@ class SocketOutputAction : public ControlAction {
     SocketOutputAction(std::string socketName, std::string action, bool addNewLine)
         : m_socketName(std::move(socketName)), m_action(std::move(action)), m_addNewLine(addNewLine) {}
 
-    void execute(CDasherInterfaceBase *intf) override;
+    void execute(CDasherInterfaceBase* intf) override;
 
   private:
     std::string m_socketName;
@@ -271,7 +271,7 @@ class SocketOutputAction : public ControlAction {
 class ATSPIAction : public ControlAction {
   public:
     ATSPIAction(std::string action) : m_action(std::move(action)) {}
-    void execute(CDasherInterfaceBase *intf) override;
+    void execute(CDasherInterfaceBase* intf) override;
 
   private:
     std::string m_action;
@@ -284,32 +284,32 @@ class ATSPIAction : public ControlAction {
 /// A nullptr entry in successors means an <alph/> escape (bridge to alphabet).
 class NodeTemplate {
   public:
-    NodeTemplate(const std::string &strLabel, int iColour)
+    NodeTemplate(const std::string& strLabel, int iColour)
         : m_strLabel(strLabel), m_iColour(iColour), m_pLabel(nullptr) {}
 
     ~NodeTemplate() {
         delete m_pLabel;
-        for (auto *action : m_actions)
+        for (auto* action : m_actions)
             delete action;
     }
 
     const std::string m_strLabel;
     const int m_iColour;
-    std::list<NodeTemplate *> successors; ///< nullptr = <alph/> escape
-    std::vector<ControlAction *> m_actions;
-    CDasherScreen::Label *m_pLabel;
+    std::list<NodeTemplate*> successors; ///< nullptr = <alph/> escape
+    std::vector<ControlAction*> m_actions;
+    CDasherScreen::Label* m_pLabel;
 
-    int calculateNewOffset(CDasherInterfaceBase *intf, int offsetBefore) const;
-    void executeActions(CDasherInterfaceBase *intf) const;
+    int calculateNewOffset(CDasherInterfaceBase* intf, int offsetBefore) const;
+    void executeActions(CDasherInterfaceBase* intf) const;
 };
 
 /// A node in the control tree. Children distributed uniformly (no LM).
 class CContNode : public CDasherNode {
   public:
-    CContNode(int iOffset, int iColour, NodeTemplate *pTemplate, CControlManager *pMgr);
+    CContNode(int iOffset, int iColour, NodeTemplate* pTemplate, CControlManager* pMgr);
 
-    CNodeManager *mgr() const override;
-    CDasherScreen::Label *getLabel() override { return m_pTemplate->m_pLabel; }
+    CNodeManager* mgr() const override;
+    CDasherScreen::Label* getLabel() override { return m_pTemplate->m_pLabel; }
     bool bShove() override { return false; }
     double SpeedMul() override;
 
@@ -317,16 +317,16 @@ class CContNode : public CDasherNode {
     int ExpectedNumChildren() override;
     void Do() override;
 
-    const ColorPalette::Color &getLabelColor(const ColorPalette *) override { return ColorPalette::noColor; }
-    const ColorPalette::Color &getOutlineColor(const ColorPalette *) override { return ColorPalette::noColor; }
-    const ColorPalette::Color &getNodeColor(const ColorPalette *) override;
+    const ColorPalette::Color& getLabelColor(const ColorPalette*) override { return ColorPalette::noColor; }
+    const ColorPalette::Color& getOutlineColor(const ColorPalette*) override { return ColorPalette::noColor; }
+    const ColorPalette::Color& getNodeColor(const ColorPalette*) override;
 
-    NodeTemplate *templateNode() const { return m_pTemplate; }
+    NodeTemplate* templateNode() const { return m_pTemplate; }
     int colourIndex() const { return m_iColourIndex; }
 
   private:
-    NodeTemplate *m_pTemplate;
-    CControlManager *m_pMgr;
+    NodeTemplate* m_pTemplate;
+    CControlManager* m_pMgr;
     int m_iColourIndex;
 };
 
@@ -334,49 +334,49 @@ class CContNode : public CDasherNode {
 /// template, and parses control.xml.
 class CControlManager : public CNodeManager, public AbstractXMLParser {
   public:
-    CControlManager(CSettingsStore *pSettingsStore, CDasherInterfaceBase *pInterface,
-                    CNodeCreationManager *pNCManager, CMessageDisplay *pMsgs);
+    CControlManager(CSettingsStore* pSettingsStore, CDasherInterfaceBase* pInterface, CNodeCreationManager* pNCManager,
+                    CMessageDisplay* pMsgs);
     ~CControlManager();
 
     /// Create a root control node for grafting under an alphabet node.
     /// Returns nullptr if no root template is configured.
-    CDasherNode *GetRoot(CDasherNode *pContext, int iOffset);
+    CDasherNode* GetRoot(CDasherNode* pContext, int iOffset);
 
     /// Create/update screen labels for all templates.
-    void ChangeScreen(CDasherScreen *pScreen);
+    void ChangeScreen(CDasherScreen* pScreen);
 
     /// Pick a colour index for a template, auto-cycling if unspecified.
-    int getColour(NodeTemplate *pTemplate, CDasherNode *pParent);
+    int getColour(NodeTemplate* pTemplate, CDasherNode* pParent);
 
     /// Rebuild root template's successors from parsed XML.
     void updateActions();
 
     // Accessors
-    CDasherInterfaceBase *GetInterface() { return m_pInterface; }
-    CSettingsStore *GetSettingsStore() { return m_pSettingsStore; }
-    CNodeCreationManager *GetNCManager() { return m_pNCManager; }
-    NodeTemplate *GetRootTemplate() { return m_pRoot; }
-    ActionRegistry *GetActionRegistry() { return &m_registry; }
+    CDasherInterfaceBase* GetInterface() { return m_pInterface; }
+    CSettingsStore* GetSettingsStore() { return m_pSettingsStore; }
+    CNodeCreationManager* GetNCManager() { return m_pNCManager; }
+    NodeTemplate* GetRootTemplate() { return m_pRoot; }
+    ActionRegistry* GetActionRegistry() { return &m_registry; }
 
     // AbstractXMLParser
-    bool Parse(pugi::xml_document &document, const std::string filePath, bool bUser) override;
+    bool Parse(pugi::xml_document& document, const std::string filePath, bool bUser) override;
 
   private:
-    CSettingsStore *m_pSettingsStore;
-    CDasherInterfaceBase *m_pInterface;
-    CNodeCreationManager *m_pNCManager;
-    CDasherScreen *m_pScreen = nullptr;
+    CSettingsStore* m_pSettingsStore;
+    CDasherInterfaceBase* m_pInterface;
+    CNodeCreationManager* m_pNCManager;
+    CDasherScreen* m_pScreen = nullptr;
 
     ActionRegistry m_registry;
-    NodeTemplate *m_pRoot = nullptr;
-    std::list<NodeTemplate *> m_parsedNodes;
+    NodeTemplate* m_pRoot = nullptr;
+    std::list<NodeTemplate*> m_parsedNodes;
 
     /// Register all built-in actions in the registry.
     void registerBuiltinActions();
 
   public:
     /// Map a colour index to a ColorPalette::Color.
-    static const ColorPalette::Color &indexToColor(int iIndex);
+    static const ColorPalette::Color& indexToColor(int iIndex);
 };
 
 } // namespace Dasher

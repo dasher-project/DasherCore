@@ -157,7 +157,7 @@ void CNodeCreationManager::CreateControlBox() {
     unsigned long iControlSpace;
     if (m_pSettingsStore->GetBoolParameter(Dasher::BP_CONTROL_MODE)) {
         m_pControlManager = new Dasher::CControlManager(m_pSettingsStore, m_pInterface, this,
-                                                         static_cast<CMessageDisplay*>(m_pInterface));
+                                                        static_cast<CMessageDisplay*>(m_pInterface));
         // Register frontend-provided custom actions before parsing control.xml
         for (auto& [name, callback] : m_pInterface->GetPendingCustomActions())
             m_pControlManager->GetActionRegistry()->registerCustomAction(name, std::move(callback));

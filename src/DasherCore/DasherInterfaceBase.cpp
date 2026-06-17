@@ -449,7 +449,7 @@ void CDasherInterfaceBase::NewFrame(unsigned long iTime, bool bForceRedraw) {
 }
 
 void CDasherInterfaceBase::ExecuteDelayedActions() {
-    for (auto &action : m_delayedActions)
+    for (auto& action : m_delayedActions)
         action();
     m_delayedActions.clear();
 }

@@ -28,12 +28,12 @@ TEST(action_registry_factory) {
     ActionRegistry registry;
 
     // Register a factory that creates a StopAction
-    registry.registerFactory("stop", [](const auto &) { return new StopAction(); });
+    registry.registerFactory("stop", [](const auto&) { return new StopAction(); });
 
     ASSERT(registry.hasAction("stop"));
 
     std::map<std::string, std::string> attrs;
-    ControlAction *action = registry.create("stop", attrs);
+    ControlAction* action = registry.create("stop", attrs);
     ASSERT(action != nullptr);
     delete action;
 
@@ -50,7 +50,7 @@ TEST(action_registry_custom_action) {
     callbackCount = 0;
 
     registry.registerCustomAction("my_action",
-                                  [](const std::string &name, const std::map<std::string, std::string> &attrs) {
+                                  [](const std::string& name, const std::map<std::string, std::string>& attrs) {
                                       receivedName = name;
                                       receivedAttrs = attrs;
                                       callbackCount++;
@@ -59,7 +59,7 @@ TEST(action_registry_custom_action) {
     ASSERT(registry.hasAction("my_action"));
 
     std::map<std::string, std::string> attrs = {{"key1", "val1"}, {"key2", "val2"}};
-    ControlAction *action = registry.create("my_action", attrs);
+    ControlAction* action = registry.create("my_action", attrs);
     ASSERT(action != nullptr);
 
     // Execute — CustomAction::execute doesn't use the interface pointer
@@ -80,15 +80,13 @@ TEST(action_registry_overwrite) {
 
     int callCount1 = 0, callCount2 = 0;
 
-    registry.registerCustomAction("action_a",
-                                  [&](const auto &, const auto &) { callCount1++; });
+    registry.registerCustomAction("action_a", [&](const auto&, const auto&) { callCount1++; });
 
     // Overwrite with a different callback
-    registry.registerCustomAction("action_a",
-                                  [&](const auto &, const auto &) { callCount2++; });
+    registry.registerCustomAction("action_a", [&](const auto&, const auto&) { callCount2++; });
 
     std::map<std::string, std::string> attrs;
-    ControlAction *action = registry.create("action_a", attrs);
+    ControlAction* action = registry.create("action_a", attrs);
     ASSERT(action != nullptr);
     action->execute(nullptr);
     delete action;
@@ -116,7 +114,7 @@ struct ActionCallbackData {
 
 static ActionCallbackData g_callbackData;
 
-static void action_callback(const char *name, int count, const char **keys, const char **vals, void * /*ud*/) {
+static void action_callback(const char* name, int count, const char** keys, const char** vals, void* /*ud*/) {
     g_callbackData.name = name ? name : "";
     g_callbackData.attrs.clear();
     for (int i = 0; i < count; i++) {
@@ -128,7 +126,7 @@ static void action_callback(const char *name, int count, const char **keys, cons
 TEST(capi_register_action_null_safety) {
     // All these should handle null gracefully without crashing
     static int callbackCalled = 0;
-    auto cb = [](const char *, int, const char **, const char **, void *) { callbackCalled++; };
+    auto cb = [](const char*, int, const char**, const char**, void*) { callbackCalled++; };
 
     dasher_register_action(nullptr, "test_action", cb, nullptr);
     dasher_register_action(nullptr, nullptr, cb, nullptr);
@@ -140,16 +138,16 @@ TEST(capi_register_action_null_safety) {
 }
 
 TEST(capi_register_action_before_realize) {
-    dasher_ctx *ctx = create_isolated_context();
+    dasher_ctx* ctx = create_isolated_context();
     ASSERT(ctx != nullptr);
 
     // Register a custom action before realization
     static int callbackCalled = 0;
     callbackCalled = 0;
 
-    dasher_register_action(ctx, "test_custom_action",
-                           [](const char *, int, const char **, const char **, void *) { callbackCalled++; },
-                           nullptr);
+    dasher_register_action(
+        ctx, "test_custom_action", [](const char*, int, const char**, const char**, void*) { callbackCalled++; },
+        nullptr);
 
     // Now realize
     dasher_set_screen_size(ctx, 800, 600);
@@ -160,9 +158,9 @@ TEST(capi_register_action_before_realize) {
     dasher_set_bool_parameter(ctx, bp_control_mode, 1);
 
     // Run a frame to ensure control box is built
-    int *commands = nullptr;
+    int* commands = nullptr;
     int cmd_count = 0;
-    char **strings = nullptr;
+    char** strings = nullptr;
     int str_count = 0;
     dasher_frame(ctx, 1000, &commands, &cmd_count, &strings, &str_count);
 
@@ -176,7 +174,7 @@ TEST(capi_register_action_before_realize) {
 }
 
 TEST(capi_register_action_after_realize) {
-    dasher_ctx *ctx = create_isolated_context();
+    dasher_ctx* ctx = create_isolated_context();
     ASSERT(ctx != nullptr);
 
     // Realize first
@@ -188,15 +186,15 @@ TEST(capi_register_action_after_realize) {
     dasher_set_bool_parameter(ctx, bp_control_mode, 1);
 
     // Run a frame
-    int *commands = nullptr;
+    int* commands = nullptr;
     int cmd_count = 0;
-    char **strings = nullptr;
+    char** strings = nullptr;
     int str_count = 0;
     dasher_frame(ctx, 1000, &commands, &cmd_count, &strings, &str_count);
 
     // Register custom action after realization — should not crash
-    dasher_register_action(ctx, "late_action",
-                           [](const char *, int, const char **, const char **, void *) {}, nullptr);
+    dasher_register_action(
+        ctx, "late_action", [](const char*, int, const char**, const char**, void*) {}, nullptr);
 
     // Should be able to run more frames without issues
     dasher_frame(ctx, 2000, &commands, &cmd_count, &strings, &str_count);
@@ -206,7 +204,7 @@ TEST(capi_register_action_after_realize) {
 }
 
 TEST(capi_control_mode_enables_successfully) {
-    dasher_ctx *ctx = create_isolated_context();
+    dasher_ctx* ctx = create_isolated_context();
     ASSERT(ctx != nullptr);
     dasher_set_screen_size(ctx, 800, 600);
 
@@ -218,9 +216,9 @@ TEST(capi_control_mode_enables_successfully) {
     ASSERT_EQ(dasher_get_bool_parameter(ctx, bp_control_mode), 1);
 
     // Run a frame — should not crash or hang
-    int *commands = nullptr;
+    int* commands = nullptr;
     int cmd_count = 0;
-    char **strings = nullptr;
+    char** strings = nullptr;
     int str_count = 0;
     dasher_frame(ctx, 1000, &commands, &cmd_count, &strings, &str_count);
     ASSERT(cmd_count > 0);
@@ -230,7 +228,7 @@ TEST(capi_control_mode_enables_successfully) {
 }
 
 TEST(capi_action_callback_receives_attrs) {
-    dasher_ctx *ctx = create_isolated_context();
+    dasher_ctx* ctx = create_isolated_context();
     ASSERT(ctx != nullptr);
 
     g_callbackData.reset();
@@ -244,9 +242,9 @@ TEST(capi_action_callback_receives_attrs) {
     int bp_control_mode = dasher_find_parameter_key("BP_CONTROL_MODE");
     dasher_set_bool_parameter(ctx, bp_control_mode, 1);
 
-    int *commands = nullptr;
+    int* commands = nullptr;
     int cmd_count = 0;
-    char **strings = nullptr;
+    char** strings = nullptr;
     int str_count = 0;
     dasher_frame(ctx, 1000, &commands, &cmd_count, &strings, &str_count);
 
@@ -259,7 +257,7 @@ TEST(capi_action_callback_receives_attrs) {
     printf("  capi_action_callback_receives_attrs passed\n");
 }
 
-int main(int argc, char *argv[]) {
+int main(int argc, char* argv[]) {
     printf("Running control action system tests...\n\n");
 
     // ActionRegistry unit tests

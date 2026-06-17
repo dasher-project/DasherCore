@@ -643,8 +643,7 @@ void CAlphabetManager::IterateChildGroups(CAlphNode* pParent, const SGroupInfo* 
     }
 
     // Add control node as extra sibling at base group level
-    if (pParentGroup == m_pBaseGroup)
-        m_pNCManager->AddExtras(pParent);
+    if (pParentGroup == m_pBaseGroup) m_pNCManager->AddExtras(pParent);
 
     pParent->SetFlag(CDasherNode::NF_ALLCHILDREN, true);
 }

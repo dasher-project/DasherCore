@@ -287,8 +287,7 @@ void CAlphIO::ReadCharAttributes(pugi::xml_node xml_node, CAlphInfo::character& 
             const std::string distance = potentialActions.attribute("distance").as_string();
             const std::pair<bool, EditDistance> d = parseDistance(distance);
             DoActions.push_back(new MoveAction(d.first, d.second));
-        } else if (std::strcmp(actionName, "fixedTTSAction") == 0 &&
-                   !potentialActions.attribute("text").empty()) {
+        } else if (std::strcmp(actionName, "fixedTTSAction") == 0 && !potentialActions.attribute("text").empty()) {
             DoActions.push_back(new FixedSpeakAction(potentialActions.attribute("text").as_string()));
         } else if (std::strcmp(actionName, "contextTTSAction") == 0) {
             if (potentialActions.attribute("context").empty()) {
