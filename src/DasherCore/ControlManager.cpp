@@ -283,8 +283,8 @@ void CControlManager::registerBuiltinActions() {
     m_registry.registerFactory("speak_cancel", [](const auto&) { return new SpeakCancelAction(); });
 
     // Move/delete with dist + forward attributes
-    auto distFactory = [](auto createDist, const char* tagName) -> ActionFactory {
-        return [createDist, tagName](const std::map<std::string, std::string>& attrs) -> ControlAction* {
+    auto distFactory = [](auto createDist) -> ActionFactory {
+        return [createDist](const std::map<std::string, std::string>& attrs) -> ControlAction* {
             auto it = attrs.find("dist");
             if (it == attrs.end()) {
                 it = attrs.find("distance");
@@ -333,11 +333,10 @@ void CControlManager::registerBuiltinActions() {
     };
 
     m_registry.registerFactory(
-        "move", distFactory([](bool f, EditDistance d) -> ControlAction* { return new MoveAction(f, d); }, "move"));
+        "move", distFactory([](bool f, EditDistance d) -> ControlAction* { return new MoveAction(f, d); }));
 
     m_registry.registerFactory(
-        "delete",
-        distFactory([](bool f, EditDistance d) -> ControlAction* { return new DeleteAction(f, d); }, "delete"));
+        "delete", distFactory([](bool f, EditDistance d) -> ControlAction* { return new DeleteAction(f, d); }));
 
     // Speak/copy with "what" attribute
     auto textActionFactory = [](char mode) -> ActionFactory {

@@ -249,8 +249,8 @@ class KeyboardAction : public ControlAction {
     void execute(CDasherInterfaceBase* intf) override;
 
   private:
-    PressType m_type;
-    std::vector<std::vector<unsigned short>> m_keycodes;
+    [[maybe_unused]] PressType m_type;
+    [[maybe_unused]] std::vector<std::vector<unsigned short>> m_keycodes;
 };
 
 /// Output to a socket.
@@ -262,9 +262,9 @@ class SocketOutputAction : public ControlAction {
     void execute(CDasherInterfaceBase* intf) override;
 
   private:
-    std::string m_socketName;
-    std::string m_action;
-    bool m_addNewLine;
+    [[maybe_unused]] std::string m_socketName;
+    [[maybe_unused]] std::string m_action;
+    [[maybe_unused]] bool m_addNewLine;
 };
 
 /// ATSPI accessibility action.
