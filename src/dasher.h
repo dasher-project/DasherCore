@@ -371,6 +371,29 @@ DASHER_API void dasher_set_string_override(dasher_ctx* ctx, const char* key, con
 // Returned pointer is valid until the next API call.
 DASHER_API const char* dasher_get_localized_string(dasher_ctx* ctx, const char* key);
 
+// ── Custom actions ─────────────────────────────────────────────────────────
+//
+// Register a custom action type that can be referenced from control.xml.
+// When a control node containing <name key="value" .../> is entered, the
+// callback fires with the action name and all XML attributes as parallel
+// key/value arrays.
+//
+// Must be called BEFORE dasher_set_screen_size() for the action to be
+// available during initial control.xml parsing. If called after, the action
+// will be registered but existing parsed nodes won't include it until the
+// control box is rebuilt (e.g. by toggling BP_CONTROL_MODE).
+//
+// Example control.xml usage:
+//   <node label="API">
+//     <my_action endpoint="/api/save" method="POST"/>
+//   </node>
+
+typedef void (*dasher_action_callback)(const char* name, int attr_count, const char** attr_keys,
+                                       const char** attr_values, void* user_data);
+
+DASHER_API void dasher_register_action(dasher_ctx* ctx, const char* name, dasher_action_callback callback,
+                                       void* user_data);
+
 // ── Test / diagnostic hooks ────────────────────────────────────────────────
 //
 // These functions expose internal engine state for testing and golden-output

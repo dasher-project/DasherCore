@@ -60,7 +60,6 @@ static std::string alphabetIdToFilename(const std::string& alphId) {
 
 // Declare our global file logging object
 
-#include "ActionManager.h"
 #include "FileUtils.h"
 #include "SmoothingFilter.h"
 #include "DasherCore/FileLogger.h"
@@ -74,71 +73,21 @@ const int g_iLogOptions = logTimeStamp | logDateStamp;
 
 using namespace Dasher;
 
+CControlManager* CDasherInterfaceBase::GetControlManager() {
+    return m_pNCManager ? m_pNCManager->GetControlManager() : nullptr;
+}
+
 CDasherInterfaceBase::CDasherInterfaceBase(CSettingsStore* pSettingsStore)
     : m_pDasherModel(std::make_unique<CDasherModel>()), m_pFramerate(std::make_unique<CFrameRate>(pSettingsStore)),
-      m_pSettingsStore(pSettingsStore), m_pModuleManager(std::make_unique<CModuleManager>()),
-      m_pActionManager(std::make_unique<CActionManager>()) {
+      m_pSettingsStore(pSettingsStore), m_pModuleManager(std::make_unique<CModuleManager>()) {
 
     m_pSettingsStore->OnParameterChanged.Subscribe(this, [this](Parameter p) { HandleParameterChange(p); });
 
     // Global logging object we can use from anywhere
-    // Skip in low-memory mode (keyboard extensions) to avoid sandbox write violations
+    // Skip in low-memory mode (keyboard extension) to avoid sandbox write violations
     if (!m_bLowMemoryMode) {
         m_pGlobalApplicationLog = std::make_unique<CFileLogger>("dasher.log", g_iLogLevel, g_iLogOptions);
     }
-
-    // Register for all events that we are "responsible" for
-    GetActionManager()->OnCharEntered.Subscribe(
-        this, [this](CSymbolNode* Trigger, TextCharAction*) { editOutput(Trigger->outputText(), Trigger); });
-    GetActionManager()->OnCharRemoved.Subscribe(
-        this, [this](CSymbolNode* Trigger, TextCharUndoAction*) { editDelete(Trigger->outputText(), Trigger); });
-    GetActionManager()->OnContextSpeak.Subscribe(
-        this, [this](CSymbolNode*, ContextSpeechAction* Action, CDasherInterfaceBase* Intf) {
-            // Should be moved into own module/class
-            switch (Action->context) {
-            case TextAction::Repeat:
-                Speak(Action->strLast, false);
-                break;
-            case TextAction::NewText:
-                Speak(Action->getNewContext(Intf), false);
-                break;
-            case TextAction::Distance:
-                Speak(Action->getBasedOnDistance(Intf, Action->m_dist), false);
-            }
-        });
-    GetActionManager()->OnSpeakCancel.Subscribe(this, [this](CSymbolNode*, SpeakCancelAction*) { Speak("", true); });
-    GetActionManager()->OnDasherPause.Subscribe(
-        this, [this](CSymbolNode*, PauseDasherAction*) { GetActiveInputMethod()->pause(); });
-    GetActionManager()->OnDasherStop.Subscribe(this, [this](CSymbolNode*, StopDasherAction*) {
-        Done();
-        GetActiveInputMethod()->pause();
-    });
-    GetActionManager()->OnCopy.Subscribe(this, [this](CSymbolNode*, CopyAction* Action, CDasherInterfaceBase* Intf) {
-        // Should be moved into own module/class
-        switch (Action->context) {
-        case TextAction::Repeat:
-            CopyToClipboard(Action->strLast);
-            break;
-        case TextAction::NewText:
-            CopyToClipboard(Action->getNewContext(Intf));
-            break;
-        case TextAction::Distance:
-            CopyToClipboard(Action->getBasedOnDistance(Intf, Action->m_dist));
-            break;
-        }
-    });
-    GetActionManager()->OnDelete.Subscribe(
-        this, [this](CSymbolNode*, const DeleteAction* Action) { ctrlDelete(Action->m_bForwards, Action->m_dist); });
-    GetActionManager()->OnMove.Subscribe(
-        this, [this](CSymbolNode*, const MoveAction* Action) { ctrlMove(Action->m_bForwards, Action->m_dist); });
-    GetActionManager()->OnSettingChange.Subscribe(this, [this](CSymbolNode*, const ChangeSettingsAction* Action) {
-        if (std::holds_alternative<bool>(Action->newValue))
-            m_pSettingsStore->SetBoolParameter(Action->parameter, std::get<bool>(Action->newValue));
-        if (std::holds_alternative<long>(Action->newValue))
-            m_pSettingsStore->SetLongParameter(Action->parameter, std::get<long>(Action->newValue));
-        if (std::holds_alternative<std::string>(Action->newValue))
-            m_pSettingsStore->SetStringParameter(Action->parameter, std::get<std::string>(Action->newValue));
-    });
 
     OnEditEvent.Subscribe(this, [this](CEditEvent::EditEventType type, const std::string& strText, CDasherNode*) {
         if (this->GetGameModule() || !m_pSettingsStore->GetBoolParameter(BP_SPEAK_WORDS) || !this->SupportsSpeech())
@@ -226,7 +175,6 @@ CDasherInterfaceBase::~CDasherInterfaceBase() {
     // Deregistering here allows for reusing a settings instance
     m_pSettingsStore->OnParameterChanged.Unsubscribe(this);
     m_pSettingsStore->OnPreParameterChange.Unsubscribe(this);
-    GetActionManager()->UnsubscribeAll(this);
     OnEditEvent.Unsubscribe(this); // Word Speak Event
 
     // //WriteTrainFileFull();???
@@ -293,6 +241,14 @@ void CDasherInterfaceBase::HandleParameterChange(Parameter parameter) {
     case LP_NODE_BUDGET:
         m_defaultPolicy.reset(
             new AmortizedPolicy(m_pDasherModel.get(), m_pSettingsStore->GetLongParameter(LP_NODE_BUDGET)));
+        break;
+    case BP_CONTROL_MODE:
+        // Rebuild control box first (deletes old CControlManager/templates),
+        // then rebuild node tree — order is critical to avoid dangling
+        // template pointers in live CContNodes during AddExtras().
+        m_pNCManager->CreateControlBox();
+        SetOffset(m_pDasherModel->GetOffset(), true);
+        ScheduleRedraw();
         break;
     default:
         break;
@@ -491,7 +447,13 @@ void CDasherInterfaceBase::NewFrame(unsigned long iTime, bool bForceRedraw) {
 
     bReentered = false;
 
-    GetActionManager()->ExecuteDelayedActions();
+    ExecuteDelayedActions();
+}
+
+void CDasherInterfaceBase::ExecuteDelayedActions() {
+    for (auto& action : m_delayedActions)
+        action();
+    m_delayedActions.clear();
 }
 
 void CDasherInterfaceBase::onUnpause(unsigned long lTime) {

@@ -33,7 +33,7 @@
 namespace Dasher {
 class CAlphNode;
 class CAlphabetManager;
-class Action;
+class ControlAction;
 } // namespace Dasher
 
 class CNodeCreationManager;

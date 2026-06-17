@@ -20,6 +20,8 @@
 
 #include "AlphInfo.h"
 
+#include "DasherCore/ControlManager.h"
+
 using namespace Dasher;
 
 const std::string CAlphInfo::s_emptyStr;

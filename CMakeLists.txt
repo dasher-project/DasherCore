@@ -242,5 +242,17 @@ if(BUILD_CAPI)
         dasher_add_test(dasher_deterministic_tests test_deterministic.cpp)
         dasher_add_test(dasher_training_tests test_training.cpp)
         dasher_add_test(dasher_node_tree_tests test_node_tree.cpp)
+
+        # Control action system tests — needs internal DasherCore classes (ActionRegistry)
+        # AND C API functions, so we compile CAPI.cpp directly and link DasherCore
+        add_executable(dasher_control_action_tests
+            ${CMAKE_CURRENT_LIST_DIR}/tests/test_control_actions.cpp
+            ${CMAKE_CURRENT_LIST_DIR}/src/CAPI.cpp)
+        target_include_directories(dasher_control_action_tests PRIVATE
+            ${CMAKE_CURRENT_LIST_DIR}/src/
+            ${CMAKE_CURRENT_LIST_DIR}/tests/)
+        target_link_libraries(dasher_control_action_tests PRIVATE DasherCore pugixml)
+        target_compile_definitions(dasher_control_action_tests PRIVATE TEST_DATA_DIR="${TEST_DATA_DIR}")
+        add_test(NAME dasher_control_action_tests COMMAND dasher_control_action_tests)
     endif()
 endif()

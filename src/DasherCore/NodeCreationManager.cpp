@@ -2,6 +2,7 @@
 #include "DasherInterfaceBase.h"
 #include "NodeCreationManager.h"
 
+#include "ControlManager.h"
 #include "FileUtils.h"
 #include "MandarinAlphMgr.h"
 #include "RoutingAlphMgr.h"
@@ -119,11 +120,14 @@ CNodeCreationManager::CNodeCreationManager(CSettingsStore* pSettingsStore, CDash
     }
 
     HandleParameterChange(LP_ORIENTATION);
+
+    CreateControlBox();
 }
 
 CNodeCreationManager::~CNodeCreationManager() {
     delete m_pAlphabetManager;
     delete m_pTrainer;
+    delete m_pControlManager;
 
     m_pSettingsStore->OnParameterChanged.Unsubscribe(this);
 }
@@ -132,9 +136,46 @@ void CNodeCreationManager::ChangeScreen(CDasherScreen* pScreen) {
     if (m_pScreen == pScreen) return;
     m_pScreen = pScreen;
     m_pAlphabetManager->MakeLabels(pScreen);
+    if (m_pControlManager) m_pControlManager->ChangeScreen(pScreen);
 }
 
 void CNodeCreationManager::ImportTrainingText(const std::string& strPath) {
     ProgressNotifier pn(m_pInterface, m_pTrainer);
     pn.ParseFile(strPath, true);
+}
+
+void CNodeCreationManager::HandleParameterChange(Dasher::Parameter parameter) {
+    // BP_CONTROL_MODE is handled by CDasherInterfaceBase calling
+    // CreateControlBox() explicitly before SetOffset(), to ensure the
+    // control manager state is updated before the node tree is rebuilt.
+}
+
+void CNodeCreationManager::CreateControlBox() {
+    delete m_pControlManager;
+    m_pControlManager = nullptr;
+
+    unsigned long iControlSpace;
+    if (m_pSettingsStore->GetBoolParameter(Dasher::BP_CONTROL_MODE)) {
+        m_pControlManager = new Dasher::CControlManager(m_pSettingsStore, m_pInterface, this,
+                                                        static_cast<CMessageDisplay*>(m_pInterface));
+        // Register frontend-provided custom actions before parsing control.xml
+        for (auto& [name, callback] : m_pInterface->GetPendingCustomActions())
+            m_pControlManager->GetActionRegistry()->registerCustomAction(name, std::move(callback));
+        Dasher::FileUtils::ScanFiles(m_pControlManager, "control.xml");
+        if (m_pScreen) m_pControlManager->ChangeScreen(m_pScreen);
+        iControlSpace = Dasher::CDasherModel::NORMALIZATION / 20;
+    } else {
+        iControlSpace = 0;
+    }
+    m_iAlphNorm = Dasher::CDasherModel::NORMALIZATION - iControlSpace;
+}
+
+void CNodeCreationManager::AddExtras(Dasher::CDasherNode* pParent) {
+    if (m_pControlManager) {
+        Dasher::CDasherNode* ctl = m_pControlManager->GetRoot(pParent, pParent->offset());
+        if (ctl) {
+            unsigned int iLbnd = pParent->GetChildren().back()->Hbnd();
+            ctl->Reparent(pParent, iLbnd, Dasher::CDasherModel::NORMALIZATION);
+        }
+    }
 }

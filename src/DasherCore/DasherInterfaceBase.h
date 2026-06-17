@@ -38,7 +38,10 @@
 #include "ModuleManager.h"
 #include "FrameRate.h"
 #include "DasherModel.h"
+#include "ControlManager.h"
+#include <functional>
 #include <memory>
+#include <vector>
 
 namespace Dasher {
 class CDasherScreen;
@@ -318,9 +321,26 @@ class Dasher::CDasherInterfaceBase : public CMessageDisplay, private NoClones {
     CInputFilter* GetActiveInputMethod() { return m_pInputFilter; }
     const CAlphInfo* GetActiveAlphabet();
     CModuleManager* GetModuleManager() { return m_pModuleManager.get(); }
-    CActionManager* GetActionManager() { return m_pActionManager.get(); }
     CDasherModel* GetModel() { return m_pDasherModel.get(); }
     CDasherView* GetView() { return m_pDasherView.get(); }
+
+    /// Returns the settings store (for actions that change settings).
+    CSettingsStore* GetSettingsStore() { return m_pSettingsStore; }
+
+    /// Returns the control manager (nullptr if control mode is off or not yet realized).
+    Dasher::CControlManager* GetControlManager();
+
+    /// Returns custom action registrations for the C API.
+    /// Called by CNodeCreationManager before control.xml parsing.
+    /// Override in subclasses to provide frontend-registered custom actions.
+    virtual std::vector<std::pair<std::string, Dasher::CustomActionCallback>> GetPendingCustomActions() { return {}; }
+
+    /// Queue a deferred action to execute at end of the current frame.
+    /// Used by ChangeSettingAction to avoid unsafe parameter changes mid-render.
+    void DelayAction(std::function<void()> action) { m_delayedActions.push_back(std::move(action)); }
+
+    /// Execute and clear all queued deferred actions. Called from NewFrame().
+    void ExecuteDelayedActions();
 
     void StartShutdown();
 
@@ -496,7 +516,6 @@ class Dasher::CDasherInterfaceBase : public CMessageDisplay, private NoClones {
     CDasherInput* m_pInput = nullptr;
     CInputFilter* m_pInputFilter = nullptr;
     std::unique_ptr<CModuleManager> m_pModuleManager;
-    std::unique_ptr<CActionManager> m_pActionManager;
     std::unique_ptr<CAlphIO> m_AlphIO;
     std::unique_ptr<CColorIO> m_ColorIO;
     std::unique_ptr<CNodeCreationManager> m_pNCManager;
@@ -523,6 +542,9 @@ class Dasher::CDasherInterfaceBase : public CMessageDisplay, private NoClones {
 
     /// Low-memory mode flag: load only selected alphabet + minimal modules.
     bool m_bLowMemoryMode = false;
+
+    /// Queue of deferred actions (for ChangeSettingAction etc.)
+    std::vector<std::function<void()>> m_delayedActions;
 
     /// @}
 };

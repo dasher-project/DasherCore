@@ -26,9 +26,8 @@
 #include <string>
 #include <vector>
 
-#include "DasherCore/Actions.h"
-
 namespace Dasher {
+class ControlAction;
 class CAlphInfo;
 class CAlphIO;
 } // namespace Dasher
@@ -79,8 +78,8 @@ class Dasher::CAlphInfo : public SGroupInfo {
         return s > 0 && s <= (symbol)m_vCharacters.size() && m_vCharacters[s - 1].Text == "\n";
     }
 
-    const std::vector<Action*>& GetCharDoActions(symbol s) const { return m_vCharacterDoActions[s - 1]; }
-    const std::vector<Action*>& GetCharUndoActions(symbol s) const { return m_vCharacterUndoActions[s - 1]; }
+    const std::vector<ControlAction*>& GetCharDoActions(symbol s) const { return m_vCharacterDoActions[s - 1]; }
+    const std::vector<ControlAction*>& GetCharUndoActions(symbol s) const { return m_vCharacterUndoActions[s - 1]; }
 
     // symbol GetStartConversionSymbol() const;
     // symbol GetEndConversionSymbol() const;
@@ -160,8 +159,8 @@ class Dasher::CAlphInfo : public SGroupInfo {
         float speedFactor = -1; // allows for slowdown in this box
     };
     std::vector<character> m_vCharacters;
-    std::vector<std::vector<Action*>> m_vCharacterDoActions = {};
-    std::vector<std::vector<Action*>> m_vCharacterUndoActions = {};
+    std::vector<std::vector<ControlAction*>> m_vCharacterDoActions = {};
+    std::vector<std::vector<ControlAction*>> m_vCharacterUndoActions = {};
 
     void copyCharacterFrom(const CAlphInfo* other, int idx);
 };

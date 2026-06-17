@@ -266,6 +266,31 @@
       "group": "Input"
     },
     {
+      "key": "BP_CONTROL_MODE",
+      "storageName": "ControlMode",
+      "type": "bool",
+      "default": false,
+      "label": "Control Mode",
+      "description": "Show a control node in the Dasher canvas providing editing commands (delete, move, speak, etc.).",
+      "uiType": "Switch",
+      "tier": "common",
+      "subgroup": "Control",
+      "group": "Input"
+    },
+    {
+      "key": "BP_SLOW_CONTROL_BOX",
+      "storageName": "SlowControlBox",
+      "type": "bool",
+      "default": true,
+      "label": "Slow in Control Nodes",
+      "description": "Reduces speed by half when navigating inside control nodes, making it harder to trigger actions by mistake.",
+      "uiType": "Switch",
+      "tier": "advanced",
+      "subgroup": "Control",
+      "dependsOn": "BP_CONTROL_MODE",
+      "group": "Input"
+    },
+    {
       "key": "BP_COPY_ALL_ON_STOP",
       "storageName": "CopyOnStop",
       "type": "bool",
