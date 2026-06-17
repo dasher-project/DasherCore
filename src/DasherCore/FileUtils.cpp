@@ -26,9 +26,10 @@ int Dasher::FileUtils::GetFileSize(const std::string& strFileName) {
 }
 
 void Dasher::FileUtils::ScanFiles(AbstractParser* parser, const std::string& strPattern) {
-    // Full real path given -> parse only that file
+    // Absolute path to a real file -> parse only that file
     std::error_code error_code; // just used for not throwing errors
-    if (std::filesystem::exists(strPattern, error_code) && std::filesystem::is_regular_file(strPattern, error_code)) {
+    std::filesystem::path p(strPattern);
+    if (p.is_absolute() && std::filesystem::exists(p, error_code) && std::filesystem::is_regular_file(p, error_code)) {
         parser->ParseFile(strPattern, IsFileWriteable(strPattern));
         return;
     }
@@ -58,7 +59,11 @@ void Dasher::FileUtils::ScanFiles(AbstractParser* parser, const std::string& str
 }
 
 bool Dasher::FileUtils::WriteUserDataFile(const std::string& filename, const std::string& strNewText, bool append) {
-    std::ofstream File(filename, (append) ? std::ios_base::app : std::ios_base::out);
+    std::filesystem::path fullPath(filename);
+    if (fullPath.is_relative() && !s_dataDirectory.empty()) {
+        fullPath = std::filesystem::path(s_dataDirectory) / filename;
+    }
+    std::ofstream File(fullPath, (append) ? std::ios_base::app : std::ios_base::out);
 
     if (File.is_open()) {
         File << strNewText;
