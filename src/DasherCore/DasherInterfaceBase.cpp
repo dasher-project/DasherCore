@@ -655,6 +655,8 @@ void CDasherInterfaceBase::CreateInputFilter() {
 
     if (m_pInputFilter == nullptr) m_pInputFilter = m_pModuleManager->GetDefaultInputMethod();
 
+    if (m_pInputFilter == nullptr) return; // Modules not yet registered
+
     m_pInputFilter->Activate();
 }
 
