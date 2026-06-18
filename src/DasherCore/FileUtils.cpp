@@ -17,8 +17,16 @@ void FileUtils::SetDataDirectory(const std::string& dataDir) {
 } // namespace Dasher
 
 static bool IsFileWriteable(const std::filesystem::path& file_path) {
-    std::fstream file(file_path.string(), std::ios_base::app | std::fstream::out);
-    return file.is_open();
+    // Check writability via permission bits without opening the file.
+    // Opening with ios_base::app|out (the previous implementation) attempted
+    // to create/append the file just to test writability, which generated
+    // sandbox deny storms against read-only bundled data on iOS keyboard
+    // extensions and could accidentally create empty files on other platforms.
+    std::error_code ec;
+    const auto status = std::filesystem::status(file_path, ec);
+    if (ec) return false;
+    using P = std::filesystem::perms;
+    return (status.permissions() & (P::owner_write | P::group_write | P::others_write)) != P::none;
 }
 
 int Dasher::FileUtils::GetFileSize(const std::string& strFileName) {
