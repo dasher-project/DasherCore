@@ -438,6 +438,24 @@ void        dasher_set_palette(dasher_ctx* ctx, const char* palette_name);
 
 `dasher_get_palette_preview_colors` writes 4 ARGB preview colours into `out_colors` (must have room for 4 ints). Returns 0 on success.
 
+### Appearance / dark mode (RFC 0007)
+
+Palettes may declare an `appearance` (`light`/`dark`) and a `companion` (their opposite-appearance partner) in their XML. Use these to follow the OS light/dark preference without hardcoding name pairs per frontend.
+
+```c
+int         dasher_get_palette_appearance(dasher_ctx* ctx, int index);   // 0=unspecified, 1=light, 2=dark, -1=oor
+const char* dasher_find_companion_palette(dasher_ctx* ctx, const char* palette_name); // NULL if none
+int         dasher_set_appearance(dasher_ctx* ctx, int appearance);      // 1=light, 2=dark; 0 on success, -1 if no companion
+```
+
+`dasher_set_appearance` switches the current palette to its companion that matches the requested appearance; if the current palette already matches it is a no-op. If no companion is available it returns `-1` and leaves the palette unchanged (the user's explicit choice is respected). Companion lookup is bidirectional, so legacy palettes without metadata are still paired with a dark companion that names them.
+
+Typical frontend usage on an OS appearance change:
+
+```c
+dasher_set_appearance(ctx, is_dark ? 2 : 1);
+```
+
 ## Game Mode
 
 ```c

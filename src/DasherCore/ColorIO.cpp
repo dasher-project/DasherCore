@@ -174,8 +174,19 @@ bool CColorIO::Parse(pugi::xml_document& document, const std::string, bool bUser
     std::string parentName = outer.attribute("parentName").as_string(HardcodedDefaultPalette->PaletteName.c_str());
     std::string colorSchemeName = outer.attribute("name").as_string(); // definitely exists, we checked above
 
+    // RFC 0007: appearance classification + companion link (not colour values).
+    std::string appearanceStr = outer.attribute("appearance").as_string("");
+    std::string companionName = outer.attribute("companion").as_string("");
+    ColorPalette::Appearance appearance = ColorPalette::Appearance::Unspecified;
+    if (appearanceStr == "light")
+        appearance = ColorPalette::Appearance::Light;
+    else if (appearanceStr == "dark")
+        appearance = ColorPalette::Appearance::Dark;
+
     for (pugi::xml_attribute attribute : outer.attributes()) {
-        if (strcmp(attribute.name(), "parentName") == 0 || strcmp(attribute.name(), "name") == 0) continue;
+        if (strcmp(attribute.name(), "parentName") == 0 || strcmp(attribute.name(), "name") == 0 ||
+            strcmp(attribute.name(), "appearance") == 0 || strcmp(attribute.name(), "companion") == 0)
+            continue;
 
         if (strcmp(attribute.name(), "uiPreviewColors") == 0) {
             UIPreviewColors = GetAttributeAsColorList(attribute);
@@ -231,8 +242,8 @@ bool CColorIO::Parse(pugi::xml_document& document, const std::string, bool bUser
     //"HardcodedDefault" is the parent for now, later on the parents get relinked by looking up the parentNames
     auto it2 = KnownPalettes.find(colorSchemeName);
     if (it2 != KnownPalettes.end()) delete it2->second;
-    KnownPalettes[colorSchemeName] =
-        new ColorPalette(HardcodedDefaultPalette, parentName, NamedColors, GroupColors, uiColorsArray, colorSchemeName);
+    KnownPalettes[colorSchemeName] = new ColorPalette(HardcodedDefaultPalette, parentName, NamedColors, GroupColors,
+                                                      uiColorsArray, colorSchemeName, appearance, companionName);
 
     return true;
 }

@@ -221,6 +221,33 @@ DASHER_API int dasher_get_palette_preview_colors(dasher_ctx* ctx, int index, int
 // Set the active colour palette by name.
 DASHER_API void dasher_set_palette(dasher_ctx* ctx, const char* palette_name);
 
+// ── Appearance / dark mode (RFC 0007) ─────────────────────────────────────
+//
+// Palettes may declare an `appearance` ("light" or "dark") and a `companion`
+// (the name of their opposite-appearance partner) in their XML. Frontends can
+// use these to follow the OS light/dark preference by switching to the current
+// palette's companion, without each frontend hardcoding name pairs.
+//
+// Legacy palettes without metadata report appearance 0 (unspecified) but are
+// still paired via a bidirectional companion lookup: if palette A declares
+// companion="B", then B's effective companion is A.
+
+// Get the appearance classification of a palette.
+// Returns: 0 = unspecified, 1 = light, 2 = dark, -1 = index out of range.
+DASHER_API int dasher_get_palette_appearance(dasher_ctx* ctx, int index);
+
+// Find the companion (opposite-appearance) palette for the given palette name.
+// Lookup is bidirectional (see above). Returns the companion name (valid until
+// the next API call), or NULL if the palette has no companion.
+DASHER_API const char* dasher_find_companion_palette(dasher_ctx* ctx, const char* palette_name);
+
+// Switch to the companion of the current palette that matches the requested
+// appearance. appearance: 1 = light, 2 = dark.
+// If the current palette already matches, this is a no-op and returns 0.
+// Returns 0 on success, -1 if no suitable companion is available (in which case
+// the current palette is left unchanged — the user's explicit choice is respected).
+DASHER_API int dasher_set_appearance(dasher_ctx* ctx, int appearance);
+
 // ── Alphabets ─────────────────────────────────────────────────────────────
 
 // Get the number of available alphabets.

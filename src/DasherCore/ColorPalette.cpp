@@ -60,9 +60,11 @@ ColorPalette::Color ColorPalette::Color::lerp(const Color& ColorA, const Color& 
 ColorPalette::ColorPalette(ColorPalette* ParentPalette, std::string ParentPaletteName,
                            const std::unordered_map<NamedColor::knownColorName, Color>& NamedColors,
                            const std::unordered_map<std::string, GroupColorInfo>& GroupColors,
-                           std::array<Color, 4> UIPreviewColors, std::string PaletteName)
+                           std::array<Color, 4> UIPreviewColors, std::string PaletteName, Appearance appearance,
+                           std::string companionName)
     : ParentPalette(ParentPalette), ParentPaletteName(std::move(ParentPaletteName)), PaletteName(PaletteName),
-      NamedColors(NamedColors), GroupColors(GroupColors), UIPreviewColors(UIPreviewColors) {}
+      AppearanceValue(appearance), CompanionName(std::move(companionName)), NamedColors(NamedColors),
+      GroupColors(GroupColors), UIPreviewColors(UIPreviewColors) {}
 
 const ColorPalette::Color& ColorPalette::GetAltColor(const std::vector<Color>& NormalColors,
                                                      const std::vector<Color>& AltColors, bool useAlt,
@@ -88,6 +90,20 @@ const ColorPalette::Color& ColorPalette::GetNamedColor(const NamedColor::knownCo
 }
 
 const std::array<ColorPalette::Color, 4>& ColorPalette::GetUIPreviewColors() const {
+    // A palette parsed without explicit preview colours and with no suitable group
+    // is assigned the error sentinel (black/magenta). For inheritance-based palettes
+    // (e.g. dark companions with no groups of their own), fall back to the parent's
+    // preview so the picker shows the parent's representative colours. (RFC 0007)
+    static const std::array<Color, 4> sentinel = {Color(0, 0, 0, 255), Color(255, 0, 255, 255), Color(0, 0, 0, 255),
+                                                  Color(255, 0, 255, 255)};
+    bool isSentinel = true;
+    for (int i = 0; i < 4; i++) {
+        if (!(UIPreviewColors[i] == sentinel[i])) {
+            isSentinel = false;
+            break;
+        }
+    }
+    if (isSentinel && ParentPalette) return ParentPalette->GetUIPreviewColors();
     return UIPreviewColors;
 }
 
