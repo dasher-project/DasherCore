@@ -54,6 +54,7 @@ CGameModule::~CGameModule() {
 
 void CGameModule::HandleEditEvent(CEditEvent::EditEventType type, const std::string& strText, CDasherNode* node) {
     if (!m_pAlph) return; // Game Mode currently not running
+    if (!node) return;    // TextOutputAction passes nullptr as the cause node
     const int iOffset(node->offset());
     switch (type) {
     // Added a new character (Stepped one node forward)
