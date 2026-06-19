@@ -410,6 +410,9 @@ struct dasher_ctx {
             return static_cast<unsigned int>(m_owner->cursorPos);
         }
         void editOutput(const std::string& strText, Dasher::CDasherNode* pCause) override {
+            if (m_owner->cursorPos > m_owner->editBuffer.size()) {
+                m_owner->cursorPos = m_owner->editBuffer.size();
+            }
             m_owner->editBuffer.insert(m_owner->cursorPos, strText);
             m_owner->cursorPos += strText.size();
             if (m_owner->outputCb && !strText.empty()) m_owner->outputCb(0, strText.c_str(), m_owner->outputCbUserData);
@@ -643,11 +646,13 @@ DASHER_API const char* dasher_get_output_text(dasher_ctx* ctx) {
 DASHER_API void dasher_reset_output_text(dasher_ctx* ctx) {
     if (!ctx) return;
     ctx->editBuffer.clear();
+    ctx->cursorPos = 0;
 }
 
 DASHER_API void dasher_reset(dasher_ctx* ctx) {
     if (!ctx || !ctx->intf) return;
     ctx->editBuffer.clear();
+    ctx->cursorPos = 0;
     ctx->intf->SetOffset(0, true);
 }
 
@@ -660,6 +665,7 @@ DASHER_API const char* dasher_get_alphabet_id(dasher_ctx* ctx) {
 DASHER_API void dasher_set_alphabet_id(dasher_ctx* ctx, const char* alphabet_id) {
     if (!ctx || !ctx->intf || !alphabet_id) return;
     ctx->editBuffer.clear();
+    ctx->cursorPos = 0;
     if (!ctx->realized) {
         ctx->pendingAlphabet = alphabet_id;
         return;
