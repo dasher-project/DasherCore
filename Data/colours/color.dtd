@@ -30,6 +30,8 @@
     gameGuideColor CDATA #IMPLIED
     oneButtonDynamicOuterGuidesColor CDATA #IMPLIED
     conversionNodeColor CDATA #IMPLIED
+    appearance (light|dark) #IMPLIED  <!-- Light/dark classification for system appearance matching (see RFC 0007) -->
+    companion CDATA #IMPLIED  <!-- Name of the opposite-appearance partner palette -->
 >
 
 <!-- Group Color Definition -->

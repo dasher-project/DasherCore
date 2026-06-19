@@ -44,6 +44,11 @@ static const knownColorName gameGuide = "gameGuideColor";
 
 class ColorPalette {
   public:
+    // Visual classification of a palette for system-appearance matching (RFC 0007).
+    // Unspecified palettes (e.g. legacy-format files without metadata) are still
+    // pairable via a bidirectional companion lookup.
+    enum class Appearance : int { Unspecified = 0, Light = 1, Dark = 2 };
+
     typedef struct Color {
         int Red = 0;
         int Green = 0;
@@ -96,7 +101,8 @@ class ColorPalette {
     ColorPalette(ColorPalette* ParentPalette, std::string ParentPaletteName,
                  const std::unordered_map<NamedColor::knownColorName, Color>& NamedColors,
                  const std::unordered_map<std::string, GroupColorInfo>& GroupColors,
-                 std::array<Color, 4> UIPreviewColors, std::string PaletteName);
+                 std::array<Color, 4> UIPreviewColors, std::string PaletteName,
+                 Appearance appearance = Appearance::Unspecified, std::string companionName = "");
     const Color& GetAltColor(const std::vector<Color>& NormalColors, const std::vector<Color>& AltColors, bool useAlt,
                              int Index) const;
     const Color& GetAltColor(const Color& NormalColor, const Color& AltColor, bool useAlt) const;
@@ -105,6 +111,9 @@ class ColorPalette {
     const ColorPalette* ParentPalette = nullptr;
     std::string ParentPaletteName;
     std::string PaletteName;
+
+    Appearance AppearanceValue = Appearance::Unspecified; // RFC 0007: light/dark classification
+    std::string CompanionName;                            // RFC 0007: opposite-appearance partner name
 
     const Color& GetNamedColor(const NamedColor::knownColorName& NamedColor, bool AskParent = true) const;
 

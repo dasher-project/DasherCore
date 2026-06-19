@@ -9,6 +9,7 @@
 #include "DasherCore/XmlSettingsStore.h"
 #include "DasherCore/FileUtils.h"
 #include "DasherCore/ColorPalette.h"
+#include "DasherCore/ColorIO.h"
 #include "DasherCore/GameModule.h"
 #include "DasherCore/Alphabet/AlphInfo.h"
 #include "DasherCore/Alphabet/AlphIO.h"
@@ -986,6 +987,88 @@ DASHER_API void dasher_set_palette(dasher_ctx* ctx, const char* palette_name) {
         ctx->mouseDown = false;
     }
     ctx->intf->SetStringParameter(Dasher::SP_COLOUR_ID, std::string(palette_name));
+}
+
+// ── Appearance / dark mode (RFC 0007) ──────────────────────────────────────
+
+namespace {
+// Bidirectional companion lookup (RFC 0007). Returns the opposite-appearance
+// partner palette, or nullptr if none. If the palette declares an explicit
+// `companion`, that is used; otherwise we scan for a palette that declares this
+// one as its companion (so legacy palettes without metadata are still paired).
+const Dasher::ColorPalette* companionLookup(Dasher::CColorIO* colorIO, const std::string& name) {
+    if (!colorIO) return nullptr;
+    const Dasher::ColorPalette* p = colorIO->FindPalette(name);
+    if (!p || p->PaletteName != name) return nullptr; // FindPalette falls back to default
+
+    // Forward: explicit companion declared and resolvable.
+    if (!p->CompanionName.empty()) {
+        const Dasher::ColorPalette* q = colorIO->FindPalette(p->CompanionName);
+        if (q && q->PaletteName == p->CompanionName && q != p) return q;
+    }
+    // Reverse: some other palette declares this one as its companion.
+    const auto* all = colorIO->GetKnownPalettes();
+    for (const auto& [n, q] : *all) {
+        if (q == p) continue;
+        if (q->CompanionName == name) return q;
+    }
+    return nullptr;
+}
+
+// Effective appearance, treating an unspecified palette whose companion is dark
+// as effectively light (the common legacy-palette case).
+Dasher::ColorPalette::Appearance effectiveAppearance(Dasher::CColorIO* colorIO, const Dasher::ColorPalette* p) {
+    using App = Dasher::ColorPalette::Appearance;
+    if (!p) return App::Unspecified;
+    if (p->AppearanceValue != App::Unspecified) return p->AppearanceValue;
+    const Dasher::ColorPalette* comp = companionLookup(colorIO, p->PaletteName);
+    if (comp && comp->AppearanceValue == App::Dark) return App::Light;
+    return App::Unspecified;
+}
+} // namespace
+
+DASHER_API int dasher_get_palette_appearance(dasher_ctx* ctx, int index) {
+    if (!ctx || !ctx->intf) return -1;
+    auto colorIO = ctx->intf->GetColorIO();
+    if (!colorIO) return -1;
+    auto names = ctx->intf->GetPermittedValues(Dasher::SP_COLOUR_ID);
+    if (index < 0 || index >= static_cast<int>(names.size())) return -1;
+    const Dasher::ColorPalette* p = colorIO->FindPalette(names[index]);
+    if (!p || p->PaletteName != names[index]) return 0; // not found -> unspecified
+    return static_cast<int>(p->AppearanceValue);
+}
+
+DASHER_API const char* dasher_find_companion_palette(dasher_ctx* ctx, const char* palette_name) {
+    if (!ctx || !ctx->intf || !palette_name) return nullptr;
+    auto colorIO = ctx->intf->GetColorIO();
+    if (!colorIO) return nullptr;
+    const Dasher::ColorPalette* comp = companionLookup(colorIO, palette_name);
+    if (!comp) return nullptr;
+    ctx->tlString = comp->PaletteName;
+    return ctx->tlString.c_str();
+}
+
+DASHER_API int dasher_set_appearance(dasher_ctx* ctx, int appearance) {
+    if (!ctx || !ctx->intf) return -1;
+    if (appearance != 1 && appearance != 2) return -1;
+    using App = Dasher::ColorPalette::Appearance;
+    App target = (appearance == 1) ? App::Light : App::Dark;
+
+    auto colorIO = ctx->intf->GetColorIO();
+    if (!colorIO) return -1;
+    std::string currentName = ctx->intf->GetStringParameter(Dasher::SP_COLOUR_ID);
+    const Dasher::ColorPalette* current = colorIO->FindPalette(currentName);
+
+    // Candidate 1: the current palette already matches.
+    if (current && effectiveAppearance(colorIO, current) == target) return 0;
+
+    // Candidate 2: the current palette's companion matches.
+    const Dasher::ColorPalette* comp = companionLookup(colorIO, currentName);
+    if (comp && effectiveAppearance(colorIO, comp) == target) {
+        dasher_set_palette(ctx, comp->PaletteName.c_str());
+        return 0;
+    }
+    return -1; // no suitable companion; leave the current palette unchanged
 }
 
 // ── Alphabets ──────────────────────────────────────────────────────────────
