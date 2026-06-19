@@ -20,7 +20,7 @@
 
 #pragma once
 
-#if defined(_WIN32) || defined(__APPLE__)
+#if defined(_WIN32) || defined(__APPLE__) || defined(__ANDROID__)
 
 #define _(szText) szText
 #define N_(szText) (szText)
