@@ -1,0 +1,51 @@
+name: DCO
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  dco:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check Signed-off-by on all commits
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -euo pipefail
+          commits=$(git rev-list --no-merges "$BASE_SHA".."$HEAD_SHA")
+          missing=0
+          for sha in $commits; do
+            body=$(git log -1 --format='%B' "$sha")
+            if ! echo "$body" | grep -qE '^Signed-off-by: .+ <.+@.+>'; then
+              short=$(git rev-parse --short "$sha")
+              subject=$(git log -1 --format='%s' "$sha")
+              echo "::error file=::Missing Signed-off-by on commit $short ($subject)"
+              missing=$((missing + 1))
+            fi
+          done
+          if [ "$missing" -gt 0 ]; then
+            echo ""
+            echo "❌ $missing commit(s) missing Signed-off-by."
+            echo ""
+            echo "To fix, rebase with signoff:"
+            echo "  git rebase --signoff origin/${{ github.base_ref }}"
+            echo "  git push --force-with-lease"
+            echo ""
+            echo "Or amend the last commit:"
+            echo "  git commit --amend -s --no-edit"
+            echo ""
+            echo "See: https://developercertificate.org/"
+            exit 1
+          fi
+          echo "✅ All commits have Signed-off-by"
