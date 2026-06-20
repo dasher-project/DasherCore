@@ -541,6 +541,17 @@ int effectiveAppearanceValue(const dasher_ctx* ctx) {
 // source of truth, so this can never clobber the user's explicit choice.
 void resolveAppearance(dasher_ctx* ctx) {
     if (!ctx || !ctx->intf) return;
+
+    // Late seed: ensureAppearanceInitialised may have run before Realize,
+    // when ColorIO wasn't available and the companion lookup failed.
+    // Retry now — once ColorIO exists, the lookup succeeds and fills the gap.
+    if (ctx->darkPalette.empty() && !ctx->lightPalette.empty()) {
+        if (auto* colorIO = ctx->intf->GetColorIO()) {
+            if (const Dasher::ColorPalette* comp = companionLookup(colorIO, ctx->lightPalette))
+                ctx->darkPalette = comp->PaletteName;
+        }
+    }
+
     int eff = effectiveAppearanceValue(ctx);
     std::string target = (eff == 1) ? ctx->lightPalette : ctx->darkPalette;
     if (target.empty()) target = (eff == 1) ? ctx->darkPalette : ctx->lightPalette; // other side
