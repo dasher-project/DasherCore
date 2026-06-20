@@ -440,20 +440,36 @@ void        dasher_set_palette(dasher_ctx* ctx, const char* palette_name);
 
 ### Appearance / dark mode (RFC 0007)
 
-Palettes may declare an `appearance` (`light`/`dark`) and a `companion` (their opposite-appearance partner) in their XML. Use these to follow the OS light/dark preference without hardcoding name pairs per frontend.
+DasherCore owns a light/dark appearance model so frontends don't each reinvent the System/Light/Dark toggle, the companion lookup, or the palette-preference storage. State persists to `<user_dir>/appearance_settings.xml`. The active palette (returned by `dasher_get_current_palette`) is *derived* from mode + system input + preferences, so an auto-switch can never overwrite the user's explicit choice across restarts.
 
 ```c
-int         dasher_get_palette_appearance(dasher_ctx* ctx, int index);   // 0=unspecified, 1=light, 2=dark, -1=oor
+int         dasher_get_palette_appearance(dasher_ctx* ctx, int index);   // 0=unspecified,1=light,2=dark,-1=oor
 const char* dasher_find_companion_palette(dasher_ctx* ctx, const char* palette_name); // NULL if none
-int         dasher_set_appearance(dasher_ctx* ctx, int appearance);      // 1=light, 2=dark; 0 on success, -1 if no companion
+
+int         dasher_get_appearance_mode(dasher_ctx* ctx);                 // 0=system,1=light,2=dark
+void        dasher_set_appearance_mode(dasher_ctx* ctx, int mode);
+int         dasher_get_system_appearance(dasher_ctx* ctx);               // 1=light,2=dark (transient)
+void        dasher_set_system_appearance(dasher_ctx* ctx, int appearance);
+
+const char* dasher_get_light_palette(dasher_ctx* ctx);                   // persisted preferences
+const char* dasher_get_dark_palette(dasher_ctx* ctx);
+void        dasher_set_light_palette(dasher_ctx* ctx, const char* name);
+void        dasher_set_dark_palette(dasher_ctx* ctx, const char* name);
+void        dasher_set_user_palette(dasher_ctx* ctx, const char* name);  // sets current side + defaults other
 ```
 
-`dasher_set_appearance` switches the current palette to its companion that matches the requested appearance; if the current palette already matches it is a no-op. If no companion is available it returns `-1` and leaves the palette unchanged (the user's explicit choice is respected). Companion lookup is bidirectional, so legacy palettes without metadata are still paired with a dark companion that names them.
+- **Mode** `SYSTEM` follows `dasher_set_system_appearance`; `LIGHT`/`DARK` force that side.
+- **Two preferences** (`light_palette`, `dark_palette`) are stored independently, so a user can mix — e.g. Rainbow for light, TurboLUT Dark for dark. `dasher_set_user_palette` sets the current effective side and defaults the other to the chosen palette's companion.
+- `dasher_set_palette` routes through `dasher_set_user_palette`, so existing pickers stay correct within the model.
 
-Typical frontend usage on an OS appearance change:
+Typical frontend usage:
 
 ```c
-dasher_set_appearance(ctx, is_dark ? 2 : 1);
+// On launch and whenever the OS appearance changes:
+dasher_set_system_appearance(ctx, os_is_dark ? 2 : 1);
+
+// Settings UI: System / Light / Dark control
+dasher_set_appearance_mode(ctx, mode);  // 0=system,1=light,2=dark
 ```
 
 ## Game Mode
