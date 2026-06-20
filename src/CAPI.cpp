@@ -26,6 +26,8 @@
 #include <cstring>
 #include <filesystem>
 
+#include "pugixml.hpp"
+
 // ── UTF-8 / text boundary helpers ──────────────────────────────────────────
 
 namespace {
@@ -339,6 +341,17 @@ struct dasher_ctx {
     std::string dataDir;
     std::string userDir;
     std::string stringBuf;
+
+    // Appearance model state (RFC 0007). Lives at the C API layer — appearance
+    // is a shell/canvas concern, not a DasherCore engine parameter. Persisted to
+    // <userDir>/appearance_settings.xml. The active palette (SP_COLOUR_ID) is
+    // derived from these via resolveAppearance(), so an auto-switch can never
+    // overwrite the user's explicit preference.
+    int appearanceMode = 0;   // 0=system, 1=light, 2=dark
+    int systemAppearance = 1; // transient OS input: 1=light, 2=dark
+    std::string lightPalette; // user's preferred palette for light appearance
+    std::string darkPalette;  // user's preferred palette for dark appearance
+    bool appearanceLoaded = false;
     dasher_output_callback outputCb = nullptr;
     void* outputCbUserData = nullptr;
     dasher_message_callback messageCb = nullptr;
@@ -492,6 +505,111 @@ struct dasher_ctx {
 
 // ── C API implementation ──────────────────────────────────────────────────
 
+// Appearance model helpers (RFC 0007). Defined outside `extern "C"` because they
+// use C++ types (std::string, pugixml). Called by the C-linkage API functions
+// and by dasher_create below.
+namespace {
+// Bidirectional companion lookup. Returns the opposite-appearance partner
+// palette, or nullptr if none. Explicit `companion` first; then a reverse scan
+// so legacy palettes without metadata are still paired.
+const Dasher::ColorPalette* companionLookup(Dasher::CColorIO* colorIO, const std::string& name) {
+    if (!colorIO) return nullptr;
+    const Dasher::ColorPalette* p = colorIO->FindPalette(name);
+    if (!p || p->PaletteName != name) return nullptr; // FindPalette falls back to default
+
+    if (!p->CompanionName.empty()) {
+        const Dasher::ColorPalette* q = colorIO->FindPalette(p->CompanionName);
+        if (q && q->PaletteName == p->CompanionName && q != p) return q;
+    }
+    const auto* all = colorIO->GetKnownPalettes();
+    for (const auto& [n, q] : *all) {
+        if (q == p) continue;
+        if (q->CompanionName == name) return q;
+    }
+    return nullptr;
+}
+
+// Effective appearance (1=light, 2=dark) from mode + transient system input.
+int effectiveAppearanceValue(const dasher_ctx* ctx) {
+    if (ctx->appearanceMode == 1) return 1; // forced light
+    if (ctx->appearanceMode == 2) return 2; // forced dark
+    return ctx->systemAppearance;           // follow system (defaults to light)
+}
+
+// Recompute the active palette from mode + system + preferences and write it to
+// SP_COLOUR_ID (what the canvas renders). The persisted preferences are the
+// source of truth, so this can never clobber the user's explicit choice.
+void resolveAppearance(dasher_ctx* ctx) {
+    if (!ctx || !ctx->intf) return;
+    int eff = effectiveAppearanceValue(ctx);
+    std::string target = (eff == 1) ? ctx->lightPalette : ctx->darkPalette;
+    if (target.empty()) target = (eff == 1) ? ctx->darkPalette : ctx->lightPalette; // other side
+    if (target.empty()) return; // nothing chosen yet; leave the engine default
+
+    std::string current = ctx->intf->GetStringParameter(Dasher::SP_COLOUR_ID);
+    if (current != target) ctx->intf->SetStringParameter(Dasher::SP_COLOUR_ID, target);
+}
+
+std::string appearanceSettingsPath(const dasher_ctx* ctx) {
+    std::string p = ctx->userDir;
+#ifdef _WIN32
+    p += "\\appearance_settings.xml";
+#else
+    p += "/appearance_settings.xml";
+#endif
+    return p;
+}
+
+// Load mode + light/dark preferences from the sidecar. Non-fatal on any error.
+void loadAppearanceSettings(dasher_ctx* ctx) {
+    if (ctx->appearanceLoaded) return;
+    ctx->appearanceLoaded = true;
+    std::string path = appearanceSettingsPath(ctx);
+    pugi::xml_document doc;
+    pugi::xml_parse_result res = doc.load_file(path.c_str());
+    if (!res) return; // missing/unreadable: leave defaults
+    pugi::xml_node root = doc.child("appearance");
+    if (!root) return;
+    ctx->appearanceMode = root.attribute("mode").as_int(0);
+    ctx->lightPalette = root.attribute("light").as_string("");
+    ctx->darkPalette = root.attribute("dark").as_string("");
+    if (ctx->appearanceMode < 0 || ctx->appearanceMode > 2) ctx->appearanceMode = 0;
+}
+
+// Persist mode + light/dark preferences to the sidecar. Non-fatal on any error.
+void saveAppearanceSettings(dasher_ctx* ctx) {
+    if (!ctx || ctx->userDir.empty()) return;
+    pugi::xml_document doc;
+    pugi::xml_node root = doc.append_child("appearance");
+    root.append_attribute("mode") = ctx->appearanceMode;
+    root.append_attribute("light") = ctx->lightPalette.c_str();
+    root.append_attribute("dark") = ctx->darkPalette.c_str();
+    doc.save_file(appearanceSettingsPath(ctx).c_str());
+}
+
+// Ensure the model is initialised: on first use, seed the light preference from
+// the engine's current palette and default the dark side to its companion.
+void ensureAppearanceInitialised(dasher_ctx* ctx) {
+    if (ctx->appearanceLoaded) {
+        resolveAppearance(ctx);
+        return;
+    }
+    loadAppearanceSettings(ctx);
+    if (ctx->lightPalette.empty() && ctx->darkPalette.empty()) {
+        // Fresh start: adopt whatever palette the engine loaded as the light
+        // preference, and default the dark side to its companion.
+        std::string current = ctx->intf->GetStringParameter(Dasher::SP_COLOUR_ID);
+        ctx->lightPalette = current;
+        if (auto* colorIO = ctx->intf->GetColorIO()) {
+            if (const Dasher::ColorPalette* comp = companionLookup(colorIO, current))
+                ctx->darkPalette = comp->PaletteName;
+        }
+        saveAppearanceSettings(ctx);
+    }
+    resolveAppearance(ctx);
+}
+} // namespace
+
 extern "C" {
 
 static std::string s_errorString;
@@ -506,7 +624,6 @@ DASHER_API dasher_ctx* dasher_create(const char* data_dir, const char* user_dir,
         if (out_error) *out_error = s_errorString.data();
         return nullptr;
     }
-
 #ifdef _WIN32
     setlocale(LC_CTYPE, ".UTF8");
 #endif
@@ -543,6 +660,11 @@ DASHER_API dasher_ctx* dasher_create(const char* data_dir, const char* user_dir,
         delete ctx;
         return nullptr;
     }
+
+    // Load persisted appearance preferences and resolve the active palette, so
+    // the user's explicit choice is reflected immediately on startup (RFC 0007).
+    loadAppearanceSettings(ctx);
+    resolveAppearance(ctx);
 
     return ctx;
 }
@@ -986,46 +1108,17 @@ DASHER_API void dasher_set_palette(dasher_ctx* ctx, const char* palette_name) {
         ctx->intf->KeyUp(nowMs(), Dasher::Keys::Primary_Input);
         ctx->mouseDown = false;
     }
-    ctx->intf->SetStringParameter(Dasher::SP_COLOUR_ID, std::string(palette_name));
+    // Route through the appearance model (RFC 0007): this sets the user's
+    // preference for the current effective appearance (and defaults the other
+    // side to the companion), then resolves. This keeps palette selection
+    // consistent with light/dark mode and prevents the persistence leak that
+    // direct SP_COLOUR_ID writes would cause. If the model hasn't been touched
+    // yet, ensureAppearanceInitialised seeds it first.
+    dasher_set_user_palette(ctx, palette_name);
 }
 
 // ── Appearance / dark mode (RFC 0007) ──────────────────────────────────────
-
-namespace {
-// Bidirectional companion lookup (RFC 0007). Returns the opposite-appearance
-// partner palette, or nullptr if none. If the palette declares an explicit
-// `companion`, that is used; otherwise we scan for a palette that declares this
-// one as its companion (so legacy palettes without metadata are still paired).
-const Dasher::ColorPalette* companionLookup(Dasher::CColorIO* colorIO, const std::string& name) {
-    if (!colorIO) return nullptr;
-    const Dasher::ColorPalette* p = colorIO->FindPalette(name);
-    if (!p || p->PaletteName != name) return nullptr; // FindPalette falls back to default
-
-    // Forward: explicit companion declared and resolvable.
-    if (!p->CompanionName.empty()) {
-        const Dasher::ColorPalette* q = colorIO->FindPalette(p->CompanionName);
-        if (q && q->PaletteName == p->CompanionName && q != p) return q;
-    }
-    // Reverse: some other palette declares this one as its companion.
-    const auto* all = colorIO->GetKnownPalettes();
-    for (const auto& [n, q] : *all) {
-        if (q == p) continue;
-        if (q->CompanionName == name) return q;
-    }
-    return nullptr;
-}
-
-// Effective appearance, treating an unspecified palette whose companion is dark
-// as effectively light (the common legacy-palette case).
-Dasher::ColorPalette::Appearance effectiveAppearance(Dasher::CColorIO* colorIO, const Dasher::ColorPalette* p) {
-    using App = Dasher::ColorPalette::Appearance;
-    if (!p) return App::Unspecified;
-    if (p->AppearanceValue != App::Unspecified) return p->AppearanceValue;
-    const Dasher::ColorPalette* comp = companionLookup(colorIO, p->PaletteName);
-    if (comp && comp->AppearanceValue == App::Dark) return App::Light;
-    return App::Unspecified;
-}
-} // namespace
+// (Helpers live above `extern "C"` — they return std::string / use C++ types.)
 
 DASHER_API int dasher_get_palette_appearance(dasher_ctx* ctx, int index) {
     if (!ctx || !ctx->intf) return -1;
@@ -1048,27 +1141,83 @@ DASHER_API const char* dasher_find_companion_palette(dasher_ctx* ctx, const char
     return ctx->tlString.c_str();
 }
 
-DASHER_API int dasher_set_appearance(dasher_ctx* ctx, int appearance) {
-    if (!ctx || !ctx->intf) return -1;
-    if (appearance != 1 && appearance != 2) return -1;
-    using App = Dasher::ColorPalette::Appearance;
-    App target = (appearance == 1) ? App::Light : App::Dark;
+DASHER_API int dasher_get_appearance_mode(dasher_ctx* ctx) {
+    if (!ctx) return 0;
+    return ctx->appearanceMode;
+}
 
-    auto colorIO = ctx->intf->GetColorIO();
-    if (!colorIO) return -1;
-    std::string currentName = ctx->intf->GetStringParameter(Dasher::SP_COLOUR_ID);
-    const Dasher::ColorPalette* current = colorIO->FindPalette(currentName);
+DASHER_API void dasher_set_appearance_mode(dasher_ctx* ctx, int mode) {
+    if (!ctx || mode < 0 || mode > 2) return;
+    ensureAppearanceInitialised(ctx);
+    if (ctx->appearanceMode == mode) return;
+    ctx->appearanceMode = mode;
+    saveAppearanceSettings(ctx);
+    resolveAppearance(ctx);
+}
 
-    // Candidate 1: the current palette already matches.
-    if (current && effectiveAppearance(colorIO, current) == target) return 0;
+DASHER_API int dasher_get_system_appearance(dasher_ctx* ctx) {
+    if (!ctx) return 1;
+    return ctx->systemAppearance;
+}
 
-    // Candidate 2: the current palette's companion matches.
-    const Dasher::ColorPalette* comp = companionLookup(colorIO, currentName);
-    if (comp && effectiveAppearance(colorIO, comp) == target) {
-        dasher_set_palette(ctx, comp->PaletteName.c_str());
-        return 0;
+DASHER_API void dasher_set_system_appearance(dasher_ctx* ctx, int appearance) {
+    if (!ctx || (appearance != 1 && appearance != 2)) return;
+    ensureAppearanceInitialised(ctx);
+    if (ctx->systemAppearance == appearance) return;
+    ctx->systemAppearance = appearance;
+    // Only matters in SYSTEM mode, but resolve is cheap and keeps state consistent.
+    if (ctx->appearanceMode == 0) resolveAppearance(ctx);
+}
+
+DASHER_API const char* dasher_get_light_palette(dasher_ctx* ctx) {
+    if (!ctx || !ctx->intf) return "";
+    ensureAppearanceInitialised(ctx);
+    ctx->tlString = ctx->lightPalette;
+    return ctx->tlString.c_str();
+}
+
+DASHER_API const char* dasher_get_dark_palette(dasher_ctx* ctx) {
+    if (!ctx || !ctx->intf) return "";
+    ensureAppearanceInitialised(ctx);
+    ctx->tlString = ctx->darkPalette;
+    return ctx->tlString.c_str();
+}
+
+DASHER_API void dasher_set_light_palette(dasher_ctx* ctx, const char* name) {
+    if (!ctx || !ctx->intf || !name) return;
+    ensureAppearanceInitialised(ctx);
+    ctx->lightPalette = name;
+    saveAppearanceSettings(ctx);
+    resolveAppearance(ctx);
+}
+
+DASHER_API void dasher_set_dark_palette(dasher_ctx* ctx, const char* name) {
+    if (!ctx || !ctx->intf || !name) return;
+    ensureAppearanceInitialised(ctx);
+    ctx->darkPalette = name;
+    saveAppearanceSettings(ctx);
+    resolveAppearance(ctx);
+}
+
+DASHER_API void dasher_set_user_palette(dasher_ctx* ctx, const char* name) {
+    if (!ctx || !ctx->intf || !name) return;
+    ensureAppearanceInitialised(ctx);
+    int eff = effectiveAppearanceValue(ctx);
+    if (eff == 1)
+        ctx->lightPalette = name;
+    else
+        ctx->darkPalette = name;
+
+    // Default the other side to the chosen palette's companion if unset, so the
+    // user gets a sensible matching variant without configuring both sides.
+    std::string& other = (eff == 1) ? ctx->darkPalette : ctx->lightPalette;
+    if (other.empty() || other == ctx->lightPalette || other == ctx->darkPalette) {
+        if (auto* colorIO = ctx->intf->GetColorIO()) {
+            if (const Dasher::ColorPalette* comp = companionLookup(colorIO, name)) other = comp->PaletteName;
+        }
     }
-    return -1; // no suitable companion; leave the current palette unchanged
+    saveAppearanceSettings(ctx);
+    resolveAppearance(ctx);
 }
 
 // ── Alphabets ──────────────────────────────────────────────────────────────
@@ -1158,6 +1307,7 @@ DASHER_API const char* dasher_game_get_wrong_text(dasher_ctx* ctx) {
 DASHER_API void dasher_save_settings(dasher_ctx* ctx) {
     if (!ctx || !ctx->settings) return;
     ctx->settings->Save();
+    if (ctx->appearanceLoaded) saveAppearanceSettings(ctx); // RFC 0007 sidecar
 }
 
 // ── Localization ──────────────────────────────────────────────────────────

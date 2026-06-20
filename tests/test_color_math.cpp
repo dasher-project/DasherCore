@@ -163,36 +163,114 @@ TEST(color_palette_companion_lookup) {
     printf("v color_palette_companion_lookup passed\n");
 }
 
-TEST(color_palette_set_appearance) {
+TEST(color_palette_appearance_mode_system) {
     dasher_ctx* ctx = create_isolated_context();
     ASSERT(ctx);
     dasher_set_screen_size(ctx, 800, 600);
 
-    dasher_set_palette(ctx, "Rainbow");
+    // Fresh: mode defaults to SYSTEM (0), system appearance to LIGHT (1).
+    ASSERT_EQ(dasher_get_appearance_mode(ctx), 0);
+    ASSERT_EQ(dasher_get_system_appearance(ctx), 1);
+
+    // Picker sets the user palette. In SYSTEM+light the light side is "Rainbow";
+    // the dark side defaults to its companion "Rainbow Dark".
+    dasher_set_user_palette(ctx, "Rainbow");
+    ASSERT_STR_EQ(dasher_get_light_palette(ctx), "Rainbow");
+    ASSERT_STR_EQ(dasher_get_dark_palette(ctx), "Rainbow Dark");
     ASSERT_STR_EQ(dasher_get_current_palette(ctx), "Rainbow");
 
-    // Request dark -> switch to Rainbow Dark.
-    ASSERT_EQ(dasher_set_appearance(ctx, 2), 0);
+    // OS goes dark -> active switches to the dark preference.
+    dasher_set_system_appearance(ctx, 2);
     ASSERT_STR_EQ(dasher_get_current_palette(ctx), "Rainbow Dark");
+    // The light preference is NOT clobbered by the auto-switch (the bug fix).
+    ASSERT_STR_EQ(dasher_get_light_palette(ctx), "Rainbow");
 
-    // Requesting dark again is a no-op (already on the dark variant).
-    ASSERT_EQ(dasher_set_appearance(ctx, 2), 0);
-    ASSERT_STR_EQ(dasher_get_current_palette(ctx), "Rainbow Dark");
-
-    // Request light -> switch back to Rainbow.
-    ASSERT_EQ(dasher_set_appearance(ctx, 1), 0);
+    // OS goes light -> back to Rainbow.
+    dasher_set_system_appearance(ctx, 1);
     ASSERT_STR_EQ(dasher_get_current_palette(ctx), "Rainbow");
-
-    // A palette with no companion cannot switch -> -1, and is left unchanged.
-    dasher_set_palette(ctx, "Yellow on Blue");
-    ASSERT_EQ(dasher_set_appearance(ctx, 1), -1);
-    ASSERT_STR_EQ(dasher_get_current_palette(ctx), "Yellow on Blue");
-
-    // Invalid appearance value -> -1.
-    ASSERT_EQ(dasher_set_appearance(ctx, 9), -1);
 
     dasher_destroy(ctx);
-    printf("v color_palette_set_appearance passed\n");
+    printf("v color_palette_appearance_mode_system passed\n");
+}
+
+TEST(color_palette_appearance_forced_mode) {
+    dasher_ctx* ctx = create_isolated_context();
+    ASSERT(ctx);
+    dasher_set_screen_size(ctx, 800, 600);
+
+    dasher_set_user_palette(ctx, "Rainbow"); // light=Rainbow, dark=Rainbow Dark
+    dasher_set_system_appearance(ctx, 2);    // system dark
+
+    // Force LIGHT even though system is dark.
+    dasher_set_appearance_mode(ctx, 1);
+    ASSERT_EQ(dasher_get_appearance_mode(ctx), 1);
+    ASSERT_STR_EQ(dasher_get_current_palette(ctx), "Rainbow");
+
+    // Force DARK.
+    dasher_set_appearance_mode(ctx, 2);
+    ASSERT_STR_EQ(dasher_get_current_palette(ctx), "Rainbow Dark");
+
+    // Back to SYSTEM follows the (still dark) system input.
+    dasher_set_appearance_mode(ctx, 0);
+    ASSERT_STR_EQ(dasher_get_current_palette(ctx), "Rainbow Dark");
+
+    // Invalid mode is rejected.
+    dasher_set_appearance_mode(ctx, 9);
+    ASSERT_EQ(dasher_get_appearance_mode(ctx), 0);
+
+    dasher_destroy(ctx);
+    printf("v color_palette_appearance_forced_mode passed\n");
+}
+
+TEST(color_palette_appearance_independent_prefs) {
+    dasher_ctx* ctx = create_isolated_context();
+    ASSERT(ctx);
+    dasher_set_screen_size(ctx, 800, 600);
+
+    // The user may mix: Rainbow for light, TurboLUT Dark for dark (not 1:1).
+    dasher_set_light_palette(ctx, "Rainbow");
+    dasher_set_dark_palette(ctx, "TurboLUT Dark");
+
+    dasher_set_appearance_mode(ctx, 1); // light
+    ASSERT_STR_EQ(dasher_get_current_palette(ctx), "Rainbow");
+    dasher_set_appearance_mode(ctx, 2); // dark
+    ASSERT_STR_EQ(dasher_get_current_palette(ctx), "TurboLUT Dark");
+
+    dasher_destroy(ctx);
+    printf("v color_palette_appearance_independent_prefs passed\n");
+}
+
+TEST(color_palette_appearance_persistence) {
+    // Two contexts sharing one user dir prove the user's explicit choice
+    // survives an auto-switch across restarts (the persistence-bug regression).
+    char sharedDir[256];
+    snprintf(sharedDir, sizeof(sharedDir), "%s/dasher_persist_%d_%d", dasher_temp_dir(), dasher_getpid(),
+             (int)(uintptr_t)sharedDir);
+    dasher_mkdir(sharedDir);
+
+    // Session 1: user picks Rainbow (light); system goes dark so active becomes
+    // Rainbow Dark at close.
+    dasher_ctx* c1 = dasher_create(TEST_DATA_DIR, sharedDir, nullptr);
+    ASSERT(c1);
+    dasher_set_screen_size(c1, 800, 600);
+    dasher_set_user_palette(c1, "Rainbow");
+    dasher_set_system_appearance(c1, 2);
+    ASSERT_STR_EQ(dasher_get_current_palette(c1), "Rainbow Dark");
+    dasher_save_settings(c1);
+    dasher_destroy(c1);
+
+    // Session 2: preferences must reload; active must re-resolve to the light
+    // preference (system input is transient and defaults to light), NOT stay
+    // stuck on the leaked "Rainbow Dark".
+    dasher_ctx* c2 = dasher_create(TEST_DATA_DIR, sharedDir, nullptr);
+    ASSERT(c2);
+    dasher_set_screen_size(c2, 800, 600);
+    ASSERT_STR_EQ(dasher_get_light_palette(c2), "Rainbow");
+    ASSERT_STR_EQ(dasher_get_dark_palette(c2), "Rainbow Dark");
+    ASSERT_STR_EQ(dasher_get_current_palette(c2), "Rainbow"); // original choice restored
+    dasher_destroy(c2);
+
+    printf("v color_palette_appearance_persistence passed\n");
 }
 
 int main() {
@@ -208,7 +286,10 @@ int main() {
     test_color_palette_switch();
     test_color_palette_appearance_classification();
     test_color_palette_companion_lookup();
-    test_color_palette_set_appearance();
+    test_color_palette_appearance_mode_system();
+    test_color_palette_appearance_forced_mode();
+    test_color_palette_appearance_independent_prefs();
+    test_color_palette_appearance_persistence();
 
     printf("\nAll color math tests passed!\n");
     return 0;
