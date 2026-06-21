@@ -73,6 +73,7 @@ bool isSep(char c, const char* seps) {
 
 // Forward search: skip non-separators, then skip separators
 size_t findAfter(const std::string& s, size_t pos, const char* seps) {
+    if (pos > s.size()) pos = s.size();
     size_t p = pos;
     while (p < s.size() && !isSep(s[p], seps)) {
         p = nextChar(s, p);
@@ -85,6 +86,7 @@ size_t findAfter(const std::string& s, size_t pos, const char* seps) {
 
 // Backward search: skip separators, then skip non-separators
 size_t findBefore(const std::string& s, size_t pos, const char* seps) {
+    if (pos >= s.size()) pos = s.size() > 0 ? s.size() - 1 : 0;
     size_t p = pos;
     while (p > 0 && isSep(s[p], seps)) {
         p = prevChar(s, p);
@@ -396,7 +398,12 @@ struct dasher_ctx {
 
         unsigned int ctrlOffsetAfterMove(unsigned int offsetBefore, bool bForwards,
                                          Dasher::EditDistance dist) override {
-            size_t start = offsetBefore, end = offsetBefore;
+            // offsetBefore is the model's node offset, which can exceed editBuffer.size()
+            // because control nodes have offsets but produce no edit buffer characters.
+            // Clamp to buffer bounds before using as an index.
+            size_t bufLen = m_owner->editBuffer.size();
+            size_t clamped = std::min(static_cast<size_t>(offsetBefore), bufLen);
+            size_t start = clamped, end = clamped;
             getRange(m_owner->editBuffer, bForwards, dist, start, end);
             return static_cast<unsigned int>(bForwards ? end : start);
         }
