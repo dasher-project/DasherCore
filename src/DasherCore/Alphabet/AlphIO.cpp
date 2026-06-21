@@ -120,10 +120,14 @@ bool Dasher::CAlphIO::ParseSingle(pugi::xml_node alphabet, const std::string, bo
             CurrentAlphabet->PreferredColors = meta.text().as_string();
         else if (std::strcmp(name, "orientation") == 0) {
             std::string otype = meta.attribute("type").as_string("LR");
-            if (otype == "RL") CurrentAlphabet->Orientation = Options::RightToLeft;
-            else if (otype == "TB") CurrentAlphabet->Orientation = Options::TopToBottom;
-            else if (otype == "BT") CurrentAlphabet->Orientation = Options::BottomToTop;
-            else CurrentAlphabet->Orientation = Options::LeftToRight;
+            if (otype == "RL")
+                CurrentAlphabet->Orientation = Options::RightToLeft;
+            else if (otype == "TB")
+                CurrentAlphabet->Orientation = Options::TopToBottom;
+            else if (otype == "BT")
+                CurrentAlphabet->Orientation = Options::BottomToTop;
+            else
+                CurrentAlphabet->Orientation = Options::LeftToRight;
         }
     }
 
@@ -272,8 +276,7 @@ void CAlphIO::ReadCharAttributes(pugi::xml_node xml_node, CAlphInfo::character& 
 
     // v6 uses "label"/"text" attributes; v5 uses "d"/"t" attributes
     alphabet_character.Display = xml_node.attribute("label").as_string();
-    if (alphabet_character.Display.empty())
-        alphabet_character.Display = xml_node.attribute("d").as_string();
+    if (alphabet_character.Display.empty()) alphabet_character.Display = xml_node.attribute("d").as_string();
     alphabet_character.Text = xml_node.attribute("text").as_string();
     if (alphabet_character.Text.empty())
         alphabet_character.Text = xml_node.attribute("t").as_string(alphabet_character.Display.c_str());
@@ -415,6 +418,13 @@ void CAlphIO::ReadCharAttributes(pugi::xml_node xml_node, CAlphInfo::character& 
     alphabet_character.ColorGroupOffset = parentGroup->iNumChildNodes;
     alphabet_character.fixedProbability = xml_node.attribute("fixedProbability").as_float(-1);
     alphabet_character.speedFactor = xml_node.attribute("speedFactor").as_float(-1);
+
+    // v5 compatibility: if no action children were found (v5 <s> elements have no
+    // action children), create default text output/delete actions from the text.
+    if (DoActions.empty() && !alphabet_character.Text.empty()) {
+        DoActions.push_back(new TextOutputAction(alphabet_character.Text));
+        UndoActions.push_back(new TextDeleteAction(alphabet_character.Text));
+    }
 }
 
 // Reverses the internal linked list for the given SGroupInfo
