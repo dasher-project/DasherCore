@@ -267,7 +267,9 @@ class CommandScreen final : public Dasher::CDasherScreen {
     }
 
     void Display() override {}
-    bool IsPointVisible(Dasher::screenint, Dasher::screenint) override { return true; }
+    bool IsPointVisible(Dasher::screenint x, Dasher::screenint y) override {
+        return x >= 0 && y >= 0 && x < GetWidth() && y < GetHeight();
+    }
 
   private:
     void push(int op, int a, int b, int c, int d, int32_t colour) {
@@ -301,8 +303,10 @@ class PointerInput : public Dasher::CScreenCoordInput {
 
     void SetPosition(float x, float y) {
         m_hasPos = true;
-        m_x = clamp_int(lround_int(static_cast<double>(x)), 0, m_width - 1);
-        m_y = clamp_int(lround_int(static_cast<double>(y)), 0, m_height - 1);
+        // Don't clamp — allow out-of-bounds coordinates so BP_STOP_OUTSIDE
+        // can detect when the pointer leaves the canvas area.
+        m_x = lround_int(static_cast<double>(x));
+        m_y = lround_int(static_cast<double>(y));
     }
 
     bool GetScreenCoords(Dasher::screenint& iX, Dasher::screenint& iY, Dasher::CDasherView*) override {
@@ -731,6 +735,11 @@ DASHER_API void dasher_mouse_down(dasher_ctx* ctx) {
     if (!ctx || !ctx->intf) return;
     if (ctx->mouseDown) return;
     ctx->mouseDown = true;
+
+    // In circle start mode, clicking should NOT start/stop Dasher —
+    // only hovering inside the circle should. (Steve Saling feedback)
+    if (ctx->intf->GetLongParameter(Dasher::LP_START_MODE) == Dasher::Options::StartMode::circle_start) return;
+
     ctx->intf->SetBoolParameter(Dasher::BP_START_MOUSE, true);
     ctx->intf->KeyDown(nowMs(), Dasher::Keys::Primary_Input);
 }

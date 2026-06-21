@@ -123,11 +123,11 @@ const ColorPalette::Color& CContNode::getNodeColor(const ColorPalette*) {
 // ── Colour mapping ─────────────────────────────────────────────────────────
 
 const ColorPalette::Color& CControlManager::indexToColor(int iIndex) {
+    // Semantic colors matching the default control.xml
     static const ColorPalette::Color controlGrey(128, 128, 128);
     static const ColorPalette::Color controlGreen(60, 180, 75);
     static const ColorPalette::Color controlAmber(220, 160, 0);
     static const ColorPalette::Color controlRed(200, 50, 50);
-    static const ColorPalette::Color controlDefault(90, 90, 140);
 
     switch (iIndex) {
     case 8:
@@ -139,8 +139,27 @@ const ColorPalette::Color& CControlManager::indexToColor(int iIndex) {
     case 242:
         return controlRed;
     default:
-        return controlDefault;
+        break;
     }
+
+    // For custom control XML with arbitrary color indices (e.g. v5 imports),
+    // cycle through a palette of distinct, readable colors. This approximates
+    // v5's behavior of looking up palette indices.
+    static const ColorPalette::Color cyclePalette[] = {
+        ColorPalette::Color(60, 140, 200),  // blue
+        ColorPalette::Color(80, 170, 100),  // green
+        ColorPalette::Color(200, 120, 50),  // orange
+        ColorPalette::Color(160, 80, 180),  // purple
+        ColorPalette::Color(50, 160, 180),  // teal
+        ColorPalette::Color(220, 140, 60),  // amber
+        ColorPalette::Color(180, 60, 100),  // pink
+        ColorPalette::Color(100, 100, 110), // grey
+        ColorPalette::Color(90, 130, 50),   // olive
+        ColorPalette::Color(140, 90, 200),  // violet
+        ColorPalette::Color(200, 80, 80),   // coral
+        ColorPalette::Color(50, 130, 210),  // sky
+    };
+    return cyclePalette[iIndex % 12];
 }
 
 // ── Built-in action implementations ────────────────────────────────────────
