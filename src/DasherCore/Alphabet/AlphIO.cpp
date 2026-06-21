@@ -39,6 +39,11 @@ SGroupInfo* CAlphIO::ParseGroupRecursive(pugi::xml_node& group_node, CAlphInfo* 
     pNewGroup->strName = group_node.attribute("name").as_string("");
     pNewGroup->strLabel = group_node.attribute("label").as_string("");
     pNewGroup->colorGroup = group_node.attribute("colorInfoName").as_string("");
+    // v5 groups don't have colorInfoName — they use "b" for color index.
+    // Without a colorGroup name, GetNodeColor returns undefinedColor which
+    // becomes transparent (Alpha=0), making nodes invisible.
+    // Default to "lowercase" which exists in all standard palettes.
+    if (pNewGroup->colorGroup.empty()) pNewGroup->colorGroup = "lowercase";
 
     pNewGroup->pNext = previous_sibling;
     pNewGroup->pChild = nullptr;
