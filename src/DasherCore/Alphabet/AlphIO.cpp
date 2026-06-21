@@ -116,7 +116,19 @@ bool Dasher::CAlphIO::ParseSingle(pugi::xml_node alphabet, const std::string, bo
     CurrentAlphabet->TrainingFile = alphabet.attribute("trainingFilename").as_string();
     CurrentAlphabet->PreferredColors = alphabet.attribute("colorsName").as_string();
 
-    // Handle v5 metadata child elements (v6 uses attributes on <alphabet>)
+    // Orientation — always read v6 attribute first (present on every v6 alphabet)
+    const std::string orientation_type = alphabet.attribute("orientation").as_string("LR");
+    if (orientation_type == "RL") {
+        CurrentAlphabet->Orientation = Options::RightToLeft;
+    } else if (orientation_type == "TB") {
+        CurrentAlphabet->Orientation = Options::TopToBottom;
+    } else if (orientation_type == "BT") {
+        CurrentAlphabet->Orientation = Options::BottomToTop;
+    } else {
+        CurrentAlphabet->Orientation = Options::LeftToRight;
+    }
+
+    // Handle v5 metadata child elements (override if v5 format is present)
     for (pugi::xml_node meta : alphabet.children()) {
         const char* name = meta.name();
         if (std::strcmp(name, "train") == 0 && CurrentAlphabet->TrainingFile.empty())
@@ -133,18 +145,6 @@ bool Dasher::CAlphIO::ParseSingle(pugi::xml_node alphabet, const std::string, bo
                 CurrentAlphabet->Orientation = Options::BottomToTop;
             else
                 CurrentAlphabet->Orientation = Options::LeftToRight;
-        }
-    }
-
-    // If orientation wasn't set from v5 element, try v6 attribute
-    if (CurrentAlphabet->Orientation == Options::LeftToRight) {
-        const std::string orientation_type = alphabet.attribute("orientation").as_string("LR");
-        if (orientation_type == "RL") {
-            CurrentAlphabet->Orientation = Options::RightToLeft;
-        } else if (orientation_type == "TB") {
-            CurrentAlphabet->Orientation = Options::TopToBottom;
-        } else if (orientation_type == "BT") {
-            CurrentAlphabet->Orientation = Options::BottomToTop;
         }
     }
 
