@@ -88,11 +88,24 @@ SGroupInfo* CAlphIO::ParseGroupRecursive(pugi::xml_node& group_node, CAlphInfo* 
     return pNewGroup;
 }
 
-bool Dasher::CAlphIO::Parse(pugi::xml_document& document, const std::string, bool bUser) {
-    pugi::xml_node alphabet = document.document_element();
+bool Dasher::CAlphIO::Parse(pugi::xml_document& document, const std::string strDesc, bool bUser) {
+    pugi::xml_node root = document.document_element();
 
-    if (std::strcmp(alphabet.name(), "alphabet") != 0) return false; // a non <alphabet ...> node
+    // v5 format: <alphabets> root containing <alphabet> children
+    if (std::strcmp(root.name(), "alphabets") == 0) {
+        bool any = false;
+        for (pugi::xml_node alpha : root.children("alphabet")) {
+            if (ParseSingle(alpha, strDesc, bUser)) any = true;
+        }
+        return any;
+    }
 
+    // v6 format: <alphabet> root (single alphabet per file)
+    if (std::strcmp(root.name(), "alphabet") != 0) return false;
+    return ParseSingle(root, strDesc, bUser);
+}
+
+bool Dasher::CAlphIO::ParseSingle(pugi::xml_node alphabet, const std::string, bool bUser) {
     CAlphInfo* CurrentAlphabet = new CAlphInfo();
     CurrentAlphabet->AlphID = alphabet.attribute("name").as_string();
     CurrentAlphabet->TrainingFile = alphabet.attribute("trainingFilename").as_string();
