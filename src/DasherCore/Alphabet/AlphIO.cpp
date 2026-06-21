@@ -49,8 +49,8 @@ SGroupInfo* CAlphIO::ParseGroupRecursive(pugi::xml_node& group_node, CAlphInfo* 
     new_ancestors.push_back(pNewGroup);
     SGroupInfo* previous_subgroup_sibling = nullptr;
     for (auto node : group_node.children()) {
-        // symbol
-        if (std::strcmp(node.name(), "node") == 0) {
+        // symbol (v6 "node" or v5 "s")
+        if (std::strcmp(node.name(), "node") == 0 || std::strcmp(node.name(), "s") == 0) {
             CurrentAlphabet->m_vCharacters.resize(CurrentAlphabet->m_vCharacters.size() + 1); // new char
             CurrentAlphabet->m_vCharacterDoActions.resize(CurrentAlphabet->m_vCharacterDoActions.size() +
                                                           1); // new Do Actions
@@ -111,16 +111,32 @@ bool Dasher::CAlphIO::ParseSingle(pugi::xml_node alphabet, const std::string, bo
     CurrentAlphabet->TrainingFile = alphabet.attribute("trainingFilename").as_string();
     CurrentAlphabet->PreferredColors = alphabet.attribute("colorsName").as_string();
 
-    // orientation
-    const std::string orientation_type = alphabet.attribute("orientation").as_string("LR");
-    if (orientation_type == "RL") {
-        CurrentAlphabet->Orientation = Options::RightToLeft;
-    } else if (orientation_type == "TB") {
-        CurrentAlphabet->Orientation = Options::TopToBottom;
-    } else if (orientation_type == "BT") {
-        CurrentAlphabet->Orientation = Options::BottomToTop;
-    } else {
-        CurrentAlphabet->Orientation = Options::LeftToRight;
+    // Handle v5 metadata child elements (v6 uses attributes on <alphabet>)
+    for (pugi::xml_node meta : alphabet.children()) {
+        const char* name = meta.name();
+        if (std::strcmp(name, "train") == 0 && CurrentAlphabet->TrainingFile.empty())
+            CurrentAlphabet->TrainingFile = meta.text().as_string();
+        else if (std::strcmp(name, "palette") == 0 && CurrentAlphabet->PreferredColors.empty())
+            CurrentAlphabet->PreferredColors = meta.text().as_string();
+        else if (std::strcmp(name, "orientation") == 0) {
+            std::string otype = meta.attribute("type").as_string("LR");
+            if (otype == "RL") CurrentAlphabet->Orientation = Options::RightToLeft;
+            else if (otype == "TB") CurrentAlphabet->Orientation = Options::TopToBottom;
+            else if (otype == "BT") CurrentAlphabet->Orientation = Options::BottomToTop;
+            else CurrentAlphabet->Orientation = Options::LeftToRight;
+        }
+    }
+
+    // If orientation wasn't set from v5 element, try v6 attribute
+    if (CurrentAlphabet->Orientation == Options::LeftToRight) {
+        const std::string orientation_type = alphabet.attribute("orientation").as_string("LR");
+        if (orientation_type == "RL") {
+            CurrentAlphabet->Orientation = Options::RightToLeft;
+        } else if (orientation_type == "TB") {
+            CurrentAlphabet->Orientation = Options::TopToBottom;
+        } else if (orientation_type == "BT") {
+            CurrentAlphabet->Orientation = Options::BottomToTop;
+        }
     }
 
     // conversion mode
@@ -254,8 +270,13 @@ void CAlphIO::ReadCharAttributes(pugi::xml_node xml_node, CAlphInfo::character& 
 
     if (xml_node.type() == pugi::node_null) return;
 
+    // v6 uses "label"/"text" attributes; v5 uses "d"/"t" attributes
     alphabet_character.Display = xml_node.attribute("label").as_string();
-    alphabet_character.Text = xml_node.attribute("text").as_string(alphabet_character.Display.c_str());
+    if (alphabet_character.Display.empty())
+        alphabet_character.Display = xml_node.attribute("d").as_string();
+    alphabet_character.Text = xml_node.attribute("text").as_string();
+    if (alphabet_character.Text.empty())
+        alphabet_character.Text = xml_node.attribute("t").as_string(alphabet_character.Display.c_str());
 
     for (auto potentialActions : xml_node.children()) {
         const char* actionName = potentialActions.name();
