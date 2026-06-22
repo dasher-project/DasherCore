@@ -21,7 +21,6 @@ TEST(action_registry_empty) {
     std::map<std::string, std::string> emptyAttrs;
     ASSERT(registry.create("nonexistent", emptyAttrs) == nullptr);
 
-    printf("  action_registry_empty passed\n");
 }
 
 TEST(action_registry_factory) {
@@ -37,7 +36,6 @@ TEST(action_registry_factory) {
     ASSERT(action != nullptr);
     delete action;
 
-    printf("  action_registry_factory passed\n");
 }
 
 TEST(action_registry_custom_action) {
@@ -72,7 +70,6 @@ TEST(action_registry_custom_action) {
     ASSERT_STR_EQ(receivedAttrs["key1"].c_str(), "val1");
     ASSERT_STR_EQ(receivedAttrs["key2"].c_str(), "val2");
 
-    printf("  action_registry_custom_action passed\n");
 }
 
 TEST(action_registry_overwrite) {
@@ -95,7 +92,6 @@ TEST(action_registry_overwrite) {
     ASSERT_EQ(callCount1, 0);
     ASSERT_EQ(callCount2, 1);
 
-    printf("  action_registry_overwrite passed\n");
 }
 
 // ── C API integration tests ────────────────────────────────────────────────
@@ -134,7 +130,6 @@ TEST(capi_register_action_null_safety) {
 
     ASSERT_EQ(callbackCalled, 0);
 
-    printf("  capi_register_action_null_safety passed\n");
 }
 
 TEST(capi_register_action_before_realize) {
@@ -170,7 +165,6 @@ TEST(capi_register_action_before_realize) {
     ASSERT(root_children > 0);
 
     dasher_destroy(ctx);
-    printf("  capi_register_action_before_realize passed\n");
 }
 
 TEST(capi_register_action_after_realize) {
@@ -199,7 +193,6 @@ TEST(capi_register_action_after_realize) {
     dasher_frame(ctx, 2000, &commands, &cmd_count, &strings, &str_count);
 
     dasher_destroy(ctx);
-    printf("  capi_register_action_after_realize passed\n");
 }
 
 TEST(capi_control_mode_enables_successfully) {
@@ -223,7 +216,6 @@ TEST(capi_control_mode_enables_successfully) {
     ASSERT(cmd_count > 0);
 
     dasher_destroy(ctx);
-    printf("  capi_control_mode_enables_successfully passed\n");
 }
 
 TEST(capi_action_callback_receives_attrs) {
@@ -253,25 +245,4 @@ TEST(capi_action_callback_receives_attrs) {
     // The ActionRegistry unit tests above verify callback firing directly.
 
     dasher_destroy(ctx);
-    printf("  capi_action_callback_receives_attrs passed\n");
-}
-
-int main(int argc, char* argv[]) {
-    printf("Running control action system tests...\n\n");
-
-    // ActionRegistry unit tests
-    test_action_registry_empty();
-    test_action_registry_factory();
-    test_action_registry_custom_action();
-    test_action_registry_overwrite();
-
-    // C API integration tests
-    test_capi_register_action_null_safety();
-    test_capi_register_action_before_realize();
-    test_capi_register_action_after_realize();
-    test_capi_control_mode_enables_successfully();
-    test_capi_action_callback_receives_attrs();
-
-    printf("\n All control action tests passed!\n");
-    return 0;
 }

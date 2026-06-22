@@ -14,14 +14,12 @@ TEST(param_schema_all_valid) {
         ASSERT(info.type >= 0 && info.type <= 2);
         ASSERT(info.ui_type >= 0 && info.ui_type <= 5);
     }
-    printf("v param_schema_all_valid passed\n");
 }
 
 TEST(param_schema_out_of_range) {
     dasher_parameter_info info;
     ASSERT_EQ(dasher_get_parameter_info(-1, &info), -1);
     ASSERT_EQ(dasher_get_parameter_info(99999, &info), -1);
-    printf("v param_schema_out_of_range passed\n");
 }
 
 TEST(param_find_all_known_keys) {
@@ -58,14 +56,12 @@ TEST(param_find_all_known_keys) {
         printf("  %s -> key %d\n", known_keys[i], key);
         ASSERT(key >= 0);
     }
-    printf("v param_find_all_known_keys passed\n");
 }
 
 TEST(param_find_nonexistent) {
     ASSERT_EQ(dasher_find_parameter_key("NONEXISTENT_PARAM"), -1);
     ASSERT_EQ(dasher_find_parameter_key(""), -1);
     ASSERT_EQ(dasher_find_parameter_key(nullptr), -1);
-    printf("v param_find_nonexistent passed\n");
 }
 
 TEST(param_bool_roundtrip) {
@@ -85,7 +81,6 @@ TEST(param_bool_roundtrip) {
     dasher_set_bool_parameter(ctx, key, orig);
 
     dasher_destroy(ctx);
-    printf("v param_bool_roundtrip passed\n");
 }
 
 TEST(param_long_roundtrip) {
@@ -104,7 +99,6 @@ TEST(param_long_roundtrip) {
     dasher_set_long_parameter(ctx, bitrate_key, orig);
 
     dasher_destroy(ctx);
-    printf("v param_long_roundtrip passed\n");
 }
 
 TEST(param_string_roundtrip) {
@@ -122,7 +116,6 @@ TEST(param_string_roundtrip) {
     free((void*)orig);
 
     dasher_destroy(ctx);
-    printf("v param_string_roundtrip passed\n");
 }
 
 TEST(param_speed_clamping) {
@@ -143,7 +136,6 @@ TEST(param_speed_clamping) {
     ASSERT(speed >= 20);
 
     dasher_destroy(ctx);
-    printf("v param_speed_clamping passed\n");
 }
 
 TEST(param_speed_affects_bitrate) {
@@ -164,7 +156,6 @@ TEST(param_speed_affects_bitrate) {
     ASSERT(bitrate_200 > bitrate_100);
 
     dasher_destroy(ctx);
-    printf("v param_speed_affects_bitrate passed\n");
 }
 
 TEST(param_type_consistency) {
@@ -190,7 +181,6 @@ TEST(param_type_consistency) {
     ASSERT(bool_count > 0);
     ASSERT(long_count > 0);
     ASSERT(string_count > 0);
-    printf("v param_type_consistency passed\n");
 }
 
 TEST(param_groups_are_valid) {
@@ -227,7 +217,6 @@ TEST(param_groups_are_valid) {
             printf("  Unknown group '%s' for param '%s' (key=%d)\n", info.group, info.name, info.key);
         }
     }
-    printf("v param_groups_are_valid passed\n");
 }
 
 TEST(param_persistence_roundtrip) {
@@ -265,7 +254,6 @@ TEST(param_persistence_roundtrip) {
 
     free((void*)color2);
     dasher_destroy(ctx2);
-    printf("v param_persistence_roundtrip passed\n");
 }
 
 TEST(param_invalid_key_safe) {
@@ -274,26 +262,4 @@ TEST(param_invalid_key_safe) {
     // We only verify find_parameter_key returns -1 for unknown names.
     ASSERT_EQ(dasher_find_parameter_key("NONEXISTENT_KEY_XYZ"), -1);
     ASSERT_EQ(dasher_find_parameter_key(""), -1);
-    printf("v param_invalid_key_safe passed\n");
-}
-
-int main() {
-    printf("Running Dasher parameter tests...\n\n");
-
-    test_param_schema_all_valid();
-    test_param_schema_out_of_range();
-    test_param_find_all_known_keys();
-    test_param_find_nonexistent();
-    test_param_bool_roundtrip();
-    test_param_long_roundtrip();
-    test_param_string_roundtrip();
-    test_param_speed_clamping();
-    test_param_speed_affects_bitrate();
-    test_param_type_consistency();
-    test_param_groups_are_valid();
-    test_param_persistence_roundtrip();
-    test_param_invalid_key_safe();
-
-    printf("\nAll parameter tests passed!\n");
-    return 0;
 }

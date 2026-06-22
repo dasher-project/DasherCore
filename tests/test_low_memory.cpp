@@ -1,16 +1,5 @@
 // Low-memory mode tests: verify reduced memory footprint
 #include "test_common.h"
-
-static void run_frames(dasher_ctx* ctx, int count) {
-    int* commands = nullptr;
-    int cmd_count = 0;
-    char** strings = nullptr;
-    int str_count = 0;
-    for (int i = 0; i < count; i++) {
-        dasher_frame(ctx, 1000 + i * 20, &commands, &cmd_count, &strings, &str_count);
-    }
-}
-
 TEST(low_memory_alphabet_count) {
     // In low-memory mode, only 1-2 alphabets should be loaded
     dasher_ctx* ctx = create_isolated_context();
@@ -35,7 +24,6 @@ TEST(low_memory_alphabet_count) {
     ASSERT(normal_count > count);
 
     dasher_destroy(ctx);
-    printf("v low_memory_alphabet_count passed\n");
 }
 
 TEST(low_memory_text_output) {
@@ -57,7 +45,7 @@ TEST(low_memory_text_output) {
     dasher_mouse_down(ctx);
     for (int i = 0; i < 100; i++) {
         dasher_mouse_move(ctx, 700.0f, 280.0f);
-        run_frames(ctx, 1);
+        run_frames(ctx, 1, 1000, 20);
     }
     dasher_mouse_up(ctx);
 
@@ -67,7 +55,6 @@ TEST(low_memory_text_output) {
     ASSERT(strlen(text) > 0);
 
     dasher_destroy(ctx);
-    printf("v low_memory_text_output passed\n");
 }
 
 TEST(low_memory_alphabet_switch) {
@@ -98,7 +85,7 @@ TEST(low_memory_alphabet_switch) {
     dasher_mouse_down(ctx);
     for (int i = 0; i < 50; i++) {
         dasher_mouse_move(ctx, 700.0f, 280.0f);
-        run_frames(ctx, 1);
+        run_frames(ctx, 1, 1000, 20);
     }
     dasher_mouse_up(ctx);
 
@@ -106,7 +93,6 @@ TEST(low_memory_alphabet_switch) {
     ASSERT(text != nullptr);
 
     dasher_destroy(ctx);
-    printf("v low_memory_alphabet_switch passed\n");
 }
 
 TEST(low_memory_frame_commands) {
@@ -136,17 +122,4 @@ TEST(low_memory_frame_commands) {
 
     dasher_mouse_up(ctx);
     dasher_destroy(ctx);
-    printf("v low_memory_frame_commands passed\n");
-}
-
-int main() {
-    printf("Running Dasher low-memory mode tests...\n\n");
-
-    test_low_memory_alphabet_count();
-    test_low_memory_text_output();
-    test_low_memory_alphabet_switch();
-    test_low_memory_frame_commands();
-
-    printf("\nAll low-memory tests passed!\n");
-    return 0;
 }

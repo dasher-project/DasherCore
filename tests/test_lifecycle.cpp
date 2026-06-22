@@ -2,17 +2,6 @@
 #include "test_common.h"
 #include <cmath>
 #include <initializer_list>
-
-static void run_frames(dasher_ctx* ctx, int count, int64_t start_ms) {
-    int* commands = nullptr;
-    int cmd_count = 0;
-    char** strings = nullptr;
-    int str_count = 0;
-    for (int i = 0; i < count; i++) {
-        dasher_frame(ctx, start_ms + i * 16, &commands, &cmd_count, &strings, &str_count);
-    }
-}
-
 TEST(lifecycle_create_destroy_recreate) {
     for (int round = 0; round < 3; round++) {
         dasher_ctx* ctx = create_isolated_context();
@@ -29,7 +18,6 @@ TEST(lifecycle_create_destroy_recreate) {
         dasher_destroy(ctx);
         printf("  Round %d: ok\n", round);
     }
-    printf("v lifecycle_create_destroy_recreate passed\n");
 }
 
 TEST(lifecycle_multiple_contexts) {
@@ -50,7 +38,6 @@ TEST(lifecycle_multiple_contexts) {
 
     dasher_destroy(ctx1);
     dasher_destroy(ctx2);
-    printf("v lifecycle_multiple_contexts passed\n");
 }
 
 TEST(lifecycle_long_session) {
@@ -81,7 +68,6 @@ TEST(lifecycle_long_session) {
     printf("  Final output length: %zu\n", strlen(final_text));
 
     dasher_destroy(ctx);
-    printf("v lifecycle_long_session passed\n");
 }
 
 TEST(lifecycle_screen_resize) {
@@ -106,7 +92,6 @@ TEST(lifecycle_screen_resize) {
     printf("  After resize to 1024x768: %d commands\n", cmd_count);
 
     dasher_destroy(ctx);
-    printf("v lifecycle_screen_resize passed\n");
 }
 
 TEST(lifecycle_rapid_mouse_movement) {
@@ -125,7 +110,6 @@ TEST(lifecycle_rapid_mouse_movement) {
 
     printf("  Survived 500 rapid mouse moves\n");
     dasher_destroy(ctx);
-    printf("v lifecycle_rapid_mouse_movement passed\n");
 }
 
 TEST(lifecycle_game_mode_repeated) {
@@ -148,7 +132,6 @@ TEST(lifecycle_game_mode_repeated) {
     }
 
     dasher_destroy(ctx);
-    printf("v lifecycle_game_mode_repeated passed\n");
 }
 
 TEST(lifecycle_speed_changes_mid_session) {
@@ -168,7 +151,6 @@ TEST(lifecycle_speed_changes_mid_session) {
     }
 
     dasher_destroy(ctx);
-    printf("v lifecycle_speed_changes_mid_session passed\n");
 }
 
 TEST(lifecycle_output_callback_userdata) {
@@ -207,7 +189,6 @@ TEST(lifecycle_output_callback_userdata) {
     ASSERT(data.event_count > 0);
 
     dasher_destroy(ctx);
-    printf("v lifecycle_output_callback_userdata passed\n");
 }
 
 TEST(lifecycle_message_callback_userdata) {
@@ -239,7 +220,6 @@ TEST(lifecycle_message_callback_userdata) {
     printf("  Messages received: %d\n", msg.count);
 
     dasher_destroy(ctx);
-    printf("v lifecycle_message_callback_userdata passed\n");
 }
 
 TEST(lifecycle_reset_clears_state) {
@@ -278,7 +258,6 @@ TEST(lifecycle_reset_clears_state) {
     printf("  After re-type: '%s' (len=%zu)\n", text3, strlen(text3));
 
     dasher_destroy(ctx);
-    printf("v lifecycle_reset_clears_state passed\n");
 }
 
 TEST(lifecycle_speak_callback_registration) {
@@ -321,24 +300,4 @@ TEST(lifecycle_speak_callback_registration) {
     printf("  Speak callback fired: %d times\n", data.count);
 
     dasher_destroy(ctx);
-    printf("v lifecycle_speak_callback_registration passed\n");
-}
-
-int main() {
-    printf("Running Dasher lifecycle and robustness tests...\n\n");
-
-    test_lifecycle_create_destroy_recreate();
-    test_lifecycle_multiple_contexts();
-    test_lifecycle_long_session();
-    test_lifecycle_screen_resize();
-    test_lifecycle_rapid_mouse_movement();
-    test_lifecycle_game_mode_repeated();
-    test_lifecycle_speed_changes_mid_session();
-    test_lifecycle_output_callback_userdata();
-    test_lifecycle_message_callback_userdata();
-    test_lifecycle_reset_clears_state();
-    test_lifecycle_speak_callback_registration();
-
-    printf("\nAll lifecycle tests passed!\n");
-    return 0;
 }

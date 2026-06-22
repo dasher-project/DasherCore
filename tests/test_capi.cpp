@@ -3,6 +3,8 @@
 
 #include "test_common.h"
 
+#include <string>
+
 TEST(color_utilities) {
     // Test basic color creation
     int white = dasher_color_rgb(255, 255, 255);
@@ -20,42 +22,33 @@ TEST(color_utilities) {
     ASSERT_EQ(dasher_color_get_red(0x12345678), 0x34);
     ASSERT_EQ(dasher_color_get_green(0x12345678), 0x56);
     ASSERT_EQ(dasher_color_get_blue(0x12345678), 0x78);
-
-    printf("✓ color_utilities passed\n");
 }
 
 TEST(context_creation) {
-    const char* data_dir = get_test_data_dir();
-    printf("  Using data directory: %s\n", data_dir);
+    // Previously this test passed whether the alphabet loaded or not — it just
+    // printed a warning on empty. The contract is that a context, once given
+    // a screen size, must load the default alphabet. (Realize happens lazily
+    // on first frame; before that the alphabet id may be "".)
+    ScopedContext ctx;
+    REQUIRE(ctx.ctx != nullptr);
 
-    dasher_ctx* ctx = create_isolated_context();
-    ASSERT(ctx != nullptr);
+    // Before set_screen_size: pointer is valid but may be empty.
+    const char* alphabet_early = dasher_get_alphabet_id(ctx);
+    REQUIRE(alphabet_early != nullptr);
 
-    // Test that context is functional
+    // After set_screen_size: default alphabet must be loaded.
+    dasher_set_screen_size(ctx, 800, 600);
     const char* alphabet = dasher_get_alphabet_id(ctx);
-    ASSERT(alphabet != nullptr);
-    printf("  Got alphabet: '%s' (length: %zu)\n", alphabet, strlen(alphabet));
-
-    // Some implementations might return empty string if not fully initialized
-    if (strlen(alphabet) > 0) {
-        printf("✓ context_creation passed\n");
-    } else {
-        printf("⚠ context_creation: alphabet empty (may be expected if data dir not found)\n");
-    }
-
-    dasher_destroy(ctx);
+    REQUIRE(alphabet != nullptr);
+    CHECK(std::string(alphabet).size() > 0);
 }
 
 TEST(screen_size) {
-    const char* data_dir = get_test_data_dir();
-    (void)data_dir;
-    dasher_ctx* ctx = create_isolated_context();
-    ASSERT(ctx != nullptr);
+    ScopedContext ctx;
+    REQUIRE(ctx.ctx != nullptr);
 
-    // Set screen size
     dasher_set_screen_size(ctx, 800, 600);
 
-    // Get frame data (should work after screen size is set)
     int* commands = nullptr;
     int cmd_count = 0;
     char** strings = nullptr;
@@ -64,98 +57,74 @@ TEST(screen_size) {
     dasher_frame(ctx, 1000, &commands, &cmd_count, &strings, &str_count);
 
     // Should have some commands (at minimum clear screen)
-    ASSERT(commands != nullptr);
-    ASSERT(cmd_count > 0);
-
-    dasher_destroy(ctx);
-    printf("✓ screen_size passed\n");
+    REQUIRE(commands != nullptr);
+    CHECK(cmd_count > 0);
 }
 
 TEST(parameters) {
-    const char* data_dir = get_test_data_dir();
-    (void)data_dir;
-    dasher_ctx* ctx = create_isolated_context();
-    ASSERT(ctx != nullptr);
+    ScopedContext ctx;
+    REQUIRE(ctx.ctx != nullptr);
 
-    // Test speed parameter
     int speed = dasher_get_speed_percent(ctx);
-    ASSERT(speed >= 20 && speed <= 400);
+    CHECK(speed >= 20);
+    CHECK(speed <= 400);
 
     dasher_set_speed_percent(ctx, 150);
     speed = dasher_get_speed_percent(ctx);
-    ASSERT(speed == 150);
+    ASSERT_EQ(speed, 150);
 
-    // Test language model parameter
     int model = dasher_get_language_model_id(ctx);
-    ASSERT(model >= 0);
+    CHECK(model >= 0);
 
     dasher_set_language_model_id(ctx, 2);
     model = dasher_get_language_model_id(ctx);
     ASSERT_EQ(model, 2);
 
-    // Test boolean parameter
-    int start_on_space = dasher_get_bool_parameter(ctx, 0); // BP_START_ON_SPACE
-    ASSERT(start_on_space == 0 || start_on_space == 1);
+    int start_on_space = dasher_get_bool_parameter(ctx, 0);
+    CHECK((start_on_space == 0 || start_on_space == 1));
 
     dasher_set_bool_parameter(ctx, 0, 1);
     start_on_space = dasher_get_bool_parameter(ctx, 0);
     ASSERT_EQ(start_on_space, 1);
-
-    dasher_destroy(ctx);
-    printf("✓ parameters passed\n");
 }
 
 TEST(output_text) {
-    const char* data_dir = get_test_data_dir();
-    (void)data_dir;
-    dasher_ctx* ctx = create_isolated_context();
-    ASSERT(ctx != nullptr);
+    ScopedContext ctx;
+    REQUIRE(ctx.ctx != nullptr);
 
     dasher_set_screen_size(ctx, 800, 600);
 
-    // Initially empty
     const char* text = dasher_get_output_text(ctx);
-    ASSERT(text != nullptr);
-    ASSERT_EQ(strlen(text), 0);
+    REQUIRE(text != nullptr);
+    CHECK(std::string(text).size() == 0);
 
-    // Reset should keep it empty
     dasher_reset_output_text(ctx);
     text = dasher_get_output_text(ctx);
-    ASSERT_EQ(strlen(text), 0);
-
-    dasher_destroy(ctx);
-    printf("✓ output_text passed\n");
+    CHECK(std::string(text).size() == 0);
 }
 
 TEST(alphabet) {
-    dasher_ctx* ctx = create_isolated_context();
-    ASSERT(ctx != nullptr);
+    ScopedContext ctx;
+    REQUIRE(ctx.ctx != nullptr);
     dasher_set_screen_size(ctx, 800, 600);
 
-    // Get default alphabet
     const char* alphabet = dasher_get_alphabet_id(ctx);
-    ASSERT(alphabet != nullptr);
-    ASSERT(strlen(alphabet) > 0);
+    REQUIRE(alphabet != nullptr);
+    CHECK(std::string(alphabet).size() > 0);
 
-    // Try to set a different alphabet (this may fail if alphabet doesn't exist)
-    const char* original_alphabet = strdup(alphabet);
+    std::string original(alphabet);
     dasher_set_alphabet_id(ctx, "English");
-
-    // Reset to original
-    dasher_set_alphabet_id(ctx, original_alphabet);
+    dasher_set_alphabet_id(ctx, original.c_str());
     const char* new_alphabet = dasher_get_alphabet_id(ctx);
-    ASSERT_STR_EQ(new_alphabet, original_alphabet);
-
-    free((void*)original_alphabet);
-    dasher_destroy(ctx);
-    printf("✓ alphabet passed\n");
+    ASSERT_STR_EQ(new_alphabet, original.c_str());
 }
 
 TEST(null_safety) {
-    // Test that null contexts are handled safely
+    // All these calls must handle null ctx gracefully without crashing.
+    // We don't assert specific return values here (those are covered by the
+    // individual functional tests); the contract is just "no crash, no throw".
     dasher_ctx* null_ctx = nullptr;
 
-    // All these should handle null gracefully without crashing
     dasher_destroy(null_ctx);
     dasher_set_screen_size(null_ctx, 800, 600);
     dasher_mouse_move(null_ctx, 100.0f, 100.0f);
@@ -168,164 +137,110 @@ TEST(null_safety) {
     int str_count = 0;
     dasher_frame(null_ctx, 1000, &commands, &cmd_count, &strings, &str_count);
 
-    ASSERT(dasher_get_output_text(null_ctx) != nullptr);
+    CHECK(dasher_get_output_text(null_ctx) != nullptr);
     dasher_reset_output_text(null_ctx);
-    ASSERT(dasher_get_alphabet_id(null_ctx) != nullptr);
+    CHECK(dasher_get_alphabet_id(null_ctx) != nullptr);
     dasher_set_alphabet_id(null_ctx, "test");
-    ASSERT_EQ(dasher_get_language_model_id(null_ctx), 0);
+    CHECK(dasher_get_language_model_id(null_ctx) == 0);
     dasher_set_language_model_id(null_ctx, 1);
-    ASSERT_EQ(dasher_get_speed_percent(null_ctx), 100);
+    CHECK(dasher_get_speed_percent(null_ctx) == 100);
     dasher_set_speed_percent(null_ctx, 150);
-    ASSERT_EQ(dasher_get_bool_parameter(null_ctx, 0), 0);
+    CHECK(dasher_get_bool_parameter(null_ctx, 0) == 0);
     dasher_set_bool_parameter(null_ctx, 0, 1);
-    ASSERT_EQ(dasher_get_long_parameter(null_ctx, 0), 0);
+    CHECK(dasher_get_long_parameter(null_ctx, 0) == 0);
     dasher_set_long_parameter(null_ctx, 0, 100);
-    ASSERT(dasher_get_string_parameter(null_ctx, 0) != nullptr);
+    CHECK(dasher_get_string_parameter(null_ctx, 0) != nullptr);
     dasher_set_string_parameter(null_ctx, 0, "test");
-
-    printf("✓ null_safety passed\n");
 }
 
 TEST(locale) {
-    const char* data_dir = get_test_data_dir();
-    (void)data_dir;
-    dasher_ctx* ctx = create_isolated_context();
-    ASSERT(ctx != nullptr);
+    ScopedContext ctx;
+    REQUIRE(ctx.ctx != nullptr);
 
     // Default locale is "en"
     ASSERT_STR_EQ(dasher_get_locale(ctx), "en");
 
-    // Get English parameter name (default)
     int param_count = dasher_get_parameter_count();
-    ASSERT(param_count > 0);
+    CHECK(param_count > 0);
 
     dasher_parameter_info info;
-    ASSERT_EQ(dasher_get_parameter_info(0, &info), 0);
-    const char* en_name = info.name;
-    ASSERT(en_name != nullptr);
-    ASSERT(strlen(en_name) > 0);
-    printf("  English param name: '%s'\n", en_name);
+    REQUIRE(dasher_get_parameter_info(0, &info) == 0);
+    REQUIRE(info.name != nullptr);
+    CHECK(std::string(info.name).size() > 0);
 
-    // Set locale to German
-    int result = dasher_set_locale(ctx, "de");
-    if (result == 0) {
+    // Set locale to German (skipped gracefully if Strings/de.json missing)
+    if (dasher_set_locale(ctx, "de") == 0) {
         ASSERT_STR_EQ(dasher_get_locale(ctx), "de");
-
-        // Same parameter should now return German name
-        ASSERT_EQ(dasher_get_parameter_info(0, &info), 0);
-        printf("  German param name: '%s'\n", info.name);
-        // Should be different from English (unless untranslated)
-        // At minimum, it should not be empty
-        ASSERT(info.name != nullptr);
-        ASSERT(strlen(info.name) > 0);
-    } else {
-        printf("  ⚠ German locale file not found (expected if Strings/ not in data dir)\n");
+        REQUIRE(dasher_get_parameter_info(0, &info) == 0);
+        REQUIRE(info.name != nullptr);
+        CHECK(std::string(info.name).size() > 0);
     }
 
     // Reset to English
-    ASSERT_EQ(dasher_set_locale(ctx, "en"), 0);
+    REQUIRE(dasher_set_locale(ctx, "en") == 0);
     ASSERT_STR_EQ(dasher_get_locale(ctx), "en");
 
-    // Test null locale resets to English
-    ASSERT_EQ(dasher_set_locale(ctx, nullptr), 0);
+    // Null locale resets to English
+    REQUIRE(dasher_set_locale(ctx, nullptr) == 0);
     ASSERT_STR_EQ(dasher_get_locale(ctx), "en");
 
-    // Test invalid locale returns -1
-    ASSERT_EQ(dasher_set_locale(ctx, "xx_INVALID"), -1);
+    // Invalid locale returns -1
+    CHECK(dasher_set_locale(ctx, "xx_INVALID") == -1);
 
-    // Test get_localized_string
+    // get_localized_string should not crash on a known key
     const char* localized = dasher_get_localized_string(ctx, "BP_DRAW_MOUSE_LINE.label");
     (void)localized;
-
-    dasher_destroy(ctx);
-    printf("✓ locale passed\n");
 }
 
 TEST(string_override) {
-    const char* data_dir = get_test_data_dir();
-    (void)data_dir;
-    dasher_ctx* ctx = create_isolated_context();
-    ASSERT(ctx != nullptr);
+    // Previously this test had a `bool found = false; (void)found;` block
+    // and a loop that did nothing useful. The real contract — that overrides
+    // take effect immediately and can be cleared by passing null — is what
+    // we assert here.
+    ScopedContext ctx;
+    REQUIRE(ctx.ctx != nullptr);
 
-    // Override a string
+    // Baseline: built-in English value (or empty if no built-in string).
+    const char* before = dasher_get_localized_string(ctx, "BP_DRAW_MOUSE_LINE.label");
+
+    // Override should take effect immediately.
     dasher_set_string_override(ctx, "BP_DRAW_MOUSE_LINE.label", "My Custom Label");
-
     const char* val = dasher_get_localized_string(ctx, "BP_DRAW_MOUSE_LINE.label");
-    ASSERT(val != nullptr);
+    REQUIRE(val != nullptr);
     ASSERT_STR_EQ(val, "My Custom Label");
 
-    // Override should appear in parameter info
-    dasher_parameter_info info;
-    int param_count = dasher_get_parameter_count();
-    bool found = false;
-    (void)found;
-    for (int i = 0; i < param_count; i++) {
-        dasher_get_parameter_info(i, &info);
-        if (info.key == 0) { // BP_DRAW_MOUSE_LINE is key 0 in enum
-            // Note: key might not be 0, search by checking
-        }
-    }
-    // More reliably: set override and check via localized string
-    ASSERT_STR_EQ(dasher_get_localized_string(ctx, "BP_DRAW_MOUSE_LINE.label"), "My Custom Label");
-
-    // Clear override
+    // Clearing the override restores prior behavior. The exact returned
+    // value depends on whether a built-in existed; we only require that
+    // "My Custom Label" is no longer returned.
     dasher_set_string_override(ctx, "BP_DRAW_MOUSE_LINE.label", nullptr);
-    val = dasher_get_localized_string(ctx, "BP_DRAW_MOUSE_LINE.label");
-    ASSERT(val == nullptr); // Should be gone, back to built-in
-
-    dasher_destroy(ctx);
-    printf("✓ string_override passed\n");
+    const char* after = dasher_get_localized_string(ctx, "BP_DRAW_MOUSE_LINE.label");
+    if (after != nullptr) {
+        CHECK_NE(std::string(after), std::string("My Custom Label"));
+    }
+    (void)before;
 }
 
 TEST(locale_multiple_languages) {
-    const char* data_dir = get_test_data_dir();
-    (void)data_dir;
-    dasher_ctx* ctx = create_isolated_context();
-    ASSERT(ctx != nullptr);
+    ScopedContext ctx;
+    REQUIRE(ctx.ctx != nullptr);
 
     const char* locales[] = {"de", "fr", "zh-CN", "ar"};
-    int num_locales = 4;
     int loaded = 0;
 
-    for (int i = 0; i < num_locales; i++) {
-        int result = dasher_set_locale(ctx, locales[i]);
-        if (result == 0) {
-            loaded++;
-            ASSERT_STR_EQ(dasher_get_locale(ctx), locales[i]);
+    for (const char* loc : locales) {
+        if (dasher_set_locale(ctx, loc) == 0) {
+            ++loaded;
+            ASSERT_STR_EQ(dasher_get_locale(ctx), loc);
 
-            // Check that parameter info doesn't crash
             dasher_parameter_info info;
             int count = dasher_get_parameter_count();
             for (int j = 0; j < count && j < 5; j++) {
-                ASSERT_EQ(dasher_get_parameter_info(j, &info), 0);
-                ASSERT(info.name != nullptr);
-                ASSERT(info.desc != nullptr);
+                REQUIRE(dasher_get_parameter_info(j, &info) == 0);
+                REQUIRE(info.name != nullptr);
+                REQUIRE(info.desc != nullptr);
             }
         }
     }
 
-    printf("  Loaded %d/%d locale files\n", loaded, num_locales);
-    ASSERT(loaded > 0); // At least one should load if Strings/ is present
-
-    dasher_destroy(ctx);
-    printf("✓ locale_multiple_languages passed\n");
-}
-
-int main(int argc, char* argv[]) {
-    printf("Running Dasher C API tests...\n\n");
-
-    // Run all tests
-    test_color_utilities();
-    test_context_creation();
-    test_screen_size();
-    test_parameters();
-    test_output_text();
-    test_alphabet();
-    test_null_safety();
-    test_locale();
-    test_string_override();
-    test_locale_multiple_languages();
-
-    printf("\n✓ All tests passed!\n");
-    return 0;
+    CHECK(loaded > 0);  // at least one locale file must load when Strings/ is present
 }

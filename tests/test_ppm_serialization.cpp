@@ -1,16 +1,6 @@
 // PPM serialization tests: verify model state consistency across save/reload cycles
 #include "test_common.h"
 #include <sys/stat.h>
-
-static void run_frames(dasher_ctx* ctx, int count) {
-    int* c = nullptr;
-    int cc = 0;
-    char** s = nullptr;
-    int sc = 0;
-    for (int i = 0; i < count; i++)
-        dasher_frame(ctx, 1000 + i * 16, &c, &cc, &s, &sc);
-}
-
 static unsigned long hash_probabilities(dasher_ctx* ctx) {
     int lbnds[256], hbnds[256];
     int n = dasher_get_probabilities(ctx, lbnds, hbnds, 256);
@@ -35,7 +25,6 @@ TEST(ppm_prob_consistent_across_contexts) {
     }
     ASSERT_EQ(hashes[0], hashes[1]);
     ASSERT_EQ(hashes[0], hashes[2]);
-    printf("v ppm_prob_consistent_across_contexts passed\n");
 }
 
 TEST(ppm_training_changes_prob_hash) {
@@ -60,7 +49,6 @@ TEST(ppm_training_changes_prob_hash) {
     ASSERT_EQ(hbnds[n - 1], 65536);
 
     dasher_destroy(ctx);
-    printf("v ppm_training_changes_prob_hash passed\n");
 }
 
 TEST(ppm_prob_after_type_matches_initial) {
@@ -83,7 +71,6 @@ TEST(ppm_prob_after_type_matches_initial) {
     ASSERT_EQ(hash_initial, hash_reset);
 
     dasher_destroy(ctx);
-    printf("v ppm_prob_after_type_matches_initial passed\n");
 }
 
 TEST(ppm_different_training_produces_different_hash) {
@@ -114,7 +101,6 @@ TEST(ppm_different_training_produces_different_hash) {
     ASSERT(hashes[0] != 0);
     ASSERT(hashes[1] != 0);
 
-    printf("v ppm_different_training_produces_different_hash passed\n");
 }
 
 TEST(ppm_root_child_count_stable) {
@@ -130,7 +116,6 @@ TEST(ppm_root_child_count_stable) {
     ASSERT_EQ(counts[0], counts[1]);
     ASSERT_EQ(counts[0], counts[2]);
 
-    printf("v ppm_root_child_count_stable passed\n");
 }
 
 TEST(ppm_normalized_after_training) {
@@ -147,19 +132,4 @@ TEST(ppm_normalized_after_training) {
     ASSERT_EQ(hbnds[n - 1], 65536);
 
     dasher_destroy(ctx);
-    printf("v ppm_normalized_after_training passed\n");
-}
-
-int main() {
-    printf("Running PPM serialization tests...\n\n");
-
-    test_ppm_prob_consistent_across_contexts();
-    test_ppm_training_changes_prob_hash();
-    test_ppm_prob_after_type_matches_initial();
-    test_ppm_different_training_produces_different_hash();
-    test_ppm_root_child_count_stable();
-    test_ppm_normalized_after_training();
-
-    printf("\nAll PPM serialization tests passed!\n");
-    return 0;
 }

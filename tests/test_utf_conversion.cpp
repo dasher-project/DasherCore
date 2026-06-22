@@ -26,7 +26,6 @@ TEST(utf8_ascii_roundtrip) {
     *backStart = 0;
     ASSERT_STR_EQ((char*)back, "Hello");
 
-    printf("v utf8_ascii_roundtrip passed\n");
 }
 
 TEST(utf8_multibyte_roundtrip) {
@@ -55,7 +54,6 @@ TEST(utf8_multibyte_roundtrip) {
     *backStart = 0;
     ASSERT_STR_EQ((char*)back, utf8_str);
 
-    printf("v utf8_multibyte_roundtrip passed\n");
 }
 
 TEST(utf8_emoji_roundtrip) {
@@ -85,7 +83,6 @@ TEST(utf8_emoji_roundtrip) {
     *backStart = 0;
     ASSERT_STR_EQ((char*)back, utf8_str);
 
-    printf("v utf8_emoji_roundtrip passed\n");
 }
 
 TEST(utf8_utf32_roundtrip) {
@@ -113,7 +110,6 @@ TEST(utf8_utf32_roundtrip) {
     *backStart = 0;
     ASSERT_STR_EQ((char*)back, utf8_str);
 
-    printf("v utf8_utf32_roundtrip passed\n");
 }
 
 TEST(utf8_empty_string) {
@@ -128,7 +124,6 @@ TEST(utf8_empty_string) {
     ASSERT_EQ(cr, conversionOK);
     ASSERT_EQ(tgtStart - target, 0);
 
-    printf("v utf8_empty_string passed\n");
 }
 
 TEST(utf8_legal_sequence_check) {
@@ -138,25 +133,8 @@ TEST(utf8_legal_sequence_check) {
     UTF8 single[1] = {'A'};
     ASSERT(isLegalUTF8Sequence(single, single + 1));
 
-    printf("v utf8_legal_sequence_check passed\n");
 }
 
 TEST(utf8_replacement_char) {
     ASSERT_EQ(UNI_REPLACEMENT_CHAR, (UTF32)0x0000FFFD);
-    printf("v utf8_replacement_char passed\n");
-}
-
-int main() {
-    printf("Running UTF conversion tests...\n\n");
-
-    test_utf8_ascii_roundtrip();
-    test_utf8_multibyte_roundtrip();
-    test_utf8_emoji_roundtrip();
-    test_utf8_utf32_roundtrip();
-    test_utf8_empty_string();
-    test_utf8_legal_sequence_check();
-    test_utf8_replacement_char();
-
-    printf("\nAll UTF conversion tests passed!\n");
-    return 0;
 }

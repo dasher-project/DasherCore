@@ -15,7 +15,6 @@ TEST(map_symbol_count_matches_alphabet) {
     ASSERT(root_children > 0);
 
     dasher_destroy(ctx);
-    printf("v map_symbol_count_matches_alphabet passed\n");
 }
 
 TEST(map_first_symbol_is_valid) {
@@ -35,7 +34,6 @@ TEST(map_first_symbol_is_valid) {
     }
 
     dasher_destroy(ctx);
-    printf("v map_first_symbol_is_valid passed\n");
 }
 
 TEST(map_all_symbols_accessible) {
@@ -56,7 +54,6 @@ TEST(map_all_symbols_accessible) {
     ASSERT(accessible > 0);
 
     dasher_destroy(ctx);
-    printf("v map_all_symbols_accessible passed\n");
 }
 
 TEST(map_alphabet_switch_updates_symbols) {
@@ -81,7 +78,6 @@ TEST(map_alphabet_switch_updates_symbols) {
     ASSERT(count2 > 0);
 
     dasher_destroy(ctx);
-    printf("v map_alphabet_switch_updates_symbols passed\n");
 }
 
 TEST(map_symbols_deterministic_across_contexts) {
@@ -105,7 +101,6 @@ TEST(map_symbols_deterministic_across_contexts) {
     ASSERT_STR_EQ(first_symbols[0], first_symbols[1]);
     ASSERT_STR_EQ(first_symbols[0], first_symbols[2]);
 
-    printf("v map_symbols_deterministic_across_contexts passed\n");
 }
 
 TEST(map_symbol_text_buffer_too_small) {
@@ -120,19 +115,4 @@ TEST(map_symbol_text_buffer_too_small) {
     // Either returns -1 or truncates - just verify no crash
 
     dasher_destroy(ctx);
-    printf("v map_symbol_text_buffer_too_small passed\n");
-}
-
-int main() {
-    printf("Running alphabet map tests...\n\n");
-
-    test_map_symbol_count_matches_alphabet();
-    test_map_first_symbol_is_valid();
-    test_map_all_symbols_accessible();
-    test_map_alphabet_switch_updates_symbols();
-    test_map_symbols_deterministic_across_contexts();
-    test_map_symbol_text_buffer_too_small();
-
-    printf("\nAll alphabet map tests passed!\n");
-    return 0;
 }

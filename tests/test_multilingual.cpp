@@ -1,23 +1,12 @@
 // Multilingual tests: alphabet switching, interaction per alphabet, locale/i18n
 #include "test_common.h"
-
-static void run_frames(dasher_ctx* ctx, int count) {
-    int* commands = nullptr;
-    int cmd_count = 0;
-    char** strings = nullptr;
-    int str_count = 0;
-    for (int i = 0; i < count; i++) {
-        dasher_frame(ctx, 1000 + i * 20, &commands, &cmd_count, &strings, &str_count);
-    }
-}
-
 static void produce_text(dasher_ctx* ctx, int frames) {
     dasher_set_speed_percent(ctx, 300);
     dasher_mouse_move(ctx, 700.0f, 300.0f);
     dasher_mouse_down(ctx);
     for (int i = 0; i < frames; i++) {
         dasher_mouse_move(ctx, 700.0f, 280.0f);
-        run_frames(ctx, 1);
+        run_frames(ctx, 1, 1000, 20);
     }
     dasher_mouse_up(ctx);
 }
@@ -33,7 +22,7 @@ TEST(alphabet_switch_german) {
     printf("  Original alphabet: '%s'\n", orig);
 
     dasher_set_alphabet_id(ctx, "Deutsch / German with limited punctuation");
-    run_frames(ctx, 5);
+    run_frames(ctx, 5, 1000, 20);
     const char* current = dasher_get_alphabet_id(ctx);
     printf("  After setting German: '%s'\n", current);
     ASSERT(strlen(current) > 0);
@@ -41,7 +30,6 @@ TEST(alphabet_switch_german) {
     dasher_set_alphabet_id(ctx, orig);
     free((void*)orig);
     dasher_destroy(ctx);
-    printf("v alphabet_switch_german passed\n");
 }
 
 TEST(alphabet_switch_french) {
@@ -50,13 +38,12 @@ TEST(alphabet_switch_french) {
     dasher_set_screen_size(ctx, 800, 600);
 
     dasher_set_alphabet_id(ctx, "Français / French with numerals and punctuation");
-    run_frames(ctx, 5);
+    run_frames(ctx, 5, 1000, 20);
     const char* current = dasher_get_alphabet_id(ctx);
     printf("  French alphabet: '%s'\n", current);
     ASSERT(strlen(current) > 0);
 
     dasher_destroy(ctx);
-    printf("v alphabet_switch_french passed\n");
 }
 
 TEST(alphabet_switch_spanish) {
@@ -65,13 +52,12 @@ TEST(alphabet_switch_spanish) {
     dasher_set_screen_size(ctx, 800, 600);
 
     dasher_set_alphabet_id(ctx, "Español / Spanish with punctuation and numerals");
-    run_frames(ctx, 5);
+    run_frames(ctx, 5, 1000, 20);
     const char* current = dasher_get_alphabet_id(ctx);
     printf("  Spanish alphabet: '%s'\n", current);
     ASSERT(strlen(current) > 0);
 
     dasher_destroy(ctx);
-    printf("v alphabet_switch_spanish passed\n");
 }
 
 TEST(alphabet_invalid_id_fallback) {
@@ -84,7 +70,7 @@ TEST(alphabet_invalid_id_fallback) {
     const char* orig = strdup(alph_id);
 
     dasher_set_alphabet_id(ctx, "Nonexistent Alphabet XYZ123");
-    run_frames(ctx, 5);
+    run_frames(ctx, 5, 1000, 20);
 
     const char* current = dasher_get_alphabet_id(ctx);
     printf("  After invalid set: '%s'\n", current);
@@ -92,7 +78,6 @@ TEST(alphabet_invalid_id_fallback) {
     dasher_set_alphabet_id(ctx, orig);
     free((void*)orig);
     dasher_destroy(ctx);
-    printf("v alphabet_invalid_id_fallback passed\n");
 }
 
 TEST(alphabet_german_produces_text) {
@@ -101,7 +86,7 @@ TEST(alphabet_german_produces_text) {
     dasher_set_screen_size(ctx, 800, 600);
 
     dasher_set_alphabet_id(ctx, "Deutsch / German with limited punctuation");
-    run_frames(ctx, 10);
+    run_frames(ctx, 10, 1000, 20);
     produce_text(ctx, 200);
 
     const char* text = dasher_get_output_text(ctx);
@@ -110,7 +95,6 @@ TEST(alphabet_german_produces_text) {
     ASSERT(strlen(text) > 0);
 
     dasher_destroy(ctx);
-    printf("v alphabet_german_produces_text passed\n");
 }
 
 TEST(alphabet_history_values) {
@@ -133,7 +117,6 @@ TEST(alphabet_history_values) {
     printf("  %d alphabet values, English found: %s\n", count, has_english ? "yes" : "no");
 
     dasher_destroy(ctx);
-    printf("v alphabet_history_values passed\n");
 }
 
 TEST(alphabet_switch_clears_output) {
@@ -151,7 +134,6 @@ TEST(alphabet_switch_clears_output) {
     ASSERT_EQ(strlen(text2), 0);
 
     dasher_destroy(ctx);
-    printf("v alphabet_switch_clears_output passed\n");
 }
 
 TEST(locale_set_and_get) {
@@ -178,7 +160,6 @@ TEST(locale_set_and_get) {
 
     free((void*)orig_locale);
     dasher_destroy(ctx);
-    printf("v locale_set_and_get passed\n");
 }
 
 TEST(locale_invalid_returns_error) {
@@ -194,7 +175,6 @@ TEST(locale_invalid_returns_error) {
     ASSERT_STR_EQ(dasher_get_locale(ctx), "en");
 
     dasher_destroy(ctx);
-    printf("v locale_invalid_returns_error passed\n");
 }
 
 TEST(locale_localized_string_lookup) {
@@ -211,7 +191,6 @@ TEST(locale_localized_string_lookup) {
     ASSERT(missing == nullptr);
 
     dasher_destroy(ctx);
-    printf("v locale_localized_string_lookup passed\n");
 }
 
 TEST(locale_string_override_and_clear) {
@@ -229,7 +208,6 @@ TEST(locale_string_override_and_clear) {
     ASSERT(cleared == nullptr);
 
     dasher_destroy(ctx);
-    printf("v locale_string_override_and_clear passed\n");
 }
 
 TEST(locale_param_names_change_with_locale) {
@@ -256,25 +234,4 @@ TEST(locale_param_names_change_with_locale) {
 
     dasher_set_locale(ctx, "en");
     dasher_destroy(ctx);
-    printf("v locale_param_names_change_with_locale passed\n");
-}
-
-int main() {
-    printf("Running Dasher multilingual tests...\n\n");
-
-    test_alphabet_switch_german();
-    test_alphabet_switch_french();
-    test_alphabet_switch_spanish();
-    test_alphabet_invalid_id_fallback();
-    test_alphabet_german_produces_text();
-    test_alphabet_history_values();
-    test_alphabet_switch_clears_output();
-    test_locale_set_and_get();
-    test_locale_invalid_returns_error();
-    test_locale_localized_string_lookup();
-    test_locale_string_override_and_clear();
-    test_locale_param_names_change_with_locale();
-
-    printf("\nAll multilingual tests passed!\n");
-    return 0;
 }

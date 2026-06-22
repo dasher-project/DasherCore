@@ -37,7 +37,6 @@ TEST(settings_all_bool_persistent_survive_reload) {
     printf("  All %d bool params toggled and reloaded\n", bool_count);
     dasher_destroy(ctx2);
 
-    printf("v settings_all_bool_persistent_survive_reload passed\n");
 }
 
 TEST(settings_speed_survives_reload) {
@@ -59,7 +58,6 @@ TEST(settings_speed_survives_reload) {
     ASSERT_EQ(dasher_get_speed_percent(ctx2), 250);
     dasher_destroy(ctx2);
 
-    printf("v settings_speed_survives_reload passed\n");
 }
 
 TEST(settings_alphabet_survives_reload) {
@@ -86,7 +84,6 @@ TEST(settings_alphabet_survives_reload) {
     ASSERT_STR_EQ(loaded, "English without punctuation");
     dasher_destroy(ctx2);
 
-    printf("v settings_alphabet_survives_reload passed\n");
 }
 
 TEST(settings_color_palette_survives_reload) {
@@ -111,7 +108,6 @@ TEST(settings_color_palette_survives_reload) {
     ASSERT_STR_EQ(dasher_get_string_parameter(ctx2, color_key), "Yellow on Blue");
     dasher_destroy(ctx2);
 
-    printf("v settings_color_palette_survives_reload passed\n");
 }
 
 TEST(settings_orientation_survives_reload) {
@@ -139,7 +135,6 @@ TEST(settings_orientation_survives_reload) {
     ASSERT_EQ(loaded, 1);
     dasher_destroy(ctx2);
 
-    printf("v settings_orientation_survives_reload passed\n");
 }
 
 TEST(settings_lm_max_order_survives_reload) {
@@ -164,7 +159,6 @@ TEST(settings_lm_max_order_survives_reload) {
     ASSERT_EQ(dasher_get_long_parameter(ctx2, order_key), 12);
     dasher_destroy(ctx2);
 
-    printf("v settings_lm_max_order_survives_reload passed\n");
 }
 
 TEST(settings_empty_file_uses_defaults) {
@@ -182,20 +176,4 @@ TEST(settings_empty_file_uses_defaults) {
     ASSERT(speed >= 20 && speed <= 400);
 
     dasher_destroy(ctx);
-    printf("v settings_empty_file_uses_defaults passed\n");
-}
-
-int main() {
-    printf("Running settings XML serialization tests...\n\n");
-
-    test_settings_all_bool_persistent_survive_reload();
-    test_settings_speed_survives_reload();
-    test_settings_alphabet_survives_reload();
-    test_settings_color_palette_survives_reload();
-    test_settings_orientation_survives_reload();
-    test_settings_lm_max_order_survives_reload();
-    test_settings_empty_file_uses_defaults();
-
-    printf("\nAll settings XML tests passed!\n");
-    return 0;
 }

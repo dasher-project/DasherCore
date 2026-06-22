@@ -13,7 +13,6 @@ TEST(coord_screen_to_dasher_basic) {
     ASSERT(dx != 0 || dy != 0);
 
     dasher_destroy(ctx);
-    printf("v coord_screen_to_dasher_basic passed\n");
 }
 
 TEST(coord_dasher_to_screen_basic) {
@@ -33,7 +32,6 @@ TEST(coord_dasher_to_screen_basic) {
     ASSERT(abs(sy - 300) <= 5);
 
     dasher_destroy(ctx);
-    printf("v coord_dasher_to_screen_basic passed\n");
 }
 
 TEST(coord_round_trip_multiple_points) {
@@ -64,7 +62,6 @@ TEST(coord_round_trip_multiple_points) {
     }
 
     dasher_destroy(ctx);
-    printf("v coord_round_trip_multiple_points passed\n");
 }
 
 TEST(coord_dasher_origin_maps_near_crosshair) {
@@ -88,7 +85,6 @@ TEST(coord_dasher_origin_maps_near_crosshair) {
     ASSERT(dy < dy3);
 
     dasher_destroy(ctx);
-    printf("v coord_dasher_origin_maps_near_crosshair passed\n");
 }
 
 TEST(coord_different_screen_sizes) {
@@ -106,7 +102,6 @@ TEST(coord_different_screen_sizes) {
 
         dasher_destroy(ctx);
     }
-    printf("v coord_different_screen_sizes passed\n");
 }
 
 TEST(coord_crosshair_y_is_origin) {
@@ -119,19 +114,4 @@ TEST(coord_crosshair_y_is_origin) {
     printf("  Right-center -> Dasher(%lld, %lld) [expect dy near 2048]\n", dx, dy);
 
     dasher_destroy(ctx);
-    printf("v coord_crosshair_y_is_origin passed\n");
-}
-
-int main() {
-    printf("Running coordinate transform tests...\n\n");
-
-    test_coord_screen_to_dasher_basic();
-    test_coord_dasher_to_screen_basic();
-    test_coord_round_trip_multiple_points();
-    test_coord_dasher_origin_maps_near_crosshair();
-    test_coord_different_screen_sizes();
-    test_coord_crosshair_y_is_origin();
-
-    printf("\nAll coordinate transform tests passed!\n");
-    return 0;
 }

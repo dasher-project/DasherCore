@@ -30,7 +30,6 @@ TEST(snapshot_frame0_deterministic) {
         ASSERT_EQ(hashes[i], hashes[0]);
     printf("  Hash: %lu (deterministic across 5 runs)\n", hashes[0]);
 
-    printf("v snapshot_frame0_deterministic passed\n");
 }
 
 TEST(snapshot_frame10_deterministic) {
@@ -56,7 +55,6 @@ TEST(snapshot_frame10_deterministic) {
         ASSERT_EQ(hashes[i], hashes[0]);
     printf("  Frame 10 hash: %lu (deterministic)\n", hashes[0]);
 
-    printf("v snapshot_frame10_deterministic passed\n");
 }
 
 TEST(snapshot_with_mouse_input_deterministic) {
@@ -87,7 +85,6 @@ TEST(snapshot_with_mouse_input_deterministic) {
     ASSERT_EQ(hashes[2], hashes[0]);
     printf("  Mouse-input frame 20 hash: %lu\n", hashes[0]);
 
-    printf("v snapshot_with_mouse_input_deterministic passed\n");
 }
 
 TEST(snapshot_command_structure_consistent) {
@@ -138,7 +135,6 @@ TEST(snapshot_command_structure_consistent) {
     ASSERT(clear_count >= 1);
 
     dasher_destroy(ctx);
-    printf("v snapshot_command_structure_consistent passed\n");
 }
 
 TEST(snapshot_output_text_deterministic) {
@@ -172,18 +168,4 @@ TEST(snapshot_output_text_deterministic) {
     ASSERT_EQ(strcmp(outputs[0], outputs[2]), 0);
     printf("  Output is deterministic across 3 runs\n");
 
-    printf("v snapshot_output_text_deterministic passed\n");
-}
-
-int main() {
-    printf("Running draw command snapshot tests...\n\n");
-
-    test_snapshot_frame0_deterministic();
-    test_snapshot_frame10_deterministic();
-    test_snapshot_with_mouse_input_deterministic();
-    test_snapshot_command_structure_consistent();
-    test_snapshot_output_text_deterministic();
-
-    printf("\nAll draw snapshot tests passed!\n");
-    return 0;
 }
