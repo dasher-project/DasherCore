@@ -259,6 +259,18 @@ if(BUILD_CAPI)
         dasher_add_test(dasher_training_tests test_training.cpp)
         dasher_add_test(dasher_node_tree_tests test_node_tree.cpp)
 
+        # Phase B (characterization) — closes coverage gaps noted in the review.
+        #   - buffer_lifetime: the C API "valid until next call" contract
+        #   - lm_correctness: training, LP_UNIFORM/LP_LM_*/BP_LM_ADAPTIVE effects
+        #   - view_geometry:   LP_ORIENTATION, BP_NONLINEAR_Y, LP_GEOMETRY
+        #   - input_filters:   all 14 registered filters (12 previously untested)
+        #   - xml_error_paths: malformed alphabet/color/settings XML
+        dasher_add_test(dasher_capi_buffer_lifetime_tests test_capi_buffer_lifetime.cpp)
+        dasher_add_test(dasher_lm_correctness_tests test_lm_correctness.cpp)
+        dasher_add_test(dasher_view_geometry_tests test_view_geometry.cpp)
+        dasher_add_test(dasher_input_filter_tests test_input_filters.cpp)
+        dasher_add_test(dasher_xml_error_path_tests test_xml_error_paths.cpp)
+
         # Control action system tests — needs internal DasherCore classes (ActionRegistry)
         # AND C API functions, so we compile CAPI.cpp directly and link DasherCore
         add_executable(dasher_control_action_tests
