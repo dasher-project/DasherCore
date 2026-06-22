@@ -24,54 +24,7 @@
 #include <fstream>
 #include <string>
 
-namespace {
-
-// Build a minimal "Data" directory inside the temp dir, populated with
-// symlinks to the real bundled XML files (file-by-file, so we can add our
-// own malformed files alongside). Returns the path to use as data_dir.
-//
-// We can't symlink the whole subdirectory because then we couldn't add
-// malformed test files alongside the real ones. Instead we symlink each
-// real file individually.
-std::string build_data_dir(const ScopedTempDir& tmp) {
-    std::filesystem::path root = tmp.path;
-    std::filesystem::path data = root / "Data";
-
-    const std::string real_data = get_test_data_dir();
-    const std::string real_data_data = real_data + "/Data";
-    std::string real = std::filesystem::is_directory(real_data_data)
-                           ? real_data_data
-                           : real_data;
-
-    // For each bundled subdir, mirror its files into our temp Data/.
-    for (auto sub : {"alphabets", "colours", "training", "control"}) {
-        std::filesystem::path src_dir = std::filesystem::path(real) / sub;
-        std::filesystem::path dst_dir = data / sub;
-        if (!std::filesystem::is_directory(src_dir)) continue;
-        std::filesystem::create_directories(dst_dir);
-        for (auto& entry : std::filesystem::directory_iterator(src_dir)) {
-            if (!entry.is_regular_file()) continue;
-            std::error_code ec;
-            std::filesystem::create_symlink(entry.path(),
-                                             dst_dir / entry.path().filename(), ec);
-            // Ignore errors (e.g. file exists from a previous attempt).
-        }
-    }
-
-    return root.string();
-}
-
-// Write content to {data_dir}/Data/{subdir}/{filename}.
-bool write_data_file(const std::string& data_dir, const std::string& subdir,
-                     const std::string& filename, const std::string& content) {
-    std::filesystem::path p = std::filesystem::path(data_dir) / "Data" / subdir / filename;
-    std::ofstream out(p);
-    if (!out) return false;
-    out << content;
-    return static_cast<bool>(out);
-}
-
-}  // namespace
+// build_data_dir and write_data_file are provided by test_common.h.
 
 // ---------------------------------------------------------------------------
 // Foundational: the build_data_dir helper works

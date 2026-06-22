@@ -271,6 +271,16 @@ if(BUILD_CAPI)
         dasher_add_test(dasher_input_filter_tests test_input_filters.cpp)
         dasher_add_test(dasher_xml_error_path_tests test_xml_error_paths.cpp)
 
+        # Phase C (deeper coverage) — end-to-end + perf + property tests.
+        #   - control_actions_navigation: fires callback via actual node nav
+        #   - spell_word: drives mouse via probabilities to enter children
+        #   - benchmarks: dasher_frame p99 latency baseline (catches regressions)
+        #   - property_invariants: normalization holds across random training
+        dasher_add_test(dasher_control_actions_navigation_tests test_control_actions_navigation.cpp)
+        dasher_add_test(dasher_spell_word_tests test_spell_word.cpp)
+        dasher_add_test(dasher_benchmark_tests test_benchmarks.cpp)
+        dasher_add_test(dasher_property_invariant_tests test_property_invariants.cpp)
+
         # Control action system tests — needs internal DasherCore classes (ActionRegistry)
         # AND C API functions, so we compile CAPI.cpp directly and link DasherCore
         add_executable(dasher_control_action_tests

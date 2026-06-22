@@ -70,6 +70,12 @@ Data/dasher_settings.xml
 *.settings.xml
 dasher_settings.xml
 dasher.log
+
+# Training files written by the engine to CWD when contexts are destroyed.
+# This is a real bug (Tier 1 item: library should not write to CWD) — for
+# now we ignore the leaked files so they don't pollute git status.
+training_*.txt
+
 build-san/
 build-tidy/
 build-san/

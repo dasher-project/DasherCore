@@ -30,6 +30,7 @@
 #include <cstdio>
 #include <cstring>
 #include <filesystem>
+#include <fstream>
 #include <string>
 
 #ifdef _WIN32
@@ -178,4 +179,56 @@ inline void run_frames(dasher_ctx* ctx, int count,
         dasher_frame(ctx, start_ms + i * step_ms,
                      &cmds, &cmd_count, &strs, &str_count);
     }
+}
+
+// ---------------------------------------------------------------------------
+// build_data_dir: create a temp Data/ directory populated with symlinks to
+// the real bundled data files. Used by tests that need to inject malformed
+// XML or custom control.xml files alongside the real data.
+//
+// The engine searches {data_dir, data_dir/Data} and matches files by glob
+// (e.g. "alphabet.*.xml"), so we symlink each real file individually (rather
+// than the whole directory) so test code can add its own files alongside.
+//
+// Returns the path to use as data_dir (parent of Data/).
+// ---------------------------------------------------------------------------
+
+inline std::string build_data_dir(const ScopedTempDir& tmp) {
+    std::filesystem::path root = tmp.path;
+    std::filesystem::path data = root / "Data";
+
+    const char* real_data_env = get_test_data_dir();
+    std::string real_data = real_data_env;
+    std::string real_data_data = real_data + "/Data";
+    std::string real = std::filesystem::is_directory(real_data_data)
+                           ? real_data_data
+                           : real_data;
+
+    for (auto sub : {"alphabets", "colours", "training", "control"}) {
+        std::filesystem::path src_dir = std::filesystem::path(real) / sub;
+        std::filesystem::path dst_dir = data / sub;
+        if (!std::filesystem::is_directory(src_dir)) continue;
+        std::filesystem::create_directories(dst_dir);
+        for (auto& entry : std::filesystem::directory_iterator(src_dir)) {
+            if (!entry.is_regular_file()) continue;
+            std::error_code ec;
+            std::filesystem::create_symlink(entry.path(),
+                                             dst_dir / entry.path().filename(), ec);
+        }
+    }
+
+    return root.string();
+}
+
+// Write content to {data_dir}/Data/{subdir}/{filename}. Returns true on
+// success. Used by tests that need to inject custom XML files.
+inline bool write_data_file(const std::string& data_dir,
+                            const std::string& subdir,
+                            const std::string& filename,
+                            const std::string& content) {
+    std::filesystem::path p = std::filesystem::path(data_dir) / "Data" / subdir / filename;
+    std::ofstream out(p);
+    if (!out) return false;
+    out << content;
+    return static_cast<bool>(out);
 }
