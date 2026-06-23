@@ -728,24 +728,6 @@
       "subgroup": "Advanced"
     },
     {
-      "key": "LP_USER_LOG_LEVEL_MASK",
-      "storageName": "UserLogLevelMask",
-      "type": "long",
-      "default": 0,
-      "label": "User Log Level",
-      "description": "Controls level of user logging, 0 = none, 1 = short, 2 = detailed, 3 = both.",
-      "uiType": "Enum",
-      "tier": "expert",
-      "group": "Output",
-      "subgroup": "Logging",
-      "enumValues": [
-        {"label": "None", "cppExpr": "0"},
-        {"label": "Short", "cppExpr": "1"},
-        {"label": "Detailed", "cppExpr": "2"},
-        {"label": "Both", "cppExpr": "3"}
-      ]
-    },
-    {
       "key": "LP_ZOOMSTEPS",
       "storageName": "Zoomsteps",
       "type": "long",

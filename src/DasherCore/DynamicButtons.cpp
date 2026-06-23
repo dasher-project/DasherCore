@@ -85,11 +85,9 @@ void CDynamicButtons::ButtonEvent(unsigned long iTime, Keys::VirtualKey Key, int
     // What happens next depends on the state:
     if (isPaused()) {
         // Any button causes a restart
-        if (CUserLogBase* pUserLog = m_pInterface->GetUserLogPtr()) pUserLog->KeyDown(Key, iType, 1);
         run(iTime);
     } else if (isReversing()) {
         // Any button pauses
-        if (CUserLogBase* pUserLog = m_pInterface->GetUserLogPtr()) pUserLog->KeyDown(Key, iType, 2);
         m_pInterface->Done();
         pause();
     } else {
@@ -98,13 +96,11 @@ void CDynamicButtons::ButtonEvent(unsigned long iTime, Keys::VirtualKey Key, int
         case 0: // single press
             if ((Key == Keys::Big_Start_Stop_Key) || (Key == Keys::Primary_Input)) {
                 // dedicated pause button
-                if (CUserLogBase* pUserLog = m_pInterface->GetUserLogPtr()) pUserLog->KeyDown(Key, iType, 2);
                 m_pInterface->Done();
                 pause();
                 break;
             } else if (Key == 1) {
                 // dedicated reverse button
-                if (CUserLogBase* pUserLog = m_pInterface->GetUserLogPtr()) pUserLog->KeyDown(Key, iType, 6);
                 reverse(iTime);
                 break;
             }

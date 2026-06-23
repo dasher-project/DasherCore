@@ -104,8 +104,6 @@
   "LP_GEOMETRY.enum.Squish and Log": "Squish and Log",
   "LP_LM_WORD_ALPHA.label": "Word Alpha",
   "LP_LM_WORD_ALPHA.description": "Alpha value for word-based model.",
-  "LP_USER_LOG_LEVEL_MASK.label": "User Log Level",
-  "LP_USER_LOG_LEVEL_MASK.description": "Controls level of user logging, 0 = none, 1 = short, 2 = detailed, 3 = both.",
   "LP_ZOOMSTEPS.label": "Zoom Steps",
   "LP_ZOOMSTEPS.description": "Defines how many discrete steps are needed to zoom from the outer edge to the center.",
   "LP_B.label": "B-Parameter",

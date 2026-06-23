@@ -125,11 +125,9 @@ void COneButtonDynamicFilter::ActionButton(unsigned long iTime, Keys::VirtualKey
     }
 
     if ((Key == Keys::Button_2) || (Key == Keys::Button_3) || (Key == Keys::Button_4)) {
-        if (CUserLogBase* pUserLog = m_pInterface->GetUserLogPtr()) pUserLog->KeyDown(Key, iType, 5);
         m_iTarget = 1 - m_iTarget;
         m_bDecorationChanged = true;
     } else {
-        if (CUserLogBase* pUserLog = m_pInterface->GetUserLogPtr()) pUserLog->KeyDown(Key, iType, 0);
     }
 }
 

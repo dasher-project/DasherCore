@@ -376,6 +376,12 @@ struct dasher_ctx {
     dasher_parameter_callback paramCb = nullptr;
     void* paramCbUserData = nullptr;
 
+    // Diagnostic log callback (replaces the former CFileLogger/CBasicLog/UserLog
+    // systems). When null, log messages are silently discarded.
+    dasher_log_callback logCb = nullptr;
+    void* logCbUserData = nullptr;
+    int logCbMinLevel = 0;
+
     struct CustomActionEntry {
         std::string name;
         dasher_action_callback callback;
@@ -1479,6 +1485,13 @@ DASHER_API void dasher_set_message_callback(dasher_ctx* ctx, dasher_message_call
     if (!ctx) return;
     ctx->messageCb = callback;
     ctx->messageCbUserData = user_data;
+}
+
+DASHER_API void dasher_set_log_callback(dasher_ctx* ctx, dasher_log_callback callback, void* user_data, int min_level) {
+    if (!ctx) return;
+    ctx->logCb = callback;
+    ctx->logCbUserData = user_data;
+    ctx->logCbMinLevel = min_level;
 }
 
 DASHER_API void dasher_set_speak_callback(dasher_ctx* ctx, dasher_speak_callback callback, void* user_data) {

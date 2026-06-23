@@ -343,6 +343,28 @@ typedef void (*dasher_message_callback)(int message_type, const char* text, void
 
 DASHER_API void dasher_set_message_callback(dasher_ctx* ctx, dasher_message_callback callback, void* user_data);
 
+// ── Log callback ───────────────────────────────────────────────────────────
+//
+// Register a callback to receive internal diagnostic log messages from
+// the engine. This is the single channel for frontend→engine diagnostic
+// logging — replaces the former CFileLogger/CBasicLog/UserLog systems.
+//
+// When no callback is registered, log messages are discarded (zero overhead).
+// When registered, only messages at or above min_level are delivered.
+//
+// Log levels:
+//   0 = debug    — verbose tracing (per-frame details, LM state)
+//   1 = info     — normal operation (alphabet loaded, training complete)
+//   2 = warning  — recoverable problems (missing file, bad parameter)
+//   3 = error    — unrecoverable problems (assertion-level)
+//
+// The callback fires on the thread that calls dasher_frame() or any API
+// method that produces a log message.
+
+typedef void (*dasher_log_callback)(int level, const char* message, void* user_data);
+
+DASHER_API void dasher_set_log_callback(dasher_ctx* ctx, dasher_log_callback callback, void* user_data, int min_level);
+
 // ── Speech callback ─────────────────────────────────────────────────────────
 //
 // Register a callback for DasherCore's built-in speech features.
