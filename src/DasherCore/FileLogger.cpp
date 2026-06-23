@@ -20,7 +20,10 @@ CFileLogger::CFileLogger(const std::string& strFilenamePath, eLogLevel iLogLevel
     // directory and cause the working directory to change.  We don't want our log file
     // moving around, so we'll find a absolute path when we are created and stick to
     // that for the remainder of our life.
-    m_strFilenamePath = Dasher::FileUtils::GetFullFilenamePath(strFilenamePath);
+    // Resolve through FileUtils so a relative name like "dasher.log" lands in the
+    // configured user data directory rather than the process CWD — opening files in
+    // CWD from a library constructor is a long-standing leak (Tier 1 #5).
+    m_strFilenamePath = Dasher::FileUtils::GetFullFilenamePath(Dasher::FileUtils::ResolveUserDataPath(strFilenamePath));
 
     // See if we should get rid of any existing filename with our given name.  This prevents having
     // to remember to delete the file before every new debugging run.

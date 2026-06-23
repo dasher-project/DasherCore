@@ -9,9 +9,14 @@ namespace Dasher {
 
 // Static member initialization
 std::string FileUtils::s_dataDirectory;
+std::string FileUtils::s_userDataDirectory;
 
 void FileUtils::SetDataDirectory(const std::string& dataDir) {
     s_dataDirectory = dataDir;
+}
+
+void FileUtils::SetUserDataDirectory(const std::string& userDir) {
+    s_userDataDirectory = userDir;
 }
 
 } // namespace Dasher
@@ -67,11 +72,7 @@ void Dasher::FileUtils::ScanFiles(AbstractParser* parser, const std::string& str
 }
 
 bool Dasher::FileUtils::WriteUserDataFile(const std::string& filename, const std::string& strNewText, bool append) {
-    std::filesystem::path fullPath(filename);
-    if (fullPath.is_relative() && !s_dataDirectory.empty()) {
-        fullPath = std::filesystem::path(s_dataDirectory) / filename;
-    }
-    std::ofstream File(fullPath, (append) ? std::ios_base::app : std::ios_base::out);
+    std::ofstream File(ResolveUserDataPath(filename), (append) ? std::ios_base::app : std::ios_base::out);
 
     if (File.is_open()) {
         File << strNewText;
@@ -79,6 +80,22 @@ bool Dasher::FileUtils::WriteUserDataFile(const std::string& filename, const std
         return true;
     }
     return false;
+}
+
+std::string Dasher::FileUtils::ResolveUserDataPath(const std::string& filename) {
+    std::filesystem::path fullPath(filename);
+    if (!fullPath.is_relative()) return filename;
+    // Prefer the user-writable data directory for mutable files
+    // (training deltas, dasher.log, settings). Fall back to the bundled
+    // data directory if the client never configured a separate user dir
+    // — this preserves the historical single-dir behaviour.
+    if (!s_userDataDirectory.empty()) {
+        return (std::filesystem::path(s_userDataDirectory) / filename).string();
+    }
+    if (!s_dataDirectory.empty()) {
+        return (std::filesystem::path(s_dataDirectory) / filename).string();
+    }
+    return filename;
 }
 
 std::string Dasher::FileUtils::GetFullFilenamePath(const std::string strFilename) {

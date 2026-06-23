@@ -656,7 +656,12 @@ DASHER_API dasher_ctx* dasher_create(const char* data_dir, const char* user_dir,
     ctx->userDir = user_dir ? std::string(user_dir) : dir;
     std::string writableDir = user_dir ? std::string(user_dir) : dir;
 
+    // Keep the bundled data directory (read-only corpora) and the
+    // user-writable directory (logs, training deltas, settings)
+    // distinct so we never leak library files into CWD. Closes the
+    // dasher.log and training_english_GB.txt CWD leaks (Tier 1 #5).
     Dasher::FileUtils::SetDataDirectory(dir);
+    Dasher::FileUtils::SetUserDataDirectory(writableDir);
 
     std::string settingsPath = writableDir;
 #ifdef _WIN32
