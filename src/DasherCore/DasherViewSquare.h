@@ -189,7 +189,7 @@ class Dasher::CDasherViewSquare : public CDasherView {
     const myint m_Y3 = static_cast<const myint>(0.05 * CDasherModel::MAX_Y);
 
     inline void Crosshair();
-    bool CoversCrosshair(myint Range, myint y1, myint y2);
+    bool CoversCrosshair(myint Range, myint y1, myint y2) const;
     ColorPalette::Color SimulateTransparency(CDasherNode* pCurrentNode) const;
 
     // Divides by SCALE_FACTOR, rounding away from 0

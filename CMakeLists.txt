@@ -199,9 +199,11 @@ if(BUILD_CAPI)
         set(DOCTEST_INCLUDE_DIR "${CMAKE_CURRENT_LIST_DIR}/Thirdparty/doctest")
 
         # Default per-test timeout. Tests routinely take 15-30s because each
-        # dasher_create() loads every alphabet XML file from Data/. 120s gives
-        # plenty of headroom on slow CI runners while still catching hangs.
-        set(DASHER_TEST_TIMEOUT 120 CACHE STRING "Per-test timeout in seconds")
+        # dasher_create() loads every alphabet XML file from Data/. 300s
+        # gives headroom on slow filesystems (WSL+9P, Windows CI) and for
+        # Debug builds with asserts active, while still catching real hangs.
+        # (CI can override via `ctest --timeout` on the command line.)
+        set(DASHER_TEST_TIMEOUT 300 CACHE STRING "Per-test timeout in seconds")
 
         # Helper function for adding a test executable
         function(dasher_add_test name source)

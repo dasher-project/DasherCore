@@ -27,19 +27,19 @@ void CSettingsStore::AddParameters(const std::unordered_map<Parameter, const Set
         parameters_.emplace(std::make_pair(key, value));
 
         if (std::holds_alternative<bool>(parameters_.at(key).value)) {
-            DASHER_ASSERT(parameters_.at(key).type == Settings::ParamBool);
+            DASHER_ASSERT(parameters_.at(key).type == Settings::PARAM_BOOL);
             if (!LoadSetting(parameters_.at(key).storageName, &std::get<bool>(parameters_.at(key).value))) {
                 parameters_.at(key).value = value.value;
                 SaveSetting(value.storageName, std::get<bool>(value.value));
             }
         } else if (std::holds_alternative<long>(parameters_.at(key).value)) {
-            DASHER_ASSERT(parameters_.at(key).type == Settings::ParamLong);
+            DASHER_ASSERT(parameters_.at(key).type == Settings::PARAM_LONG);
             if (!LoadSetting(parameters_.at(key).storageName, &std::get<long>(parameters_.at(key).value))) {
                 parameters_.at(key).value = value.value;
                 SaveSetting(value.storageName, std::get<long>(value.value));
             }
         } else if (std::holds_alternative<std::string>(parameters_.at(key).value)) {
-            DASHER_ASSERT(parameters_.at(key).type == Settings::ParamString);
+            DASHER_ASSERT(parameters_.at(key).type == Settings::PARAM_STRING);
             if (!LoadSetting(parameters_.at(key).storageName, &std::get<std::string>(parameters_.at(key).value))) {
                 parameters_.at(key).value = value.value;
                 SaveSetting(value.storageName, std::get<std::string>(value.value));
@@ -119,8 +119,11 @@ void CSettingsStore::SetStringParameter(Parameter parameter, const std::string s
 template <typename T>
 const T& CSettingsStore::GetParameter(Parameter parameter) const {
     auto p = parameters_.find(parameter);
-    // Check that the parameter is in fact in the right spot in the table
-    DASHER_ASSERT(p != parameters_.end() && std::holds_alternative<T>(p->second.type));
+    // Parameter must exist in the table. A type mismatch (e.g. caller asks
+    // for a string on a bool parameter) is a recoverable condition —
+    // std::get<T> below will throw std::bad_variant_access, which CAPI
+    // callers like dasher_get_string_parameter catch and map to "".
+    DASHER_ASSERT(p != parameters_.end());
     return std::get<T>(p->second.value);
 }
 

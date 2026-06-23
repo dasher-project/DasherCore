@@ -93,7 +93,7 @@ void CDasherModel::Make_root(CDasherNode* pNewRoot) {
         delete oldroots[0];
         oldroots.pop_front();
     }
-    DASHER_ASSERT(pNewRoot->GetFlag(NF_SEEN));
+    DASHER_ASSERT(pNewRoot->GetFlag(CDasherNode::NF_SEEN));
     m_Root = pNewRoot;
 
     // Update the root coordinates, as well as any currently scheduled locations
@@ -156,7 +156,7 @@ bool CDasherModel::Reparent_root() {
     //  (or committing would enter the node into the LM a second time)
 
     // Update the root coordinates to reflect the new root
-    DASHER_ASSERT(pNewRoot->GetFlag(NF_SEEN));
+    DASHER_ASSERT(pNewRoot->GetFlag(CDasherNode::NF_SEEN));
     m_Root = pNewRoot;
 
     m_Rootmax = m_Rootmax + ((NORMALIZATION - upper) * iRootWidth) / iRange;

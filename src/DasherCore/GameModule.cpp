@@ -75,12 +75,12 @@ void CGameModule::HandleEditEvent(CEditEvent::EditEventType type, const std::str
     case CEditEvent::EDIT_DELETE:
         if (iOffset == m_iLastSym) {
             // seems they've just deleted the last _correct_ character they'd entered...
-            DASHER_ASSERT(evt->m_sText == m_pAlph->GetText(m_vTargetSymbols[m_iLastSym]));
+            DASHER_ASSERT(strText == m_pAlph->GetText(m_vTargetSymbols[m_iLastSym]));
             --m_iLastSym;
         } else {
             // just deleted previously-entered wrong text - hopefully they're heading in the right direction!
-            DASHER_ASSERT(m_strWrong.length() >= evt->m_sText.length());
-            DASHER_ASSERT(m_strWrong.substr(m_strWrong.length() - evt->m_sText.length()) == evt->m_sText);
+            DASHER_ASSERT(m_strWrong.length() >= strText.length());
+            DASHER_ASSERT(m_strWrong.substr(m_strWrong.length() - strText.length()) == strText);
             m_strWrong = m_strWrong.substr(0, m_strWrong.length() - strText.length());
         }
         break;
