@@ -35,6 +35,12 @@ add_compile_options(
 add_compile_options(
     $<$<CXX_COMPILER_ID:MSVC>:/W4>
     $<$<CXX_COMPILER_ID:MSVC>:/permissive->
+    # C4100 (unre-ferenced formal parameter) — disabled globally. The legacy
+    # codebase has hundreds of inherited virtual method overrides where
+    # parameters are intentionally unused in specific subclasses. This is a
+    # style issue, not a bug. The bug-finding warnings (C4701 uninitialized,
+    # C4244 narrowing) remain enabled.
+    $<$<CXX_COMPILER_ID:MSVC>:/wd4100>
 )
 
 ###############################
