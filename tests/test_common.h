@@ -112,7 +112,11 @@ struct ScopedTempDir {
         char buf[256];
         snprintf(buf, sizeof(buf), "%s/dasher_test_%d_%d", dasher_temp_dir(), dasher_getpid(), counter++);
         path = buf;
+        // Remove any stale dir from a previous process with the same PID + counter.
+        // Same fix as create_isolated_context() — prevents stale dasher_settings.xml
+        // from being loaded, which caused non-deterministic test results.
         std::error_code ec;
+        std::filesystem::remove_all(path, ec);
         std::filesystem::create_directories(path, ec);
     }
 
@@ -137,11 +141,17 @@ struct ScopedTempDir {
 // where the dir cleans up on scope exit. (The ctx itself is still owned
 // by the caller; dasher_destroy() must be called.)
 // ---------------------------------------------------------------------------
-
 inline dasher_ctx* create_isolated_context() {
     char tmpdir[256];
     static int counter = 0;
     snprintf(tmpdir, sizeof(tmpdir), "%s/dasher_test_%d_%d", dasher_temp_dir(), dasher_getpid(), counter++);
+    // Remove any stale dir from a previous process with the same PID + counter.
+    // Without this, XmlSettingsStore loads stale dasher_settings.xml from the
+    // previous run, producing different parameter values and non-deterministic
+    // test results. (This was the root cause of the "Linux-only flakiness" in
+    // draw_snapshot_tests — not unordered_map iteration as originally suspected.)
+    std::error_code ec;
+    std::filesystem::remove_all(tmpdir, ec);
     dasher_mkdir(tmpdir);
     return dasher_create(TEST_DATA_DIR, tmpdir, nullptr);
 }
