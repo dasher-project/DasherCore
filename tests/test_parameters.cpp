@@ -109,7 +109,7 @@ TEST(param_string_roundtrip) {
     int font_key = dasher_find_parameter_key("SP_DASHER_FONT");
     ASSERT(font_key >= 0);
 
-    const char* orig = strdup(dasher_get_string_parameter(ctx, font_key));
+    const char* orig = dasher_strdup(dasher_get_string_parameter(ctx, font_key));
     dasher_set_string_parameter(ctx, font_key, "Courier New");
     ASSERT_STR_EQ(dasher_get_string_parameter(ctx, font_key), "Courier New");
     dasher_set_string_parameter(ctx, font_key, orig);
@@ -245,7 +245,7 @@ TEST(param_persistence_roundtrip) {
 
     int speed2 = dasher_get_speed_percent(ctx2);
     int bool2 = dasher_get_bool_parameter(ctx2, bool_key);
-    const char* color2 = strdup(dasher_get_string_parameter(ctx2, dasher_find_parameter_key("SP_COLOUR_ID")));
+    const char* color2 = dasher_strdup(dasher_get_string_parameter(ctx2, dasher_find_parameter_key("SP_COLOUR_ID")));
 
     printf("  Reloaded: speed=%d bool=%d color='%s'\n", speed2, bool2, color2);
     ASSERT_EQ(speed2, 180);

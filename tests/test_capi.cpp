@@ -163,7 +163,7 @@ TEST(locale) {
     int param_count = dasher_get_parameter_count();
     CHECK(param_count > 0);
 
-    dasher_parameter_info info;
+    dasher_parameter_info info{};
     REQUIRE(dasher_get_parameter_info(0, &info) == 0);
     REQUIRE(info.name != nullptr);
     CHECK(std::string(info.name).size() > 0);
@@ -242,5 +242,5 @@ TEST(locale_multiple_languages) {
         }
     }
 
-    CHECK(loaded > 0);  // at least one locale file must load when Strings/ is present
+    CHECK(loaded > 0); // at least one locale file must load when Strings/ is present
 }

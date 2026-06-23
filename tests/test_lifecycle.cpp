@@ -204,7 +204,7 @@ TEST(lifecycle_message_callback_userdata) {
 
     dasher_set_message_callback(
         ctx,
-        [](int type, const char* text, void* user_data) {
+        [](int /*type*/, const char* text, void* user_data) {
             MsgData* d = static_cast<MsgData*>(user_data);
             d->count++;
             if (text) {
@@ -273,7 +273,7 @@ TEST(lifecycle_speak_callback_registration) {
 
     dasher_set_speak_callback(
         ctx,
-        [](const char* text, int interrupt, void* user_data) {
+        [](const char* text, int /*interrupt*/, void* user_data) {
             SpeakData* d = static_cast<SpeakData*>(user_data);
             d->count++;
             if (text) {

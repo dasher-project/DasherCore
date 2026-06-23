@@ -18,7 +18,7 @@ TEST(alphabet_switch_german) {
 
     const char* alph_id = dasher_get_alphabet_id(ctx);
     ASSERT(alph_id != nullptr);
-    const char* orig = strdup(alph_id);
+    const char* orig = dasher_strdup(alph_id);
     printf("  Original alphabet: '%s'\n", orig);
 
     dasher_set_alphabet_id(ctx, "Deutsch / German with limited punctuation");
@@ -67,7 +67,7 @@ TEST(alphabet_invalid_id_fallback) {
 
     const char* alph_id = dasher_get_alphabet_id(ctx);
     ASSERT(alph_id != nullptr);
-    const char* orig = strdup(alph_id);
+    const char* orig = dasher_strdup(alph_id);
 
     dasher_set_alphabet_id(ctx, "Nonexistent Alphabet XYZ123");
     run_frames(ctx, 5, 1000, 20);
@@ -143,7 +143,7 @@ TEST(locale_set_and_get) {
 
     const char* loc = dasher_get_locale(ctx);
     ASSERT(loc != nullptr);
-    const char* orig_locale = strdup(loc);
+    const char* orig_locale = dasher_strdup(loc);
     printf("  Original locale: '%s'\n", orig_locale);
 
     int result = dasher_set_locale(ctx, "de");

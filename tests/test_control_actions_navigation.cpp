@@ -49,19 +49,17 @@ void reset_capture() {
     g_capture.last_attrs.clear();
 }
 
-}  // namespace
+} // namespace
 
 // The C callback signature (from dasher.h).
-extern "C" void test_action_callback(const char* name, int attr_count,
-                                      const char** keys, const char** values,
-                                      void* user_data) {
+extern "C" void test_action_callback(const char* name, int attr_count, const char** keys, const char** values,
+                                     void* user_data) {
     (void)user_data;
     g_capture.call_count.fetch_add(1);
     g_capture.last_name = name ? name : "";
     g_capture.last_attrs.clear();
     for (int i = 0; i < attr_count; ++i) {
-        g_capture.last_attrs[keys[i] ? keys[i] : ""] =
-            values[i] ? values[i] : "";
+        g_capture.last_attrs[keys[i] ? keys[i] : ""] = values[i] ? values[i] : "";
     }
 }
 
@@ -86,8 +84,10 @@ TEST_CASE("ctrl/enabling control mode adds a top-level child") {
 
     dasher_set_bool_parameter(ctx, bp_cm, 1);
     // Run one frame so the new node tree is realized.
-    int* cmds = nullptr; int cc = 0;
-    char** strs = nullptr; int sc = 0;
+    int* cmds = nullptr;
+    int cc = 0;
+    char** strs = nullptr;
+    int sc = 0;
     dasher_frame(ctx, 1000, &cmds, &cc, &strs, &sc);
 
     int n_on = dasher_get_root_child_count(ctx);
@@ -95,10 +95,10 @@ TEST_CASE("ctrl/enabling control mode adds a top-level child") {
 
     // The new (last) child has bounds ~= [62259, 65536] (control gets
     // NORMALIZATION/20 = 3277 of the 65536 total).
-    long long lb, hb;
+    long long lb = 0, hb = 0;
     REQUIRE(dasher_get_root_child_bounds(ctx, n_on - 1, &lb, &hb) == 0);
     CHECK(hb == 65536);
-    CHECK(hb - lb <= 65536 / 10);  // generous upper bound on control share
+    CHECK(hb - lb <= 65536 / 10); // generous upper bound on control share
 
     dasher_set_bool_parameter(ctx, bp_cm, 0);
     dasher_destroy(ctx);
@@ -119,8 +119,7 @@ TEST_CASE("ctrl/callback fires when user navigates into control node") {
 
     // Remove the symlink to the bundled control.xml, replace with our custom
     // version that adds a node referencing our test action.
-    std::filesystem::path ctl_path = std::filesystem::path(data_dir)
-                                       / "Data" / "control" / "control.xml";
+    std::filesystem::path ctl_path = std::filesystem::path(data_dir) / "Data" / "control" / "control.xml";
     std::error_code ec;
     std::filesystem::remove(ctl_path, ec);
 
@@ -158,8 +157,10 @@ TEST_CASE("ctrl/callback fires when user navigates into control node") {
     }
 
     // Run one frame to populate root children.
-    int* cmds = nullptr; int cc = 0;
-    char** strs = nullptr; int sc = 0;
+    int* cmds = nullptr;
+    int cc = 0;
+    char** strs = nullptr;
+    int sc = 0;
     dasher_frame(ctx, 1000, &cmds, &cc, &strs, &sc);
 
     // Sanity: control mode is on, control child exists at the end.
@@ -186,16 +187,17 @@ TEST_CASE("ctrl/callback fires when user navigates into control node") {
     int frames_run = 0;
     for (; frames_run < frame_budget; ++frames_run) {
         dasher_mouse_move(ctx, sx, sy);
-        int* cmds2 = nullptr; int cc2 = 0;
-        char** strs2 = nullptr; int sc2 = 0;
+        int* cmds2 = nullptr;
+        int cc2 = 0;
+        char** strs2 = nullptr;
+        int sc2 = 0;
         dasher_frame(ctx, 1000 + frames_run * 16, &cmds2, &cc2, &strs2, &sc2);
         if (g_capture.call_count.load() > 0) break;
     }
     dasher_mouse_up(ctx);
 
     // The callback must have fired at least once.
-    INFO("callback fired ", g_capture.call_count.load(),
-         " times after ", frames_run, " frames");
+    INFO("callback fired ", g_capture.call_count.load(), " times after ", frames_run, " frames");
     CHECK(g_capture.call_count.load() >= 1);
 
     // And the attributes must match what we put in control.xml.

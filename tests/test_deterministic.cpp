@@ -66,7 +66,6 @@ TEST(det_different_y_different_output) {
     printf("  Y=100: '%s'\n", out2);
     // Different Y positions should generally produce different output
     ASSERT_NEQ(strcmp(out1, out2), 0);
-
 }
 
 TEST(det_no_input_no_output) {
@@ -136,7 +135,7 @@ TEST(det_speed_affects_rate) {
         dasher_set_screen_size(ctx, 800, 600);
         dasher_set_speed_percent(ctx, speeds[s]);
         const char* output = type_and_get(ctx, 700.0f, 300.0f, 100);
-        lens[s] = strlen(output);
+        lens[s] = (int)strlen(output);
         printf("  Speed %d%%: %d chars\n", speeds[s], lens[s]);
         dasher_destroy(ctx);
     }
@@ -144,5 +143,4 @@ TEST(det_speed_affects_rate) {
     // Higher speed should generally produce more text
     // (not strict for all cases, but 400% >> 100% should hold)
     ASSERT(lens[2] >= lens[0]);
-
 }

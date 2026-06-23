@@ -39,6 +39,12 @@
 #include <sys/stat.h>
 #define dasher_mkdir(path) _mkdir(path)
 #define dasher_getpid() _getpid()
+// MSVC deprecates the POSIX strdup() name in favour of _strdup().
+// Tests that just need a quick snapshot of a C-API-returned string use
+// this portable wrapper.
+inline char* dasher_strdup(const char* s) {
+    return _strdup(s);
+}
 static inline const char* dasher_temp_dir() {
     const char* t = getenv("TEMP");
     return t ? t : ".";
@@ -48,6 +54,9 @@ static inline const char* dasher_temp_dir() {
 #include <unistd.h>
 #define dasher_mkdir(path) mkdir(path, 0755)
 #define dasher_getpid() getpid()
+inline char* dasher_strdup(const char* s) {
+    return strdup(s);
+}
 static inline const char* dasher_temp_dir() {
     return "/tmp";
 }
@@ -101,8 +110,7 @@ struct ScopedTempDir {
     ScopedTempDir() {
         static int counter = 0;
         char buf[256];
-        snprintf(buf, sizeof(buf), "%s/dasher_test_%d_%d",
-                 dasher_temp_dir(), dasher_getpid(), counter++);
+        snprintf(buf, sizeof(buf), "%s/dasher_test_%d_%d", dasher_temp_dir(), dasher_getpid(), counter++);
         path = buf;
         std::error_code ec;
         std::filesystem::create_directories(path, ec);
@@ -133,8 +141,7 @@ struct ScopedTempDir {
 inline dasher_ctx* create_isolated_context() {
     char tmpdir[256];
     static int counter = 0;
-    snprintf(tmpdir, sizeof(tmpdir), "%s/dasher_test_%d_%d",
-             dasher_temp_dir(), dasher_getpid(), counter++);
+    snprintf(tmpdir, sizeof(tmpdir), "%s/dasher_test_%d_%d", dasher_temp_dir(), dasher_getpid(), counter++);
     dasher_mkdir(tmpdir);
     return dasher_create(TEST_DATA_DIR, tmpdir, nullptr);
 }
@@ -143,12 +150,8 @@ struct ScopedContext {
     dasher_ctx* ctx;
     ScopedTempDir dir;
 
-    ScopedContext() {
-        ctx = dasher_create(TEST_DATA_DIR, dir.c_str(), nullptr);
-    }
-    explicit ScopedContext(int width, int height) : ScopedContext() {
-        dasher_set_screen_size(ctx, width, height);
-    }
+    ScopedContext() { ctx = dasher_create(TEST_DATA_DIR, dir.c_str(), nullptr); }
+    explicit ScopedContext(int width, int height) : ScopedContext() { dasher_set_screen_size(ctx, width, height); }
     ~ScopedContext() {
         if (ctx) dasher_destroy(ctx);
     }
@@ -169,15 +172,13 @@ struct ScopedContext {
 // responsible for that. Most tests want 800x600; use ScopedContext(w, h).
 // ---------------------------------------------------------------------------
 
-inline void run_frames(dasher_ctx* ctx, int count,
-                       int64_t start_ms = 1000, int64_t step_ms = 16) {
+inline void run_frames(dasher_ctx* ctx, int count, int64_t start_ms = 1000, int64_t step_ms = 16) {
     for (int i = 0; i < count; ++i) {
         int* cmds = nullptr;
         int cmd_count = 0;
         char** strs = nullptr;
         int str_count = 0;
-        dasher_frame(ctx, start_ms + i * step_ms,
-                     &cmds, &cmd_count, &strs, &str_count);
+        dasher_frame(ctx, start_ms + i * step_ms, &cmds, &cmd_count, &strs, &str_count);
     }
 }
 
@@ -200,9 +201,7 @@ inline std::string build_data_dir(const ScopedTempDir& tmp) {
     const char* real_data_env = get_test_data_dir();
     std::string real_data = real_data_env;
     std::string real_data_data = real_data + "/Data";
-    std::string real = std::filesystem::is_directory(real_data_data)
-                           ? real_data_data
-                           : real_data;
+    std::string real = std::filesystem::is_directory(real_data_data) ? real_data_data : real_data;
 
     for (auto sub : {"alphabets", "colours", "training", "control"}) {
         std::filesystem::path src_dir = std::filesystem::path(real) / sub;
@@ -212,8 +211,7 @@ inline std::string build_data_dir(const ScopedTempDir& tmp) {
         for (auto& entry : std::filesystem::directory_iterator(src_dir)) {
             if (!entry.is_regular_file()) continue;
             std::error_code ec;
-            std::filesystem::create_symlink(entry.path(),
-                                             dst_dir / entry.path().filename(), ec);
+            std::filesystem::create_symlink(entry.path(), dst_dir / entry.path().filename(), ec);
         }
     }
 
@@ -222,9 +220,7 @@ inline std::string build_data_dir(const ScopedTempDir& tmp) {
 
 // Write content to {data_dir}/Data/{subdir}/{filename}. Returns true on
 // success. Used by tests that need to inject custom XML files.
-inline bool write_data_file(const std::string& data_dir,
-                            const std::string& subdir,
-                            const std::string& filename,
+inline bool write_data_file(const std::string& data_dir, const std::string& subdir, const std::string& filename,
                             const std::string& content) {
     std::filesystem::path p = std::filesystem::path(data_dir) / "Data" / subdir / filename;
     std::ofstream out(p);

@@ -14,6 +14,9 @@
 
 #include "test_common.h"
 
+#include <climits>
+#include <cfloat>
+
 #include <cmath>
 #include <string>
 
@@ -24,20 +27,22 @@ struct RectStats {
     int count = 0;
     long long sum_cx = 0;
     long long sum_cy = 0;
-    int min_x = __INT_MAX__;
+    int min_x = INT_MAX;
     int max_x = 0;
-    int min_y = __INT_MAX__;
+    int min_y = INT_MAX;
     int max_y = 0;
 };
 
 RectStats capture_rect_stats(dasher_ctx* ctx, int frames_to_capture) {
     RectStats stats;
     for (int i = 0; i < frames_to_capture; ++i) {
-        int* cmds = nullptr; int cc = 0;
-        char** strs = nullptr; int sc = 0;
+        int* cmds = nullptr;
+        int cc = 0;
+        char** strs = nullptr;
+        int sc = 0;
         dasher_frame(ctx, 1000 + i * 16, &cmds, &cc, &strs, &sc);
         for (int j = 0; j + 5 < cc; j += 6) {
-            if (cmds[j] != 4) continue;  // filled rect
+            if (cmds[j] != 4) continue; // filled rect
             int x1 = cmds[j + 1], y1 = cmds[j + 2];
             int x2 = cmds[j + 3], y2 = cmds[j + 4];
             stats.count++;
@@ -52,7 +57,7 @@ RectStats capture_rect_stats(dasher_ctx* ctx, int frames_to_capture) {
     return stats;
 }
 
-}  // namespace
+} // namespace
 
 // ---------------------------------------------------------------------------
 // LP_ORIENTATION: 0=LeftToRight, 1=RightToLeft, 2=TopToBottom, 3=BottomToTop
@@ -69,7 +74,7 @@ TEST_CASE("view/orientation parameter defaults to AlphabetDefault") {
     const int lp_orient = dasher_find_parameter_key("LP_ORIENTATION");
     REQUIRE(lp_orient > 0);
     long v = dasher_get_long_parameter(ctx, lp_orient);
-    CHECK(v == -2);  // AlphabetDefault — runtime resolves to alphabet's own
+    CHECK(v == -2); // AlphabetDefault — runtime resolves to alphabet's own
 }
 
 TEST_CASE("view/orientation swap is observable via screen_to_dasher") {
@@ -84,11 +89,11 @@ TEST_CASE("view/orientation swap is observable via screen_to_dasher") {
     ScopedContext ctx(800, 600);
     const int lp_orient = dasher_find_parameter_key("LP_ORIENTATION");
 
-    dasher_set_long_parameter(ctx, lp_orient, 0);  // LeftToRight
+    dasher_set_long_parameter(ctx, lp_orient, 0); // LeftToRight
     long long dx_lr, dy_lr;
     REQUIRE(dasher_screen_to_dasher(ctx, 700, 300, &dx_lr, &dy_lr) == 0);
 
-    dasher_set_long_parameter(ctx, lp_orient, 2);  // TopToBottom
+    dasher_set_long_parameter(ctx, lp_orient, 2); // TopToBottom
     long long dx_tb, dy_tb;
     REQUIRE(dasher_screen_to_dasher(ctx, 700, 300, &dx_tb, &dy_tb) == 0);
 
@@ -96,7 +101,7 @@ TEST_CASE("view/orientation swap is observable via screen_to_dasher") {
     // different outputs.
     CHECK((dx_lr != dx_tb || dy_lr != dy_tb));
 
-    dasher_set_long_parameter(ctx, lp_orient, 0);  // restore
+    dasher_set_long_parameter(ctx, lp_orient, 0); // restore
 }
 
 TEST_CASE("view/orientation each value is reachable") {
@@ -137,7 +142,7 @@ TEST_CASE("view/root child bounds are invariant under orientation") {
         REQUIRE(dasher_get_root_child_bounds(ctx, i, &lbnds_lr[i], &hbnds_lr[i]) == 0);
     }
 
-    dasher_set_long_parameter(ctx, lp_orient, 2);  // TopToBottom
+    dasher_set_long_parameter(ctx, lp_orient, 2); // TopToBottom
 
     for (int i = 0; i < n; ++i) {
         long long lb, hb;
@@ -184,7 +189,7 @@ TEST_CASE("view/nonlinear_y changes mapping for extreme screen Y") {
     // unaffected by nonlinear_y).
     CHECK(dy_off != dy_on);
 
-    dasher_set_bool_parameter(ctx, bp_nly, 1);  // restore default
+    dasher_set_bool_parameter(ctx, bp_nly, 1); // restore default
 }
 
 TEST_CASE("view/nonlinear_y does not affect middle of screen") {
@@ -228,11 +233,11 @@ TEST_CASE("view/geometry affects X mapping for large dx") {
     const int lp_geom = dasher_find_parameter_key("LP_GEOMETRY");
 
     int sx_old, sy_old;
-    dasher_set_long_parameter(ctx, lp_geom, 0);  // old_style
+    dasher_set_long_parameter(ctx, lp_geom, 0); // old_style
     REQUIRE(dasher_dasher_to_screen(ctx, 3800, 2048, &sx_old, &sy_old) == 0);
 
     int sx_squish, sy_squish;
-    dasher_set_long_parameter(ctx, lp_geom, 3);  // squish_and_log
+    dasher_set_long_parameter(ctx, lp_geom, 3); // squish_and_log
     REQUIRE(dasher_dasher_to_screen(ctx, 3800, 2048, &sx_squish, &sy_squish) == 0);
 
     // X mapping must differ between the two geometry modes for far-dx.

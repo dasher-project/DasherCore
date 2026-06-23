@@ -13,7 +13,7 @@ TEST(utf8_ascii_roundtrip) {
     ConversionResult cr = ConvertUTF8toUTF16((const UTF8**)&srcStart, srcEnd, &tgtStart, tgtEnd, lenientConversion);
     ASSERT_EQ(cr, conversionOK);
 
-    int utf16_len = tgtStart - target;
+    int utf16_len = static_cast<int>(tgtStart - target);
     printf("  'Hello' -> %d UTF16 units\n", utf16_len);
     ASSERT_EQ(utf16_len, 5);
 
@@ -25,13 +25,12 @@ TEST(utf8_ascii_roundtrip) {
     ASSERT_EQ(cr, conversionOK);
     *backStart = 0;
     ASSERT_STR_EQ((char*)back, "Hello");
-
 }
 
 TEST(utf8_multibyte_roundtrip) {
     // "héllo" - é is U+00E9 (2 bytes in UTF-8, 1 unit in UTF-16)
     const char* utf8_str = "h\xc3\xa9llo";
-    int utf8_len = strlen(utf8_str);
+    int utf8_len = static_cast<int>(strlen(utf8_str));
 
     UTF8* srcStart = (UTF8*)utf8_str;
     UTF8* srcEnd = (UTF8*)utf8_str + utf8_len;
@@ -41,7 +40,7 @@ TEST(utf8_multibyte_roundtrip) {
 
     ConversionResult cr = ConvertUTF8toUTF16((const UTF8**)&srcStart, srcEnd, &tgtStart, tgtEnd, lenientConversion);
     ASSERT_EQ(cr, conversionOK);
-    int utf16_len = tgtStart - target;
+    int utf16_len = static_cast<int>(tgtStart - target);
     printf("  'héllo' (%d UTF8 bytes) -> %d UTF16 units\n", utf8_len, utf16_len);
     ASSERT_EQ(utf16_len, 5);
 
@@ -53,14 +52,13 @@ TEST(utf8_multibyte_roundtrip) {
     ASSERT_EQ(cr, conversionOK);
     *backStart = 0;
     ASSERT_STR_EQ((char*)back, utf8_str);
-
 }
 
 TEST(utf8_emoji_roundtrip) {
     // "a😀b" - 😀 is U+1F600 (4 bytes UTF-8, 2 units UTF-16 surrogate pair)
     const char* utf8_str = "a\xf0\x9f\x98\x80"
                            "b";
-    int utf8_len = strlen(utf8_str);
+    int utf8_len = static_cast<int>(strlen(utf8_str));
 
     UTF8* srcStart = (UTF8*)utf8_str;
     UTF8* srcEnd = (UTF8*)utf8_str + utf8_len;
@@ -70,7 +68,7 @@ TEST(utf8_emoji_roundtrip) {
 
     ConversionResult cr = ConvertUTF8toUTF16((const UTF8**)&srcStart, srcEnd, &tgtStart, tgtEnd, lenientConversion);
     ASSERT_EQ(cr, conversionOK);
-    int utf16_len = tgtStart - target;
+    int utf16_len = static_cast<int>(tgtStart - target);
     printf("  'a😀b' (%d UTF8 bytes) -> %d UTF16 units\n", utf8_len, utf16_len);
     ASSERT_EQ(utf16_len, 4); // a + surrogate pair + b
 
@@ -82,12 +80,11 @@ TEST(utf8_emoji_roundtrip) {
     ASSERT_EQ(cr, conversionOK);
     *backStart = 0;
     ASSERT_STR_EQ((char*)back, utf8_str);
-
 }
 
 TEST(utf8_utf32_roundtrip) {
     const char* utf8_str = "Hello\xE4\xB8\x96\xE7\x95\x8C"; // "Hello世界"
-    int utf8_len = strlen(utf8_str);
+    int utf8_len = static_cast<int>(strlen(utf8_str));
 
     UTF8* srcStart = (UTF8*)utf8_str;
     UTF8* srcEnd = (UTF8*)utf8_str + utf8_len;
@@ -97,7 +94,7 @@ TEST(utf8_utf32_roundtrip) {
 
     ConversionResult cr = ConvertUTF8toUTF32((const UTF8**)&srcStart, srcEnd, &tgtStart, tgtEnd, lenientConversion);
     ASSERT_EQ(cr, conversionOK);
-    int utf32_len = tgtStart - target;
+    int utf32_len = static_cast<int>(tgtStart - target);
     printf("  'Hello世界' -> %d UTF32 units\n", utf32_len);
     ASSERT_EQ(utf32_len, 7); // 5 ASCII + 2 CJK
 
@@ -109,7 +106,6 @@ TEST(utf8_utf32_roundtrip) {
     ASSERT_EQ(cr, conversionOK);
     *backStart = 0;
     ASSERT_STR_EQ((char*)back, utf8_str);
-
 }
 
 TEST(utf8_empty_string) {
@@ -123,7 +119,6 @@ TEST(utf8_empty_string) {
     ConversionResult cr = ConvertUTF8toUTF16((const UTF8**)&srcStart, srcEnd, &tgtStart, tgtEnd, lenientConversion);
     ASSERT_EQ(cr, conversionOK);
     ASSERT_EQ(tgtStart - target, 0);
-
 }
 
 TEST(utf8_legal_sequence_check) {
@@ -132,7 +127,6 @@ TEST(utf8_legal_sequence_check) {
 
     UTF8 single[1] = {'A'};
     ASSERT(isLegalUTF8Sequence(single, single + 1));
-
 }
 
 TEST(utf8_replacement_char) {
