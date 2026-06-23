@@ -13,6 +13,8 @@ import json
 import os
 import sys
 import argparse
+import shutil
+import subprocess
 
 AUTOGEN_HEADER = """\
 // =============================================================================
@@ -203,6 +205,17 @@ def generate(manifest_path, output_path):
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
     with open(output_path, 'w') as f:
         f.write(content)
+
+    # Run clang-format on the generated file so it matches the project's
+    # .clang-format style. The template above intentionally uses compact
+    # tab-indented formatting (easier to maintain in Python); clang-format
+    # normalizes it to the project standard. If clang-format is not
+    # installed, the raw output is still valid C++ — just not formatted.
+    clang_format = shutil.which("clang-format")
+    if clang_format:
+        subprocess.run([clang_format, "-i", output_path], check=True)
+    else:
+        print("WARNING: clang-format not found; output is unformatted.", file=sys.stderr)
 
     print(f"Generated {output_path} from {manifest_path}")
     print(f"  {len(manifest['parameters'])} parameters")
