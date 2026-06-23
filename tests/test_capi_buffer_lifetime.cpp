@@ -37,7 +37,7 @@ TEST_CASE("frame/pointers valid immediately after call") {
     // Pointers must be non-null for any non-trivial frame (cmd_count > 0).
     // First frame should at minimum contain a clear-screen command.
     REQUIRE(cmds != nullptr);
-    REQUIRE(cmd_count >= 6);  // at least one 6-int command
+    REQUIRE(cmd_count >= 6); // at least one 6-int command
     // strs pointer may be null if str_count == 0 (no text on first frame).
     // Only assert non-null when there are actual strings.
     if (str_count > 0) {
@@ -55,7 +55,7 @@ TEST_CASE("frame/pointers valid immediately after call") {
         int op = cmds[i];
         if (op >= 0 && op <= 6) opcodes_seen[op]++;
     }
-    CHECK(opcodes_seen[0] >= 1);  // clear-screen is always issued
+    CHECK(opcodes_seen[0] >= 1); // clear-screen is always issued
 }
 
 TEST_CASE("frame/output_text pointer stable until next call") {
@@ -103,21 +103,28 @@ TEST_CASE("frame/pointers may differ between successive frames") {
     // contract explicitly says callers must not hold pointers across calls.
     ScopedContext ctx(800, 600);
 
-    int* cmds1 = nullptr; int cc1 = 0;
-    char** strs1 = nullptr; int sc1 = 0;
+    int* cmds1 = nullptr;
+    int cc1 = 0;
+    char** strs1 = nullptr;
+    int sc1 = 0;
     dasher_frame(ctx, 1000, &cmds1, &cc1, &strs1, &sc1);
 
-    int* cmds2 = nullptr; int cc2 = 0;
-    char** strs2 = nullptr; int sc2 = 0;
+    // Save the last opcode NOW, before the second dasher_frame() call
+    // invalidates cmds1 (the contract: pointers are valid until the next
+    // dasher_frame() call). Reading cmds1 after the second frame is UB.
+    REQUIRE(cc1 >= 6);
+    int last_op1 = cmds1[cc1 - 6];
+
+    int* cmds2 = nullptr;
+    int cc2 = 0;
+    char** strs2 = nullptr;
+    int sc2 = 0;
     dasher_frame(ctx, 1016, &cmds2, &cc2, &strs2, &sc2);
 
     // Both pointers must be valid in isolation.
     REQUIRE(cmds1 != nullptr);
     REQUIRE(cmds2 != nullptr);
-    // The buffer contents must be valid (read each opcode of each buffer
-    // independently). If the buffers were aliased, the test still passes —
-    // we are only asserting that both are usable.
-    int last_op1 = cmds1[cc1 - 6];
+    REQUIRE(cc2 >= 6);
     int last_op2 = cmds2[cc2 - 6];
     CHECK(last_op1 >= 0);
     CHECK(last_op2 >= 0);
@@ -159,10 +166,14 @@ TEST_CASE("frame/separate contexts do not share buffers") {
     ScopedContext a(800, 600);
     ScopedContext b(800, 600);
 
-    int* cmds_a = nullptr; int cc_a = 0;
-    char** strs_a = nullptr; int sc_a = 0;
-    int* cmds_b = nullptr; int cc_b = 0;
-    char** strs_b = nullptr; int sc_b = 0;
+    int* cmds_a = nullptr;
+    int cc_a = 0;
+    char** strs_a = nullptr;
+    int sc_a = 0;
+    int* cmds_b = nullptr;
+    int cc_b = 0;
+    char** strs_b = nullptr;
+    int sc_b = 0;
 
     dasher_frame(a, 1000, &cmds_a, &cc_a, &strs_a, &sc_a);
     dasher_frame(b, 1000, &cmds_b, &cc_b, &strs_b, &sc_b);

@@ -56,7 +56,7 @@ void CTwoPushDynamicFilter::GetUISettings(std::vector<Dasher::Parameter>& List) 
 CTwoPushDynamicFilter::CTwoPushDynamicFilter(CSettingsStore* pSettingsStore, CDasherInterfaceBase* pInterface,
                                              CFrameRate* pFramerate)
     : CDynamicButtons(pSettingsStore, pInterface, pFramerate, _("Two-push Dynamic Mode (New One Button)")),
-      m_dNatsSinceFirstPush(-std::numeric_limits<double>::infinity()) {
+      m_dNatsSinceFirstPush(-std::numeric_limits<double>::infinity()), m_iActiveMarker(-1) {
     CTwoPushDynamicFilter::HandleParameterChange(LP_TWO_PUSH_OUTER); // and all the others too!
     m_pSettingsStore->OnParameterChanged.Subscribe(this, [this](Parameter p) { HandleParameterChange(p); });
 }
