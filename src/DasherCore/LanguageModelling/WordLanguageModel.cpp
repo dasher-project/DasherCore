@@ -279,6 +279,15 @@ void CWordLanguageModel::GetProbs(Context context, std::vector<unsigned int>& pr
         iToSpend -= p;
     }
 
+    // Symbol 0 is a special dummy/sentinel that must carry zero probability
+    // (AlphabetManager::IterateChildGroups asserts (*pCProb)[0] == 0 so the
+    // cumulative-difference arithmetic cp[i]-cp[j] stays valid for all i,j).
+    // Every other LM (PPM, PPMPY, RoutingPPM, CTW, Dict) enforces this
+    // explicitly; Word LM was missing it, which only happened to go unnoticed
+    // on platforms where the spelling model assigned ~0 probability to
+    // symbol 0. macOS libc++ showed the real bug.
+    probs[0] = 0;
+
     DASHER_ASSERT(iToSpend == 0);
 }
 
