@@ -136,7 +136,6 @@ void CTwoPushDynamicFilter::HandleParameterChange(Parameter parameter) {
         double dOuter = m_pSettingsStore->GetLongParameter(LP_TWO_PUSH_OUTER);
         m_dLogUpMul = log(dOuter / upDist());
         m_dLogDownMul = log(dOuter / downDist());
-        // cout << "bitsUp " << m_dLogUpMul << " bitsDown " << m_dLogDownMul << std::endl;
     }
         [[fallthrough]];
     case LP_TWO_PUSH_TOLERANCE:
@@ -155,7 +154,6 @@ void CTwoPushDynamicFilter::updateBitrate(double dBitrate) {
     m_dLastBitRate = dBitrate;
 
     double dPressBits = dBitrate * (double)m_pSettingsStore->GetLongParameter(LP_TWO_PUSH_TOLERANCE) / 1000.0;
-    // cout << "Max Bitrate changed - now " << dBitrate << " user accuracy " << dPressBits;
     m_dMinShortTwoPushTime = m_dLogUpMul - dPressBits;
     m_dMaxShortTwoPushTime = m_dLogUpMul + dPressBits;
     m_dMinLongTwoPushTime = m_dLogDownMul - dPressBits;
@@ -164,8 +162,6 @@ void CTwoPushDynamicFilter::updateBitrate(double dBitrate) {
     m_dMaxLongTwoPushTime = m_dLogDownMul + dPressBits;
     // TODO, what requirements do we actually need to make to ensure sanity (specifically, that computed m_aiTarget's
     // are in range)?
-    // cout << "bits; minShort " << m_dMinShortTwoPushTime << " maxShort " << m_dMaxShortTwoPushTime << " minLong " <<
-    // m_dMinLongTwoPushTime << " maxLong " << m_dMaxLongTwoPushTime << std::endl;
     m_bDecorationChanged = true;
 
     m_dLagBits = dBitrate * m_pSettingsStore->GetLongParameter(LP_DYNAMIC_BUTTON_LAG) / 1000.0;
@@ -178,8 +174,6 @@ void CTwoPushDynamicFilter::updateBitrate(double dBitrate) {
     m_aaiGuideAreas[0][1] = 2048 - static_cast<int>(up * exp(m_dMinShortTwoPushTime));
     m_aaiGuideAreas[1][0] = 2048 + static_cast<int>(down * exp(m_dMinLongTwoPushTime));
     m_aaiGuideAreas[1][1] = 2048 + static_cast<int>(down * exp(m_dMaxLongTwoPushTime));
-    // cout << "Short " << m_aaiGuideAreas[0][0] << " to " << m_aaiGuideAreas[0][1] << ", Long " <<
-    // m_aaiGuideAreas[1][0] << " to " << m_aaiGuideAreas[1][1];
 }
 
 void CTwoPushDynamicFilter::KeyDown(unsigned long Time, Keys::VirtualKey Key, CDasherView* pView, CDasherInput* pInput,
@@ -217,9 +211,7 @@ void CTwoPushDynamicFilter::ActionButton(unsigned long iTime, Keys::VirtualKey K
         // no button pushed (recently)
         m_dNatsSinceFirstPush = pModel->GetNats();
         // note, could be negative if overall reversed since last ResetNats (Offset)
-        // cout << "First push - got " << m_dNatsSinceFirstPush << std::endl;
     } else {
-        // cout << "Second push - event type " << iType << " logGrowth " << pModel->GetNats() << std::endl;
         if (m_iActiveMarker == -1)
             reverse(iTime);
         else {
@@ -265,7 +257,6 @@ void CTwoPushDynamicFilter::TimerImpl(unsigned long iTime, CDasherView* m_pDashe
         m_bDecorationChanged |=
             doSet(m_aiMarker[1], static_cast<const int>(2048 + exp(m_dLagBits + dLogGrowth) * dDown));
         if (dLogGrowth > m_dMaxLongTwoPushTime) {
-            // cout << " growth " << dLogGrowth << " - reversing" << std::endl;
             // button pushed, but then waited too long.
             reverse(iTime);
         } else if (dLogGrowth >= m_dMinShortTwoPushTime && dLogGrowth <= m_dMaxShortTwoPushTime)

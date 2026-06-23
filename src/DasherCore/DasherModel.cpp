@@ -75,7 +75,6 @@ void CDasherModel::ClearScheduledSteps() {
 }
 
 void CDasherModel::Make_root(CDasherNode* pNewRoot) {
-    //  std::cout << "Make root" << std::endl;
 
     DASHER_ASSERT(pNewRoot != NULL);
     DASHER_ASSERT(pNewRoot->Parent() == m_Root);
@@ -375,12 +374,10 @@ void CDasherModel::ScheduleOneStep(dasherint y1, dasherint y2, int nSteps, int l
                             d = (MAX_Y - targetRange) * 2 * static_cast<dasherint>(limX);
             bool bOver = std::max(llabs(m1), llabs(m2)) > std::numeric_limits<dasherint>::max() / n;
             if (bOver) {
-                // std::cout << "Overflow in max-speed-limit " << m1 << "," << m2 << " =wd> " << ((m1*n)/d) << "," <<
                 // ((m2*n)/d); so do it a harder way, but which uses smaller intermediates:
                 //  (Yes, this is valid even if !bOver. Could use it all the time?)
                 m1 = (m1 / d) * n + ((m1 % d) * n) / d;
                 m2 = (m2 / d) * n + ((m2 % d) * n) / d;
-                // std::cout << " => " << m1 << "," << m2 << std::endl;
             } else {
                 m1 = (m1 * n) / d;
                 m2 = (m2 * n) / d;

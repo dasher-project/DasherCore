@@ -37,7 +37,6 @@ CPPMPYLanguageModel::CPPMPYLanguageModel(CSettingsStore* pSettingsStore, int iNu
 
   //  DASHER_ASSERT(m_setContexts.count(ppmcontext) > 0);
 
-  //  std::cout<<"size of context set  "<<m_setContexts.size()<<std::endl;
 
   int iNumSymbols = GetSize();
 
@@ -75,9 +74,7 @@ CPPMPYLanguageModel::CPPMPYLanguageModel(CSettingsStore* pSettingsStore, int iNu
 
     CPPMPYnode *pSymbol;
     for(i =0; i<DIVISION; i++){
-      // std::cout<<"I "<<i<<std::endl;
       pSymbol = pTemp->child[i];
-      //std::cout<<"Symbols "<<pSymbol->symbol<<std::endl;
       while(pSymbol) {
     int sym = pSymbol->symbol;
 
@@ -161,14 +158,10 @@ void CPPMPYLanguageModel::GetPartProbs(Context context, std::vector<std::pair<sy
         vChildren[0].second = norm;
         return;
     }
-    //  std::cout<<"Norms is "<<norm<<std::endl;
-    //  std::cout<<"iUniform is "<<iUniform<<std::endl;
 
     const CPPMContext* ppmcontext = reinterpret_cast<const CPPMContext*>(context);
 
     //  DASHER_ASSERT(m_setContexts.count(ppmcontext) > 0);
-
-    //  std::cout<<"size of context set  "<<m_setContexts.size()<<std::endl;
 
     //  probs.resize(iNumSymbols);
 
@@ -185,7 +178,6 @@ void CPPMPYLanguageModel::GetPartProbs(Context context, std::vector<std::pair<sy
     for (std::vector<std::pair<symbol, unsigned int>>::iterator it = vChildren.begin(); it != vChildren.end(); it++) {
         DASHER_ASSERT(it->first > 0 && it->first < GetSize()); // i.e., is valid CH symbol
         it->second = static_cast<unsigned int>(iUniformLeft / (vChildren.size() - i));
-        //  std::cout<<"iUniformLeft: "<<iUniformLeft<<std::endl;
         iUniformLeft -= it->second;
         iToSpend -= it->second;
         i++;
@@ -210,7 +202,6 @@ void CPPMPYLanguageModel::GetPartProbs(Context context, std::vector<std::pair<sy
                 vCounts[j] = 0;
         }
 
-        //    std::cout<<"after lan mod firs tloop"<<std::endl;
         if (iTotal) {
             unsigned int size_of_slice = iToSpend;
 
@@ -228,7 +219,6 @@ void CPPMPYLanguageModel::GetPartProbs(Context context, std::vector<std::pair<sy
     }
     delete[] vCounts;
     // code
-    // std::cout<<"after lan mod second loop"<<std::endl;
 
     //      std::ostringstream str;
     //      for (sym=0;sym<modelchars;sym++)
@@ -241,7 +231,6 @@ void CPPMPYLanguageModel::GetPartProbs(Context context, std::vector<std::pair<sy
     //              str2 << valid[sym] << " ";
     //      str2 << std::endl;
     //      DASHER_TRACEOUTPUT("valid %s",str2.str().c_str());
-    // std::cout<<"after lan mod third loop"<<std::endl;
 
     // allow for rounding error by distributing the leftovers evenly amongst all elements...
     //  (ACL: previous code assigned nothing to element. Why? - I'm guessing due to confusion
@@ -252,25 +241,18 @@ void CPPMPYLanguageModel::GetPartProbs(Context context, std::vector<std::pair<sy
         it->second += p;
         iToSpend -= p;
     }
-    // std::cout<<"after lan mod fourth loop"<<std::endl;
     int iLeft = static_cast<int>(vChildren.size()) - 1;
-
-    //  std::cout<<"iNumsyjbols "<<vChildren.size()<<std::endl;
 
     for (std::vector<std::pair<symbol, unsigned int>>::iterator it = vChildren.begin() + 1; it != vChildren.end();
          it++) {
 
-        //     std::cout<<"iLeft "<<iLeft<<std::endl;
-        //  std::cout<<"iToSpend "<<iToSpend<<std::endl;
         unsigned int pRem = iToSpend / iLeft;
         it->second += pRem;
         --iLeft;
         iToSpend -= pRem;
     }
 
-    // std::cout<<"after lan mod fifth loop"<<std::endl;
     DASHER_ASSERT(iToSpend == 0);
-    // std::cout<<"after lan mod assert?"<<std::endl;
 }
 
 // ACL this was Will's original "GetPYProbs" method - explicitly called instead of GetProbs
@@ -279,7 +261,6 @@ void CPPMPYLanguageModel::GetPartProbs(Context context, std::vector<std::pair<sy
 void CPPMPYLanguageModel::GetProbs(Context context, std::vector<unsigned int>& probs, int norm, int iUniform) const {
     const CPPMContext* ppmcontext = reinterpret_cast<const CPPMContext*>(context);
 
-    //  std::cout<<"PPMCONTEXT symbol: "<<ppmcontext->head->symbol<<std::endl;
     /*
      CPPMPYnode * pNode = m_pRoot->child;
 
@@ -395,7 +376,6 @@ void CPPMPYLanguageModel::LearnPYSymbol(Context c, int pysym) {
     DASHER_ASSERT(pysym > 0 && pysym <= m_iNumPYsyms);
     CPPMPYLanguageModel::CPPMContext& context = *reinterpret_cast<CPPMContext*>(c);
 
-    //  std::cout<<"py learn context : "<<context.head->symbol<<std::endl;
     /*   CPPMPYnode * pNode = m_pRoot->child;
 
        while(pNode){

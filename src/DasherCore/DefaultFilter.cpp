@@ -258,7 +258,6 @@ double xmax(double y) {
     static const int a = 1, b = 1;
     static const double c = 100;
     return std::min(c, a * (exp(b * y * y) - 1));
-    // cout << "xmax = " << xmax << endl;
 }
 
 void CDefaultFilter::ApplyTransform(myint& iDasherX, myint& iDasherY, CDasherView* pView) {

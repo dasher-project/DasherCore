@@ -29,8 +29,6 @@ class CMixtureLanguageModel : public CLanguageModel {
     CMixtureLanguageModel(CSettingsStore* pSettingsStore, const CAlphInfo* pAlph, const CAlphabetMap* pAlphMap)
         : CLanguageModel(pAlph->iEnd - 1), m_pSettingsStore(pSettingsStore) {
 
-        //      std::cout << m_pAlphabet << std::endl;
-
         NextContext = 0;
 
         lma = new CPPMLanguageModel(m_pSettingsStore, m_iNumSyms);

@@ -147,7 +147,6 @@ void CAbstractPPM::EnterSymbol(Context c, int Symbol) {
                 //      Usprintf(debug,TEXT("found context %x order %d\n"),head,order);
                 //      DebugOutput(debug);
 
-                //                      std::cout << context.order << std::endl;
                 return;
             }
         }
@@ -162,8 +161,6 @@ void CAbstractPPM::EnterSymbol(Context c, int Symbol) {
         context.head = m_pRoot;
         context.order = 0;
     }
-
-    //      std::cout << context.order << std::endl;
 }
 
 /////////////////////////////////////////////////////////////////////
@@ -325,7 +322,6 @@ CAbstractPPM::CPPMnode* CAbstractPPM::CPPMnode::find_symbol(symbol s) const
             if (m_ppChildren[i]->sym == s) return m_ppChildren[i];
         return 0;
     }
-    //  printf("finding symbol %d at node %d\n",sym,node->id);
 
     for (int i = s;; i++) { // search through elements which have overflowed into subsequent slots
         CPPMnode* found = this->m_ppChildren[i % m_iNumChildSlots]; // wrap round
@@ -403,8 +399,6 @@ void CAbstractPPM::CPPMnode::AddChild(CPPMnode* pNewChild, int numSymbols) {
 CAbstractPPM::CPPMnode* CAbstractPPM::AddSymbolToNode(CPPMnode* pNode, symbol sym) {
 
     CPPMnode* pReturn = pNode->find_symbol(sym);
-
-    //      std::cout << sym << ",";
 
     if (pReturn != NULL) {
         pReturn->count++;

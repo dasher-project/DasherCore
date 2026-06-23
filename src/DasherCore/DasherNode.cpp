@@ -39,12 +39,9 @@ CDasherNode::CDasherNode(int iOffset, CDasherScreen::Label* pLabel)
 
 // TODO: put this back to being inlined
 CDasherNode::~CDasherNode() {
-    //  std::cout << "Deleting node: " << this << std::endl;
     // Release any storage that the node manager has allocated,
     // unreference ref counted stuff etc.
     DeleteChildren();
-
-    //  std::cout << "done." << std::endl;
 
     iNumNodes--;
 }
