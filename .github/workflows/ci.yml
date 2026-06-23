@@ -108,9 +108,18 @@ jobs:
 
       - name: Check for warnings
         run: |
-          # Filter out compiler warnings ([-Wxxx]) and command-line noise;
-          # only fail on actual clang-tidy findings ([check-name] pattern)
-          TIDY_WARNINGS=$(grep "warning:" clang-tidy-output.txt | grep -v '\[-W' | grep -v 'command-line option' || true)
+          # Filter out compiler warnings and command-line noise; only fail
+          # on actual clang-tidy findings ([check-name] pattern).
+          # Both forms of compiler warning are excluded:
+          #   [-Wfoo]               — direct from the compiler
+          #   [clang-diagnostic-foo] — same warnings, surfaced via clang-tidy
+          # The latter is what clang-tidy emits when it wraps a -W warning
+          # into its own [check-name] reporting format.
+          TIDY_WARNINGS=$(grep "warning:" clang-tidy-output.txt \
+            | grep -v '\[-W' \
+            | grep -v '\[clang-diagnostic-' \
+            | grep -v 'command-line option' \
+            || true)
           if [ -n "$TIDY_WARNINGS" ]; then
             echo "::error::clang-tidy found issues"
             echo "$TIDY_WARNINGS"

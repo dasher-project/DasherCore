@@ -25,6 +25,13 @@ Checks: >
   -cert-dcl37-c,
   -cert-dcl51-cpp,
   -cert-dcl16-c,
+  -cert-dcl03-c,
+  # cert-dcl03-c suggests replacing assert() with static_assert. Disabled
+  # because DASHER_ASSERT (now mapped to assert() in Debug builds per
+  # Tier 1 #2) is used for runtime invariants that cannot be evaluated
+  # at compile time (e.g. DASHER_ASSERT(false) for "should never happen"
+  # branches, DASHER_ASSERT(p != nullptr) for runtime pointers). The
+  # check fires on every such site.
   clang-analyzer-*,
   -clang-analyzer-core.NullDereference,
   -clang-analyzer-core.CallAndMessage,

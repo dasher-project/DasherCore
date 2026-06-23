@@ -149,16 +149,6 @@ class CGameModule {
     /// Time and nats at which this sentence started
     unsigned long m_ulSentenceStartTime;
     double m_dSentenceStartNats;
-
-    /* ---------------------------------------------------------------------
-     * Constants
-     * ---------------------------------------------------------------------
-     */
-
-    /**
-     * The font size used to draw the target string.
-     */
-    const int m_iFontSize;
 };
 
 } // namespace Dasher

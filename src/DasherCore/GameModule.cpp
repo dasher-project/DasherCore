@@ -21,7 +21,7 @@ CGameModule::CGameModule(CSettingsStore* pSettingsStore, Dasher::CDasherInterfac
     : m_pInterface(pInterface), m_pModel(pModel), m_pView(nullptr), m_pSettingsStore(pSettingsStore), m_iLastSym(-1),
       m_y1(std::numeric_limits<myint>::min()), m_y2(std::numeric_limits<myint>::max()),
       m_iTargetY(CDasherModel::ORIGIN_Y), m_uHelpStart(std::numeric_limits<unsigned long>::max()), m_ulTotalTime(0),
-      m_dTotalNats(0.0), m_uiTotalSyms(0), m_iFontSize(36) {
+      m_dTotalNats(0.0), m_uiTotalSyms(0) {
     HandleViewChange(pView);
 
     m_pInterface->OnEditEvent.Subscribe(this, [this](CEditEvent::EditEventType type, const std::string& strText,
