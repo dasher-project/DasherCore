@@ -348,6 +348,13 @@ struct dasher_ctx {
     std::string userDir;
     std::string stringBuf;
 
+    // Buffers backing const char* returns from various getters. These
+    // MUST live in dasher_ctx (not file-scope static) so that two
+    // contexts don't trample each other's returned pointers — a real
+    // cross-context bug noted in the codebase review (Tier 1 #4).
+    std::vector<std::string> stringValues; // dasher_get_palette_name / alphabet_name / parameter_string_values
+    std::string gameTextBuf;               // dasher_game_get_target_text
+
     // Appearance model state (RFC 0007). Lives at the C API layer — appearance
     // is a shell/canvas concern, not a DasherCore engine parameter. Persisted to
     // <userDir>/appearance_settings.xml. The active palette (SP_COLOUR_ID) is
@@ -984,7 +991,6 @@ static std::string s_paramInfoGroup;
 static std::string s_paramInfoSubgroup;
 static std::vector<std::string> s_enumStrings;
 static std::vector<std::pair<std::string, int>> s_enumEntries;
-static std::vector<std::string> s_stringValues;
 
 static void ensureParamKeys() {
     if (!s_paramKeys.empty()) return;
@@ -1083,16 +1089,17 @@ DASHER_API int dasher_get_parameter_enum_value(int key, int index) {
 
 DASHER_API int dasher_get_parameter_string_values(dasher_ctx* ctx, int key, const char** out_names, int max_out) {
     if (!out_names || max_out <= 0) return 0;
-    s_stringValues.clear();
+    if (!ctx) return 0;
+    ctx->stringValues.clear();
 
-    if (ctx && ctx->intf) {
-        s_stringValues = ctx->intf->GetPermittedValues(static_cast<Dasher::Parameter>(key));
+    if (ctx->intf) {
+        ctx->stringValues = ctx->intf->GetPermittedValues(static_cast<Dasher::Parameter>(key));
     }
 
-    int count = static_cast<int>(s_stringValues.size());
+    int count = static_cast<int>(ctx->stringValues.size());
     if (count > max_out) count = max_out;
     for (int i = 0; i < count; i++) {
-        out_names[i] = s_stringValues[i].c_str();
+        out_names[i] = ctx->stringValues[i].c_str();
     }
     return count;
 }
@@ -1109,8 +1116,8 @@ DASHER_API const char* dasher_get_palette_name(dasher_ctx* ctx, int index) {
     if (!ctx || !ctx->intf) return "";
     auto names = ctx->intf->GetPermittedValues(Dasher::SP_COLOUR_ID);
     if (index < 0 || index >= static_cast<int>(names.size())) return "";
-    s_stringValues = std::move(names);
-    return s_stringValues[index].c_str();
+    ctx->stringValues = std::move(names);
+    return ctx->stringValues[index].c_str();
 }
 
 DASHER_API const char* dasher_get_current_palette(dasher_ctx* ctx) {
@@ -1264,8 +1271,8 @@ DASHER_API const char* dasher_get_alphabet_name(dasher_ctx* ctx, int index) {
     if (!ctx || !ctx->intf) return "";
     auto names = ctx->intf->GetPermittedValues(Dasher::SP_ALPHABET_ID);
     if (index < 0 || index >= static_cast<int>(names.size())) return "";
-    s_stringValues = std::move(names);
-    return s_stringValues[index].c_str();
+    ctx->stringValues = std::move(names);
+    return ctx->stringValues[index].c_str();
 }
 
 // ── Game Mode ───────────────────────────────────────────────────────────────
@@ -1293,8 +1300,6 @@ DASHER_API void dasher_game_set_canvas_text(dasher_ctx* ctx, int enabled) {
     if (gm) gm->SetCanvasTextEnabled(enabled != 0);
 }
 
-static std::string s_gameTextBuf;
-
 static std::string symbolsToText(const Dasher::CAlphInfo* alph, const std::vector<Dasher::symbol>& syms, int count) {
     std::string result;
     for (int i = 0; i < count && i < (int)syms.size(); i++) {
@@ -1308,8 +1313,8 @@ DASHER_API const char* dasher_game_get_target_text(dasher_ctx* ctx) {
     auto* gm = ctx->intf->GetGameModule();
     if (!gm) return "";
     const auto& syms = gm->GetTargetSymbols();
-    s_gameTextBuf = symbolsToText(gm->GetAlphabet(), syms, (int)syms.size());
-    return s_gameTextBuf.c_str();
+    ctx->gameTextBuf = symbolsToText(gm->GetAlphabet(), syms, (int)syms.size());
+    return ctx->gameTextBuf.c_str();
 }
 
 DASHER_API int dasher_game_get_correct_count(dasher_ctx* ctx) {
@@ -1330,8 +1335,8 @@ DASHER_API const char* dasher_game_get_wrong_text(dasher_ctx* ctx) {
     if (!ctx || !ctx->intf) return "";
     auto* gm = ctx->intf->GetGameModule();
     if (!gm) return "";
-    s_gameTextBuf = gm->GetWrongText();
-    return s_gameTextBuf.c_str();
+    ctx->gameTextBuf = gm->GetWrongText();
+    return ctx->gameTextBuf.c_str();
 }
 
 // ── Persistence ───────────────────────────────────────────────────────────
