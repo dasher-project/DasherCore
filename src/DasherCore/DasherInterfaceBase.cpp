@@ -690,7 +690,6 @@ void CDasherInterfaceBase::CreateModules() {
     GetModuleManager()->RegisterInputMethodModule(std::make_unique<CCompassMode>(m_pSettingsStore, this));
     GetModuleManager()->RegisterInputMethodModule(
         std::make_unique<CStylusFilter>(m_pSettingsStore, this, m_pFramerate.get()));
-    // WIP Temporary as too many segfaults! //RegisterModule(new CDemoFilter(this, this, m_pFramerate));
 }
 
 std::vector<std::string> CDasherInterfaceBase::GetPermittedValues(Parameter parameter) {
