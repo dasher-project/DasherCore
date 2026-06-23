@@ -143,6 +143,52 @@ class CAbstractPPM : public CLanguageModel, private NoClones {
     void dump();
     bool isValidContext(const Context c) const;
 
+  protected:
+    /// A (symbol, count) pair representing one child of a PPM trie node.
+    /// Used by collectChildCounts() to abstract away the different child
+    /// storage mechanisms (inline hash vs pychild map).
+    struct SymbolCount {
+        symbol sym;
+        unsigned short count;
+    };
+
+    /// Collect children of a PPM node as (symbol, count) pairs.
+    ///
+    /// Base implementation iterates the CPPMnode inline hash table
+    /// (the fast open-addressed array built into each node). This is
+    /// used by the standard PPM and RoutingPPM language models.
+    ///
+    /// CPPMPYLanguageModel overrides this to iterate its pychild
+    /// std::map instead, which stores pinyin-specific counts separately
+    /// from the Chinese symbol trie.
+    ///
+    /// \param node the PPM trie node whose children to collect
+    /// \param out vector to fill with (symbol, count) pairs; cleared first
+    virtual void collectChildCounts(const CPPMnode* node, std::vector<SymbolCount>& out) const;
+
+    /// The shared PPM probability-merge loop — the heart of Dasher's
+    /// predictive engine.
+    ///
+    /// Produces a cumulative probability vector by blending evidence from
+    /// multiple context lengths (via vine-pointer backoff) with a uniform
+    /// backoff distribution. See the implementation in PPMLanguageModel.cpp
+    /// for a detailed description of the four-phase algorithm.
+    ///
+    /// Subclasses customize child iteration via collectChildCounts().
+    /// The caller provides the alpha/beta smoothing parameters (typically
+    /// read from LP_LM_ALPHA and LP_LM_BETA settings).
+    ///
+    /// \param ppmcontext the current PPM context (vine-chain head)
+    /// \param probs output vector; resized to iNumSymbols, filled with
+    ///             cumulative probabilities summing to norm
+    /// \param iNumSymbols number of symbols (including sentinel 0)
+    /// \param norm total probability mass (typically 65536)
+    /// \param iUniform mass for the uniform backoff distribution
+    /// \param alpha smoothing constant from LP_LM_ALPHA
+    /// \param beta count threshold from LP_LM_BETA
+    void mergePPMProbs(const CPPMContext* ppmcontext, std::vector<unsigned int>& probs, int iNumSymbols, int norm,
+                       int iUniform, int alpha, int beta) const;
+
   private:
     CPPMnode* AddSymbolToNode(CPPMnode* pNode, symbol sym);
 

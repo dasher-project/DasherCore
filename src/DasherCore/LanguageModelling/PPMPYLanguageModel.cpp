@@ -258,112 +258,26 @@ void CPPMPYLanguageModel::GetPartProbs(Context context, std::vector<std::pair<sy
 // ACL this was Will's original "GetPYProbs" method - explicitly called instead of GetProbs
 //  by an explicit cast to PPMPYLanguageModel whenever MandarinDasher was activated. Renaming
 //  to GetProbs causes the normal (virtual) call to come straight here without any special-casing...
+void CPPMPYLanguageModel::collectChildCounts(const CPPMnode* node, std::vector<SymbolCount>& out) const {
+    // PPMPY stores children in a pychild map on CPPMPYnode, not in the
+    // CPPMnode inline hash. Cast to access it.
+    const CPPMPYnode* pyNode = dynamic_cast<const CPPMPYnode*>(node);
+    if (pyNode) {
+        for (const auto& [sym, count] : pyNode->pychild) {
+            out.push_back({sym, count});
+        }
+    }
+}
+
 void CPPMPYLanguageModel::GetProbs(Context context, std::vector<unsigned int>& probs, int norm, int iUniform) const {
     const CPPMContext* ppmcontext = reinterpret_cast<const CPPMContext*>(context);
-
-    /*
-     CPPMPYnode * pNode = m_pRoot->child;
-
-      while(pNode){
-      std::cout<<"Next Symbol: "<<pNode->symbol<<"   ";
-      pNode = pNode->next;
-    }
-      std::cout<<" "<<std::endl;
-    */
-    //  DASHER_ASSERT(m_setContexts.count(ppmcontext) > 0);
-
-    int iNumSymbols = m_iNumPYsyms + 1;
-
-    probs.resize(iNumSymbols);
-
-    std::vector<bool> exclusions(iNumSymbols);
-
-    unsigned int iToSpend = norm;
-    unsigned int iUniformLeft = iUniform;
-
-    // TODO: Sort out zero symbol case
-    probs[0] = 0;
-    exclusions[0] = false;
-
-    int i;
-    for (i = 1; i < iNumSymbols; i++) {
-        probs[i] = iUniformLeft / (iNumSymbols - i);
-        iUniformLeft -= probs[i];
-        iToSpend -= probs[i];
-        exclusions[i] = false;
-    }
-
-    DASHER_ASSERT(iUniformLeft == 0);
-
-    //  bool doExclusion = GetLongParameter( LP_LM_ALPHA );
-    bool doExclusion = 0; // FIXME
 
     int alpha = m_pSettingsStore->GetLongParameter(LP_LM_ALPHA);
     int beta = m_pSettingsStore->GetLongParameter(LP_LM_BETA);
 
-    for (CPPMnode* pTemp = ppmcontext->head; pTemp; pTemp = pTemp->vine) {
-        int iTotal = 0;
-        const std::map<symbol, unsigned short int>& pychild(dynamic_cast<CPPMPYnode*>(pTemp)->pychild);
-
-        for (std::map<symbol, unsigned short int>::const_iterator it = pychild.begin(); it != pychild.end(); it++) {
-            if (!(exclusions[it->first] && doExclusion)) iTotal += it->second;
-        }
-
-        if (iTotal) {
-            unsigned int size_of_slice = iToSpend;
-
-            for (std::map<symbol, unsigned short int>::const_iterator it = pychild.begin(); it != pychild.end(); it++) {
-                if (!(exclusions[it->first] && doExclusion)) {
-                    exclusions[it->first] = 1;
-
-                    unsigned int p =
-                        static_cast<myint>(size_of_slice) * (100 * it->second - beta) / (100 * iTotal + alpha);
-
-                    probs[it->first] += p;
-                    iToSpend -= p;
-                }
-                //                              Usprintf(debug,TEXT("sym %u counts %d p %u tospend %u
-                //                              \n"),sym,s->count,p,tospend); DebugOutput( debug);
-            }
-        }
-    }
-
-    unsigned int size_of_slice = iToSpend;
-    int symbolsleft = 0;
-
-    for (i = 1; i < iNumSymbols; i++)
-        if (!(exclusions[i] && doExclusion)) symbolsleft++;
-
-    //      std::ostringstream str;
-    //      for (sym=0;sym<modelchars;sym++)
-    //              str << probs[sym] << " ";
-    //      str << std::endl;
-    //      DASHER_TRACEOUTPUT("probs %s",str.str().c_str());
-
-    //      std::ostringstream str2;
-    //      for (sym=0;sym<modelchars;sym++)
-    //              str2 << valid[sym] << " ";
-    //      str2 << std::endl;
-    //      DASHER_TRACEOUTPUT("valid %s",str2.str().c_str());
-
-    for (i = 1; i < iNumSymbols; i++) {
-        if (!(exclusions[i] && doExclusion)) {
-            unsigned int p = size_of_slice / symbolsleft;
-            probs[i] += p;
-            iToSpend -= p;
-        }
-    }
-
-    int iLeft = iNumSymbols - 1;
-
-    for (int j = 1; j < iNumSymbols; ++j) {
-        unsigned int p = iToSpend / iLeft;
-        probs[j] += p;
-        --iLeft;
-        iToSpend -= p;
-    }
-
-    DASHER_ASSERT(iToSpend == 0);
+    // PPMPY predicts pinyin symbols, so the symbol count is m_iNumPYsyms + 1
+    // (the +1 is for the sentinel symbol 0 which gets probability 0).
+    mergePPMProbs(ppmcontext, probs, m_iNumPYsyms + 1, norm, iUniform, alpha, beta);
 }
 
 /////////////////////////////////////////////////////////////////////
