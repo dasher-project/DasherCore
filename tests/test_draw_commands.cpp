@@ -1,7 +1,8 @@
 // Draw command tests: validate opcode structure, bounds, strings, rendering
 #include "test_common.h"
 
-[[maybe_unused]]static void get_frame(dasher_ctx* ctx, int64_t time, int** cmds, int* cmd_count, char*** strs, int* str_count) {
+[[maybe_unused]] static void get_frame(dasher_ctx* ctx, int64_t time, int** cmds, int* cmd_count, char*** strs,
+                                       int* str_count) {
     *cmds = nullptr;
     *cmd_count = 0;
     *strs = nullptr;

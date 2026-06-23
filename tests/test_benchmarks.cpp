@@ -43,7 +43,7 @@ double percentile_ms(std::vector<double>& samples, double pct) {
     return samples[idx];
 }
 
-}  // namespace
+} // namespace
 
 TEST_CASE("bench/dasher_frame p99 under 100ms over 10000 frames") {
     ScopedContext ctx(800, 600);
@@ -69,13 +69,14 @@ TEST_CASE("bench/dasher_frame p99 under 100ms over 10000 frames") {
         float sy = 300.0f + 30.0f * std::sin(i * 0.01f);
         dasher_mouse_move(ctx, 700.0f, sy);
 
-        int* cmds = nullptr; int cc = 0;
-        char** strs = nullptr; int sc = 0;
+        int* cmds = nullptr;
+        int cc = 0;
+        char** strs = nullptr;
+        int sc = 0;
         auto t0 = clk::now();
         dasher_frame(ctx, 100000 + i * 16, &cmds, &cc, &strs, &sc);
         auto t1 = clk::now();
-        samples_ms.push_back(
-            std::chrono::duration<double, std::milli>(t1 - t0).count());
+        samples_ms.push_back(std::chrono::duration<double, std::milli>(t1 - t0).count());
     }
     dasher_mouse_up(ctx);
 
@@ -83,10 +84,11 @@ TEST_CASE("bench/dasher_frame p99 under 100ms over 10000 frames") {
     const double p50 = percentile_ms(samples_ms, 0.50);
     const double p95 = percentile_ms(samples_ms, 0.95);
     const double p99 = percentile_ms(samples_ms, 0.99);
-    const double max_ms = samples_ms.back();  // samples is sorted after percentile call
+    const double max_ms = samples_ms.back(); // samples is sorted after percentile call
 
     double sum = 0.0;
-    for (double s : samples_ms) sum += s;
+    for (double s : samples_ms)
+        sum += s;
     const double mean = sum / samples_ms.size();
 
     // Log to stdout so CI captures the numbers for trend analysis.
@@ -119,15 +121,16 @@ TEST_CASE("bench/dasher_frame at rest is faster than active") {
     active_samples.reserve(N);
 
     // Idle: mouse stationary at crosshair, no zoom.
-    dasher_mouse_move(ctx, 400.0f, 300.0f);  // at crosshair = no motion
+    dasher_mouse_move(ctx, 400.0f, 300.0f); // at crosshair = no motion
     for (int i = 0; i < N; ++i) {
-        int* cmds = nullptr; int cc = 0;
-        char** strs = nullptr; int sc = 0;
+        int* cmds = nullptr;
+        int cc = 0;
+        char** strs = nullptr;
+        int sc = 0;
         auto t0 = clk::now();
         dasher_frame(ctx, 200000 + i * 16, &cmds, &cc, &strs, &sc);
         auto t1 = clk::now();
-        idle_samples.push_back(
-            std::chrono::duration<double, std::milli>(t1 - t0).count());
+        idle_samples.push_back(std::chrono::duration<double, std::milli>(t1 - t0).count());
     }
 
     // Active: mouse in motion, zooming forward.
@@ -135,13 +138,14 @@ TEST_CASE("bench/dasher_frame at rest is faster than active") {
     dasher_mouse_down(ctx);
     for (int i = 0; i < N; ++i) {
         dasher_mouse_move(ctx, 700.0f, 300.0f + (i % 50));
-        int* cmds = nullptr; int cc = 0;
-        char** strs = nullptr; int sc = 0;
+        int* cmds = nullptr;
+        int cc = 0;
+        char** strs = nullptr;
+        int sc = 0;
         auto t0 = clk::now();
         dasher_frame(ctx, 300000 + i * 16, &cmds, &cc, &strs, &sc);
         auto t1 = clk::now();
-        active_samples.push_back(
-            std::chrono::duration<double, std::milli>(t1 - t0).count());
+        active_samples.push_back(std::chrono::duration<double, std::milli>(t1 - t0).count());
     }
     dasher_mouse_up(ctx);
 
@@ -157,5 +161,5 @@ TEST_CASE("bench/dasher_frame at rest is faster than active") {
     // Active should be at least as expensive as idle. Equal is OK (no
     // motion means no zoom, so the workloads converge), but idle should
     // not be more expensive than active.
-    CHECK(idle_p50 <= active_p50 + 1.0);  // 1ms tolerance for noise
+    CHECK(idle_p50 <= active_p50 + 1.0); // 1ms tolerance for noise
 }

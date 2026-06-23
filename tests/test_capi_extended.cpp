@@ -318,5 +318,4 @@ TEST(null_safety_extended) {
 
     int32_t colors[4] = {0};
     ASSERT_EQ(dasher_get_palette_preview_colors(null_ctx, 0, colors), -1);
-
 }

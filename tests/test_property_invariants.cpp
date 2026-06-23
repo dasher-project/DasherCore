@@ -44,11 +44,10 @@ struct Rng {
 };
 
 const char* kWords[] = {
-    "the", "and", "for", "are", "but", "not", "you", "all", "can", "had",
-    "her", "was", "one", "our", "out", "day", "get", "has", "him", "his",
-    "how", "man", "new", "now", "old", "see", "two", "way", "who", "boy",
-    "did", "its", "let", "put", "say", "she", "too", "use", "cat", "dog",
-    "ran", "sat", "ate", "fly", "sky", "sun", "moon", "star", "rain", "snow",
+    "the", "and", "for", "are", "but", "not", "you", "all",  "can",  "had",  "her",  "was", "one",
+    "our", "out", "day", "get", "has", "him", "his", "how",  "man",  "new",  "now",  "old", "see",
+    "two", "way", "who", "boy", "did", "its", "let", "put",  "say",  "she",  "too",  "use", "cat",
+    "dog", "ran", "sat", "ate", "fly", "sky", "sun", "moon", "star", "rain", "snow",
 };
 
 const char* random_training_text(Rng& rng) {
@@ -86,8 +85,7 @@ std::vector<Bounds> get_bounds(dasher_ctx* ctx) {
 // mass) strictly. We check normalization (last hbnd == 65536) loosely
 // because some LMs (Word, Mixture) have a known bug where the total mass
 // falls short of 65536. Documented in the per-LM property test below.
-std::string check_invariants(const std::vector<Bounds>& b,
-                             bool strict_normalize = true) {
+std::string check_invariants(const std::vector<Bounds>& b, bool strict_normalize = true) {
     if (b.empty()) return "no children returned";
     for (size_t i = 0; i < b.size(); ++i) {
         if (b[i].hbnd <= b[i].lbnd) {
@@ -109,7 +107,7 @@ std::string check_invariants(const std::vector<Bounds>& b,
     return "";
 }
 
-}  // namespace
+} // namespace
 
 // ---------------------------------------------------------------------------
 // Property: invariant holds after random training, on a fresh context
@@ -123,7 +121,7 @@ TEST_CASE("prop/normalization holds across random training texts") {
     //
     // The default LM is PPM, which normalizes correctly (see the per-LM
     // property test for the Word/Mixture caveat).
-    Rng rng(42);  // fixed seed for reproducibility
+    Rng rng(42); // fixed seed for reproducibility
     int violations = 0;
     int trials = 0;
 
@@ -177,14 +175,16 @@ TEST_CASE("prop/normalization holds after training and navigation") {
             int sy = 200 + rng.in_range(0, 200);
             dasher_mouse_move(ctx, 700.0f, static_cast<float>(sy));
 
-            int* cmds = nullptr; int cc = 0;
-            char** strs = nullptr; int sc = 0;
+            int* cmds = nullptr;
+            int cc = 0;
+            char** strs = nullptr;
+            int sc = 0;
             dasher_frame(ctx, 1000 + frame * 16, &cmds, &cc, &strs, &sc);
 
             // Check invariants every 10 frames (cheaper than every frame).
             if (frame % 10 == 0) {
                 auto bounds = get_bounds(ctx);
-                if (bounds.empty()) continue;  // crosshair at empty node — skip
+                if (bounds.empty()) continue; // crosshair at empty node — skip
                 std::string v = check_invariants(bounds);
                 if (!v.empty()) {
                     ++violations_in_trial;
@@ -271,8 +271,7 @@ TEST_CASE("prop/probability mass sums to 65536 for every registered LM") {
         ScopedContext ctx(800, 600);
         dasher_set_language_model_id(ctx, lm_id);
 
-        REQUIRE(dasher_import_training_text(ctx,
-            "the cat sat on the mat the cat sat on the mat") == 0);
+        REQUIRE(dasher_import_training_text(ctx, "the cat sat on the mat the cat sat on the mat") == 0);
 
         auto bounds = get_bounds(ctx);
         REQUIRE(!bounds.empty());
@@ -292,8 +291,7 @@ TEST_CASE("prop/probability mass sums to 65536 for every registered LM") {
 
     // Report what we found.
     for (const auto& r : results) {
-        printf("[LM id=%d name=%s] total_mass=%d %s\n",
-               r.id, r.name.c_str(), r.total_mass,
+        printf("[LM id=%d name=%s] total_mass=%d %s\n", r.id, r.name.c_str(), r.total_mass,
                r.structural_violation.empty() ? "" : r.structural_violation.c_str());
     }
 

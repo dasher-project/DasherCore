@@ -100,7 +100,6 @@ TEST(map_symbols_deterministic_across_contexts) {
     ASSERT_EQ(counts[0], counts[2]);
     ASSERT_STR_EQ(first_symbols[0], first_symbols[1]);
     ASSERT_STR_EQ(first_symbols[0], first_symbols[2]);
-
 }
 
 TEST(map_symbol_text_buffer_too_small) {

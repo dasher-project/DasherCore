@@ -20,7 +20,6 @@ TEST(action_registry_empty) {
 
     std::map<std::string, std::string> emptyAttrs;
     ASSERT(registry.create("nonexistent", emptyAttrs) == nullptr);
-
 }
 
 TEST(action_registry_factory) {
@@ -35,7 +34,6 @@ TEST(action_registry_factory) {
     ControlAction* action = registry.create("stop", attrs);
     ASSERT(action != nullptr);
     delete action;
-
 }
 
 TEST(action_registry_custom_action) {
@@ -69,7 +67,6 @@ TEST(action_registry_custom_action) {
     ASSERT_EQ(receivedAttrs.size(), (size_t)2);
     ASSERT_STR_EQ(receivedAttrs["key1"].c_str(), "val1");
     ASSERT_STR_EQ(receivedAttrs["key2"].c_str(), "val2");
-
 }
 
 TEST(action_registry_overwrite) {
@@ -91,7 +88,6 @@ TEST(action_registry_overwrite) {
     // Only the second callback should fire
     ASSERT_EQ(callCount1, 0);
     ASSERT_EQ(callCount2, 1);
-
 }
 
 // ── C API integration tests ────────────────────────────────────────────────
@@ -129,7 +125,6 @@ TEST(capi_register_action_null_safety) {
     dasher_register_action(nullptr, "test_action", nullptr, nullptr);
 
     ASSERT_EQ(callbackCalled, 0);
-
 }
 
 TEST(capi_register_action_before_realize) {

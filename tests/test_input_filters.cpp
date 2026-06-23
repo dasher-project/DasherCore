@@ -58,11 +58,11 @@ constexpr int kNumFilters = sizeof(kAllFilters) / sizeof(kAllFilters[0]);
 
 // Key codes (from DasherTypes.h:114-138, dasher.h:71).
 constexpr int kKeyStartStop = 0;
-constexpr int kKeyButton1   = 1;  // backoff
-constexpr int kKeyButton2   = 2;  // forward/up
-constexpr int kKeyButton3   = 3;  // forward/down
-constexpr int kKeyButton4   = 4;  // forward/extra
-constexpr int kKeyPrimary   = 100;
+constexpr int kKeyButton1 = 1; // backoff
+constexpr int kKeyButton2 = 2; // forward/up
+constexpr int kKeyButton3 = 3; // forward/down
+constexpr int kKeyButton4 = 4; // forward/extra
+constexpr int kKeyPrimary = 100;
 
 // Helper: look up SP_INPUT_FILTER key (memoized; same value across all
 // contexts in this process).
@@ -81,7 +81,7 @@ void press_release(dasher_ctx* ctx, int key, int press_ms = 20) {
     dasher_key_event(ctx, key, 0);
 }
 
-}  // namespace
+} // namespace
 
 // ---------------------------------------------------------------------------
 // Foundational: every filter name activates cleanly
@@ -109,11 +109,12 @@ TEST_CASE("filters/invalid name silently falls back") {
     ScopedContext ctx(800, 600);
     set_filter(ctx, "Nonexistent Filter Mode");
     // The string is stored as-is.
-    CHECK(std::string(dasher_get_string_parameter(ctx, sp_input_filter_key()))
-              == "Nonexistent Filter Mode");
+    CHECK(std::string(dasher_get_string_parameter(ctx, sp_input_filter_key())) == "Nonexistent Filter Mode");
     // But the engine still runs (a frame doesn't crash).
-    int* cmds = nullptr; int cc = 0;
-    char** strs = nullptr; int sc = 0;
+    int* cmds = nullptr;
+    int cc = 0;
+    char** strs = nullptr;
+    int sc = 0;
     dasher_frame(ctx, 1000, &cmds, &cc, &strs, &sc);
     CHECK(cc > 0);
 }
@@ -128,13 +129,11 @@ TEST_CASE("filters/setting SP_INPUT_FILTER before realize is lost") {
     REQUIRE(ctx != nullptr);
 
     set_filter(ctx, "Click Mode");
-    CHECK(std::string(dasher_get_string_parameter(ctx, sp_input_filter_key()))
-              == "Click Mode");
+    CHECK(std::string(dasher_get_string_parameter(ctx, sp_input_filter_key())) == "Click Mode");
 
     // set_screen_size realizes and overwrites.
     dasher_set_screen_size(ctx, 800, 600);
-    CHECK(std::string(dasher_get_string_parameter(ctx, sp_input_filter_key()))
-              == "Normal Control");
+    CHECK(std::string(dasher_get_string_parameter(ctx, sp_input_filter_key())) == "Normal Control");
 
     dasher_destroy(ctx);
 }
@@ -234,8 +233,10 @@ TEST_CASE("filters/Click Mode handles discrete clicks") {
     }
     // No specific output assertion: click mode on a non-target yields
     // variable text. The contract is "no crash on the click cycle".
-    int* cmds = nullptr; int cc = 0;
-    char** strs = nullptr; int sc = 0;
+    int* cmds = nullptr;
+    int cc = 0;
+    char** strs = nullptr;
+    int sc = 0;
     dasher_frame(ctx, 100000, &cmds, &cc, &strs, &sc);
     CHECK(cc > 0);
 }
@@ -246,7 +247,7 @@ TEST_CASE("filters/Stylus Control handles tap-style clicks") {
     // Lower LP_TAP_TIME so the test (which uses wall-clock mouse_down/up)
     // reliably classifies as a "short tap" rather than a long press.
     const int lp_tap = dasher_find_parameter_key("LP_TAP_TIME");
-    dasher_set_long_parameter(ctx, lp_tap, 100000);  // 100s — any tap is short
+    dasher_set_long_parameter(ctx, lp_tap, 100000); // 100s — any tap is short
 
     dasher_mouse_move(ctx, 400.0f, 200.0f);
     for (int n = 0; n < 5; ++n) {
@@ -256,7 +257,7 @@ TEST_CASE("filters/Stylus Control handles tap-style clicks") {
         dasher_mouse_up(ctx);
         run_frames(ctx, 3, 1100 + n * 100, 16);
     }
-    dasher_set_long_parameter(ctx, lp_tap, 25);  // restore default
+    dasher_set_long_parameter(ctx, lp_tap, 25); // restore default
 }
 
 // ---------------------------------------------------------------------------
@@ -312,11 +313,11 @@ TEST_CASE("filters/Two Button Dynamic Mode alternates up/down keys") {
     set_filter(ctx, "Two Button Dynamic Mode");
     dasher_set_speed_percent(ctx, 200);
 
-    press_release(ctx, kKeyButton2, 20);  // start
+    press_release(ctx, kKeyButton2, 20); // start
 
     for (int k = 0; k < 10; ++k) {
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
-        int key = (k % 2 == 0) ? kKeyButton2 : kKeyButton3;  // alternate up/down
+        int key = (k % 2 == 0) ? kKeyButton2 : kKeyButton3; // alternate up/down
         press_release(ctx, key, 20);
         run_frames(ctx, 3, 1000 + k * 100, 16);
     }
@@ -354,10 +355,10 @@ TEST_CASE("filters/Direct Mode cycles through forward buttons") {
     ScopedContext ctx(800, 600);
     set_filter(ctx, "Direct Mode");
     const int lp_zoomsteps = dasher_find_parameter_key("LP_ZOOMSTEPS");
-    dasher_set_long_parameter(ctx, lp_zoomsteps, 4);  // snappier zoom
+    dasher_set_long_parameter(ctx, lp_zoomsteps, 4); // snappier zoom
 
     for (int k = 0; k < 30; ++k) {
-        int key = kKeyButton2 + (k % 3);  // Button_2, Button_3, Button_4
+        int key = kKeyButton2 + (k % 3); // Button_2, Button_3, Button_4
         press_release(ctx, key, 5);
         run_frames(ctx, 4, 1000 + k * 64, 16);
     }
@@ -404,7 +405,7 @@ TEST_CASE("filters/Compass Mode four direction buttons") {
     dasher_set_long_parameter(ctx, lp_zoomsteps, 4);
 
     for (int k = 0; k < 30; ++k) {
-        int key = kKeyButton1 + (k % 4);  // cycle through 4 directions
+        int key = kKeyButton1 + (k % 4); // cycle through 4 directions
         press_release(ctx, key, 5);
         run_frames(ctx, 4, 1000 + k * 64, 16);
     }

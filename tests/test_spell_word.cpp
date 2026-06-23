@@ -79,7 +79,7 @@ std::string collect_alphabet_chars(dasher_ctx* ctx) {
     return out;
 }
 
-}  // namespace
+} // namespace
 
 // ---------------------------------------------------------------------------
 // Smoke: continuous hover at one target produces output
@@ -119,13 +119,12 @@ TEST_CASE("spell/drive into highest-probability child changes root") {
 
     // Find the highest-mass child.
     auto best_it = std::max_element(initial.begin(), initial.end(),
-        [](const ChildBounds& a, const ChildBounds& b) { return a.mass() < b.mass(); });
+                                    [](const ChildBounds& a, const ChildBounds& b) { return a.mass() < b.mass(); });
     REQUIRE(best_it != initial.end());
     CHECK(best_it->mass() > 0);
 
     const int target_sy = estimate_screen_y_for_child(*best_it, 600);
-    INFO("target child ", best_it->index, " mass ", best_it->mass(),
-         " sy ", target_sy);
+    INFO("target child ", best_it->index, " mass ", best_it->mass(), " sy ", target_sy);
 
     // Drive input at that target until root child count changes (meaning
     // we descended into the child) or we hit the frame budget.
@@ -137,8 +136,10 @@ TEST_CASE("spell/drive into highest-probability child changes root") {
     bool descended = false;
     for (; frames_run < frame_budget; ++frames_run) {
         dasher_mouse_move(ctx, 700.0f, static_cast<float>(target_sy));
-        int* cmds = nullptr; int cc = 0;
-        char** strs = nullptr; int sc = 0;
+        int* cmds = nullptr;
+        int cc = 0;
+        char** strs = nullptr;
+        int sc = 0;
         dasher_frame(ctx, 1000 + frames_run * 16, &cmds, &cc, &strs, &sc);
 
         auto current = get_children(ctx);
@@ -151,8 +152,7 @@ TEST_CASE("spell/drive into highest-probability child changes root") {
         }
         bool bounds_changed = false;
         for (size_t i = 0; i < current.size() && i < initial.size(); ++i) {
-            if (current[i].lbnd != initial[i].lbnd
-                || current[i].hbnd != initial[i].hbnd) {
+            if (current[i].lbnd != initial[i].lbnd || current[i].hbnd != initial[i].hbnd) {
                 bounds_changed = true;
                 break;
             }
@@ -194,8 +194,10 @@ TEST_CASE("spell/realistic session produces alphabet-only output") {
         // Sweep sy from 100 to 500 and back over the run.
         int sy = 100 + (i % 400);
         dasher_mouse_move(ctx, 700.0f, static_cast<float>(sy));
-        int* cmds = nullptr; int cc = 0;
-        char** strs = nullptr; int sc = 0;
+        int* cmds = nullptr;
+        int cc = 0;
+        char** strs = nullptr;
+        int sc = 0;
         dasher_frame(ctx, 1000 + i * 16, &cmds, &cc, &strs, &sc);
     }
     dasher_mouse_up(ctx);
@@ -216,19 +218,18 @@ TEST_CASE("spell/realistic session produces alphabet-only output") {
     int unknown = 0;
     for (size_t i = 0; i < output.size(); ++i) {
         unsigned char c = static_cast<unsigned char>(output[i]);
-        if (c >= 0x80) continue;  // skip UTF-8 continuation / multi-byte
+        if (c >= 0x80) continue; // skip UTF-8 continuation / multi-byte
         ++checked;
         if (alphabet_chars.find(static_cast<char>(c)) == std::string::npos) {
             ++unknown;
         }
     }
-    INFO("output: '", output, "' (len=", output.size(), ", checked=",
-         checked, ", unknown=", unknown, ")");
+    INFO("output: '", output, "' (len=", output.size(), ", checked=", checked, ", unknown=", unknown, ")");
     // Allow some unknowns (control characters like \n emitted by the
     // engine for paragraph nodes), but require the vast majority to be
     // alphabet characters.
     if (checked > 0) {
-        CHECK(unknown * 4 < checked);  // < 25% unknown
+        CHECK(unknown * 4 < checked); // < 25% unknown
     }
 }
 
@@ -250,8 +251,10 @@ TEST_CASE("spell/same trajectory produces same output across runs") {
         dasher_mouse_down(ctx);
         for (int i = 0; i < 200; ++i) {
             dasher_mouse_move(ctx, 700.0f, 300.0f + (i % 50));
-            int* cmds = nullptr; int cc = 0;
-            char** strs = nullptr; int sc = 0;
+            int* cmds = nullptr;
+            int cc = 0;
+            char** strs = nullptr;
+            int sc = 0;
             dasher_frame(ctx, 1000 + i * 16, &cmds, &cc, &strs, &sc);
         }
         dasher_mouse_up(ctx);

@@ -256,5 +256,4 @@ TEST(color_palette_appearance_persistence) {
     ASSERT_STR_EQ(dasher_get_dark_palette(c2), "Rainbow Dark");
     ASSERT_STR_EQ(dasher_get_current_palette(c2), "Rainbow"); // original choice restored
     dasher_destroy(c2);
-
 }

@@ -58,15 +58,13 @@ TEST_CASE("xml/truncated alphabet file is ignored") {
     ScopedTempDir tmp;
     std::string data_dir = build_data_dir(tmp);
 
-    const std::string truncated =
-        "<?xml version=\"1.0\"?>\n"
-        "<alphabet name=\"TruncatedTest\">\n"
-        "  <orientation type=\"LR\"/>\n"
-        "  <train>dasher_training_en_GB.txt</train>\n"
-        "  <spacebar output=\" \"/>\n";  // no closing </alphabet>
+    const std::string truncated = "<?xml version=\"1.0\"?>\n"
+                                  "<alphabet name=\"TruncatedTest\">\n"
+                                  "  <orientation type=\"LR\"/>\n"
+                                  "  <train>dasher_training_en_GB.txt</train>\n"
+                                  "  <spacebar output=\" \"/>\n"; // no closing </alphabet>
 
-    REQUIRE(write_data_file(data_dir, "alphabets",
-                            "alphabet.truncated_test.xml", truncated));
+    REQUIRE(write_data_file(data_dir, "alphabets", "alphabet.truncated_test.xml", truncated));
 
     // Creating a context with this file present must not crash.
     dasher_ctx* ctx = dasher_create(data_dir.c_str(), tmp.c_str(), nullptr);
@@ -100,8 +98,7 @@ TEST_CASE("xml/alphabet with binary garbage is ignored") {
     garbage.push_back('\xFE');
     garbage.append("not xml at all");
 
-    REQUIRE(write_data_file(data_dir, "alphabets",
-                            "alphabet.garbage_test.xml", garbage));
+    REQUIRE(write_data_file(data_dir, "alphabets", "alphabet.garbage_test.xml", garbage));
 
     // Engine still realizes (other valid alphabets load).
     dasher_ctx* ctx = dasher_create(data_dir.c_str(), tmp.c_str(), nullptr);
@@ -115,8 +112,7 @@ TEST_CASE("xml/empty alphabet file is ignored") {
     ScopedTempDir tmp;
     std::string data_dir = build_data_dir(tmp);
 
-    REQUIRE(write_data_file(data_dir, "alphabets",
-                            "alphabet.empty_test.xml", ""));
+    REQUIRE(write_data_file(data_dir, "alphabets", "alphabet.empty_test.xml", ""));
 
     dasher_ctx* ctx = dasher_create(data_dir.c_str(), tmp.c_str(), nullptr);
     REQUIRE(ctx != nullptr);
@@ -132,14 +128,12 @@ TEST_CASE("xml/alphabet with valid XML but wrong schema is ignored") {
     ScopedTempDir tmp;
     std::string data_dir = build_data_dir(tmp);
 
-    const std::string wrong_schema =
-        "<?xml version=\"1.0\"?>\n"
-        "<wrong_root>\n"
-        "  <some_tag>value</some_tag>\n"
-        "</wrong_root>\n";
+    const std::string wrong_schema = "<?xml version=\"1.0\"?>\n"
+                                     "<wrong_root>\n"
+                                     "  <some_tag>value</some_tag>\n"
+                                     "</wrong_root>\n";
 
-    REQUIRE(write_data_file(data_dir, "alphabets",
-                            "alphabet.wrong_schema.xml", wrong_schema));
+    REQUIRE(write_data_file(data_dir, "alphabets", "alphabet.wrong_schema.xml", wrong_schema));
 
     dasher_ctx* ctx = dasher_create(data_dir.c_str(), tmp.c_str(), nullptr);
     REQUIRE(ctx != nullptr);
@@ -156,14 +150,12 @@ TEST_CASE("xml/truncated colour file is ignored") {
     ScopedTempDir tmp;
     std::string data_dir = build_data_dir(tmp);
 
-    const std::string truncated =
-        "<?xml version=\"1.0\"?>\n"
-        "<colors name=\"TruncatedPalette\">\n"
-        "  <palette name=\"main\">\n"
-        "    <entry colour=\"#000000\"";  // truncated
+    const std::string truncated = "<?xml version=\"1.0\"?>\n"
+                                  "<colors name=\"TruncatedPalette\">\n"
+                                  "  <palette name=\"main\">\n"
+                                  "    <entry colour=\"#000000\""; // truncated
 
-    REQUIRE(write_data_file(data_dir, "colours",
-                            "colours.truncated.xml", truncated));
+    REQUIRE(write_data_file(data_dir, "colours", "colours.truncated.xml", truncated));
 
     dasher_ctx* ctx = dasher_create(data_dir.c_str(), tmp.c_str(), nullptr);
     REQUIRE(ctx != nullptr);
@@ -200,10 +192,9 @@ TEST_CASE("xml/malformed settings load does not crash") {
     std::string data_dir = build_data_dir(tmp);
 
     // Write a malformed settings file into the user dir.
-    const std::string bad_settings =
-        "<?xml version=\"1.0\"?>\n"
-        "<settings>\n"
-        "  <item name=\"LP_MAX_BITRATE\">not_a_number";
+    const std::string bad_settings = "<?xml version=\"1.0\"?>\n"
+                                     "<settings>\n"
+                                     "  <item name=\"LP_MAX_BITRATE\">not_a_number";
     std::ofstream out(std::string(tmp.path) + "/dasher_settings.xml");
     out << bad_settings;
     out.close();
@@ -231,9 +222,8 @@ TEST_CASE("xml/dash-only settings file does not corrupt state") {
     ScopedTempDir tmp;
     std::string data_dir = build_data_dir(tmp);
 
-    const std::string empty_settings =
-        "<?xml version=\"1.0\"?>\n"
-        "<!-- intentionally empty -->\n";
+    const std::string empty_settings = "<?xml version=\"1.0\"?>\n"
+                                       "<!-- intentionally empty -->\n";
 
     std::ofstream out(std::string(tmp.path) + "/dasher_settings.xml");
     out << empty_settings;
@@ -258,8 +248,7 @@ TEST_CASE("xml/multiple bad files at once are all skipped") {
 
     REQUIRE(write_data_file(data_dir, "alphabets", "alphabet.bad1.xml", ""));
     REQUIRE(write_data_file(data_dir, "alphabets", "alphabet.bad2.xml", "garbage"));
-    REQUIRE(write_data_file(data_dir, "alphabets", "alphabet.bad3.xml",
-                             "<?xml version=\"1.0\"?><not_alphabet/>"));
+    REQUIRE(write_data_file(data_dir, "alphabets", "alphabet.bad3.xml", "<?xml version=\"1.0\"?><not_alphabet/>"));
 
     dasher_ctx* ctx = dasher_create(data_dir.c_str(), tmp.c_str(), nullptr);
     REQUIRE(ctx != nullptr);

@@ -134,5 +134,4 @@ TEST(training_identical_repeated_deterministic) {
     printf("  Hashes: %lu, %lu, %lu\n", hashes[0], hashes[1], hashes[2]);
     ASSERT_EQ(hashes[0], hashes[1]);
     ASSERT_EQ(hashes[0], hashes[2]);
-
 }

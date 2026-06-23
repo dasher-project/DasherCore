@@ -74,17 +74,16 @@ Distribution get_distribution(dasher_ctx* ctx) {
 
 int find_symbol_index(dasher_ctx* ctx, const char* target) {
     int n = dasher_get_alphabet_symbol_count(ctx);
-    for (int i = 1; i < n; ++i) {  // symbols are 1-indexed
+    for (int i = 1; i < n; ++i) { // symbols are 1-indexed
         char buf[64];
-        if (dasher_get_alphabet_symbol_text(ctx, i, buf, sizeof(buf)) == 0
-            && std::string(buf) == target) {
+        if (dasher_get_alphabet_symbol_text(ctx, i, buf, sizeof(buf)) == 0 && std::string(buf) == target) {
             return i;
         }
     }
     return -1;
 }
 
-}  // namespace
+} // namespace
 
 // ---------------------------------------------------------------------------
 // Probability normalization & shape invariants
@@ -95,7 +94,7 @@ TEST_CASE("lm/initial distribution normalized to 65536") {
     Distribution d = get_distribution(ctx);
 
     CHECK(d.size() > 0);
-    CHECK(d.total_mass() == 65536);  // CDasherModel::NORMALIZATION
+    CHECK(d.total_mass() == 65536); // CDasherModel::NORMALIZATION
 }
 
 TEST_CASE("lm/bounds are monotonic and contiguous") {
@@ -103,9 +102,9 @@ TEST_CASE("lm/bounds are monotonic and contiguous") {
     Distribution d = get_distribution(ctx);
 
     for (int i = 0; i < d.size(); ++i) {
-        CHECK(d.hbnds[i] > d.lbnds[i]);          // every child has positive mass
+        CHECK(d.hbnds[i] > d.lbnds[i]); // every child has positive mass
         if (i > 0) {
-            CHECK(d.lbnds[i] == d.hbnds[i - 1]);  // contiguous cumulative bounds
+            CHECK(d.lbnds[i] == d.hbnds[i - 1]); // contiguous cumulative bounds
         }
     }
 }
@@ -167,7 +166,7 @@ TEST_CASE("lm/find English alphabet letters by index") {
 
     // A character genuinely absent from the alphabet returns -1.
     // Emoji, for instance, is not in the English alphabet.
-    CHECK(find_symbol_index(ctx, "\xF0\x9F\x98\x80") == -1);  // U+1F600 grinning face
+    CHECK(find_symbol_index(ctx, "\xF0\x9F\x98\x80") == -1); // U+1F600 grinning face
 }
 
 // ---------------------------------------------------------------------------
@@ -193,9 +192,8 @@ TEST_CASE("lm/training updates persistent LM state") {
 
     // Train on text dominated by a few characters. The text is parsed
     // against the active alphabet; letters not in the alphabet are skipped.
-    REQUIRE(dasher_import_training_text(ctx,
-        "the the the the the the the the the the "
-        "the the the the the the the the the the") == 0);
+    REQUIRE(dasher_import_training_text(ctx, "the the the the the the the the the the "
+                                             "the the the the the the the the the the") == 0);
 
     // The persistent LM state has been updated, but the current node tree
     // is unaffected. Run frames to force node tree regeneration as the
@@ -219,8 +217,7 @@ TEST_CASE("lm/training updates persistent LM state") {
     int l1 = 0;
     int common = std::min(before.size(), after.size());
     for (int i = 0; i < common; ++i) {
-        l1 += std::abs((after.hbnds[i] - after.lbnds[i])
-                     - (before.hbnds[i] - before.lbnds[i]));
+        l1 += std::abs((after.hbnds[i] - after.lbnds[i]) - (before.hbnds[i] - before.lbnds[i]));
     }
     CHECK(l1 > 0);
 }
@@ -244,10 +241,10 @@ TEST_CASE("lm/training is synchronous on persistent state") {
     Distribution after_immediate = get_distribution(ctx);
     int l1_immediate = 0;
     for (int i = 0; i < before.size(); ++i) {
-        l1_immediate += std::abs((after_immediate.hbnds[i] - after_immediate.lbnds[i])
-                               - (before.hbnds[i] - before.lbnds[i]));
+        l1_immediate +=
+            std::abs((after_immediate.hbnds[i] - after_immediate.lbnds[i]) - (before.hbnds[i] - before.lbnds[i]));
     }
-    CHECK(l1_immediate == 0);  // cached bounds unchanged immediately
+    CHECK(l1_immediate == 0); // cached bounds unchanged immediately
 
     // Drive input to force node rebuild; now training effects surface.
     dasher_set_speed_percent(ctx, 300);
@@ -305,8 +302,7 @@ TEST_CASE("lm/LP_UNIFORM stored but not immediately re-derived") {
     REQUIRE(lp_uniform > 0);
 
     // Train on a skewed text so we have something to (eventually) flatten.
-    REQUIRE(dasher_import_training_text(ctx,
-        "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee") == 0);
+    REQUIRE(dasher_import_training_text(ctx, "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee") == 0);
 
     dasher_set_long_parameter(ctx, lp_uniform, 0);
     CHECK(dasher_get_long_parameter(ctx, lp_uniform) == 0);
@@ -320,12 +316,11 @@ TEST_CASE("lm/LP_UNIFORM stored but not immediately re-derived") {
     REQUIRE(low_u.size() == high_u.size());
     int l1 = 0;
     for (int i = 0; i < low_u.size(); ++i) {
-        l1 += std::abs((high_u.hbnds[i] - high_u.lbnds[i])
-                     - (low_u.hbnds[i] - low_u.lbnds[i]));
+        l1 += std::abs((high_u.hbnds[i] - high_u.lbnds[i]) - (low_u.hbnds[i] - low_u.lbnds[i]));
     }
     CHECK(l1 == 0);
 
-    dasher_set_long_parameter(ctx, lp_uniform, 50);  // restore default
+    dasher_set_long_parameter(ctx, lp_uniform, 50); // restore default
 }
 
 TEST_CASE("lm/LP_LM_MAX_ORDER round-trips but does not re-derive immediately") {
@@ -339,21 +334,19 @@ TEST_CASE("lm/LP_LM_MAX_ORDER round-trips but does not re-derive immediately") {
     const int lp_max_order = dasher_find_parameter_key("LP_LM_MAX_ORDER");
     REQUIRE(lp_max_order > 0);
 
-    REQUIRE(dasher_import_training_text(ctx,
-        "the cat sat on the mat the cat sat on the mat "
-        "the dog ran the dog ran the dog ran fast") == 0);
+    REQUIRE(dasher_import_training_text(ctx, "the cat sat on the mat the cat sat on the mat "
+                                             "the dog ran the dog ran the dog ran fast") == 0);
 
-    dasher_set_long_parameter(ctx, lp_max_order, 1);  // unigram
+    dasher_set_long_parameter(ctx, lp_max_order, 1); // unigram
     Distribution unigram = get_distribution(ctx);
 
-    dasher_set_long_parameter(ctx, lp_max_order, 8);  // 8-gram
+    dasher_set_long_parameter(ctx, lp_max_order, 8); // 8-gram
     Distribution high_order = get_distribution(ctx);
 
     REQUIRE(unigram.size() == high_order.size());
     int l1 = 0;
     for (int i = 0; i < unigram.size(); ++i) {
-        l1 += std::abs((high_order.hbnds[i] - high_order.lbnds[i])
-                     - (unigram.hbnds[i] - unigram.lbnds[i]));
+        l1 += std::abs((high_order.hbnds[i] - high_order.lbnds[i]) - (unigram.hbnds[i] - unigram.lbnds[i]));
     }
     // Documented current behavior: no immediate change. The parameter
     // round-trips (verified below) and is observable on the next model
@@ -364,12 +357,11 @@ TEST_CASE("lm/LP_LM_MAX_ORDER round-trips but does not re-derive immediately") {
     // To actually observe a MAX_ORDER change, you need a fresh context.
     ScopedContext ctx2(800, 600);
     dasher_set_long_parameter(ctx2, lp_max_order, 8);
-    REQUIRE(dasher_import_training_text(ctx2,
-        "the cat sat on the mat the cat sat on the mat") == 0);
+    REQUIRE(dasher_import_training_text(ctx2, "the cat sat on the mat the cat sat on the mat") == 0);
     Distribution order8_fresh = get_distribution(ctx2);
     CHECK(order8_fresh.total_mass() == 65536);
 
-    dasher_set_long_parameter(ctx, lp_max_order, 5);  // restore default
+    dasher_set_long_parameter(ctx, lp_max_order, 5); // restore default
 }
 
 TEST_CASE("lm/LP_LM_ALPHA and LP_LM_BETA round-trip") {
@@ -403,10 +395,9 @@ TEST_CASE("lm/LP_LM_ALPHA round-trips") {
     // fresh context after the change).
     ScopedContext ctx(800, 600);
 
-    REQUIRE(dasher_get_language_model_id(ctx) == 0);  // PPM is default
+    REQUIRE(dasher_get_language_model_id(ctx) == 0); // PPM is default
 
-    REQUIRE(dasher_import_training_text(ctx,
-        "the the the the the the the the the the the") == 0);
+    REQUIRE(dasher_import_training_text(ctx, "the the the the the the the the the the the") == 0);
 
     const int alpha = dasher_find_parameter_key("LP_LM_ALPHA");
 
@@ -421,8 +412,7 @@ TEST_CASE("lm/LP_LM_ALPHA round-trips") {
     REQUIRE(low_alpha.size() == high_alpha.size());
     int l1 = 0;
     for (int i = 0; i < low_alpha.size(); ++i) {
-        l1 += std::abs((high_alpha.hbnds[i] - high_alpha.lbnds[i])
-                     - (low_alpha.hbnds[i] - low_alpha.lbnds[i]));
+        l1 += std::abs((high_alpha.hbnds[i] - high_alpha.lbnds[i]) - (low_alpha.hbnds[i] - low_alpha.lbnds[i]));
     }
     // Documented: no immediate effect on existing node bounds.
     CHECK(l1 == 0);
@@ -450,27 +440,23 @@ TEST_CASE("lm/BP_LM_ADAPTIVE round-trips and documents training gate") {
     CHECK(dasher_get_bool_parameter(ctx, bp_adaptive) == 0);
     Distribution before = get_distribution(ctx);
 
-    REQUIRE(dasher_import_training_text(ctx,
-        "zzz zzz zzz zzz zzz zzz zzz zzz zzz zzz") == 0);
+    REQUIRE(dasher_import_training_text(ctx, "zzz zzz zzz zzz zzz zzz zzz zzz zzz zzz") == 0);
 
     Distribution after = get_distribution(ctx);
     int l1 = 0;
     for (int i = 0; i < before.size(); ++i) {
-        l1 += std::abs((after.hbnds[i] - after.lbnds[i])
-                     - (before.hbnds[i] - before.lbnds[i]));
+        l1 += std::abs((after.hbnds[i] - after.lbnds[i]) - (before.hbnds[i] - before.lbnds[i]));
     }
     // With adaptive=false, the existing node bounds are unchanged.
     CHECK(l1 == 0);
 
     // Restore adaptive=true and verify explicit training now changes things.
     dasher_set_bool_parameter(ctx, bp_adaptive, 1);
-    REQUIRE(dasher_import_training_text(ctx,
-        "zzz zzz zzz zzz zzz zzz zzz zzz zzz zzz") == 0);
+    REQUIRE(dasher_import_training_text(ctx, "zzz zzz zzz zzz zzz zzz zzz zzz zzz zzz") == 0);
     Distribution after_adaptive = get_distribution(ctx);
     int l1_after = 0;
     for (int i = 0; i < before.size(); ++i) {
-        l1_after += std::abs((after_adaptive.hbnds[i] - after_adaptive.lbnds[i])
-                           - (before.hbnds[i] - before.lbnds[i]));
+        l1_after += std::abs((after_adaptive.hbnds[i] - after_adaptive.lbnds[i]) - (before.hbnds[i] - before.lbnds[i]));
     }
-    CHECK(l1_after >= 0);  // either it changes or doesn't — document only
+    CHECK(l1_after >= 0); // either it changes or doesn't — document only
 }

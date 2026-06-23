@@ -100,7 +100,6 @@ TEST(ppm_different_training_produces_different_hash) {
     // Both should be valid probability distributions
     ASSERT(hashes[0] != 0);
     ASSERT(hashes[1] != 0);
-
 }
 
 TEST(ppm_root_child_count_stable) {
@@ -115,7 +114,6 @@ TEST(ppm_root_child_count_stable) {
     printf("  Root child counts: %d, %d, %d\n", counts[0], counts[1], counts[2]);
     ASSERT_EQ(counts[0], counts[1]);
     ASSERT_EQ(counts[0], counts[2]);
-
 }
 
 TEST(ppm_normalized_after_training) {
