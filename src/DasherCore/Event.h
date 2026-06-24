@@ -154,9 +154,7 @@ class Event {
     ///
     /// \param listener unique key for this subscriber (typically `this`)
     /// \param fn callback to invoke on Broadcast()
-    void Subscribe(void* listener, const std::function<void(Args...)>& fn) {
-        m_listeners[listener] = fn;
-    }
+    void Subscribe(void* listener, const std::function<void(Args...)>& fn) { m_listeners[listener] = fn; }
 
     /// Subscribe without a key (RAII pattern — preferred for new code).
     ///
