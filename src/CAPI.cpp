@@ -404,9 +404,20 @@ struct dasher_ctx {
         }
 
         void Message(const std::string& strText, bool bInterrupt) override {
+            // Route user-facing messages to the message callback (for UI display)
             if (m_owner->messageCb && !strText.empty())
                 m_owner->messageCb(bInterrupt ? 1 : 0, strText.c_str(), m_owner->messageCbUserData);
             if (!m_owner->messageCb) CDashIntfScreenMsgs::Message(strText, bInterrupt);
+
+            // Also route to the log callback for diagnostic logging.
+            // Modal/interrupt messages are WARN level; async are INFO.
+            // This ensures frontends that registered dasher_set_log_callback
+            // receive engine messages even if they didn't register the
+            // message callback separately.
+            if (m_owner->logCb && !strText.empty()) {
+                int level = bInterrupt ? 2 /*WARN*/ : 1 /*INFO*/;
+                if (level >= m_owner->logCbMinLevel) m_owner->logCb(level, strText.c_str(), m_owner->logCbUserData);
+            }
         }
 
         unsigned int ctrlOffsetAfterMove(unsigned int offsetBefore, bool bForwards,
