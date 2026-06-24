@@ -39,11 +39,6 @@ SGroupInfo* CAlphIO::ParseGroupRecursive(pugi::xml_node& group_node, CAlphInfo* 
     pNewGroup->strName = group_node.attribute("name").as_string("");
     pNewGroup->strLabel = group_node.attribute("label").as_string("");
     pNewGroup->colorGroup = group_node.attribute("colorInfoName").as_string("");
-    // v5 groups don't have colorInfoName — they use "b" for color index.
-    // Without a colorGroup name, GetNodeColor returns undefinedColor which
-    // becomes transparent (Alpha=0), making nodes invisible.
-    // Default to "lowercase" which exists in all standard palettes.
-    if (pNewGroup->colorGroup.empty()) pNewGroup->colorGroup = "lowercase";
 
     pNewGroup->pNext = previous_sibling;
     pNewGroup->pChild = nullptr;
@@ -54,8 +49,8 @@ SGroupInfo* CAlphIO::ParseGroupRecursive(pugi::xml_node& group_node, CAlphInfo* 
     new_ancestors.push_back(pNewGroup);
     SGroupInfo* previous_subgroup_sibling = nullptr;
     for (auto node : group_node.children()) {
-        // symbol (v6 "node" or v5 "s")
-        if (std::strcmp(node.name(), "node") == 0 || std::strcmp(node.name(), "s") == 0) {
+        // symbol
+        if (std::strcmp(node.name(), "node") == 0) {
             CurrentAlphabet->m_vCharacters.resize(CurrentAlphabet->m_vCharacters.size() + 1); // new char
             CurrentAlphabet->m_vCharacterDoActions.resize(CurrentAlphabet->m_vCharacterDoActions.size() +
                                                           1); // new Do Actions
@@ -93,30 +88,17 @@ SGroupInfo* CAlphIO::ParseGroupRecursive(pugi::xml_node& group_node, CAlphInfo* 
     return pNewGroup;
 }
 
-bool Dasher::CAlphIO::Parse(pugi::xml_document& document, const std::string strDesc, bool bUser) {
-    pugi::xml_node root = document.document_element();
+bool Dasher::CAlphIO::Parse(pugi::xml_document& document, const std::string, bool bUser) {
+    pugi::xml_node alphabet = document.document_element();
 
-    // v5 format: <alphabets> root containing <alphabet> children
-    if (std::strcmp(root.name(), "alphabets") == 0) {
-        bool any = false;
-        for (pugi::xml_node alpha : root.children("alphabet")) {
-            if (ParseSingle(alpha, strDesc, bUser)) any = true;
-        }
-        return any;
-    }
+    if (std::strcmp(alphabet.name(), "alphabet") != 0) return false; // a non <alphabet ...> node
 
-    // v6 format: <alphabet> root (single alphabet per file)
-    if (std::strcmp(root.name(), "alphabet") != 0) return false;
-    return ParseSingle(root, strDesc, bUser);
-}
-
-bool Dasher::CAlphIO::ParseSingle(pugi::xml_node alphabet, const std::string, bool bUser) {
     CAlphInfo* CurrentAlphabet = new CAlphInfo();
     CurrentAlphabet->AlphID = alphabet.attribute("name").as_string();
     CurrentAlphabet->TrainingFile = alphabet.attribute("trainingFilename").as_string();
     CurrentAlphabet->PreferredColors = alphabet.attribute("colorsName").as_string();
 
-    // Orientation — always read v6 attribute first (present on every v6 alphabet)
+    // orientation
     const std::string orientation_type = alphabet.attribute("orientation").as_string("LR");
     if (orientation_type == "RL") {
         CurrentAlphabet->Orientation = Options::RightToLeft;
@@ -126,26 +108,6 @@ bool Dasher::CAlphIO::ParseSingle(pugi::xml_node alphabet, const std::string, bo
         CurrentAlphabet->Orientation = Options::BottomToTop;
     } else {
         CurrentAlphabet->Orientation = Options::LeftToRight;
-    }
-
-    // Handle v5 metadata child elements (override if v5 format is present)
-    for (pugi::xml_node meta : alphabet.children()) {
-        const char* name = meta.name();
-        if (std::strcmp(name, "train") == 0 && CurrentAlphabet->TrainingFile.empty())
-            CurrentAlphabet->TrainingFile = meta.text().as_string();
-        else if (std::strcmp(name, "palette") == 0 && CurrentAlphabet->PreferredColors.empty())
-            CurrentAlphabet->PreferredColors = meta.text().as_string();
-        else if (std::strcmp(name, "orientation") == 0) {
-            std::string otype = meta.attribute("type").as_string("LR");
-            if (otype == "RL")
-                CurrentAlphabet->Orientation = Options::RightToLeft;
-            else if (otype == "TB")
-                CurrentAlphabet->Orientation = Options::TopToBottom;
-            else if (otype == "BT")
-                CurrentAlphabet->Orientation = Options::BottomToTop;
-            else
-                CurrentAlphabet->Orientation = Options::LeftToRight;
-        }
     }
 
     // conversion mode
@@ -279,12 +241,8 @@ void CAlphIO::ReadCharAttributes(pugi::xml_node xml_node, CAlphInfo::character& 
 
     if (xml_node.type() == pugi::node_null) return;
 
-    // v6 uses "label"/"text" attributes; v5 uses "d"/"t" attributes
     alphabet_character.Display = xml_node.attribute("label").as_string();
-    if (alphabet_character.Display.empty()) alphabet_character.Display = xml_node.attribute("d").as_string();
-    alphabet_character.Text = xml_node.attribute("text").as_string();
-    if (alphabet_character.Text.empty())
-        alphabet_character.Text = xml_node.attribute("t").as_string(alphabet_character.Display.c_str());
+    alphabet_character.Text = xml_node.attribute("text").as_string(alphabet_character.Display.c_str());
 
     for (auto potentialActions : xml_node.children()) {
         const char* actionName = potentialActions.name();
@@ -423,13 +381,6 @@ void CAlphIO::ReadCharAttributes(pugi::xml_node xml_node, CAlphInfo::character& 
     alphabet_character.ColorGroupOffset = parentGroup->iNumChildNodes;
     alphabet_character.fixedProbability = xml_node.attribute("fixedProbability").as_float(-1);
     alphabet_character.speedFactor = xml_node.attribute("speedFactor").as_float(-1);
-
-    // v5 compatibility: if no action children were found (v5 <s> elements have no
-    // action children), create default text output/delete actions from the text.
-    if (DoActions.empty() && !alphabet_character.Text.empty()) {
-        DoActions.push_back(new TextOutputAction(alphabet_character.Text));
-        UndoActions.push_back(new TextDeleteAction(alphabet_character.Text));
-    }
 }
 
 // Reverses the internal linked list for the given SGroupInfo

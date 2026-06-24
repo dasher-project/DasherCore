@@ -12,7 +12,6 @@
 #include "DasherTypes.h"
 #include "DasherInterfaceBase.h"
 #include "WordGeneratorBase.h"
-#include "DemoFilter.h"
 
 namespace Dasher {
 
@@ -30,7 +29,6 @@ namespace Dasher {
  */
 class CGameModule {
   public:
-    friend class CDemoFilter;
     /**
      * Constructor
      * @param pEventHandler A pointer to the event handler
@@ -151,16 +149,6 @@ class CGameModule {
     /// Time and nats at which this sentence started
     unsigned long m_ulSentenceStartTime;
     double m_dSentenceStartNats;
-
-    /* ---------------------------------------------------------------------
-     * Constants
-     * ---------------------------------------------------------------------
-     */
-
-    /**
-     * The font size used to draw the target string.
-     */
-    const int m_iFontSize;
 };
 
 } // namespace Dasher

@@ -55,11 +55,11 @@ bool CDasherView::ClipLineToVisible(myint& x1, myint& y1, myint& x2, myint& y2) 
     // ok. have x1 <= x2...
     const CDasherView::DasherCoordScreenRegion vr = VisibleRegion();
     if (x1 > vr.maxX) {
-        DASHER_ASSERT(x2 > visibleRegion.maxX);
+        DASHER_ASSERT(x2 > vr.maxX);
         return false; // entirely offscreen!
     }
     if (x2 < vr.minX) {
-        DASHER_ASSERT(x1 < visibleRegion.minX);
+        DASHER_ASSERT(x1 < vr.minX);
         return false;
     }
     if (x1 < vr.minX) {

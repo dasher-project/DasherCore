@@ -2,6 +2,8 @@
 #include "DefaultFilter.h"
 #include "DasherView.h"
 
+#include <limits>
+
 using namespace Dasher;
 
 CTwoBoxStartHandler::CTwoBoxStartHandler(CDefaultFilter* pCreator, CSettingsStore* pSettingsStore)

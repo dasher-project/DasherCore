@@ -348,6 +348,13 @@ struct dasher_ctx {
     std::string userDir;
     std::string stringBuf;
 
+    // Buffers backing const char* returns from various getters. These
+    // MUST live in dasher_ctx (not file-scope static) so that two
+    // contexts don't trample each other's returned pointers — a real
+    // cross-context bug noted in the codebase review (Tier 1 #4).
+    std::vector<std::string> stringValues; // dasher_get_palette_name / alphabet_name / parameter_string_values
+    std::string gameTextBuf;               // dasher_game_get_target_text
+
     // Appearance model state (RFC 0007). Lives at the C API layer — appearance
     // is a shell/canvas concern, not a DasherCore engine parameter. Persisted to
     // <userDir>/appearance_settings.xml. The active palette (SP_COLOUR_ID) is
@@ -368,6 +375,12 @@ struct dasher_ctx {
     void* clipboardCbUserData = nullptr;
     dasher_parameter_callback paramCb = nullptr;
     void* paramCbUserData = nullptr;
+
+    // Diagnostic log callback (replaces the former CFileLogger/CBasicLog/UserLog
+    // systems). When null, log messages are silently discarded.
+    dasher_log_callback logCb = nullptr;
+    void* logCbUserData = nullptr;
+    int logCbMinLevel = 0;
 
     struct CustomActionEntry {
         std::string name;
@@ -391,9 +404,20 @@ struct dasher_ctx {
         }
 
         void Message(const std::string& strText, bool bInterrupt) override {
+            // Route user-facing messages to the message callback (for UI display)
             if (m_owner->messageCb && !strText.empty())
                 m_owner->messageCb(bInterrupt ? 1 : 0, strText.c_str(), m_owner->messageCbUserData);
             if (!m_owner->messageCb) CDashIntfScreenMsgs::Message(strText, bInterrupt);
+
+            // Also route to the log callback for diagnostic logging.
+            // Modal/interrupt messages are WARN level; async are INFO.
+            // This ensures frontends that registered dasher_set_log_callback
+            // receive engine messages even if they didn't register the
+            // message callback separately.
+            if (m_owner->logCb && !strText.empty()) {
+                int level = bInterrupt ? 2 /*WARN*/ : 1 /*INFO*/;
+                if (level >= m_owner->logCbMinLevel) m_owner->logCb(level, strText.c_str(), m_owner->logCbUserData);
+            }
         }
 
         unsigned int ctrlOffsetAfterMove(unsigned int offsetBefore, bool bForwards,
@@ -656,7 +680,12 @@ DASHER_API dasher_ctx* dasher_create(const char* data_dir, const char* user_dir,
     ctx->userDir = user_dir ? std::string(user_dir) : dir;
     std::string writableDir = user_dir ? std::string(user_dir) : dir;
 
+    // Keep the bundled data directory (read-only corpora) and the
+    // user-writable directory (logs, training deltas, settings)
+    // distinct so we never leak library files into CWD. Closes the
+    // dasher.log and training_english_GB.txt CWD leaks (Tier 1 #5).
     Dasher::FileUtils::SetDataDirectory(dir);
+    Dasher::FileUtils::SetUserDataDirectory(writableDir);
 
     std::string settingsPath = writableDir;
 #ifdef _WIN32
@@ -979,7 +1008,6 @@ static std::string s_paramInfoGroup;
 static std::string s_paramInfoSubgroup;
 static std::vector<std::string> s_enumStrings;
 static std::vector<std::pair<std::string, int>> s_enumEntries;
-static std::vector<std::string> s_stringValues;
 
 static void ensureParamKeys() {
     if (!s_paramKeys.empty()) return;
@@ -1078,16 +1106,17 @@ DASHER_API int dasher_get_parameter_enum_value(int key, int index) {
 
 DASHER_API int dasher_get_parameter_string_values(dasher_ctx* ctx, int key, const char** out_names, int max_out) {
     if (!out_names || max_out <= 0) return 0;
-    s_stringValues.clear();
+    if (!ctx) return 0;
+    ctx->stringValues.clear();
 
-    if (ctx && ctx->intf) {
-        s_stringValues = ctx->intf->GetPermittedValues(static_cast<Dasher::Parameter>(key));
+    if (ctx->intf) {
+        ctx->stringValues = ctx->intf->GetPermittedValues(static_cast<Dasher::Parameter>(key));
     }
 
-    int count = static_cast<int>(s_stringValues.size());
+    int count = static_cast<int>(ctx->stringValues.size());
     if (count > max_out) count = max_out;
     for (int i = 0; i < count; i++) {
-        out_names[i] = s_stringValues[i].c_str();
+        out_names[i] = ctx->stringValues[i].c_str();
     }
     return count;
 }
@@ -1104,8 +1133,8 @@ DASHER_API const char* dasher_get_palette_name(dasher_ctx* ctx, int index) {
     if (!ctx || !ctx->intf) return "";
     auto names = ctx->intf->GetPermittedValues(Dasher::SP_COLOUR_ID);
     if (index < 0 || index >= static_cast<int>(names.size())) return "";
-    s_stringValues = std::move(names);
-    return s_stringValues[index].c_str();
+    ctx->stringValues = std::move(names);
+    return ctx->stringValues[index].c_str();
 }
 
 DASHER_API const char* dasher_get_current_palette(dasher_ctx* ctx) {
@@ -1259,8 +1288,8 @@ DASHER_API const char* dasher_get_alphabet_name(dasher_ctx* ctx, int index) {
     if (!ctx || !ctx->intf) return "";
     auto names = ctx->intf->GetPermittedValues(Dasher::SP_ALPHABET_ID);
     if (index < 0 || index >= static_cast<int>(names.size())) return "";
-    s_stringValues = std::move(names);
-    return s_stringValues[index].c_str();
+    ctx->stringValues = std::move(names);
+    return ctx->stringValues[index].c_str();
 }
 
 // ── Game Mode ───────────────────────────────────────────────────────────────
@@ -1288,8 +1317,6 @@ DASHER_API void dasher_game_set_canvas_text(dasher_ctx* ctx, int enabled) {
     if (gm) gm->SetCanvasTextEnabled(enabled != 0);
 }
 
-static std::string s_gameTextBuf;
-
 static std::string symbolsToText(const Dasher::CAlphInfo* alph, const std::vector<Dasher::symbol>& syms, int count) {
     std::string result;
     for (int i = 0; i < count && i < (int)syms.size(); i++) {
@@ -1303,8 +1330,8 @@ DASHER_API const char* dasher_game_get_target_text(dasher_ctx* ctx) {
     auto* gm = ctx->intf->GetGameModule();
     if (!gm) return "";
     const auto& syms = gm->GetTargetSymbols();
-    s_gameTextBuf = symbolsToText(gm->GetAlphabet(), syms, (int)syms.size());
-    return s_gameTextBuf.c_str();
+    ctx->gameTextBuf = symbolsToText(gm->GetAlphabet(), syms, (int)syms.size());
+    return ctx->gameTextBuf.c_str();
 }
 
 DASHER_API int dasher_game_get_correct_count(dasher_ctx* ctx) {
@@ -1325,8 +1352,8 @@ DASHER_API const char* dasher_game_get_wrong_text(dasher_ctx* ctx) {
     if (!ctx || !ctx->intf) return "";
     auto* gm = ctx->intf->GetGameModule();
     if (!gm) return "";
-    s_gameTextBuf = gm->GetWrongText();
-    return s_gameTextBuf.c_str();
+    ctx->gameTextBuf = gm->GetWrongText();
+    return ctx->gameTextBuf.c_str();
 }
 
 // ── Persistence ───────────────────────────────────────────────────────────
@@ -1469,6 +1496,13 @@ DASHER_API void dasher_set_message_callback(dasher_ctx* ctx, dasher_message_call
     if (!ctx) return;
     ctx->messageCb = callback;
     ctx->messageCbUserData = user_data;
+}
+
+DASHER_API void dasher_set_log_callback(dasher_ctx* ctx, dasher_log_callback callback, void* user_data, int min_level) {
+    if (!ctx) return;
+    ctx->logCb = callback;
+    ctx->logCbUserData = user_data;
+    ctx->logCbMinLevel = min_level;
 }
 
 DASHER_API void dasher_set_speak_callback(dasher_ctx* ctx, dasher_speak_callback callback, void* user_data) {

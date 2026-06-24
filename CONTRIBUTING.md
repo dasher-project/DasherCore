@@ -130,6 +130,33 @@ Write readable code first. Optimize only after profiling proves a bottleneck.
 - Prefer pass-by-`const`-reference over copy for large types
 - Don't inline complex logic — let the compiler decide
 
+### Rule 7: Naming Convention for New Code
+
+DasherCore has 25 years of accumulated naming styles. We do NOT rename
+existing code (that would be a massive churn PR with zero functional
+benefit). Instead, all **new** code — new classes, new functions, new
+files — should follow these conventions:
+
+| Element | Convention | Example | Notes |
+|---------|-----------|---------|-------|
+| Classes | `PascalCase` | `class AlphabetManager` | Not `CAlphabetManager` (the C-prefix is legacy MFC style) |
+| Methods | `PascalCase` | `void GetProbs()` | Not `getProbs()` or `get_probs()` |
+| Member variables | `snake_case_` (trailing underscore) | `int symbol_count_;` | Not `m_iSymbolCount` (legacy Hungarian) |
+| Free functions | `snake_case` | `int get_root_child_count()` | C API functions use `dasher_` prefix |
+| Constants/enums | `PascalCase` or `UPPER_SNAKE` | `NORMALIZATION`, `EDIT_OUTPUT` | Match surrounding code |
+| Files | `PascalCase.h` / `PascalCase.cpp` | `AlphabetManager.h` | Not `alphabet_manager.h` |
+| Namespaces | `PascalCase` | `namespace Dasher` | |
+
+**Existing conventions you'll encounter (do not change these):**
+- `CFoo` — MFC-style class prefix (~70 classes). The dominant legacy style.
+- `m_iFoo`, `m_bFoo` — Hungarian-notation member prefix. Common in legacy.
+- `Get_node_under_crosshair` — snake_case methods (rare, in DasherModel).
+- `dasher_foo_bar()` — C API functions in `dasher.h` (frozen, do not change).
+
+**Rule of thumb:** When you touch a file, match the file's existing style
+for that edit. When you create a new file, use the conventions above.
+When in doubt, ask in the PR.
+
 ---
 
 ## Testing

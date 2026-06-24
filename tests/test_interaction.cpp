@@ -2,17 +2,6 @@
 #include "test_common.h"
 #include <chrono>
 #include <cmath>
-
-static void run_frames(dasher_ctx* ctx, int count, int64_t start_ms) {
-    int* commands = nullptr;
-    int cmd_count = 0;
-    char** strings = nullptr;
-    int str_count = 0;
-    for (int i = 0; i < count; i++) {
-        dasher_frame(ctx, start_ms + i * 16, &commands, &cmd_count, &strings, &str_count);
-    }
-}
-
 TEST(interaction_produces_text) {
     dasher_ctx* ctx = create_isolated_context();
     ASSERT(ctx != nullptr);
@@ -38,7 +27,6 @@ TEST(interaction_produces_text) {
     ASSERT(strlen(text) > 0);
 
     dasher_destroy(ctx);
-    printf("v interaction_produces_text passed\n");
 }
 
 TEST(interaction_callback_fires) {
@@ -78,7 +66,6 @@ TEST(interaction_callback_fires) {
     ASSERT(strlen(output_buf) > 0);
 
     dasher_destroy(ctx);
-    printf("v interaction_callback_fires passed\n");
 }
 
 TEST(interaction_reset_clears) {
@@ -106,7 +93,6 @@ TEST(interaction_reset_clears) {
     ASSERT_EQ(strlen(text), 0);
 
     dasher_destroy(ctx);
-    printf("v interaction_reset_clears passed\n");
 }
 
 TEST(interaction_continuous_movement) {
@@ -145,17 +131,4 @@ TEST(interaction_continuous_movement) {
     ASSERT(strlen(final_text) > 0);
 
     dasher_destroy(ctx);
-    printf("v interaction_continuous_movement passed\n");
-}
-
-int main() {
-    printf("Running Dasher interaction tests...\n\n");
-
-    test_interaction_produces_text();
-    test_interaction_callback_fires();
-    test_interaction_reset_clears();
-    test_interaction_continuous_movement();
-
-    printf("\nAll interaction tests passed!\n");
-    return 0;
 }

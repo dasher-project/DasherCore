@@ -146,8 +146,6 @@ CMandarinAlphMgr::~CMandarinAlphMgr() {
 }
 
 void CMandarinAlphMgr::CreateLanguageModel() {
-    // std::cout<<"CHALphabet size "<< pCHAlphabet->GetNumberTextSymbols(); [7603]
-    // std::cout<<"Setting PPMPY model"<<std::endl;
     m_pLanguageModel = new CPPMPYLanguageModel(m_pSettingsStore, static_cast<int>(m_vGroupsByConversion.size()) - 1,
                                                static_cast<int>(m_vConversionsByGroup.size()) - 1);
 }
@@ -329,7 +327,6 @@ void CMandarinAlphMgr::CConvRoot::PopulateChildrenWithExisting(CMandSym* existin
     // Finally loop through and create the children
     for (std::vector<std::pair<symbol, unsigned int>>::const_iterator it = m_vChInfo.begin(); it != m_vChInfo.end();
          it++) {
-        //      std::cout << "Current scec: " << pCurrentSCEChild << std::endl;
         const unsigned int iLbnd(iCum), iHbnd(iCum + it->second);
 
         iCum = iHbnd;
@@ -415,8 +412,6 @@ void CMandarinAlphMgr::GetConversions(std::vector<std::pair<symbol, unsigned int
         //  GetPartProbs distributes the last param between however elements there are in vChildren...
         static_cast<CPPMPYLanguageModel*>(m_pLanguageModel)
             ->GetPartProbs(context, vChildren, static_cast<int>(iNorm), uniform);
-
-        // std::cout<<"after get probs "<<std::endl;
 
         uint64_t sumProb = 0;
         for (std::vector<std::pair<symbol, unsigned int>>::const_iterator it = vChildren.begin(); it != vChildren.end();

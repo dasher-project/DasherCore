@@ -1,16 +1,5 @@
 // Extended C API tests: cover functions not tested in test_capi.cpp
 #include "test_common.h"
-
-static void run_frames(dasher_ctx* ctx, int count) {
-    int* commands = nullptr;
-    int cmd_count = 0;
-    char** strings = nullptr;
-    int str_count = 0;
-    for (int i = 0; i < count; i++) {
-        dasher_frame(ctx, 1000 + i * 20, &commands, &cmd_count, &strings, &str_count);
-    }
-}
-
 TEST(long_string_params) {
     dasher_ctx* ctx = create_isolated_context();
     ASSERT(ctx != nullptr);
@@ -46,7 +35,6 @@ TEST(long_string_params) {
     ASSERT_STR_EQ(new_alph, "English lower case");
 
     dasher_destroy(ctx);
-    printf("v long_string_params passed\n");
 }
 
 TEST(palettes) {
@@ -82,7 +70,6 @@ TEST(palettes) {
     dasher_set_palette(ctx, first_name);
 
     dasher_destroy(ctx);
-    printf("v palettes passed\n");
 }
 
 TEST(alphabet_listing) {
@@ -102,7 +89,6 @@ TEST(alphabet_listing) {
     }
 
     dasher_destroy(ctx);
-    printf("v alphabet_listing passed\n");
 }
 
 TEST(enum_values) {
@@ -126,7 +112,6 @@ TEST(enum_values) {
     }
 
     dasher_destroy(ctx);
-    printf("v enum_values passed\n");
 }
 
 TEST(language_model_info) {
@@ -148,7 +133,6 @@ TEST(language_model_info) {
     }
 
     dasher_destroy(ctx);
-    printf("v language_model_info passed\n");
 }
 
 TEST(message_callback) {
@@ -176,7 +160,6 @@ TEST(message_callback) {
     printf("  Messages received: %d\n", msg_count);
 
     dasher_destroy(ctx);
-    printf("v message_callback passed\n");
 }
 
 TEST(reset) {
@@ -207,7 +190,6 @@ TEST(reset) {
     ASSERT_EQ(strlen(text), 0);
 
     dasher_destroy(ctx);
-    printf("v reset passed\n");
 }
 
 TEST(save_settings) {
@@ -240,7 +222,6 @@ TEST(save_settings) {
 
     dasher_destroy(ctx);
     dasher_destroy(ctx2);
-    printf("v save_settings passed\n");
 }
 
 TEST(key_event) {
@@ -252,10 +233,9 @@ TEST(key_event) {
     dasher_key_event(ctx, 0, 1); // press key 0
     dasher_key_event(ctx, 0, 0); // release key 0
 
-    run_frames(ctx, 5);
+    run_frames(ctx, 5, 1000, 20);
 
     dasher_destroy(ctx);
-    printf("v key_event passed\n");
 }
 
 TEST(string_values) {
@@ -278,7 +258,6 @@ TEST(string_values) {
     }
 
     dasher_destroy(ctx);
-    printf("v string_values passed\n");
 }
 
 TEST(game_mode_basic) {
@@ -311,7 +290,6 @@ TEST(game_mode_basic) {
     ASSERT_EQ(dasher_game_mode_active(ctx), 0);
 
     dasher_destroy(ctx);
-    printf("v game_mode_basic passed\n");
 }
 
 TEST(null_safety_extended) {
@@ -340,26 +318,4 @@ TEST(null_safety_extended) {
 
     int32_t colors[4] = {0};
     ASSERT_EQ(dasher_get_palette_preview_colors(null_ctx, 0, colors), -1);
-
-    printf("v null_safety_extended passed\n");
-}
-
-int main() {
-    printf("Running Dasher extended C API tests...\n\n");
-
-    test_long_string_params();
-    test_palettes();
-    test_alphabet_listing();
-    test_enum_values();
-    test_language_model_info();
-    test_message_callback();
-    test_reset();
-    test_save_settings();
-    test_key_event();
-    test_string_values();
-    test_game_mode_basic();
-    test_null_safety_extended();
-
-    printf("\nAll extended tests passed!\n");
-    return 0;
 }

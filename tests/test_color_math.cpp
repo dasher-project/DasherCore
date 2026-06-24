@@ -8,7 +8,6 @@ TEST(color_argb_construction) {
     ASSERT_EQ(dasher_color_get_green(c), 64);
     ASSERT_EQ(dasher_color_get_blue(c), 32);
     printf("  ARGB(255,128,64,32) = 0x%08X\n", c);
-    printf("v color_argb_construction passed\n");
 }
 
 TEST(color_rgb_is_opaque) {
@@ -17,7 +16,6 @@ TEST(color_rgb_is_opaque) {
     ASSERT_EQ(dasher_color_get_red(c), 200);
     ASSERT_EQ(dasher_color_get_green(c), 100);
     ASSERT_EQ(dasher_color_get_blue(c), 50);
-    printf("v color_rgb_is_opaque passed\n");
 }
 
 TEST(color_alpha_zero) {
@@ -26,7 +24,6 @@ TEST(color_alpha_zero) {
     ASSERT_EQ(dasher_color_get_red(c), 255);
     ASSERT_EQ(dasher_color_get_green(c), 255);
     ASSERT_EQ(dasher_color_get_blue(c), 255);
-    printf("v color_alpha_zero passed\n");
 }
 
 TEST(color_black) {
@@ -36,7 +33,6 @@ TEST(color_black) {
     ASSERT_EQ(dasher_color_get_red(c), 0);
     ASSERT_EQ(dasher_color_get_green(c), 0);
     ASSERT_EQ(dasher_color_get_blue(c), 0);
-    printf("v color_black passed\n");
 }
 
 TEST(color_white) {
@@ -46,7 +42,6 @@ TEST(color_white) {
     ASSERT_EQ(dasher_color_get_red(c), 255);
     ASSERT_EQ(dasher_color_get_green(c), 255);
     ASSERT_EQ(dasher_color_get_blue(c), 255);
-    printf("v color_white passed\n");
 }
 
 TEST(color_round_trip_many) {
@@ -66,7 +61,6 @@ TEST(color_round_trip_many) {
         ASSERT_EQ(dasher_color_get_blue(c), b);
     }
     printf("  %d colors round-tripped correctly\n", n);
-    printf("v color_round_trip_many passed\n");
 }
 
 TEST(color_palette_preview_nonempty) {
@@ -87,7 +81,6 @@ TEST(color_palette_preview_nonempty) {
     }
 
     dasher_destroy(ctx);
-    printf("v color_palette_preview_nonempty passed\n");
 }
 
 TEST(color_palette_switch) {
@@ -108,7 +101,6 @@ TEST(color_palette_switch) {
     }
 
     dasher_destroy(ctx);
-    printf("v color_palette_switch passed\n");
 }
 
 TEST(color_palette_appearance_classification) {
@@ -137,7 +129,6 @@ TEST(color_palette_appearance_classification) {
     ASSERT_EQ(dasher_get_palette_appearance(ctx, palette_count), -1);
 
     dasher_destroy(ctx);
-    printf("v color_palette_appearance_classification passed\n");
 }
 
 TEST(color_palette_companion_lookup) {
@@ -160,7 +151,6 @@ TEST(color_palette_companion_lookup) {
     ASSERT(none == nullptr);
 
     dasher_destroy(ctx);
-    printf("v color_palette_companion_lookup passed\n");
 }
 
 TEST(color_palette_appearance_mode_system) {
@@ -190,7 +180,6 @@ TEST(color_palette_appearance_mode_system) {
     ASSERT_STR_EQ(dasher_get_current_palette(ctx), "Rainbow");
 
     dasher_destroy(ctx);
-    printf("v color_palette_appearance_mode_system passed\n");
 }
 
 TEST(color_palette_appearance_forced_mode) {
@@ -219,7 +208,6 @@ TEST(color_palette_appearance_forced_mode) {
     ASSERT_EQ(dasher_get_appearance_mode(ctx), 0);
 
     dasher_destroy(ctx);
-    printf("v color_palette_appearance_forced_mode passed\n");
 }
 
 TEST(color_palette_appearance_independent_prefs) {
@@ -237,7 +225,6 @@ TEST(color_palette_appearance_independent_prefs) {
     ASSERT_STR_EQ(dasher_get_current_palette(ctx), "TurboLUT Dark");
 
     dasher_destroy(ctx);
-    printf("v color_palette_appearance_independent_prefs passed\n");
 }
 
 TEST(color_palette_appearance_persistence) {
@@ -269,28 +256,4 @@ TEST(color_palette_appearance_persistence) {
     ASSERT_STR_EQ(dasher_get_dark_palette(c2), "Rainbow Dark");
     ASSERT_STR_EQ(dasher_get_current_palette(c2), "Rainbow"); // original choice restored
     dasher_destroy(c2);
-
-    printf("v color_palette_appearance_persistence passed\n");
-}
-
-int main() {
-    printf("Running color math tests...\n\n");
-
-    test_color_argb_construction();
-    test_color_rgb_is_opaque();
-    test_color_alpha_zero();
-    test_color_black();
-    test_color_white();
-    test_color_round_trip_many();
-    test_color_palette_preview_nonempty();
-    test_color_palette_switch();
-    test_color_palette_appearance_classification();
-    test_color_palette_companion_lookup();
-    test_color_palette_appearance_mode_system();
-    test_color_palette_appearance_forced_mode();
-    test_color_palette_appearance_independent_prefs();
-    test_color_palette_appearance_persistence();
-
-    printf("\nAll color math tests passed!\n");
-    return 0;
 }

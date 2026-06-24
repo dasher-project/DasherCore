@@ -71,8 +71,6 @@ CWordLanguageModel::CWordnode* CWordLanguageModel::AddSymbolToNode(CWordnode* pN
     if (pReturn != NULL) {
         if (*update) {
 
-            //      std::cout << "USHRT_MAX: " << USHRT_MAX << " " << bLearn << std::endl;
-
             //      if( (pReturn->count < USHRT_MAX) && bLearn ) // Truncate counts at storage limit
             if (bLearn) // Truncate counts at storage limit
                 pReturn->count++;
@@ -91,8 +89,6 @@ CWordLanguageModel::CWordnode* CWordLanguageModel::AddSymbolToNode(CWordnode* pN
                             // nodes if we're not learning, but should be
                             // okay for now
     }
-
-    //  std::cout << pReturn->count << std::endl;
 
     ++NodesAllocated;
 
@@ -283,6 +279,15 @@ void CWordLanguageModel::GetProbs(Context context, std::vector<unsigned int>& pr
         iToSpend -= p;
     }
 
+    // Symbol 0 is a special dummy/sentinel that must carry zero probability
+    // (AlphabetManager::IterateChildGroups asserts (*pCProb)[0] == 0 so the
+    // cumulative-difference arithmetic cp[i]-cp[j] stays valid for all i,j).
+    // Every other LM (PPM, PPMPY, RoutingPPM, CTW, Dict) enforces this
+    // explicitly; Word LM was missing it, which only happened to go unnoticed
+    // on platforms where the spelling model assigned ~0 probability to
+    // symbol 0. macOS libc++ showed the real bug.
+    probs[0] = 0;
+
     DASHER_ASSERT(iToSpend == 0);
 }
 
@@ -340,8 +345,6 @@ void CWordLanguageModel::CollapseContext(CWordLanguageModel::CWordContext& conte
 
             while ((pCurrent != NULL) && !bUpdateExclusion) {
 
-                //      std::cout << "Incrementing" << std::endl;
-
                 ++(pCurrent->count);
 
                 int i(0);
@@ -355,11 +358,7 @@ void CWordLanguageModel::CollapseContext(CWordLanguageModel::CWordContext& conte
                 for (std::vector<symbol>::iterator it(oSymbols.begin()); it != oSymbols.end(); ++it) {
                     int iSymbol(*it);
 
-                    //      std::cout << "Symbol " << iSymbol << std::endl;
-
                     CWordnode* pTmpChild(pTmp->find_symbol(iSymbol));
-
-                    //      std::cout << "pTmpChild: " << pTmpChild << std::endl;
 
                     if (pTmpChild == NULL) {
                         // We don't already have this child, so add a new node
@@ -384,8 +383,6 @@ void CWordLanguageModel::CollapseContext(CWordLanguageModel::CWordContext& conte
                 }
 
                 pCurrent = pCurrent->vine;
-
-                //      std::cout << "foo: " << pCurrent << " " << bUpdateExclusion << std::endl;
             }
 
             // Now we need to go through and fix up the vine pointers
@@ -424,16 +421,12 @@ void CWordLanguageModel::CollapseContext(CWordLanguageModel::CWordContext& conte
         CWordnode* pTmpChild;
         CWordnode* pTmpVine(NULL);
 
-        //    std::cout << "pTmp is " << pTmp << std::endl;
-
         int iUpdateExclusion(1);
 
         {
 
             pTmpChild = AddSymbolToNode(pTmp, iNewSymbol, &iUpdateExclusion,
                                         false); // FIXME - might have added a new node here, so fix up vine pointers.
-
-            //      std::cout << "New node: " << pTmpChild << std::endl;
 
             context.word_head = pTmpChild;
             ++context.word_order;
@@ -443,12 +436,8 @@ void CWordLanguageModel::CollapseContext(CWordLanguageModel::CWordContext& conte
 
         while (pTmp != NULL) {
 
-            //      std::cout << "pTmp is " << pTmp << std::endl;
-
             pTmpChild = AddSymbolToNode(pTmp, iNewSymbol, &iUpdateExclusion,
                                         false); // FIXME - might have added a new node here, so fix up vine pointers.
-
-            //      std::cout << "New node: " << pTmpChild << std::endl;
 
             if (pTmpVine) pTmpVine->vine = pTmpChild;
 
@@ -460,11 +449,8 @@ void CWordLanguageModel::CollapseContext(CWordLanguageModel::CWordContext& conte
 
         // Finally get rid of the letter part of the context
 
-        //    std::cout << "Changed head to " << context.word_head << std::endl;
-
         while (context.word_order > 2) {
             context.word_head = context.word_head->vine;
-            //      std::cout << " * Followed vine to head to " << context.word_head << std::endl;
             --(context.word_order);
         }
 
@@ -519,8 +505,6 @@ void CWordLanguageModel::AddSymbol(CWordLanguageModel::CWordContext& context, sy
     // Context head is a special case so that we can increment order etc.
 
     int foo2(1);
-
-    //  std::cout << "aa: " << pTmp << " " << m_pRoot << std::endl;
 
     pTmpVine = AddSymbolToNode(pTmp, sym, &foo2, false); // Last parameter is whether to learn or not
 

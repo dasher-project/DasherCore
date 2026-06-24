@@ -21,7 +21,7 @@ CGameModule::CGameModule(CSettingsStore* pSettingsStore, Dasher::CDasherInterfac
     : m_pInterface(pInterface), m_pModel(pModel), m_pView(nullptr), m_pSettingsStore(pSettingsStore), m_iLastSym(-1),
       m_y1(std::numeric_limits<myint>::min()), m_y2(std::numeric_limits<myint>::max()),
       m_iTargetY(CDasherModel::ORIGIN_Y), m_uHelpStart(std::numeric_limits<unsigned long>::max()), m_ulTotalTime(0),
-      m_dTotalNats(0.0), m_uiTotalSyms(0), m_iFontSize(36) {
+      m_dTotalNats(0.0), m_uiTotalSyms(0) {
     HandleViewChange(pView);
 
     m_pInterface->OnEditEvent.Subscribe(this, [this](CEditEvent::EditEventType type, const std::string& strText,
@@ -75,12 +75,12 @@ void CGameModule::HandleEditEvent(CEditEvent::EditEventType type, const std::str
     case CEditEvent::EDIT_DELETE:
         if (iOffset == m_iLastSym) {
             // seems they've just deleted the last _correct_ character they'd entered...
-            DASHER_ASSERT(evt->m_sText == m_pAlph->GetText(m_vTargetSymbols[m_iLastSym]));
+            DASHER_ASSERT(strText == m_pAlph->GetText(m_vTargetSymbols[m_iLastSym]));
             --m_iLastSym;
         } else {
             // just deleted previously-entered wrong text - hopefully they're heading in the right direction!
-            DASHER_ASSERT(m_strWrong.length() >= evt->m_sText.length());
-            DASHER_ASSERT(m_strWrong.substr(m_strWrong.length() - evt->m_sText.length()) == evt->m_sText);
+            DASHER_ASSERT(m_strWrong.length() >= strText.length());
+            DASHER_ASSERT(m_strWrong.substr(m_strWrong.length() - strText.length()) == strText);
             m_strWrong = m_strWrong.substr(0, m_strWrong.length() - strText.length());
         }
         break;

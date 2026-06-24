@@ -3,6 +3,8 @@
 
 // Idea - should back off button always just undo the previous 'forwards' button?
 
+#include <limits>
+
 #include "DasherButtons.h"
 #include "DasherScreen.h"
 #include "DasherInterfaceBase.h"

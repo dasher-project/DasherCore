@@ -74,6 +74,9 @@ class CPPMPYLanguageModel : public CAbstractPPM {
     };
     CPPMPYnode* makeNode(int sym);
 
+    /// Override to iterate the pychild map instead of CPPMnode children.
+    void collectChildCounts(const CPPMnode* node, std::vector<SymbolCount>& out) const override;
+
   private:
     int NodesAllocated;
     mutable CSimplePooledAlloc<CPPMPYnode> m_NodeAlloc;

@@ -1,15 +1,5 @@
 // Training adaptation tests: verify training text changes model behavior
 #include "test_common.h"
-
-static void run_frames(dasher_ctx* ctx, int count) {
-    int* c = nullptr;
-    int cc = 0;
-    char** s = nullptr;
-    int sc = 0;
-    for (int i = 0; i < count; i++)
-        dasher_frame(ctx, 1000 + i * 16, &c, &cc, &s, &sc);
-}
-
 static unsigned long hash_probabilities(dasher_ctx* ctx) {
     int lbnds[256], hbnds[256];
     int n = dasher_get_probabilities(ctx, lbnds, hbnds, 256);
@@ -32,7 +22,6 @@ TEST(training_import_returns_success) {
     ASSERT_EQ(rc, 0);
 
     dasher_destroy(ctx);
-    printf("v training_import_returns_success passed\n");
 }
 
 TEST(training_import_empty_string) {
@@ -45,7 +34,6 @@ TEST(training_import_empty_string) {
     ASSERT_EQ(rc, 0);
 
     dasher_destroy(ctx);
-    printf("v training_import_empty_string passed\n");
 }
 
 TEST(training_multiple_imports_cumulative) {
@@ -72,7 +60,6 @@ TEST(training_multiple_imports_cumulative) {
     ASSERT(n2 > 0);
 
     dasher_destroy(ctx);
-    printf("v training_multiple_imports_cumulative passed\n");
 }
 
 TEST(training_repeated_words_shift_probabilities) {
@@ -102,7 +89,6 @@ TEST(training_repeated_words_shift_probabilities) {
     printf("  %d children, normalized OK after heavy training\n", n);
 
     dasher_destroy(ctx);
-    printf("v training_repeated_words_shift_probabilities passed\n");
 }
 
 TEST(training_preserves_normalization) {
@@ -128,7 +114,6 @@ TEST(training_preserves_normalization) {
     }
 
     dasher_destroy(ctx);
-    printf("v training_preserves_normalization passed\n");
 }
 
 TEST(training_identical_repeated_deterministic) {
@@ -149,20 +134,4 @@ TEST(training_identical_repeated_deterministic) {
     printf("  Hashes: %lu, %lu, %lu\n", hashes[0], hashes[1], hashes[2]);
     ASSERT_EQ(hashes[0], hashes[1]);
     ASSERT_EQ(hashes[0], hashes[2]);
-
-    printf("v training_identical_repeated_deterministic passed\n");
-}
-
-int main() {
-    printf("Running training adaptation tests...\n\n");
-
-    test_training_import_returns_success();
-    test_training_import_empty_string();
-    test_training_multiple_imports_cumulative();
-    test_training_repeated_words_shift_probabilities();
-    test_training_preserves_normalization();
-    test_training_identical_repeated_deterministic();
-
-    printf("\nAll training adaptation tests passed!\n");
-    return 0;
 }

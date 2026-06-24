@@ -179,15 +179,12 @@ void CTwoButtonDynamicFilter::ActionButton(unsigned long iTime, Keys::VirtualKey
         iEffect = 4;
         // fall through to apply offset
     } else {
-        if (CUserLogBase* pUserLog = m_pInterface->GetUserLogPtr()) pUserLog->KeyDown(Key, iType, 0);
         return;
     }
     // fell through to apply offset
     ApplyOffset(pModel, static_cast<int>(dFactor * m_pSettingsStore->GetLongParameter(LP_TWO_BUTTON_OFFSET) *
                                          exp(m_dLagBits * FrameSpeedMul(pModel, iTime))));
     pModel->ResetNats();
-
-    if (CUserLogBase* pUserLog = m_pInterface->GetUserLogPtr()) pUserLog->KeyDown(Key, iType, iEffect);
 }
 
 bool CTwoButtonDynamicFilter::GetSettings(SModuleSettings** pSettings, int* iCount) {

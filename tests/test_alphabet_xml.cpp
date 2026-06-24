@@ -11,7 +11,6 @@ TEST(alphabet_default_loaded) {
     ASSERT(strlen(alph) > 0);
 
     dasher_destroy(ctx);
-    printf("v alphabet_default_loaded passed\n");
 }
 
 TEST(alphabet_count_positive) {
@@ -30,7 +29,6 @@ TEST(alphabet_count_positive) {
     }
 
     dasher_destroy(ctx);
-    printf("v alphabet_count_positive passed\n");
 }
 
 TEST(alphabet_switch_to_english_no_punct) {
@@ -48,7 +46,6 @@ TEST(alphabet_switch_to_english_no_punct) {
     ASSERT(sym_count > 0);
 
     dasher_destroy(ctx);
-    printf("v alphabet_switch_to_english_no_punct passed\n");
 }
 
 TEST(alphabet_switch_invalid_falls_back) {
@@ -63,7 +60,6 @@ TEST(alphabet_switch_invalid_falls_back) {
     ASSERT(strlen(after) > 0);
 
     dasher_destroy(ctx);
-    printf("v alphabet_switch_invalid_falls_back passed\n");
 }
 
 TEST(alphabet_symbol_texts_are_nonempty) {
@@ -86,7 +82,6 @@ TEST(alphabet_symbol_texts_are_nonempty) {
     ASSERT(nonempty > 0);
 
     dasher_destroy(ctx);
-    printf("v alphabet_symbol_texts_are_nonempty passed\n");
 }
 
 TEST(alphabet_symbol_out_of_range_returns_error) {
@@ -103,7 +98,6 @@ TEST(alphabet_symbol_out_of_range_returns_error) {
     ASSERT_EQ(rc, -1);
 
     dasher_destroy(ctx);
-    printf("v alphabet_symbol_out_of_range_returns_error passed\n");
 }
 
 TEST(alphabet_switch_changes_probabilities) {
@@ -140,7 +134,6 @@ TEST(alphabet_switch_changes_probabilities) {
     ASSERT(changed);
 
     dasher_destroy(ctx);
-    printf("v alphabet_switch_changes_probabilities passed\n");
 }
 
 TEST(alphabet_affects_root_child_count) {
@@ -165,21 +158,4 @@ TEST(alphabet_affects_root_child_count) {
     ASSERT(count2 > 0);
 
     dasher_destroy(ctx);
-    printf("v alphabet_affects_root_child_count passed\n");
-}
-
-int main() {
-    printf("Running alphabet XML parsing tests...\n\n");
-
-    test_alphabet_default_loaded();
-    test_alphabet_count_positive();
-    test_alphabet_switch_to_english_no_punct();
-    test_alphabet_switch_invalid_falls_back();
-    test_alphabet_symbol_texts_are_nonempty();
-    test_alphabet_symbol_out_of_range_returns_error();
-    test_alphabet_switch_changes_probabilities();
-    test_alphabet_affects_root_child_count();
-
-    printf("\nAll alphabet XML tests passed!\n");
-    return 0;
 }

@@ -29,8 +29,6 @@ class CMixtureLanguageModel : public CLanguageModel {
     CMixtureLanguageModel(CSettingsStore* pSettingsStore, const CAlphInfo* pAlph, const CAlphabetMap* pAlphMap)
         : CLanguageModel(pAlph->iEnd - 1), m_pSettingsStore(pSettingsStore) {
 
-        //      std::cout << m_pAlphabet << std::endl;
-
         NextContext = 0;
 
         lma = new CPPMLanguageModel(m_pSettingsStore, m_iNumSyms);
@@ -92,8 +90,28 @@ class CMixtureLanguageModel : public CLanguageModel {
         lma->GetProbs(ContextMap.find(static_cast<const int>(context))->second->GetContextA(), ProbsA, iNormA, 0);
         lmb->GetProbs(ContextMap.find(static_cast<const int>(context))->second->GetContextB(), ProbsB, iNormB, 0);
 
+        // Symbol 0 is the sentinel (root/end marker) — must carry zero
+        // probability so that AlphabetManager's cumulative-difference
+        // arithmetic remains valid. Same contract as every other LM.
+        Probs[0] = 0;
+
+        // Blend the two sub-models' distributions
+        unsigned int iActual = 0;
         for (int i(1); i < iNumSymbols; i++) {
             Probs[i] = ProbsA[i] + ProbsB[i];
+            iActual += Probs[i];
+        }
+
+        // Rounding correction: the blend may lose a few units to integer
+        // truncation in the sub-models. Distribute the residual so that
+        // sum(Probs) == iNorm exactly — same pattern as PPM's Step 4.
+        unsigned int iToSpend = iNorm - iActual;
+        int iLeft = iNumSymbols - 1;
+        for (int i(1); i < iNumSymbols; i++) {
+            unsigned int p = iToSpend / iLeft;
+            Probs[i] += p;
+            --iLeft;
+            iToSpend -= p;
         }
     };
 

@@ -744,7 +744,7 @@ void CDasherViewSquare::DasherDrawCube(myint iDasherMaxX, myint iDasherMinY, myi
                        outlineColor, iThickness);
 }
 
-bool CDasherViewSquare::CoversCrosshair(myint Range, myint y1, myint y2) {
+bool CDasherViewSquare::CoversCrosshair(myint Range, myint y1, myint y2) const {
     if (Range > CDasherModel::ORIGIN_X && y1 < CDasherModel::ORIGIN_Y && y2 > CDasherModel::ORIGIN_Y) {
         switch (m_pSettingsStore->GetLongParameter(LP_SHAPE_TYPE)) {
         case Options::DISJOINT_RECTANGLE:
@@ -803,7 +803,7 @@ void CDasherViewSquare::NewRender(CDasherNode* pCurrentNode, myint y1, myint y2,
                                   CExpansionPolicy& policy, double dMaxCost, CDasherNode*& pCurrentTopCenterNode,
                                   CubeDepthLevel nodeDepth, CubeDepthLevel parentDepth,
                                   ScreenRegion parentScreenBounds) {
-    DASHER_ASSERT_VALIDPTR_RW(pRender);
+    DASHER_ASSERT_VALIDPTR_RW(pCurrentNode);
 
     const DasherCoordScreenRegion visibleRegion = VisibleRegion();
 

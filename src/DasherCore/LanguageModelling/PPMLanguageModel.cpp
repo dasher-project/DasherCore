@@ -33,80 +33,153 @@ bool CAbstractPPM::isValidContext(const Context context) const {
 
 void CPPMLanguageModel::GetProbs(Context context, std::vector<unsigned int>& probs, int norm, int iUniform) const {
     const CPPMContext* ppmcontext = reinterpret_cast<const CPPMContext*>(context);
-
     DASHER_ASSERT(isValidContext(context));
 
-    int iNumSymbols = GetSize();
+    int alpha = m_pSettingsStore->GetLongParameter(LP_LM_ALPHA);
+    int beta = m_pSettingsStore->GetLongParameter(LP_LM_BETA);
 
+    mergePPMProbs(ppmcontext, probs, GetSize(), norm, iUniform, alpha, beta);
+}
+
+/////////////////////////////////////////////////////////////////////
+// CAbstractPPM — shared PPM probability-merge loop
+//
+// This is the heart of the Dasher predictive engine. Given a context
+// (a chain of PPM trie nodes via vine pointers), it produces a probability
+// distribution over all possible next symbols.
+//
+// The algorithm blends evidence from multiple context lengths:
+//
+//   1. UNIFORM BACKOFF: Start by distributing iUniform units of
+//      probability mass evenly across all symbols (except symbol 0,
+//      which is the sentinel/root and always gets probability 0).
+//
+//   2. VINE-CHAIN TRAVERSAL: Walk from the deepest context node back
+//      toward the root via vine pointers. At each level, children with
+//      observed counts receive additional probability mass proportional
+//      to their count, discounted by alpha (a smoothing constant) and
+//      beta (a count threshold):
+//
+//        p = remaining_mass * (100 * count - beta) / (100 * total + alpha)
+//
+//      Symbols seen at shorter contexts are "excluded" from longer
+//      contexts (when doExclusion is enabled — currently disabled,
+//      see FIXME below). The remaining_mass shrinks at each level.
+//
+//   3. LEFTOVER: Any probability mass still unspent after the vine
+//      traversal is distributed evenly among symbols that were never
+//      seen in any context.
+//
+//   4. ROUNDING CORRECTION: Integer arithmetic loses a few units to
+//      truncation. The final loop distributes the residual so that
+//      sum(probs) == norm exactly.
+//
+// The result is a cumulative probability vector where:
+//   probs[0] == 0  (sentinel — required by AlphabetManager)
+//   sum(probs) == norm  (typically 65536 = 2^16)
+//
+// Subclasses customize child iteration via collectChildCounts():
+//   - CPPMLanguageModel: iterates CPPMnode inline hash (standard PPM)
+//   - CPPMPYLanguageModel: iterates pychild map (Mandarin pinyin routing)
+
+void CAbstractPPM::collectChildCounts(const CPPMnode* node, std::vector<SymbolCount>& out) const {
+    // Default: iterate children via the CPPMnode inline hash table.
+    // The inline hash is an open-addressed array built into each node,
+    // sized proportionally to the number of children. See CPPMnode
+    // documentation in PPMLanguageModel.h for the storage strategy.
+    for (ChildIterator pSymbol = node->children(); pSymbol != node->end(); pSymbol++) {
+        out.push_back({(*pSymbol)->sym, (*pSymbol)->count});
+    }
+}
+
+void CAbstractPPM::mergePPMProbs(const CPPMContext* ppmcontext, std::vector<unsigned int>& probs, int iNumSymbols,
+                                 int norm, int iUniform, int alpha, int beta) const {
     probs.resize(iNumSymbols);
 
+    // exclusions[sym] = true once sym has received probability from
+    // a context level. When doExclusion is enabled, excluded symbols
+    // are skipped at deeper context levels to avoid double-counting.
+    // (doExclusion is currently disabled — see FIXME below.)
     std::vector<bool> exclusions(iNumSymbols);
 
-    unsigned int iToSpend = norm;
+    unsigned int iToSpend = norm; // remaining probability mass to distribute
     unsigned int iUniformLeft = iUniform;
 
-    // TODO: Sort out zero symbol case
+    // Symbol 0 is the sentinel (root/end marker). It must carry zero
+    // probability so that cumulative-difference arithmetic in
+    // AlphabetManager::IterateChildGroups remains valid.
     probs[0] = 0;
     exclusions[0] = false;
 
+    // --- Step 1: Uniform backoff distribution ---
+    // Distribute iUniform units evenly across symbols 1..N-1.
+    // This ensures every symbol gets at least some baseline probability,
+    // even if it was never observed in any context.
     for (int i = 1; i < iNumSymbols; i++) {
         probs[i] = iUniformLeft / (iNumSymbols - i);
         iUniformLeft -= probs[i];
         iToSpend -= probs[i];
         exclusions[i] = false;
     }
-
     DASHER_ASSERT(iUniformLeft == 0);
 
-    //  bool doExclusion = GetLongParameter( LP_LM_ALPHA );
-    bool doExclusion = 0; // FIXME
+    // FIXME: doExclusion is always 0. The exclusion mechanism was
+    // intended to prevent symbols seen at shorter contexts from
+    // receiving probability at longer contexts (a standard PPM
+    // technique). It's disabled because enabling it requires careful
+    // tuning to avoid degrading prediction quality. The infrastructure
+    // is preserved here so it can be enabled experimentally.
+    bool doExclusion = 0;
 
-    int alpha = m_pSettingsStore->GetLongParameter(LP_LM_ALPHA);
-    int beta = m_pSettingsStore->GetLongParameter(LP_LM_BETA);
+    // Reusable buffer for child counts (avoids per-level allocation)
+    std::vector<SymbolCount> childCounts;
 
+    // --- Step 2: Vine-chain traversal ---
+    // Walk from the deepest context node toward the root. At each
+    // level, observed children receive additional probability mass
+    // proportional to their count, blended with alpha/beta smoothing.
+    //
+    // The vine pointer links each node to its parent in the suffix
+    // chain: if the context is "the cat sat", the vine chain visits
+    // nodes for "sat" → "cat sat" → "the cat sat" → root, progressively
+    // using shorter contexts as longer ones are exhausted.
     for (CPPMnode* pTemp = ppmcontext->head; pTemp; pTemp = pTemp->vine) {
-        int iTotal = 0;
+        childCounts.clear();
+        collectChildCounts(pTemp, childCounts);
 
-        for (ChildIterator pSymbol = pTemp->children(); pSymbol != pTemp->end(); pSymbol++) {
-            symbol sym = (*pSymbol)->sym;
-            if (!(exclusions[sym] && doExclusion)) iTotal += (*pSymbol)->count;
+        // Sum counts of non-excluded children at this context level
+        int iTotal = 0;
+        for (const auto& sc : childCounts) {
+            if (!(exclusions[sc.sym] && doExclusion)) iTotal += sc.count;
         }
 
         if (iTotal) {
+            // size_of_slice = all remaining mass. Each child gets a
+            // fraction proportional to its count, discounted by alpha
+            // (smoothing) and beta (count threshold).
             unsigned int size_of_slice = iToSpend;
-            for (ChildIterator pSymbol = pTemp->children(); pSymbol != pTemp->end(); pSymbol++) {
-                if (!(exclusions[(*pSymbol)->sym] && doExclusion)) {
-                    exclusions[(*pSymbol)->sym] = 1;
+            for (const auto& sc : childCounts) {
+                if (!(exclusions[sc.sym] && doExclusion)) {
+                    exclusions[sc.sym] = 1;
 
                     unsigned int p =
-                        static_cast<myint>(size_of_slice) * (100 * (*pSymbol)->count - beta) / (100 * iTotal + alpha);
+                        static_cast<myint>(size_of_slice) * (100 * sc.count - beta) / (100 * iTotal + alpha);
 
-                    probs[(*pSymbol)->sym] += p;
+                    probs[sc.sym] += p;
                     iToSpend -= p;
                 }
-                //                              Usprintf(debug,TEXT("sym %u counts %d p %u tospend %u
-                //                              \n"),sym,s->count,p,tospend); DebugOutput(debug);
             }
         }
     }
 
+    // --- Step 3: Leftover distribution ---
+    // Any mass not consumed by the vine traversal is distributed
+    // evenly among symbols that were never observed (not excluded).
     unsigned int size_of_slice = iToSpend;
     int symbolsleft = 0;
 
     for (int i = 1; i < iNumSymbols; i++)
         if (!(exclusions[i] && doExclusion)) symbolsleft++;
-
-    //      std::ostringstream str;
-    //      for (sym=0;sym<modelchars;sym++)
-    //              str << probs[sym] << " ";
-    //      str << std::endl;
-    //      DASHER_TRACEOUTPUT("probs %s",str.str().c_str());
-
-    //      std::ostringstream str2;
-    //      for (sym=0;sym<modelchars;sym++)
-    //              str2 << valid[sym] << " ";
-    //      str2 << std::endl;
-    //      DASHER_TRACEOUTPUT("valid %s",str2.str().c_str());
 
     for (int i = 1; i < iNumSymbols; i++) {
         if (!(exclusions[i] && doExclusion)) {
@@ -116,6 +189,9 @@ void CPPMLanguageModel::GetProbs(Context context, std::vector<unsigned int>& pro
         }
     }
 
+    // --- Step 4: Rounding correction ---
+    // Integer division loses a few units to truncation. Distribute
+    // the residual sequentially so that sum(probs) == norm exactly.
     int iLeft = iNumSymbols - 1;
 
     for (int i = 1; i < iNumSymbols; i++) {
@@ -147,7 +223,6 @@ void CAbstractPPM::EnterSymbol(Context c, int Symbol) {
                 //      Usprintf(debug,TEXT("found context %x order %d\n"),head,order);
                 //      DebugOutput(debug);
 
-                //                      std::cout << context.order << std::endl;
                 return;
             }
         }
@@ -162,8 +237,6 @@ void CAbstractPPM::EnterSymbol(Context c, int Symbol) {
         context.head = m_pRoot;
         context.order = 0;
     }
-
-    //      std::cout << context.order << std::endl;
 }
 
 /////////////////////////////////////////////////////////////////////
@@ -325,7 +398,6 @@ CAbstractPPM::CPPMnode* CAbstractPPM::CPPMnode::find_symbol(symbol s) const
             if (m_ppChildren[i]->sym == s) return m_ppChildren[i];
         return 0;
     }
-    //  printf("finding symbol %d at node %d\n",sym,node->id);
 
     for (int i = s;; i++) { // search through elements which have overflowed into subsequent slots
         CPPMnode* found = this->m_ppChildren[i % m_iNumChildSlots]; // wrap round
@@ -403,8 +475,6 @@ void CAbstractPPM::CPPMnode::AddChild(CPPMnode* pNewChild, int numSymbols) {
 CAbstractPPM::CPPMnode* CAbstractPPM::AddSymbolToNode(CPPMnode* pNode, symbol sym) {
 
     CPPMnode* pReturn = pNode->find_symbol(sym);
-
-    //      std::cout << sym << ",";
 
     if (pReturn != NULL) {
         pReturn->count++;

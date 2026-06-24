@@ -35,7 +35,6 @@ TEST(det_same_input_same_output) {
 
     ASSERT_EQ(strcmp(results[0], results[1]), 0);
     ASSERT_EQ(strcmp(results[0], results[2]), 0);
-    printf("v det_same_input_same_output passed\n");
 }
 
 TEST(det_different_y_different_output) {
@@ -67,8 +66,6 @@ TEST(det_different_y_different_output) {
     printf("  Y=100: '%s'\n", out2);
     // Different Y positions should generally produce different output
     ASSERT_NEQ(strcmp(out1, out2), 0);
-
-    printf("v det_different_y_different_output passed\n");
 }
 
 TEST(det_no_input_no_output) {
@@ -88,7 +85,6 @@ TEST(det_no_input_no_output) {
     ASSERT_EQ(strlen(output), 0);
 
     dasher_destroy(ctx);
-    printf("v det_no_input_no_output passed\n");
 }
 
 TEST(det_reset_clears_output) {
@@ -108,7 +104,6 @@ TEST(det_reset_clears_output) {
     ASSERT_EQ(strlen(output2), 0);
 
     dasher_destroy(ctx);
-    printf("v det_reset_clears_output passed\n");
 }
 
 TEST(det_offset_starts_at_zero) {
@@ -128,7 +123,6 @@ TEST(det_offset_starts_at_zero) {
     ASSERT(offset > 0);
 
     dasher_destroy(ctx);
-    printf("v det_offset_starts_at_zero passed\n");
 }
 
 TEST(det_speed_affects_rate) {
@@ -141,7 +135,7 @@ TEST(det_speed_affects_rate) {
         dasher_set_screen_size(ctx, 800, 600);
         dasher_set_speed_percent(ctx, speeds[s]);
         const char* output = type_and_get(ctx, 700.0f, 300.0f, 100);
-        lens[s] = strlen(output);
+        lens[s] = (int)strlen(output);
         printf("  Speed %d%%: %d chars\n", speeds[s], lens[s]);
         dasher_destroy(ctx);
     }
@@ -149,20 +143,4 @@ TEST(det_speed_affects_rate) {
     // Higher speed should generally produce more text
     // (not strict for all cases, but 400% >> 100% should hold)
     ASSERT(lens[2] >= lens[0]);
-
-    printf("v det_speed_affects_rate passed\n");
-}
-
-int main() {
-    printf("Running deterministic text production tests...\n\n");
-
-    test_det_same_input_same_output();
-    test_det_different_y_different_output();
-    test_det_no_input_no_output();
-    test_det_reset_clears_output();
-    test_det_offset_starts_at_zero();
-    test_det_speed_affects_rate();
-
-    printf("\nAll deterministic tests passed!\n");
-    return 0;
 }

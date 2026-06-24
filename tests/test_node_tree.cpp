@@ -1,15 +1,5 @@
 // Node tree structure tests: verify tree navigation and bounds consistency
 #include "test_common.h"
-
-static void run_frames(dasher_ctx* ctx, int count) {
-    int* c = nullptr;
-    int cc = 0;
-    char** s = nullptr;
-    int sc = 0;
-    for (int i = 0; i < count; i++)
-        dasher_frame(ctx, 1000 + i * 16, &c, &cc, &s, &sc);
-}
-
 TEST(tree_root_child_count_positive) {
     dasher_ctx* ctx = create_isolated_context();
     ASSERT(ctx);
@@ -20,7 +10,6 @@ TEST(tree_root_child_count_positive) {
     ASSERT(count > 0);
 
     dasher_destroy(ctx);
-    printf("v tree_root_child_count_positive passed\n");
 }
 
 TEST(tree_all_children_have_valid_bounds) {
@@ -41,7 +30,6 @@ TEST(tree_all_children_have_valid_bounds) {
     }
 
     printf("  All %d children have valid bounds\n", count);
-    printf("v tree_all_children_have_valid_bounds passed\n");
 
     dasher_destroy(ctx);
 }
@@ -65,7 +53,6 @@ TEST(tree_bounds_are_contiguous) {
     ASSERT_EQ(prev_hbnd, 65536LL);
 
     dasher_destroy(ctx);
-    printf("v tree_bounds_are_contiguous passed\n");
 }
 
 TEST(tree_child_bounds_match_probability_api) {
@@ -85,7 +72,6 @@ TEST(tree_child_bounds_match_probability_api) {
     }
 
     dasher_destroy(ctx);
-    printf("v tree_child_bounds_match_probability_api passed\n");
 }
 
 TEST(tree_invalid_index_returns_error) {
@@ -101,7 +87,6 @@ TEST(tree_invalid_index_returns_error) {
     ASSERT_EQ(dasher_get_root_child_bounds(ctx, -1, &dummy_l, &dummy_h), -1);
 
     dasher_destroy(ctx);
-    printf("v tree_invalid_index_returns_error passed\n");
 }
 
 TEST(tree_count_stable_across_frames) {
@@ -117,7 +102,6 @@ TEST(tree_count_stable_across_frames) {
     ASSERT_EQ(count0, count1);
 
     dasher_destroy(ctx);
-    printf("v tree_count_stable_across_frames passed\n");
 }
 
 TEST(tree_count_changes_with_alphabet) {
@@ -139,20 +123,4 @@ TEST(tree_count_changes_with_alphabet) {
     ASSERT(count2 > 0);
 
     dasher_destroy(ctx);
-    printf("v tree_count_changes_with_alphabet passed\n");
-}
-
-int main() {
-    printf("Running node tree structure tests...\n\n");
-
-    test_tree_root_child_count_positive();
-    test_tree_all_children_have_valid_bounds();
-    test_tree_bounds_are_contiguous();
-    test_tree_child_bounds_match_probability_api();
-    test_tree_invalid_index_returns_error();
-    test_tree_count_stable_across_frames();
-    test_tree_count_changes_with_alphabet();
-
-    printf("\nAll node tree tests passed!\n");
-    return 0;
 }

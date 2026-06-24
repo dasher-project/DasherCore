@@ -214,7 +214,6 @@ void CConversionManager::CConvNode::PopulateChildren() {
         // Finally loop through and create the children
 
         for (std::vector<SCENode*>::const_iterator it = vChildren.begin(); it != vChildren.end(); it++) {
-            //      std::cout << "Current scec: " << pCurrentSCEChild << std::endl;
             SCENode* pCurrentSCEChild(*it);
             DASHER_ASSERT(pCurrentSCEChild != NULL);
             unsigned int iLbnd(iCum);
@@ -225,8 +224,6 @@ void CConversionManager::CConvNode::PopulateChildren() {
 
             // TODO: Parameters here are placeholders - need to figure out
             // what's right
-
-            //  std::cout << "#" << pCurrentSCEChild->pszConversion << "#" << std::endl;
 
             CConvNode* pNewNode = mgr()->makeNode(offset() + 1, mgr()->GetLabel(pCurrentSCEChild->pszConversion));
 

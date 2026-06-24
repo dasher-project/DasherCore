@@ -54,7 +54,6 @@ class CDasherInterfaceBase;
 class FileUtils;
 } // namespace Dasher
 
-class CUserLogBase;
 class CNodeCreationManager;
 
 /// \defgroup Core Core Dasher classes
@@ -82,8 +81,6 @@ class Dasher::CDasherInterfaceBase : public CMessageDisplay, private NoClones {
     /// should be considered dangerous and use minimised. Eventually to
     /// be replaced by properly encapsulated equivalents.
     /// @{
-
-    CUserLogBase* GetUserLogPtr();
 
     // @}
 
@@ -114,8 +111,6 @@ class Dasher::CDasherInterfaceBase : public CMessageDisplay, private NoClones {
     std::vector<std::string> GetPermittedValues(Parameter parameter);
 
     CColorIO* GetColorIO() { return m_ColorIO.get(); }
-
-    CFileLogger* GetGlobalApplicationLogger() const { return m_pGlobalApplicationLog.get(); }
 
     //@}
 
@@ -519,8 +514,6 @@ class Dasher::CDasherInterfaceBase : public CMessageDisplay, private NoClones {
     std::unique_ptr<CAlphIO> m_AlphIO;
     std::unique_ptr<CColorIO> m_ColorIO;
     std::unique_ptr<CNodeCreationManager> m_pNCManager;
-    std::unique_ptr<CUserLogBase> m_pUserLog;
-    std::unique_ptr<CFileLogger> m_pGlobalApplicationLog;
 
     // the game mode module - only
     // initialized if game mode is enabled

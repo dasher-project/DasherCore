@@ -35,6 +35,12 @@ add_compile_options(
 add_compile_options(
     $<$<CXX_COMPILER_ID:MSVC>:/W4>
     $<$<CXX_COMPILER_ID:MSVC>:/permissive->
+    # C4100 (unre-ferenced formal parameter) — disabled globally. The legacy
+    # codebase has hundreds of inherited virtual method overrides where
+    # parameters are intentionally unused in specific subclasses. This is a
+    # style issue, not a bug. The bug-finding warnings (C4701 uninitialized,
+    # C4244 narrowing) remain enabled.
+    $<$<CXX_COMPILER_ID:MSVC>:/wd4100>
 )
 
 ###############################
@@ -133,14 +139,6 @@ list(REMOVE_ITEM SOURCE_FILES
     "${CMAKE_CURRENT_LIST_DIR}/src/DasherCore/Common/Unicode/original_harness.c"
 )
 
-# Still in the library but not actively used anymore. Also not supported on all platforms
-list(REMOVE_ITEM HEADER_FILES "${CMAKE_CURRENT_LIST_DIR}/src/DasherCore/CannaConversionHelper.h")
-list(REMOVE_ITEM HEADER_FILES "${CMAKE_CURRENT_LIST_DIR}/src/DasherCore/SocketInputBase.h")
-list(REMOVE_ITEM HEADER_FILES "${CMAKE_CURRENT_LIST_DIR}/src/DasherCore/SocketInput.h")
-list(REMOVE_ITEM SOURCE_FILES "${CMAKE_CURRENT_LIST_DIR}/src/DasherCore/CannaConversionHelper.cpp")
-list(REMOVE_ITEM SOURCE_FILES "${CMAKE_CURRENT_LIST_DIR}/src/DasherCore/SocketInputBase.cpp")
-list(REMOVE_ITEM SOURCE_FILES "${CMAKE_CURRENT_LIST_DIR}/src/DasherCore/SocketInput.cpp")
-
 ADD_library(DasherCore STATIC
 	${HEADER_FILES}
 	${SOURCE_FILES}
@@ -203,22 +201,40 @@ if(BUILD_CAPI)
             set(TEST_DATA_DIR "${CMAKE_CURRENT_LIST_DIR}")
         endif()
 
+        # doctest is the test framework. Vendored as a single header in Thirdparty/.
+        set(DOCTEST_INCLUDE_DIR "${CMAKE_CURRENT_LIST_DIR}/Thirdparty/doctest")
+
+        # Default per-test timeout. Tests routinely take 15-30s because each
+        # dasher_create() loads every alphabet XML file from Data/. 300s
+        # gives headroom on slow filesystems (WSL+9P, Windows CI) and for
+        # Debug builds with asserts active, while still catching real hangs.
+        # (CI can override via `ctest --timeout` on the command line.)
+        set(DASHER_TEST_TIMEOUT 300 CACHE STRING "Per-test timeout in seconds")
+
         # Helper function for adding a test executable
         function(dasher_add_test name source)
             add_executable(${name} ${CMAKE_CURRENT_LIST_DIR}/tests/${source})
-            target_include_directories(${name} PRIVATE ${CMAKE_CURRENT_LIST_DIR}/src/ ${CMAKE_CURRENT_LIST_DIR}/tests/)
+            target_include_directories(${name} PRIVATE
+                ${CMAKE_CURRENT_LIST_DIR}/src/
+                ${CMAKE_CURRENT_LIST_DIR}/tests/
+                ${DOCTEST_INCLUDE_DIR})
             target_link_libraries(${name} PRIVATE dasher)
             target_compile_definitions(${name} PRIVATE TEST_DATA_DIR="${TEST_DATA_DIR}")
             add_test(NAME ${name} COMMAND ${name})
+            set_tests_properties(${name} PROPERTIES TIMEOUT ${DASHER_TEST_TIMEOUT})
         endfunction()
 
         # Variant for tests that need internal DasherCore symbols (e.g. ConvertUTF)
         function(dasher_add_test_internal name source)
             add_executable(${name} ${CMAKE_CURRENT_LIST_DIR}/tests/${source})
-            target_include_directories(${name} PRIVATE ${CMAKE_CURRENT_LIST_DIR}/src/ ${CMAKE_CURRENT_LIST_DIR}/tests/)
+            target_include_directories(${name} PRIVATE
+                ${CMAKE_CURRENT_LIST_DIR}/src/
+                ${CMAKE_CURRENT_LIST_DIR}/tests/
+                ${DOCTEST_INCLUDE_DIR})
             target_link_libraries(${name} PRIVATE DasherCore pugixml)
             target_compile_definitions(${name} PRIVATE TEST_DATA_DIR="${TEST_DATA_DIR}")
             add_test(NAME ${name} COMMAND ${name})
+            set_tests_properties(${name} PROPERTIES TIMEOUT ${DASHER_TEST_TIMEOUT})
         endfunction()
 
         dasher_add_test(dasher_capi_tests test_capi.cpp)
@@ -243,6 +259,28 @@ if(BUILD_CAPI)
         dasher_add_test(dasher_training_tests test_training.cpp)
         dasher_add_test(dasher_node_tree_tests test_node_tree.cpp)
 
+        # Phase B (characterization) — closes coverage gaps noted in the review.
+        #   - buffer_lifetime: the C API "valid until next call" contract
+        #   - lm_correctness: training, LP_UNIFORM/LP_LM_*/BP_LM_ADAPTIVE effects
+        #   - view_geometry:   LP_ORIENTATION, BP_NONLINEAR_Y, LP_GEOMETRY
+        #   - input_filters:   all 14 registered filters (12 previously untested)
+        #   - xml_error_paths: malformed alphabet/color/settings XML
+        dasher_add_test(dasher_capi_buffer_lifetime_tests test_capi_buffer_lifetime.cpp)
+        dasher_add_test(dasher_lm_correctness_tests test_lm_correctness.cpp)
+        dasher_add_test(dasher_view_geometry_tests test_view_geometry.cpp)
+        dasher_add_test(dasher_input_filter_tests test_input_filters.cpp)
+        dasher_add_test(dasher_xml_error_path_tests test_xml_error_paths.cpp)
+
+        # Phase C (deeper coverage) — end-to-end + perf + property tests.
+        #   - control_actions_navigation: fires callback via actual node nav
+        #   - spell_word: drives mouse via probabilities to enter children
+        #   - benchmarks: dasher_frame p99 latency baseline (catches regressions)
+        #   - property_invariants: normalization holds across random training
+        dasher_add_test(dasher_control_actions_navigation_tests test_control_actions_navigation.cpp)
+        dasher_add_test(dasher_spell_word_tests test_spell_word.cpp)
+        dasher_add_test(dasher_benchmark_tests test_benchmarks.cpp)
+        dasher_add_test(dasher_property_invariant_tests test_property_invariants.cpp)
+
         # Control action system tests — needs internal DasherCore classes (ActionRegistry)
         # AND C API functions, so we compile CAPI.cpp directly and link DasherCore
         add_executable(dasher_control_action_tests
@@ -250,9 +288,11 @@ if(BUILD_CAPI)
             ${CMAKE_CURRENT_LIST_DIR}/src/CAPI.cpp)
         target_include_directories(dasher_control_action_tests PRIVATE
             ${CMAKE_CURRENT_LIST_DIR}/src/
-            ${CMAKE_CURRENT_LIST_DIR}/tests/)
+            ${CMAKE_CURRENT_LIST_DIR}/tests/
+            ${DOCTEST_INCLUDE_DIR})
         target_link_libraries(dasher_control_action_tests PRIVATE DasherCore pugixml)
         target_compile_definitions(dasher_control_action_tests PRIVATE TEST_DATA_DIR="${TEST_DATA_DIR}")
         add_test(NAME dasher_control_action_tests COMMAND dasher_control_action_tests)
+        set_tests_properties(dasher_control_action_tests PROPERTIES TIMEOUT ${DASHER_TEST_TIMEOUT})
     endif()
 endif()

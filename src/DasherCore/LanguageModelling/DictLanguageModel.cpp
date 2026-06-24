@@ -35,7 +35,6 @@ void CDictLanguageModel::CDictContext::dump()
 CDictLanguageModel::CDictnode* CDictLanguageModel::CDictnode::find_symbol(int sym) const
 // see if symbol is a child of node
 {
-    //  printf("finding symbol %d at node %d\n",sym,node->id);
     CDictnode* found = child;
     while (found) {
         if (found->sbl == sym) return found;
@@ -509,8 +508,6 @@ void CDictLanguageModel::EnterSymbol(Context c, int Symbol) {
 
     // Add the symbol to the current word string
 
-    //  cout << max_order << std::endl;
-
     if (max_order > 0) {
         char sbuffer[5];
         snprintf(sbuffer, 5, "%04d", Symbol);
@@ -539,17 +536,13 @@ void CDictLanguageModel::EnterSymbol(Context c, int Symbol) {
                 context.order++;
                 context.head = find;
 
-                //      std::cout << context.order << std::endl;
                 return;
             }
         }
         //    m_iMaxOrder = params->GetValue( std::string( "LMMaxOrder" ) );
 
-        //    std::cout << "a" << std::endl;
-
         //    while (context.order>  params->GetValue( std::string( "LMMaxOrder" )))
         // {
-        // std::cout << "b" << std::endl;
 
         context.order--;
         context.head = context.head->vine;
@@ -560,5 +553,4 @@ void CDictLanguageModel::EnterSymbol(Context c, int Symbol) {
         context.head = m_pRoot;
         context.order = 0;
     }
-    //  std::cout << "(reduced) " << context.order << std::endl;
 }

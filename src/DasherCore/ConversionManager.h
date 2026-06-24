@@ -62,8 +62,6 @@ class CDasherInterfaceBase;
 /// management process.
 ///
 class CConversionManager : public CNodeManager {
-    friend class CConvertingAlphMgr;
-
   protected:
     class CConvNode; // fwd decl
   public:

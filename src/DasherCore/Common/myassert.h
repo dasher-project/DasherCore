@@ -24,10 +24,23 @@
 #include <config.h>
 #endif
 
-// The DASHER_ASSERT macro causes execution to break into the debugger in DEBUG mode
-// In non-debug debug builds - no check is done
+// The DASHER_ASSERT macro fires in debug builds (i.e. when NDEBUG is not
+// defined — the standard C/C++ convention that CMake's Debug preset
+// follows). In release builds it compiles to nothing.
+//
+// Historically this gate used "#ifdef DEBUG", which the project never
+// defined anywhere — so every DASHER_ASSERT was silently ((void)true)
+// in every build, masking real bugs (e.g. the visibleRegion/vr typo in
+// DasherView.cpp that compiled only because the expression was never
+// parsed). Switching to NDEBUG matches <cassert> semantics and makes
+// asserts active in Debug CI runs.
 
-#ifdef DEBUG
+#ifdef NDEBUG
+
+#define DASHER_ASSERT(expr) ((void)0)
+
+#else // !NDEBUG — debug build
+
 #ifdef _WIN32
 
 #include <crtdbg.h>
@@ -41,12 +54,7 @@
 
 #endif // _WIN32
 
-#else
-
-// Non-debug version (assertions disabled)
-#define DASHER_ASSERT(expr) ((void)true)
-
-#endif // DEBUG
+#endif // NDEBUG
 
 /////////////////////////////////////////////////////////////////////////////
 

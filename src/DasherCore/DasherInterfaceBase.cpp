@@ -27,8 +27,6 @@
 #include "DasherModel.h"
 #include "Event.h"
 #include "NodeCreationManager.h"
-#include "UserLog.h"
-#include "BasicLog.h"
 #include "GameModule.h"
 
 // Input filters
@@ -62,14 +60,6 @@ static std::string alphabetIdToFilename(const std::string& alphId) {
 
 #include "FileUtils.h"
 #include "SmoothingFilter.h"
-#include "DasherCore/FileLogger.h"
-#ifndef NDEBUG
-const eLogLevel g_iLogLevel = eLogLevel::logDEBUG;
-const int g_iLogOptions = logTimeStamp | logDateStamp | logDeleteOldFile;
-#else
-const eLogLevel g_iLogLevel = eLogLevel::logNORMAL;
-const int g_iLogOptions = logTimeStamp | logDateStamp;
-#endif
 
 using namespace Dasher;
 
@@ -82,12 +72,6 @@ CDasherInterfaceBase::CDasherInterfaceBase(CSettingsStore* pSettingsStore)
       m_pSettingsStore(pSettingsStore), m_pModuleManager(std::make_unique<CModuleManager>()) {
 
     m_pSettingsStore->OnParameterChanged.Subscribe(this, [this](Parameter p) { HandleParameterChange(p); });
-
-    // Global logging object we can use from anywhere
-    // Skip in low-memory mode (keyboard extension) to avoid sandbox write violations
-    if (!m_bLowMemoryMode) {
-        m_pGlobalApplicationLog = std::make_unique<CFileLogger>("dasher.log", g_iLogLevel, g_iLogOptions);
-    }
 
     OnEditEvent.Subscribe(this, [this](CEditEvent::EditEventType type, const std::string& strText, CDasherNode*) {
         if (this->GetGameModule() || !m_pSettingsStore->GetBoolParameter(BP_SPEAK_WORDS) || !this->SupportsSpeech())
@@ -142,12 +126,6 @@ void CDasherInterfaceBase::Realize(unsigned long ulTime) {
 
     // TODO: Sort out log type selection
 
-    const int iUserLogLevel = m_pSettingsStore->GetLongParameter(LP_USER_LOG_LEVEL_MASK);
-    if (iUserLogLevel == 10)
-        m_pUserLog = std::make_unique<CBasicLog>(m_pSettingsStore, this);
-    else if (iUserLogLevel > 0)
-        m_pUserLog = std::make_unique<CUserLog>(m_pSettingsStore, this, iUserLogLevel);
-
     CreateModules();
 
     ChangeAlphabet(); // This creates the NodeCreationManager, the Alphabet,
@@ -166,9 +144,7 @@ void CDasherInterfaceBase::Realize(unsigned long ulTime) {
     // InvalidateContext(true);
     ScheduleRedraw();
 
-    // All the setup is done by now, so let the user log object know
-    // that future parameter changes should be logged.
-    if (m_pUserLog != NULL) m_pUserLog->InitIsDone();
+    ScheduleRedraw();
 }
 
 CDasherInterfaceBase::~CDasherInterfaceBase() {
@@ -182,9 +158,6 @@ CDasherInterfaceBase::~CDasherInterfaceBase() {
 
     // Clean up cached lock label (created by Redraw when locked)
     delete m_pLockLabel;
-
-    // When we destruct on shutdown, we'll output any detailed log file
-    if (m_pUserLog) m_pUserLog->OutputFile();
 }
 
 void CDasherInterfaceBase::HandleParameterChange(Parameter parameter) {
@@ -349,8 +322,6 @@ bool CDasherInterfaceBase::hasDone() {
 void CDasherInterfaceBase::Done() {
     ScheduleRedraw();
 
-    if (m_pUserLog != NULL) m_pUserLog->StopWriting((float)GetNats());
-
     if (m_pSettingsStore->GetBoolParameter(BP_COPY_ALL_ON_STOP) && SupportsClipboard()) {
         CopyToClipboard(GetAllContext());
     }
@@ -433,13 +404,6 @@ void CDasherInterfaceBase::NewFrame(unsigned long iTime, bool bForceRedraw) {
             }
             // 2. Render nodes decorations, messages
             bBlit = Redraw(iTime, bForceRedraw, *pol);
-
-            if (m_pUserLog != nullptr) {
-                //(any) UserLogBase will have been watching output events to gather information
-                // about symbols added/deleted; this tells it to apply that information at end-of-frame
-                // (previously DashIntf gathered the info, and then passed it to the logger here).
-                m_pUserLog->FrameEnded();
-            }
         }
         if (FinishRender(iTime)) bBlit = true;
         if (bBlit) m_DasherScreen->Display();
@@ -459,7 +423,6 @@ void CDasherInterfaceBase::ExecuteDelayedActions() {
 void CDasherInterfaceBase::onUnpause(unsigned long lTime) {
     // TODO When Game+UserLog modules are combined => reduce to just one call here
     if (m_pGameModule) m_pGameModule->StartWriting(lTime);
-    if (m_pUserLog) m_pUserLog->StartWriting();
 }
 
 bool CDasherInterfaceBase::Redraw(unsigned long ulTime, bool bRedrawNodes, CExpansionPolicy& policy) {
@@ -615,11 +578,6 @@ void CDasherInterfaceBase::ResetParameter(Parameter parameter) {
     m_pSettingsStore->ResetParameter(parameter);
 }
 
-// We need to be able to get at the UserLog object from outside the interface
-CUserLogBase* CDasherInterfaceBase::GetUserLogPtr() {
-    return m_pUserLog.get();
-}
-
 void CDasherInterfaceBase::KeyDown(unsigned long iTime, Keys::VirtualKey Key) {
     if (isLocked()) return;
 
@@ -690,7 +648,6 @@ void CDasherInterfaceBase::CreateModules() {
     GetModuleManager()->RegisterInputMethodModule(std::make_unique<CCompassMode>(m_pSettingsStore, this));
     GetModuleManager()->RegisterInputMethodModule(
         std::make_unique<CStylusFilter>(m_pSettingsStore, this, m_pFramerate.get()));
-    // WIP Temporary as too many segfaults! //RegisterModule(new CDemoFilter(this, this, m_pFramerate));
 }
 
 std::vector<std::string> CDasherInterfaceBase::GetPermittedValues(Parameter parameter) {

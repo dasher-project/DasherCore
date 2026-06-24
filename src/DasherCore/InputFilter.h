@@ -3,7 +3,6 @@
 #include "DasherView.h"
 #include "DasherModel.h"
 #include "ModuleManager.h"
-#include "UserLogBase.h"
 #include "DasherInput.h"
 
 namespace Dasher {

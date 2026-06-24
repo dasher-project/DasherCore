@@ -33,6 +33,7 @@
 
 # Build directories
 build/
+build-*/
 build-sanitize/
 Build/
 out/
@@ -42,6 +43,13 @@ Testing/
 
 # Build logs
 build_log.txt
+*.log.txt
+
+# Local helper scripts and scratch files (prefixed with underscore)
+_*.ps1
+_*.bat
+_*.sh
+_*.py
 
 # IDE
 .autotools
@@ -70,6 +78,12 @@ Data/dasher_settings.xml
 *.settings.xml
 dasher_settings.xml
 dasher.log
+
+# Training files written by the engine to CWD when contexts are destroyed.
+# This is a real bug (Tier 1 item: library should not write to CWD) — for
+# now we ignore the leaked files so they don't pollute git status.
+training_*.txt
+
 build-san/
 build-tidy/
 build-san/

@@ -6,6 +6,38 @@
 // generic, extensible action framework. Both alphabet symbol nodes and control
 // nodes create and execute actions through the same ActionRegistry.
 //
+// ┌─ Architecture ───────────────────────────────────────────────────────┐
+// │                                                                      │
+// │  ActionRegistry  ◄── factories registered by name (XML-driven)       │
+// │       │                                                              │
+// │       ▼                                                              │
+// │  ControlAction (abstract base)                                       │
+// │       ├── StopAction, PauseAction                                    │
+// │       ├── MoveAction, DeleteAction                                   │
+// │       ├── TextActionBase → SpeakAction, CopyAction                   │
+// │       ├── TextOutputAction, TextDeleteAction                         │
+// │       ├── FixedSpeakAction, SpeakCancelAction                        │
+// │       ├── ChangeSettingAction                                        │
+// │       ├── KeyboardAction                                             │
+// │       ├── SocketOutputAction (parsed from alphabet XML)              │
+// │       ├── ATSPIAction (parsed from alphabet XML)                     │
+// │       └── CustomAction (registered by frontends via C API)           │
+// │       │                                                              │
+// │       ▼                                                              │
+// │  NodeTemplate  ── holds a list of actions + successor templates      │
+// │       │                                                              │
+// │       ▼                                                              │
+// │  CContNode  ── a CDasherNode that wraps a NodeTemplate               │
+// │       │                                                              │
+// │       ▼                                                              │
+// │  CControlManager  ── owns the root template, parses control.xml,     │
+// │                      manages the action registry                     │
+// │                                                                      │
+// │  When the user navigates into a CContNode, its NodeTemplate's        │
+// │  actions are executed (Do()). If a successor is nullptr, it's an     │
+// │  <alph/> escape — a bridge back to the alphabet node tree.           │
+// └──────────────────────────────────────────────────────────────────────┘
+//
 // Copyright (c) 2007-2024 The Dasher Team
 //
 // This file is part of Dasher. Dasher is free software; you can redistribute
@@ -253,7 +285,10 @@ class KeyboardAction : public ControlAction {
     [[maybe_unused]] std::vector<std::vector<unsigned short>> m_keycodes;
 };
 
-/// Output to a socket.
+/// Output to a socket. Parsed from alphabet XML `<socketOutput>` elements.
+/// The execute() method is currently a no-op (socket output was removed from
+/// DasherCore), but the class is still instantiated by AlphIO for backward
+/// compatibility with v4/v5 alphabet files.
 class SocketOutputAction : public ControlAction {
   public:
     SocketOutputAction(std::string socketName, std::string action, bool addNewLine)
@@ -262,12 +297,14 @@ class SocketOutputAction : public ControlAction {
     void execute(CDasherInterfaceBase* intf) override;
 
   private:
-    [[maybe_unused]] std::string m_socketName;
-    [[maybe_unused]] std::string m_action;
-    [[maybe_unused]] bool m_addNewLine;
+    std::string m_socketName;
+    std::string m_action;
+    bool m_addNewLine;
 };
 
-/// ATSPI accessibility action.
+/// ATSPI accessibility action. Parsed from alphabet XML `<atspi>` elements.
+/// Like SocketOutputAction, execute() is currently a no-op but the class is
+/// instantiated by AlphIO for backward compatibility.
 class ATSPIAction : public ControlAction {
   public:
     ATSPIAction(std::string action) : m_action(std::move(action)) {}
