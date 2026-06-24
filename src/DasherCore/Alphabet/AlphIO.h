@@ -47,7 +47,6 @@ class Dasher::CAlphIO : public AbstractXMLParser {
     virtual ~CAlphIO();
 
     virtual bool Parse(pugi::xml_document& document, const std::string filePath, bool bUser) override;
-    bool ParseSingle(pugi::xml_node alphabet, const std::string filePath, bool bUser);
 
     void GetAlphabets(std::vector<std::string>* AlphabetList) const;
     const CAlphInfo* GetInfo(const std::string& AlphID) const;
