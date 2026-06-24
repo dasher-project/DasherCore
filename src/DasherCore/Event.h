@@ -8,33 +8,27 @@
 //
 // Design notes:
 //
-// This replaces the original void*-keyed unordered_map approach with a
-// std::map for deterministic broadcast order. The original system had
-// two problems:
+// This file enhances the original void*-keyed event system with:
+//   1. RAII Subscription guard — auto-unsubscribes on destruction,
+//      eliminating the classic signal/slot lifetime hazard.
+//   2. Keyless Subscribe overload — new code doesn't need to pass `this`.
 //
-//   1. unordered_map<void*, fn> iterated in hash-dependent order,
-//      which was non-deterministic on Linux (libstdc++ randomizes hash
-//      seeds per process). This could cause subtle ordering bugs if
-//      multiple subscribers' side effects compound.
+// The original void* Subscribe/Unsubscribe API is preserved unchanged
+// for the 18 Subscribe and 22 Unsubscribe call sites throughout the
+// engine.
 //
-//   2. Manual Unsubscribe() — if a subscriber forgot to unsubscribe
-//      before destruction, the Event held a dangling pointer. This
-//      is the classic C++ signal/slot lifetime hazard.
-//
-// The fix addresses both:
-//   - std::map gives sorted (deterministic) iteration order
-//   - The Subscription RAII guard auto-unsubscribes on destruction
-//
-// Existing callers using Subscribe(void*, fn) / Unsubscribe(void*)
-// continue to work without changes. New code should prefer the RAII
-// pattern: store the returned Subscription as a member, and let it
-// auto-clean on destruction.
+// Note on iteration order: we use unordered_map (not std::map) for
+// subscriber storage. std::map was tried for deterministic broadcast
+// order but caused stuttering on Windows — its red-black tree allocates
+// each node separately, creating cache misses during Broadcast. With
+// typical subscriber counts (5-10), unordered_map's contiguous buckets
+// are faster. Subscribers must not depend on call order.
 
 #pragma once
 
 #include <string>
 #include <functional>
-#include <map>
+#include <unordered_map>
 #include <cstdint>
 
 namespace Dasher {
@@ -179,9 +173,9 @@ class Event {
 
     /// Invoke all subscriber callbacks with the given arguments.
     ///
-    /// Listeners are called in sorted key order (std::map guarantees
-    /// deterministic iteration). This is important when subscribers have
-    /// order-dependent side effects.
+    /// Listeners are called in hash-table iteration order (not sorted).
+    /// Do not rely on call order — if multiple subscribers have
+    /// order-dependent side effects, refactor to remove the coupling.
     void Broadcast(Args... args) {
         for (auto& [key, fn] : m_listeners) {
             if (fn) fn(args...);
@@ -192,9 +186,13 @@ class Event {
     friend class Subscription;
     void unsubscribe(void* key) { m_listeners.erase(key); }
 
-    // std::map (not unordered_map) for deterministic broadcast order.
-    // The key is the subscriber's pointer (legacy) or a synthetic key (RAII).
-    std::map<void*, std::function<void(Args...)>> m_listeners;
+    // std::unordered_map for O(1) subscribe/unsubscribe. We previously
+    // tried std::map for deterministic broadcast order, but it caused
+    // stuttering on Windows (MSVC) due to per-node heap allocations and
+    // cache misses in the red-black tree. unordered_map's contiguous bucket
+    // array has better cache locality for the small subscriber counts
+    // (typically 5-10) used in DasherCore.
+    std::unordered_map<void*, std::function<void(Args...)>> m_listeners;
 
     // Counter for synthetic keys (used by the keyless Subscribe overload).
     // Starts at 1 (odd) to avoid colliding with real pointers (even).
