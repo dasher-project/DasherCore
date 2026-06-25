@@ -154,6 +154,66 @@ bool Dasher::CAlphIO::Parse(pugi::xml_document& document, const std::string, boo
         }
     }
 
+    // v5 special character elements (<space>, <paragraph>) appear as direct
+    // children of <alphabet>, not inside a group. Wrap them in a synthetic
+    // paragraphSpace group appended after the regular groups, matching the v6
+    // structure and the Windows V5MigrationService converter. <control> is
+    // skipped — control mode is engine-handled, not an alphabet symbol.
+    if (isV5) {
+        SGroupInfo* pSpecialGroup = nullptr;
+        for (pugi::xml_node& child : alphabet.children()) {
+            const char* name = child.name();
+            bool isSpace = std::strcmp(name, "space") == 0;
+            bool isParagraph = std::strcmp(name, "paragraph") == 0;
+            if (!isSpace && !isParagraph) continue;
+
+            if (!pSpecialGroup) {
+                pSpecialGroup = new SGroupInfo();
+                pSpecialGroup->iNumChildNodes = 0;
+                pSpecialGroup->strName = "paragraphSpace";
+                pSpecialGroup->strLabel = "";
+                pSpecialGroup->colorGroup = "paragraphSpace";
+                pSpecialGroup->pNext = previous_sibling;
+                pSpecialGroup->pChild = nullptr;
+                pSpecialGroup->iStart = static_cast<int>(CurrentAlphabet->m_vCharacters.size()) + 1;
+            }
+
+            CurrentAlphabet->m_vCharacters.resize(CurrentAlphabet->m_vCharacters.size() + 1);
+            CurrentAlphabet->m_vCharacterDoActions.resize(CurrentAlphabet->m_vCharacterDoActions.size() + 1);
+            CurrentAlphabet->m_vCharacterUndoActions.resize(CurrentAlphabet->m_vCharacterUndoActions.size() + 1);
+            ReadCharAttributes(child, CurrentAlphabet->m_vCharacters.back(), pSpecialGroup,
+                               CurrentAlphabet->m_vCharacterDoActions.back(),
+                               CurrentAlphabet->m_vCharacterUndoActions.back());
+            pSpecialGroup->iNumChildNodes++;
+
+            // v5 <paragraph> without an explicit 't' attribute should output a
+            // newline, not the display glyph — matching v5-era behaviour and
+            // the Windows V5MigrationService converter. ReadCharAttributes
+            // defaulted Text to Display (the 'd' glyph), so fix up both the
+            // text and the default actions it created.
+            if (isParagraph && child.attribute("t").empty()) {
+                auto& ch = CurrentAlphabet->m_vCharacters.back();
+                ch.Text = "\n";
+                auto& doAct = CurrentAlphabet->m_vCharacterDoActions.back();
+                auto& undoAct = CurrentAlphabet->m_vCharacterUndoActions.back();
+                for (auto* a : doAct)
+                    delete a;
+                doAct.clear();
+                for (auto* a : undoAct)
+                    delete a;
+                undoAct.clear();
+                doAct.push_back(new TextOutputAction(ch.Text));
+                undoAct.push_back(new TextDeleteAction(ch.Text));
+            }
+        }
+        if (pSpecialGroup) {
+            pSpecialGroup->iEnd = static_cast<int>(CurrentAlphabet->m_vCharacters.size()) + 1;
+            CurrentAlphabet->iNumChildNodes++;
+            CurrentAlphabet->pChild = pSpecialGroup;
+            previous_sibling = pSpecialGroup;
+        }
+    }
+
     CurrentAlphabet->iEnd = static_cast<int>(CurrentAlphabet->m_vCharacters.size()) + 1;
     // child groups were added (to linked list) in reverse order. Put them in (iStart/iEnd) order...
     ReverseChildList(CurrentAlphabet->pChild);
