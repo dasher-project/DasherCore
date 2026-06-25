@@ -159,3 +159,180 @@ TEST(alphabet_affects_root_child_count) {
 
     dasher_destroy(ctx);
 }
+
+// ---------------------------------------------------------------------------
+// v5 → v6 alphabet format support (RFC 0005)
+//
+// Dasher v5 shipped for 10+ years with a different XML schema. The AlphIO
+// parser now accepts both formats. These tests verify the v5 path and guard
+// against the v6 regression that PR #28 introduced (space character lost).
+// ---------------------------------------------------------------------------
+
+// Regression guard: the v6 space character (label "□", unicode 32) must
+// resolve to a literal space in the default alphabet. PR #28 broke this by
+// changing the Text default-from-Display logic; this test locks it down.
+TEST(alphabet_v6_space_character_resolves_to_space) {
+    dasher_ctx* ctx = create_isolated_context();
+    ASSERT(ctx);
+    dasher_set_screen_size(ctx, 800, 600);
+
+    int sym_count = dasher_get_alphabet_symbol_count(ctx);
+    ASSERT(sym_count > 0);
+
+    // Valid symbol indices are 1..sym_count inclusive (index 0 is the sentinel).
+    bool found_space = false;
+    for (int i = 1; i <= sym_count; i++) {
+        char buf[128];
+        if (dasher_get_alphabet_symbol_text(ctx, i, buf, sizeof(buf)) == 0 && strcmp(buf, " ") == 0) {
+            found_space = true;
+            break;
+        }
+    }
+    printf("  space character present in v6 default alphabet: %s\n", found_space ? "yes" : "no");
+    ASSERT(found_space);
+
+    dasher_destroy(ctx);
+}
+
+// A v5-format alphabet (root <alphabets>, <s> symbols, <train> child element)
+// must load and appear in the alphabet list alongside the bundled v6 files.
+TEST(alphabet_v5_format_loads) {
+    ScopedTempDir tmp;
+    std::string data_dir = build_data_dir(tmp);
+
+    const char* v5xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+                        "<!DOCTYPE alphabets SYSTEM \"alphabet.dtd\">\n"
+                        "<alphabets langcode=\"en-GB\">\n"
+                        "  <alphabet name=\"V5 Test Alphabet\">\n"
+                        "    <orientation type=\"LR\"/>\n"
+                        "    <encoding type=\"Western\"/>\n"
+                        "    <palette>European/Asian</palette>\n"
+                        "    <train>training_english_GB.txt</train>\n"
+                        "    <group name=\"Lower case Latin letters\" b=\"0\" visible=\"off\">\n"
+                        "      <s d=\"a\" t=\"a\" b=\"10\"/>\n"
+                        "      <s d=\"b\" t=\"b\" b=\"11\"/>\n"
+                        "      <s d=\"c\" t=\"c\" b=\"12\"/>\n"
+                        "    </group>\n"
+                        "    <group name=\"Paragraph and space\" b=\"9\">\n"
+                        "      <s d=\"\xC2\xB6\" t=\"\xC2\xB6\" b=\"9\"/>\n"
+                        "      <s d=\"\xE2\x96\xA1\" t=\" \" b=\"9\"/>\n"
+                        "    </group>\n"
+                        "  </alphabet>\n"
+                        "</alphabets>\n";
+    ASSERT(write_data_file(data_dir, "alphabets", "alphabet.v5test.xml", v5xml));
+
+    dasher_ctx* ctx = dasher_create(data_dir.c_str(), tmp.c_str(), nullptr);
+    ASSERT(ctx);
+    dasher_set_screen_size(ctx, 800, 600);
+
+    bool found = false;
+    int count = dasher_get_alphabet_count(ctx);
+    for (int i = 0; i < count; i++) {
+        if (strcmp(dasher_get_alphabet_name(ctx, i), "V5 Test Alphabet") == 0) {
+            found = true;
+            break;
+        }
+    }
+    printf("  v5 alphabet found among %d alphabets: %s\n", count, found ? "yes" : "no");
+    ASSERT(found);
+
+    dasher_destroy(ctx);
+}
+
+// v5 <s> symbols must produce the correct output text, including the
+// display≠text case (box → space) and a multibyte emoji.
+TEST(alphabet_v5_symbols_have_correct_text) {
+    ScopedTempDir tmp;
+    std::string data_dir = build_data_dir(tmp);
+
+    const char* v5xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+                        "<alphabets langcode=\"en-GB\">\n"
+                        "  <alphabet name=\"V5 Symbol Test\">\n"
+                        "    <orientation type=\"LR\"/>\n"
+                        "    <train>training_english_GB.txt</train>\n"
+                        "    <group name=\"letters\" b=\"0\">\n"
+                        "      <s d=\"x\" t=\"x\" b=\"10\"/>\n"
+                        "      <s d=\"\xE2\x96\xA1\" t=\" \" b=\"9\"/>\n"
+                        "      <s d=\"\xF0\x9F\x98\x80\" t=\"\xF0\x9F\x98\x80\" b=\"125\"/>\n"
+                        "    </group>\n"
+                        "  </alphabet>\n"
+                        "</alphabets>\n";
+    ASSERT(write_data_file(data_dir, "alphabets", "alphabet.v5symbols.xml", v5xml));
+
+    dasher_ctx* ctx = dasher_create(data_dir.c_str(), tmp.c_str(), nullptr);
+    ASSERT(ctx);
+    dasher_set_screen_size(ctx, 800, 600);
+
+    dasher_set_alphabet_id(ctx, "V5 Symbol Test");
+    ASSERT_STR_EQ(dasher_get_alphabet_id(ctx), "V5 Symbol Test");
+
+    int sym_count = dasher_get_alphabet_symbol_count(ctx);
+    printf("  v5 alphabet symbol count: %d\n", sym_count);
+    ASSERT(sym_count >= 3);
+
+    bool found_x = false, found_space = false, found_emoji = false;
+    for (int i = 1; i <= sym_count; i++) {
+        char buf[128];
+        if (dasher_get_alphabet_symbol_text(ctx, i, buf, sizeof(buf)) != 0) continue;
+        std::string s(buf);
+        if (s == "x") found_x = true;
+        if (s == " ") found_space = true;
+        if (s == "\xF0\x9F\x98\x80") found_emoji = true;
+    }
+    printf("  x=%d space=%d emoji=%d\n", found_x, found_space, found_emoji);
+    ASSERT(found_x);
+    ASSERT(found_space);
+    ASSERT(found_emoji);
+
+    dasher_destroy(ctx);
+}
+
+// v5 metadata in child elements (<train>, <palette>) must be picked up when
+// the v6 attributes (trainingFilename, colorsName) are absent. We verify by
+// loading the alphabet (which exercises <train>/<palette> parsing) and
+// confirming it appears in the list and is switchable.
+TEST(alphabet_v5_metadata_from_child_elements) {
+    ScopedTempDir tmp;
+    std::string data_dir = build_data_dir(tmp);
+
+    const char* v5xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+                        "<alphabets langcode=\"en-GB\">\n"
+                        "  <alphabet name=\"V5 Meta Test\">\n"
+                        "    <orientation type=\"LR\"/>\n"
+                        "    <palette>European/Asian</palette>\n"
+                        "    <train>training_english_GB.txt</train>\n"
+                        "    <group name=\"letters\" b=\"0\">\n"
+                        "      <s d=\"q\" t=\"q\" b=\"10\"/>\n"
+                        "      <s d=\"w\" t=\"w\" b=\"11\"/>\n"
+                        "      <s d=\"e\" t=\"e\" b=\"12\"/>\n"
+                        "    </group>\n"
+                        "  </alphabet>\n"
+                        "</alphabets>\n";
+    ASSERT(write_data_file(data_dir, "alphabets", "alphabet.v5meta.xml", v5xml));
+
+    dasher_ctx* ctx = dasher_create(data_dir.c_str(), tmp.c_str(), nullptr);
+    ASSERT(ctx);
+    dasher_set_screen_size(ctx, 800, 600);
+
+    // The alphabet parsed successfully if it appears in the list — this means
+    // the <train> and <palette> child elements were consumed without rejecting
+    // the document.
+    bool found = false;
+    int count = dasher_get_alphabet_count(ctx);
+    for (int i = 0; i < count; i++) {
+        if (strcmp(dasher_get_alphabet_name(ctx, i), "V5 Meta Test") == 0) {
+            found = true;
+            break;
+        }
+    }
+    ASSERT(found);
+
+    dasher_set_alphabet_id(ctx, "V5 Meta Test");
+    ASSERT_STR_EQ(dasher_get_alphabet_id(ctx), "V5 Meta Test");
+
+    int sym_count = dasher_get_alphabet_symbol_count(ctx);
+    printf("  v5 meta alphabet symbols: %d\n", sym_count);
+    ASSERT(sym_count > 0);
+
+    dasher_destroy(ctx);
+}
