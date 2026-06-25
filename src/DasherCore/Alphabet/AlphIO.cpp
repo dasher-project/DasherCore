@@ -39,6 +39,7 @@ SGroupInfo* CAlphIO::ParseGroupRecursive(pugi::xml_node& group_node, CAlphInfo* 
     pNewGroup->strName = group_node.attribute("name").as_string("");
     pNewGroup->strLabel = group_node.attribute("label").as_string("");
     pNewGroup->colorGroup = group_node.attribute("colorInfoName").as_string("");
+    if (pNewGroup->colorGroup.empty()) pNewGroup->colorGroup = "lowercase";
 
     pNewGroup->pNext = previous_sibling;
     pNewGroup->pChild = nullptr;
@@ -49,8 +50,8 @@ SGroupInfo* CAlphIO::ParseGroupRecursive(pugi::xml_node& group_node, CAlphInfo* 
     new_ancestors.push_back(pNewGroup);
     SGroupInfo* previous_subgroup_sibling = nullptr;
     for (auto node : group_node.children()) {
-        // symbol
-        if (std::strcmp(node.name(), "node") == 0) {
+        // symbol (v6 "node" or v5 "s")
+        if (std::strcmp(node.name(), "node") == 0 || std::strcmp(node.name(), "s") == 0) {
             CurrentAlphabet->m_vCharacters.resize(CurrentAlphabet->m_vCharacters.size() + 1); // new char
             CurrentAlphabet->m_vCharacterDoActions.resize(CurrentAlphabet->m_vCharacterDoActions.size() +
                                                           1); // new Do Actions
@@ -91,6 +92,15 @@ SGroupInfo* CAlphIO::ParseGroupRecursive(pugi::xml_node& group_node, CAlphInfo* 
 bool Dasher::CAlphIO::Parse(pugi::xml_document& document, const std::string, bool bUser) {
     pugi::xml_node alphabet = document.document_element();
 
+    // v5 format: <alphabets> wrapper — extract first <alphabet> child.
+    // A v5 document wraps one or more <alphabet> elements in an <alphabets>
+    // root; v6 uses <alphabet> as the root directly.
+    bool isV5 = (std::strcmp(alphabet.name(), "alphabets") == 0);
+    if (isV5) {
+        alphabet = alphabet.child("alphabet");
+        if (!alphabet) return false;
+    }
+
     if (std::strcmp(alphabet.name(), "alphabet") != 0) return false; // a non <alphabet ...> node
 
     CAlphInfo* CurrentAlphabet = new CAlphInfo();
@@ -108,6 +118,16 @@ bool Dasher::CAlphIO::Parse(pugi::xml_document& document, const std::string, boo
         CurrentAlphabet->Orientation = Options::BottomToTop;
     } else {
         CurrentAlphabet->Orientation = Options::LeftToRight;
+    }
+
+    // v5 metadata child elements — override only if v6 attribute was empty.
+    if (CurrentAlphabet->TrainingFile.empty()) {
+        pugi::xml_node trainEl = alphabet.child("train");
+        if (trainEl) CurrentAlphabet->TrainingFile = trainEl.text().as_string();
+    }
+    if (CurrentAlphabet->PreferredColors.empty()) {
+        pugi::xml_node paletteEl = alphabet.child("palette");
+        if (paletteEl) CurrentAlphabet->PreferredColors = paletteEl.text().as_string();
     }
 
     // conversion mode
@@ -139,7 +159,17 @@ bool Dasher::CAlphIO::Parse(pugi::xml_document& document, const std::string, boo
     ReverseChildList(CurrentAlphabet->pChild);
 
     auto it = Alphabets.find(CurrentAlphabet->AlphID);
-    if (it != Alphabets.end()) delete it->second;
+    if (it != Alphabets.end()) {
+        // v5 alphabets are legacy (e.g. the bundled oldAlphabets/ files). Never
+        // let them overwrite a v6 alphabet that already loaded under the same
+        // name — the v6 version is authoritative. User-authored v5 files with
+        // unique names still load normally.
+        if (isV5) {
+            delete CurrentAlphabet;
+            return true;
+        }
+        delete it->second;
+    }
     Alphabets[CurrentAlphabet->AlphID] = CurrentAlphabet;
 
     return true;
@@ -241,8 +271,21 @@ void CAlphIO::ReadCharAttributes(pugi::xml_node xml_node, CAlphInfo::character& 
 
     if (xml_node.type() == pugi::node_null) return;
 
+    // v6 uses "label" for display; v5 uses "d". Fall back if v6 attribute missing.
     alphabet_character.Display = xml_node.attribute("label").as_string();
+    if (alphabet_character.Display.empty()) alphabet_character.Display = xml_node.attribute("d").as_string();
+
+    // CRITICAL: Keep as_string(Display.c_str()) — NOT as_string(). The default
+    // value (Display) is relied upon by v6 nodes like <node label="□"> with no
+    // "text" attribute. Changing to as_string() breaks the textCharAction
+    // unicode="32" path for the space character.
     alphabet_character.Text = xml_node.attribute("text").as_string(alphabet_character.Display.c_str());
+    // v5 fallback: if text matched display (text attribute was absent), try
+    // the v5 "t" attribute which may carry a different output character.
+    if (alphabet_character.Text == alphabet_character.Display) {
+        auto tAttr = xml_node.attribute("t");
+        if (!tAttr.empty()) alphabet_character.Text = tAttr.as_string();
+    }
 
     for (auto potentialActions : xml_node.children()) {
         const char* actionName = potentialActions.name();
@@ -381,6 +424,14 @@ void CAlphIO::ReadCharAttributes(pugi::xml_node xml_node, CAlphInfo::character& 
     alphabet_character.ColorGroupOffset = parentGroup->iNumChildNodes;
     alphabet_character.fixedProbability = xml_node.attribute("fixedProbability").as_float(-1);
     alphabet_character.speedFactor = xml_node.attribute("speedFactor").as_float(-1);
+
+    // v5 compatibility: <s> elements have no action children. If no actions
+    // were found, create default text output/delete from the resolved text,
+    // matching what v6's <textCharAction/> does implicitly.
+    if (DoActions.empty() && !alphabet_character.Text.empty()) {
+        DoActions.push_back(new TextOutputAction(alphabet_character.Text));
+        UndoActions.push_back(new TextDeleteAction(alphabet_character.Text));
+    }
 }
 
 // Reverses the internal linked list for the given SGroupInfo
