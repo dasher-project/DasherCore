@@ -336,3 +336,58 @@ TEST(alphabet_v5_metadata_from_child_elements) {
 
     dasher_destroy(ctx);
 }
+
+// Real v5 format: <space>, <paragraph>, <control> as DIRECT children of
+// <alphabet> (not inside a <group>). These must be wrapped in a synthetic
+// paragraphSpace group by the parser. <space> → text " ", <paragraph> →
+// text "\n" (newline default), <control> → skipped (engine-handled).
+TEST(alphabet_v5_special_chars_as_direct_children) {
+    ScopedTempDir tmp;
+    std::string data_dir = build_data_dir(tmp);
+
+    const char* v5xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+                        "<!DOCTYPE alphabets SYSTEM \"alphabet.dtd\">\n"
+                        "<alphabets langcode=\"en-GB\">\n"
+                        "  <alphabet name=\"V5 Special Chars Test\">\n"
+                        "    <orientation type=\"LR\"/>\n"
+                        "    <train>training_english_GB.txt</train>\n"
+                        "    <space d=\"\xE2\x96\xA1\" t=\" \" b=\"9\"/>\n"
+                        "    <paragraph d=\"\xC2\xB6\" b=\"9\"/>\n"
+                        "    <control d=\"Control\" t=\"\" b=\"8\"/>\n"
+                        "    <group name=\"Letters\" b=\"0\">\n"
+                        "      <s d=\"a\" t=\"a\" b=\"10\"/>\n"
+                        "      <s d=\"b\" t=\"b\" b=\"11\"/>\n"
+                        "    </group>\n"
+                        "  </alphabet>\n"
+                        "</alphabets>\n";
+    ASSERT(write_data_file(data_dir, "alphabets", "alphabet.v5special.xml", v5xml));
+
+    dasher_ctx* ctx = dasher_create(data_dir.c_str(), tmp.c_str(), nullptr);
+    ASSERT(ctx);
+    dasher_set_screen_size(ctx, 800, 600);
+
+    dasher_set_alphabet_id(ctx, "V5 Special Chars Test");
+    ASSERT_STR_EQ(dasher_get_alphabet_id(ctx), "V5 Special Chars Test");
+
+    int sym_count = dasher_get_alphabet_symbol_count(ctx);
+    printf("  v5 special-chars alphabet symbols: %d\n", sym_count);
+    // 2 letters + space + paragraph = 4 (control is skipped)
+    ASSERT(sym_count >= 4);
+
+    // Scan all symbols for the expected text values.
+    bool found_letter_a = false, found_space = false, found_newline = false;
+    for (int i = 1; i <= sym_count; i++) {
+        char buf[128];
+        if (dasher_get_alphabet_symbol_text(ctx, i, buf, sizeof(buf)) != 0) continue;
+        std::string s(buf);
+        if (s == "a") found_letter_a = true;
+        if (s == " ") found_space = true;
+        if (s == "\n") found_newline = true;
+    }
+    printf("  letter_a=%d space=%d newline=%d\n", found_letter_a, found_space, found_newline);
+    ASSERT(found_letter_a);
+    ASSERT(found_space);
+    ASSERT(found_newline);
+
+    dasher_destroy(ctx);
+}
