@@ -310,6 +310,13 @@ DASHER_API const char* dasher_game_get_wrong_text(dasher_ctx* ctx);
 // Save current settings to disk.
 DASHER_API void dasher_save_settings(dasher_ctx* ctx);
 
+// Reset every parameter to its built-in default value. Fires parameter-change
+// notifications so a live engine reconfigures itself (alphabet/colour/LM
+// reload, etc.). Does not delete the persisted settings files — frontends that
+// want persisted defaults should delete dasher_settings.xml /
+// appearance_settings.xml separately before calling.
+DASHER_API void dasher_reset_settings(dasher_ctx* ctx);
+
 // ── Output callbacks ───────────────────────────────────────────────────────
 //
 // Register a callback to receive output/delete events in real time.

@@ -518,6 +518,14 @@ void dasher_save_settings(dasher_ctx* ctx);
 
 Saves current settings to the XML file specified at creation (`<user_dir>/dasher_settings.xml`).
 
+```c
+void dasher_reset_settings(dasher_ctx* ctx);
+```
+
+Resets every parameter to its built-in default value (from `Parameters.h`). It routes through the typed `SetBoolParameter` / `SetLongParameter` / `SetStringParameter` methods, so the normal parameter-change notifications fire and a live engine reconfigures itself (alphabet, colour palette, and language model are reloaded, etc.).
+
+This only affects the **in-memory** session — it does not delete the persisted files. Frontends that want persisted defaults should delete `dasher_settings.xml` (and `appearance_settings.xml` for the RFC 0007 appearance sidecar) from the user directory before calling, so defaults also load on the next launch. Null-safe: a no-op for `NULL ctx`.
+
 ## Frontend Integration Examples
 
 ### Swift (iOS)
