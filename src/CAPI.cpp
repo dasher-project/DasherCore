@@ -1364,6 +1364,36 @@ DASHER_API void dasher_save_settings(dasher_ctx* ctx) {
     if (ctx->appearanceLoaded) saveAppearanceSettings(ctx); // RFC 0007 sidecar
 }
 
+// Reset every parameter to its built-in default value (from Parameters.h).
+// Routes through the typed Set*Parameter methods so the normal parameter-change
+// notifications fire and a live engine reconfigures itself (alphabet/colour/LM
+// reload, etc.). Persistence files are left untouched; frontends that want
+// persisted defaults delete dasher_settings.xml / appearance_settings.xml
+// themselves before calling.
+DASHER_API void dasher_reset_settings(dasher_ctx* ctx) {
+    if (!ctx || !ctx->intf) return;
+    try {
+        for (const auto& [param, entry] : Dasher::Settings::parameter_defaults) {
+            const auto& value = entry.value;
+            if (std::holds_alternative<bool>(value)) {
+                ctx->intf->SetBoolParameter(param, std::get<bool>(value));
+            } else if (std::holds_alternative<long>(value)) {
+                ctx->intf->SetLongParameter(param, std::get<long>(value));
+            } else if (std::holds_alternative<std::string>(value)) {
+                ctx->intf->SetStringParameter(param, std::get<std::string>(value));
+            }
+        }
+    } catch (const std::exception& e) {
+        // C API boundary: never propagate C++ exceptions to the caller. Surface
+        // the failure through the diagnostic log callback (level 3 = ERROR)
+        // registered via dasher_set_log_callback, if any.
+        if (ctx->logCb && 3 /*ERROR*/ >= ctx->logCbMinLevel) ctx->logCb(3, e.what(), ctx->logCbUserData);
+    } catch (...) {
+        if (ctx->logCb && 3 /*ERROR*/ >= ctx->logCbMinLevel)
+            ctx->logCb(3, "dasher_reset_settings: unknown exception", ctx->logCbUserData);
+    }
+}
+
 // ── Localization ──────────────────────────────────────────────────────────
 
 static std::unordered_map<std::string, std::string> parseStringsJson(const std::string& content) {
