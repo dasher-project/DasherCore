@@ -70,7 +70,7 @@ All translatable strings live in one place: `settings_manifest.json`. The engine
 
 ```bash
 python3 Scripts/extract_strings.py
-# → Strings/strings_en.json (219 flat key-value pairs)
+# → Strings/strings_en.json (201 flat key-value pairs)
 ```
 
 This produces a simple JSON file that translators edit. Keys use the C++ enum constant names:
@@ -172,7 +172,7 @@ The C API lives in `src/dasher.h` (public header) and `src/CAPI.cpp` (implementa
 ```c
 #include "dasher.h"
 
-dasher_ctx* ctx = dasher_create("/path/to/DasherCore/Data");
+dasher_ctx* ctx = dasher_create("/path/to/DasherCore/Data", NULL, NULL);
 dasher_set_screen_size(ctx, 800, 600);
 
 while (running) {

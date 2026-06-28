@@ -3,7 +3,7 @@
 This document describes the internal architecture of DasherCore — the
 engine, not the frontends. It targets developers who need to understand
 the code flow before making changes. For the public C API contract, see
-`src/dasher.h`. For the cleanup plan, see `TIER2-3-PLAN.md`.
+`src/dasher.h`.
 
 
 ## Component overview
@@ -56,7 +56,7 @@ the code flow before making changes. For the public C API contract, see
 | `CDasherInput` | Abstract input device. C API provides `PointerInput` (mouse/touch). | `DasherInput.h` |
 | `CInputFilter` | Input interpretation strategy (14 registered: Normal Control, Click Mode, One/Button/Two-Button/Two-Push Dynamic, etc.). | `InputFilter.h` |
 | `CNodeCreationManager` | Creates and manages the node tree. Owns the AlphabetManager, ConversionManager, ControlManager, and Trainer. | `NodeCreationManager.h` |
-| `CLanguageModel` | Probability model for predicting next symbol. 5 registered: PPM, Word, Mixture, CTW, Mandarin (PPMPY). | `LanguageModel.h` |
+| `CLanguageModel` | Probability model for predicting next symbol. 4 registered in LMRegistry: PPM, Word, Mixture, CTW. Mandarin (PPMPY) is created directly by `CMandarinAlphMgr`, not via the registry. | `LanguageModel.h` |
 | `CSettingsStore` | Parameter storage. Backed by `XmlSettingsStore` for persistence. | `SettingsStore.h` |
 
 
@@ -175,18 +175,18 @@ dasher_frame(ctx, time_ms, &cmds, &cmd_count, &strs, &str_count)
 ### Draw command format
 
 Each frame produces an array of `int` commands. Commands are
-opcode-driven, 6 ints each (except text commands which are variable):
+opcode-driven, 6 ints each (the text command stores only a string index; the string itself is returned separately):
 
 ```
 [opcode] [arg1] [arg2] [arg3] [arg4] [arg5]
 
-Opcode 0: Clear screen     [argb color] [alpha] [0] [0] [0]
-Opcode 1: Circle           [center_x] [center_y] [radius] [fill_argb] [outline_argb]
-Opcode 2: Rectangle (outline-only) [x1] [y1] [x2] [y2] [color]
-Opcode 3: Rectangle (filled) [x1] [y1] [x2] [y2] [fill_color]
-Opcode 4: Polygon          [count] [points_offset] [fill] [outline] [width]
-Opcode 5: Text             [string_index] [x] [y] [font_size] [color]
-Opcode 6: Polyline         [width] [color] [0] [0] [0]
+Opcode 0: Clear screen     [0] [0] [0] [0] [argb background]
+Opcode 1: Circle           [center_x] [center_y] [radius] [1 filled / 0 outline] [argb]
+Opcode 2: Line segment     [x1] [y1] [x2] [y2] [argb]
+Opcode 3: Rectangle (outline) [x1] [y1] [x2] [y2] [argb]
+Opcode 4: Rectangle (filled) [x1] [y1] [x2] [y2] [argb]
+Opcode 5: Text             [x] [y] [font_size] [string_index] [argb]
+Opcode 6: Polyline width   [width] [0] [0] [0] [0]
 ```
 
 The frontend interprets these commands and draws to its native canvas.
@@ -237,7 +237,7 @@ CWD leak fixed in Tier 1 #5. It now writes to `{userDir}/` via
 
 Parameters are defined in `settings_manifest.json` (the canonical
 source). A Python codegen (`Scripts/generate_parameters.py`) generates
-`Parameters.h` (enum) and `Parameters.cpp` (default values + metadata).
+`Parameters.cpp` (default values + metadata). The `Parameters.h` enum is hand-maintained.
 
 Three parameter kinds:
 - **BP_** (Bool Parameters): `BP_LM_ADAPTIVE`, `BP_CONTROL_MODE`, etc.
@@ -288,7 +288,7 @@ only threading protection, and it's a safety net, not a design feature.
 
 ## Test architecture
 
-31 test executables, all using doctest (vendored in `Thirdparty/doctest/`).
+32 test executables, all using doctest (vendored in `Thirdparty/doctest/`).
 Shared helpers in `tests/test_common.h`:
 
 - `create_isolated_context()` / `ScopedContext` — per-test temp dir + context
