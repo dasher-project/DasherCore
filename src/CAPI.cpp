@@ -343,6 +343,13 @@ struct dasher_ctx {
     std::string tlString;
     bool realized = false;
     bool mouseDown = false;
+    // Latched true when a C++ exception was caught at the C-API boundary of a
+    // per-frame entry point (frame/mouse/key). Once set, those entry points
+    // no-op until the engine is destroyed and recreated — the engine state is
+    // indeterminate after a mid-frame throw. Frontends query this via
+    // dasher_has_engine_error(). Per RFC 0009 Amendment 2; not cleared by
+    // dasher_reset (only by recreating the context).
+    bool engineError = false;
     std::string pendingAlphabet;
     std::string dataDir;
     std::string userDir;
@@ -787,36 +794,70 @@ DASHER_API void dasher_set_screen_size(dasher_ctx* ctx, int width, int height) {
 
 DASHER_API void dasher_mouse_move(dasher_ctx* ctx, float x, float y) {
     if (!ctx || !ctx->input) return;
-    ctx->input->SetPosition(x, y);
+    if (ctx->engineError) return;
+    try {
+        ctx->input->SetPosition(x, y);
+    } catch (const std::exception& e) {
+        log_boundary_error(ctx, "dasher_mouse_move", e.what());
+        ctx->engineError = true;
+    } catch (...) {
+        log_boundary_error(ctx, "dasher_mouse_move", "unknown exception");
+        ctx->engineError = true;
+    }
 }
 
 DASHER_API void dasher_mouse_down(dasher_ctx* ctx) {
     if (!ctx || !ctx->intf) return;
+    if (ctx->engineError) return;
     if (ctx->mouseDown) return;
     ctx->mouseDown = true;
-
-    // In circle start mode, clicking should NOT start/stop Dasher —
-    // only hovering inside the circle should. (Steve Saling feedback)
-    if (ctx->intf->GetLongParameter(Dasher::LP_START_MODE) == Dasher::Options::StartMode::circle_start) return;
-
-    ctx->intf->SetBoolParameter(Dasher::BP_START_MOUSE, true);
-    ctx->intf->KeyDown(nowMs(), Dasher::Keys::Primary_Input);
+    try {
+        // In circle start mode, clicking should NOT start/stop Dasher —
+        // only hovering inside the circle should. (Steve Saling feedback)
+        if (ctx->intf->GetLongParameter(Dasher::LP_START_MODE) == Dasher::Options::StartMode::circle_start) return;
+        ctx->intf->SetBoolParameter(Dasher::BP_START_MOUSE, true);
+        ctx->intf->KeyDown(nowMs(), Dasher::Keys::Primary_Input);
+    } catch (const std::exception& e) {
+        log_boundary_error(ctx, "dasher_mouse_down", e.what());
+        ctx->engineError = true;
+    } catch (...) {
+        log_boundary_error(ctx, "dasher_mouse_down", "unknown exception");
+        ctx->engineError = true;
+    }
 }
 
 DASHER_API void dasher_mouse_up(dasher_ctx* ctx) {
     if (!ctx || !ctx->intf) return;
+    if (ctx->engineError) return;
     if (!ctx->mouseDown) return;
     ctx->mouseDown = false;
-    ctx->intf->KeyUp(nowMs(), Dasher::Keys::Primary_Input);
+    try {
+        ctx->intf->KeyUp(nowMs(), Dasher::Keys::Primary_Input);
+    } catch (const std::exception& e) {
+        log_boundary_error(ctx, "dasher_mouse_up", e.what());
+        ctx->engineError = true;
+    } catch (...) {
+        log_boundary_error(ctx, "dasher_mouse_up", "unknown exception");
+        ctx->engineError = true;
+    }
 }
 
 DASHER_API void dasher_key_event(dasher_ctx* ctx, int key, int pressed) {
     if (!ctx || !ctx->intf) return;
-    auto vk = static_cast<Dasher::Keys::VirtualKey>(key);
-    if (pressed) {
-        ctx->intf->KeyDown(nowMs(), vk);
-    } else {
-        ctx->intf->KeyUp(nowMs(), vk);
+    if (ctx->engineError) return;
+    try {
+        auto vk = static_cast<Dasher::Keys::VirtualKey>(key);
+        if (pressed) {
+            ctx->intf->KeyDown(nowMs(), vk);
+        } else {
+            ctx->intf->KeyUp(nowMs(), vk);
+        }
+    } catch (const std::exception& e) {
+        log_boundary_error(ctx, "dasher_key_event", e.what());
+        ctx->engineError = true;
+    } catch (...) {
+        log_boundary_error(ctx, "dasher_key_event", "unknown exception");
+        ctx->engineError = true;
     }
 }
 
@@ -828,15 +869,28 @@ DASHER_API void dasher_frame(dasher_ctx* ctx, int64_t time_ms, int** out_command
     if (out_string_count) *out_string_count = 0;
 
     if (!ctx || !ctx->intf || !ctx->screen || !ctx->realized) return;
+    if (ctx->engineError) return;
 
-    ctx->screen->BeginFrame();
-    ctx->intf->NewFrame(static_cast<unsigned long>((time_ms > 0) ? time_ms : 0), true);
-    ctx->screen->BuildStringPtrs();
+    try {
+        ctx->screen->BeginFrame();
+        ctx->intf->NewFrame(static_cast<unsigned long>((time_ms > 0) ? time_ms : 0), true);
+        ctx->screen->BuildStringPtrs();
 
-    if (out_commands) *out_commands = const_cast<int*>(reinterpret_cast<const int*>(ctx->screen->GetCommands()));
-    if (out_command_count) *out_command_count = ctx->screen->GetCommandCount();
-    if (out_strings) *out_strings = const_cast<char**>(ctx->screen->GetStringPtrs());
-    if (out_string_count) *out_string_count = ctx->screen->GetStringCount();
+        if (out_commands) *out_commands = const_cast<int*>(reinterpret_cast<const int*>(ctx->screen->GetCommands()));
+        if (out_command_count) *out_command_count = ctx->screen->GetCommandCount();
+        if (out_strings) *out_strings = const_cast<char**>(ctx->screen->GetStringPtrs());
+        if (out_string_count) *out_string_count = ctx->screen->GetStringCount();
+    } catch (const std::exception& e) {
+        log_boundary_error(ctx, "dasher_frame", e.what());
+        ctx->engineError = true;
+    } catch (...) {
+        log_boundary_error(ctx, "dasher_frame", "unknown exception");
+        ctx->engineError = true;
+    }
+}
+
+DASHER_API int dasher_has_engine_error(dasher_ctx* ctx) {
+    return (ctx && ctx->engineError) ? 1 : 0;
 }
 
 DASHER_API const char* dasher_get_output_text(dasher_ctx* ctx) {

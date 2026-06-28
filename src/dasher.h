@@ -93,6 +93,14 @@ DASHER_API void dasher_key_event(dasher_ctx* ctx, int key, int pressed);
 DASHER_API void dasher_frame(dasher_ctx* ctx, int64_t time_ms, int** out_commands, int* out_command_count,
                              char*** out_strings, int* out_string_count);
 
+// Engine fault flag. Returns 1 if a C++ exception was caught at the boundary
+// of dasher_frame / dasher_mouse_* / dasher_key_event, leaving the engine in
+// an indeterminate state; 0 otherwise. When true, those per-frame entry points
+// no-op and the frontend must stop calling them, surface an error, then
+// dasher_destroy() + dasher_create() a fresh context. Not cleared by
+// dasher_reset(). See RFC 0009 Amendment 2.
+DASHER_API int dasher_has_engine_error(dasher_ctx* ctx);
+
 // Get/set output text (characters entered so far).
 // Returned pointer is valid until the next API call on this context.
 DASHER_API const char* dasher_get_output_text(dasher_ctx* ctx);
