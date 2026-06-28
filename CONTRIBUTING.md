@@ -96,9 +96,15 @@ all frontends (Swift, C#, WASM, Rust). It must be flawless:
   catch all exceptions and return an error code.
 - **No C++ types cross the boundary.** Use `const char*`, `int`, `int64_t`,
   and raw structs — never `std::string` or `std::vector`.
+- **Use the log callback for diagnostics.** When exceptions occur in void
+  functions or during initialization, log them via `ctx->logCb` if registered,
+  then return or continue safely. Never use `fprintf(stderr, ...)` — it
+  doesn't work on embedded targets. Prefer the internal `log_boundary_error()`
+  helper (noexcept, allocation-free) so a catch handler can never itself throw
+  across the boundary.
 
 ```cpp
-// GOOD
+// GOOD — function with return value
 DASHER_API int dasher_get_offset(dasher_ctx* ctx) {
     if (!ctx || !ctx->realized) return -1;
     try {
@@ -108,9 +114,32 @@ DASHER_API int dasher_get_offset(dasher_ctx* ctx) {
     }
 }
 
+// GOOD — void function: log via callback, then return
+DASHER_API void dasher_set_bool_parameter(dasher_ctx* ctx, int key, int value) {
+    if (!ctx || !ctx->intf) return;
+    try {
+        ctx->intf->SetBoolParameter(static_cast<Dasher::Parameter>(key), value != 0);
+    } catch (const std::exception& e) {
+        if (ctx->logCb && 3 >= ctx->logCbMinLevel)
+            ctx->logCb(3, e.what(), ctx->logCbUserData);
+    } catch (...) {
+        if (ctx->logCb && 3 >= ctx->logCbMinLevel)
+            ctx->logCb(3, "unknown exception", ctx->logCbUserData);
+    }
+}
+
 // BAD — exception crosses extern "C"
 DASHER_API int dasher_get_offset(dasher_ctx* ctx) {
     return ctx->intf->GetModel()->GetOffset();  // Can throw!
+}
+
+// BAD — fprintf doesn't work on iOS/WASM/embedded
+DASHER_API void dasher_set_bool_parameter(dasher_ctx* ctx, int key, int value) {
+    try {
+        ctx->intf->SetBoolParameter(static_cast<Dasher::Parameter>(key), value != 0);
+    } catch (const std::exception& e) {
+        fprintf(stderr, "Exception: %s\n", e.what());  // Lost on embedded!
+    }
 }
 ```
 

@@ -538,6 +538,26 @@ struct dasher_ctx {
     };
 };
 
+// ── C API Boundary Exception Helpers ────────────────────────────────────────
+// Enforces Rule 4: never throw across the C API boundary. All exceptions are
+// caught and reported via the log callback at level 3 (ERROR) when registered
+// and at/above min_level; otherwise silently discarded.
+//
+// noexcept and allocation-free (fixed buffer + snprintf). A catch handler that
+// itself throws — e.g. a std::string concat hitting bad_alloc — re-violates the
+// boundary and, for void setters, cannot recover. RFC 0009 Amendment 2 requires
+// this property so engine fault context reliably reaches the frontend ring
+// buffer before the function returns.
+
+static void log_boundary_error(dasher_ctx* ctx, const char* context, const char* detail) noexcept {
+    if (!ctx || !ctx->logCb || 3 /*ERROR*/ < ctx->logCbMinLevel) return;
+    char buf[256];
+    const int n = snprintf(buf, sizeof(buf), "%s: %s", context ? context : "", detail ? detail : "");
+    if (n < 0) return; // encoding error — nothing useful to report
+    // snprintf always null-terminates (size > 0), so buf is valid even if truncated.
+    ctx->logCb(3, buf, ctx->logCbUserData);
+}
+
 // ── C API implementation ──────────────────────────────────────────────────
 
 // Appearance model helpers (RFC 0007). Defined outside `extern "C"` because they
@@ -745,7 +765,10 @@ DASHER_API void dasher_set_screen_size(dasher_ctx* ctx, int width, int height) {
     if (!ctx->realized) {
         try {
             ctx->intf->Realize(nowMs());
-        } catch (...) { // NOLINT(bugprone-empty-catch)
+        } catch (const std::exception& e) {
+            log_boundary_error(ctx, "dasher_set_screen_size: Realize failed", e.what());
+        } catch (...) {
+            log_boundary_error(ctx, "dasher_set_screen_size: Realize failed", "unknown exception");
         }
         ctx->realized = true;
 
@@ -922,48 +945,88 @@ DASHER_API int dasher_get_speed_percent(dasher_ctx* ctx) {
 
 DASHER_API void dasher_set_speed_percent(dasher_ctx* ctx, int percent) {
     if (!ctx || !ctx->intf) return;
-    const double base = 160.0;
-    const int clamped = (percent < 20) ? 20 : (percent > 400) ? 400 : percent;
-    long bitrate = static_cast<long>(lround_int(clamped / 100.0 * base));
-    if (bitrate < 1) bitrate = 1;
-    ctx->intf->SetLongParameter(Dasher::LP_MAX_BITRATE, bitrate);
+    try {
+        const double base = 160.0;
+        const int clamped = (percent < 20) ? 20 : (percent > 400) ? 400 : percent;
+        long bitrate = static_cast<long>(lround_int(clamped / 100.0 * base));
+        if (bitrate < 1) bitrate = 1;
+        ctx->intf->SetLongParameter(Dasher::LP_MAX_BITRATE, bitrate);
+    } catch (const std::exception& e) {
+        log_boundary_error(ctx, "dasher_set_speed_percent", e.what());
+    } catch (...) {
+        log_boundary_error(ctx, "dasher_set_speed_percent", "unknown exception");
+    }
 }
 
 DASHER_API int dasher_get_bool_parameter(dasher_ctx* ctx, int key) {
     if (!ctx || !ctx->intf) return 0;
     try {
         return ctx->intf->GetBoolParameter(static_cast<Dasher::Parameter>(key)) ? 1 : 0;
-    } catch (const std::bad_variant_access&) {
-        fprintf(stderr, "DASHER: bad_variant_access in get_bool_parameter key=%d\n", key);
+    } catch (const std::exception& e) {
+        char context[96];
+        snprintf(context, sizeof(context), "dasher_get_bool_parameter key=%d", key);
+        log_boundary_error(ctx, context, e.what());
+        return 0;
+    } catch (...) {
+        char context[96];
+        snprintf(context, sizeof(context), "dasher_get_bool_parameter key=%d", key);
+        log_boundary_error(ctx, context, "unknown exception");
         return 0;
     }
 }
 
 DASHER_API void dasher_set_bool_parameter(dasher_ctx* ctx, int key, int value) {
     if (!ctx || !ctx->intf) return;
-    ctx->intf->SetBoolParameter(static_cast<Dasher::Parameter>(key), value != 0);
+    try {
+        ctx->intf->SetBoolParameter(static_cast<Dasher::Parameter>(key), value != 0);
+    } catch (const std::exception& e) {
+        log_boundary_error(ctx, "dasher_set_bool_parameter", e.what());
+    } catch (...) {
+        log_boundary_error(ctx, "dasher_set_bool_parameter", "unknown exception");
+    }
 }
 
 DASHER_API long dasher_get_long_parameter(dasher_ctx* ctx, int key) {
     if (!ctx || !ctx->intf) return 0;
     try {
         return ctx->intf->GetLongParameter(static_cast<Dasher::Parameter>(key));
-    } catch (const std::bad_variant_access&) {
-        fprintf(stderr, "DASHER: bad_variant_access in get_long_parameter key=%d\n", key);
+    } catch (const std::exception& e) {
+        char context[96];
+        snprintf(context, sizeof(context), "dasher_get_long_parameter key=%d", key);
+        log_boundary_error(ctx, context, e.what());
+        return 0;
+    } catch (...) {
+        char context[96];
+        snprintf(context, sizeof(context), "dasher_get_long_parameter key=%d", key);
+        log_boundary_error(ctx, context, "unknown exception");
         return 0;
     }
 }
 
 DASHER_API void dasher_set_long_parameter(dasher_ctx* ctx, int key, long value) {
     if (!ctx || !ctx->intf) return;
-    ctx->intf->SetLongParameter(static_cast<Dasher::Parameter>(key), value);
+    try {
+        ctx->intf->SetLongParameter(static_cast<Dasher::Parameter>(key), value);
+    } catch (const std::exception& e) {
+        log_boundary_error(ctx, "dasher_set_long_parameter", e.what());
+    } catch (...) {
+        log_boundary_error(ctx, "dasher_set_long_parameter", "unknown exception");
+    }
 }
 
 DASHER_API const char* dasher_get_string_parameter(dasher_ctx* ctx, int key) {
     if (!ctx || !ctx->intf) return "";
     try {
         ctx->tlString = ctx->intf->GetStringParameter(static_cast<Dasher::Parameter>(key));
+    } catch (const std::exception& e) {
+        char context[96];
+        snprintf(context, sizeof(context), "dasher_get_string_parameter key=%d", key);
+        log_boundary_error(ctx, context, e.what());
+        ctx->tlString = "";
     } catch (...) {
+        char context[96];
+        snprintf(context, sizeof(context), "dasher_get_string_parameter key=%d", key);
+        log_boundary_error(ctx, context, "unknown exception");
         ctx->tlString = "";
     }
     return ctx->tlString.c_str();
@@ -971,7 +1034,13 @@ DASHER_API const char* dasher_get_string_parameter(dasher_ctx* ctx, int key) {
 
 DASHER_API void dasher_set_string_parameter(dasher_ctx* ctx, int key, const char* value) {
     if (!ctx || !ctx->intf || !value) return;
-    ctx->intf->SetStringParameter(static_cast<Dasher::Parameter>(key), value);
+    try {
+        ctx->intf->SetStringParameter(static_cast<Dasher::Parameter>(key), value);
+    } catch (const std::exception& e) {
+        log_boundary_error(ctx, "dasher_set_string_parameter", e.what());
+    } catch (...) {
+        log_boundary_error(ctx, "dasher_set_string_parameter", "unknown exception");
+    }
 }
 
 // Color utility functions
