@@ -8,40 +8,28 @@ the code flow before making changes. For the public C API contract, see
 
 ## Component overview
 
-```
-                         dasher.h (public C API)
-                              │
-                    ┌─────────┴──────────┐
-                    │   CAPI.cpp          │   C → C++ adapter layer
-                    │   (dasher_ctx)      │   Owns one Interface + one Screen
-                    └─────────┬──────────┘
-                              │
-              ┌───────────────┼───────────────┐
-              │               │               │
-     ┌────────┴──────┐ ┌──────┴───────┐ ┌─────┴──────┐
-     │ CDasherInter- │ │ CommandScreen │ │ PointerInput│  C-API-owned
-     │ faceBase      │ │ (CDasherScreen)│ │ (CDasherInput)│ implementations
-     │ (god class)   │ └──────────────┘ └────────────┘
-     └──────┬────────┘
-            │ owns / dispatches to
-   ┌────────┼────────┬────────────┬─────────────┐
-   │        │        │            │             │
-┌──┴──┐ ┌───┴────┐ ┌──┴──────┐ ┌───┴────┐ ┌─────┴──────┐
-│Model│ │View    │ │Input    │ │Module  │ │SettingsStore│
-│     │ │(Dasher │ │Filter   │ │Manager │ │(XML-backed) │
-│     │ │View)   │ │         │ │        │ │             │
-└──┬──┘ └────────┘ └─────────┘ └───┬────┘ └─────────────┘
-   │                                │
-   │ creates nodes via              │ registers:
-   │                                │  - Input filters (14)
-┌──┴──────────────┐                │  - Language models (5)
-│NodeCreation     │                │  - Input devices
-│Manager (NCM)    │                │  - Colour palettes
-│  ├AlphabetMgr   │◄───────────────┘
-│  ├ConvMgr       │
-│  ├ControlMgr    │
-│  └Trainer       │
-└─────────────────┘
+```mermaid
+flowchart TD
+    API["dasher.h — public C API"]
+    CTX["CAPI.cpp · dasher_ctx<br/><i>C-to-C++ adapter; owns one Interface + one Screen</i>"]
+
+    INTF["CDasherInterfaceBase<br/><i>'god class': lifecycle, rendering, settings, edit buffer, training</i>"]
+    SCREEN["CommandScreen<br/><i>(CDasherScreen)</i>"]
+    INPUT["PointerInput<br/><i>(CDasherInput)</i>"]
+
+    MODEL["CDasherModel — node tree + zooming"]
+    VIEW["CDasherView — transforms + rendering"]
+    FILTER["CInputFilter — 14 strategies"]
+    MODMGR["CModuleManager"]
+    SETTINGS["CSettingsStore — XML-backed"]
+
+    NCM["CNodeCreationManager<br/>AlphabetMgr · ConvMgr · ControlMgr · Trainer"]
+
+    API --> CTX
+    CTX --> INTF & SCREEN & INPUT
+    INTF --> MODEL & VIEW & FILTER & MODMGR & SETTINGS
+    MODEL -->|"creates nodes via"| NCM
+    MODMGR -.->|"registers filters, LMs (4), devices, palettes"| NCM
 ```
 
 ### Key types
