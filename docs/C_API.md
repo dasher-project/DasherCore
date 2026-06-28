@@ -64,7 +64,7 @@ cmake --build .
 |--------|------|--------|
 | `DasherCore` | Static library | Core C++ engine |
 | `dasher` | Shared library | C API (`src/CAPI.cpp`) |
-| `dasher_test` | Executable | Unit tests |
+| `dasher_*_tests` | Executables | Unit tests (one executable per test file, e.g. `dasher_capi_tests`) |
 
 ### Code Generation
 
@@ -337,12 +337,12 @@ void dasher_set_speed_percent(dasher_ctx* ctx, int percent);
 
 ## Parameters
 
-DasherCore has a self-describing parameter schema with 86 parameters across three types:
+DasherCore has a self-describing parameter schema with 99 parameters across three types:
 
 | Type | Prefix | Count | Accessors |
 |------|--------|-------|-----------|
-| Boolean | `BP_*` | 27 | `dasher_get/set_bool_parameter` |
-| Long | `LP_*` | 46 | `dasher_get/set_long_parameter` |
+| Boolean | `BP_*` | 30 | `dasher_get/set_bool_parameter` |
+| Long | `LP_*` | 56 | `dasher_get/set_long_parameter` |
 | String | `SP_*` | 13 | `dasher_get/set_string_parameter` |
 
 ### Generic Parameter Access
