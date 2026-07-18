@@ -520,8 +520,18 @@ DASHER_API int dasher_get_alphabet_symbol_text(dasher_ctx* ctx, int index, char*
 DASHER_API int dasher_import_training_text(dasher_ctx* ctx, const char* text);
 
 // Get the current Dasher offset (character position in the output).
-// Returns -1 if not realized.
+// Returns -1 if the engine is not realized.
 DASHER_API int dasher_get_offset(dasher_ctx* ctx);
+
+// ── Typing rate (RFC 0012) ─────────────────────────────────────────────────
+//
+// Live typing-rate metrics from a rolling 5-second window of recent output.
+// CPS = characters produced per second; WPM = CPS × 12 (the standard
+// 5-character-word convention). Both return 0.0 when the user hasn't typed
+// recently (the window expires after 5 seconds of inactivity).
+
+DASHER_API double dasher_get_cps(dasher_ctx* ctx);
+DASHER_API double dasher_get_wpm(dasher_ctx* ctx);
 
 #ifdef __cplusplus
 }
