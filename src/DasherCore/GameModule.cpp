@@ -199,7 +199,10 @@ void CGameModule::DecorateView(unsigned long lTime, CDasherView* pView, CDasherM
     if (m_iLastSym == static_cast<int>(m_vTargetSymbols.size()) - 1) {
         m_pInterface->Message(ComputeStats(m_vTargetY), true);
         m_vTargetY.clear(); // could preserve if samples not excessive...but is it meaningful (given restart)?
-        m_pInterface->GetActiveInputMethod()->pause();
+        // GetActiveInputMethod() can be null (e.g. low-memory mode, teardown
+        // races); guard to avoid a null deref at phrase completion. The codebase
+        // already null-checks it elsewhere (DashIntfScreenMsgs).
+        if (auto* pInput = m_pInterface->GetActiveInputMethod()) pInput->pause();
         m_ulTotalTime += (lTime - m_ulSentenceStartTime);
         m_dTotalNats += (pModel->GetNats() - m_dSentenceStartNats);
         m_uiTotalSyms += static_cast<unsigned int>(m_vTargetSymbols.size());
