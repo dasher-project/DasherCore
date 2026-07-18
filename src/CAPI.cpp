@@ -24,8 +24,8 @@
 #include <cmath>
 #include <cstdio>
 #include <cstring>
+#include <deque>
 #include <filesystem>
-
 #include "pugixml.hpp"
 
 // ── UTF-8 / text boundary helpers ──────────────────────────────────────────
@@ -340,6 +340,8 @@ struct dasher_ctx {
     Dasher::CDashIntfScreenMsgs* intf = nullptr;
     std::string editBuffer;
     size_t cursorPos = 0;
+    // Typing rate tracker (RFC 0012): timestamps of recent character outputs.
+    std::deque<std::chrono::steady_clock::time_point> rateTimestamps;
     std::string tlString;
     bool realized = false;
     bool mouseDown = false;
@@ -472,6 +474,8 @@ struct dasher_ctx {
             m_owner->editBuffer.insert(m_owner->cursorPos, strText);
             m_owner->cursorPos += strText.size();
             if (m_owner->outputCb && !strText.empty()) m_owner->outputCb(0, strText.c_str(), m_owner->outputCbUserData);
+            m_owner->rateTimestamps.push_back(std::chrono::steady_clock::now());
+            fprintf(stderr, "[RATE] editOutput push: size=%zu\n", m_owner->rateTimestamps.size());
             CDashIntfScreenMsgs::editOutput(strText, pCause);
         }
         void editDelete(const std::string& strText, Dasher::CDasherNode* pCause) override {
@@ -903,12 +907,14 @@ DASHER_API void dasher_reset_output_text(dasher_ctx* ctx) {
     if (!ctx) return;
     ctx->editBuffer.clear();
     ctx->cursorPos = 0;
+    ctx->rateTimestamps.clear();
 }
 
 DASHER_API void dasher_reset(dasher_ctx* ctx) {
     if (!ctx || !ctx->intf) return;
     ctx->editBuffer.clear();
     ctx->cursorPos = 0;
+    ctx->rateTimestamps.clear();
     ctx->intf->SetOffset(0, true);
 }
 
@@ -1815,6 +1821,30 @@ DASHER_API void dasher_register_action(dasher_ctx* ctx, const char* name, dasher
                 });
         }
     }
+}
+
+// ── Typing rate (RFC 0012) ──────────────────────────────────────────────────
+
+DASHER_API double dasher_get_cps(dasher_ctx* ctx) {
+    if (!ctx) return 0.0;
+    // Lazy-trim: remove timestamps older than 5 seconds.
+    auto now = std::chrono::steady_clock::now();
+    auto cutoff = now - std::chrono::seconds(5);
+    while (!ctx->rateTimestamps.empty() && ctx->rateTimestamps.front() < cutoff) {
+        ctx->rateTimestamps.pop_front();
+    }
+    if (ctx->rateTimestamps.empty()) return 0.0;
+    // Window duration: from the oldest remaining timestamp to now.
+    // Cap at 5s; floor at 1s for stability (avoids spikes on the first char).
+    double elapsed = std::chrono::duration<double>(now - ctx->rateTimestamps.front()).count();
+    if (elapsed < 1.0) elapsed = 1.0;
+    double cps = static_cast<double>(ctx->rateTimestamps.size()) / elapsed;
+    fprintf(stderr, "[RATE] getCps: size=%zu elapsed=%.1f cps=%.2f\n", ctx->rateTimestamps.size(), elapsed, cps);
+    return cps;
+}
+
+DASHER_API double dasher_get_wpm(dasher_ctx* ctx) {
+    return dasher_get_cps(ctx) * 12.0;
 }
 
 } // extern "C"
