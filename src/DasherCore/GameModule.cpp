@@ -54,33 +54,31 @@ CGameModule::~CGameModule() {
 
 void CGameModule::HandleEditEvent(CEditEvent::EditEventType type, const std::string& strText, CDasherNode* node) {
     if (!m_pAlph) return; // Game Mode currently not running
-    if (!node) return;    // TextOutputAction passes nullptr as the cause node
-    const int iOffset(node->offset());
+    // node may be null (TextOutputAction / C-API output path passes nullptr);
+    // fall back to sequential position matching when there's no node offset.
+    const int iOffset = node ? node->offset() : (m_iLastSym + 1);
     switch (type) {
     // Added a new character (Stepped one node forward)
     case CEditEvent::EDIT_OUTPUT:
         if (iOffset == m_iLastSym + 1 && iOffset < static_cast<int>(m_vTargetSymbols.size())) {
-            DASHER_ASSERT(m_strWrong == "");
             if (strText == m_pAlph->GetText(m_vTargetSymbols[iOffset])) {
                 // User has entered correct text...
                 ++m_iLastSym;
-            } else
+                m_strWrong.clear();
+            } else {
                 m_strWrong = strText;
+            }
         } else {
-            DASHER_ASSERT(iOffset >= m_iLastSym + 1);
             m_strWrong += strText;
         }
         break;
     // Removed a character (Stepped one node back)
     case CEditEvent::EDIT_DELETE:
-        if (iOffset == m_iLastSym) {
-            // seems they've just deleted the last _correct_ character they'd entered...
-            DASHER_ASSERT(strText == m_pAlph->GetText(m_vTargetSymbols[m_iLastSym]));
-            --m_iLastSym;
-        } else {
-            // just deleted previously-entered wrong text - hopefully they're heading in the right direction!
-            DASHER_ASSERT(m_strWrong.length() >= strText.length());
-            DASHER_ASSERT(m_strWrong.substr(m_strWrong.length() - strText.length()) == strText);
+        if (m_strWrong.empty()) {
+            // No wrong text → must be deleting the last correct character
+            if (m_iLastSym >= 0) --m_iLastSym;
+        } else if (m_strWrong.length() >= strText.length()) {
+            // Deleting previously-entered wrong text
             m_strWrong = m_strWrong.substr(0, m_strWrong.length() - strText.length());
         }
         break;
@@ -195,8 +193,24 @@ void CGameModule::DecorateView(unsigned long lTime, CDasherView* pView, CDasherM
     m_y1 = std::numeric_limits<myint>::min();
     m_y2 = std::numeric_limits<myint>::max();
 
-    // Check if we've reached the end of a chunk
-    if (m_iLastSym == static_cast<int>(m_vTargetSymbols.size()) - 1) {
+    // Check if we've reached the end of a chunk. Two paths:
+    // 1. Symbol tracking: m_iLastSym reached the last target symbol.
+    // 2. Text matching (fallback): the output text ends with the target
+    //    text — handles the C-API null-node path + delete-and-retry.
+    bool phraseComplete = (m_iLastSym == static_cast<int>(m_vTargetSymbols.size()) - 1);
+    if (!phraseComplete && !m_vTargetSymbols.empty()) {
+        const std::string output = m_pInterface->GetAllContext();
+        std::string target;
+        for (auto s : m_vTargetSymbols)
+            target += m_pAlph->GetText(s);
+        if (output.size() >= target.size() &&
+            output.compare(output.size() - target.size(), target.size(), target) == 0) {
+            phraseComplete = true;
+            m_iLastSym = static_cast<int>(m_vTargetSymbols.size()) - 1;
+        }
+    }
+
+    if (phraseComplete) {
         m_pInterface->Message(ComputeStats(m_vTargetY), true);
         m_vTargetY.clear(); // could preserve if samples not excessive...but is it meaningful (given restart)?
         // GetActiveInputMethod() can be null (e.g. low-memory mode, teardown
