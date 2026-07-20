@@ -533,6 +533,15 @@ DASHER_API int dasher_get_offset(dasher_ctx* ctx);
 DASHER_API double dasher_get_cps(dasher_ctx* ctx);
 DASHER_API double dasher_get_wpm(dasher_ctx* ctx);
 
+// Clear the typing-rate measurement window so CPS/WPM restart from zero.
+// Frontends use this for a "reset averages" button — the user can see their
+// rate from a clean starting point without restarting the engine.
+// Also clears the auto-speed-controller's learned typing rate so
+// BP_AUTO_SPEEDCONTROL starts adapting fresh (it re-reads LP_MAX_BITRATE
+// on the next frame, so call dasher_set_speed_percent() first if you want
+// to reset to a specific baseline speed).
+DASHER_API void dasher_reset_cps(dasher_ctx* ctx);
+
 #ifdef __cplusplus
 }
 #endif

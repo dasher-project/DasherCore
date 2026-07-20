@@ -319,3 +319,49 @@ TEST(null_safety_extended) {
     int32_t colors[4] = {0};
     ASSERT_EQ(dasher_get_palette_preview_colors(null_ctx, 0, colors), -1);
 }
+
+// ── Typing-rate reset (#44) ──────────────────────────────────────────────────
+
+TEST(cps_reset_clears_measurement_window) {
+    dasher_ctx* ctx = create_isolated_context();
+    ASSERT(ctx != nullptr);
+    dasher_set_screen_size(ctx, 800, 600);
+
+    // Before any output: CPS should be 0.
+    ASSERT_EQ(dasher_get_cps(ctx), 0.0);
+
+    // Simulate some output by directly pushing timestamps (same as editOutput does).
+    // We can't easily drive the engine to produce text in a unit test, so we
+    // verify the reset mechanism itself: CPS is non-zero after timestamps exist,
+    // then zero again after reset.
+    //
+    // Since rateTimestamps is private, we test via the public surface:
+    // 1. dasher_get_cps on a fresh ctx → 0 (no timestamps)
+    // 2. dasher_reset_cps → clears (idempotent on empty)
+    // 3. dasher_get_cps → still 0
+
+    dasher_reset_cps(ctx);
+    ASSERT_EQ(dasher_get_cps(ctx), 0.0);
+
+    // Reset is safe on a null context.
+    dasher_reset_cps(nullptr);
+
+    dasher_destroy(ctx);
+}
+
+TEST(cps_reset_after_reset_settings) {
+    // dasher_reset() already clears rateTimestamps internally (line 917 of CAPI.cpp).
+    // Verify dasher_reset_cps is consistent with that behaviour.
+    dasher_ctx* ctx = create_isolated_context();
+    ASSERT(ctx != nullptr);
+    dasher_set_screen_size(ctx, 800, 600);
+
+    // Both resets should leave CPS at 0.
+    dasher_reset_cps(ctx);
+    ASSERT_EQ(dasher_get_cps(ctx), 0.0);
+
+    dasher_reset(ctx);
+    ASSERT_EQ(dasher_get_cps(ctx), 0.0);
+
+    dasher_destroy(ctx);
+}
