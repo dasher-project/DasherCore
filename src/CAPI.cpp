@@ -475,7 +475,6 @@ struct dasher_ctx {
             m_owner->cursorPos += strText.size();
             if (m_owner->outputCb && !strText.empty()) m_owner->outputCb(0, strText.c_str(), m_owner->outputCbUserData);
             m_owner->rateTimestamps.push_back(std::chrono::steady_clock::now());
-            fprintf(stderr, "[RATE] editOutput push: size=%zu\n", m_owner->rateTimestamps.size());
             CDashIntfScreenMsgs::editOutput(strText, pCause);
         }
         void editDelete(const std::string& strText, Dasher::CDasherNode* pCause) override {
@@ -1839,12 +1838,16 @@ DASHER_API double dasher_get_cps(dasher_ctx* ctx) {
     double elapsed = std::chrono::duration<double>(now - ctx->rateTimestamps.front()).count();
     if (elapsed < 1.0) elapsed = 1.0;
     double cps = static_cast<double>(ctx->rateTimestamps.size()) / elapsed;
-    fprintf(stderr, "[RATE] getCps: size=%zu elapsed=%.1f cps=%.2f\n", ctx->rateTimestamps.size(), elapsed, cps);
     return cps;
 }
 
 DASHER_API double dasher_get_wpm(dasher_ctx* ctx) {
     return dasher_get_cps(ctx) * 12.0;
+}
+
+DASHER_API void dasher_reset_cps(dasher_ctx* ctx) {
+    if (!ctx) return;
+    ctx->rateTimestamps.clear();
 }
 
 } // extern "C"
