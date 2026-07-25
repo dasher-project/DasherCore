@@ -237,6 +237,39 @@ TEST_CASE("strand2/bounds within screen and monotone") {
     }
 }
 
+TEST_CASE("strand2/snapshot survives node lifetime changes (no dangling deref)") {
+    // Regression for the use-after-free crash: the old design stored raw
+    // CDasherNode* pointers during Render() and dereferenced them in the query;
+    // by then the model could have freed/mutated those nodes. The snapshot is
+    // now fully resolved during Render(), so changing node lifetimes between the
+    // frame and the query must not crash (or, under ASan, fault).
+    ScopedContext ctx(800, 600);
+    REQUIRE(dasher_set_visible_nodes_enabled(ctx, 1) == 0);
+
+    dasher_set_speed_percent(ctx, 250);
+    dasher_mouse_move(ctx, 720.0f, 300.0f);
+    dasher_mouse_down(ctx);
+    int* cmds = nullptr;
+    int cc = 0;
+    char** fstrs = nullptr;
+    int fsc = 0;
+    for (int i = 0; i < 20; ++i)
+        dasher_frame(ctx, 1000 + i * 16, &cmds, &cc, &fstrs, &fsc);
+    dasher_mouse_up(ctx);
+
+    // Force a model reset, which rebuilds/frees the node tree the snapshot was
+    // taken from. The query must read only the pre-resolved snapshot — never
+    // dereference a freed node — so this must not crash.
+    dasher_reset(ctx);
+
+    std::vector<dasher_node_info> nodes(64);
+    init_node_info(nodes.data(), 64);
+    char** strs = nullptr;
+    int sc = 0;
+    const int n = dasher_get_visible_nodes(ctx, nodes.data(), 64, &strs, &sc);
+    CHECK(n >= -1); // -1 (capture reset) or a non-negative count; never a crash
+}
+
 TEST_CASE("strand2/never throws across the C boundary on a long session") {
     // Regression for the Rule 4 crash: GetAlphSymbol() throws on the base class
     // and dasher_get_visible_nodes must catch every exception (return -1) rather

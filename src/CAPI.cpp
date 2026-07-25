@@ -1880,26 +1880,26 @@ DASHER_API int dasher_get_visible_nodes(dasher_ctx* ctx, dasher_node_info* out_n
             out.struct_size = v1_size;
             out.dasher_y1 = static_cast<long long>(n.dasher_y1);
             out.dasher_y2 = static_cast<long long>(n.dasher_y2);
-            // GetAlphSymbol() throws on the base class (only CSymbolNode
-            // overrides it), so gate it on IsSymbolNode(). Group/control/
-            // conversion nodes report -1.
-            out.symbol = (n.node && n.node->IsSymbolNode()) ? n.node->GetAlphSymbol() : -1;
-            out.has_children = n.node && n.node->ChildCount() > 0 ? 1 : 0;
+            // All node-derived values were resolved during Render() and stored
+            // in the snapshot — no CDasherNode* is dereferenced here, so the
+            // model is free to mutate/free nodes between the frame and this
+            // query. (Previously this lazily dereferenced a stored pointer,
+            // which dangled and crashed — review feedback on #51.)
+            out.symbol = n.symbol;
+            out.has_children = n.has_children;
             out.depth = n.depth;
-            out.is_game_node = n.node && n.node->GetFlag(Dasher::CDasherNode::NF_GAME) ? 1 : 0;
+            out.is_game_node = n.is_game_node;
             out.screen_x1 = n.screen_x1;
             out.screen_y1 = n.screen_y1;
             out.screen_x2 = n.screen_x2;
             out.screen_y2 = n.screen_y2;
             out.fill_argb = colorToARGB(n.fill);
             out.outline_argb = colorToARGB(n.outline);
-            out.label_index = -1;
-            if (n.node) {
-                auto* label = n.node->getLabel();
-                if (label && !label->m_strText.empty()) {
-                    ctx->nodeLabelStrings.push_back(label->m_strText);
-                    out.label_index = static_cast<int>(ctx->nodeLabelStrings.size() - 1);
-                }
+            if (!n.label.empty()) {
+                ctx->nodeLabelStrings.push_back(n.label);
+                out.label_index = static_cast<int>(ctx->nodeLabelStrings.size() - 1);
+            } else {
+                out.label_index = -1;
             }
         }
 

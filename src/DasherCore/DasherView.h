@@ -15,6 +15,7 @@ class CDasherNode;
 #include "Event.h"
 #include "ColorPalette.h"
 
+#include <string>
 #include <vector>
 
 /// \defgroup View Visualisation of the model
@@ -143,7 +144,10 @@ class Dasher::CDasherView {
     /// command buffer draws for the same frame (Strand 1/2 parity).
     /// @{
     struct VisibleNode {
-        CDasherNode* node;       // rendered node (valid until next Render)
+        // Fully-resolved, self-contained snapshot — NO raw CDasherNode* pointer.
+        // The model may free/mutate nodes between Render() and a later query, so
+        // every value the frontend needs is copied here while the node is
+        // guaranteed alive, during the render pass itself.
         Dasher::myint dasher_y1; // node's Dasher-Y range
         Dasher::myint dasher_y2;
         int depth;                // tree depth from root child (cube-extrusion source)
@@ -151,6 +155,10 @@ class Dasher::CDasherView {
         int screen_x2, screen_y2;
         ColorPalette::Color fill;    // node fill colour (from active palette)
         ColorPalette::Color outline; // node outline colour
+        int symbol;                  // alphabet symbol index (-1 for group/control)
+        int has_children;            // 1 if this node had children
+        int is_game_node;            // 1 if on the game-mode path
+        std::string label;           // label text (empty if none)
     };
 
     /// Enable/disable per-node capture during Render(). Off by default.

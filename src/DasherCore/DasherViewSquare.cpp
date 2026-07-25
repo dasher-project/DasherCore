@@ -847,7 +847,6 @@ void CDasherViewSquare::CaptureNode(CDasherNode* node, myint y1, myint y2, int d
     Dasher2Screen(dxMaxX, dxMinY, sax, say);
     Dasher2Screen(0, dxMaxY, sbx, sby);
     VisibleNode rec;
-    rec.node = node;
     rec.dasher_y1 = y1;
     rec.dasher_y2 = y2;
     rec.depth = depth;
@@ -857,6 +856,20 @@ void CDasherViewSquare::CaptureNode(CDasherNode* node, myint y1, myint y2, int d
     rec.screen_y2 = std::max(say, sby);
     rec.fill = node->getNodeColor(m_pColorPalette);
     rec.outline = node->getOutlineColor(m_pColorPalette);
+    // Resolve everything that identifies/describes the node NOW, while it is
+    // guaranteed alive. dasher_get_visible_nodes must not dereference the node
+    // later — the model may have freed/mutated it by then.
+    rec.symbol = -1;
+    if (node->IsSymbolNode()) {
+        try {
+            rec.symbol = node->GetAlphSymbol();
+        } catch (...) {
+            rec.symbol = -1; // defensive: GetAlphSymbol throws on the base class
+        }
+    }
+    rec.has_children = node->ChildCount() > 0 ? 1 : 0;
+    rec.is_game_node = node->GetFlag(CDasherNode::NF_GAME) ? 1 : 0;
+    if (auto* label = node->getLabel()) rec.label = label->m_strText;
     m_visibleNodes.push_back(rec);
 }
 
