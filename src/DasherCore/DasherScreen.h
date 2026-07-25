@@ -96,13 +96,21 @@ class Dasher::CDasherScreen {
                             const ColorPalette::Color& color) = 0;
 
     // Cubes and 3D labels that are drawn in Options::CUBE mode, meant for a 3D rendering
+    // backend. The default implementations are all no-ops, so a plain 2D screen (such as
+    // the C API CommandScreen) must override DrawCube / Draw3DLabel / DrawProjectedRectangle
+    // to make cube mode render anything at all. FinishRender3D stays a no-op for 2D screens
+    // (there is no 3D compositing pass to flush).
     virtual void Draw3DLabel(Label* label, screenint x, screenint y, screenint textInset,
                              Options::ScreenOrientations orientation, myint extrusionLevel, myint groupRecursionDepth,
                              unsigned int iFontSize, const ColorPalette::Color& color) {}
     virtual void DrawCube(float posX, float posY, float sizeX, float sizeY, CubeDepthLevel nodeDepth,
                           CubeDepthLevel parentDepth, const ColorPalette::Color& color,
                           const ColorPalette::Color& outlineColor, int iThickness) {}
-    virtual void DrawProjectedRectangle(screenint posX, screenint posY, screenint sizeX, screenint sizeY) {}
+    // A rectangle projected through the 3D scene (the cube-mode crosshair bar). The colour
+    // is supplied by the caller (the view, via its palette) because CDasherScreen itself has
+    // no palette access.
+    virtual void DrawProjectedRectangle(screenint posX, screenint posY, screenint sizeX, screenint sizeY,
+                                        const ColorPalette::Color& color) {}
     virtual void FinishRender3D(myint originX, myint originY, myint originExtrusionLevel) {}
 
     /// Draw a filled rectangle

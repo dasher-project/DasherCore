@@ -268,6 +268,42 @@ class CommandScreen final : public Dasher::CDasherScreen {
         }
     }
 
+    // ── Cube mode (Options::CUBE) ───────────────────────────────────────────
+    // The flat command buffer has no 3D backend, so cube mode renders as flat
+    // shaded rectangles: one filled rect (opcode 4) per cube face, plus an
+    // outline (opcode 3) when requested. Without these overrides the whole cube
+    // path is silently dropped (the base-class methods are no-ops), which left
+    // the canvas black — see issue #47.
+    void DrawCube(float posX, float posY, float sizeX, float sizeY, Dasher::CubeDepthLevel, Dasher::CubeDepthLevel,
+                  const Dasher::ColorPalette::Color& color, const Dasher::ColorPalette::Color& outlineColor,
+                  int iThickness) override {
+        const int x1 = static_cast<int>(posX - sizeX / 2.0f);
+        const int y1 = static_cast<int>(posY - sizeY / 2.0f);
+        const int x2 = static_cast<int>(posX + sizeX / 2.0f);
+        const int y2 = static_cast<int>(posY + sizeY / 2.0f);
+        if (!color.isFullyTransparent()) push(4, x1, y1, x2, y2, colorToARGB(color));
+        if (iThickness > 0 && !outlineColor.isFullyTransparent()) push(3, x1, y1, x2, y2, colorToARGB(outlineColor));
+    }
+
+    void Draw3DLabel(Label* label, Dasher::screenint x, Dasher::screenint y, Dasher::screenint,
+                     Dasher::Options::ScreenOrientations, Dasher::myint, Dasher::myint, unsigned int iFontSize,
+                     const Dasher::ColorPalette::Color& color) override {
+        // Cube-mode labels reach the screen via Draw3DLabel rather than DrawString;
+        // emit the same opcode-5 text command. The 3D extrusion is lost, but the
+        // label is positioned/coloured identically.
+        DrawString(label, x, y, iFontSize, color);
+    }
+
+    void DrawProjectedRectangle(Dasher::screenint posX, Dasher::screenint posY, Dasher::screenint sizeX,
+                                Dasher::screenint sizeY, const Dasher::ColorPalette::Color& color) override {
+        // The cube-mode crosshair bar. Emit it as a filled rectangle.
+        const int x1 = static_cast<int>(posX - sizeX / 2);
+        const int y1 = static_cast<int>(posY - sizeY / 2);
+        const int x2 = static_cast<int>(posX + sizeX / 2);
+        const int y2 = static_cast<int>(posY + sizeY / 2);
+        if (!color.isFullyTransparent()) push(4, x1, y1, x2, y2, colorToARGB(color));
+    }
+
     void Display() override {}
     bool IsPointVisible(Dasher::screenint x, Dasher::screenint y) override {
         return x >= 0 && y >= 0 && x < GetWidth() && y < GetHeight();
