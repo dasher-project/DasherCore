@@ -72,6 +72,7 @@ void CDasherViewSquare::SetOrientation(Options::ScreenOrientations newOrient) {
 
 CDasherNode* CDasherViewSquare::Render(CDasherNode* pRoot, myint iRootMin, myint iRootMax, CExpansionPolicy& policy) {
     DASHER_ASSERT(pRoot != 0);
+    if (m_captureVisibleNodes) m_visibleNodes.clear();
     const DasherCoordScreenRegion visibleRegion = VisibleRegion();
     const ScreenRegion screenRegion = {0, 0, Screen()->GetWidth(), Screen()->GetHeight()};
 
@@ -600,6 +601,8 @@ void CDasherViewSquare::DisjointRender(CDasherNode* pRender, myint y1, myint y2,
     pRender->SetFlag(CDasherNode::NF_SUPER,
                      (y2 - y1 >= visibleRegion.maxX) && (y1 <= visibleRegion.minY) && (y2 >= visibleRegion.maxY));
 
+    if (m_captureVisibleNodes) CaptureNode(pRender, y1, y2, 0);
+
     if (pRender->getLabel()) {
         myint ny1 = std::min(visibleRegion.maxY, std::max(visibleRegion.minY, y1)),
               ny2 = std::min(visibleRegion.maxY, std::max(visibleRegion.minY, y2));
@@ -828,6 +831,35 @@ ColorPalette::Color CDasherViewSquare::SimulateTransparency(CDasherNode* pCurren
     return interpolatedColor;
 }
 
+void CDasherViewSquare::CaptureNode(CDasherNode* node, myint y1, myint y2, int depth) {
+    if (!node) return;
+    const DasherCoordScreenRegion vr = VisibleRegion();
+    const myint Range = y2 - y1;
+    // Clipped Dasher-space rect, matching the OVERLAPPING_RECTANGLE draw (the
+    // parity reference shape for Strand 1 vs Strand 2): x in [0, min(Range,maxX)],
+    // y in [max(y1,minY), min(y2,maxY)]. Other shapes (circle/triangle/cube) draw
+    // a subset of this box; for Strand 2 the frontend shapes it itself, so the
+    // bounding box is the right thing to report.
+    const myint dxMaxX = std::min(Range, vr.maxX);
+    const myint dxMinY = std::max(y1, vr.minY);
+    const myint dxMaxY = std::min(y2, vr.maxY);
+    screenint sax, say, sbx, sby;
+    Dasher2Screen(dxMaxX, dxMinY, sax, say);
+    Dasher2Screen(0, dxMaxY, sbx, sby);
+    VisibleNode rec;
+    rec.node = node;
+    rec.dasher_y1 = y1;
+    rec.dasher_y2 = y2;
+    rec.depth = depth;
+    rec.screen_x1 = std::min(sax, sbx);
+    rec.screen_y1 = std::min(say, sby);
+    rec.screen_x2 = std::max(sax, sbx);
+    rec.screen_y2 = std::max(say, sby);
+    rec.fill = node->getNodeColor(m_pColorPalette);
+    rec.outline = node->getOutlineColor(m_pColorPalette);
+    m_visibleNodes.push_back(rec);
+}
+
 void CDasherViewSquare::NewRender(CDasherNode* pCurrentNode, myint y1, myint y2, CTextString* pPrevText,
                                   CExpansionPolicy& policy, double dMaxCost, CDasherNode*& pCurrentTopCenterNode,
                                   CubeDepthLevel nodeDepth, CubeDepthLevel parentDepth,
@@ -891,6 +923,8 @@ void CDasherViewSquare::NewRender(CDasherNode* pCurrentNode, myint y1, myint y2,
                                                            : pCurrentNode->getNodeColor(m_pColorPalette));
         const ColorPalette::Color& outline_color =
             line_width == 0 ? ColorPalette::noColor : pCurrentNode->getOutlineColor(m_pColorPalette);
+
+        if (m_captureVisibleNodes) CaptureNode(pCurrentNode, y1, y2, static_cast<int>(nodeDepth.extrusionLevel));
 
         switch (m_pSettingsStore->GetLongParameter(LP_SHAPE_TYPE)) {
         case Options::OVERLAPPING_RECTANGLE:

@@ -549,6 +549,70 @@ DASHER_API double dasher_get_wpm(dasher_ctx* ctx);
 // to reset to a specific baseline speed).
 DASHER_API void dasher_reset_cps(dasher_ctx* ctx);
 
+// ── Custom rendering, Strand 2 (RFC 0013) ──────────────────────────────────
+//
+// An alternative to the int[] command buffer (Strand 1): the frontend queries
+// the visible node tree each frame and renders it itself with its own graphics
+// API. Use this for 3D cubes, VR/spatial layouts, custom visualisations, or
+// accessibility views that the flat painter's-algorithm buffer can't express.
+//
+// Capture is OFF by default — call dasher_set_visible_nodes_enabled(ctx, 1)
+// once at setup; then after each dasher_frame() the recorded nodes are
+// available via dasher_get_visible_nodes(). Strand 1 frontends pay zero
+// overhead if they never enable it.
+//
+// The captured node set matches exactly what the command buffer draws for the
+// same frame (Strand 1/Strand 2 parity), so a frontend can mix strands.
+
+// Per-node info. Both structs begin with struct_size, set by the caller to
+// sizeof(...) before the call, so the engine can detect the ABI version and
+// the structs can grow without breaking existing frontends.
+typedef struct dasher_node_info {
+    int struct_size;     // caller sets to sizeof(dasher_node_info)
+    long long dasher_y1; // node's Dasher-Y range
+    long long dasher_y2;
+    int symbol;               // alphabet symbol index (-1 for group/control nodes)
+    int has_children;         // 1 if this node has children
+    int depth;                // tree depth from the rendered root (0 = root)
+    int is_game_node;         // 1 if on the game-mode path
+    int screen_x1, screen_y1; // node's clipped screen bounds
+    int screen_x2, screen_y2;
+    int fill_argb;    // node fill colour (from active palette)
+    int outline_argb; // node outline colour
+    int label_index;  // index into out_strings (-1 if no label)
+} dasher_node_info;
+
+// Viewport state for the frame.
+typedef struct dasher_viewport {
+    int struct_size;         // caller sets to sizeof(dasher_viewport)
+    long long crosshair_x;   // crosshair Dasher X (fixed at the origin)
+    long long crosshair_y;   // crosshair Dasher Y
+    long long visible_min_y; // visible Dasher-Y range
+    long long visible_max_y;
+    int screen_width; // canvas size the engine was told via dasher_set_screen_size
+    int screen_height;
+} dasher_viewport;
+
+// Enable/disable per-frame node capture. Default off. Returns 0 on success,
+// -1 if ctx is null / not realised.
+DASHER_API int dasher_set_visible_nodes_enabled(dasher_ctx* ctx, int enabled);
+
+// Query the visible node tree recorded during the most recent dasher_frame().
+// Nodes are written to out_nodes (up to max_nodes), depth-first (parent before
+// children). Returns the number of nodes written (may exceed max_nodes — call
+// with a larger buffer if so; -1 on error). out_strings/out_string_count hold
+// label text; dasher_node_info.label_index indexes into out_strings.
+//
+// out_nodes, out_strings point into engine-owned buffers valid only until the
+// next dasher_frame() or dasher_get_visible_nodes() call — copy if you need
+// the data beyond the next frame. Returns -1 if capture is disabled or the
+// engine is not realised.
+DASHER_API int dasher_get_visible_nodes(dasher_ctx* ctx, dasher_node_info* out_nodes, int max_nodes,
+                                        char*** out_strings, int* out_string_count);
+
+// Query viewport state. Returns 0 on success, -1 on error.
+DASHER_API int dasher_get_viewport(dasher_ctx* ctx, dasher_viewport* out);
+
 #ifdef __cplusplus
 }
 #endif

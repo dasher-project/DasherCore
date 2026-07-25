@@ -269,6 +269,12 @@ class Dasher::CDasherNode : private NoClones {
 #endif
     }
 
+    /// True iff this node is an alphabet symbol node (safe to call GetAlphSymbol()
+    /// on without triggering the base-class throw). Default false; CSymbolNode
+    /// overrides to true. Used by the Strand 2 node API to populate `symbol`
+    /// without RTTI in the C-boundary layer.
+    virtual bool IsSymbolNode() const { return false; }
+
     virtual const ColorPalette::Color& getLabelColor(const ColorPalette* colorPalette) = 0;
     virtual const ColorPalette::Color& getOutlineColor(const ColorPalette* colorPalette) = 0;
     virtual const ColorPalette::Color& getNodeColor(const ColorPalette* colorPalette) = 0;

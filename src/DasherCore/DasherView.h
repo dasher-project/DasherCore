@@ -15,6 +15,8 @@ class CDasherNode;
 #include "Event.h"
 #include "ColorPalette.h"
 
+#include <vector>
+
 /// \defgroup View Visualisation of the model
 /// @{
 
@@ -129,6 +131,35 @@ class Dasher::CDasherView {
     /// function will blank out around it (in white) if not
     /// @return the innermost node covering the crosshair
     virtual CDasherNode* Render(CDasherNode* pRoot, myint iRootMin, myint iRootMax, CExpansionPolicy& policy) = 0;
+
+    /// @}
+
+    /// @name Node capture (Strand 2 / RFC 0013)
+    /// When enabled, the view records each node it actually draws during Render()
+    /// so a frontend can query the visible node tree and render it itself
+    /// (3D cubes, VR, custom visualisations). Recording is OFF by default and
+    /// is an opt-in via SetVisibleNodeCapture(true) — Strand 1 (command-buffer)
+    /// frontends pay zero overhead. The captured set matches exactly what the
+    /// command buffer draws for the same frame (Strand 1/2 parity).
+    /// @{
+    struct VisibleNode {
+        CDasherNode* node;       // rendered node (valid until next Render)
+        Dasher::myint dasher_y1; // node's Dasher-Y range
+        Dasher::myint dasher_y2;
+        int depth;                // tree depth from root child (cube-extrusion source)
+        int screen_x1, screen_y1; // node's clipped screen bounds
+        int screen_x2, screen_y2;
+        ColorPalette::Color fill;    // node fill colour (from active palette)
+        ColorPalette::Color outline; // node outline colour
+    };
+
+    /// Enable/disable per-node capture during Render(). Off by default.
+    virtual void SetVisibleNodeCapture(bool /*enabled*/) {}
+    /// Whether capture is currently enabled.
+    virtual bool IsVisibleNodeCaptureEnabled() const { return false; }
+    /// Return the nodes captured during the most recent Render() (empty unless
+    /// capture is enabled). Returned by value; valid until the next Render().
+    virtual std::vector<VisibleNode> GetVisibleNodes() const { return {}; }
 
     /// @}
 

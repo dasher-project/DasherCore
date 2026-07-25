@@ -273,6 +273,7 @@ if(BUILD_CAPI)
         # Internal: links DasherCore directly to drive CircleTo/IsSpaceAroundNode.
         dasher_add_test_internal(dasher_circle_view_internal_tests test_circle_view_internal.cpp)
         dasher_add_test(dasher_cube_geometry_tests test_cube_geometry.cpp)
+        dasher_add_test(dasher_strand2_nodes_tests test_strand2_nodes.cpp)
         dasher_add_test(dasher_input_filter_tests test_input_filters.cpp)
         dasher_add_test(dasher_xml_error_path_tests test_xml_error_paths.cpp)
 
