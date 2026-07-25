@@ -439,9 +439,26 @@ void CDasherViewSquare::Circle(myint Range, myint y1, myint y2, const ColorPalet
 }
 
 void CDasherViewSquare::CircleTo(myint cy, myint r, myint y1, myint x1, myint y3, myint x3, point dest,
-                                 std::vector<point>& pts, double dXMul) const {
+                                 std::vector<point>& pts, double dXMul, int depth) const {
+    // Termination guards:
+    //  - depth <= 0: hard cap on recursion so the stack can never be exhausted.
+    //    Approximating the remaining arc with a straight line is always fine at
+    //    the subdivision granularity reached by then.
+    //  - y1 >= y3: no forward progress. This happens once integer truncation
+    //    stalls (y1 and y3 within 1 of each other); subdividing further cannot
+    //    move the midpoint, so stop.
+    if (depth <= 0 || y1 >= y3) {
+        pts.push_back(dest);
+        return;
+    }
     myint y2((y1 + y3) / 2);
-    myint x2(static_cast<myint>(sqrt((sq(r) - sq(cy - y2)) * dXMul)));
+    // Clamp before sqrt: degenerate arcs passed in via DasherSpaceArc can have
+    // endpoints outside the circle (|cy - y| > r), making sq(r)-sq(cy-y2)
+    // negative. sqrt of a negative yields NaN, which used to poison `mid`,
+    // defeat the convergence test below, and recurse without bound (stack
+    // overflow / SIGSEGV).
+    const double underSqrt = static_cast<double>(sq(r) - sq(cy - y2)) * dXMul;
+    myint x2(static_cast<myint>(sqrt(underSqrt > 0.0 ? underSqrt : 0.0)));
     point mid;                           // where midpoint of circle/arc should be
     Dasher2Screen(x2, y2, mid.x, mid.y); //(except "midpoint" measured along y axis)
     int lmx = (pts.back().x + dest.x) / 2, lmy = (pts.back().y + dest.y) / 2; // midpoint of straight line
@@ -449,8 +466,8 @@ void CDasherViewSquare::CircleTo(myint cy, myint r, myint y1, myint x1, myint y3
         // okay, use straight line
         pts.push_back(dest);
     } else {
-        CircleTo(cy, r, y1, x1, y2, x2, mid, pts, dXMul);
-        CircleTo(cy, r, y2, x2, y3, x3, dest, pts, dXMul);
+        CircleTo(cy, r, y1, x1, y2, x2, mid, pts, dXMul, depth - 1);
+        CircleTo(cy, r, y2, x2, y3, x3, dest, pts, dXMul, depth - 1);
     }
 }
 #undef sq
@@ -523,8 +540,20 @@ bool CDasherViewSquare::IsSpaceAroundNode(myint y1, myint y2) const {
     if ((maxX < visibleRegion.maxX) || (y1 > visibleRegion.minY) || (y2 < visibleRegion.maxY))
         return true; // space around sq => space around anything smaller!
 
-    // in theory, even if the crosshair is off-screen (!), anything spanning y1-y2 should cover it...
-    DASHER_ASSERT(CoversCrosshair(y2 - y1, y1, y2));
+    // The invariant "any shape spanning y1-y2 covers the crosshair" only holds
+    // for rectangular shapes. Curved/angled shapes (triangles, quadrics,
+    // circles/ellipses) can span the full visible height yet legitimately miss
+    // the crosshair, so CoversCrosshair can validly return false for them and
+    // the assertion must not fire. (Circle mode used to SIGABRT here.)
+    switch (m_pSettingsStore->GetLongParameter(LP_SHAPE_TYPE)) {
+    case Options::DISJOINT_RECTANGLE:
+    case Options::OVERLAPPING_RECTANGLE:
+    case Options::CUBE:
+        DASHER_ASSERT(CoversCrosshair(y2 - y1, y1, y2));
+        break;
+    default:
+        break;
+    }
 
     switch (m_pSettingsStore->GetLongParameter(LP_SHAPE_TYPE)) {
     case Options::DISJOINT_RECTANGLE:
