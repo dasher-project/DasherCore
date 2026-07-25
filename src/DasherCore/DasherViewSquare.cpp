@@ -125,7 +125,7 @@ CDasherNode* CDasherViewSquare::Render(CDasherNode* pRoot, myint iRootMin, myint
         screenint sizeX = 7, sizeY = static_cast<screenint>(static_cast<float>(Screen()->GetHeight()) * 1.05f);
         if (GetOrientation() == Options::TopToBottom || GetOrientation() == Options::BottomToTop)
             std::swap(sizeX, sizeY);
-        Screen()->DrawProjectedRectangle(originX, originY, sizeX, sizeY);
+        Screen()->DrawProjectedRectangle(originX, originY, sizeX, sizeY, GetNamedColor(NamedColor::crosshair));
 
         // Print 3DText
         for (geometry_3DText& text : m_Delayed3DTexts) {

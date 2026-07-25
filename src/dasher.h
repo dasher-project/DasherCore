@@ -86,8 +86,15 @@ DASHER_API void dasher_key_event(dasher_ctx* ctx, int key, int pressed);
 //   3: Rectangle outline     — a=x1, b=y1, c=x2, d=y2, argb
 //   4: Rectangle filled      — a=x1, b=y1, c=x2, d=y2, argb
 //   5: Text                  — a=x, b=y, c=fontSize, d=stringIndex, argb
+//   6: Set line width        — a=lineWidth (applies to subsequent opcode 2 lines)
 //
 // For opcode 5, d is an index into the strings array.
+//
+// LP_SHAPE_TYPE == CUBE (6) renders through the same opcode-3/4/5 commands:
+// each cube face is an opcode-4 filled rectangle (with an opcode-3 outline when
+// the node has one), the crosshair bar is an opcode-4 rectangle, and cube-mode
+// labels are opcode-5 text. The flat buffer carries no 3D extrusion, so cube
+// mode looks like flat rectangles over this API.
 //
 // argb format: (alpha << 24) | (red << 16) | (green << 8) | blue
 DASHER_API void dasher_frame(dasher_ctx* ctx, int64_t time_ms, int** out_commands, int* out_command_count,
