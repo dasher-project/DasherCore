@@ -1835,10 +1835,14 @@ DASHER_API int dasher_get_offset(dasher_ctx* ctx) {
 
 DASHER_API int dasher_set_visible_nodes_enabled(dasher_ctx* ctx, int enabled) {
     if (!ctx || !ctx->intf || !ctx->realized) return -1;
-    auto* view = ctx->intf->GetView();
-    if (!view) return -1;
-    view->SetVisibleNodeCapture(enabled != 0);
-    return 0;
+    try {
+        auto* view = ctx->intf->GetView();
+        if (!view) return -1;
+        view->SetVisibleNodeCapture(enabled != 0);
+        return 0;
+    } catch (...) {
+        return -1;
+    }
 }
 
 DASHER_API int dasher_get_visible_nodes(dasher_ctx* ctx, dasher_node_info* out_nodes, int max_nodes,
@@ -1846,83 +1850,95 @@ DASHER_API int dasher_get_visible_nodes(dasher_ctx* ctx, dasher_node_info* out_n
     if (!ctx || !ctx->intf || !ctx->realized) return -1;
     if (!out_nodes || max_nodes <= 0) return -1;
 
-    auto* view = ctx->intf->GetView();
-    if (!view || !view->IsVisibleNodeCaptureEnabled()) return -1;
+    // CONTRIBUTING Rule 4: never let a C++ exception cross extern "C". Node
+    // accessors (notably GetAlphSymbol, which throws on the base class) can
+    // throw, so the whole body is guarded; the IsSymbolNode() check below keeps
+    // the common path throw-free, and this catch is the safety net.
+    try {
+        auto* view = ctx->intf->GetView();
+        if (!view || !view->IsVisibleNodeCaptureEnabled()) return -1;
 
-    // ABI version check: the caller sets struct_size on the first element.
-    const int caller_size = out_nodes[0].struct_size;
-    const int v1_size = static_cast<int>(sizeof(dasher_node_info));
-    if (caller_size < v1_size) {
-        // Caller is built against an older, smaller struct than this engine.
-        // Filling v1 fields would overflow their allocation.
-        return -1;
-    }
+        // ABI version check: the caller sets struct_size on the first element.
+        const int caller_size = out_nodes[0].struct_size;
+        const int v1_size = static_cast<int>(sizeof(dasher_node_info));
+        if (caller_size < v1_size) {
+            // Caller is built against an older, smaller struct than this engine.
+            // Filling v1 fields would overflow their allocation.
+            return -1;
+        }
 
-    const auto nodes = view->GetVisibleNodes(); // by value; stable copy
+        const auto nodes = view->GetVisibleNodes(); // by value; stable copy
 
-    ctx->nodeLabelStrings.clear();
-    ctx->nodeLabelPtrs.clear();
+        ctx->nodeLabelStrings.clear();
+        ctx->nodeLabelPtrs.clear();
 
-    const int total = static_cast<int>(nodes.size());
-    const int written = std::min(total, max_nodes);
-    for (int i = 0; i < written; ++i) {
-        const auto& n = nodes[i];
-        dasher_node_info& out = out_nodes[i];
-        out.struct_size = v1_size;
-        out.dasher_y1 = static_cast<long long>(n.dasher_y1);
-        out.dasher_y2 = static_cast<long long>(n.dasher_y2);
-        // GetAlphSymbol() throws on the base class (only CSymbolNode overrides
-        // it), so gate it on IsSymbolNode(). Group/control/conversion nodes
-        // report -1.
-        out.symbol = (n.node && n.node->IsSymbolNode()) ? n.node->GetAlphSymbol() : -1;
-        out.has_children = n.node && n.node->ChildCount() > 0 ? 1 : 0;
-        out.depth = n.depth;
-        out.is_game_node = n.node && n.node->GetFlag(Dasher::CDasherNode::NF_GAME) ? 1 : 0;
-        out.screen_x1 = n.screen_x1;
-        out.screen_y1 = n.screen_y1;
-        out.screen_x2 = n.screen_x2;
-        out.screen_y2 = n.screen_y2;
-        out.fill_argb = colorToARGB(n.fill);
-        out.outline_argb = colorToARGB(n.outline);
-        out.label_index = -1;
-        if (n.node) {
-            auto* label = n.node->getLabel();
-            if (label && !label->m_strText.empty()) {
-                ctx->nodeLabelStrings.push_back(label->m_strText);
-                out.label_index = static_cast<int>(ctx->nodeLabelStrings.size() - 1);
+        const int total = static_cast<int>(nodes.size());
+        const int written = std::min(total, max_nodes);
+        for (int i = 0; i < written; ++i) {
+            const auto& n = nodes[i];
+            dasher_node_info& out = out_nodes[i];
+            out.struct_size = v1_size;
+            out.dasher_y1 = static_cast<long long>(n.dasher_y1);
+            out.dasher_y2 = static_cast<long long>(n.dasher_y2);
+            // GetAlphSymbol() throws on the base class (only CSymbolNode
+            // overrides it), so gate it on IsSymbolNode(). Group/control/
+            // conversion nodes report -1.
+            out.symbol = (n.node && n.node->IsSymbolNode()) ? n.node->GetAlphSymbol() : -1;
+            out.has_children = n.node && n.node->ChildCount() > 0 ? 1 : 0;
+            out.depth = n.depth;
+            out.is_game_node = n.node && n.node->GetFlag(Dasher::CDasherNode::NF_GAME) ? 1 : 0;
+            out.screen_x1 = n.screen_x1;
+            out.screen_y1 = n.screen_y1;
+            out.screen_x2 = n.screen_x2;
+            out.screen_y2 = n.screen_y2;
+            out.fill_argb = colorToARGB(n.fill);
+            out.outline_argb = colorToARGB(n.outline);
+            out.label_index = -1;
+            if (n.node) {
+                auto* label = n.node->getLabel();
+                if (label && !label->m_strText.empty()) {
+                    ctx->nodeLabelStrings.push_back(label->m_strText);
+                    out.label_index = static_cast<int>(ctx->nodeLabelStrings.size() - 1);
+                }
             }
         }
+
+        // Build char* pointers for the strings array.
+        ctx->nodeLabelPtrs.resize(ctx->nodeLabelStrings.size());
+        for (size_t i = 0; i < ctx->nodeLabelStrings.size(); ++i)
+            ctx->nodeLabelPtrs[i] = ctx->nodeLabelStrings[i].data();
+
+        if (out_strings) *out_strings = ctx->nodeLabelPtrs.data();
+        if (out_string_count) *out_string_count = static_cast<int>(ctx->nodeLabelPtrs.size());
+
+        // Return the total available count (may exceed max_nodes) so the caller
+        // can grow its buffer and re-query if truncated.
+        return total;
+    } catch (...) {
+        return -1;
     }
-
-    // Build char* pointers for the strings array.
-    ctx->nodeLabelPtrs.resize(ctx->nodeLabelStrings.size());
-    for (size_t i = 0; i < ctx->nodeLabelStrings.size(); ++i)
-        ctx->nodeLabelPtrs[i] = ctx->nodeLabelStrings[i].data();
-
-    if (out_strings) *out_strings = ctx->nodeLabelPtrs.data();
-    if (out_string_count) *out_string_count = static_cast<int>(ctx->nodeLabelPtrs.size());
-
-    // Return the total available count (may exceed max_nodes) so the caller can
-    // grow its buffer and re-query if truncated.
-    return total;
 }
 
 DASHER_API int dasher_get_viewport(dasher_ctx* ctx, dasher_viewport* out) {
     if (!ctx || !ctx->intf || !ctx->realized || !out) return -1;
-    const int caller_size = out->struct_size;
-    const int v1_size = static_cast<int>(sizeof(dasher_viewport));
-    if (caller_size < v1_size) return -1;
-    auto* view = ctx->intf->GetView();
-    if (!view) return -1;
-    const auto vr = view->VisibleRegion();
-    out->struct_size = v1_size;
-    out->crosshair_x = static_cast<long long>(Dasher::CDasherModel::ORIGIN_X);
-    out->crosshair_y = static_cast<long long>(Dasher::CDasherModel::ORIGIN_Y);
-    out->visible_min_y = static_cast<long long>(vr.minY);
-    out->visible_max_y = static_cast<long long>(vr.maxY);
-    out->screen_width = view->Screen()->GetWidth();
-    out->screen_height = view->Screen()->GetHeight();
-    return 0;
+    try {
+        const int caller_size = out->struct_size;
+        const int v1_size = static_cast<int>(sizeof(dasher_viewport));
+        if (caller_size < v1_size) return -1;
+        auto* view = ctx->intf->GetView();
+        if (!view) return -1;
+        const auto vr = view->VisibleRegion();
+        out->struct_size = v1_size;
+        out->crosshair_x = static_cast<long long>(Dasher::CDasherModel::ORIGIN_X);
+        out->crosshair_y = static_cast<long long>(Dasher::CDasherModel::ORIGIN_Y);
+        out->visible_min_y = static_cast<long long>(vr.minY);
+        out->visible_max_y = static_cast<long long>(vr.maxY);
+        out->screen_width = view->Screen()->GetWidth();
+        out->screen_height = view->Screen()->GetHeight();
+        return 0;
+    } catch (...) {
+        return -1;
+    }
 }
 
 // ── Custom actions ─────────────────────────────────────────────────────────

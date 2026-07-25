@@ -236,3 +236,38 @@ TEST_CASE("strand2/bounds within screen and monotone") {
         CHECK(nd.screen_y2 >= 0);
     }
 }
+
+TEST_CASE("strand2/never throws across the C boundary on a long session") {
+    // Regression for the Rule 4 crash: GetAlphSymbol() throws on the base class
+    // and dasher_get_visible_nodes must catch every exception (return -1) rather
+    // than let one cross extern "C" (SIGABRT). A long, deep drive maximises the
+    // chance of hitting any throwing accessor; the test process surviving is the
+    // assertion.
+    ScopedContext ctx(800, 600);
+    REQUIRE(dasher_set_visible_nodes_enabled(ctx, 1) == 0);
+
+    dasher_set_speed_percent(ctx, 300);
+    dasher_mouse_move(ctx, 730.0f, 290.0f);
+    dasher_mouse_down(ctx);
+
+    std::vector<dasher_node_info> nodes(256);
+    init_node_info(nodes.data(), 256);
+
+    for (int i = 0; i < 60; ++i) {
+        int* cmds = nullptr;
+        int cc = 0;
+        char** fstrs = nullptr;
+        int fsc = 0;
+        dasher_frame(ctx, 1000 + i * 16, &cmds, &cc, &fstrs, &fsc);
+
+        char** strs = nullptr;
+        int sc = 0;
+        const int n = dasher_get_visible_nodes(ctx, nodes.data(), 256, &strs, &sc);
+        // Always a sane result — never a crash. -1 (capture off / guarded throw)
+        // or a non-negative node count.
+        CHECK(n >= -1);
+        CHECK(n < 100000); // sanity bound
+    }
+
+    dasher_mouse_up(ctx);
+}
