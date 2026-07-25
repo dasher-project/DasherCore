@@ -269,6 +269,9 @@ if(BUILD_CAPI)
         dasher_add_test(dasher_capi_buffer_lifetime_tests test_capi_buffer_lifetime.cpp)
         dasher_add_test(dasher_lm_correctness_tests test_lm_correctness.cpp)
         dasher_add_test(dasher_view_geometry_tests test_view_geometry.cpp)
+        dasher_add_test(dasher_circle_geometry_tests test_circle_geometry.cpp)
+        # Internal: links DasherCore directly to drive CircleTo/IsSpaceAroundNode.
+        dasher_add_test_internal(dasher_circle_view_internal_tests test_circle_view_internal.cpp)
         dasher_add_test(dasher_input_filter_tests test_input_filters.cpp)
         dasher_add_test(dasher_xml_error_path_tests test_xml_error_paths.cpp)
 

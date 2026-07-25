@@ -104,8 +104,18 @@ class Dasher::CDasherViewSquare : public CDasherView {
     /// dest - point (x2,y2) in screen coords
     /// pts - vector into which to store points; on entry, last element should already be screen-coords of (x1,y1)
     /// dXMul - multiply x coords (in dasher space) by this (i.e. aspect ratio), for ovals
+    /// depth - remaining subdivision budget. CircleTo subdivides the arc
+    ///   recursively; this bounds the recursion so a degenerate arc (NaN
+    ///   midpoint, integer-rounding stall) cannot exhaust the stack. At the
+    ///   budget the remaining arc is approximated by a straight line, which is
+    ///   visually fine at the granularity reached.
     void CircleTo(myint cy, myint r, myint y1, myint x1, myint y3, myint x3, point dest, std::vector<point>& pts,
-                  double dXMul) const;
+                  double dXMul, int depth = kMaxCircleSubdivisionDepth) const;
+    /// Maximum recursion depth for CircleTo(). 2^20 segments is far more than any
+    /// real arc needs (a screen-sized circle resolves to pixel accuracy in ~13
+    /// levels), yet keeps the worst-case call count bounded if convergence ever
+    /// fails. Stack usage at this depth is negligible.
+    static constexpr int kMaxCircleSubdivisionDepth = 20;
     void Circle(myint Range, myint y1, myint y2, const ColorPalette::Color& fillColor,
                 const ColorPalette::Color& outlineColor, int lineWidth) const;
     void Quadric(myint Range, myint lowY, myint highY, const ColorPalette::Color& fillColor,
