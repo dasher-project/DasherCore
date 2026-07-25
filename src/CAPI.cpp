@@ -267,22 +267,33 @@ class CommandScreen final : public Dasher::CDasherScreen {
             push(2, Points[Number - 1].x, Points[Number - 1].y, Points[0].x, Points[0].y, colorToARGB(outlineColor));
         }
     }
-
     // ── Cube mode (Options::CUBE) ───────────────────────────────────────────
-    // The flat command buffer has no 3D backend, so cube mode renders as flat
-    // shaded rectangles: one filled rect (opcode 4) per cube face, plus an
-    // outline (opcode 3) when requested. Without these overrides the whole cube
-    // path is silently dropped (the base-class methods are no-ops), which left
-    // the canvas black — see issue #47.
-    void DrawCube(float posX, float posY, float sizeX, float sizeY, Dasher::CubeDepthLevel, Dasher::CubeDepthLevel,
-                  const Dasher::ColorPalette::Color& color, const Dasher::ColorPalette::Color& outlineColor,
-                  int iThickness) override {
+    // The flat command buffer has no 3D backend, and painter's-algorithm
+    // emulation (shaded top/right faces) does NOT work here: Dasher renders
+    // depth-first, so each child's flat front face paints over the parent's
+    // shaded faces, leaving only leaf nodes with any visible 3D — see issue #49.
+    //
+    // Instead, DrawCube emits a dedicated opcode-7 record carrying the raw cube
+    // data (bounds + extrusion depth + colours + thickness) through the buffer
+    // intact. Frontends then render cubes as a 3D overlay in a second pass,
+    // composited on top of the flat layout, using whatever 3D API they have.
+    //
+    // Opcode 7 occupies TWO 6-int slots (12 ints), both prefixed with 7, so the
+    // buffer stays uniformly 6-int divisible: a parser advancing 6 ints per slot
+    // stays in sync, and frontends that don't know opcode 7 just see two unknown
+    // opcode-7 slots per cube and skip them (graceful degradation, no desync).
+    //
+    //   slot 1: [7, x1, y1, x2, y2, extrusionLevel]
+    //   slot 2: [7, fillARGB, outlineARGB, thickness, 0, 0]
+    void DrawCube(float posX, float posY, float sizeX, float sizeY, Dasher::CubeDepthLevel nodeDepth,
+                  Dasher::CubeDepthLevel, const Dasher::ColorPalette::Color& color,
+                  const Dasher::ColorPalette::Color& outlineColor, int iThickness) override {
         const int x1 = static_cast<int>(posX - sizeX / 2.0f);
         const int y1 = static_cast<int>(posY - sizeY / 2.0f);
         const int x2 = static_cast<int>(posX + sizeX / 2.0f);
         const int y2 = static_cast<int>(posY + sizeY / 2.0f);
-        if (!color.isFullyTransparent()) push(4, x1, y1, x2, y2, colorToARGB(color));
-        if (iThickness > 0 && !outlineColor.isFullyTransparent()) push(3, x1, y1, x2, y2, colorToARGB(outlineColor));
+        push(7, x1, y1, x2, y2, static_cast<int>(nodeDepth.extrusionLevel));
+        push(7, colorToARGB(color), colorToARGB(outlineColor), iThickness, 0, 0);
     }
 
     void Draw3DLabel(Label* label, Dasher::screenint x, Dasher::screenint y, Dasher::screenint,

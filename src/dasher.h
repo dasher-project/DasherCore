@@ -78,7 +78,9 @@ DASHER_API void dasher_key_event(dasher_ctx* ctx, int key, int pressed);
 // Returns pointers into internal buffers — valid only until the next
 // dasher_frame() call on this context. Do NOT free them.
 //
-// Command format: each command is 6 ints: [opcode, a, b, c, d, argb]
+// Command format: the buffer is a sequence of 6-int slots, each read
+// opcode-first: [opcode, a, b, c, d, argb]. A parser advancing 6 ints per slot
+// stays in sync for every opcode.
 //
 //   0: Clear screen          — argb = background colour
 //   1: Circle                — a=x, b=y, c=radius, d=1 filled / 0 outline, argb
@@ -87,14 +89,23 @@ DASHER_API void dasher_key_event(dasher_ctx* ctx, int key, int pressed);
 //   4: Rectangle filled      — a=x1, b=y1, c=x2, d=y2, argb
 //   5: Text                  — a=x, b=y, c=fontSize, d=stringIndex, argb
 //   6: Set line width        — a=lineWidth (applies to subsequent opcode 2 lines)
+//   7: Cube (2 slots/12 ints)— slot 1: [7, x1, y1, x2, y2, extrusionLevel]
+//                              slot 2: [7, fillARGB, outlineARGB, thickness, 0, 0]
+//
+// Opcode 7 (LP_SHAPE_TYPE == CUBE) carries the raw cube data — including the
+// per-node extrusion depth — through the buffer for frontend 3D compositing.
+// It occupies TWO consecutive 6-int slots (both prefixed with 7) so the buffer
+// stays uniformly 6-int divisible: frontends that don't implement cube mode
+// just see two unknown opcode-7 slots and skip them (graceful degradation).
+//
+// Why a dedicated opcode: the flat buffer has no depth buffer, and Dasher
+// renders depth-first, so shaded-face emulation under painter's algorithm gets
+// buried under child rectangles. Frontends render cube mode in two passes:
+// (1) opcodes 0-6 as the flat layout, (2) opcode-7 cubes composited as a 3D
+// overlay on top (alpha-blended shaded faces with extrusion scaled to screen
+// gaps), using the frontend's own graphics API.
 //
 // For opcode 5, d is an index into the strings array.
-//
-// LP_SHAPE_TYPE == CUBE (6) renders through the same opcode-3/4/5 commands:
-// each cube face is an opcode-4 filled rectangle (with an opcode-3 outline when
-// the node has one), the crosshair bar is an opcode-4 rectangle, and cube-mode
-// labels are opcode-5 text. The flat buffer carries no 3D extrusion, so cube
-// mode looks like flat rectangles over this API.
 //
 // argb format: (alpha << 24) | (red << 16) | (green << 8) | blue
 DASHER_API void dasher_frame(dasher_ctx* ctx, int64_t time_ms, int** out_commands, int* out_command_count,

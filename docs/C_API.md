@@ -188,13 +188,13 @@ Advances one frame and returns draw commands.
 
 - **`time_ms`** — Current time in milliseconds. If <= 0, treated as 0.
 - **`out_commands`** — Set to internal command buffer (array of `int`). Valid until next `dasher_frame()`. Do NOT free.
-- **`out_command_count`** — Set to **total number of ints** (not number of commands — divide by 6 for command count).
+- **`out_command_count`** — Set to **total number of ints** (not slot count — divide by 6; opcode 7 occupies two slots).
 - **`out_strings`** — Array of `char*` string pointers. Valid until next `dasher_frame()`.
 - **`out_string_count`** — Number of strings.
 
 ### Draw Command Format
 
-Each command is 6 `int32_t` values: `[opcode, a, b, c, d, argb]`
+The buffer is a sequence of 6-`int32_t` slots, each read opcode-first: `[opcode, a, b, c, d, argb]`. A parser advancing 6 ints per slot stays in sync for every opcode.
 
 | Opcode | Name | Fields | Description |
 |--------|------|--------|-------------|
@@ -204,8 +204,21 @@ Each command is 6 `int32_t` values: `[opcode, a, b, c, d, argb]`
 | 3 | Rectangle outline | a=x1, b=y1, c=x2, d=y2, argb | Rectangle outline |
 | 4 | Rectangle filled | a=x1, b=y1, c=x2, d=y2, argb | Filled rectangle |
 | 5 | Text | a=x, b=y, c=fontSize, d=stringIndex, argb | Render string from strings array |
+| 6 | Set line width | a=lineWidth | Applies to subsequent opcode 2 lines |
+| 7 | Cube (2 slots) | slot 1: `[7, x1, y1, x2, y2, extrusionLevel]`<br>slot 2: `[7, fillARGB, outlineARGB, thickness, 0, 0]` | Cube node (CUBE shape); raw data for frontend 3D overlay. Occupies **two** 6-int slots (12 ints). |
 
 **ARGB format:** `(alpha << 24) | (red << 16) | (green << 8) | blue`
+
+#### Cube mode (opcode 7) — two-pass rendering
+
+The flat command buffer has no depth buffer, and Dasher renders depth-first, so shaded-face emulation under painter's algorithm gets buried under child rectangles. `CommandScreen::DrawCube` therefore emits a dedicated opcode-7 record carrying the raw cube data (bounds + `extrusionLevel` + colours + thickness) through the buffer intact. Frontends render cube mode in two passes:
+
+1. **Pass 1** — render opcodes 0-6 in order (flat layout + text).
+2. **Pass 2** — render opcode-7 cubes composited as a 3D overlay on top (alpha-blended shaded faces with extrusion offsets scaled to actual screen gaps), using the frontend's own graphics API (CGContext, Metal, Skia, Canvas, …).
+
+The cube overlay is a visual enhancement layered over the flat layout, not a replacement. Frontends that don't implement pass 2 will render the flat layout only (cube nodes won't be visible, since they are emitted as opcode 7, not opcode 4).
+
+Opcode 7 occupies **two 6-int slots** (12 ints, both prefixed with `7`) rather than one, so the buffer stays uniformly 6-int divisible: a parser advancing 6 ints per slot never desynchronises, and frontends that don't know opcode 7 simply see two unknown slots per cube and skip them. The cost is 3 unused ints per cube — negligible (cube mode has ~50–200 visible nodes/frame in a buffer already ≥10K ints).
 
 ### Rendering Example
 
@@ -222,6 +235,17 @@ for (int i = 0; i < cmd_count; i += 6) {
         case 3: draw_rect_outline(a, b, c, d, argb); break;
         case 4: draw_rect_filled(a, b, c, d, argb); break;
         case 5: draw_text(a, b, c, strs[d], argb); break;
+        case 6: set_line_width(a); break;
+        case 7: { // Cube — spans this slot AND the next one (12 ints total)
+            int x1 = a, y1 = b, x2 = c, y2 = d;
+            int extrusionLevel = argb;
+            int fillARGB   = cmds[i+7];
+            int outlineARGB = cmds[i+8];
+            int thickness  = cmds[i+9];
+            enqueue_cube_overlay(x1, y1, x2, y2, extrusionLevel, fillARGB, outlineARGB, thickness);
+            i += 6; // skip the second slot (the loop's i += 6 skips the first)
+            break;
+        }
     }
 }
 ```
@@ -563,7 +587,7 @@ dasher_frame(ctx, System.currentTimeMillis(), cmds, cmdCount, null, null)
 ## Important Notes
 
 1. **`dasher_set_screen_size` must be called before `dasher_frame`** — it triggers engine initialization.
-2. **`out_command_count` is total int count, not command count** — divide by 6 for command count.
+2. **`out_command_count` is total int count, not slot count** — divide by 6 (opcode 7/Cube occupies two 6-int slots).
 3. **String pointers are ephemeral** — copy immediately if you need the value beyond the current API call.
 4. **Localization state is global** — changing locale in one context affects all contexts (shared static state).
 5. **Speed percent mapping** — 100% = `LP_MAX_BITRATE` of 160, range 20–400%.
