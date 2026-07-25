@@ -234,8 +234,97 @@ int dasher_color_rgb(int red, int green, int blue);              // Create opaqu
 int dasher_color_get_alpha(int argb);                            // Extract alpha
 int dasher_color_get_red(int argb);                              // Extract red
 int dasher_color_get_green(int argb);                            // Extract green
-int dasher_color_get_blue(int argb);                             // Extract blue
+int dasher_color_get_blue(int argb);                            // Extract blue
 ```
+
+## Custom Rendering — Strand 2 (RFC 0013)
+
+The `int[]` command buffer from `dasher_frame()` (Strand 1) is 2D painter's algorithm — no depth buffer, no compositing. It can't represent 3D extruded cubes, VR/spatial layouts, or fully custom visualisations. **Strand 2** is the alternative: query the visible node tree each frame and render it yourself with your own graphics API.
+
+The two strands coexist. A frontend can use Strand 1 for most rendering and drop into Strand 2 for specific features (e.g. render cube mode as real 3D from the node tree), or render everything from scratch.
+
+### Enabling capture
+
+Node capture is **off by default** — Strand 1-only frontends pay zero overhead. Enable it once at setup:
+
+```c
+dasher_set_visible_nodes_enabled(ctx, 1);
+```
+
+After this, each `dasher_frame()` records the nodes it draws; `dasher_get_visible_nodes()` returns them.
+
+### `dasher_get_visible_nodes`
+
+```c
+typedef struct dasher_node_info {
+    int struct_size;            // caller sets to sizeof(dasher_node_info) before the call
+    long long dasher_y1;        // node's Dasher-Y range
+    long long dasher_y2;
+    int symbol;                 // alphabet symbol index (-1 for group/control nodes)
+    int has_children;           // 1 if this node has children
+    int depth;                  // tree depth from the rendered root (0 = root)
+    int is_game_node;           // 1 if on the game-mode path
+    int screen_x1, screen_y1;   // node's clipped screen bounds
+    int screen_x2, screen_y2;
+    int fill_argb;              // node fill colour (from active palette)
+    int outline_argb;           // node outline colour
+    int label_index;            // index into out_strings (-1 if no label)
+} dasher_node_info;
+
+// Returns the number of visible nodes (may exceed max_nodes — grow the buffer
+// and re-query if so). Nodes are depth-first (parent before children).
+// out_strings / out_string_count hold label text; label_index indexes into it.
+// out_nodes and out_strings are engine-owned, valid until the next
+// dasher_frame() or dasher_get_visible_nodes() call.
+// Returns -1 if capture is disabled, the engine isn't realised, or the caller's
+// struct_size is smaller than this engine's struct.
+int dasher_get_visible_nodes(dasher_ctx* ctx, dasher_node_info* out_nodes, int max_nodes,
+                             char*** out_strings, int* out_string_count);
+```
+
+The captured node set matches **exactly** what the Strand 1 command buffer draws for the same frame (Strand 1/Strand 2 parity), so a frontend can mix strands without drift. `screen_x1..y2` use the same clip formula as the opcode-4 filled-rectangle draw. `depth` is the source for cube extrusion (deeper nodes recede); `symbol`/`label_index` identify what each node represents.
+
+### `dasher_get_viewport`
+
+```c
+typedef struct dasher_viewport {
+    int struct_size;            // caller sets to sizeof(dasher_viewport) before the call
+    long long crosshair_x;      // crosshair Dasher X (fixed at the origin)
+    long long crosshair_y;      // crosshair Dasher Y
+    long long visible_min_y;    // visible Dasher-Y range
+    long long visible_max_y;
+    int screen_width;           // canvas size from dasher_set_screen_size
+    int screen_height;
+} dasher_viewport;
+
+int dasher_get_viewport(dasher_ctx* ctx, dasher_viewport* out);  // 0 on success, -1 on error
+```
+
+### Rendering example (Strand 2)
+
+```c
+dasher_set_visible_nodes_enabled(ctx, 1);
+
+// each frame:
+dasher_frame(ctx, time_ms, &cmds, &cc, &strs, &sc);  // still call it — it advances the engine
+
+dasher_node_info nodes[256];
+for (int i = 0; i < 256; ++i) nodes[i].struct_size = sizeof(dasher_node_info);
+char** labels = NULL;
+int label_count = 0;
+int n = dasher_get_visible_nodes(ctx, nodes, 256, &labels, &label_count);
+if (n > 256) { /* grew past the buffer — reallocate and re-query */ }
+
+for (int i = 0; i < n && i < 256; ++i) {
+    dasher_node_info nd = nodes[i];
+    // Render however you like: flat rect, 3D cube extruded by nd.depth, sphere…
+    if (nd.label_index >= 0) draw_label(labels[nd.label_index], nd.screen_x1, nd.screen_y1);
+    draw_node(nd.screen_x1, nd.screen_y1, nd.screen_x2, nd.screen_y2,
+              nd.fill_argb, nd.outline_argb);
+}
+```
+
+For a 3D cube frontend, render the same nodes in two passes (flat layout first, then cubes composited on top using `depth` for the extrusion), or render everything in 3D from the start. `LP_SHAPE_TYPE` (read via `dasher_get_long_parameter`) is a hint the frontend can honour or ignore — shape and depth become frontend concerns, not engine concerns.
 
 ## Output Text
 
