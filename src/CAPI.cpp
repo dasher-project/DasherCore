@@ -1822,6 +1822,18 @@ DASHER_API int dasher_get_alphabet_symbol_image(dasher_ctx* ctx, int index, char
     return 0;
 }
 
+DASHER_API int dasher_get_alphabet_symbol_display(dasher_ctx* ctx, int index, char* out_text, int max_len) {
+    if (!ctx || !ctx->intf || !out_text || max_len <= 0) return -1;
+    auto* alph = ctx->intf->GetActiveAlphabet();
+    if (!alph) return -1;
+    if (index < 0 || index >= alph->iEnd) return -1;
+    std::string text = alph->GetDisplayText(index);
+    int len = std::min((int)text.size(), max_len - 1);
+    std::memcpy(out_text, text.c_str(), len);
+    out_text[len] = '\0';
+    return 0;
+}
+
 DASHER_API int dasher_import_training_text(dasher_ctx* ctx, const char* text) {
     if (!ctx || !ctx->intf || !text) return -1;
     try {

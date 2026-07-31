@@ -521,6 +521,10 @@ DASHER_API int dasher_get_alphabet_symbol_count(dasher_ctx* ctx);
 // Returns 0 on success, -1 if out of range. out_text is NUL-terminated.
 DASHER_API int dasher_get_alphabet_symbol_text(dasher_ctx* ctx, int index, char* out_text, int max_len);
 
+// Get the display label (what appears in Dasher boxes) for an alphabet symbol.
+// Returns 0 on success, -1 if out of range. out_text is NUL-terminated.
+DASHER_API int dasher_get_alphabet_symbol_display(dasher_ctx* ctx, int index, char* out_text, int max_len);
+
 // Get the optional image path for an alphabet symbol (RFC 0014).
 // The path is relative to the alphabet's data directory, or empty if no image.
 // Returns 0 on success, -1 if out of range. out_path is NUL-terminated.
