@@ -1808,6 +1808,20 @@ DASHER_API int dasher_get_alphabet_symbol_text(dasher_ctx* ctx, int index, char*
     return 0;
 }
 
+DASHER_API int dasher_get_alphabet_symbol_image(dasher_ctx* ctx, int index, char* out_path, int max_len) {
+    if (!ctx || !ctx->intf || !out_path || max_len <= 0) return -1;
+    auto* alph = ctx->intf->GetActiveAlphabet();
+    if (!alph) return -1;
+    if (index < 0 || index >= alph->iEnd) return -1;
+    std::string path = alph->GetImage(index);
+    // Empty path means "no image" — still return 0 with empty string so the
+    // frontend can distinguish "valid symbol, no image" from "error".
+    int len = std::min((int)path.size(), max_len - 1);
+    std::memcpy(out_path, path.c_str(), len);
+    out_path[len] = '\0';
+    return 0;
+}
+
 DASHER_API int dasher_import_training_text(dasher_ctx* ctx, const char* text) {
     if (!ctx || !ctx->intf || !text) return -1;
     try {
