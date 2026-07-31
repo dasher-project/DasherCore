@@ -15,6 +15,7 @@
 #include "DasherCore/Alphabet/AlphIO.h"
 #include "DasherCore/DasherModel.h"
 #include "DasherCore/DasherNode.h"
+#include "DasherCore/DasherView.h"
 #include "DasherCore/NodeCreationManager.h"
 #include "DasherCore/ControlManager.h"
 #include "DasherCore/LanguageModelling/LMRegistry.h"
@@ -399,6 +400,12 @@ struct dasher_ctx {
     // cross-context bug noted in the codebase review (Tier 1 #4).
     std::vector<std::string> stringValues; // dasher_get_palette_name / alphabet_name / parameter_string_values
     std::string gameTextBuf;               // dasher_game_get_target_text
+
+    // Strand 2 (RFC 0013): label strings for dasher_get_visible_nodes. Owned
+    // here so the returned char** is stable until the next visible_nodes/frame
+    // call, mirroring the command-buffer ownership contract.
+    std::vector<std::string> nodeLabelStrings;
+    std::vector<char*> nodeLabelPtrs;
 
     // Appearance model state (RFC 0007). Lives at the C API layer — appearance
     // is a shell/canvas concern, not a DasherCore engine parameter. Persisted to
@@ -1822,6 +1829,116 @@ DASHER_API int dasher_get_offset(dasher_ctx* ctx) {
     auto* model = ctx->intf->GetModel();
     if (!model) return -1;
     return model->GetOffset();
+}
+
+// ── Custom rendering, Strand 2 (RFC 0013) ──────────────────────────────────
+
+DASHER_API int dasher_set_visible_nodes_enabled(dasher_ctx* ctx, int enabled) {
+    if (!ctx || !ctx->intf || !ctx->realized) return -1;
+    try {
+        auto* view = ctx->intf->GetView();
+        if (!view) return -1;
+        view->SetVisibleNodeCapture(enabled != 0);
+        return 0;
+    } catch (...) {
+        return -1;
+    }
+}
+
+DASHER_API int dasher_get_visible_nodes(dasher_ctx* ctx, dasher_node_info* out_nodes, int max_nodes,
+                                        char*** out_strings, int* out_string_count) {
+    if (!ctx || !ctx->intf || !ctx->realized) return -1;
+    if (!out_nodes || max_nodes <= 0) return -1;
+
+    // CONTRIBUTING Rule 4: never let a C++ exception cross extern "C". Node
+    // accessors (notably GetAlphSymbol, which throws on the base class) can
+    // throw, so the whole body is guarded; the IsSymbolNode() check below keeps
+    // the common path throw-free, and this catch is the safety net.
+    try {
+        auto* view = ctx->intf->GetView();
+        if (!view || !view->IsVisibleNodeCaptureEnabled()) return -1;
+
+        // ABI version check: the caller sets struct_size on the first element.
+        const int caller_size = out_nodes[0].struct_size;
+        const int v1_size = static_cast<int>(sizeof(dasher_node_info));
+        if (caller_size < v1_size) {
+            // Caller is built against an older, smaller struct than this engine.
+            // Filling v1 fields would overflow their allocation.
+            return -1;
+        }
+
+        const auto nodes = view->GetVisibleNodes(); // by value; stable copy
+
+        ctx->nodeLabelStrings.clear();
+        ctx->nodeLabelPtrs.clear();
+
+        const int total = static_cast<int>(nodes.size());
+        const int written = std::min(total, max_nodes);
+        for (int i = 0; i < written; ++i) {
+            const auto& n = nodes[i];
+            dasher_node_info& out = out_nodes[i];
+            out.struct_size = v1_size;
+            out.dasher_y1 = static_cast<long long>(n.dasher_y1);
+            out.dasher_y2 = static_cast<long long>(n.dasher_y2);
+            // All node-derived values were resolved during Render() and stored
+            // in the snapshot — no CDasherNode* is dereferenced here, so the
+            // model is free to mutate/free nodes between the frame and this
+            // query. (Previously this lazily dereferenced a stored pointer,
+            // which dangled and crashed — review feedback on #51.)
+            out.symbol = n.symbol;
+            out.has_children = n.has_children;
+            out.depth = n.depth;
+            out.is_game_node = n.is_game_node;
+            out.screen_x1 = n.screen_x1;
+            out.screen_y1 = n.screen_y1;
+            out.screen_x2 = n.screen_x2;
+            out.screen_y2 = n.screen_y2;
+            out.fill_argb = colorToARGB(n.fill);
+            out.outline_argb = colorToARGB(n.outline);
+            if (!n.label.empty()) {
+                ctx->nodeLabelStrings.push_back(n.label);
+                out.label_index = static_cast<int>(ctx->nodeLabelStrings.size() - 1);
+            } else {
+                out.label_index = -1;
+            }
+        }
+
+        // Build char* pointers for the strings array.
+        ctx->nodeLabelPtrs.resize(ctx->nodeLabelStrings.size());
+        for (size_t i = 0; i < ctx->nodeLabelStrings.size(); ++i)
+            ctx->nodeLabelPtrs[i] = ctx->nodeLabelStrings[i].data();
+
+        if (out_strings) *out_strings = ctx->nodeLabelPtrs.data();
+        if (out_string_count) *out_string_count = static_cast<int>(ctx->nodeLabelPtrs.size());
+
+        // Return the total available count (may exceed max_nodes) so the caller
+        // can grow its buffer and re-query if truncated.
+        return total;
+    } catch (...) {
+        return -1;
+    }
+}
+
+DASHER_API int dasher_get_viewport(dasher_ctx* ctx, dasher_viewport* out) {
+    if (!ctx || !ctx->intf || !ctx->realized || !out) return -1;
+    try {
+        const int caller_size = out->struct_size;
+        const int v1_size = static_cast<int>(sizeof(dasher_viewport));
+        if (caller_size < v1_size) return -1;
+        auto* view = ctx->intf->GetView();
+        if (!view) return -1;
+        const auto vr = view->VisibleRegion();
+        out->struct_size = v1_size;
+        out->crosshair_x = static_cast<long long>(Dasher::CDasherModel::ORIGIN_X);
+        out->crosshair_y = static_cast<long long>(Dasher::CDasherModel::ORIGIN_Y);
+        out->visible_min_y = static_cast<long long>(vr.minY);
+        out->visible_max_y = static_cast<long long>(vr.maxY);
+        out->screen_width = view->Screen()->GetWidth();
+        out->screen_height = view->Screen()->GetHeight();
+        return 0;
+    } catch (...) {
+        return -1;
+    }
 }
 
 // ── Custom actions ─────────────────────────────────────────────────────────

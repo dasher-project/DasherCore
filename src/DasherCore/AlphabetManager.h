@@ -146,6 +146,7 @@ class CSymbolNode : public CAlphNode {
     void GetContext(CDasherInterfaceBase* pInterface, const CAlphabetMap* pAlphabetMap,
                     std::vector<symbol>& vContextSymbols, int iOffset, int iLength) override;
     symbol GetAlphSymbol() override;
+    bool IsSymbolNode() const override { return true; }
     /// Override: if the symbol to create is the same as this node's symbol, return this node instead of creating a new
     /// one
     CDasherNode* RebuildSymbol(CAlphNode* pParent, symbol iSymbol) override;

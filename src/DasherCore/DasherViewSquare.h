@@ -228,6 +228,18 @@ class Dasher::CDasherViewSquare : public CDasherView {
     mutable DasherCoordScreenRegion m_visible_region;
 
     CSettingsStore* m_pSettingsStore;
+
+    // ── Node capture (Strand 2 / RFC 0013) ──────────────────────────────────
+  public:
+    void SetVisibleNodeCapture(bool enabled) override { m_captureVisibleNodes = enabled; }
+    bool IsVisibleNodeCaptureEnabled() const override { return m_captureVisibleNodes; }
+    std::vector<VisibleNode> GetVisibleNodes() const override { return m_visibleNodes; }
+
+  private:
+    bool m_captureVisibleNodes = false;
+    std::vector<VisibleNode> m_visibleNodes;
+    // Record one drawn node's geometry/colour (no-op when capture is off).
+    void CaptureNode(CDasherNode* node, myint y1, myint y2, int depth);
 };
 
 /// @}
