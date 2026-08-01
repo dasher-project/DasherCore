@@ -95,6 +95,9 @@ class Dasher::CAlphInfo : public SGroupInfo {
     }
 
     const std::string& GetText(symbol i) const { return validSymbol(i) ? m_vCharacters[i - 1].Text : s_emptyStr; }
+
+    /// Returns the optional image path for symbol i, or empty string if none.
+    const std::string& GetImage(symbol i) const { return validSymbol(i) ? m_vCharacters[i - 1].Image : s_emptyStr; }
     double GetSymbolFixedProbability(symbol i) const {
         return validSymbol(i) ? m_vCharacters[i - 1].fixedProbability : 0.0;
     }
@@ -152,6 +155,7 @@ class Dasher::CAlphInfo : public SGroupInfo {
 
         std::string Display;
         std::string Text;
+        std::string Image; // optional image path (empty = no image)
         SGroupInfo* parentGroup = nullptr;
         int ColorGroupOffset = -1; // Offset within group
         float fixedProbability =

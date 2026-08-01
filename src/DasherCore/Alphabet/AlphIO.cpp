@@ -347,6 +347,10 @@ void CAlphIO::ReadCharAttributes(pugi::xml_node xml_node, CAlphInfo::character& 
         if (!tAttr.empty()) alphabet_character.Text = tAttr.as_string();
     }
 
+    // Optional image path (RFC 0014): if present, frontends can render an
+    // image instead of the text label.
+    alphabet_character.Image = xml_node.attribute("image").as_string();
+
     for (auto potentialActions : xml_node.children()) {
         const char* actionName = potentialActions.name();
 
