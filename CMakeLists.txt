@@ -259,6 +259,7 @@ if(BUILD_CAPI)
         dasher_add_test(dasher_deterministic_tests test_deterministic.cpp)
         dasher_add_test(dasher_training_tests test_training.cpp)
         dasher_add_test(dasher_node_tree_tests test_node_tree.cpp)
+        dasher_add_test(dasher_locales_sync_tests test_locales_sync.cpp)
 
         # Phase B (characterization) — closes coverage gaps noted in the review.
         #   - buffer_lifetime: the C API "valid until next call" contract
