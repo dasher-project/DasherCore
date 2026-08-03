@@ -148,7 +148,7 @@
       "key": "BP_AUTOCALIBRATE",
       "storageName": "Autocalibrate",
       "type": "bool",
-      "default": false,
+      "default": true,
       "label": "Auto-Calibrate Target",
       "description": "Automatically adjusts the 'straight-ahead' point based on the user's average pointer position.",
       "uiType": "Switch",
@@ -369,10 +369,22 @@
       "group": "Customization",
       "subgroup": "Layout",
       "enumValues": [
-        {"label": "Automatic", "cppExpr": "-2"},
-        {"label": "Normal", "cppExpr": "0"},
-        {"label": "Left-Handed", "cppExpr": "1"},
-        {"label": "Right-Handed", "cppExpr": "2"}
+        {
+          "label": "Automatic",
+          "cppExpr": "-2"
+        },
+        {
+          "label": "Normal",
+          "cppExpr": "0"
+        },
+        {
+          "label": "Left-Handed",
+          "cppExpr": "1"
+        },
+        {
+          "label": "Right-Handed",
+          "cppExpr": "2"
+        }
       ]
     },
     {
@@ -420,10 +432,22 @@
       "group": "Language",
       "subgroup": "Learning",
       "enumValues": [
-        {"label": "PPM", "cppExpr": "0"},
-        {"label": "Word", "cppExpr": "2"},
-        {"label": "Mixture", "cppExpr": "3"},
-        {"label": "CTW", "cppExpr": "4"}
+        {
+          "label": "PPM",
+          "cppExpr": "0"
+        },
+        {
+          "label": "Word",
+          "cppExpr": "2"
+        },
+        {
+          "label": "Mixture",
+          "cppExpr": "3"
+        },
+        {
+          "label": "CTW",
+          "cppExpr": "4"
+        }
       ]
     },
     {
@@ -470,13 +494,34 @@
       "group": "Customization",
       "subgroup": "Appearance",
       "enumValues": [
-        {"label": "Disjoint Rectangles", "cppExpr": "static_cast<long>(Options::DISJOINT_RECTANGLE)"},
-        {"label": "Overlapping Rectangles", "cppExpr": "static_cast<long>(Options::OVERLAPPING_RECTANGLE)"},
-        {"label": "Triangles", "cppExpr": "static_cast<long>(Options::TRIANGLE)"},
-        {"label": "Truncated Triangles", "cppExpr": "static_cast<long>(Options::TRUNCATED_TRIANGLE)"},
-        {"label": "Quadric", "cppExpr": "static_cast<long>(Options::QUADRIC)"},
-        {"label": "Circle", "cppExpr": "static_cast<long>(Options::CIRCLE)"},
-        {"label": "Cube", "cppExpr": "static_cast<long>(Options::CUBE)"}
+        {
+          "label": "Disjoint Rectangles",
+          "cppExpr": "static_cast<long>(Options::DISJOINT_RECTANGLE)"
+        },
+        {
+          "label": "Overlapping Rectangles",
+          "cppExpr": "static_cast<long>(Options::OVERLAPPING_RECTANGLE)"
+        },
+        {
+          "label": "Triangles",
+          "cppExpr": "static_cast<long>(Options::TRIANGLE)"
+        },
+        {
+          "label": "Truncated Triangles",
+          "cppExpr": "static_cast<long>(Options::TRUNCATED_TRIANGLE)"
+        },
+        {
+          "label": "Quadric",
+          "cppExpr": "static_cast<long>(Options::QUADRIC)"
+        },
+        {
+          "label": "Circle",
+          "cppExpr": "static_cast<long>(Options::CIRCLE)"
+        },
+        {
+          "label": "Cube",
+          "cppExpr": "static_cast<long>(Options::CUBE)"
+        }
       ]
     },
     {
@@ -511,7 +556,7 @@
       "type": "long",
       "default": 50,
       "label": "Uniform Probability",
-      "description": "Uniform probability weight (×1000). Higher values make less-probable symbols larger.",
+      "description": "Uniform probability weight (\u00d71000). Higher values make less-probable symbols larger.",
       "uiType": "Slider",
       "min": 0,
       "max": 1000,

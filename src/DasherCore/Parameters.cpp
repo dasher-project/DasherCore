@@ -68,7 +68,7 @@ const std::unordered_map<Parameter, const Parameter_Value> parameter_defaults = 
                      "Precise Dynamics", Settings::UIControlType::Switch, true, "BP_EXACT_DYNAMICS", "CDynamicFilter",
                      "Input"}},
     {BP_AUTOCALIBRATE,
-     Parameter_Value{"Autocalibrate", PARAM_BOOL, Persistence::PERSISTENT, false,
+     Parameter_Value{"Autocalibrate", PARAM_BOOL, Persistence::PERSISTENT, true,
                      "Automatically adjusts the 'straight-ahead' point based on the user's average pointer position.",
                      "Auto-Calibrate Target", Settings::UIControlType::Switch, false, "BP_AUTOCALIBRATE",
                      "CDefaultFilter", "Input"}},
