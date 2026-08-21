@@ -140,7 +140,11 @@ DASHER_API int dasher_get_language_model_param_key(int id, int index);
 // Returns -1 if not found.
 DASHER_API int dasher_find_parameter_key(const char* enum_key_name);
 
-// Get/set speed as a percentage (100 = default, range 20-400).
+// Get/set speed as a percentage (100 = raw LP_MAX_BITRATE 160). The set
+// clamps to the engine's declared LP_MAX_BITRATE range (see
+// dasher_get_parameter_info), not a fixed percent cap — Dasher v5 allowed raw
+// 10–800 (6–500 %), and the historic 20–400 percent clamp silently truncated
+// the top of that range.
 DASHER_API int dasher_get_speed_percent(dasher_ctx* ctx);
 DASHER_API void dasher_set_speed_percent(dasher_ctx* ctx, int percent);
 
@@ -341,8 +345,14 @@ DASHER_API void dasher_reset_settings(dasher_ctx* ctx);
 // Event types:
 //   0 = text output   — text is the string being inserted
 //   1 = text delete   — text is the string being removed (backspace)
+//   2 = buffer clear  — text is empty; the whole buffer was discarded
+//                       (dasher_reset, dasher_reset_output_text, or an
+//                       alphabet change). Deltas alone cannot express this,
+//                       so subscribers maintaining a shadow buffer must
+//                       treat this as "clear your copy".
 //
-// The callback fires on the thread that calls dasher_frame().
+// The callback fires on the thread that calls dasher_frame(). Event type 2
+// may also fire from the thread calling the reset function itself.
 
 typedef void (*dasher_output_callback)(int event_type, const char* text, void* user_data);
 

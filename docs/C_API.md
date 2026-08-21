@@ -347,8 +347,10 @@ Receives real-time text events without polling. Event types:
 |------|---------|
 | 0 | Text output (insertion) |
 | 1 | Text delete (backspace) |
+| 2 | Buffer cleared wholesale — `dasher_reset`, `dasher_reset_output_text`, or an alphabet change (which clears the buffer). `text` is empty; shadow buffers must be cleared, not diffed |
 
-The callback fires on the thread calling `dasher_frame()`.
+The callback fires on the thread calling `dasher_frame()`. Event type 2 may
+also fire on the thread calling the reset function itself.
 
 ### Message Callback
 
@@ -421,7 +423,7 @@ int  dasher_get_speed_percent(dasher_ctx* ctx);
 void dasher_set_speed_percent(dasher_ctx* ctx, int percent);
 ```
 
-- Range: 20–400 (clamped). Default: 100.
+- Range: the engine's declared `LP_MAX_BITRATE` bounds (raw 1–1000 → ~1–625 %, in whole-percent steps of the raw unit). The previous fixed 20–400 clamp truncated Dasher v5's top speeds (v5 allowed raw 10–800 = up to 500 %); values are now clamped to the manifest range instead. Default: 100.
 - Internally maps to `LP_MAX_BITRATE`: `bitrate = percent / 100.0 * 160`
 
 ## Parameters
@@ -655,7 +657,7 @@ dasher_frame(ctx, System.currentTimeMillis(), cmds, cmdCount, null, null)
 2. **`out_command_count` is total int count, not command count** — divide by 6 for command count.
 3. **String pointers are ephemeral** — copy immediately if you need the value beyond the current API call.
 4. **Localization state is global** — changing locale in one context affects all contexts (shared static state).
-5. **Speed percent mapping** — 100% = `LP_MAX_BITRATE` of 160, range 20–400%.
+5. **Speed percent mapping** — 100% = `LP_MAX_BITRATE` of 160, clamped to the engine's declared `LP_MAX_BITRATE` range (not a fixed percent cap).
 6. **Language model ID gap** — IDs are 0, 2, 3, 4 (no ID 1). Historical.
 7. **No font rendering** — text width is estimated as `characters * fontSize / 2`. Actual font metrics are the frontend's responsibility.
 8. **Polygons are decomposed into line segments** — no filled polygon opcode.

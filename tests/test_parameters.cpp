@@ -123,17 +123,23 @@ TEST(param_speed_clamping) {
     ASSERT(ctx != nullptr);
     dasher_set_screen_size(ctx, 800, 600);
 
+    // The percent setter clamps to the engine's declared LP_MAX_BITRATE range
+    // (raw 1–1000 → ~1–625 %), replacing the historic fixed 20–400 cap that
+    // truncated Dasher v5's top speeds (v5 allowed raw 10–800 = up to 500 %).
     dasher_set_speed_percent(ctx, 50);
     int speed = dasher_get_speed_percent(ctx);
-    ASSERT(speed >= 20 && speed <= 400);
+    ASSERT(speed >= 1 && speed <= 625);
 
     dasher_set_speed_percent(ctx, 1000);
     speed = dasher_get_speed_percent(ctx);
-    ASSERT(speed <= 400);
+    ASSERT(speed <= 625); // raw clamped to 1000 → 625 %
 
     dasher_set_speed_percent(ctx, 1);
     speed = dasher_get_speed_percent(ctx);
-    ASSERT(speed >= 20);
+    ASSERT(speed >= 1); // raw clamped up to the engine minimum
+
+    dasher_set_speed_percent(ctx, 500); // v5's maximum, must survive exactly
+    ASSERT(dasher_get_speed_percent(ctx) == 500);
 
     dasher_destroy(ctx);
 }

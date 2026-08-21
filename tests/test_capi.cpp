@@ -73,6 +73,19 @@ TEST(parameters) {
     speed = dasher_get_speed_percent(ctx);
     ASSERT_EQ(speed, 150);
 
+    // The percent setter clamps to the engine's declared LP_MAX_BITRATE range
+    // (raw 1–1000 → ~1–625 %), not the historic fixed 20–400 cap: Dasher v5
+    // allowed raw 10–800 (up to 500 %) and power users rely on the top of it.
+    dasher_set_speed_percent(ctx, 500); // v5's max, raw 800
+    ASSERT_EQ(dasher_get_speed_percent(ctx), 500);
+    dasher_set_speed_percent(ctx, 100000); // clamped to raw 1000 → 625 %
+    ASSERT_EQ(dasher_get_speed_percent(ctx), 625);
+    dasher_set_speed_percent(ctx, 0); // clamped up to raw 1 → 1 %
+    ASSERT_EQ(dasher_get_speed_percent(ctx), 1);
+    // Restore a mid value for the rest of the suite.
+    dasher_set_speed_percent(ctx, 150);
+    ASSERT_EQ(dasher_get_speed_percent(ctx), 150);
+
     int model = dasher_get_language_model_id(ctx);
     CHECK(model >= 0);
 
