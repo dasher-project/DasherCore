@@ -192,6 +192,53 @@ TEST(reset) {
     dasher_destroy(ctx);
 }
 
+TEST(reset_emits_buffer_clear_event) {
+    // Resets clear the edit buffer without insert/delete deltas, so they must
+    // announce themselves as event type 2 — subscribers keeping a shadow
+    // buffer cannot reconstruct "everything vanished" from 0/1 events
+    // (Dasher-GTK's stale output pane after "New" was this bug).
+    dasher_ctx* ctx = create_isolated_context();
+    ASSERT(ctx != nullptr);
+    dasher_set_screen_size(ctx, 800, 600);
+
+    static int clear_events = 0;
+    static int other_events = 0;
+    clear_events = 0;
+    other_events = 0;
+
+    dasher_set_output_callback(
+        ctx,
+        [](int event_type, const char* text, void*) {
+            if (event_type == 2) {
+                ASSERT(text != nullptr); // empty string, never null
+                clear_events++;
+            } else if (event_type == 0 || event_type == 1) {
+                other_events++;
+            }
+            // Unknown future event types must be ignored, not fatal.
+        },
+        nullptr);
+
+    dasher_reset_output_text(ctx);
+    ASSERT_EQ(clear_events, 1);
+
+    dasher_reset(ctx);
+    ASSERT_EQ(clear_events, 2);
+
+    // Alphabet changes clear the buffer as a documented side effect, so they
+    // fire the event too.
+    dasher_set_alphabet_id(ctx, "English with numerals and limited punctuation");
+    ASSERT_EQ(clear_events, 3);
+
+    // Setting the *same* alphabet still cleared the buffer (historic
+    // behaviour), so the event fires regardless.
+    dasher_set_alphabet_id(ctx, "English with numerals and limited punctuation");
+    ASSERT_EQ(clear_events, 4);
+
+    (void)other_events;
+    dasher_destroy(ctx);
+}
+
 TEST(save_settings) {
     static int save_test_counter = 0;
     char shared_dir[256];

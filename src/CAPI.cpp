@@ -945,11 +945,20 @@ DASHER_API const char* dasher_get_output_text(dasher_ctx* ctx) {
     return ctx->tlString.c_str();
 }
 
+// Notify subscribers that the edit buffer was cleared wholesale (event type
+// 2). Insert/delete deltas (0/1) can't express this, and without the event
+// every frontend has to know which API calls clear the buffer and re-sync
+// manually — Dasher-GTK's stale output pane after "New" was exactly this bug.
+static void notify_buffer_cleared(dasher_ctx* ctx) {
+    if (ctx->outputCb) ctx->outputCb(2, "", ctx->outputCbUserData);
+}
+
 DASHER_API void dasher_reset_output_text(dasher_ctx* ctx) {
     if (!ctx) return;
     ctx->editBuffer.clear();
     ctx->cursorPos = 0;
     ctx->rateTimestamps.clear();
+    notify_buffer_cleared(ctx);
 }
 
 DASHER_API void dasher_reset(dasher_ctx* ctx) {
@@ -958,6 +967,7 @@ DASHER_API void dasher_reset(dasher_ctx* ctx) {
     ctx->cursorPos = 0;
     ctx->rateTimestamps.clear();
     ctx->intf->SetOffset(0, true);
+    notify_buffer_cleared(ctx);
 }
 
 DASHER_API const char* dasher_get_alphabet_id(dasher_ctx* ctx) {
@@ -970,6 +980,7 @@ DASHER_API void dasher_set_alphabet_id(dasher_ctx* ctx, const char* alphabet_id)
     if (!ctx || !ctx->intf || !alphabet_id) return;
     ctx->editBuffer.clear();
     ctx->cursorPos = 0;
+    notify_buffer_cleared(ctx); // documented side effect: setting clears the buffer
     if (!ctx->realized) {
         ctx->pendingAlphabet = alphabet_id;
         return;
@@ -1049,9 +1060,20 @@ DASHER_API void dasher_set_speed_percent(dasher_ctx* ctx, int percent) {
     if (!ctx || !ctx->intf) return;
     try {
         const double base = 160.0;
-        const int clamped = (percent < 20) ? 20 : (percent > 400) ? 400 : percent;
-        long bitrate = static_cast<long>(lround_int(clamped / 100.0 * base));
-        if (bitrate < 1) bitrate = 1;
+        // Clamp to the engine's declared LP_MAX_BITRATE range rather than the
+        // historic 20–400 %: that cap was raw 32–640, which silently truncated
+        // the top of Dasher v5's speed range (v5 allowed raw 10–800, i.e. up
+        // to 500 %). Frontend speed controls should take their bounds from the
+        // same manifest (dasher_get_parameter_info).
+        long min_bitrate = 1, max_bitrate = 1000;
+        auto it = Dasher::Settings::parameter_defaults.find(Dasher::LP_MAX_BITRATE);
+        if (it != Dasher::Settings::parameter_defaults.end() && it->second.max > 0) {
+            min_bitrate = it->second.min;
+            max_bitrate = it->second.max;
+        }
+        long bitrate = static_cast<long>(lround_int(percent / 100.0 * base));
+        if (bitrate < min_bitrate) bitrate = min_bitrate;
+        if (bitrate > max_bitrate) bitrate = max_bitrate;
         ctx->intf->SetLongParameter(Dasher::LP_MAX_BITRATE, bitrate);
     } catch (const std::exception& e) {
         log_boundary_error(ctx, "dasher_set_speed_percent", e.what());
