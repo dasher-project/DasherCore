@@ -191,6 +191,17 @@ static int32_t colorToARGB(const Dasher::ColorPalette::Color& c) {
 
 // ── Command-buffer screen ──────────────────────────────────────────────────
 
+// UTF-8 code-point count (lead-byte count). Used by the fallback width
+// estimate: counting bytes over-measured multibyte text ('é' = 2 bytes),
+// which made the label shunting over-shove for accented alphabets.
+static int utf8_codepoint_count(const std::string& s) {
+    int n = 0;
+    for (unsigned char c : s) {
+        if ((c & 0xC0) != 0x80) n++;
+    }
+    return n;
+}
+
 class CommandScreen final : public Dasher::CDasherScreen {
   public:
     CommandScreen(int width, int height)
@@ -218,10 +229,71 @@ class CommandScreen final : public Dasher::CDasherScreen {
     char* const* GetStringPtrs() const { return m_stringPtrs.data(); }
     int GetStringCount() const { return static_cast<int>(m_strings.size()); }
 
+    // Frontend-supplied text measurement (issue #56): when present, label
+    // layout uses the real metrics of the font the canvas draws with. Stored
+    // here (not on the ctx) because TextSize is a screen method.
+    void SetTextSizeCallback(dasher_text_size_callback cb, void* userData) {
+        m_textSizeCb = cb;
+        m_textSizeUserData = userData;
+        ++m_metricsGeneration; // new callback = new measurements
+    }
+
+    void TextMetricsChanged() { ++m_metricsGeneration; }
+
+    // Label variant that caches measurements per font size, invalidated by a
+    // generation counter when the canvas font changes. TextSize is called for
+    // every visible label on (potentially) every frame; the callback crosses
+    // an FFI boundary and does real font measurement on the frontend side, so
+    // caching here keeps steady-state frames callback-free.
+    class CachingLabel : public CDasherScreen::Label {
+      public:
+        CachingLabel(const std::string& strText, unsigned int iWrapSize) : Label(strText, iWrapSize) {}
+
+        struct Measurement {
+            uint64_t generation;
+            Dasher::screenint width;
+            Dasher::screenint height;
+        };
+        std::unordered_map<unsigned int, Measurement> measured;
+    };
+
+    Label* MakeLabel(const std::string& strText, unsigned int iWrapSize) override {
+        return new CachingLabel(strText, iWrapSize);
+    }
+
     std::pair<Dasher::screenint, Dasher::screenint> TextSize(Label* label, unsigned int iFontSize) override {
         if (!label) return std::make_pair(Dasher::screenint(0), Dasher::screenint(0));
-        return std::make_pair(static_cast<Dasher::screenint>(label->m_strText.size() * iFontSize / 2),
-                              static_cast<Dasher::screenint>(iFontSize));
+
+        // Only single-line labels go through the frontend: wrapped labels
+        // (lock/pause message) would need wrap-aware measurement, which this
+        // callback contract doesn't express.
+        auto* caching = dynamic_cast<CachingLabel*>(label);
+        if (caching && caching->m_iWrapSize == 0) {
+            auto it = caching->measured.find(iFontSize);
+            if (it != caching->measured.end() && it->second.generation == m_metricsGeneration)
+                return std::make_pair(it->second.width, it->second.height);
+
+            if (m_textSizeCb) {
+                int w = -1, h = -1;
+                if (m_textSizeCb(label->m_strText.c_str(), static_cast<int>(iFontSize), &w, &h, m_textSizeUserData) ==
+                        0 &&
+                    w >= 0 && h >= 0) {
+                    auto result = std::make_pair(Dasher::screenint(w), Dasher::screenint(h));
+                    caching->measured[iFontSize] = {m_metricsGeneration, result.first, result.second};
+                    return result;
+                }
+                // Callback failed: fall through to the estimate, but don't
+                // cache it — a later frame may measure successfully.
+            } else {
+                // No callback: cache the estimate too, so dynamic_cast-heavy
+                // paths behave identically with and without one.
+                auto result = EstimateTextSize(label, iFontSize);
+                caching->measured[iFontSize] = {m_metricsGeneration, result.first, result.second};
+                return result;
+            }
+        }
+
+        return EstimateTextSize(label, iFontSize);
     }
 
     void DrawString(Label* label, Dasher::screenint x, Dasher::screenint y, unsigned int iFontSize,
@@ -319,6 +391,22 @@ class CommandScreen final : public Dasher::CDasherScreen {
         m_commands.push_back(d);
         m_commands.push_back(colour);
     }
+
+    // The built-in estimate, used when no callback is registered (or a
+    // measurement failed). Counts UTF-8 code points, not bytes: multibyte
+    // text previously measured as 2× its glyph count, over-shoving the label
+    // layout for accented alphabets. Still an estimate — real metrics come
+    // from the frontend via the text-size callback (issue #56).
+    static std::pair<Dasher::screenint, Dasher::screenint> EstimateTextSize(Label* label, unsigned int iFontSize) {
+        const int codepoints = utf8_codepoint_count(label->m_strText);
+        return std::make_pair(Dasher::screenint(codepoints * iFontSize / 2), Dasher::screenint(iFontSize));
+    }
+
+    dasher_text_size_callback m_textSizeCb = nullptr;
+    void* m_textSizeUserData = nullptr;
+    // Bumped by SetTextSizeCallback / TextMetricsChanged; label caches whose
+    // entry carries an older generation are re-measured.
+    uint64_t m_metricsGeneration = 0;
 
     std::vector<int32_t> m_commands;
     std::vector<std::string> m_strings;
@@ -418,6 +506,11 @@ struct dasher_ctx {
     std::string darkPalette;  // user's preferred palette for dark appearance
     bool appearanceLoaded = false;
     dasher_output_callback outputCb = nullptr;
+    // Pending text measurement callback: kept here (not only on the screen)
+    // because frontends register callbacks before dasher_set_screen_size
+    // creates the CommandScreen; set_screen_size forwards it.
+    dasher_text_size_callback textSizeCb = nullptr;
+    void* textSizeCbUserData = nullptr;
     void* outputCbUserData = nullptr;
     dasher_message_callback messageCb = nullptr;
     void* messageCbUserData = nullptr;
@@ -809,6 +902,9 @@ DASHER_API void dasher_set_screen_size(dasher_ctx* ctx, int width, int height) {
 
     if (!ctx->screen) {
         ctx->screen = std::make_unique<CommandScreen>(width, height);
+        // Forward any text measurement callback registered before the screen
+        // existed (frontends commonly wire callbacks before starting the engine).
+        if (ctx->textSizeCb) ctx->screen->SetTextSizeCallback(ctx->textSizeCb, ctx->textSizeCbUserData);
         ctx->intf->ChangeScreen(ctx->screen.get());
     } else {
         ctx->screen->SetSize(width, height);
@@ -1713,6 +1809,19 @@ DASHER_API void dasher_set_output_callback(dasher_ctx* ctx, dasher_output_callba
     if (!ctx) return;
     ctx->outputCb = callback;
     ctx->outputCbUserData = user_data;
+}
+
+DASHER_API void dasher_set_text_size_callback(dasher_ctx* ctx, dasher_text_size_callback callback, void* user_data) {
+    if (!ctx) return;
+    // Keep on the ctx too: if the screen doesn't exist yet, creation forwards it.
+    ctx->textSizeCb = callback;
+    ctx->textSizeCbUserData = user_data;
+    if (ctx->screen) ctx->screen->SetTextSizeCallback(callback, user_data);
+}
+
+DASHER_API void dasher_text_metrics_changed(dasher_ctx* ctx) {
+    if (!ctx || !ctx->screen) return;
+    ctx->screen->TextMetricsChanged();
 }
 
 DASHER_API void dasher_set_message_callback(dasher_ctx* ctx, dasher_message_callback callback, void* user_data) {
