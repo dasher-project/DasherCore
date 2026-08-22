@@ -352,6 +352,40 @@ Receives real-time text events without polling. Event types:
 The callback fires on the thread calling `dasher_frame()`. Event type 2 may
 also fire on the thread calling the reset function itself.
 
+### Text Measurement Callback
+
+The engine positions node labels (including the anti-overlap "shunting" that
+pushes a child label past its parent) using reported text widths. Real glyph
+advances differ substantially from any estimate, and estimation errors compound
+down the label chain — at deep zoom this surfaced to users as jumbled,
+overlapping letters (issue #56). Frontends rendering the command buffer should
+register a measurement callback that uses the **same font** they draw text
+commands with:
+
+```c
+typedef int (*dasher_text_size_callback)(const char* text, int font_size,
+                                         int* out_width, int* out_height,
+                                         void* user_data);
+
+void dasher_set_text_size_callback(dasher_ctx* ctx, dasher_text_size_callback callback, void* user_data);
+void dasher_text_metrics_changed(dasher_ctx* ctx);
+```
+
+- Fill `*out_width`/`*out_height` in **pixels** and return `0`; return non-zero
+  to fall back to the engine's estimate (the failure is not cached — the next
+  frame retries).
+- The callback fires on the thread calling `dasher_frame()`; results are cached
+  per label and font size, so steady-state frames don't re-measure.
+- Registering before `dasher_set_screen_size` is fine — the callback is
+  forwarded when the screen is created.
+- After the canvas font changes (e.g. `SP_DASHER_FONT`), call
+  `dasher_text_metrics_changed()` to invalidate the cache.
+- Wrapped labels (the paused/lock message) are not measured through the
+  callback; they always use the estimate.
+- Without a callback the engine estimates width as `utf8_codepoints ×
+  fontSize / 2` (code points, not bytes — accented text previously
+  over-measured). Good enough to run; not good enough for deep zoom.
+
 ### Message Callback
 
 ```c
@@ -659,6 +693,6 @@ dasher_frame(ctx, System.currentTimeMillis(), cmds, cmdCount, null, null)
 4. **Localization state is global** — changing locale in one context affects all contexts (shared static state).
 5. **Speed percent mapping** — 100% = `LP_MAX_BITRATE` of 160, clamped to the engine's declared `LP_MAX_BITRATE` range (not a fixed percent cap).
 6. **Language model ID gap** — IDs are 0, 2, 3, 4 (no ID 1). Historical.
-7. **No font rendering** — text width is estimated as `characters * fontSize / 2`. Actual font metrics are the frontend's responsibility.
+7. **No font rendering — but text measurement is frontend-supplied** — the engine never rasterises text; frontends draw opcode-5 commands with a real font. Register `dasher_set_text_size_callback` so label layout uses that font's actual metrics; without it, width is estimated as `utf8_codepoints × fontSize / 2` (see [Text Measurement Callback](#text-measurement-callback), issue #56).
 8. **Polygons are decomposed into line segments** — no filled polygon opcode.
 9. **Fully transparent elements are skipped** — commands with alpha=0 are not emitted.

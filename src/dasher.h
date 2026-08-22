@@ -358,6 +358,38 @@ typedef void (*dasher_output_callback)(int event_type, const char* text, void* u
 
 DASHER_API void dasher_set_output_callback(dasher_ctx* ctx, dasher_output_callback callback, void* user_data);
 
+// ── Text measurement callback ──────────────────────────────────────────────
+//
+// The engine lays out node labels (the anti-overlap "shunting" that pushes a
+// child label past its parent's right edge) using the canvas's reported text
+// width. Frontends that render the command buffer draw with a real font, so
+// only they know true glyph advances — an estimate compounds down the label
+// chain and deep-zoom text degenerates into overlapping jumbles (issue #56).
+//
+// Register this callback to supply real measurements made with the SAME font
+// the canvas draws text commands (opcode 5) with (see SP_DASHER_FONT and the
+// per-command font size). `text` is UTF-8. Fill *out_width and *out_height in
+// pixels and return 0. Return non-zero (or pass a null callback) to fall back
+// to the engine's built-in estimate.
+//
+// - Fires on the thread that calls dasher_frame(); keep it fast (the engine
+//   caches results per label and font size).
+// - Only single-line labels are measured through the callback; wrapped labels
+//   (e.g. the paused/lock message) always use the estimate.
+// - After the canvas font family/face changes, call
+//   dasher_text_metrics_changed() so cached measurements are re-queried.
+
+typedef int (*dasher_text_size_callback)(const char* text, int font_size, int* out_width, int* out_height,
+                                         void* user_data);
+
+DASHER_API void dasher_set_text_size_callback(dasher_ctx* ctx, dasher_text_size_callback callback, void* user_data);
+
+// Invalidate all cached text measurements. Call whenever the font the canvas
+// actually draws with changes (e.g. SP_DASHER_FONT was set, or the frontend's
+// font selection UI was used), so subsequent frames re-measure via the
+// registered dasher_text_size_callback.
+DASHER_API void dasher_text_metrics_changed(dasher_ctx* ctx);
+
 // ── Message callback ───────────────────────────────────────────────────────
 //
 // Register a callback to receive engine messages (warnings, errors, info).
