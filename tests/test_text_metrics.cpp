@@ -20,7 +20,6 @@
 #include <map>
 #include <string>
 #include <utility>
-#include <vector>
 
 namespace {
 
@@ -35,10 +34,27 @@ struct MeasureState {
 
     int max_pair_calls() const {
         int m = 0;
-        for (auto& [k, v] : calls_per_pair) m = std::max(m, v);
+        for (const auto& entry : calls_per_pair) {
+            m = std::max(m, entry.second);
+        }
         return m;
     }
 };
+
+// Shared measurement callback: consults MeasureState, honours fail_calls.
+int measure_trampoline(const char* text, int font_size, int* w, int* h, void* ud) {
+    auto* s = static_cast<MeasureState*>(ud);
+    if (!text || !w || !h) return 1;
+    if (s->fail_calls > 0) {
+        s->fail_calls--;
+        return 1; // frontend could not measure
+    }
+    s->calls++;
+    s->calls_per_pair[{text, font_size}]++;
+    *w = s->width_of(text, font_size);
+    *h = font_size;
+    return 0;
+}
 
 } // namespace
 
@@ -54,25 +70,10 @@ TEST_CASE("text size callback is consulted during frames and cached per label/si
         return static_cast<int>(text.size()) * font_size * 3 / 4;
     };
 
-    dasher_set_text_size_callback(
-        ctx, [](const char* text, int font_size, int* w, int* h, void* ud) -> int {
-            auto* s = static_cast<MeasureState*>(ud);
-            if (!text || !w || !h) return 1;
-            if (s->fail_calls > 0) {
-                s->fail_calls--;
-                return 1;
-            }
-            s->calls++;
-            s->calls_per_pair[{text, font_size}]++;
-            *w = s->width_of(text, font_size);
-            *h = font_size;
-            return 0;
-        },
-        &st);
-
     // Wire the callback BEFORE the screen exists — frontends register
     // callbacks before starting the engine; dasher_set_screen_size must
     // forward it.
+    dasher_set_text_size_callback(ctx, measure_trampoline, &st);
     dasher_set_screen_size(ctx, 800, 600);
     run_frames(ctx, 5);
     REQUIRE(st.calls > 0);
@@ -101,19 +102,7 @@ TEST_CASE("failing measurement falls back to the estimate and retries later") {
     MeasureState st;
     st.width_of = [](const std::string&, int font_size) { return font_size; };
 
-    dasher_set_text_size_callback(
-        ctx, [](const char* text, int font_size, int* w, int* h, void* ud) -> int {
-            auto* s = static_cast<MeasureState*>(ud);
-            if (s->fail_calls > 0) {
-                s->fail_calls--;
-                return 1; // frontend could not measure
-            }
-            s->calls++;
-            *w = s->width_of(text ? text : "", font_size);
-            *h = font_size;
-            return 0;
-        },
-        &st);
+    dasher_set_text_size_callback(ctx, measure_trampoline, &st);
     dasher_set_screen_size(ctx, 800, 600);
 
     st.fail_calls = 1000; // every measurement fails this phase
