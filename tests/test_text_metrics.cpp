@@ -84,13 +84,19 @@ TEST_CASE("text size callback is consulted during frames and cached per label/si
     run_frames(ctx, 10);
     CHECK(st.max_pair_calls() == 1);
 
-    // Metrics invalidation (canvas font changed) → labels re-measured.
+    // Metrics invalidation (canvas font changed) → labels re-measured. Compare
+    // before/after counts: calls is already positive here, so a bare > 0 would
+    // pass even if invalidation silently did nothing.
+    const int calls_before_invalidation = st.calls;
+    const int max_pair_before_invalidation = st.max_pair_calls();
     dasher_text_metrics_changed(ctx);
     run_frames(ctx, 1);
-    CHECK(st.calls > 0);
-    const int after_invalidation = st.max_pair_calls();
+    CHECK(st.calls > calls_before_invalidation);
+    CHECK(st.max_pair_calls() > max_pair_before_invalidation);
+    // ...and the fresh measurements are cached again.
+    const int calls_after_invalidation = st.calls;
     run_frames(ctx, 5);
-    CHECK(st.max_pair_calls() == after_invalidation); // and cached again
+    CHECK(st.calls == calls_after_invalidation);
 
     dasher_destroy(ctx);
 }
