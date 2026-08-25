@@ -195,6 +195,31 @@ TEST(reset) {
     dasher_destroy(ctx);
 }
 
+TEST(create_with_fresh_user_dir_regex_hazard_path) {
+    // Regression: XmlSettingsStore::Load() passes the settings file's
+    // absolute path to ScanFiles(); when the file does not exist yet
+    // (fresh user dir - the normal first-run case) the old code fell
+    // through to std::regex(pattern), and Windows paths throw there:
+    // backslashes become escapes, so a final component starting with a
+    // digit ("\2" -> backreference) or 'c' ("\c" -> control escape) made
+    // dasher_create fail outright. A path component of "2c" makes the
+    // hazard deterministic; both sequential creates must succeed.
+    const std::string data = get_test_data_dir();
+
+    for (int i = 0; i < 2; i++) {
+        ScopedTempDir tmp; // fresh dir each iteration => no settings file yet
+        std::error_code ec;
+        const auto hazard = std::filesystem::path(tmp.path) / "2c";
+        std::filesystem::create_directories(hazard, ec);
+
+        char* err = nullptr;
+        dasher_ctx* ctx = dasher_create(data.c_str(), hazard.string().c_str(), &err);
+        if (!ctx) printf("  create #%d failed: %s\n", i, err ? err : "(no error string)");
+        ASSERT(ctx != nullptr);
+        dasher_destroy(ctx);
+    }
+}
+
 TEST(reset_emits_buffer_clear_event) {
     // Resets clear the edit buffer without insert/delete deltas, so they must
     // announce themselves as event type 2 — subscribers keeping a shadow
