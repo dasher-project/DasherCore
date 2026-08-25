@@ -1,5 +1,8 @@
 // Extended C API tests: cover functions not tested in test_capi.cpp
 #include "test_common.h"
+
+#include <cstring>
+#include <vector>
 TEST(long_string_params) {
     dasher_ctx* ctx = create_isolated_context();
     ASSERT(ctx != nullptr);
@@ -294,15 +297,32 @@ TEST(string_values) {
     int alph_key = dasher_find_parameter_key("SP_ALPHABET_ID");
     ASSERT(alph_key >= 0);
 
-    const char* values_buf[32] = {nullptr};
-    int count = dasher_get_parameter_string_values(ctx, alph_key, values_buf, 32);
+    // Probe call first: must return the full count (regression: it used to
+    // return 0 before querying, so every permitted-value list looked empty
+    // and frontends rendered blank pickers).
+    const int probe_count = dasher_get_parameter_string_values(ctx, alph_key, nullptr, 0);
+    ASSERT(probe_count > 0);
+
+    std::vector<const char*> values_buf(probe_count, nullptr);
+    int count = dasher_get_parameter_string_values(ctx, alph_key, values_buf.data(), probe_count);
     printf("  String values count: %d\n", count);
-    ASSERT(count > 0);
+    ASSERT(count == probe_count);
 
     for (int i = 0; i < count && i < 5; i++) {
         ASSERT(values_buf[i] != nullptr);
         printf("  Value %d: '%s'\n", i, values_buf[i]);
     }
+
+    // The engine's current alphabet must be one of the permitted values.
+    const char* current = dasher_get_alphabet_id(ctx);
+    bool found = false;
+    for (int i = 0; i < count; i++) {
+        if (values_buf[i] && current && strcmp(values_buf[i], current) == 0) {
+            found = true;
+            break;
+        }
+    }
+    ASSERT(found);
 
     dasher_destroy(ctx);
 }

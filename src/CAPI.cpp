@@ -1394,13 +1394,19 @@ DASHER_API int dasher_get_parameter_enum_value(int key, int index) {
 }
 
 DASHER_API int dasher_get_parameter_string_values(dasher_ctx* ctx, int key, const char** out_names, int max_out) {
-    if (!out_names || max_out <= 0) return 0;
     if (!ctx) return 0;
     ctx->stringValues.clear();
 
     if (ctx->intf) {
         ctx->stringValues = ctx->intf->GetPermittedValues(static_cast<Dasher::Parameter>(key));
     }
+
+    // Probe call (null buffer / zero capacity): return the full count so
+    // callers can size a buffer and call again. Previously this returned 0
+    // before ever querying the engine, so every permitted-value list (e.g.
+    // the 622 alphabets) came back empty and frontends rendered blank
+    // pickers.
+    if (!out_names || max_out <= 0) return static_cast<int>(ctx->stringValues.size());
 
     int count = static_cast<int>(ctx->stringValues.size());
     if (count > max_out) count = max_out;
