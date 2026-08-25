@@ -39,11 +39,19 @@ int Dasher::FileUtils::GetFileSize(const std::string& strFileName) {
 }
 
 void Dasher::FileUtils::ScanFiles(AbstractParser* parser, const std::string& strPattern) {
-    // Absolute path to a real file -> parse only that file
+    // Absolute paths name one specific file, never a glob. If the file is
+    // missing, return instead of falling through to the regex: compiling a
+    // Windows path as a regex throws on its backslashes ("\2" is parsed as
+    // a backreference, "\c" as an invalid control escape), which made
+    // dasher_create fail whenever the settings file did not exist yet
+    // (fresh user dir) — XmlSettingsStore::Load() ScanFiles()s the
+    // settings path itself.
     std::error_code error_code; // just used for not throwing errors
     std::filesystem::path p(strPattern);
-    if (p.is_absolute() && std::filesystem::exists(p, error_code) && std::filesystem::is_regular_file(p, error_code)) {
-        parser->ParseFile(strPattern, IsFileWriteable(strPattern));
+    if (p.is_absolute()) {
+        if (std::filesystem::exists(p, error_code) && std::filesystem::is_regular_file(p, error_code)) {
+            parser->ParseFile(strPattern, IsFileWriteable(strPattern));
+        }
         return;
     }
 
