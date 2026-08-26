@@ -243,3 +243,48 @@ TEST(draw_no_mouse_produces_idle_frame) {
 
     dasher_destroy(ctx);
 }
+
+TEST(uppercase_group_box_has_distinct_colour) {
+    // Regression (#62 — "v5 put capitals in a separate, uniquely colored
+    // node"): the uppercase group box must render with its palette group
+    // colour. Two failures conspired: legacy colour.*.xml files parsed AFTER
+    // the new-format color.*.xml files, and Data/colours/colour.xml is a
+    // legacy palette also named "Default" — it overwrote the new Default and
+    // dropped its group colours (uppercase #FFFF00). And the legacy parser
+    // itself never set letter-family group colours, so legacy palettes lost
+    // v5's uppercase pink (palette index 111 = #FF80FF).
+    dasher_ctx* ctx = create_isolated_context();
+    ASSERT(ctx != nullptr);
+    dasher_set_screen_size(ctx, 800, 600);
+
+    auto frameHasFill = [&](int r, int g, int b) {
+        int* cmds;
+        int cmd_count;
+        char** strs;
+        int str_count;
+        get_frame(ctx, 1000, &cmds, &cmd_count, &strs, &str_count);
+        for (int i = 0; i + 5 < cmd_count; i += 6) {
+            if (cmds[i] != 4) continue; // filled rectangle
+            int argb = cmds[i + 5];
+            if (((argb >> 16) & 0xFF) == r && ((argb >> 8) & 0xFF) == g && (argb & 0xFF) == b) return true;
+        }
+        return false;
+    };
+
+    // Warm up so the initial tree is fully expanded.
+    run_frames(ctx, 30);
+
+    // Default palette: uppercase group box = #FFFF00 (from color.default.xml,
+    // which must survive the legacy colour.xml name collision).
+    ASSERT(frameHasFill(255, 255, 0));
+
+    // Legacy palette: same group colour via the legacy indices —
+    // ParseLegacy must set the letter-family group colours.
+    const int colourKey = dasher_find_parameter_key("SP_COLOUR_ID");
+    ASSERT(colourKey >= 0);
+    dasher_set_string_parameter(ctx, colourKey, "European/Asian (Original)");
+    run_frames(ctx, 30);
+    ASSERT(frameHasFill(255, 255, 0));
+
+    dasher_destroy(ctx);
+}

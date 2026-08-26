@@ -113,8 +113,13 @@ void CDasherInterfaceBase::Realize(unsigned long ulTime) {
     }
 
     m_ColorIO = std::make_unique<CColorIO>(this);
-    Dasher::FileUtils::ScanFiles(m_ColorIO.get(), "color.*.xml");
+    // Legacy palettes first, new format second: on name collisions the
+    // maintained new-format file must win. Data/colours/colour.xml is a
+    // legacy palette also named "Default" — parsing it after color.*.xml
+    // overwrote the new Default, dropping its group colours (e.g. the
+    // distinct uppercase group box, #62).
     Dasher::FileUtils::ScanFiles(m_ColorIO.get(), "colour.*.xml");
+    Dasher::FileUtils::ScanFiles(m_ColorIO.get(), "color.*.xml");
     m_ColorIO->RelinkParents();
 
     ChangeView();
