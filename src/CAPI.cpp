@@ -474,6 +474,10 @@ struct dasher_ctx {
     // restart drift, #60). v5 never had this because its frontends embedded
     // the engine on one clock.
     int64_t lastFrameMs = 0;
+    // Last input-event stamp (see inputTime): strictly increasing across
+    // consecutive inputs within one frame window, so intra-frame gesture
+    // ordering/durations survive.
+    int64_t lastInputMs = 0;
     // Typing rate tracker (RFC 0012): timestamps of recent character outputs.
     std::deque<std::chrono::steady_clock::time_point> rateTimestamps;
     std::string tlString;
@@ -696,8 +700,16 @@ struct dasher_ctx {
 // Stamp for input events arriving between frames: the engine's own timeline
 // (the most recent dasher_frame time), never steady_clock — the engine
 // subtracts input stamps from frame times, so mixing clocks corrupts
-// framerate/slow-start state at every stop/restart (#60).
-static unsigned long inputTime(const dasher_ctx* ctx) { return static_cast<unsigned long>(ctx->lastFrameMs); }
+// framerate/slow-start state at every stop/restart (#60). Multiple inputs
+// within one frame window get strictly increasing stamps so gesture timing
+// (stylus tap vs hold, multi-press) still sees distinct timestamps.
+static unsigned long inputTime(dasher_ctx* ctx) {
+    if (ctx->lastInputMs < ctx->lastFrameMs)
+        ctx->lastInputMs = ctx->lastFrameMs;
+    else
+        ctx->lastInputMs += 1;
+    return static_cast<unsigned long>(ctx->lastInputMs);
+}
 
 // ── C API Boundary Exception Helpers ────────────────────────────────────────
 // Enforces Rule 4: never throw across the C API boundary. All exceptions are

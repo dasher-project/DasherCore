@@ -225,7 +225,8 @@ TEST(restart_keeps_typing_after_stop_start_cycle) {
 
     // First run: types normally (same setup as the reset test).
     dasher_mouse_down(ctx);
-    for (int i = 0; i < 300; i++) frame();
+    for (int i = 0; i < 300; i++)
+        frame();
     dasher_mouse_up(ctx);
     const size_t len1 = outLen();
     const long f1 = dasher_get_long_parameter(ctx, fr_key);
@@ -233,17 +234,20 @@ TEST(restart_keeps_typing_after_stop_start_cycle) {
 
     // Stop, then restart.
     dasher_mouse_down(ctx);
-    for (int i = 0; i < 5; i++) frame();
+    for (int i = 0; i < 5; i++)
+        frame();
     dasher_mouse_up(ctx);
 
     dasher_mouse_down(ctx);
-    for (int i = 0; i < 4; i++) frame();
+    for (int i = 0; i < 4; i++)
+        frame();
     // Sample the restart transient: pre-fix, the first post-restart window
     // was seeded from a steady_clock stamp and measured ~0 fps, collapsing
     // LP_FRAMERATE to ~half (observed 4999 -> 2499) and doubling step sizes
     // for ~10 frames — the "canvas pulls you much higher" restart fling.
     const long f2 = dasher_get_long_parameter(ctx, fr_key);
-    for (int i = 0; i < 146; i++) frame();
+    for (int i = 0; i < 146; i++)
+        frame();
     dasher_mouse_up(ctx);
     const size_t len2 = outLen();
 
