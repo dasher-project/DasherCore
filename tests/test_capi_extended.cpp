@@ -195,6 +195,67 @@ TEST(reset) {
     dasher_destroy(ctx);
 }
 
+TEST(restart_keeps_typing_after_stop_start_cycle) {
+    // Regression (#60 — restart drift reported on Windows + Android): input
+    // events were stamped with steady_clock while dasher_frame runs on the
+    // frontend's own timeline. run() seeds the framerate window and
+    // slow-start clock from the input stamp, so a start subtracted across
+    // two clocks: the first sample window measured garbage, LP_FRAMERATE (a
+    // decaying average) collapsed, the next step flung the canvas and the
+    // engine ended up stopped/frozen with no output. Input stamps must come
+    // from the engine's own frame timeline (v5 semantics: one clock).
+    dasher_ctx* ctx = create_isolated_context();
+    ASSERT(ctx != nullptr);
+    dasher_set_speed_percent(ctx, 300);
+    dasher_set_screen_size(ctx, 800, 600);
+
+    const int fr_key = dasher_find_parameter_key("LP_FRAMERATE");
+    ASSERT(fr_key >= 0);
+
+    int64_t clock = 1000;
+    auto frame = [&]() {
+        dasher_mouse_move(ctx, 700.0f, 280.0f);
+        int* c = nullptr;
+        int cc = 0;
+        char** s = nullptr;
+        int sc = 0;
+        dasher_frame(ctx, clock += 20, &c, &cc, &s, &sc);
+    };
+    auto outLen = [&]() { return strlen(dasher_get_output_text(ctx)); };
+
+    // First run: types normally (same setup as the reset test).
+    dasher_mouse_down(ctx);
+    for (int i = 0; i < 300; i++) frame();
+    dasher_mouse_up(ctx);
+    const size_t len1 = outLen();
+    const long f1 = dasher_get_long_parameter(ctx, fr_key);
+    ASSERT(len1 > 0); // pre-fix: engine froze with zero output
+
+    // Stop, then restart.
+    dasher_mouse_down(ctx);
+    for (int i = 0; i < 5; i++) frame();
+    dasher_mouse_up(ctx);
+
+    dasher_mouse_down(ctx);
+    for (int i = 0; i < 4; i++) frame();
+    // Sample the restart transient: pre-fix, the first post-restart window
+    // was seeded from a steady_clock stamp and measured ~0 fps, collapsing
+    // LP_FRAMERATE to ~half (observed 4999 -> 2499) and doubling step sizes
+    // for ~10 frames — the "canvas pulls you much higher" restart fling.
+    const long f2 = dasher_get_long_parameter(ctx, fr_key);
+    for (int i = 0; i < 146; i++) frame();
+    dasher_mouse_up(ctx);
+    const size_t len2 = outLen();
+
+    printf("  run1: len=%zu FR=%ld  restart@4: FR=%ld len=%zu\n", len1, f1, f2, len2);
+
+    // Post-restart the engine keeps typing at the same measured rate.
+    ASSERT(len2 > len1);
+    ASSERT(f2 >= f1 - f1 / 10);
+
+    dasher_destroy(ctx);
+}
+
 TEST(create_with_fresh_user_dir_regex_hazard_path) {
     // Regression: XmlSettingsStore::Load() passes the settings file's
     // absolute path to ScanFiles(); when the file does not exist yet

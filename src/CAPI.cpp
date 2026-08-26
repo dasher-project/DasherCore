@@ -465,6 +465,15 @@ struct dasher_ctx {
     Dasher::CDashIntfScreenMsgs* intf = nullptr;
     std::string editBuffer;
     size_t cursorPos = 0;
+    // The engine's own timeline: the timestamp of the most recent
+    // dasher_frame(). Input events (mouse/key) are stamped with this so the
+    // engine never subtracts across clocks — frontends pass their own
+    // timeline to dasher_frame (compositor frame time, uptime, anything),
+    // and mixing that with a steady_clock stamp here poisoned
+    // LP_FRAMERATE/slow-start at every stop/restart (the Windows + Android
+    // restart drift, #60). v5 never had this because its frontends embedded
+    // the engine on one clock.
+    int64_t lastFrameMs = 0;
     // Typing rate tracker (RFC 0012): timestamps of recent character outputs.
     std::deque<std::chrono::steady_clock::time_point> rateTimestamps;
     std::string tlString;
@@ -683,6 +692,12 @@ struct dasher_ctx {
         }
     };
 };
+
+// Stamp for input events arriving between frames: the engine's own timeline
+// (the most recent dasher_frame time), never steady_clock — the engine
+// subtracts input stamps from frame times, so mixing clocks corrupts
+// framerate/slow-start state at every stop/restart (#60).
+static unsigned long inputTime(const dasher_ctx* ctx) { return static_cast<unsigned long>(ctx->lastFrameMs); }
 
 // ── C API Boundary Exception Helpers ────────────────────────────────────────
 // Enforces Rule 4: never throw across the C API boundary. All exceptions are
@@ -958,7 +973,7 @@ DASHER_API void dasher_mouse_down(dasher_ctx* ctx) {
         // only hovering inside the circle should. (Steve Saling feedback)
         if (ctx->intf->GetLongParameter(Dasher::LP_START_MODE) == Dasher::Options::StartMode::circle_start) return;
         ctx->intf->SetBoolParameter(Dasher::BP_START_MOUSE, true);
-        ctx->intf->KeyDown(nowMs(), Dasher::Keys::Primary_Input);
+        ctx->intf->KeyDown(inputTime(ctx), Dasher::Keys::Primary_Input);
     } catch (const std::exception& e) {
         log_boundary_error(ctx, "dasher_mouse_down", e.what());
         ctx->engineError = true;
@@ -974,7 +989,7 @@ DASHER_API void dasher_mouse_up(dasher_ctx* ctx) {
     if (!ctx->mouseDown) return;
     ctx->mouseDown = false;
     try {
-        ctx->intf->KeyUp(nowMs(), Dasher::Keys::Primary_Input);
+        ctx->intf->KeyUp(inputTime(ctx), Dasher::Keys::Primary_Input);
     } catch (const std::exception& e) {
         log_boundary_error(ctx, "dasher_mouse_up", e.what());
         ctx->engineError = true;
@@ -990,9 +1005,9 @@ DASHER_API void dasher_key_event(dasher_ctx* ctx, int key, int pressed) {
     try {
         auto vk = static_cast<Dasher::Keys::VirtualKey>(key);
         if (pressed) {
-            ctx->intf->KeyDown(nowMs(), vk);
+            ctx->intf->KeyDown(inputTime(ctx), vk);
         } else {
-            ctx->intf->KeyUp(nowMs(), vk);
+            ctx->intf->KeyUp(inputTime(ctx), vk);
         }
     } catch (const std::exception& e) {
         log_boundary_error(ctx, "dasher_key_event", e.what());
@@ -1009,6 +1024,10 @@ DASHER_API void dasher_frame(dasher_ctx* ctx, int64_t time_ms, int** out_command
     if (out_command_count) *out_command_count = 0;
     if (out_strings) *out_strings = nullptr;
     if (out_string_count) *out_string_count = 0;
+
+    // Anchor the engine timeline before anything else: input events between
+    // frames are stamped from this (see dasher_ctx::lastFrameMs).
+    if (ctx) ctx->lastFrameMs = time_ms > 0 ? time_ms : 0;
 
     if (!ctx || !ctx->intf || !ctx->screen || !ctx->realized) return;
     if (ctx->engineError) return;
@@ -1083,7 +1102,7 @@ DASHER_API void dasher_set_alphabet_id(dasher_ctx* ctx, const char* alphabet_id)
     }
     if (ctx->intf->GetStringParameter(Dasher::SP_ALPHABET_ID) == alphabet_id) return;
     if (ctx->mouseDown) {
-        ctx->intf->KeyUp(nowMs(), Dasher::Keys::Primary_Input);
+        ctx->intf->KeyUp(inputTime(ctx), Dasher::Keys::Primary_Input);
         ctx->mouseDown = false;
     }
     ctx->intf->SetStringParameter(Dasher::SP_ALPHABET_ID, alphabet_id);
@@ -1456,7 +1475,7 @@ DASHER_API int dasher_get_palette_preview_colors(dasher_ctx* ctx, int index, int
 DASHER_API void dasher_set_palette(dasher_ctx* ctx, const char* palette_name) {
     if (!ctx || !ctx->intf || !palette_name) return;
     if (ctx->mouseDown) {
-        ctx->intf->KeyUp(nowMs(), Dasher::Keys::Primary_Input);
+        ctx->intf->KeyUp(inputTime(ctx), Dasher::Keys::Primary_Input);
         ctx->mouseDown = false;
     }
     // Route through the appearance model (RFC 0007): this sets the user's
