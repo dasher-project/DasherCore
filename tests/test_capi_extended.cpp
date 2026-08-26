@@ -306,21 +306,37 @@ TEST(autocalibrate_off_by_default_and_offset_session_scoped) {
     }
 
     // Session scope: a fresh context in the SAME user dir starts at 0 —
-    // the learned offset is not persisted.
+    // the learned offset is not persisted, and a stale <TargetOffset>
+    // written by an older build (pre-ephemeral) is ignored on load.
     {
         ScopedTempDir tmp;
         char* err = nullptr;
         dasher_ctx* ctx = dasher_create(get_test_data_dir(), tmp.path.c_str(), &err);
         ASSERT(ctx != nullptr);
-        // Write a learned offset while running...
+        // Write a learned offset + opt-in while running...
         dasher_set_screen_size(ctx, 800, 600);
         dasher_set_bool_parameter(ctx, ac_key, 1);
         dasher_set_long_parameter(ctx, off_key, 42);
         dasher_save_settings(ctx);
         dasher_destroy(ctx);
 
-        // ...restart the same user dir: the learned offset is ephemeral
-        // (back to 0), while the explicit opt-in persists (eyegaze users
+        // ...and simulate an upgrading user whose older build persisted the
+        // drifted offset directly into the settings file (the store's
+        // schema is <long name="..." value="..."/>).
+        {
+            std::filesystem::path settingsPath = std::filesystem::path(tmp.path) / "dasher_settings.xml";
+            std::ifstream in(settingsPath);
+            std::string xml((std::istreambuf_iterator<char>(in)), std::istreambuf_iterator<char>());
+            in.close();
+            const size_t closing = xml.find("</settings>");
+            ASSERT(closing != std::string::npos);
+            xml.insert(closing, "<long name=\"TargetOffset\" value=\"-68\"/>");
+            std::ofstream out(settingsPath, std::ios::trunc);
+            out << xml;
+        }
+
+        // Restart the same user dir: the stale drifted offset is ignored
+        // (ephemeral), while the explicit opt-in persists (eyegaze users
         // keep their setting across sessions).
         dasher_ctx* ctx2 = dasher_create(get_test_data_dir(), tmp.path.c_str(), &err);
         ASSERT(ctx2 != nullptr);

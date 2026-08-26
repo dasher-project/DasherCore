@@ -26,6 +26,12 @@ void CSettingsStore::AddParameters(const std::unordered_map<Parameter, const Set
     for (const auto& [key, value] : table) {
         parameters_.emplace(std::make_pair(key, value));
 
+        // Ephemeral parameters never load from storage (SetParameter already
+        // never saves them): a persisted value from an older build — e.g. a
+        // drifted TargetOffset written while autocalibration misfired
+        // (#64) — must be ignored, not resurrected on every start.
+        if (value.persistence != Settings::Persistence::PERSISTENT) continue;
+
         if (std::holds_alternative<bool>(parameters_.at(key).value)) {
             DASHER_ASSERT(parameters_.at(key).type == Settings::PARAM_BOOL);
             if (!LoadSetting(parameters_.at(key).storageName, &std::get<bool>(parameters_.at(key).value))) {
