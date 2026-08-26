@@ -702,11 +702,14 @@ struct dasher_ctx {
 // subtracts input stamps from frame times, so mixing clocks corrupts
 // framerate/slow-start state at every stop/restart (#60). Multiple inputs
 // within one frame window get strictly increasing stamps so gesture timing
-// (stylus tap vs hold, multi-press) still sees distinct timestamps.
+// (stylus tap vs hold, multi-press) still sees distinct timestamps — but
+// capped 2ms past the frame time, so a burst of same-frame inputs can never
+// outrun the next frame stamp and underflow the unsigned elapsed-time math
+// downstream (slow-start).
 static unsigned long inputTime(dasher_ctx* ctx) {
     if (ctx->lastInputMs < ctx->lastFrameMs)
         ctx->lastInputMs = ctx->lastFrameMs;
-    else
+    else if (ctx->lastInputMs < ctx->lastFrameMs + 2)
         ctx->lastInputMs += 1;
     return static_cast<unsigned long>(ctx->lastInputMs);
 }
