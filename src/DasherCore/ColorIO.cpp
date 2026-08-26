@@ -110,7 +110,12 @@ bool CColorIO::ParseLegacy(pugi::xml_document& document) {
         }
 
         // Letter groups: 10-109, alt: 140-239
-        // Map all common colorInfoName values used by alphabets
+        // Restore group-box colours (#62): v5 gave each letter-family group
+        // a distinct palette index and v6's maintained palettes continue
+        // that design (uppercase yellow, punctuation green, numbers red =
+        // legacy indices 111/112/113 = the new-format files' groupColor
+        // values). ParseLegacy never set any group colour, so legacy
+        // palettes rendered all letter families identically.
         {
             ColorPalette::GroupColorInfo letterGroup;
             for (int i = 10; i < 110 && i < (int)colors.size(); i++)
@@ -121,28 +126,38 @@ bool CColorIO::ParseLegacy(pugi::xml_document& document) {
             letterGroup.nodeLabelColorSequence = {NamedColors[NamedColor::defaultLabel]};
             letterGroup.groupOutlineColor = {NamedColors[NamedColor::defaultOutline], ColorPalette::undefinedColor};
             letterGroup.groupLabelColor = {NamedColors[NamedColor::defaultLabel], ColorPalette::undefinedColor};
+            letterGroup.groupColor.first = safeColor(0); // v5: lowercase group box
+            GroupColors["lowercase"] = letterGroup;
+            GroupColors["lower case letters"] = letterGroup;
+            GroupColors["Lower case Latin letters"] = letterGroup;
 
-            std::vector<std::string> letterGroupNames = {
-                "lowercase",
-                "lower case letters",
-                "Lower case Latin letters",
-                "upper case letters",
-                "Upper case Latin letters",
-                "numbers",
-                "Numbers",
-                "punctuation",
-                "Punctuation",
-                "ethiopic letters",
-                "vowels etc",
-                "vowel signs etc",
-                "vowel-like letters",
-                "character modifiers?",
-                "hamza",
-                "joiners",
-                "arabic-indic numbers",
-                "ascii punctuation",
+            ColorPalette::GroupColorInfo upperGroup = letterGroup;
+            upperGroup.groupColor.first =
+                safeColor(111); // v6 palette design: uppercase group (yellow, = new-format #ffff00)
+            GroupColors["uppercase"] = upperGroup;
+            GroupColors["upper case letters"] = upperGroup;
+            GroupColors["Upper case Latin letters"] = upperGroup;
+
+            ColorPalette::GroupColorInfo punctGroup = letterGroup;
+            punctGroup.groupColor.first = safeColor(112); // v5: punctuation group box
+            GroupColors["punctuation"] = punctGroup;
+            GroupColors["Punctuation"] = punctGroup;
+            GroupColors["limitedPunctuation"] = punctGroup;
+            GroupColors["ascii punctuation"] = punctGroup;
+
+            ColorPalette::GroupColorInfo numberGroup = letterGroup;
+            numberGroup.groupColor.first = safeColor(113); // v5: numbers group box
+            GroupColors["numbers"] = numberGroup;
+            GroupColors["Numbers"] = numberGroup;
+            GroupColors["arabic-indic numbers"] = numberGroup;
+
+            // Remaining groups (scripts etc.): letter cycle, no distinct box.
+            std::vector<std::string> remainingGroupNames = {
+                "ethiopic letters",     "vowels etc", "vowel signs etc", "vowel-like letters",
+                "character modifiers?", "hamza",      "joiners",
             };
-            for (auto& name : letterGroupNames)
+            letterGroup.groupColor.first = ColorPalette::undefinedColor;
+            for (auto& name : remainingGroupNames)
                 GroupColors[name] = letterGroup;
         }
 
