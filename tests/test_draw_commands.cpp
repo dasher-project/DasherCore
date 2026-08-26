@@ -257,16 +257,33 @@ TEST(uppercase_group_box_has_distinct_colour) {
     ASSERT(ctx != nullptr);
     dasher_set_screen_size(ctx, 800, 600);
 
-    auto frameHasFill = [&](int r, int g, int b) {
+    // The uppercase group's box is asserted by geometry, not colour alone:
+    // at rest the initial view's text labels are the capital letters
+    // themselves, so the "A" label must sit inside a filled rect carrying
+    // the uppercase group colour. (Colour-only would let an unrelated
+    // yellow element satisfy the assertion.)
+    auto frameHasColouredUppercaseBox = [&](int r, int g, int b) {
         int* cmds;
         int cmd_count;
         char** strs;
         int str_count;
         get_frame(ctx, 1000, &cmds, &cmd_count, &strs, &str_count);
         for (int i = 0; i + 5 < cmd_count; i += 6) {
-            if (cmds[i] != 4) continue; // filled rectangle
-            int argb = cmds[i + 5];
-            if (((argb >> 16) & 0xFF) == r && ((argb >> 8) & 0xFF) == g && (argb & 0xFF) == b) return true;
+            if (cmds[i] != 5) continue; // text
+            const int sidx = cmds[i + 4];
+            if (sidx < 0 || sidx >= str_count) continue;
+            if (strcmp(strs[sidx], "A") != 0) continue;
+            const int tx = cmds[i + 1], ty = cmds[i + 2];
+            for (int j = 0; j + 5 < cmd_count; j += 6) {
+                if (cmds[j] != 4) continue; // filled rectangle
+                const int argb = cmds[j + 5];
+                if (((argb >> 16) & 0xFF) != r || ((argb >> 8) & 0xFF) != g || (argb & 0xFF) != b) continue;
+                const int x1 = cmds[j + 1] < cmds[j + 3] ? cmds[j + 1] : cmds[j + 3];
+                const int x2 = cmds[j + 1] < cmds[j + 3] ? cmds[j + 3] : cmds[j + 1];
+                const int y1 = cmds[j + 2] < cmds[j + 4] ? cmds[j + 2] : cmds[j + 4];
+                const int y2 = cmds[j + 2] < cmds[j + 4] ? cmds[j + 4] : cmds[j + 2];
+                if (tx >= x1 && tx <= x2 && ty >= y1 && ty <= y2) return true;
+            }
         }
         return false;
     };
@@ -276,7 +293,7 @@ TEST(uppercase_group_box_has_distinct_colour) {
 
     // Default palette: uppercase group box = #FFFF00 (from color.default.xml,
     // which must survive the legacy colour.xml name collision).
-    ASSERT(frameHasFill(255, 255, 0));
+    ASSERT(frameHasColouredUppercaseBox(255, 255, 0));
 
     // Legacy palette: same group colour via the legacy indices —
     // ParseLegacy must set the letter-family group colours.
@@ -284,7 +301,7 @@ TEST(uppercase_group_box_has_distinct_colour) {
     ASSERT(colourKey >= 0);
     dasher_set_string_parameter(ctx, colourKey, "European/Asian (Original)");
     run_frames(ctx, 30);
-    ASSERT(frameHasFill(255, 255, 0));
+    ASSERT(frameHasColouredUppercaseBox(255, 255, 0));
 
     dasher_destroy(ctx);
 }
