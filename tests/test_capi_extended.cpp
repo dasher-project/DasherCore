@@ -260,6 +260,92 @@ TEST(restart_keeps_typing_after_stop_start_cycle) {
     dasher_destroy(ctx);
 }
 
+TEST(autocalibrate_off_by_default_and_offset_session_scoped) {
+    // Regression (#64 — the still-occurring restart drift): BP_AUTOCALIBRATE
+    // is Dasher's 2004 "enhanced eyetracking mode", designed to correct
+    // systematic eye-tracker Y error. v5 shipped it OFF (both legacy repos);
+    // #54 flipped v6 to true on a wrong premise, and for a pointer user
+    // deliberately dwelling above centre the filter read intentional
+    // steering as bias and drifted LP_TARGET_OFFSET monotonically
+    // (measured: 0 -> -68 over 5 dwell/lift/restart cycles), shifting the
+    // steering point by 10x that every frame and persisting across
+    // sessions. Default must be false; the learned offset must be
+    // session-scoped (EPHEMERAL), never persisted.
+    const int ac_key = dasher_find_parameter_key("BP_AUTOCALIBRATE");
+    const int off_key = dasher_find_parameter_key("LP_TARGET_OFFSET");
+    ASSERT(ac_key >= 0);
+    ASSERT(off_key >= 0);
+
+    {
+        dasher_ctx* ctx = create_isolated_context();
+        ASSERT(ctx != nullptr);
+        dasher_set_screen_size(ctx, 800, 600);
+
+        // v5 parity: off by default.
+        ASSERT_EQ(dasher_get_bool_parameter(ctx, ac_key), 0);
+
+        // Dwelling above centre with defaults must not move the offset.
+        int64_t clock = 1000;
+        auto frame = [&]() {
+            dasher_mouse_move(ctx, 640.0f, 260.0f);
+            dasher_frame(ctx, clock += 16, nullptr, nullptr, nullptr, nullptr);
+        };
+        dasher_mouse_down(ctx);
+        for (int i = 0; i < 150; i++)
+            frame();
+        ASSERT_EQ(dasher_get_long_parameter(ctx, off_key), 0);
+
+        // Opt-in (eye-gaze) still calibrates: with it on, sustained
+        // above-centre dwell must move the offset.
+        dasher_set_bool_parameter(ctx, ac_key, 1);
+        for (int i = 0; i < 400; i++)
+            frame();
+        ASSERT(dasher_get_long_parameter(ctx, off_key) != 0);
+
+        dasher_destroy(ctx);
+    }
+
+    // Session scope: a fresh context in the SAME user dir starts at 0 —
+    // the learned offset is not persisted, and a stale <TargetOffset>
+    // written by an older build (pre-ephemeral) is ignored on load.
+    {
+        ScopedTempDir tmp;
+        char* err = nullptr;
+        dasher_ctx* ctx = dasher_create(get_test_data_dir(), tmp.path.c_str(), &err);
+        ASSERT(ctx != nullptr);
+        // Write a learned offset + opt-in while running...
+        dasher_set_screen_size(ctx, 800, 600);
+        dasher_set_bool_parameter(ctx, ac_key, 1);
+        dasher_set_long_parameter(ctx, off_key, 42);
+        dasher_save_settings(ctx);
+        dasher_destroy(ctx);
+
+        // ...and simulate an upgrading user whose older build persisted the
+        // drifted offset directly into the settings file (the store's
+        // schema is <long name="..." value="..."/>).
+        {
+            std::filesystem::path settingsPath = std::filesystem::path(tmp.path) / "dasher_settings.xml";
+            std::ifstream in(settingsPath);
+            std::string xml((std::istreambuf_iterator<char>(in)), std::istreambuf_iterator<char>());
+            in.close();
+            const size_t closing = xml.find("</settings>");
+            ASSERT(closing != std::string::npos);
+            xml.insert(closing, "<long name=\"TargetOffset\" value=\"-68\"/>");
+            std::ofstream out(settingsPath, std::ios::trunc);
+            out << xml;
+        }
+
+        // Restart the same user dir: the stale drifted offset is ignored
+        // (ephemeral), while the explicit opt-in persists (eyegaze users
+        // keep their setting across sessions).
+        dasher_ctx* ctx2 = dasher_create(get_test_data_dir(), tmp.path.c_str(), &err);
+        ASSERT(ctx2 != nullptr);
+        ASSERT_EQ(dasher_get_long_parameter(ctx2, off_key), 0);
+        ASSERT_EQ(dasher_get_bool_parameter(ctx2, ac_key), 1);
+        dasher_destroy(ctx2);
+    }
+}
+
 TEST(create_with_fresh_user_dir_regex_hazard_path) {
     // Regression: XmlSettingsStore::Load() passes the settings file's
     // absolute path to ScanFiles(); when the file does not exist yet
