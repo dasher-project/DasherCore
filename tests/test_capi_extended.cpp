@@ -291,13 +291,15 @@ TEST(autocalibrate_off_by_default_and_offset_session_scoped) {
             dasher_frame(ctx, clock += 16, nullptr, nullptr, nullptr, nullptr);
         };
         dasher_mouse_down(ctx);
-        for (int i = 0; i < 150; i++) frame();
+        for (int i = 0; i < 150; i++)
+            frame();
         ASSERT_EQ(dasher_get_long_parameter(ctx, off_key), 0);
 
         // Opt-in (eye-gaze) still calibrates: with it on, sustained
         // above-centre dwell must move the offset.
         dasher_set_bool_parameter(ctx, ac_key, 1);
-        for (int i = 0; i < 400; i++) frame();
+        for (int i = 0; i < 400; i++)
+            frame();
         ASSERT(dasher_get_long_parameter(ctx, off_key) != 0);
 
         dasher_destroy(ctx);
