@@ -204,16 +204,24 @@ TEST(alphabet_v6_paragraph_outputs_newline) {
     ASSERT(ctx);
     dasher_set_screen_size(ctx, 800, 600);
 
+    // Every shipped v6 alphabet that carries a paragraphSpace group.
+    // Names must match the <alphabet name="..."> attribute exactly: an
+    // unknown name silently falls back to the default alphabet, which
+    // would make the check pass without testing the resource.
     const char* alphabets_to_check[] = {
         "English with numerals and limited punctuation",
         "English with limited punctuation",
         "English with numerals and lots of punctuation",
         "English with accents, numerals, punctuation",
-        "German with numerals and punctuation",
+        "English Latex",
+        "Deutsch / German with limited punctuation",
+        "Deutsch / German with numerals and punctuation",
     };
 
     for (const char* alph : alphabets_to_check) {
         dasher_set_alphabet_id(ctx, alph);
+        ASSERT_STR_EQ(dasher_get_alphabet_id(ctx), alph);
+
         int sym_count = dasher_get_alphabet_symbol_count(ctx);
         ASSERT(sym_count > 0);
 
@@ -223,12 +231,11 @@ TEST(alphabet_v6_paragraph_outputs_newline) {
             if (dasher_get_alphabet_symbol_display(ctx, i, disp, sizeof(disp)) != 0) continue;
             if (strcmp(disp, "\xc2\xb6") != 0) continue; // UTF-8 pilcrow
             found_paragraph_display = true;
-            if (dasher_get_alphabet_symbol_text(ctx, i, text, sizeof(text)) == 0
-                && strcmp(text, "\n") == 0)
+            if (dasher_get_alphabet_symbol_text(ctx, i, text, sizeof(text)) == 0 && strcmp(text, "\n") == 0)
                 paragraph_is_newline = true;
         }
-        printf("  %s: paragraph display found=%d outputs_newline=%d\n",
-               alph, found_paragraph_display, paragraph_is_newline);
+        printf("  %s: paragraph display found=%d outputs_newline=%d\n", alph, found_paragraph_display,
+               paragraph_is_newline);
         ASSERT(found_paragraph_display);
         ASSERT(paragraph_is_newline);
     }
