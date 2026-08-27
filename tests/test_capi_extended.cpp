@@ -579,12 +579,55 @@ TEST(reload_settings) {
     ASSERT_EQ(dasher_get_speed_percent(ctx), 120); // kept, not reset
     ASSERT_EQ(param_changes, 0);                   // no spurious callbacks
 
+    // Junk suffix: "12junk" must not validate — the 12 prefix would
+    // silently reach the live setter. Same for bool "truejunk".
+    {
+        char path[512];
+        snprintf(path, sizeof(path), "%s/dasher_settings.xml", user_dir);
+        FILE* f = fopen(path, "w");
+        if (f) {
+            fputs("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<settings>\n<long name=\"MaxBitRateTimes100\" "
+                  "value=\"12junk\"/>\n<bool name=\"AutoSpeedControl\" value=\"truejunk\"/>\n</settings>\n",
+                  f);
+            fclose(f);
+        }
+    }
+    dasher_reload_settings(ctx);
+    ASSERT_EQ(dasher_get_speed_percent(ctx), 120); // kept, not reset
+    ASSERT_EQ(param_changes, 0);                   // no spurious callbacks
+
     // Edit buffer survives the reload
     // (not asserting content — just that the engine is still functional)
     dasher_reset_output_text(ctx);
     ASSERT(dasher_get_output_text(ctx) != nullptr);
 
     dasher_destroy(ctx);
+
+    // Startup with a partially corrupt file: a corrupt entry followed by
+    // a valid one. The initial Load must pick up the valid entry —
+    // stopping the scan at the corrupt one made later settings load from
+    // defaults, giving a document-order-dependent configuration.
+    {
+        char dir2[256];
+        snprintf(dir2, sizeof(dir2), "%s/dasher_reload_test_partial_%d", dasher_temp_dir(), dasher_getpid());
+        dasher_mkdir(dir2);
+        char path[512];
+        snprintf(path, sizeof(path), "%s/dasher_settings.xml", dir2);
+        FILE* f = fopen(path, "w");
+        if (f) {
+            fputs("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<settings>\n"
+                  "<long value=\"560\"/>\n"                                // corrupt: nameless
+                  "<long name=\"MaxBitRateTimes100\" value=\"12junk\"/>\n" // corrupt: junk suffix
+                  "<long name=\"MaxBitRateTimes100\" value=\"560\"/>\n"    // valid: speed 350%
+                  "</settings>\n",
+                  f);
+            fclose(f);
+        }
+        dasher_ctx* ctx2 = dasher_create(TEST_DATA_DIR, dir2, nullptr);
+        ASSERT(ctx2 != nullptr);
+        ASSERT_EQ(dasher_get_speed_percent(ctx2), 350); // valid entry loaded despite earlier corrupt ones
+        dasher_destroy(ctx2);
+    }
 }
 
 TEST(save_settings) {

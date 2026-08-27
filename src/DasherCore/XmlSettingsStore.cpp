@@ -2,6 +2,9 @@
 #include "DasherInterfaceBase.h"
 #include "FileUtils.h"
 
+#include <cctype>
+#include <cstdlib>
+
 namespace Dasher {
 
 template <typename T>
@@ -146,35 +149,33 @@ bool XmlSettingsStore::Save() {
 }
 
 namespace {
-// A bool value is valid when its first char selects an unambiguous
-// true/false in pugixml's own terms (1/0, t/f, y/n, either case);
-// anything else ("banana") would silently become false.
+// A bool value must be exactly one of pugixml's read-side tokens
+// (true/false, yes/no, 1/0 — Dasher writes "true"/"false"). A valid
+// prefix followed by junk ("truejunk") must not pass: as_bool() only
+// looks at the first character and would silently read it as true.
 bool valid_bool_value(const char* text) {
-    if (text == nullptr || *text == '\0') return false;
-    switch (*text) {
-    case '1':
-    case '0':
-    case 't':
-    case 'T':
-    case 'f':
-    case 'F':
-    case 'y':
-    case 'Y':
-    case 'n':
-    case 'N':
-        return true;
-    default:
-        return false;
+    if (text == nullptr) return false;
+    std::string token;
+    while (*text != '\0') {
+        token.push_back(static_cast<char>(tolower(static_cast<unsigned char>(*text))));
+        ++text;
     }
+    return token == "true" || token == "false" || token == "yes" || token == "no" || token == "1" || token == "0";
 }
 
-// A long value is valid when it holds at least one digit where strtoll
-// expects it ("560", " 12 ") — as_llong would return 0 for garbage.
+// A long value must parse completely: digits where strtol expects them
+// and nothing but whitespace after ("560" ok, " 12 " ok, "12junk" not —
+// as_llong() would silently return the 12 prefix).
 bool valid_long_value(const char* text) {
-    if (text == nullptr) return false;
+    if (text == nullptr || *text == '\0') return false;
     char* end = nullptr;
     strtol(text, &end, 10);
-    return end != text; // at least one digit consumed
+    if (end == text) return false; // no digits consumed
+    while (*end != '\0') {
+        if (isspace(static_cast<unsigned char>(*end)) == 0) return false;
+        ++end;
+    }
+    return true;
 }
 } // namespace
 
@@ -193,27 +194,25 @@ bool XmlSettingsStore::Parse(pugi::xml_document& document, const std::string fil
 
     // Entries with a missing or unparseable value attribute, a missing or
     // empty name, or a known parameter name under the wrong tag type are
-    // treated as corruption (e.g. a partial write): reject the whole file
-    // rather than letting a zero/false/empty value silently change the
-    // live parameter, or letting a mistyped entry drop the setting into
-    // a map LoadPersistent never reads (resetting it to default).
-    // A deliberate removal omits the element entirely. Unknown names
-    // (stale keys from older builds) are still allowed.
+    // treated as corruption: on reload the whole file is rejected (keep
+    // current state). Invalid entries are skipped without aborting the
+    // scan so the initial Load() still picks up every valid entry
+    // regardless of document order — stopping at the first bad entry
+    // made later settings initialize from defaults. A deliberate removal
+    // omits the element entirely. Unknown names (stale keys from older
+    // builds) are still allowed.
+    bool all_valid = true;
     for (pugi::xml_node bool_setting : outer.children("bool")) {
         const std::string name = bool_setting.attribute("name").as_string();
         const pugi::xml_attribute value_attr = bool_setting.attribute("value");
-        if (name.empty()) {
-            reload_parse_ok_ = false;
-            return false;
-        }
-        if (!value_attr || !valid_bool_value(value_attr.value())) {
-            reload_parse_ok_ = false;
-            return false;
+        if (name.empty() || !value_attr || !valid_bool_value(value_attr.value())) {
+            all_valid = false;
+            continue;
         }
         const auto declared = TypeForStorageName(name);
         if (declared != Settings::PARAM_INVALID && declared != Settings::PARAM_BOOL) {
-            reload_parse_ok_ = false;
-            return false;
+            all_valid = false;
+            continue;
         }
         boolean_settings_[name] = value_attr.as_bool();
     }
@@ -221,18 +220,14 @@ bool XmlSettingsStore::Parse(pugi::xml_document& document, const std::string fil
     for (pugi::xml_node string_setting : outer.children("string")) {
         const std::string name = string_setting.attribute("name").as_string();
         const pugi::xml_attribute value_attr = string_setting.attribute("value");
-        if (name.empty()) {
-            reload_parse_ok_ = false;
-            return false;
-        }
-        if (!value_attr) {
-            reload_parse_ok_ = false;
-            return false;
+        if (name.empty() || !value_attr) {
+            all_valid = false;
+            continue;
         }
         const auto declared = TypeForStorageName(name);
         if (declared != Settings::PARAM_INVALID && declared != Settings::PARAM_STRING) {
-            reload_parse_ok_ = false;
-            return false;
+            all_valid = false;
+            continue;
         }
         string_settings_[name] = value_attr.as_string();
     }
@@ -240,24 +235,19 @@ bool XmlSettingsStore::Parse(pugi::xml_document& document, const std::string fil
     for (pugi::xml_node long_setting : outer.children("long")) {
         const std::string name = long_setting.attribute("name").as_string();
         const pugi::xml_attribute value_attr = long_setting.attribute("value");
-        if (name.empty()) {
-            reload_parse_ok_ = false;
-            return false;
-        }
-        if (!value_attr || !valid_long_value(value_attr.value())) {
-            reload_parse_ok_ = false;
-            return false;
+        if (name.empty() || !value_attr || !valid_long_value(value_attr.value())) {
+            all_valid = false;
+            continue;
         }
         const auto declared = TypeForStorageName(name);
         if (declared != Settings::PARAM_INVALID && declared != Settings::PARAM_LONG) {
-            reload_parse_ok_ = false;
-            return false;
+            all_valid = false;
+            continue;
         }
         long_settings_[name] = static_cast<long>(value_attr.as_llong());
     }
 
-    reload_parse_ok_ = true; // reached only when the document loaded and validated
-
-    return true;
+    reload_parse_ok_ = all_valid;
+    return all_valid;
 }
 } // namespace Dasher
