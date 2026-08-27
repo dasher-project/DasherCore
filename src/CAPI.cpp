@@ -1693,6 +1693,23 @@ DASHER_API void dasher_save_settings(dasher_ctx* ctx) {
     if (ctx->appearanceLoaded) saveAppearanceSettings(ctx); // RFC 0007 sidecar
 }
 
+DASHER_API void dasher_reload_settings(dasher_ctx* ctx) {
+    if (!ctx || !ctx->settings) return;
+    try {
+        // Re-read dasher_settings.xml and apply changes through the normal
+        // parameter path — fires OnParameterChanged so the engine rebuilds
+        // derived state (alphabet, colours, input filter) and the frontend
+        // callback notifies. Safe to call any time; only differing values
+        // are applied. Use cases: settings file changed externally (IME
+        // service shared directory, migration, another process).
+        ctx->settings->ReloadFromFile();
+    } catch (const std::exception& e) {
+        log_boundary_error(ctx, "dasher_reload_settings", e.what());
+    } catch (...) {
+        log_boundary_error(ctx, "dasher_reload_settings", "unknown exception");
+    }
+}
+
 // Reset every parameter to its built-in default value (from Parameters.h).
 // Routes through the typed Set*Parameter methods so the normal parameter-change
 // notifications fire and a live engine reconfigures itself (alphabet/colour/LM

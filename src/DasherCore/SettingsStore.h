@@ -63,6 +63,20 @@ class CSettingsStore {
     // TODO: just load the application parameters by default?
     void AddParameters(const std::unordered_map<Parameter, const Settings::Parameter_Value> table);
 
+    /// Re-read the settings file and apply any changed values through the
+    /// normal SetParameter path (fires OnParameterChanged, triggers the
+    /// engine's per-parameter handlers, updates the frontend callback).
+    /// Only parameters whose file value differs from the current value are
+    /// applied — no spurious rebuilds. The edit buffer and model state
+    /// are preserved.
+    void ReloadFromFile();
+
+    /// Re-read the settings backing store and repopulate parameters_ in
+    /// place. Base implementation re-reads from the in-memory maps;
+    /// file-backed subclasses (XmlSettingsStore) override to re-parse the
+    /// file first.
+    virtual void RefreshFromStore();
+
     Event<Parameter, std::variant<bool, long, std::string>> OnPreParameterChange;
     Event<Parameter> OnParameterChanged;
 
@@ -72,6 +86,13 @@ class CSettingsStore {
     /// Loads all (persistent) prefs from disk, using+storing default values when no
     ///  existing value stored; non-persistent prefs are reinitialized from defaults.
     void LoadPersistent();
+
+    /// Look up the declared type for a storage name. Returns PARAM_INVALID
+    /// when the name is not a registered parameter (a stale key from an
+    /// older build — harmless, callers allow it). Used by file-backed
+    /// stores to validate that an entry's tag matches the parameter's
+    /// declared type.
+    Settings::ParameterType TypeForStorageName(const std::string& name) const;
 
   private:
     // Platform Specific settings file management

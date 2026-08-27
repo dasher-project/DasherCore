@@ -15,10 +15,66 @@ using namespace Dasher;
 
 CSettingsStore::CSettingsStore() {}
 
+void CSettingsStore::ReloadFromFile() {
+    // Re-read the persistent settings from the backing store and apply any
+    // differences through SetParameter — the same path the settings UI uses —
+    // so parameter-change handlers fire, the engine rebuilds derived state,
+    // and the frontend callback notifies.
+
+    // Snapshot the current values so we only apply real changes.
+    std::unordered_map<Parameter, std::variant<bool, long, std::string>> current;
+    for (const auto& [key, value] : parameters_) {
+        current[key] = value.value;
+    }
+
+    // Re-read from the store. Subclasses override RefreshFromStore() to
+    // re-parse the backing file (XmlSettingsStore re-scans the XML), then
+    // repopulate parameters_ in place.
+    RefreshFromStore();
+
+    // Now diff and apply through SetParameter for anything that changed.
+    // RefreshFromStore already wrote the new file values into parameters_,
+    // so we need to temporarily restore the old value before calling
+    // SetParameter with the new one — otherwise SetParameter's "nothing
+    // changed" early-return would skip the OnParameterChanged broadcast.
+    for (auto& [key, value] : parameters_) {
+        const auto it = current.find(key);
+        if (it == current.end()) continue;
+        if (value.value == it->second) continue;
+
+        // Save the new (from-file) value, restore the old one so
+        // SetParameter detects a real change and fires notifications.
+        const auto new_value = value.value;
+        value.value = it->second;
+
+        if (std::holds_alternative<bool>(new_value)) {
+            SetBoolParameter(key, std::get<bool>(new_value));
+        } else if (std::holds_alternative<long>(new_value)) {
+            SetLongParameter(key, std::get<long>(new_value));
+        } else if (std::holds_alternative<std::string>(new_value)) {
+            SetStringParameter(key, std::get<std::string>(new_value));
+        }
+    }
+}
+
+void CSettingsStore::RefreshFromStore() {
+    // Base implementation: re-read from the in-memory settings maps.
+    // Subclasses with a file-backed store (XmlSettingsStore) override this
+    // to re-parse the file first.
+    LoadPersistent();
+}
+
 void CSettingsStore::LoadPersistent() {
     // Load each of the persistent parameters.  If we fail loading for the store, then
     // we'll save the settings with the default value that comes from Parameters.h
     AddParameters(Settings::parameter_defaults);
+}
+
+Settings::ParameterType CSettingsStore::TypeForStorageName(const std::string& name) const {
+    for (const auto& [key, value] : parameters_) {
+        if (value.storageName == name) return value.type;
+    }
+    return Settings::PARAM_INVALID;
 }
 
 void CSettingsStore::AddParameters(const std::unordered_map<Parameter, const Settings::Parameter_Value> table) {

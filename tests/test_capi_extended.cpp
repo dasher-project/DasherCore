@@ -418,6 +418,235 @@ TEST(reset_emits_buffer_clear_event) {
     dasher_destroy(ctx);
 }
 
+TEST(reload_settings) {
+    // dasher_reload_settings re-reads dasher_settings.xml and applies
+    // changes through the normal parameter path. This matters when the
+    // settings file changes externally (IME sharing the user dir, a
+    // migration moving the file) — the engine should pick up the change
+    // without being destroyed and recreated.
+    static int reload_test_counter = 0;
+    char user_dir[256];
+    snprintf(user_dir, sizeof(user_dir), "%s/dasher_reload_test_%d_%d", dasher_temp_dir(), dasher_getpid(),
+             reload_test_counter++);
+    dasher_mkdir(user_dir);
+
+    dasher_ctx* ctx = dasher_create(TEST_DATA_DIR, user_dir, nullptr);
+    ASSERT(ctx != nullptr);
+    dasher_set_screen_size(ctx, 800, 600);
+
+    // Set an initial speed and save
+    dasher_set_speed_percent(ctx, 200);
+    dasher_save_settings(ctx);
+    const int before = dasher_get_speed_percent(ctx);
+    ASSERT(before == 200);
+
+    // Simulate an external change: create a second engine that writes a
+    // different speed to the same settings file
+    {
+        dasher_ctx* writer = dasher_create(TEST_DATA_DIR, user_dir, nullptr);
+        ASSERT(writer != nullptr);
+        dasher_set_speed_percent(writer, 350);
+        dasher_save_settings(writer);
+        dasher_destroy(writer);
+    }
+
+    // The first engine still has its in-memory value
+    ASSERT_EQ(dasher_get_speed_percent(ctx), 200);
+
+    // Track parameter-change notifications
+    static int param_changes = 0;
+    param_changes = 0;
+    dasher_set_parameter_callback(ctx, [](int key, void*) { param_changes++; }, nullptr);
+
+    // Reload — should pick up the external change
+    dasher_reload_settings(ctx);
+    ASSERT_EQ(dasher_get_speed_percent(ctx), 350);
+
+    // Parameter-change callback fired for the changed setting
+    ASSERT(param_changes > 0);
+
+    // Reload again with no file change — no spurious notifications
+    param_changes = 0;
+    dasher_reload_settings(ctx);
+    ASSERT_EQ(param_changes, 0);
+
+    // Removed setting: external writer deletes the entry from the XML,
+    // reload should restore the declared default and notify.
+    {
+        // Write a settings file with the speed entry removed (just an
+        // empty settings element — simplest removal case)
+        char path[512];
+        snprintf(path, sizeof(path), "%s/dasher_settings.xml", user_dir);
+        FILE* f = fopen(path, "w");
+        if (f) {
+            fputs("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<settings>\n</settings>\n", f);
+            fclose(f);
+        }
+    }
+    param_changes = 0;
+    dasher_reload_settings(ctx);
+    // Speed falls back to the manifest default (raw 80 = 50%)
+    const int default_speed = dasher_get_speed_percent(ctx);
+    ASSERT_EQ(default_speed, 50);
+    ASSERT(param_changes > 0); // the removal triggered a notification
+
+    // Malformed file: external writer corrupts the XML — reload should
+    // keep current values (not reset to defaults) and emit no callbacks.
+    {
+        char path[512];
+        snprintf(path, sizeof(path), "%s/dasher_settings.xml", user_dir);
+        FILE* f = fopen(path, "w");
+        if (f) {
+            fputs("THIS IS NOT XML AT ALL <<<\n", f);
+            fclose(f);
+        }
+    }
+    param_changes = 0;
+    dasher_reload_settings(ctx);
+    ASSERT_EQ(dasher_get_speed_percent(ctx), 50); // kept, not reset
+    ASSERT_EQ(param_changes, 0);                  // no spurious callbacks
+
+    // Wrong root: well-formed XML but not a settings file — same as
+    // malformed, keep current values and emit no callbacks.
+    {
+        char path[512];
+        snprintf(path, sizeof(path), "%s/dasher_settings.xml", user_dir);
+        FILE* f = fopen(path, "w");
+        if (f) {
+            fputs("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<not_settings>\n<long name=\"x\" "
+                  "value=\"1\"/>\n</not_settings>\n",
+                  f);
+            fclose(f);
+        }
+    }
+    param_changes = 0;
+    dasher_reload_settings(ctx);
+    ASSERT_EQ(dasher_get_speed_percent(ctx), 50); // kept, not reset
+    ASSERT_EQ(param_changes, 0);                  // no spurious callbacks
+
+    // Invalid value: valid XML, valid root, but an unparseable value —
+    // treated as corruption, keep current values, no callbacks.
+    {
+        char path[512];
+        snprintf(path, sizeof(path), "%s/dasher_settings.xml", user_dir);
+        FILE* f = fopen(path, "w");
+        if (f) {
+            fputs("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<settings>\n<long name=\"LP_MAX_BITRATE\" "
+                  "value=\"banana\"/>\n</settings>\n",
+                  f);
+            fclose(f);
+        }
+    }
+    param_changes = 0;
+    dasher_reload_settings(ctx);
+    ASSERT_EQ(dasher_get_speed_percent(ctx), 50); // kept, not reset
+    ASSERT_EQ(param_changes, 0);                  // no spurious callbacks
+
+    // Nameless entry: a <long> with no name attribute is corruption —
+    // keep values, no callbacks. Set a non-default value first so a
+    // silent reset to default would be observable.
+    dasher_set_speed_percent(ctx, 120);
+    param_changes = 0;
+    {
+        char path[512];
+        snprintf(path, sizeof(path), "%s/dasher_settings.xml", user_dir);
+        FILE* f = fopen(path, "w");
+        if (f) {
+            fputs("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<settings>\n<long value=\"560\"/>\n</settings>\n", f);
+            fclose(f);
+        }
+    }
+    dasher_reload_settings(ctx);
+    ASSERT_EQ(dasher_get_speed_percent(ctx), 120); // kept, not reset
+    ASSERT_EQ(param_changes, 0);                   // no spurious callbacks
+
+    // Wrong tag: a known parameter's storage name under the wrong element
+    // type — the entry would land in a map LoadPersistent never reads,
+    // resetting the setting to default. Corruption: keep values, no
+    // callbacks. (Speed's storage name is MaxBitRateTimes100.)
+    {
+        char path[512];
+        snprintf(path, sizeof(path), "%s/dasher_settings.xml", user_dir);
+        FILE* f = fopen(path, "w");
+        if (f) {
+            fputs("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<settings>\n<bool name=\"MaxBitRateTimes100\" "
+                  "value=\"1\"/>\n</settings>\n",
+                  f);
+            fclose(f);
+        }
+    }
+    dasher_reload_settings(ctx);
+    ASSERT_EQ(dasher_get_speed_percent(ctx), 120); // kept, not reset
+    ASSERT_EQ(param_changes, 0);                   // no spurious callbacks
+
+    // Junk suffix: "12junk" must not validate — the 12 prefix would
+    // silently reach the live setter. Same for bool "truejunk".
+    {
+        char path[512];
+        snprintf(path, sizeof(path), "%s/dasher_settings.xml", user_dir);
+        FILE* f = fopen(path, "w");
+        if (f) {
+            fputs("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<settings>\n<long name=\"MaxBitRateTimes100\" "
+                  "value=\"12junk\"/>\n<bool name=\"AutoSpeedControl\" value=\"truejunk\"/>\n</settings>\n",
+                  f);
+            fclose(f);
+        }
+    }
+    dasher_reload_settings(ctx);
+    ASSERT_EQ(dasher_get_speed_percent(ctx), 120); // kept, not reset
+    ASSERT_EQ(param_changes, 0);                   // no spurious callbacks
+
+    // Overflow: an all-numeric value beyond LONG_MAX — strtol clamps to
+    // LONG_MAX and flags ERANGE; the clamped value must not be applied.
+    {
+        char path[512];
+        snprintf(path, sizeof(path), "%s/dasher_settings.xml", user_dir);
+        FILE* f = fopen(path, "w");
+        if (f) {
+            fputs("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<settings>\n<long name=\"MaxBitRateTimes100\" "
+                  "value=\"99999999999999999999999999\"/>\n</settings>\n",
+                  f);
+            fclose(f);
+        }
+    }
+    dasher_reload_settings(ctx);
+    ASSERT_EQ(dasher_get_speed_percent(ctx), 120); // kept, not clamped-applied
+    ASSERT_EQ(param_changes, 0);                   // no spurious callbacks
+
+    // Edit buffer survives the reload
+    // (not asserting content — just that the engine is still functional)
+    dasher_reset_output_text(ctx);
+    ASSERT(dasher_get_output_text(ctx) != nullptr);
+
+    dasher_destroy(ctx);
+
+    // Startup with a partially corrupt file: a corrupt entry followed by
+    // a valid one. The initial Load must pick up the valid entry —
+    // stopping the scan at the corrupt one made later settings load from
+    // defaults, giving a document-order-dependent configuration.
+    {
+        char dir2[256];
+        snprintf(dir2, sizeof(dir2), "%s/dasher_reload_test_partial_%d", dasher_temp_dir(), dasher_getpid());
+        dasher_mkdir(dir2);
+        char path[512];
+        snprintf(path, sizeof(path), "%s/dasher_settings.xml", dir2);
+        FILE* f = fopen(path, "w");
+        if (f) {
+            fputs("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<settings>\n"
+                  "<long value=\"560\"/>\n"                                // corrupt: nameless
+                  "<long name=\"MaxBitRateTimes100\" value=\"12junk\"/>\n" // corrupt: junk suffix
+                  "<long name=\"MaxBitRateTimes100\" value=\"560\"/>\n"    // valid: speed 350%
+                  "</settings>\n",
+                  f);
+            fclose(f);
+        }
+        dasher_ctx* ctx2 = dasher_create(TEST_DATA_DIR, dir2, nullptr);
+        ASSERT(ctx2 != nullptr);
+        ASSERT_EQ(dasher_get_speed_percent(ctx2), 350); // valid entry loaded despite earlier corrupt ones
+        dasher_destroy(ctx2);
+    }
+}
+
 TEST(save_settings) {
     static int save_test_counter = 0;
     char shared_dir[256];
