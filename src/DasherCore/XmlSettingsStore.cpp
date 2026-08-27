@@ -145,9 +145,41 @@ bool XmlSettingsStore::Save() {
     return doc.save_file(last_mutable_filepath.c_str(), "\t", pugi::format_default, pugi::encoding_utf8);
 }
 
+namespace {
+// A bool value is valid when its first char selects an unambiguous
+// true/false in pugixml's own terms (1/0, t/f, y/n, either case);
+// anything else ("banana") would silently become false.
+bool valid_bool_value(const char* text) {
+    if (text == nullptr || *text == '\0') return false;
+    switch (*text) {
+    case '1':
+    case '0':
+    case 't':
+    case 'T':
+    case 'f':
+    case 'F':
+    case 'y':
+    case 'Y':
+    case 'n':
+    case 'N':
+        return true;
+    default:
+        return false;
+    }
+}
+
+// A long value is valid when it holds at least one digit where strtoll
+// expects it ("560", " 12 ") — as_llong would return 0 for garbage.
+bool valid_long_value(const char* text) {
+    if (text == nullptr) return false;
+    char* end = nullptr;
+    strtol(text, &end, 10);
+    return end != text; // at least one digit consumed
+}
+} // namespace
+
 bool XmlSettingsStore::Parse(pugi::xml_document& document, const std::string filePath, bool bUser) {
     if (bUser) last_mutable_filepath = filePath;
-
     const pugi::xml_node outer = document.child("settings");
 
     // A settings file must have a <settings> root. Well-formed XML with
@@ -158,24 +190,48 @@ bool XmlSettingsStore::Parse(pugi::xml_document& document, const std::string fil
         reload_parse_ok_ = false;
         return false;
     }
-    reload_parse_ok_ = true; // reached only when the document loaded
+
+    // Entries with a missing or unparseable value attribute are treated
+    // as corruption (e.g. a partial write): reject the whole file rather
+    // than letting a zero/false/empty value silently change the live
+    // parameter. A deliberate removal omits the element entirely.
     for (pugi::xml_node bool_setting : outer.children("bool")) {
-        std::string name = bool_setting.attribute("name").as_string();
-        const bool value = bool_setting.attribute("value").as_bool();
-        if (!name.empty()) boolean_settings_[name] = value;
+        const std::string name = bool_setting.attribute("name").as_string();
+        const pugi::xml_attribute value_attr = bool_setting.attribute("value");
+        if (!name.empty()) {
+            if (!value_attr || !valid_bool_value(value_attr.value())) {
+                reload_parse_ok_ = false;
+                return false;
+            }
+            boolean_settings_[name] = value_attr.as_bool();
+        }
     }
 
     for (pugi::xml_node string_setting : outer.children("string")) {
-        std::string name = string_setting.attribute("name").as_string();
-        const std::string value = string_setting.attribute("value").as_string();
-        if (!name.empty()) string_settings_[name] = value;
+        const std::string name = string_setting.attribute("name").as_string();
+        const pugi::xml_attribute value_attr = string_setting.attribute("value");
+        if (!name.empty()) {
+            if (!value_attr) {
+                reload_parse_ok_ = false;
+                return false;
+            }
+            string_settings_[name] = value_attr.as_string();
+        }
     }
 
     for (pugi::xml_node long_setting : outer.children("long")) {
-        std::string name = long_setting.attribute("name").as_string();
-        const long value = static_cast<long>(long_setting.attribute("value").as_llong());
-        if (!name.empty()) long_settings_[name] = value;
+        const std::string name = long_setting.attribute("name").as_string();
+        const pugi::xml_attribute value_attr = long_setting.attribute("value");
+        if (!name.empty()) {
+            if (!value_attr || !valid_long_value(value_attr.value())) {
+                reload_parse_ok_ = false;
+                return false;
+            }
+            long_settings_[name] = static_cast<long>(value_attr.as_llong());
+        }
     }
+
+    reload_parse_ok_ = true; // reached only when the document loaded and validated
 
     return true;
 }
