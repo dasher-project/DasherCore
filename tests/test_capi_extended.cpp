@@ -542,6 +542,43 @@ TEST(reload_settings) {
     ASSERT_EQ(dasher_get_speed_percent(ctx), 50); // kept, not reset
     ASSERT_EQ(param_changes, 0);                  // no spurious callbacks
 
+    // Nameless entry: a <long> with no name attribute is corruption —
+    // keep values, no callbacks. Set a non-default value first so a
+    // silent reset to default would be observable.
+    dasher_set_speed_percent(ctx, 120);
+    param_changes = 0;
+    {
+        char path[512];
+        snprintf(path, sizeof(path), "%s/dasher_settings.xml", user_dir);
+        FILE* f = fopen(path, "w");
+        if (f) {
+            fputs("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<settings>\n<long value=\"560\"/>\n</settings>\n", f);
+            fclose(f);
+        }
+    }
+    dasher_reload_settings(ctx);
+    ASSERT_EQ(dasher_get_speed_percent(ctx), 120); // kept, not reset
+    ASSERT_EQ(param_changes, 0);                   // no spurious callbacks
+
+    // Wrong tag: a known parameter's storage name under the wrong element
+    // type — the entry would land in a map LoadPersistent never reads,
+    // resetting the setting to default. Corruption: keep values, no
+    // callbacks. (Speed's storage name is MaxBitRateTimes100.)
+    {
+        char path[512];
+        snprintf(path, sizeof(path), "%s/dasher_settings.xml", user_dir);
+        FILE* f = fopen(path, "w");
+        if (f) {
+            fputs("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<settings>\n<bool name=\"MaxBitRateTimes100\" "
+                  "value=\"1\"/>\n</settings>\n",
+                  f);
+            fclose(f);
+        }
+    }
+    dasher_reload_settings(ctx);
+    ASSERT_EQ(dasher_get_speed_percent(ctx), 120); // kept, not reset
+    ASSERT_EQ(param_changes, 0);                   // no spurious callbacks
+
     // Edit buffer survives the reload
     // (not asserting content — just that the engine is still functional)
     dasher_reset_output_text(ctx);

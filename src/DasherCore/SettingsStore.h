@@ -87,6 +87,13 @@ class CSettingsStore {
     ///  existing value stored; non-persistent prefs are reinitialized from defaults.
     void LoadPersistent();
 
+    /// Look up the declared type for a storage name. Returns PARAM_INVALID
+    /// when the name is not a registered parameter (a stale key from an
+    /// older build — harmless, callers allow it). Used by file-backed
+    /// stores to validate that an entry's tag matches the parameter's
+    /// declared type.
+    Settings::ParameterType TypeForStorageName(const std::string& name) const;
+
   private:
     // Platform Specific settings file management
 

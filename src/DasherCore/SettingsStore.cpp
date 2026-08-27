@@ -70,6 +70,13 @@ void CSettingsStore::LoadPersistent() {
     AddParameters(Settings::parameter_defaults);
 }
 
+Settings::ParameterType CSettingsStore::TypeForStorageName(const std::string& name) const {
+    for (const auto& [key, value] : parameters_) {
+        if (value.storageName == name) return value.type;
+    }
+    return Settings::PARAM_INVALID;
+}
+
 void CSettingsStore::AddParameters(const std::unordered_map<Parameter, const Settings::Parameter_Value> table) {
 
     for (const auto& [key, value] : table) {

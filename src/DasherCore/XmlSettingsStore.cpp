@@ -191,44 +191,69 @@ bool XmlSettingsStore::Parse(pugi::xml_document& document, const std::string fil
         return false;
     }
 
-    // Entries with a missing or unparseable value attribute are treated
-    // as corruption (e.g. a partial write): reject the whole file rather
-    // than letting a zero/false/empty value silently change the live
-    // parameter. A deliberate removal omits the element entirely.
+    // Entries with a missing or unparseable value attribute, a missing or
+    // empty name, or a known parameter name under the wrong tag type are
+    // treated as corruption (e.g. a partial write): reject the whole file
+    // rather than letting a zero/false/empty value silently change the
+    // live parameter, or letting a mistyped entry drop the setting into
+    // a map LoadPersistent never reads (resetting it to default).
+    // A deliberate removal omits the element entirely. Unknown names
+    // (stale keys from older builds) are still allowed.
     for (pugi::xml_node bool_setting : outer.children("bool")) {
         const std::string name = bool_setting.attribute("name").as_string();
         const pugi::xml_attribute value_attr = bool_setting.attribute("value");
-        if (!name.empty()) {
-            if (!value_attr || !valid_bool_value(value_attr.value())) {
-                reload_parse_ok_ = false;
-                return false;
-            }
-            boolean_settings_[name] = value_attr.as_bool();
+        if (name.empty()) {
+            reload_parse_ok_ = false;
+            return false;
         }
+        if (!value_attr || !valid_bool_value(value_attr.value())) {
+            reload_parse_ok_ = false;
+            return false;
+        }
+        const auto declared = TypeForStorageName(name);
+        if (declared != Settings::PARAM_INVALID && declared != Settings::PARAM_BOOL) {
+            reload_parse_ok_ = false;
+            return false;
+        }
+        boolean_settings_[name] = value_attr.as_bool();
     }
 
     for (pugi::xml_node string_setting : outer.children("string")) {
         const std::string name = string_setting.attribute("name").as_string();
         const pugi::xml_attribute value_attr = string_setting.attribute("value");
-        if (!name.empty()) {
-            if (!value_attr) {
-                reload_parse_ok_ = false;
-                return false;
-            }
-            string_settings_[name] = value_attr.as_string();
+        if (name.empty()) {
+            reload_parse_ok_ = false;
+            return false;
         }
+        if (!value_attr) {
+            reload_parse_ok_ = false;
+            return false;
+        }
+        const auto declared = TypeForStorageName(name);
+        if (declared != Settings::PARAM_INVALID && declared != Settings::PARAM_STRING) {
+            reload_parse_ok_ = false;
+            return false;
+        }
+        string_settings_[name] = value_attr.as_string();
     }
 
     for (pugi::xml_node long_setting : outer.children("long")) {
         const std::string name = long_setting.attribute("name").as_string();
         const pugi::xml_attribute value_attr = long_setting.attribute("value");
-        if (!name.empty()) {
-            if (!value_attr || !valid_long_value(value_attr.value())) {
-                reload_parse_ok_ = false;
-                return false;
-            }
-            long_settings_[name] = static_cast<long>(value_attr.as_llong());
+        if (name.empty()) {
+            reload_parse_ok_ = false;
+            return false;
         }
+        if (!value_attr || !valid_long_value(value_attr.value())) {
+            reload_parse_ok_ = false;
+            return false;
+        }
+        const auto declared = TypeForStorageName(name);
+        if (declared != Settings::PARAM_INVALID && declared != Settings::PARAM_LONG) {
+            reload_parse_ok_ = false;
+            return false;
+        }
+        long_settings_[name] = static_cast<long>(value_attr.as_llong());
     }
 
     reload_parse_ok_ = true; // reached only when the document loaded and validated
