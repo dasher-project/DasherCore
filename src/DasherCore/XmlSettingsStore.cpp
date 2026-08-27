@@ -175,7 +175,7 @@ bool valid_long_value(const char* text) {
     errno = 0;
     char* end = nullptr;
     strtol(text, &end, 10);
-    if (end == text) return false; // no digits consumed
+    if (end == text) return false;     // no digits consumed
     if (errno == ERANGE) return false; // overflow — clamped value rejected
     while (*end != '\0') {
         if (isspace(static_cast<unsigned char>(*end)) == 0) return false;
