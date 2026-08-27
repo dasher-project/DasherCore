@@ -194,6 +194,48 @@ TEST(alphabet_v6_space_character_resolves_to_space) {
     dasher_destroy(ctx);
 }
 
+// The paragraph symbol (display "pilcrow") in the shipped v6 alphabets must
+// OUTPUT a newline, not the display character. The v5->v6 conversion of the
+// hand-written v6 files lost the output char, leaving an empty
+// <textCharAction/> so the pilcrow was inserted literally (reported as
+// "return just shows a paragraph symbol"). Regression test for that fix.
+TEST(alphabet_v6_paragraph_outputs_newline) {
+    dasher_ctx* ctx = create_isolated_context();
+    ASSERT(ctx);
+    dasher_set_screen_size(ctx, 800, 600);
+
+    const char* alphabets_to_check[] = {
+        "English with numerals and limited punctuation",
+        "English with limited punctuation",
+        "English with numerals and lots of punctuation",
+        "English with accents, numerals, punctuation",
+        "German with numerals and punctuation",
+    };
+
+    for (const char* alph : alphabets_to_check) {
+        dasher_set_alphabet_id(ctx, alph);
+        int sym_count = dasher_get_alphabet_symbol_count(ctx);
+        ASSERT(sym_count > 0);
+
+        bool found_paragraph_display = false, paragraph_is_newline = false;
+        for (int i = 1; i <= sym_count; i++) {
+            char disp[128], text[128];
+            if (dasher_get_alphabet_symbol_display(ctx, i, disp, sizeof(disp)) != 0) continue;
+            if (strcmp(disp, "\xc2\xb6") != 0) continue; // UTF-8 pilcrow
+            found_paragraph_display = true;
+            if (dasher_get_alphabet_symbol_text(ctx, i, text, sizeof(text)) == 0
+                && strcmp(text, "\n") == 0)
+                paragraph_is_newline = true;
+        }
+        printf("  %s: paragraph display found=%d outputs_newline=%d\n",
+               alph, found_paragraph_display, paragraph_is_newline);
+        ASSERT(found_paragraph_display);
+        ASSERT(paragraph_is_newline);
+    }
+
+    dasher_destroy(ctx);
+}
+
 // A v5-format alphabet (root <alphabets>, <s> symbols, <train> child element)
 // must load and appear in the alphabet list alongside the bundled v6 files.
 TEST(alphabet_v5_format_loads) {
