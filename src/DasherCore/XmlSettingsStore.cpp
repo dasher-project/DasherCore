@@ -147,9 +147,18 @@ bool XmlSettingsStore::Save() {
 
 bool XmlSettingsStore::Parse(pugi::xml_document& document, const std::string filePath, bool bUser) {
     if (bUser) last_mutable_filepath = filePath;
-    reload_parse_ok_ = true; // reached only when the document loaded
 
     const pugi::xml_node outer = document.child("settings");
+
+    // A settings file must have a <settings> root. Well-formed XML with
+    // any other root is not a settings file — marking the reload
+    // successful would leave the maps empty and LoadPersistent would
+    // reset the engine to defaults.
+    if (!outer) {
+        reload_parse_ok_ = false;
+        return false;
+    }
+    reload_parse_ok_ = true; // reached only when the document loaded
     for (pugi::xml_node bool_setting : outer.children("bool")) {
         std::string name = bool_setting.attribute("name").as_string();
         const bool value = bool_setting.attribute("value").as_bool();

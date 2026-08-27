@@ -506,6 +506,24 @@ TEST(reload_settings) {
     ASSERT_EQ(dasher_get_speed_percent(ctx), 50); // kept, not reset
     ASSERT_EQ(param_changes, 0);                  // no spurious callbacks
 
+    // Wrong root: well-formed XML but not a settings file — same as
+    // malformed, keep current values and emit no callbacks.
+    {
+        char path[512];
+        snprintf(path, sizeof(path), "%s/dasher_settings.xml", user_dir);
+        FILE* f = fopen(path, "w");
+        if (f) {
+            fputs("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<not_settings>\n<long name=\"x\" "
+                  "value=\"1\"/>\n</not_settings>\n",
+                  f);
+            fclose(f);
+        }
+    }
+    param_changes = 0;
+    dasher_reload_settings(ctx);
+    ASSERT_EQ(dasher_get_speed_percent(ctx), 50); // kept, not reset
+    ASSERT_EQ(param_changes, 0);                  // no spurious callbacks
+
     // Edit buffer survives the reload
     // (not asserting content — just that the engine is still functional)
     dasher_reset_output_text(ctx);
