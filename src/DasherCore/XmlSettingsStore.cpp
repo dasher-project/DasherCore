@@ -18,6 +18,15 @@ XmlSettingsStore::XmlSettingsStore(const std::string& filename, CMessageDisplay*
     : AbstractXMLParser(pDisplay), last_mutable_filepath(filename) {}
 
 void XmlSettingsStore::RefreshFromStore() {
+    // Save the current parsed maps so we can restore them if the file is
+    // missing, unreadable, or malformed — clearing upfront and parsing into
+    // nothing would make LoadPersistent treat every persistent setting as
+    // removed and reset the running engine to defaults (mass callbacks and
+    // rebuilds for what is a transient I/O problem, not a real removal).
+    const auto saved_bool = boolean_settings_;
+    const auto saved_long = long_settings_;
+    const auto saved_string = string_settings_;
+
     // Clear the parsed maps so entries removed from the file are actually
     // removed (Parse only inserts/overwrites — stale keys would survive a
     // re-parse and LoadPersistent would treat them as still present,
@@ -30,7 +39,25 @@ void XmlSettingsStore::RefreshFromStore() {
     // parameters_ from those maps (same path Load() uses, but without
     // the mode switching). The parse overwrites the maps in place;
     // LoadPersistent then updates parameters_ entries from them.
+    // reload_parse_ok_ is set by Parse() — it is only reached when the
+    // document actually loaded (missing/unreadable/malformed files fail
+    // earlier), which distinguishes a real empty-file removal from an
+    // I/O failure.
+    reload_parse_ok_ = false;
     Dasher::FileUtils::ScanFiles(this, last_mutable_filepath);
+
+    // If the file didn't parse (missing/unreadable/malformed), keep the
+    // previous state entirely — maps AND parameters. A transient I/O
+    // problem must not reset the running engine to defaults, so skip
+    // LoadPersistent too: ReloadFromFile's diff then sees no change and
+    // emits no notifications.
+    if (!reload_parse_ok_) {
+        boolean_settings_ = saved_bool;
+        long_settings_ = saved_long;
+        string_settings_ = saved_string;
+        return;
+    }
+
     mode_ = EXPLICIT_SAVE;
     LoadPersistent();
     mode_ = SAVE_IMMEDIATELY;
@@ -120,6 +147,7 @@ bool XmlSettingsStore::Save() {
 
 bool XmlSettingsStore::Parse(pugi::xml_document& document, const std::string filePath, bool bUser) {
     if (bUser) last_mutable_filepath = filePath;
+    reload_parse_ok_ = true; // reached only when the document loaded
 
     const pugi::xml_node outer = document.child("settings");
     for (pugi::xml_node bool_setting : outer.children("bool")) {

@@ -48,6 +48,9 @@ class XmlSettingsStore : public Dasher::CSettingsStore, public AbstractXMLParser
     Mode mode_ = EXPLICIT_SAVE;
     std::string last_mutable_filepath;
     bool modified_ = false;
+    // Set by Parse() during a refresh scan to record that the file
+    // actually loaded (missing/malformed files never reach Parse).
+    bool reload_parse_ok_ = false;
     std::map<std::string, bool> boolean_settings_;
     std::map<std::string, long> long_settings_;
     std::map<std::string, std::string> string_settings_;
