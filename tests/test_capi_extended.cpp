@@ -596,6 +596,23 @@ TEST(reload_settings) {
     ASSERT_EQ(dasher_get_speed_percent(ctx), 120); // kept, not reset
     ASSERT_EQ(param_changes, 0);                   // no spurious callbacks
 
+    // Overflow: an all-numeric value beyond LONG_MAX — strtol clamps to
+    // LONG_MAX and flags ERANGE; the clamped value must not be applied.
+    {
+        char path[512];
+        snprintf(path, sizeof(path), "%s/dasher_settings.xml", user_dir);
+        FILE* f = fopen(path, "w");
+        if (f) {
+            fputs("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<settings>\n<long name=\"MaxBitRateTimes100\" "
+                  "value=\"99999999999999999999999999\"/>\n</settings>\n",
+                  f);
+            fclose(f);
+        }
+    }
+    dasher_reload_settings(ctx);
+    ASSERT_EQ(dasher_get_speed_percent(ctx), 120); // kept, not clamped-applied
+    ASSERT_EQ(param_changes, 0);                   // no spurious callbacks
+
     // Edit buffer survives the reload
     // (not asserting content — just that the engine is still functional)
     dasher_reset_output_text(ctx);

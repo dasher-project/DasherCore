@@ -3,6 +3,7 @@
 #include "FileUtils.h"
 
 #include <cctype>
+#include <cerrno>
 #include <cstdlib>
 
 namespace Dasher {
@@ -163,14 +164,19 @@ bool valid_bool_value(const char* text) {
     return token == "true" || token == "false" || token == "yes" || token == "no" || token == "1" || token == "0";
 }
 
-// A long value must parse completely: digits where strtol expects them
-// and nothing but whitespace after ("560" ok, " 12 " ok, "12junk" not —
-// as_llong() would silently return the 12 prefix).
+// A long value must parse completely and fit: digits where strtol
+// expects them, nothing but whitespace after ("560" ok, " 12 " ok,
+// "12junk" not — as_llong() would silently return the 12 prefix), and
+// no overflow (strtol clamps out-of-range input to LONG_MAX/LONG_MIN
+// and reports ERANGE — the clamped value must not reach the live
+// setter).
 bool valid_long_value(const char* text) {
     if (text == nullptr || *text == '\0') return false;
+    errno = 0;
     char* end = nullptr;
     strtol(text, &end, 10);
     if (end == text) return false; // no digits consumed
+    if (errno == ERANGE) return false; // overflow — clamped value rejected
     while (*end != '\0') {
         if (isspace(static_cast<unsigned char>(*end)) == 0) return false;
         ++end;
