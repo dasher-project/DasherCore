@@ -203,7 +203,7 @@
 		</node>
 	</group>
 	<group name="paragraphSpace" colorInfoName="paragraphSpace">
-		<node label="¶">
+		<node label="¶" text="&#10;">
 			<!--Old Char Color: 9-->
 			<textCharAction />
 		</node>
