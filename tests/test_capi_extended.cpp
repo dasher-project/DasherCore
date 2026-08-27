@@ -470,6 +470,26 @@ TEST(reload_settings) {
     dasher_reload_settings(ctx);
     ASSERT_EQ(param_changes, 0);
 
+    // Removed setting: external writer deletes the entry from the XML,
+    // reload should restore the declared default and notify.
+    {
+        // Write a settings file with the speed entry removed (just an
+        // empty settings element — simplest removal case)
+        char path[512];
+        snprintf(path, sizeof(path), "%s/dasher_settings.xml", user_dir);
+        FILE* f = fopen(path, "w");
+        if (f) {
+            fputs("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<settings>\n</settings>\n", f);
+            fclose(f);
+        }
+    }
+    param_changes = 0;
+    dasher_reload_settings(ctx);
+    // Speed falls back to the manifest default (raw 80 = 50%)
+    const int default_speed = dasher_get_speed_percent(ctx);
+    ASSERT_EQ(default_speed, 50);
+    ASSERT(param_changes > 0); // the removal triggered a notification
+
     // Edit buffer survives the reload
     // (not asserting content — just that the engine is still functional)
     dasher_reset_output_text(ctx);

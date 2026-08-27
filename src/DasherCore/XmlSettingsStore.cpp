@@ -18,6 +18,14 @@ XmlSettingsStore::XmlSettingsStore(const std::string& filename, CMessageDisplay*
     : AbstractXMLParser(pDisplay), last_mutable_filepath(filename) {}
 
 void XmlSettingsStore::RefreshFromStore() {
+    // Clear the parsed maps so entries removed from the file are actually
+    // removed (Parse only inserts/overwrites — stale keys would survive a
+    // re-parse and LoadPersistent would treat them as still present,
+    // keeping the old value instead of restoring the default).
+    boolean_settings_.clear();
+    long_settings_.clear();
+    string_settings_.clear();
+
     // Re-parse the XML file into the settings maps, then repopulate
     // parameters_ from those maps (same path Load() uses, but without
     // the mode switching). The parse overwrites the maps in place;
