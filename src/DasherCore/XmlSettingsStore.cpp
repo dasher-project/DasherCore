@@ -17,6 +17,17 @@ static bool Read(const std::map<std::string, T> values, const std::string& key, 
 XmlSettingsStore::XmlSettingsStore(const std::string& filename, CMessageDisplay* pDisplay)
     : AbstractXMLParser(pDisplay), last_mutable_filepath(filename) {}
 
+void XmlSettingsStore::RefreshFromStore() {
+    // Re-parse the XML file into the settings maps, then repopulate
+    // parameters_ from those maps (same path Load() uses, but without
+    // the mode switching). The parse overwrites the maps in place;
+    // LoadPersistent then updates parameters_ entries from them.
+    Dasher::FileUtils::ScanFiles(this, last_mutable_filepath);
+    mode_ = EXPLICIT_SAVE;
+    LoadPersistent();
+    mode_ = SAVE_IMMEDIATELY;
+}
+
 void XmlSettingsStore::Load() {
     Dasher::FileUtils::ScanFiles(this, last_mutable_filepath);
     // Load all the settings or create defaults for the ones that don't exist.

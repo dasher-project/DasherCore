@@ -19,6 +19,10 @@ class XmlSettingsStore : public Dasher::CSettingsStore, public AbstractXMLParser
     // Saves the XML file, returns true on success.
     bool Save();
 
+    // Re-parse the XML file and repopulate parameters_ in place.
+    // Called by ReloadFromFile() to pick up external changes.
+    void RefreshFromStore() override;
+
     bool Parse(pugi::xml_document& document, const std::string filePath, bool bUser) override;
 
   private:

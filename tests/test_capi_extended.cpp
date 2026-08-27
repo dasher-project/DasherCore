@@ -418,6 +418,66 @@ TEST(reset_emits_buffer_clear_event) {
     dasher_destroy(ctx);
 }
 
+TEST(reload_settings) {
+    // dasher_reload_settings re-reads dasher_settings.xml and applies
+    // changes through the normal parameter path. This matters when the
+    // settings file changes externally (IME sharing the user dir, a
+    // migration moving the file) — the engine should pick up the change
+    // without being destroyed and recreated.
+    static int reload_test_counter = 0;
+    char user_dir[256];
+    snprintf(user_dir, sizeof(user_dir), "%s/dasher_reload_test_%d_%d", dasher_temp_dir(), dasher_getpid(),
+             reload_test_counter++);
+    dasher_mkdir(user_dir);
+
+    dasher_ctx* ctx = dasher_create(TEST_DATA_DIR, user_dir, nullptr);
+    ASSERT(ctx != nullptr);
+    dasher_set_screen_size(ctx, 800, 600);
+
+    // Set an initial speed and save
+    dasher_set_speed_percent(ctx, 200);
+    dasher_save_settings(ctx);
+    const int before = dasher_get_speed_percent(ctx);
+    ASSERT(before == 200);
+
+    // Simulate an external change: create a second engine that writes a
+    // different speed to the same settings file
+    {
+        dasher_ctx* writer = dasher_create(TEST_DATA_DIR, user_dir, nullptr);
+        ASSERT(writer != nullptr);
+        dasher_set_speed_percent(writer, 350);
+        dasher_save_settings(writer);
+        dasher_destroy(writer);
+    }
+
+    // The first engine still has its in-memory value
+    ASSERT_EQ(dasher_get_speed_percent(ctx), 200);
+
+    // Track parameter-change notifications
+    static int param_changes = 0;
+    param_changes = 0;
+    dasher_set_parameter_callback(ctx, [](int key, void*) { param_changes++; }, nullptr);
+
+    // Reload — should pick up the external change
+    dasher_reload_settings(ctx);
+    ASSERT_EQ(dasher_get_speed_percent(ctx), 350);
+
+    // Parameter-change callback fired for the changed setting
+    ASSERT(param_changes > 0);
+
+    // Reload again with no file change — no spurious notifications
+    param_changes = 0;
+    dasher_reload_settings(ctx);
+    ASSERT_EQ(param_changes, 0);
+
+    // Edit buffer survives the reload
+    // (not asserting content — just that the engine is still functional)
+    dasher_reset_output_text(ctx);
+    ASSERT(dasher_get_output_text(ctx) != nullptr);
+
+    dasher_destroy(ctx);
+}
+
 TEST(save_settings) {
     static int save_test_counter = 0;
     char shared_dir[256];

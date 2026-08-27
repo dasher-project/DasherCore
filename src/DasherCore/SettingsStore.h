@@ -63,6 +63,20 @@ class CSettingsStore {
     // TODO: just load the application parameters by default?
     void AddParameters(const std::unordered_map<Parameter, const Settings::Parameter_Value> table);
 
+    /// Re-read the settings file and apply any changed values through the
+    /// normal SetParameter path (fires OnParameterChanged, triggers the
+    /// engine's per-parameter handlers, updates the frontend callback).
+    /// Only parameters whose file value differs from the current value are
+    /// applied — no spurious rebuilds. The edit buffer and model state
+    /// are preserved.
+    void ReloadFromFile();
+
+    /// Re-read the settings backing store and repopulate parameters_ in
+    /// place. Base implementation re-reads from the in-memory maps;
+    /// file-backed subclasses (XmlSettingsStore) override to re-parse the
+    /// file first.
+    virtual void RefreshFromStore();
+
     Event<Parameter, std::variant<bool, long, std::string>> OnPreParameterChange;
     Event<Parameter> OnParameterChanged;
 
