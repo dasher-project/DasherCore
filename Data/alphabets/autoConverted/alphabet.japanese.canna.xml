@@ -4,7 +4,7 @@
 	<!-- $Id$ -->
 	<!-- Katakana -->
 	<group name="Hiragana">
-		<group name="A Gyo" colorInfoName="a gyo">
+		<group name="A Gyo" colorInfoName="lowercase">
 			<!--Old Group Color: 50-->
 			<node label="あ">
 				<!--Old Char Color: 80-->
@@ -32,7 +32,7 @@
 				<textCharAction />
 			</node>
 		</group>
-		<group name="Small A Gyo" colorInfoName="small a gyo">
+		<group name="Small A Gyo" colorInfoName="lowercase">
 			<!--Old Group Color: 9-->
 			<node label="ぁ">
 				<!--Old Char Color: 99-->
@@ -60,7 +60,7 @@
 				<textCharAction />
 			</node>
 		</group>
-		<group name="KA Gyo" colorInfoName="ka gyo">
+		<group name="KA Gyo" colorInfoName="lowercase">
 			<!--Old Group Color: 61-->
 			<node label="か">
 				<!--Old Char Color: 81-->
@@ -88,7 +88,7 @@
 				<textCharAction />
 			</node>
 		</group>
-		<group name="GA Gyo" colorInfoName="ga gyo">
+		<group name="GA Gyo" colorInfoName="lowercase">
 			<!--Old Group Color: 51-->
 			<node label="が">
 				<!--Old Char Color: 71-->
@@ -116,7 +116,7 @@
 				<textCharAction />
 			</node>
 		</group>
-		<group name="SA Gyo" colorInfoName="sa gyo">
+		<group name="SA Gyo" colorInfoName="lowercase">
 			<!--Old Group Color: 62-->
 			<node label="さ">
 				<!--Old Char Color: 72-->
@@ -144,7 +144,7 @@
 				<textCharAction />
 			</node>
 		</group>
-		<group name="GA Gyo" colorInfoName="ga gyo">
+		<group name="GA Gyo" colorInfoName="lowercase">
 			<!--Old Group Color: 52-->
 			<node label="ざ">
 				<!--Old Char Color: 82-->
@@ -172,7 +172,7 @@
 				<textCharAction />
 			</node>
 		</group>
-		<group name="TA Gyo" colorInfoName="ta gyo">
+		<group name="TA Gyo" colorInfoName="lowercase">
 			<!--Old Group Color: 63-->
 			<node label="た">
 				<!--Old Char Color: 73-->
@@ -200,7 +200,7 @@
 				<textCharAction />
 			</node>
 		</group>
-		<group name="Small TA Gyo" colorInfoName="small ta gyo">
+		<group name="Small TA Gyo" colorInfoName="lowercase">
 			<!--Old Group Color: 99-->
 			<node label="っ">
 				<!--Old Char Color: 99-->
@@ -208,7 +208,7 @@
 				<textCharAction />
 			</node>
 		</group>
-		<group name="DA Gyo" colorInfoName="da gyo">
+		<group name="DA Gyo" colorInfoName="lowercase">
 			<!--Old Group Color: 53-->
 			<node label="だ">
 				<!--Old Char Color: 73-->
@@ -236,7 +236,7 @@
 				<textCharAction />
 			</node>
 		</group>
-		<group name="NA Gyo" colorInfoName="na gyo">
+		<group name="NA Gyo" colorInfoName="lowercase">
 			<!--Old Group Color: 64-->
 			<node label="な">
 				<!--Old Char Color: 74-->
@@ -264,7 +264,7 @@
 				<textCharAction />
 			</node>
 		</group>
-		<group name="HA Gyo" colorInfoName="ha gyo">
+		<group name="HA Gyo" colorInfoName="lowercase">
 			<!--Old Group Color: 65-->
 			<node label="は">
 				<!--Old Char Color: 75-->
@@ -292,7 +292,7 @@
 				<textCharAction />
 			</node>
 		</group>
-		<group name="BA Gyo" colorInfoName="ba gyo">
+		<group name="BA Gyo" colorInfoName="lowercase">
 			<!--Old Group Color: 55-->
 			<node label="ば">
 				<!--Old Char Color: 85-->
@@ -320,7 +320,7 @@
 				<textCharAction />
 			</node>
 		</group>
-		<group name="PA Gyo" colorInfoName="pa gyo">
+		<group name="PA Gyo" colorInfoName="lowercase">
 			<!--Old Group Color: 65-->
 			<node label="ぱ">
 				<!--Old Char Color: 75-->
@@ -348,7 +348,7 @@
 				<textCharAction />
 			</node>
 		</group>
-		<group name="MA Gyo" colorInfoName="ma gyo">
+		<group name="MA Gyo" colorInfoName="lowercase">
 			<!--Old Group Color: 66-->
 			<node label="ま">
 				<!--Old Char Color: 76-->
@@ -376,7 +376,7 @@
 				<textCharAction />
 			</node>
 		</group>
-		<group name="YA Gyo" colorInfoName="ya gyo">
+		<group name="YA Gyo" colorInfoName="lowercase">
 			<!--Old Group Color: 67-->
 			<node label="や">
 				<!--Old Char Color: 87-->
@@ -394,7 +394,7 @@
 				<textCharAction />
 			</node>
 		</group>
-		<group name="Small YA Gyo" colorInfoName="small ya gyo">
+		<group name="Small YA Gyo" colorInfoName="lowercase">
 			<!--Old Group Color: 9-->
 			<node label="ゃ">
 				<!--Old Char Color: 99-->
@@ -412,7 +412,7 @@
 				<textCharAction />
 			</node>
 		</group>
-		<group name="RA Gyo" colorInfoName="ra gyo">
+		<group name="RA Gyo" colorInfoName="lowercase">
 			<!--Old Group Color: 68-->
 			<node label="ら">
 				<!--Old Char Color: 78-->
@@ -440,7 +440,7 @@
 				<textCharAction />
 			</node>
 		</group>
-		<group name="WA Gyo" colorInfoName="wa gyo">
+		<group name="WA Gyo" colorInfoName="lowercase">
 			<!--Old Group Color: 69-->
 			<node label="わ">
 				<!--Old Char Color: 89-->
@@ -508,7 +508,7 @@
 			<textCharAction />
 		</node>
 	</group>
-	<group name="katakana" colorInfoName="katakana">
+	<group name="katakana" colorInfoName="lowercase">
 		<!--Old Group Color: 111-->
 		<node label="ァ">
 			<textCharAction />
@@ -1138,7 +1138,7 @@
 			<textCharAction />
 		</node>
 	</group>
-	<group name="Numerals" colorInfoName="numerals">
+	<group name="Numerals" colorInfoName="numbers">
 		<!--Old Group Color: 113-->
 		<node label="1">
 			<!--Old Char Color: 35-->

@@ -5,7 +5,7 @@
 Any word that can be written using one of the Latin ISO-8859 character sets (ISO-8859-1,2,3,4,9,10,13,14,15,16) can be written, in decomposed form, using the ASCII characters, the 23 additional letters, and 14 modifiers
 -->
 	<!-- http://www.fileformat.info/info/unicode/char/ -->
-	<group name="Combining accents" colorInfoName="combining accents">
+	<group name="Combining accents" colorInfoName="accents">
 		<node label="◌̀">
 			<!--Old Char Color: 72-->
 			<!--Note: ` COMBINING GRAVE ACCENT  -->
@@ -77,7 +77,7 @@ Any word that can be written using one of the Latin ISO-8859 character sets (ISO
 			<textCharAction unicode="808" />
 		</node>
 	</group>
-	<group name="Lower case Latin letters" colorInfoName="lower case latin letters">
+	<group name="Lower case Latin letters" colorInfoName="lowercase">
 		<!--Old Group Color: 0-->
 		<node label="a">
 			<!--Old Char Color: 10-->
@@ -184,7 +184,7 @@ Any word that can be written using one of the Latin ISO-8859 character sets (ISO
 			<textCharAction />
 		</node>
 	</group>
-	<group name="Upper case Latin letters" colorInfoName="upper case latin letters">
+	<group name="Upper case Latin letters" colorInfoName="uppercase">
 		<!--Old Group Color: 111-->
 		<node label="A">
 			<!--Old Char Color: 10-->
@@ -291,7 +291,7 @@ Any word that can be written using one of the Latin ISO-8859 character sets (ISO
 			<textCharAction />
 		</node>
 	</group>
-	<group name="LC non-ascii Characters" colorInfoName="lc non-ascii characters">
+	<group name="LC non-ascii Characters" colorInfoName="lowercase">
 		<!--Old Group Color: 70-->
 		<node label="æ">
 			<!--Note: SMALL LETTER AE-->
@@ -346,7 +346,7 @@ Any word that can be written using one of the Latin ISO-8859 character sets (ISO
 			<textCharAction />
 		</node>
 	</group>
-	<group name="UC non-ascii Characters" colorInfoName="uc non-ascii characters">
+	<group name="UC non-ascii Characters" colorInfoName="uppercase">
 		<!--Old Group Color: 69-->
 		<node label="Æ">
 			<!--Note: CAPITAL LETTER AE-->

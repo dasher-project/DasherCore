@@ -6,7 +6,7 @@
  The same script is used by Assamese.
  -->
 	<group name="bengali letters">
-		<group name="bengali vowels" colorInfoName="bengali vowels">
+		<group name="bengali vowels" colorInfoName="lowercase">
 			<!--Old Group Color: 0-->
 			<node label="অ">
 				<!--Note:  LETTER A  -->
@@ -65,7 +65,7 @@
 				<textCharAction />
 			</node>
 		</group>
-		<group name="bengali consonants" colorInfoName="bengali consonants">
+		<group name="bengali consonants" colorInfoName="lowercase">
 			<!--Old Group Color: 0-->
 			<node label="ক">
 				<!--Note:  LETTER KA  -->
@@ -221,7 +221,7 @@
 			</node>
 		</group>
 	</group>
-	<group name="Bengali combining vowels" colorInfoName="bengali combining vowels">
+	<group name="Bengali combining vowels" colorInfoName="accents">
 		<!--Old Group Color: 52-->
 		<node label="◌া">
 			<!--Note:  VOWEL SIGN AA  -->
@@ -284,7 +284,7 @@
 			<textCharAction unicode="2519" />
 		</node>
 	</group>
-	<group name="Bengali numbers" colorInfoName="bengali numbers">
+	<group name="Bengali numbers" colorInfoName="numbers">
 		<!--Old Group Color: 113-->
 		<node label="১">
 			<!--Note: BENGALI DIGIT ONE-->
@@ -362,7 +362,7 @@
 	</group>
 	<group name="Punctuation" colorInfoName="punctuation">
 		<!--Old Group Color: 112-->
-		<group name="Bengali Punctuation" colorInfoName="bengali punctuation">
+		<group name="Bengali Punctuation" colorInfoName="punctuation">
 			<!--Old Group Color: 113-->
 			<node label="৲">
 				<!--Note: RUPEE MARK-->

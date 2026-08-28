@@ -8,7 +8,7 @@
  Cantonese also has a pinyin-type system called Penkyamp
 -->
 	<group name="pin yin roman letters">
-		<group name="a" colorInfoName="a">
+		<group name="a" colorInfoName="lowercase">
 			<!--Old Group Color: 60-->
 			<node label="a">
 				<!--Old Char Color: 70-->
@@ -37,7 +37,7 @@
 			</node>
 			<!-- a4 -->
 		</group>
-		<group name="b-d" colorInfoName="b-d">
+		<group name="b-d" colorInfoName="lowercase">
 			<!--Old Group Color: 61-->
 			<node label="b">
 				<!--Old Char Color: 11-->
@@ -52,7 +52,7 @@
 				<textCharAction />
 			</node>
 		</group>
-		<group name="e" colorInfoName="e">
+		<group name="e" colorInfoName="lowercase">
 			<!--Old Group Color: 62-->
 			<node label="e">
 				<!--Old Char Color: 72-->
@@ -81,7 +81,7 @@
 			</node>
 			<!-- e4 -->
 		</group>
-		<group name="f-h" colorInfoName="f-h">
+		<group name="f-h" colorInfoName="lowercase">
 			<!--Old Group Color: 63-->
 			<node label="f">
 				<!--Old Char Color: 15-->
@@ -96,7 +96,7 @@
 				<textCharAction />
 			</node>
 		</group>
-		<group name="i" colorInfoName="i">
+		<group name="i" colorInfoName="lowercase">
 			<!--Old Group Color: 64-->
 			<node label="i">
 				<!--Old Char Color: 74-->
@@ -125,7 +125,7 @@
 			</node>
 			<!-- i4 -->
 		</group>
-		<group name="j-n" colorInfoName="j-n">
+		<group name="j-n" colorInfoName="lowercase">
 			<!--Old Group Color: 65-->
 			<node label="j">
 				<!--Old Char Color: 19-->
@@ -148,7 +148,7 @@
 				<textCharAction />
 			</node>
 		</group>
-		<group name="o" colorInfoName="o">
+		<group name="o" colorInfoName="lowercase">
 			<!--Old Group Color: 66-->
 			<node label="o">
 				<!--Old Char Color: 76-->
@@ -177,7 +177,7 @@
 			</node>
 			<!-- o4 -->
 		</group>
-		<group name="p-t" colorInfoName="p-t">
+		<group name="p-t" colorInfoName="lowercase">
 			<!--Old Group Color: 67-->
 			<node label="p">
 				<!--Old Char Color: 25-->
@@ -200,7 +200,7 @@
 				<textCharAction />
 			</node>
 		</group>
-		<group name="u" colorInfoName="u">
+		<group name="u" colorInfoName="lowercase">
 			<!--Old Group Color: 68-->
 			<node label="u">
 				<!--Old Char Color: 78-->
@@ -229,7 +229,7 @@
 			</node>
 			<!-- u4 -->
 		</group>
-		<group name="ü" colorInfoName="ü">
+		<group name="ü" colorInfoName="lowercase">
 			<!--Old Group Color: 69-->
 			<node label="ü">
 				<!--Old Char Color: 79-->
@@ -257,7 +257,7 @@
 			</node>
 			<!-- &#252;4 u:4 -->
 		</group>
-		<group name="v-z" colorInfoName="v-z">
+		<group name="v-z" colorInfoName="lowercase">
 			<!--Old Group Color: 60-->
 			<node label="v">
 				<!--Old Char Color: 31-->

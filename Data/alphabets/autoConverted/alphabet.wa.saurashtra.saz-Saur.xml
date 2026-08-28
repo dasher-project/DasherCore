@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE alphabet SYSTEM "../alphabet.dtd">
 <alphabet name="Saurashtra (WorldAlphabets)" orientation="LR" trainingFilename="" colorsName="Default">
-  <group name="Lower case" colorInfoName="lower case">
+  <group name="Lower case" colorInfoName="lowercase">
     <node label="ꢒ">
       <textCharAction />
     </node>
@@ -156,7 +156,7 @@
       <textCharAction />
     </node>
   </group>
-  <group name="Upper case" colorInfoName="upper case">
+  <group name="Upper case" colorInfoName="uppercase">
     <node label="ꢒ">
       <textCharAction />
     </node>
@@ -319,7 +319,7 @@
       <textCharAction />
     </node>
   </group>
-  <group name="Editing" colorInfoName="editing">
+  <group name="Editing" colorInfoName="punctuation">
     <node label="⌫">
       <deleteTextAction distance="last char" />
     </node>

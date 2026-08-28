@@ -211,7 +211,7 @@
 			<textCharAction />
 		</node>
 	</group>
-	<group name="vowel signs and other marks" colorInfoName="vowel signs and other marks">
+	<group name="vowel signs and other marks" colorInfoName="accents">
 		<!--Old Group Color: 111-->
 		<node label="◌ા">
 			<!--Note: GUJARATI VOWEL SIGN AA -->

@@ -169,7 +169,7 @@
 			<textCharAction />
 		</node>
 	</group>
-	<group name="upper case letters (Mkhedruli) " colorInfoName="upper case letters (mkhedruli) ">
+	<group name="upper case letters (Mkhedruli) " colorInfoName="uppercase">
 		<!--Old Group Color: 111-->
 		<node label="Ⴀ">
 			<!--Note: GEORGIAN CAPITAL  AN -->

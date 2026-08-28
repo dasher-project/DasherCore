@@ -215,7 +215,7 @@
 			<textCharAction />
 		</node>
 	</group>
-	<group name="Kannada vowel signs and other marks" colorInfoName="kannada vowel signs and other marks">
+	<group name="Kannada vowel signs and other marks" colorInfoName="accents">
 		<!--Old Group Color: 111-->
 		<node label="◌ಾ">
 			<!--Note: KANNADA VOWEL SIGN AA -->

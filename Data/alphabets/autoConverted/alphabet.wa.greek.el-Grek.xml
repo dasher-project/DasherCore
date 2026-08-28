@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE alphabet SYSTEM "../alphabet.dtd">
 <alphabet name="Greek (WorldAlphabets)" orientation="LR" trainingFilename="training_wa_el_Grek.txt" colorsName="Default">
-  <group name="Lower case" colorInfoName="lower case">
+  <group name="Lower case" colorInfoName="lowercase">
     <node label="α">
       <textCharAction />
     </node>
@@ -111,7 +111,7 @@
       <textCharAction />
     </node>
   </group>
-  <group name="Upper case" colorInfoName="upper case">
+  <group name="Upper case" colorInfoName="uppercase">
     <node label="Α">
       <textCharAction />
     </node>
@@ -229,7 +229,7 @@
       <textCharAction />
     </node>
   </group>
-  <group name="Editing" colorInfoName="editing">
+  <group name="Editing" colorInfoName="punctuation">
     <node label="⌫">
       <deleteTextAction distance="last char" />
     </node>

@@ -211,7 +211,7 @@
 			<textCharAction />
 		</node>
 	</group>
-	<group name="Vowels and other signs" colorInfoName="vowels and other signs">
+	<group name="Vowels and other signs" colorInfoName="lowercase">
 		<!--Old Group Color: 111-->
 		<node label="◌ാ">
 			<!--Note: MALAYALAM VOWEL SIGN AA -->

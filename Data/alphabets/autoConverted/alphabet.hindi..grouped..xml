@@ -2,7 +2,7 @@
 <!DOCTYPE alphabet SYSTEM "../alphabet.dtd">
 <alphabet name="Hindi / हिंदी Grouped " orientation="LR" trainingFilename="training_Hindi_IN.txt" colorsName="European/Asian">
 	<group name="DEVANAGARI letters">
-		<group name="combining signs and vowels" colorInfoName="combining signs and vowels">
+		<group name="combining signs and vowels" colorInfoName="accents">
 			<!--Old Group Color: 110-->
 			<node label="ऽ">
 				<!--Old Char Color: 90-->
@@ -100,7 +100,7 @@
 				<textCharAction unicode="2381" />
 			</node>
 		</group>
-		<group name="regular vowels" colorInfoName="regular vowels">
+		<group name="regular vowels" colorInfoName="lowercase">
 			<!--Old Group Color: 61-->
 			<node label="ॐ">
 				<!--Old Char Color: 81-->

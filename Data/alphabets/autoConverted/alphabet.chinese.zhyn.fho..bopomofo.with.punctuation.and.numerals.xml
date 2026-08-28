@@ -162,7 +162,7 @@
 			<textCharAction />
 		</node>
 	</group>
-	<group name="combining diacritics" colorInfoName="combining diacritics">
+	<group name="combining diacritics" colorInfoName="accents">
 		<!--Old Group Color: 110-->
 		<node label="◌̄">
 			<!--Old Char Color: 90-->

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE alphabet SYSTEM "../alphabet.dtd">
 <alphabet name="Pure Katakana, no halfwidths" orientation="TB" trainingFilename="training_Japanese_JP.txt" colorsName="Default">
-	<group name="katakana, finalized" colorInfoName="katakana, finalized">
+	<group name="katakana, finalized" colorInfoName="lowercase">
 		<node label="ア">
 			<!--Old Char Color: 10-->
 			<!--Note:  A -->
@@ -364,7 +364,7 @@
 			<!--Note:  N -->
 			<textCharAction />
 		</node>
-		<group name="Smalls" colorInfoName="smalls">
+		<group name="Smalls" colorInfoName="lowercase">
 			<node label="ァ">
 				<!--Old Char Color: 10-->
 				<!--Note:  SMALL A -->
@@ -417,7 +417,7 @@
 			</node>
 		</group>
 	</group>
-	<group name="Hiragana, finalized" colorInfoName="hiragana, finalized">
+	<group name="Hiragana, finalized" colorInfoName="lowercase">
 		<!--Old Group Color: 0-->
 		<node label="あ">
 			<!--Old Char Color: 87-->
@@ -776,7 +776,7 @@
 			<!--Note:  N -->
 			<textCharAction />
 		</node>
-		<group name="smalls" colorInfoName="smalls">
+		<group name="smalls" colorInfoName="lowercase">
 			<node label="ぁ">
 				<!--Old Char Color: 10-->
 				<!--Note:  SMALL A -->

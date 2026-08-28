@@ -2,7 +2,7 @@
 <!DOCTYPE alphabet SYSTEM "../alphabet.dtd">
 <alphabet name="Urdu with punctuation and numerals" orientation="RL" trainingFilename="training_Urdu_PK.txt" colorsName="European/Asian">
 	<group name="letters">
-		<group name="Vowels etc" colorInfoName="vowels etc">
+		<group name="Vowels etc" colorInfoName="lowercase">
 			<!--Old Group Color: 110-->
 			<node label="◌ً">
 				<!--Old Char Color: 90-->
@@ -57,7 +57,7 @@
 				<textCharAction unicode="1648" />
 			</node>
 		</group>
-		<group name="Hamza" colorInfoName="hamza">
+		<group name="Hamza" colorInfoName="lowercase">
 			<!--Old Group Color: 60-->
 			<node label="آ">
 				<!--Old Char Color: 80-->
@@ -303,7 +303,7 @@
 			<textCharAction />
 		</node>
 	</group>
-	<group name="Arabic-Indic numbers" colorInfoName="arabic-indic numbers">
+	<group name="Arabic-Indic numbers" colorInfoName="numbers">
 		<!--Old Group Color: 116-->
 		<node label="١">
 			<!--Old Char Color: 90-->
@@ -356,7 +356,7 @@
 			<textCharAction />
 		</node>
 	</group>
-	<group name="ASCII Punctuation" colorInfoName="ascii punctuation">
+	<group name="ASCII Punctuation" colorInfoName="punctuation">
 		<!--Old Group Color: 114-->
 		<node label="~">
 			<!--Old Char Color: 99-->
@@ -527,7 +527,7 @@
 			<textCharAction />
 		</node>
 	</group>
-	<group name="Joiners" colorInfoName="joiners">
+	<group name="Joiners" colorInfoName="lowercase">
 		<!--Old Group Color: 111-->
 		<node label="∥">
 			<!--Old Char Color: 73-->

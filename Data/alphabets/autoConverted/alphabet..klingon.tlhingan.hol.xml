@@ -103,7 +103,7 @@
 			<textCharAction />
 		</node>
 	</group>
-	<group name="Numerals" colorInfoName="numerals">
+	<group name="Numerals" colorInfoName="numbers">
 		<!--Old Group Color: 113-->
 		<node label="">
 			<!--Note: 0-->
@@ -146,7 +146,7 @@
 			<textCharAction />
 		</node>
 	</group>
-	<group name="Punctuation, etc" colorInfoName="punctuation, etc">
+	<group name="Punctuation, etc" colorInfoName="punctuation">
 		<!--Old Group Color: 112-->
 		<node label="'">
 			<!--Note: latin glottal stop ()-->

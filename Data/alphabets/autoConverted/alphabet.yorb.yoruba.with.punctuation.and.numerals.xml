@@ -120,7 +120,7 @@
 			<textCharAction />
 		</node>
 	</group>
-	<group name="upper case letters" colorInfoName="upper case letters">
+	<group name="upper case letters" colorInfoName="uppercase">
 		<!--Old Group Color: 111-->
 		<node label="A">
 			<textCharAction />

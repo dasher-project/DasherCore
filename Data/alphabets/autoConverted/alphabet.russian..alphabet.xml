@@ -104,7 +104,7 @@
 			<textCharAction />
 		</node>
 	</group>
-	<group name="upper case cyrillic (Кириллица) letters" colorInfoName="upper case cyrillic (кириллица) letters">
+	<group name="upper case cyrillic (Кириллица) letters" colorInfoName="uppercase">
 		<!--Old Group Color: 111-->
 		<node label="А">
 			<textCharAction />

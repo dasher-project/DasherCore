@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE alphabet SYSTEM "../alphabet.dtd">
 <alphabet name="Somali with punctuation and numerals" orientation="LR" trainingFilename="training_somali_SO.txt" colorsName="European/Asian">
-	<group name="lower case letters" colorInfoName="lower case letters">
+	<group name="lower case letters" colorInfoName="lowercase">
 		<node label="a">
 			<!--Old Char Color: 10-->
 			<!--Note:  A -->
@@ -133,7 +133,7 @@
 			<textCharAction />
 		</node>
 	</group>
-	<group name="upper case letters" colorInfoName="upper case letters">
+	<group name="upper case letters" colorInfoName="uppercase">
 		<!--Old Group Color: 111-->
 		<node label="A">
 			<!--Old Char Color: 10-->

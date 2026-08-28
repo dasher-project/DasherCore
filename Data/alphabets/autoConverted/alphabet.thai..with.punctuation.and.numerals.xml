@@ -195,7 +195,7 @@
 			<textCharAction />
 		</node>
 	</group>
-	<group name="Character modifiers?" colorInfoName="character modifiers?">
+	<group name="Character modifiers?" colorInfoName="accents">
 		<!--Old Group Color: 111-->
 		<node label="◌่">
 			<!--Note: 0E48  MAI EK - CHECK - OK-->

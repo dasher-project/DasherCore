@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE alphabet SYSTEM "../alphabet.dtd">
 <alphabet name="Hiragana(Grouped) ひらがな 60 + 0-9" orientation="LR" trainingFilename="training_hiragana60_JP.txt" colorsName="European/Asian">
-	<group name="DIACR" colorInfoName="diacr">
+	<group name="DIACR" colorInfoName="accents">
 		<node label="゛">
 			<!--Old Char Color: 99-->
 			<!--Note: diacritical buzz-->
@@ -18,7 +18,7 @@
 			<textCharAction />
 		</node>
 	</group>
-	<group name="A" label="あ" colorInfoName="a">
+	<group name="A" label="あ" colorInfoName="lowercase">
 		<!--Old Group Color: 190-->
 		<node label="ぁ">
 			<!--Old Char Color: 99-->
@@ -71,7 +71,7 @@
 			<textCharAction />
 		</node>
 	</group>
-	<group name="KA" label="か" colorInfoName="ka">
+	<group name="KA" label="か" colorInfoName="lowercase">
 		<!--Old Group Color: 191-->
 		<node label="か">
 			<!--Old Char Color: 71-->
@@ -99,7 +99,7 @@
 			<textCharAction />
 		</node>
 	</group>
-	<group name="SA" label="さ" colorInfoName="sa">
+	<group name="SA" label="さ" colorInfoName="lowercase">
 		<!--Old Group Color: 192-->
 		<node label="さ">
 			<!--Old Char Color: 72-->
@@ -127,7 +127,7 @@
 			<textCharAction />
 		</node>
 	</group>
-	<group name="TA" label="た" colorInfoName="ta">
+	<group name="TA" label="た" colorInfoName="lowercase">
 		<!--Old Group Color: 193-->
 		<node label="た">
 			<!--Old Char Color: 83-->
@@ -160,7 +160,7 @@
 			<textCharAction />
 		</node>
 	</group>
-	<group name="NA" label="な" colorInfoName="na">
+	<group name="NA" label="な" colorInfoName="lowercase">
 		<!--Old Group Color: 194-->
 		<node label="な">
 			<!--Old Char Color: 84-->
@@ -188,7 +188,7 @@
 			<textCharAction />
 		</node>
 	</group>
-	<group name="HA" label="は" colorInfoName="ha">
+	<group name="HA" label="は" colorInfoName="lowercase">
 		<!--Old Group Color: 195-->
 		<node label="は">
 			<!--Old Char Color: 75-->
@@ -216,7 +216,7 @@
 			<textCharAction />
 		</node>
 	</group>
-	<group name="MA" label="ま" colorInfoName="ma">
+	<group name="MA" label="ま" colorInfoName="lowercase">
 		<!--Old Group Color: 196-->
 		<node label="ま">
 			<!--Old Char Color: 76-->
@@ -244,7 +244,7 @@
 			<textCharAction />
 		</node>
 	</group>
-	<group name="YA" label="や" colorInfoName="ya">
+	<group name="YA" label="や" colorInfoName="lowercase">
 		<!--Old Group Color: 197-->
 		<node label="ゃ">
 			<!--Old Char Color: 99-->
@@ -277,7 +277,7 @@
 			<textCharAction />
 		</node>
 	</group>
-	<group name="RA" label="ら" colorInfoName="ra">
+	<group name="RA" label="ら" colorInfoName="lowercase">
 		<!--Old Group Color: 198-->
 		<node label="ら">
 			<!--Old Char Color: 78-->
@@ -305,7 +305,7 @@
 			<textCharAction />
 		</node>
 	</group>
-	<group name="WA" label="わ" colorInfoName="wa">
+	<group name="WA" label="わ" colorInfoName="lowercase">
 		<!--Old Group Color: 199-->
 		<node label="わ">
 			<!--Old Char Color: 89-->
@@ -318,7 +318,7 @@
 			<textCharAction />
 		</node>
 	</group>
-	<group name="N" colorInfoName="n">
+	<group name="N" colorInfoName="lowercase">
 		<!--Old Group Color: 194-->
 		<node label="ん">
 			<!--Old Char Color: 74-->

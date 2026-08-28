@@ -109,7 +109,7 @@
 			<textCharAction />
 		</node>
 	</group>
-	<group name="Duże litery" colorInfoName="duże litery">
+	<group name="Duże litery" colorInfoName="uppercase">
 		<!--Old Group Color: 111-->
 		<node label="A">
 			<textCharAction />
@@ -217,7 +217,7 @@
 			<textCharAction />
 		</node>
 	</group>
-	<group name="Liczby" colorInfoName="liczby">
+	<group name="Liczby" colorInfoName="numbers">
 		<!--Old Group Color: 113-->
 		<node label="0">
 			<textCharAction />
@@ -250,7 +250,7 @@
 			<textCharAction />
 		</node>
 	</group>
-	<group name="Interpunkcja" colorInfoName="interpunkcja">
+	<group name="Interpunkcja" colorInfoName="punctuation">
 		<!--Old Group Color: 112-->
 		<node label="%">
 			<textCharAction />
