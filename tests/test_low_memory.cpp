@@ -186,6 +186,45 @@ TEST(alphabet_index_duplicate_ids_prefer_maintained) {
     ASSERT(symbols > 10);
 
     dasher_destroy(ctx);
+
+    // Same corpus nested INSIDE a folder literally called "oldAlphabets":
+    // the ancestor name must not collapse every file to the legacy tier
+    // (the old substring-based tier check did, making the winner traversal
+    // luck again).
+    char nested[512], nestedData[512], nestedUser[512], nestedOld[512];
+    snprintf(nested, sizeof(nested), "%s/oldAlphabets", dasher_temp_dir());
+    snprintf(nestedData, sizeof(nestedData), "%s/nested_data_%d", nested, dasher_getpid());
+    snprintf(nestedUser, sizeof(nestedUser), "%s/nested_user_%d", nested, dasher_getpid());
+    snprintf(nestedOld, sizeof(nestedOld), "%s/oldAlphabets", nestedData);
+    dasher_mkdir(nested);
+    dasher_mkdir(nestedData);
+    dasher_mkdir(nestedUser);
+    dasher_mkdir(nestedOld);
+
+    f = fopen((std::string(nestedData) + "/alphabet.dup.xml").c_str(), "w");
+    ASSERT(f != nullptr);
+    fputs("<alphabet name='Dup Test'><group name='Letters'>\n", f);
+    for (char c = 'a'; c <= 'z'; c++)
+        fprintf(f, "<node label='%c'><textCharAction /></node>\n", c);
+    fputs("</group></alphabet>\n", f);
+    fclose(f);
+    f = fopen((std::string(nestedOld) + "/alphabet.dup.legacy.xml").c_str(), "w");
+    ASSERT(f != nullptr);
+    fputs("<alphabet name='Dup Test'><group name='Letters'>\n", f);
+    fputs("<node label='x'><textCharAction /></node>\n", f);
+    fputs("<node label='y'><textCharAction /></node>\n", f);
+    fputs("<node label='z'><textCharAction /></node>\n", f);
+    fputs("</group></alphabet>\n", f);
+    fclose(f);
+
+    ctx = dasher_create(nestedData, nestedUser, nullptr);
+    ASSERT(ctx != nullptr);
+    dasher_set_screen_size(ctx, 800, 600);
+    dasher_set_alphabet_id(ctx, "Dup Test");
+    const int nestedSymbols = dasher_get_alphabet_symbol_count(ctx);
+    printf("  nested-in-oldAlphabets ancestor: %d symbols (want >10 = maintained still wins)\n", nestedSymbols);
+    ASSERT(nestedSymbols > 10);
+    dasher_destroy(ctx);
 }
 
 TEST(alphabet_index_scanner_edge_cases) {

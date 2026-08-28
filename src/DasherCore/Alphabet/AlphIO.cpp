@@ -36,9 +36,20 @@ namespace {
 // the authoritative definition — matching the index generator's tier order
 // (maintained > worldalphabets > legacy). Before this, the winner was
 // whichever file the filesystem traversal happened to visit last.
+//
+// Tier is decided by the file's IMMEDIATE PARENT directory only — the corpus
+// layout convention — never by substrings elsewhere in the path: a data
+// directory that merely lives inside a folder called "oldAlphabets" (or
+// "autoConverted") must not collapse every scanned file to that tier and
+// fall back to traversal order.
 int corpusTier(const std::string& path) {
-    if (path.find("oldAlphabets") != std::string::npos) return 2;
-    if (path.find("autoConverted") != std::string::npos) return 1;
+    const size_t sep = path.find_last_of("/\\");
+    if (sep == std::string::npos || sep == 0) return 0;
+    const size_t start = path.find_last_of("/\\", sep - 1);
+    const std::string parent =
+        path.substr(start == std::string::npos ? 0 : start + 1, sep - (start == std::string::npos ? 0 : start + 1));
+    if (parent == "oldAlphabets") return 2;
+    if (parent == "autoConverted") return 1;
     return 0;
 }
 
