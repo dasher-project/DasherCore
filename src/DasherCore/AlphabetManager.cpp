@@ -450,7 +450,6 @@ std::vector<unsigned int>* CAlphNode::GetProbInfo() {
     if (!m_pProbInfo) {
         m_pProbInfo = new std::vector<unsigned int>();
         m_pMgr->GetProbs(m_pProbInfo, iContext);
-
         // work out cumulative probs in place
         for (unsigned int i = 1; i < m_pProbInfo->size(); i++) {
             (*m_pProbInfo)[i] += (*m_pProbInfo)[i - 1];

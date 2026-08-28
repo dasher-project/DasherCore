@@ -155,12 +155,18 @@ TEST(alphabet_index_duplicate_ids_prefer_maintained) {
     dasher_mkdir(dataDir);
     dasher_mkdir(sub);
 
-    // Maintained definition: 26 letters.
+    // Maintained definition: 30 letters — 31 symbols, deliberately unlike
+    // the builtin Default alphabet (26 letters / 27 symbols) so the count
+    // assertion below cannot pass via a silent Default fallback.
     FILE* f = fopen((std::string(dataDir) + "/alphabet.dup.xml").c_str(), "w");
     ASSERT(f != nullptr);
     fputs("<alphabet name='Dup Test'><group name='Letters'>\n", f);
     for (char c = 'a'; c <= 'z'; c++)
         fprintf(f, "<node label='%c'><textCharAction /></node>\n", c);
+    fputs("<node label='&#x00e9;'><textCharAction /></node>\n", f);
+    fputs("<node label='&#x00e8;'><textCharAction /></node>\n", f);
+    fputs("<node label='&#x00ea;'><textCharAction /></node>\n", f);
+    fputs("<node label='&#x00eb;'><textCharAction /></node>\n", f);
     fputs("</group></alphabet>\n", f);
     fclose(f);
 
@@ -178,12 +184,13 @@ TEST(alphabet_index_duplicate_ids_prefer_maintained) {
     ASSERT(ctx != nullptr);
     dasher_set_screen_size(ctx, 800, 600);
 
-    // Selecting the shared ID must load the MAINTAINED definition: 26
-    // letters, not the 3-letter legacy duplicate.
+    // Selecting the shared ID must load the MAINTAINED definition: 31
+    // symbols, not the 3-letter legacy duplicate (4) and not a silent
+    // builtin-Default fallback (27).
     dasher_set_alphabet_id(ctx, "Dup Test");
     const int symbols = dasher_get_alphabet_symbol_count(ctx);
-    printf("  duplicate-ID resolution: %d symbols (want >10 = maintained variant)\n", symbols);
-    ASSERT(symbols > 10);
+    printf("  duplicate-ID resolution: %d symbols (want 31 = maintained variant)\n", symbols);
+    ASSERT_EQ(symbols, 31);
 
     dasher_destroy(ctx);
 
@@ -206,6 +213,10 @@ TEST(alphabet_index_duplicate_ids_prefer_maintained) {
     fputs("<alphabet name='Dup Test'><group name='Letters'>\n", f);
     for (char c = 'a'; c <= 'z'; c++)
         fprintf(f, "<node label='%c'><textCharAction /></node>\n", c);
+    fputs("<node label='&#x00e9;'><textCharAction /></node>\n", f);
+    fputs("<node label='&#x00e8;'><textCharAction /></node>\n", f);
+    fputs("<node label='&#x00ea;'><textCharAction /></node>\n", f);
+    fputs("<node label='&#x00eb;'><textCharAction /></node>\n", f);
     fputs("</group></alphabet>\n", f);
     fclose(f);
     f = fopen((std::string(nestedOld) + "/alphabet.dup.legacy.xml").c_str(), "w");
@@ -222,8 +233,8 @@ TEST(alphabet_index_duplicate_ids_prefer_maintained) {
     dasher_set_screen_size(ctx, 800, 600);
     dasher_set_alphabet_id(ctx, "Dup Test");
     const int nestedSymbols = dasher_get_alphabet_symbol_count(ctx);
-    printf("  nested-in-oldAlphabets ancestor: %d symbols (want >10 = maintained still wins)\n", nestedSymbols);
-    ASSERT(nestedSymbols > 10);
+    printf("  nested-in-oldAlphabets ancestor: %d symbols (want 31 = maintained still wins)\n", nestedSymbols);
+    ASSERT_EQ(nestedSymbols, 31);
     dasher_destroy(ctx);
 }
 

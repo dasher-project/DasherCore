@@ -22,6 +22,7 @@
 #include "DasherCore/ControlManager.h"
 #include "DasherCore/FileUtils.h"
 
+#include <filesystem>
 #include <fstream>
 #include <string>
 #include <cstring>
@@ -85,7 +86,16 @@ class AlphabetIndexer : public AbstractParser {
         if (std::strcmp(alphabet.name(), "alphabet") != 0) return true;
 
         const std::string name = alphabet.attribute("name").as_string();
-        if (!name.empty()) m_owner->RememberFileName(name, strPath);
+        // Absolutize: when the data directory itself is relative (GTK passes
+        // "Data" and runs CWD-dependent), ScanFiles hands us relative paths.
+        // RememberFileName entries are later fed to LoadAlphabetFile, whose
+        // single-file fast path only triggers for absolute paths — a relative
+        // path would be compiled as a regex, match nothing, and silently
+        // fall back to the builtin Default alphabet (the "flat, unweighted
+        // letters" symptom on every relative-data-dir frontend).
+        std::error_code ec;
+        const std::string absolute = std::filesystem::absolute(strPath, ec).string();
+        if (!name.empty()) m_owner->RememberFileName(name, ec ? strPath : absolute);
         return true;
     }
 
