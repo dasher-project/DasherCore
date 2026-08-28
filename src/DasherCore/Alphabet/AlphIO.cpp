@@ -29,6 +29,19 @@
 #include <sstream>
 
 namespace {
+// Corpus tier for duplicate-ID resolution: the shipped data defines one
+// alphabet in up to three places (maintained root file, autoConverted
+// WorldAlphabets export, oldAlphabets v5 original). When two files declare
+// the same AlphID, the runtime index must pick deterministically and prefer
+// the authoritative definition — matching the index generator's tier order
+// (maintained > worldalphabets > legacy). Before this, the winner was
+// whichever file the filesystem traversal happened to visit last.
+int corpusTier(const std::string& path) {
+    if (path.find("oldAlphabets") != std::string::npos) return 2;
+    if (path.find("autoConverted") != std::string::npos) return 1;
+    return 0;
+}
+
 // Cheap indexer: extracts each file's alphabet NAME via a real (but
 // result-discarding) pugixml parse — no CAlphInfo build, no groups, no
 // characters. Using pugixml itself keeps indexing semantics identical to
@@ -300,7 +313,15 @@ bool CAlphIO::HasInfo(const std::string& AlphID) const {
 }
 
 void CAlphIO::RememberFileName(const std::string& AlphID, const std::string& filename) {
-    AlphabetFiles[AlphID] = filename;
+    // Duplicate-ID resolution: keep the best-tier definition seen; within a
+    // tier the first file wins (stable). E.g. "English with limited
+    // punctuation" exists as the maintained v6 file AND as a v5 original in
+    // oldAlphabets — the index must hold the maintained one regardless of
+    // traversal order.
+    const auto it = AlphabetFiles.find(AlphID);
+    if (it == AlphabetFiles.end() || corpusTier(filename) < corpusTier(it->second)) {
+        AlphabetFiles[AlphID] = filename;
+    }
 }
 
 std::string CAlphIO::FileNameFor(const std::string& AlphID) const {

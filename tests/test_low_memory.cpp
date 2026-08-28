@@ -138,6 +138,56 @@ TEST(alphabet_switch_to_duplicate_symbol_file) {
     dasher_destroy(ctx);
 }
 
+TEST(alphabet_index_duplicate_ids_prefer_maintained) {
+    // Regression (PR #68 review): when two files declare the same AlphID,
+    // the index previously kept whichever the filesystem traversal visited
+    // last — unspecified. Now the resolution is deterministic and prefers
+    // the authoritative definition: maintained root file over the
+    // autoConverted export over the oldAlphabets v5 original. Both orders
+    // are created here explicitly so the test cannot depend on readdir luck.
+    char dataDir[256], userDir[256];
+    static int counter = 0;
+    snprintf(dataDir, sizeof(dataDir), "%s/dup_data_%d_%d", dasher_temp_dir(), dasher_getpid(), counter);
+    snprintf(userDir, sizeof(userDir), "%s/dup_user_%d_%d", dasher_temp_dir(), dasher_getpid(), counter);
+    counter++;
+    char sub[512];
+    snprintf(sub, sizeof(sub), "%s/oldAlphabets", dataDir);
+    dasher_mkdir(dataDir);
+    dasher_mkdir(sub);
+
+    // Maintained definition: 26 letters.
+    FILE* f = fopen((std::string(dataDir) + "/alphabet.dup.xml").c_str(), "w");
+    ASSERT(f != nullptr);
+    fputs("<alphabet name='Dup Test'><group name='Letters'>\n", f);
+    for (char c = 'a'; c <= 'z'; c++)
+        fprintf(f, "<node label='%c'><textCharAction /></node>\n", c);
+    fputs("</group></alphabet>\n", f);
+    fclose(f);
+
+    // Legacy duplicate: same AlphID, only 3 letters.
+    f = fopen((std::string(sub) + "/alphabet.dup.legacy.xml").c_str(), "w");
+    ASSERT(f != nullptr);
+    fputs("<alphabet name='Dup Test'><group name='Letters'>\n", f);
+    fputs("<node label='x'><textCharAction /></node>\n", f);
+    fputs("<node label='y'><textCharAction /></node>\n", f);
+    fputs("<node label='z'><textCharAction /></node>\n", f);
+    fputs("</group></alphabet>\n", f);
+    fclose(f);
+
+    dasher_ctx* ctx = dasher_create(dataDir, userDir, nullptr);
+    ASSERT(ctx != nullptr);
+    dasher_set_screen_size(ctx, 800, 600);
+
+    // Selecting the shared ID must load the MAINTAINED definition: 26
+    // letters, not the 3-letter legacy duplicate.
+    dasher_set_alphabet_id(ctx, "Dup Test");
+    const int symbols = dasher_get_alphabet_symbol_count(ctx);
+    printf("  duplicate-ID resolution: %d symbols (want >10 = maintained variant)\n", symbols);
+    ASSERT(symbols > 10);
+
+    dasher_destroy(ctx);
+}
+
 TEST(alphabet_index_scanner_edge_cases) {
     // Regression (PR #68 review): the runtime name index used a raw string
     // scan that (a) missed single-quoted attributes, (b) stored XML
