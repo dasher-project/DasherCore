@@ -203,7 +203,13 @@ void CAlphabetMap::Add(const std::string& Key, symbol Value) {
     // Loop through Entries with the correct Hash value,
     //  to check the key is not already present
     for (Entry* i = HashEntry; i; i = i->Next) {
-        DASHER_ASSERT(i->Key != Key);
+        // Tolerate duplicate symbols rather than aborting: 132 shipped
+        // alphabet files define some symbols twice (autoconverted files
+        // applied Latin case groups to caseless scripts, Mandarin tone
+        // routings share outputs, ...). First definition wins; the old
+        // DASHER_ASSERT here crashed the process (SIGABRT) the moment a
+        // user selected one of those alphabets from the menu.
+        if (i->Key == Key) return;
     }
 
     // When hash table gets 1/2 full...

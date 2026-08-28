@@ -100,6 +100,44 @@ TEST(low_memory_alphabet_switch) {
     dasher_destroy(ctx);
 }
 
+TEST(alphabet_switch_to_duplicate_symbol_file) {
+    // Regression: 132 shipped alphabet files define some symbols twice
+    // (autoconverted case groups on caseless scripts, shared Mandarin tone
+    // outputs, ...). CAlphabetMap::Add used to DASHER_ASSERT on the second
+    // definition — SIGABRT the moment one of these was selected. Switching
+    // to the worst offender in the shipped corpus (every Arabic letter
+    // twice: 36 duplicate symbols) must load and run.
+    dasher_ctx* ctx = create_isolated_context();
+    ASSERT(ctx != nullptr);
+
+    dasher_set_screen_size(ctx, 800, 600);
+    dasher_set_alphabet_id(ctx, "Arabic (WorldAlphabets)");
+
+    const char* current = dasher_get_alphabet_id(ctx);
+    printf("  After switch: '%s'\n", current ? current : "(null)");
+    ASSERT(current != nullptr);
+    ASSERT(std::string(current) == "Arabic (WorldAlphabets)");
+
+    // The engine must produce frames on the duplicate-containing alphabet.
+    dasher_mouse_move(ctx, 700.0f, 300.0f);
+    dasher_mouse_down(ctx);
+    for (int i = 0; i < 20; i++) {
+        dasher_mouse_move(ctx, 700.0f, 280.0f);
+        run_frames(ctx, 1, 1000, 20);
+    }
+    dasher_mouse_up(ctx);
+
+    int* commands = nullptr;
+    int cmd_count = 0;
+    char** strings = nullptr;
+    int str_count = 0;
+    dasher_frame(ctx, 1000, &commands, &cmd_count, &strings, &str_count);
+    ASSERT(commands != nullptr);
+    ASSERT(cmd_count > 0);
+
+    dasher_destroy(ctx);
+}
+
 TEST(low_memory_frame_commands) {
     // Frame should still produce valid draw commands in low-memory mode
     dasher_ctx* ctx = create_isolated_context();

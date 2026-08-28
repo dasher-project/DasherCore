@@ -1,6 +1,6 @@
 {
  "generator": "generate-alphabet-index.py",
- "generated_utc": "2026-08-28T17:42:13Z",
+ "generated_utc": "2026-08-28T18:20:19Z",
  "count": 474,
  "summaries": {
   "by_script": {
@@ -252,7 +252,11 @@
     "paragraphSpace",
     "Editing"
    ],
-   "source": "worldalphabets"
+   "source": "worldalphabets",
+   "flags": [
+    "duplicate-symbols"
+   ],
+   "duplicate_symbols": 1
   },
   {
    "id": "Akan (Twi) with lots of punctuation",
@@ -315,7 +319,11 @@
     "paragraphSpace",
     "Editing"
    ],
-   "source": "worldalphabets"
+   "source": "worldalphabets",
+   "flags": [
+    "duplicate-symbols"
+   ],
+   "duplicate_symbols": 1
   },
   {
    "id": "Albanian (WorldAlphabets)",
@@ -354,7 +362,11 @@
     "paragraphSpace",
     "Editing"
    ],
-   "source": "worldalphabets"
+   "source": "worldalphabets",
+   "flags": [
+    "duplicate-symbols"
+   ],
+   "duplicate_symbols": 282
   },
   {
    "id": "Amharic (አማርኛ) with punctuation and numerals",
@@ -419,7 +431,11 @@
     "paragraphSpace",
     "Editing"
    ],
-   "source": "worldalphabets"
+   "source": "worldalphabets",
+   "flags": [
+    "duplicate-symbols"
+   ],
+   "duplicate_symbols": 36
   },
   {
    "id": "Aragonese (WorldAlphabets)",
@@ -477,7 +493,11 @@
     "paragraphSpace",
     "Editing"
    ],
-   "source": "worldalphabets"
+   "source": "worldalphabets",
+   "flags": [
+    "duplicate-symbols"
+   ],
+   "duplicate_symbols": 44
   },
   {
    "id": "Assamese অসমীয়া  with punctuation and numerals",
@@ -694,7 +714,11 @@
     "paragraphSpace",
     "Editing"
    ],
-   "source": "worldalphabets"
+   "source": "worldalphabets",
+   "flags": [
+    "duplicate-symbols"
+   ],
+   "duplicate_symbols": 76
   },
   {
    "id": "Baluchi (WorldAlphabets)",
@@ -715,6 +739,10 @@
     "Editing"
    ],
    "source": "worldalphabets",
+   "flags": [
+    "duplicate-symbols"
+   ],
+   "duplicate_symbols": 28,
    "variants": [
     "autoConverted/alphabet.wa.baluchi.bal-Latn.xml"
    ]
@@ -759,7 +787,11 @@
     "paragraphSpace",
     "Editing"
    ],
-   "source": "worldalphabets"
+   "source": "worldalphabets",
+   "flags": [
+    "duplicate-symbols"
+   ],
+   "duplicate_symbols": 80
   },
   {
    "id": "Bangla (WorldAlphabets)",
@@ -778,7 +810,11 @@
     "paragraphSpace",
     "Editing"
    ],
-   "source": "worldalphabets"
+   "source": "worldalphabets",
+   "flags": [
+    "duplicate-symbols"
+   ],
+   "duplicate_symbols": 51
   },
   {
    "id": "Basaa (WorldAlphabets)",
@@ -856,7 +892,11 @@
     "paragraphSpace",
     "Editing"
    ],
-   "source": "worldalphabets"
+   "source": "worldalphabets",
+   "flags": [
+    "duplicate-symbols"
+   ],
+   "duplicate_symbols": 52
   },
   {
    "id": "Belarusian (WorldAlphabets)",
@@ -981,7 +1021,11 @@
     "paragraphSpace",
     "Editing"
    ],
-   "source": "worldalphabets"
+   "source": "worldalphabets",
+   "flags": [
+    "duplicate-symbols"
+   ],
+   "duplicate_symbols": 32
   },
   {
    "id": "Blin (WorldAlphabets)",
@@ -1001,7 +1045,11 @@
     "paragraphSpace",
     "Editing"
    ],
-   "source": "worldalphabets"
+   "source": "worldalphabets",
+   "flags": [
+    "duplicate-symbols"
+   ],
+   "duplicate_symbols": 288
   },
   {
    "id": "Bodo (WorldAlphabets)",
@@ -1021,7 +1069,11 @@
     "paragraphSpace",
     "Editing"
    ],
-   "source": "worldalphabets"
+   "source": "worldalphabets",
+   "flags": [
+    "duplicate-symbols"
+   ],
+   "duplicate_symbols": 45
   },
   {
    "id": "Bosanski / Bosnian with punctuation and numerals",
@@ -1101,7 +1153,11 @@
     "paragraphSpace",
     "Editing"
    ],
-   "source": "worldalphabets"
+   "source": "worldalphabets",
+   "flags": [
+    "duplicate-symbols"
+   ],
+   "duplicate_symbols": 30
   },
   {
    "id": "Buhid (WorldAlphabets)",
@@ -1120,7 +1176,11 @@
     "paragraphSpace",
     "Editing"
    ],
-   "source": "worldalphabets"
+   "source": "worldalphabets",
+   "flags": [
+    "duplicate-symbols"
+   ],
+   "duplicate_symbols": 20
   },
   {
    "id": "Bulgarian (WorldAlphabets)",
@@ -1182,7 +1242,11 @@
     "paragraphSpace",
     "Editing"
    ],
-   "source": "worldalphabets"
+   "source": "worldalphabets",
+   "flags": [
+    "duplicate-symbols"
+   ],
+   "duplicate_symbols": 42
   },
   {
    "id": "Burmese / Myanmar with punctuation and numerals",
@@ -1225,7 +1289,11 @@
     "paragraphSpace",
     "Editing"
    ],
-   "source": "worldalphabets"
+   "source": "worldalphabets",
+   "flags": [
+    "duplicate-symbols"
+   ],
+   "duplicate_symbols": 3
   },
   {
    "id": "Cantonese (WorldAlphabets)",
@@ -1244,7 +1312,11 @@
     "paragraphSpace",
     "Editing"
    ],
-   "source": "worldalphabets"
+   "source": "worldalphabets",
+   "flags": [
+    "duplicate-symbols"
+   ],
+   "duplicate_symbols": 2210
   },
   {
    "id": "Cantonese 倉頡輸入法 (trad) by Cangjie",
@@ -1367,7 +1439,11 @@
     "paragraphSpace",
     "Editing"
    ],
-   "source": "worldalphabets"
+   "source": "worldalphabets",
+   "flags": [
+    "duplicate-symbols"
+   ],
+   "duplicate_symbols": 1
   },
   {
    "id": "Central Kurdish (WorldAlphabets)",
@@ -1387,7 +1463,11 @@
     "paragraphSpace",
     "Editing"
    ],
-   "source": "worldalphabets"
+   "source": "worldalphabets",
+   "flags": [
+    "duplicate-symbols"
+   ],
+   "duplicate_symbols": 33
   },
   {
    "id": "Central Melanau (WorldAlphabets)",
@@ -1427,7 +1507,11 @@
     "paragraphSpace",
     "Editing"
    ],
-   "source": "worldalphabets"
+   "source": "worldalphabets",
+   "flags": [
+    "duplicate-symbols"
+   ],
+   "duplicate_symbols": 36
   },
   {
    "id": "Chechen (WorldAlphabets)",
@@ -1519,7 +1603,11 @@
     "paragraphSpace",
     "Editing"
    ],
-   "source": "worldalphabets"
+   "source": "worldalphabets",
+   "flags": [
+    "duplicate-symbols"
+   ],
+   "duplicate_symbols": 1
   },
   {
    "id": "Chiga (WorldAlphabets)",
@@ -1559,6 +1647,10 @@
     "Editing"
    ],
    "source": "worldalphabets",
+   "flags": [
+    "duplicate-symbols"
+   ],
+   "duplicate_symbols": 2210,
    "variants": [
     "autoConverted/alphabet.wa.chinese.zh-Hant.xml"
    ]
@@ -1722,7 +1814,11 @@
     "paragraphSpace",
     "Editing"
    ],
-   "source": "worldalphabets"
+   "source": "worldalphabets",
+   "flags": [
+    "duplicate-symbols"
+   ],
+   "duplicate_symbols": 2
   },
   {
    "id": "Chuvash (WorldAlphabets)",
@@ -2068,7 +2164,11 @@
     "paragraphSpace",
     "Editing"
    ],
-   "source": "worldalphabets"
+   "source": "worldalphabets",
+   "flags": [
+    "duplicate-symbols"
+   ],
+   "duplicate_symbols": 24
   },
   {
    "id": "Duala (WorldAlphabets)",
@@ -2126,7 +2226,11 @@
     "paragraphSpace",
     "Editing"
    ],
-   "source": "worldalphabets"
+   "source": "worldalphabets",
+   "flags": [
+    "duplicate-symbols"
+   ],
+   "duplicate_symbols": 30
   },
   {
    "id": "Eesti / Estonian with punctuation and numerals",
@@ -2604,7 +2708,11 @@
     "paragraphSpace",
     "Editing"
    ],
-   "source": "worldalphabets"
+   "source": "worldalphabets",
+   "flags": [
+    "duplicate-symbols"
+   ],
+   "duplicate_symbols": 20
   },
   {
    "id": "Finnish (WorldAlphabets)",
@@ -2644,7 +2752,11 @@
     "Punctuation",
     "paragraphSpace"
    ],
-   "source": "worldalphabets"
+   "source": "worldalphabets",
+   "flags": [
+    "duplicate-symbols"
+   ],
+   "duplicate_symbols": 1
   },
   {
    "id": "Français / French with numerals and punctuation",
@@ -2665,6 +2777,10 @@
     "paragraphSpace"
    ],
    "source": "worldalphabets",
+   "flags": [
+    "duplicate-symbols"
+   ],
+   "duplicate_symbols": 1,
    "variants": [
     "oldAlphabets/alphabet.french.xml"
    ]
@@ -2697,7 +2813,11 @@
     "Punctuation",
     "paragraphSpace"
    ],
-   "source": "worldalphabets"
+   "source": "worldalphabets",
+   "flags": [
+    "duplicate-symbols"
+   ],
+   "duplicate_symbols": 6
   },
   {
    "id": "French (WorldAlphabets)",
@@ -2757,6 +2877,10 @@
     "Editing"
    ],
    "source": "worldalphabets",
+   "flags": [
+    "duplicate-symbols"
+   ],
+   "duplicate_symbols": 1,
    "variants": [
     "autoConverted/alphabet.wa.fula.ff-Latn.xml"
    ]
@@ -2929,7 +3053,11 @@
     "paragraphSpace",
     "Editing"
    ],
-   "source": "worldalphabets"
+   "source": "worldalphabets",
+   "flags": [
+    "duplicate-symbols"
+   ],
+   "duplicate_symbols": 202
   },
   {
    "id": "Georgian (WorldAlphabets)",
@@ -2948,7 +3076,11 @@
     "paragraphSpace",
     "Editing"
    ],
-   "source": "worldalphabets"
+   "source": "worldalphabets",
+   "flags": [
+    "duplicate-symbols"
+   ],
+   "duplicate_symbols": 33
   },
   {
    "id": "Georgian / ქართული ენა with punctuation and numerals",
@@ -3010,7 +3142,11 @@
     "paragraphSpace",
     "Editing"
    ],
-   "source": "worldalphabets"
+   "source": "worldalphabets",
+   "flags": [
+    "duplicate-symbols"
+   ],
+   "duplicate_symbols": 1
   },
   {
    "id": "Guarani (WorldAlphabets)",
@@ -3029,7 +3165,11 @@
     "paragraphSpace",
     "Editing"
    ],
-   "source": "worldalphabets"
+   "source": "worldalphabets",
+   "flags": [
+    "duplicate-symbols"
+   ],
+   "duplicate_symbols": 1
   },
   {
    "id": "Gujarati (WorldAlphabets)",
@@ -3048,7 +3188,11 @@
     "paragraphSpace",
     "Editing"
    ],
-   "source": "worldalphabets"
+   "source": "worldalphabets",
+   "flags": [
+    "duplicate-symbols"
+   ],
+   "duplicate_symbols": 50
   },
   {
    "id": "Gujarati with punctuation and numerals",
@@ -3152,7 +3296,11 @@
     "paragraphSpace",
     "Editing"
    ],
-   "source": "worldalphabets"
+   "source": "worldalphabets",
+   "flags": [
+    "duplicate-symbols"
+   ],
+   "duplicate_symbols": 23
   },
   {
    "id": "Haryanvi (WorldAlphabets)",
@@ -3172,7 +3320,11 @@
     "paragraphSpace",
     "Editing"
    ],
-   "source": "worldalphabets"
+   "source": "worldalphabets",
+   "flags": [
+    "duplicate-symbols"
+   ],
+   "duplicate_symbols": 44
   },
   {
    "id": "Hausa (WorldAlphabets)",
@@ -3191,7 +3343,11 @@
     "paragraphSpace",
     "Editing"
    ],
-   "source": "worldalphabets"
+   "source": "worldalphabets",
+   "flags": [
+    "duplicate-symbols"
+   ],
+   "duplicate_symbols": 1
   },
   {
    "id": "Hausa (boko) with punctuation and numerals",
@@ -3234,7 +3390,11 @@
     "paragraphSpace",
     "Editing"
    ],
-   "source": "worldalphabets"
+   "source": "worldalphabets",
+   "flags": [
+    "duplicate-symbols"
+   ],
+   "duplicate_symbols": 1
   },
   {
    "id": "Hawaiian / ʻŌlelo Hawaiʻi with lots of punctuation",
@@ -3276,7 +3436,11 @@
     "paragraphSpace",
     "Editing"
    ],
-   "source": "worldalphabets"
+   "source": "worldalphabets",
+   "flags": [
+    "duplicate-symbols"
+   ],
+   "duplicate_symbols": 27
   },
   {
    "id": "Hindi (WorldAlphabets)",
@@ -3296,7 +3460,11 @@
     "paragraphSpace",
     "Editing"
    ],
-   "source": "worldalphabets"
+   "source": "worldalphabets",
+   "flags": [
+    "duplicate-symbols"
+   ],
+   "duplicate_symbols": 50
   },
   {
    "id": "Hindi / हिंदी",
@@ -3419,7 +3587,11 @@
     "Punctuation",
     "paragraphSpace"
    ],
-   "source": "worldalphabets"
+   "source": "worldalphabets",
+   "flags": [
+    "duplicate-symbols"
+   ],
+   "duplicate_symbols": 2
   },
   {
    "id": "Hiragana ひらがな 83 (diacritical groups, marks first)",
@@ -3438,7 +3610,11 @@
     "Punctuation",
     "paragraphSpace"
    ],
-   "source": "worldalphabets"
+   "source": "worldalphabets",
+   "flags": [
+    "duplicate-symbols"
+   ],
+   "duplicate_symbols": 4
   },
   {
    "id": "Hiragana ひらがな 83 + 0-9",
@@ -3786,6 +3962,10 @@
     "Editing"
    ],
    "source": "worldalphabets",
+   "flags": [
+    "duplicate-symbols"
+   ],
+   "duplicate_symbols": 109,
    "variants": [
     "autoConverted/alphabet.wa.inuktitut.iu-Latn.xml"
    ]
@@ -3950,6 +4130,10 @@
     "Editing"
    ],
    "source": "worldalphabets",
+   "flags": [
+    "duplicate-symbols"
+   ],
+   "duplicate_symbols": 46,
    "variants": [
     "autoConverted/alphabet.wa.japanese.ja-Jpan.xml",
     "autoConverted/alphabet.wa.japanese.ja-Kana.xml"
@@ -4171,7 +4355,11 @@
     "paragraphSpace",
     "Editing"
    ],
-   "source": "worldalphabets"
+   "source": "worldalphabets",
+   "flags": [
+    "duplicate-symbols"
+   ],
+   "duplicate_symbols": 47
   },
   {
    "id": "Kannada (WorldAlphabets)",
@@ -4190,7 +4378,11 @@
     "paragraphSpace",
     "Editing"
    ],
-   "source": "worldalphabets"
+   "source": "worldalphabets",
+   "flags": [
+    "duplicate-symbols"
+   ],
+   "duplicate_symbols": 52
   },
   {
    "id": "Kannada with punctuation and numerals",
@@ -4232,7 +4424,11 @@
     "paragraphSpace",
     "Editing"
    ],
-   "source": "worldalphabets"
+   "source": "worldalphabets",
+   "flags": [
+    "duplicate-symbols"
+   ],
+   "duplicate_symbols": 48
   },
   {
    "id": "Kara-Kalpak (WorldAlphabets)",
@@ -4275,6 +4471,10 @@
     "Editing"
    ],
    "source": "worldalphabets",
+   "flags": [
+    "duplicate-symbols"
+   ],
+   "duplicate_symbols": 46,
    "variants": [
     "autoConverted/alphabet.wa.kashmiri.ks-Deva.xml"
    ]
@@ -4358,7 +4558,11 @@
     "paragraphSpace",
     "Editing"
    ],
-   "source": "worldalphabets"
+   "source": "worldalphabets",
+   "flags": [
+    "duplicate-symbols"
+   ],
+   "duplicate_symbols": 47
   },
   {
    "id": "Kikuyu (WorldAlphabets)",
@@ -4463,6 +4667,10 @@
     "Editing"
    ],
    "source": "worldalphabets",
+   "flags": [
+    "duplicate-symbols"
+   ],
+   "duplicate_symbols": 50,
    "variants": [
     "autoConverted/alphabet.wa.konkani.kok-Latn.xml"
    ]
@@ -4485,6 +4693,10 @@
     "Editing"
    ],
    "source": "worldalphabets",
+   "flags": [
+    "duplicate-symbols"
+   ],
+   "duplicate_symbols": 24,
    "variants": [
     "autoConverted/alphabet.wa.korean.ko-Kore.xml"
    ]
@@ -4506,6 +4718,10 @@
     "paragraphSpace"
    ],
    "source": "worldalphabets",
+   "flags": [
+    "duplicate-symbols"
+   ],
+   "duplicate_symbols": 26,
    "variants": [
     "oldAlphabets/alphabet.koreanNested.xml"
    ]
@@ -4650,7 +4866,11 @@
     "paragraphSpace",
     "Editing"
    ],
-   "source": "worldalphabets"
+   "source": "worldalphabets",
+   "flags": [
+    "duplicate-symbols"
+   ],
+   "duplicate_symbols": 29
   },
   {
    "id": "Kwasio (WorldAlphabets)",
@@ -4709,7 +4929,11 @@
     "paragraphSpace",
     "Editing"
    ],
-   "source": "worldalphabets"
+   "source": "worldalphabets",
+   "flags": [
+    "duplicate-symbols"
+   ],
+   "duplicate_symbols": 1
   },
   {
    "id": "Ladin (WorldAlphabets)",
@@ -4749,7 +4973,11 @@
     "paragraphSpace",
     "Editing"
    ],
-   "source": "worldalphabets"
+   "source": "worldalphabets",
+   "flags": [
+    "duplicate-symbols"
+   ],
+   "duplicate_symbols": 1
   },
   {
    "id": "Langi (WorldAlphabets)",
@@ -4812,7 +5040,11 @@
     "paragraphSpace",
     "Editing"
    ],
-   "source": "worldalphabets"
+   "source": "worldalphabets",
+   "flags": [
+    "duplicate-symbols"
+   ],
+   "duplicate_symbols": 40
   },
   {
    "id": "Latgalian (WorldAlphabets)",
@@ -4961,7 +5193,11 @@
     "paragraphSpace",
     "Editing"
    ],
-   "source": "worldalphabets"
+   "source": "worldalphabets",
+   "flags": [
+    "duplicate-symbols"
+   ],
+   "duplicate_symbols": 59
   },
   {
    "id": "Lietuvos / Lithuanian with punctuation and numerals",
@@ -5023,7 +5259,11 @@
     "paragraphSpace",
     "Editing"
    ],
-   "source": "worldalphabets"
+   "source": "worldalphabets",
+   "flags": [
+    "duplicate-symbols"
+   ],
+   "duplicate_symbols": 44
   },
   {
    "id": "Lingala (WorldAlphabets)",
@@ -5061,7 +5301,11 @@
     "paragraphSpace",
     "Editing"
    ],
-   "source": "worldalphabets"
+   "source": "worldalphabets",
+   "flags": [
+    "duplicate-symbols"
+   ],
+   "duplicate_symbols": 40
   },
   {
    "id": "Literary Chinese (WorldAlphabets)",
@@ -5080,7 +5324,11 @@
     "paragraphSpace",
     "Editing"
    ],
-   "source": "worldalphabets"
+   "source": "worldalphabets",
+   "flags": [
+    "duplicate-symbols"
+   ],
+   "duplicate_symbols": 2210
   },
   {
    "id": "Lithuanian (WorldAlphabets)",
@@ -5422,7 +5670,11 @@
     "paragraphSpace",
     "Editing"
    ],
-   "source": "worldalphabets"
+   "source": "worldalphabets",
+   "flags": [
+    "duplicate-symbols"
+   ],
+   "duplicate_symbols": 32
   },
   {
    "id": "Makhuwa (WorldAlphabets)",
@@ -5539,7 +5791,11 @@
     "paragraphSpace",
     "Editing"
    ],
-   "source": "worldalphabets"
+   "source": "worldalphabets",
+   "flags": [
+    "duplicate-symbols"
+   ],
+   "duplicate_symbols": 49
   },
   {
    "id": "Malayalam with punctuation and numerals",
@@ -5623,7 +5879,11 @@
     "paragraphSpace",
     "Editing"
    ],
-   "source": "worldalphabets"
+   "source": "worldalphabets",
+   "flags": [
+    "duplicate-symbols"
+   ],
+   "duplicate_symbols": 29
   },
   {
    "id": "Mandarin (simp) by Pinyin, tone after first vowel",
@@ -7230,6 +7490,10 @@
     "paragraphSpace"
    ],
    "source": "worldalphabets",
+   "flags": [
+    "duplicate-symbols"
+   ],
+   "duplicate_symbols": 785,
    "variants": [
     "oldAlphabets/alphabet.spyTonesNew.xml"
    ]
@@ -9001,6 +9265,10 @@
     "paragraphSpace"
    ],
    "source": "worldalphabets",
+   "flags": [
+    "duplicate-symbols"
+   ],
+   "duplicate_symbols": 785,
    "variants": [
     "oldAlphabets/alphabet.spyNew.xml"
    ]
@@ -10779,6 +11047,10 @@
     "paragraphSpace"
    ],
    "source": "worldalphabets",
+   "flags": [
+    "duplicate-symbols"
+   ],
+   "duplicate_symbols": 785,
    "variants": [
     "oldAlphabets/alphabet.spyTones2New.xml"
    ]
@@ -12122,6 +12394,10 @@
     "paragraphSpace"
    ],
    "source": "worldalphabets",
+   "flags": [
+    "duplicate-symbols"
+   ],
+   "duplicate_symbols": 960,
    "variants": [
     "oldAlphabets/alphabet.bopoTrad.xml"
    ]
@@ -12145,6 +12421,10 @@
     "Editing"
    ],
    "source": "worldalphabets",
+   "flags": [
+    "duplicate-symbols"
+   ],
+   "duplicate_symbols": 44,
    "variants": [
     "autoConverted/alphabet.wa.manipuri.mni-Mtei.xml"
    ]
@@ -12206,6 +12486,10 @@
     "Editing"
    ],
    "source": "worldalphabets",
+   "flags": [
+    "duplicate-symbols"
+   ],
+   "duplicate_symbols": 49,
    "variants": [
     "autoConverted/alphabet.wa.marathi.mr-Latn.xml"
    ]
@@ -12271,7 +12555,11 @@
     "paragraphSpace",
     "Editing"
    ],
-   "source": "worldalphabets"
+   "source": "worldalphabets",
+   "flags": [
+    "duplicate-symbols"
+   ],
+   "duplicate_symbols": 38
   },
   {
    "id": "Meru (WorldAlphabets)",
@@ -12311,7 +12599,11 @@
     "paragraphSpace",
     "Editing"
    ],
-   "source": "worldalphabets"
+   "source": "worldalphabets",
+   "flags": [
+    "duplicate-symbols"
+   ],
+   "duplicate_symbols": 1
   },
   {
    "id": "Mi'kmaw (WorldAlphabets)",
@@ -12331,7 +12623,11 @@
     "paragraphSpace",
     "Editing"
    ],
-   "source": "worldalphabets"
+   "source": "worldalphabets",
+   "flags": [
+    "duplicate-symbols"
+   ],
+   "duplicate_symbols": 1
   },
   {
    "id": "Michoacán Mazahua (WorldAlphabets)",
@@ -12370,7 +12666,11 @@
     "paragraphSpace",
     "Editing"
    ],
-   "source": "worldalphabets"
+   "source": "worldalphabets",
+   "flags": [
+    "duplicate-symbols"
+   ],
+   "duplicate_symbols": 2210
   },
   {
    "id": "Mohawk (WorldAlphabets)",
@@ -12390,7 +12690,11 @@
     "paragraphSpace",
     "Editing"
    ],
-   "source": "worldalphabets"
+   "source": "worldalphabets",
+   "flags": [
+    "duplicate-symbols"
+   ],
+   "duplicate_symbols": 1
   },
   {
    "id": "Moksha (WorldAlphabets)",
@@ -12515,7 +12819,11 @@
     "paragraphSpace",
     "Editing"
    ],
-   "source": "worldalphabets"
+   "source": "worldalphabets",
+   "flags": [
+    "duplicate-symbols"
+   ],
+   "duplicate_symbols": 1
   },
   {
    "id": "Mócheno (WorldAlphabets)",
@@ -12575,7 +12883,11 @@
     "paragraphSpace",
     "Editing"
    ],
-   "source": "worldalphabets"
+   "source": "worldalphabets",
+   "flags": [
+    "duplicate-symbols"
+   ],
+   "duplicate_symbols": 4
   },
   {
    "id": "Navajo (WorldAlphabets)",
@@ -12660,7 +12972,11 @@
     "paragraphSpace",
     "Editing"
    ],
-   "source": "worldalphabets"
+   "source": "worldalphabets",
+   "flags": [
+    "duplicate-symbols"
+   ],
+   "duplicate_symbols": 50
   },
   {
    "id": "Nepali with punctuation and numerals",
@@ -12702,7 +13018,11 @@
     "paragraphSpace",
     "Editing"
    ],
-   "source": "worldalphabets"
+   "source": "worldalphabets",
+   "flags": [
+    "duplicate-symbols"
+   ],
+   "duplicate_symbols": 1
   },
   {
    "id": "Ngomba (WorldAlphabets)",
@@ -12844,7 +13164,11 @@
     "paragraphSpace",
     "Editing"
    ],
-   "source": "worldalphabets"
+   "source": "worldalphabets",
+   "flags": [
+    "duplicate-symbols"
+   ],
+   "duplicate_symbols": 41
   },
   {
    "id": "Northern Sami (WorldAlphabets)",
@@ -13019,7 +13343,11 @@
     "paragraphSpace",
     "Editing"
    ],
-   "source": "worldalphabets"
+   "source": "worldalphabets",
+   "flags": [
+    "duplicate-symbols"
+   ],
+   "duplicate_symbols": 32
   },
   {
    "id": "O'zbek / Uzbek with punctuation and numerals",
@@ -13103,7 +13431,11 @@
     "paragraphSpace",
     "Editing"
    ],
-   "source": "worldalphabets"
+   "source": "worldalphabets",
+   "flags": [
+    "duplicate-symbols"
+   ],
+   "duplicate_symbols": 47
   },
   {
    "id": "Ogham",
@@ -13264,7 +13596,11 @@
     "paragraphSpace",
     "Editing"
    ],
-   "source": "worldalphabets"
+   "source": "worldalphabets",
+   "flags": [
+    "duplicate-symbols"
+   ],
+   "duplicate_symbols": 50
   },
   {
    "id": "Perl programming language",
@@ -13306,7 +13642,11 @@
     "paragraphSpace",
     "Editing"
    ],
-   "source": "worldalphabets"
+   "source": "worldalphabets",
+   "flags": [
+    "duplicate-symbols"
+   ],
+   "duplicate_symbols": 38
   },
   {
    "id": "Pijin (WorldAlphabets)",
@@ -13494,7 +13834,11 @@
     "paragraphSpace",
     "Editing"
    ],
-   "source": "worldalphabets"
+   "source": "worldalphabets",
+   "flags": [
+    "duplicate-symbols"
+   ],
+   "duplicate_symbols": 45
   },
   {
    "id": "Pure Katakana, halfwidths, many smalls",
@@ -13558,7 +13902,11 @@
     "paragraphSpace",
     "Editing"
    ],
-   "source": "worldalphabets"
+   "source": "worldalphabets",
+   "flags": [
+    "duplicate-symbols"
+   ],
+   "duplicate_symbols": 1
   },
   {
    "id": "Rajasthani (WorldAlphabets)",
@@ -13578,7 +13926,11 @@
     "paragraphSpace",
     "Editing"
    ],
-   "source": "worldalphabets"
+   "source": "worldalphabets",
+   "flags": [
+    "duplicate-symbols"
+   ],
+   "duplicate_symbols": 34
   },
   {
    "id": "Rejang (WorldAlphabets)",
@@ -13597,7 +13949,11 @@
     "paragraphSpace",
     "Editing"
    ],
-   "source": "worldalphabets"
+   "source": "worldalphabets",
+   "flags": [
+    "duplicate-symbols"
+   ],
+   "duplicate_symbols": 37
   },
   {
    "id": "Rohingya (WorldAlphabets)",
@@ -13617,7 +13973,11 @@
     "paragraphSpace",
     "Editing"
    ],
-   "source": "worldalphabets"
+   "source": "worldalphabets",
+   "flags": [
+    "duplicate-symbols"
+   ],
+   "duplicate_symbols": 35
   },
   {
    "id": "Romanian (WorldAlphabets)",
@@ -13864,7 +14224,11 @@
     "paragraphSpace",
     "Editing"
    ],
-   "source": "worldalphabets"
+   "source": "worldalphabets",
+   "flags": [
+    "duplicate-symbols"
+   ],
+   "duplicate_symbols": 61
   },
   {
    "id": "Samburu (WorldAlphabets)",
@@ -13965,7 +14329,11 @@
     "paragraphSpace",
     "Editing"
    ],
-   "source": "worldalphabets"
+   "source": "worldalphabets",
+   "flags": [
+    "duplicate-symbols"
+   ],
+   "duplicate_symbols": 50
   },
   {
    "id": "Sanskrit with punctuation and numerals",
@@ -14008,6 +14376,10 @@
     "Editing"
    ],
    "source": "worldalphabets",
+   "flags": [
+    "duplicate-symbols"
+   ],
+   "duplicate_symbols": 26,
    "variants": [
     "autoConverted/alphabet.wa.santali.sat-Olck.xml"
    ]
@@ -14048,7 +14420,11 @@
     "paragraphSpace",
     "Editing"
    ],
-   "source": "worldalphabets"
+   "source": "worldalphabets",
+   "flags": [
+    "duplicate-symbols"
+   ],
+   "duplicate_symbols": 51
   },
   {
    "id": "Scottish Gaelic (WorldAlphabets)",
@@ -14260,7 +14636,11 @@
     "paragraphSpace",
     "Editing"
    ],
-   "source": "worldalphabets"
+   "source": "worldalphabets",
+   "flags": [
+    "duplicate-symbols"
+   ],
+   "duplicate_symbols": 1165
   },
   {
    "id": "Sicilian (WorldAlphabets)",
@@ -14319,7 +14699,11 @@
     "paragraphSpace",
     "Editing"
    ],
-   "source": "worldalphabets"
+   "source": "worldalphabets",
+   "flags": [
+    "duplicate-symbols"
+   ],
+   "duplicate_symbols": 52
   },
   {
    "id": "Sinhala (WorldAlphabets)",
@@ -14338,7 +14722,11 @@
     "paragraphSpace",
     "Editing"
    ],
-   "source": "worldalphabets"
+   "source": "worldalphabets",
+   "flags": [
+    "duplicate-symbols"
+   ],
+   "duplicate_symbols": 55
   },
   {
    "id": "Sinhala with punctuation and numerals",
@@ -14566,7 +14954,11 @@
     "paragraphSpace",
     "Editing"
    ],
-   "source": "worldalphabets"
+   "source": "worldalphabets",
+   "flags": [
+    "duplicate-symbols"
+   ],
+   "duplicate_symbols": 34
   },
   {
    "id": "Southern Sami (WorldAlphabets)",
@@ -14794,7 +15186,11 @@
     "paragraphSpace",
     "Editing"
    ],
-   "source": "worldalphabets"
+   "source": "worldalphabets",
+   "flags": [
+    "duplicate-symbols"
+   ],
+   "duplicate_symbols": 97
   },
   {
    "id": "Swati (WorldAlphabets)",
@@ -14894,7 +15290,11 @@
     "paragraphSpace",
     "Editing"
    ],
-   "source": "worldalphabets"
+   "source": "worldalphabets",
+   "flags": [
+    "duplicate-symbols"
+   ],
+   "duplicate_symbols": 22
   },
   {
    "id": "Tachelhit (WorldAlphabets)",
@@ -14914,7 +15314,11 @@
     "paragraphSpace",
     "Editing"
    ],
-   "source": "worldalphabets"
+   "source": "worldalphabets",
+   "flags": [
+    "duplicate-symbols"
+   ],
+   "duplicate_symbols": 1
   },
   {
    "id": "Tagalog / Filipino with punctuation and numerals",
@@ -14956,7 +15360,11 @@
     "paragraphSpace",
     "Editing"
    ],
-   "source": "worldalphabets"
+   "source": "worldalphabets",
+   "flags": [
+    "duplicate-symbols"
+   ],
+   "duplicate_symbols": 18
   },
   {
    "id": "Taita (WorldAlphabets)",
@@ -15037,7 +15445,11 @@
     "paragraphSpace",
     "Editing"
    ],
-   "source": "worldalphabets"
+   "source": "worldalphabets",
+   "flags": [
+    "duplicate-symbols"
+   ],
+   "duplicate_symbols": 35
   },
   {
    "id": "Tamil with punctuation and numerals",
@@ -15118,7 +15530,11 @@
     "paragraphSpace",
     "Editing"
    ],
-   "source": "worldalphabets"
+   "source": "worldalphabets",
+   "flags": [
+    "duplicate-symbols"
+   ],
+   "duplicate_symbols": 51
   },
   {
    "id": "Telugu / తెలుగు with punctuation and numerals",
@@ -15181,7 +15597,11 @@
     "paragraphSpace",
     "Editing"
    ],
-   "source": "worldalphabets"
+   "source": "worldalphabets",
+   "flags": [
+    "duplicate-symbols"
+   ],
+   "duplicate_symbols": 57
   },
   {
    "id": "Thai / ภาษาไทย with punctuation and numerals",
@@ -15225,7 +15645,11 @@
     "paragraphSpace",
     "Editing"
    ],
-   "source": "worldalphabets"
+   "source": "worldalphabets",
+   "flags": [
+    "duplicate-symbols"
+   ],
+   "duplicate_symbols": 36
   },
   {
    "id": "Tigre (WorldAlphabets)",
@@ -15245,7 +15669,11 @@
     "paragraphSpace",
     "Editing"
    ],
-   "source": "worldalphabets"
+   "source": "worldalphabets",
+   "flags": [
+    "duplicate-symbols"
+   ],
+   "duplicate_symbols": 421
   },
   {
    "id": "Tigrinya (WorldAlphabets)",
@@ -15264,7 +15692,11 @@
     "paragraphSpace",
     "Editing"
    ],
-   "source": "worldalphabets"
+   "source": "worldalphabets",
+   "flags": [
+    "duplicate-symbols"
+   ],
+   "duplicate_symbols": 300
   },
   {
    "id": "Tigrinya (ትግርኛ) with punctuation and numerals",
@@ -15365,7 +15797,11 @@
     "paragraphSpace",
     "Editing"
    ],
-   "source": "worldalphabets"
+   "source": "worldalphabets",
+   "flags": [
+    "duplicate-symbols"
+   ],
+   "duplicate_symbols": 1
   },
   {
    "id": "Tooro (WorldAlphabets)",
@@ -15488,7 +15924,11 @@
     "paragraphSpace",
     "Editing"
    ],
-   "source": "worldalphabets"
+   "source": "worldalphabets",
+   "flags": [
+    "duplicate-symbols"
+   ],
+   "duplicate_symbols": 1
   },
   {
    "id": "Turkmen (WorldAlphabets)",
@@ -15592,7 +16032,11 @@
     "paragraphSpace",
     "Editing"
    ],
-   "source": "worldalphabets"
+   "source": "worldalphabets",
+   "flags": [
+    "duplicate-symbols"
+   ],
+   "duplicate_symbols": 1
   },
   {
    "id": "Ukrainian / Українська with punctuation and numerals",
@@ -15654,7 +16098,11 @@
     "paragraphSpace",
     "Editing"
    ],
-   "source": "worldalphabets"
+   "source": "worldalphabets",
+   "flags": [
+    "duplicate-symbols"
+   ],
+   "duplicate_symbols": 38
   },
   {
    "id": "Urdu with punctuation and numerals",
@@ -15700,7 +16148,11 @@
     "paragraphSpace",
     "Editing"
    ],
-   "source": "worldalphabets"
+   "source": "worldalphabets",
+   "flags": [
+    "duplicate-symbols"
+   ],
+   "duplicate_symbols": 34
   },
   {
    "id": "Uzbek (WorldAlphabets)",
@@ -15742,7 +16194,11 @@
     "paragraphSpace",
     "Editing"
    ],
-   "source": "worldalphabets"
+   "source": "worldalphabets",
+   "flags": [
+    "duplicate-symbols"
+   ],
+   "duplicate_symbols": 274
   },
   {
    "id": "Venda (WorldAlphabets)",
@@ -15985,7 +16441,11 @@
     "paragraphSpace",
     "Editing"
    ],
-   "source": "worldalphabets"
+   "source": "worldalphabets",
+   "flags": [
+    "duplicate-symbols"
+   ],
+   "duplicate_symbols": 37
   },
   {
    "id": "Western Frisian (WorldAlphabets)",
@@ -16124,7 +16584,11 @@
     "paragraphSpace",
     "Editing"
    ],
-   "source": "worldalphabets"
+   "source": "worldalphabets",
+   "flags": [
+    "duplicate-symbols"
+   ],
+   "duplicate_symbols": 28
   },
   {
    "id": "Yoruba (WorldAlphabets)",

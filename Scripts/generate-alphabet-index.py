@@ -41,7 +41,6 @@ import time
 import xml.etree.ElementTree as ET
 from collections import Counter
 from pathlib import Path
-
 REPO = Path(__file__).resolve().parent.parent
 ALPHABETS_DIR = REPO / "Data" / "alphabets"
 OUT_FILE = ALPHABETS_DIR / "alphabet_index.json"
@@ -347,6 +346,15 @@ def main():
         RTL_SCRIPTS = {"Arab", "Hebr", "Thaa", "Nkoo", "Syrc"}
         if script in RTL_SCRIPTS and orientation != "rtl":
             entry["flags"] = ["orientation-mismatch"]
+
+        # Flag duplicate symbols: the engine now tolerates them (first
+        # definition wins, CAlphabetMap::Add) but the data should be fixed
+        # upstream — 132 files carry them from the autoconversion era.
+        symbol_counts = Counter(texts)
+        dup_count = sum(1 for v in symbol_counts.values() if v > 1)
+        if dup_count:
+            entry.setdefault("flags", []).append("duplicate-symbols")
+            entry["duplicate_symbols"] = dup_count
 
         alphabets.append(entry)
 
