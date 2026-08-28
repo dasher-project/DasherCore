@@ -7,8 +7,8 @@
   Mandarin Chinese used in the People's Republic of China.
  Cantonese also has a pinyin-type system called Penkyamp
 -->
-	<group name="pin yin roman letters" colorInfoName="pin yin roman letters">
-		<group name="a" colorInfoName="a">
+	<group name="pin yin roman letters" colorInfoName="lowercase">
+		<group name="a" colorInfoName="lowercase">
 			<!--Old Group Color: 60-->
 			<node label="a">
 				<!--Old Char Color: 70-->
@@ -49,7 +49,7 @@
 			<!--Old Char Color: 13-->
 			<textCharAction />
 		</node>
-		<group name="e" colorInfoName="e">
+		<group name="e" colorInfoName="lowercase">
 			<!--Old Group Color: 61-->
 			<node label="e">
 				<!--Old Char Color: 71-->
@@ -90,7 +90,7 @@
 			<!--Old Char Color: 17-->
 			<textCharAction />
 		</node>
-		<group name="i" colorInfoName="i">
+		<group name="i" colorInfoName="lowercase">
 			<!--Old Group Color: 62-->
 			<node label="i">
 				<!--Old Char Color: 72-->
@@ -139,7 +139,7 @@
 			<!--Old Char Color: 23-->
 			<textCharAction />
 		</node>
-		<group name="o" colorInfoName="o">
+		<group name="o" colorInfoName="lowercase">
 			<!--Old Group Color: 64-->
 			<node label="o">
 				<!--Old Char Color: 74-->
@@ -188,7 +188,7 @@
 			<!--Old Char Color: 29-->
 			<textCharAction />
 		</node>
-		<group name="u" colorInfoName="u">
+		<group name="u" colorInfoName="lowercase">
 			<!--Old Group Color: 65-->
 			<node label="u">
 				<!--Old Char Color: 75-->
@@ -217,7 +217,7 @@
 			</node>
 			<!-- u4 -->
 		</group>
-		<group name="ü" colorInfoName="ü">
+		<group name="ü" colorInfoName="lowercase">
 			<!--Old Group Color: 69-->
 			<node label="ü">
 				<!--Old Char Color: 79-->

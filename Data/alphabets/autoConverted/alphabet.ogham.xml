@@ -107,7 +107,7 @@
 			<textCharAction />
 		</node>
 	</group>
-	<group name="Ogham marks" colorInfoName="ogham marks">
+	<group name="Ogham marks" colorInfoName="lowercase">
 		<!--Old Group Color: 0-->
 		<node label="᚛">
 			<!--Note:  OGHAM FEATHER MARK  -->

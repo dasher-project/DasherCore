@@ -99,17 +99,26 @@ void CDasherInterfaceBase::Realize(unsigned long ulTime) {
 
     srand(ulTime);
 
+    // Lazy alphabet loading: index every alphabet NAME cheaply (root
+    // attribute read per file, no XML parse), then full-parse just the
+    // selected alphabet (+ default fallback). The menu (GetAlphabets) is
+    // served from the index ∪ parsed set, so every alphabet stays
+    // selectable; parsing is what is lazy. Measured effect (RFC 0018
+    // follow-up, Aug 2026): realize.alphabets 1,300ms → 65–150ms on
+    // Android, 270ms → 10–23ms on GTK — full data in
+    // dasher-startup-timing-report.md.
     m_AlphIO = std::make_unique<CAlphIO>(this);
-    if (m_bLowMemoryMode) {
-        // Load only the selected alphabet (or default) to save ~5-10MB
+    m_AlphIO->ScanNameIndex();
+    const auto loadById = [this](const std::string& alphId) {
+        std::string fn = m_AlphIO->FileNameFor(alphId);
+        if (fn.empty()) fn = alphabetIdToFilename(alphId);
+        m_AlphIO->LoadAlphabetFile(fn);
+    };
+    {
         std::string alphId = m_pSettingsStore->GetStringParameter(SP_ALPHABET_ID);
         if (alphId.empty()) alphId = "English with limited punctuation";
-        Dasher::FileUtils::ScanFiles(m_AlphIO.get(), alphabetIdToFilename(alphId));
-        // If the specific file wasn't found, fall back to the default
-        if (!m_AlphIO->GetInfo(alphId))
-            Dasher::FileUtils::ScanFiles(m_AlphIO.get(), alphabetIdToFilename("English with limited punctuation"));
-    } else {
-        Dasher::FileUtils::ScanFiles(m_AlphIO.get(), "alphabet.*.xml");
+        loadById(alphId);
+        if (!m_AlphIO->HasInfo(alphId)) loadById("English with limited punctuation");
     }
 
     m_ColorIO = std::make_unique<CColorIO>(this);
@@ -127,7 +136,7 @@ void CDasherInterfaceBase::Realize(unsigned long ulTime) {
     ChangeColors();
     // Create the user logging object if we are suppose to.  We wait
     // until now so we have the real value of the parameter and not
-    // just the default.
+    //  just the default.
 
     // TODO: Sort out log type selection
 
@@ -463,11 +472,17 @@ void CDasherInterfaceBase::ChangeAlphabet() {
         return;
     }
 
-    // In low-memory mode, load the requested alphabet on demand
-    if (m_bLowMemoryMode && m_AlphIO) {
+    // Load the requested
+    // alphabet on demand in ALL modes when it isn't parsed yet. (The old
+    // low-memory-only check used GetInfo, which never fails — it silently
+    // returns Default — so the on-demand load could never fire and switching
+    // to an unparsed alphabet silently gave the user Default instead.)
+    if (m_AlphIO) {
         std::string alphId = m_pSettingsStore->GetStringParameter(SP_ALPHABET_ID);
-        if (!m_AlphIO->GetInfo(alphId)) {
-            Dasher::FileUtils::ScanFiles(m_AlphIO.get(), alphabetIdToFilename(alphId));
+        if (!m_AlphIO->HasInfo(alphId)) {
+            std::string fn = m_AlphIO->FileNameFor(alphId);
+            if (fn.empty()) fn = alphabetIdToFilename(alphId);
+            m_AlphIO->LoadAlphabetFile(fn);
         }
     }
 

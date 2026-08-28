@@ -303,7 +303,7 @@
 			<textCharAction />
 		</node>
 	</group>
-	<group name="Runic punctuation" colorInfoName="runic punctuation">
+	<group name="Runic punctuation" colorInfoName="punctuation">
 		<!--Old Group Color: 0-->
 		<node label="᛫">
 			<!--Note: RUNIC SINGLE PUNCTUATION-->

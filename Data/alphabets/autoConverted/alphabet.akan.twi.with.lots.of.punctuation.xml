@@ -3,7 +3,7 @@
 <alphabet name="Akan (Twi) with lots of punctuation" orientation="LR" trainingFilename="training_akan_GH.txt" colorsName="European/Asian">
 	<!-- same as Adangbe and Ga and Akan and Ewe -->
 	<!--- http://www.ethnologue.com/show_language.asp?code=TWS -->
-	<group name="Lower case Latin letters" colorInfoName="lower case latin letters">
+	<group name="Lower case Latin letters" colorInfoName="lowercase">
 		<node label="a">
 			<!--Old Char Color: 10-->
 			<textCharAction />
@@ -124,7 +124,7 @@
 			<textCharAction />
 		</node>
 	</group>
-	<group name="Upper case Latin letters" colorInfoName="upper case latin letters">
+	<group name="Upper case Latin letters" colorInfoName="uppercase">
 		<!--Old Group Color: 111-->
 		<node label="A">
 			<!--Old Char Color: 10-->

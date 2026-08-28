@@ -99,7 +99,7 @@
 			<textCharAction />
 		</node>
 	</group>
-	<group name="Upper case Latin letters" colorInfoName="upper case latin letters">
+	<group name="Upper case Latin letters" colorInfoName="uppercase">
 		<!--Old Group Color: 111-->
 		<node label="A">
 			<textCharAction />

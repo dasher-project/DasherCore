@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE alphabet SYSTEM "../alphabet.dtd">
 <alphabet name="Français / French (combining accents) with numerals and punctuation" orientation="LR" trainingFilename="training_frenchC_FR.txt" colorsName="European/Asian">
-	<group name="Combining accents" colorInfoName="combining accents">
+	<group name="Combining accents" colorInfoName="accents">
 		<node label="◌̀">
 			<!--Old Char Color: 72-->
 			<!--Note: COMBINING GRAVE ACCENT ` -->
@@ -43,7 +43,7 @@
 			<textCharAction />
 		</node>
 	</group>
-	<group name="Lower case Latin letters" colorInfoName="lower case latin letters">
+	<group name="Lower case Latin letters" colorInfoName="lowercase">
 		<!--Old Group Color: 0-->
 		<node label="a">
 			<!--Old Char Color: 10-->
@@ -152,7 +152,7 @@
 			<textCharAction />
 		</node>
 	</group>
-	<group name="Upper case Latin letters" colorInfoName="upper case latin letters">
+	<group name="Upper case Latin letters" colorInfoName="uppercase">
 		<!--Old Group Color: 111-->
 		<node label="A">
 			<!--Old Char Color: 10-->

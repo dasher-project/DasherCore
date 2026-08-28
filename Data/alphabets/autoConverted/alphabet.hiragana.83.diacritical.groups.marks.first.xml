@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE alphabet SYSTEM "../alphabet.dtd">
 <alphabet name="Hiragana ひらがな 83 (diacritical groups, marks first)" orientation="LR" trainingFilename="training_hiragana83_JP.txt" colorsName="European/Asian">
-	<group name="aiueo" colorInfoName="aiueo">
+	<group name="aiueo" colorInfoName="lowercase">
 		<node label="ぁ">
 			<!--Old Char Color: 70-->
 			<!--Note:  SMALL A -->
@@ -374,7 +374,7 @@
 			<textCharAction unicode="12411" />
 		</node>
 	</group>
-	<group name="m" colorInfoName="m">
+	<group name="m" colorInfoName="lowercase">
 		<!--Old Group Color: -->
 		<node label="ま">
 			<!--Old Char Color: 76-->

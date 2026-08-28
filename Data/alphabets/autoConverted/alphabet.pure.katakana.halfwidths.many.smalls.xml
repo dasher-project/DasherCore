@@ -2,7 +2,7 @@
 <!DOCTYPE alphabet SYSTEM "../alphabet.dtd">
 <alphabet name="Pure Katakana, halfwidths, many smalls" orientation="LR" trainingFilename="training_Japanese_JP.txt" colorsName="Default">
 	<!-- Halfwidths are only used when writing horizontally -->
-	<group name="katakana merged, no halfwidths" colorInfoName="katakana merged, no halfwidths">
+	<group name="katakana merged, no halfwidths" colorInfoName="lowercase">
 		<node label="ア">
 			<!--Old Char Color: 10-->
 			<!--Note:  A -->
@@ -393,7 +393,7 @@
 			<!--Note:  N -->
 			<textCharAction />
 		</node>
-		<group name="Smalls (extra!)" colorInfoName="smalls (extra!)">
+		<group name="Smalls (extra!)" colorInfoName="lowercase">
 			<node label="ァ">
 				<!--Old Char Color: 10-->
 				<!--Note:  SMALL A -->
@@ -536,7 +536,7 @@
 			</node>
 		</group>
 	</group>
-	<group name="katakana merged, halfwidths only" colorInfoName="katakana merged, halfwidths only">
+	<group name="katakana merged, halfwidths only" colorInfoName="lowercase">
 		<!--Old Group Color: 3-->
 		<node label="ｱ">
 			<!--Old Char Color: 87-->
@@ -768,7 +768,7 @@
 			<!--Note: HALFWIDTH  N -->
 			<textCharAction />
 		</node>
-		<group name="Smalls" colorInfoName="smalls">
+		<group name="Smalls" colorInfoName="lowercase">
 			<node label="ｧ">
 				<!--Old Char Color: 87-->
 				<!--Note: HALFWIDTH  SMALL A -->
@@ -816,7 +816,7 @@
 			</node>
 		</group>
 	</group>
-	<group name="Hiragana, finalized" colorInfoName="hiragana, finalized">
+	<group name="Hiragana, finalized" colorInfoName="lowercase">
 		<!--Old Group Color: 0-->
 		<node label="あ">
 			<!--Old Char Color: 87-->
@@ -1175,7 +1175,7 @@
 			<!--Note:  N -->
 			<textCharAction />
 		</node>
-		<group name="smalls" colorInfoName="smalls">
+		<group name="smalls" colorInfoName="lowercase">
 			<node label="ぁ">
 				<!--Old Char Color: 10-->
 				<!--Note:  SMALL A -->

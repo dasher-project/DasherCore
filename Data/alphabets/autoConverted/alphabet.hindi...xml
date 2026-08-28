@@ -2,7 +2,7 @@
 <!DOCTYPE alphabet SYSTEM "../alphabet.dtd">
 <alphabet name="Hindi / हिंदी " orientation="LR" trainingFilename="training_Hindi_IN.txt" colorsName="European/Asian">
 	<!-- see file:///home/mackay/dasher/alphabets/tmpH.html for queries -->
-	<group name="DEVANAGARI letters" colorInfoName="devanagari letters">
+	<group name="DEVANAGARI letters" colorInfoName="lowercase">
 		<node label="◌ँ">
 			<!--Old Char Color: 70-->
 			<!--Note: ?? -->
@@ -312,7 +312,7 @@
 			<textCharAction />
 		</node>
 	</group>
-	<group name="combining signs and vowels" colorInfoName="combining signs and vowels">
+	<group name="combining signs and vowels" colorInfoName="accents">
 		<!--Old Group Color: 110-->
 		<node label="ऽ">
 			<!--Old Char Color: 90-->

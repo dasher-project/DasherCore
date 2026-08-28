@@ -4,7 +4,7 @@
 	<!--  needs accents too?
   None used here:
     http://developer.mimer.com/collations/charts/ewe.htm -->
-	<group name="Lower case Latin letters" colorInfoName="lower case latin letters">
+	<group name="Lower case Latin letters" colorInfoName="lowercase">
 		<node label="a">
 			<!--Old Char Color: 10-->
 			<textCharAction />
@@ -145,7 +145,7 @@
 			<textCharAction />
 		</node>
 	</group>
-	<group name="Upper case Latin letters" colorInfoName="upper case latin letters">
+	<group name="Upper case Latin letters" colorInfoName="uppercase">
 		<!--Old Group Color: 111-->
 		<node label="A">
 			<!--Old Char Color: 10-->

@@ -8,7 +8,7 @@
  English order. The only changes here are notes.
   See also  http://staffweb.cms.gre.ac.uk/~c.walshaw/abc/
  -->
-	<group name="Second octave notes" colorInfoName="second octave notes">
+	<group name="Second octave notes" colorInfoName="lowercase">
 		<node label="a">
 			<!--Old Char Color: 10-->
 			<textCharAction />
@@ -117,7 +117,7 @@
 			<textCharAction />
 		</node>
 	</group>
-	<group name="First octave notes" colorInfoName="first octave notes">
+	<group name="First octave notes" colorInfoName="lowercase">
 		<!--Old Group Color: 111-->
 		<node label="A">
 			<!--Old Char Color: 10-->
@@ -278,7 +278,7 @@
 			<textCharAction />
 		</node>
 	</group>
-	<group name="Annotation" colorInfoName="annotation">
+	<group name="Annotation" colorInfoName="lowercase">
 		<!--Old Group Color: 112-->
 		<node label="%">
 			<!--Old Char Color: 90-->

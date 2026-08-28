@@ -81,7 +81,7 @@
 			<textCharAction />
 		</node>
 	</group>
-	<group name="Phonetic symbols" colorInfoName="phonetic symbols">
+	<group name="Phonetic symbols" colorInfoName="lowercase">
 		<!--Old Group Color: 111-->
 		<node label="ɑ">
 			<textCharAction />

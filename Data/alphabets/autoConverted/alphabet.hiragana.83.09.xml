@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE alphabet SYSTEM "../alphabet.dtd">
 <alphabet name="Hiragana ひらがな 83 + 0-9" orientation="LR" trainingFilename="training_hiragana83_JP.txt" colorsName="European/Asian">
-	<group name="83 Letters (actually 81)" colorInfoName="83 letters (actually 81)">
+	<group name="83 Letters (actually 81)" colorInfoName="lowercase">
 		<node label="ぁ">
 			<!--Old Char Color: 99-->
 			<!--Note:  SMALL A -->

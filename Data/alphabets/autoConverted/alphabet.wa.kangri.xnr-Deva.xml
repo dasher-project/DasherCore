@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE alphabet SYSTEM "../alphabet.dtd">
 <alphabet name="Kangri (WorldAlphabets)" orientation="LR" trainingFilename="" colorsName="Default">
-  <group name="Lower case" colorInfoName="lower case">
+  <group name="Lower case" colorInfoName="lowercase">
     <node label="u">
       <textCharAction />
     </node>
@@ -153,7 +153,7 @@
       <textCharAction />
     </node>
   </group>
-  <group name="Upper case" colorInfoName="upper case">
+  <group name="Upper case" colorInfoName="uppercase">
     <node label="U">
       <textCharAction />
     </node>
@@ -305,7 +305,7 @@
       <textCharAction />
     </node>
   </group>
-  <group name="Digits" colorInfoName="digits">
+  <group name="Digits" colorInfoName="numbers">
     <node label="०">
       <textCharAction />
     </node>
@@ -345,7 +345,7 @@
       <textCharAction />
     </node>
   </group>
-  <group name="Editing" colorInfoName="editing">
+  <group name="Editing" colorInfoName="punctuation">
     <node label="⌫">
       <deleteTextAction distance="last char" />
     </node>

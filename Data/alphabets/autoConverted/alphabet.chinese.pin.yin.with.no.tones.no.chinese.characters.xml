@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE alphabet SYSTEM "../alphabet.dtd">
 <alphabet name="Chinese Pin Yin with no tones (no chinese characters)" orientation="LR" trainingFilename="training_pinyinNT_CN.txt" colorsName="European/Asian">
-	<group name="pin yin roman letters" colorInfoName="pin yin roman letters">
+	<group name="pin yin roman letters" colorInfoName="lowercase">
 		<node label="a">
 			<!--Old Char Color: 10-->
 			<textCharAction />
@@ -117,7 +117,7 @@
 			<textCharAction />
 		</node>
 	</group>
-	<group name="combining diacritics" colorInfoName="combining diacritics">
+	<group name="combining diacritics" colorInfoName="accents">
 		<!--Old Group Color: 110-->
 		<node label="◌̄">
 			<!--Old Char Color: 90-->

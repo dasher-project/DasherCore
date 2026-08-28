@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE alphabet SYSTEM "../alphabet.dtd">
 <alphabet name="Français / French with numerals and punctuation (vowels grouped)" orientation="LR" trainingFilename="training_french_FR.txt" colorsName="Vowels">
-	<group name="Lower case Latin letters" colorInfoName="lower case latin letters">
-		<group name="a" label="a" colorInfoName="a">
+	<group name="Lower case Latin letters" colorInfoName="lowercase">
+		<group name="a" label="a" colorInfoName="lowercase">
 			<!--Old Group Color: 10-->
-			<group name="Combining accents" colorInfoName="combining accents">
+			<group name="Combining accents" colorInfoName="accents">
 				<!--Old Group Color: 191-->
 				<node label="◌̀">
 					<!--Old Char Color: 72-->
@@ -29,7 +29,7 @@
 			<!--Old Char Color: 11-->
 			<textCharAction />
 		</node>
-		<group name="c" label="c" colorInfoName="c">
+		<group name="c" label="c" colorInfoName="lowercase">
 			<!--Old Group Color: 10-->
 			<node label="">
 				<!--Old Char Color: 10-->
@@ -44,9 +44,9 @@
 			<!--Old Char Color: 12-->
 			<textCharAction />
 		</node>
-		<group name="e" label="e" colorInfoName="e">
+		<group name="e" label="e" colorInfoName="lowercase">
 			<!--Old Group Color: 10-->
-			<group name="Combining accents" colorInfoName="combining accents">
+			<group name="Combining accents" colorInfoName="accents">
 				<!--Old Group Color: 191-->
 				<node label="◌̀">
 					<!--Old Char Color: 72-->
@@ -82,9 +82,9 @@
 			<!--Old Char Color: 12-->
 			<textCharAction />
 		</node>
-		<group name="i" label="i" colorInfoName="i">
+		<group name="i" label="i" colorInfoName="lowercase">
 			<!--Old Group Color: 10-->
-			<group name="Combining accents" colorInfoName="combining accents">
+			<group name="Combining accents" colorInfoName="accents">
 				<!--Old Group Color: 191-->
 				<node label="◌̂">
 					<!--Old Char Color: 72-->
@@ -120,9 +120,9 @@
 			<!--Old Char Color: 11-->
 			<textCharAction />
 		</node>
-		<group name="o" label="o" colorInfoName="o">
+		<group name="o" label="o" colorInfoName="lowercase">
 			<!--Old Group Color: 10-->
-			<group name="Combining accents" colorInfoName="combining accents">
+			<group name="Combining accents" colorInfoName="accents">
 				<!--Old Group Color: 191-->
 				<node label="◌̂">
 					<!--Old Char Color: 72-->
@@ -158,9 +158,9 @@
 			<!--Old Char Color: 13-->
 			<textCharAction />
 		</node>
-		<group name="u" label="u" colorInfoName="u">
+		<group name="u" label="u" colorInfoName="lowercase">
 			<!--Old Group Color: 10-->
-			<group name="Combining accents" colorInfoName="combining accents">
+			<group name="Combining accents" colorInfoName="accents">
 				<!--Old Group Color: 191-->
 				<node label="◌̀">
 					<!--Old Char Color: 72-->
@@ -202,11 +202,11 @@
 			<textCharAction />
 		</node>
 	</group>
-	<group name="Upper case Latin letters" colorInfoName="upper case latin letters">
+	<group name="Upper case Latin letters" colorInfoName="uppercase">
 		<!--Old Group Color: 111-->
-		<group name="A" label="A" colorInfoName="a">
+		<group name="A" label="A" colorInfoName="lowercase">
 			<!--Old Group Color: 10-->
-			<group name="Combining accents" colorInfoName="combining accents">
+			<group name="Combining accents" colorInfoName="accents">
 				<!--Old Group Color: 191-->
 				<node label="◌̀">
 					<!--Old Char Color: 72-->
@@ -228,7 +228,7 @@
 			<!--Old Char Color: 11-->
 			<textCharAction />
 		</node>
-		<group name="C" label="C" colorInfoName="c">
+		<group name="C" label="C" colorInfoName="lowercase">
 			<!--Old Group Color: 10-->
 			<node label="">
 				<!--Old Char Color: 10-->
@@ -243,9 +243,9 @@
 			<!--Old Char Color: 12-->
 			<textCharAction />
 		</node>
-		<group name="E" label="E" colorInfoName="e">
+		<group name="E" label="E" colorInfoName="lowercase">
 			<!--Old Group Color: 10-->
-			<group name="Combining accents" colorInfoName="combining accents">
+			<group name="Combining accents" colorInfoName="accents">
 				<!--Old Group Color: 191-->
 				<node label="◌́">
 					<!--Old Char Color: 82-->

@@ -22,7 +22,7 @@
 					<!--Note: 가-;-->
 					<textCharAction unicode="44032" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -118,7 +118,7 @@
 					<!--Note: 개-;-->
 					<textCharAction unicode="44060" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -169,7 +169,7 @@
 					<!--Note: 갸-;-->
 					<textCharAction unicode="44088" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -205,7 +205,7 @@
 					<!--Note: 걔-;-->
 					<textCharAction unicode="44116" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆫ">
 						<!--Old Char Color: 109-->
@@ -226,7 +226,7 @@
 					<!--Note: 거-;-->
 					<textCharAction unicode="44144" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -307,7 +307,7 @@
 					<!--Note: 게-;-->
 					<textCharAction unicode="44172" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆫ">
 						<!--Old Char Color: 109-->
@@ -353,7 +353,7 @@
 					<!--Note: 겨-;-->
 					<textCharAction unicode="44200" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -419,7 +419,7 @@
 					<!--Note: 계-;-->
 					<textCharAction unicode="44228" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆫ">
 						<!--Old Char Color: 109-->
@@ -450,7 +450,7 @@
 					<!--Note: 고-;-->
 					<textCharAction unicode="44256" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -521,7 +521,7 @@
 					<!--Note: 과-;-->
 					<textCharAction unicode="44284" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -572,7 +572,7 @@
 					<!--Note: 괘-;-->
 					<textCharAction unicode="44312" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆫ">
 						<!--Old Char Color: 109-->
@@ -608,7 +608,7 @@
 					<!--Note: 괴-;-->
 					<textCharAction unicode="44340" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -654,7 +654,7 @@
 					<!--Note: 교-;-->
 					<textCharAction unicode="44368" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆫ">
 						<!--Old Char Color: 109-->
@@ -685,7 +685,7 @@
 					<!--Note: 구-;-->
 					<textCharAction unicode="44396" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -756,7 +756,7 @@
 					<!--Note: 궈-;-->
 					<textCharAction unicode="44424" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -792,7 +792,7 @@
 					<!--Note: 궤-;-->
 					<textCharAction unicode="44452" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆺ">
 						<!--Old Char Color: 109-->
@@ -808,7 +808,7 @@
 					<!--Note: 귀-;-->
 					<textCharAction unicode="44480" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -849,7 +849,7 @@
 					<!--Note: 규-;-->
 					<textCharAction unicode="44508" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆫ">
 						<!--Old Char Color: 109-->
@@ -870,7 +870,7 @@
 					<!--Note: 그-;-->
 					<textCharAction unicode="44536" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -926,7 +926,7 @@
 					<!--Note: 긔-;-->
 					<textCharAction unicode="44564" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 				</group>
 			</group>
@@ -937,7 +937,7 @@
 					<!--Note: 기-;-->
 					<textCharAction unicode="44592" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -1006,7 +1006,7 @@
 					<!--Note: 까-;-->
 					<textCharAction unicode="44620" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -1072,7 +1072,7 @@
 					<!--Note: 깨-;-->
 					<textCharAction unicode="44648" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -1123,7 +1123,7 @@
 					<!--Note: 꺄-;-->
 					<textCharAction unicode="44676" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -1144,7 +1144,7 @@
 					<!--Note: 꺼-;-->
 					<textCharAction unicode="44732" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -1200,7 +1200,7 @@
 					<!--Note: 께-;-->
 					<textCharAction unicode="44760" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -1236,7 +1236,7 @@
 					<!--Note: 껴-;-->
 					<textCharAction unicode="44788" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆫ">
 						<!--Old Char Color: 109-->
@@ -1272,7 +1272,7 @@
 					<!--Note: 꼐-;-->
 					<textCharAction unicode="44816" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 				</group>
 			</group>
@@ -1283,7 +1283,7 @@
 					<!--Note: 꼬-;-->
 					<textCharAction unicode="44844" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -1344,7 +1344,7 @@
 					<!--Note: 꽈-;-->
 					<textCharAction unicode="44872" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -1375,7 +1375,7 @@
 					<!--Note: 꽤-;-->
 					<textCharAction unicode="44900" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -1396,7 +1396,7 @@
 					<!--Note: 꾀-;-->
 					<textCharAction unicode="44928" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆫ">
 						<!--Old Char Color: 109-->
@@ -1432,7 +1432,7 @@
 					<!--Note: 꾜-;-->
 					<textCharAction unicode="44956" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 				</group>
 			</group>
@@ -1443,7 +1443,7 @@
 					<!--Note: 꾸-;-->
 					<textCharAction unicode="44984" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -1499,7 +1499,7 @@
 					<!--Note: 꿔-;-->
 					<textCharAction unicode="45012" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆯ">
 						<!--Old Char Color: 108-->
@@ -1525,7 +1525,7 @@
 					<!--Note: 꿰-;-->
 					<textCharAction unicode="45040" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -1566,7 +1566,7 @@
 					<!--Note: 뀌-;-->
 					<textCharAction unicode="45068" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆫ">
 						<!--Old Char Color: 109-->
@@ -1597,7 +1597,7 @@
 					<!--Note: 뀨-;-->
 					<textCharAction unicode="45096" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 				</group>
 			</group>
@@ -1608,7 +1608,7 @@
 					<!--Note: 끄-;-->
 					<textCharAction unicode="45124" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -1674,7 +1674,7 @@
 					<!--Note: 끼-;-->
 					<textCharAction unicode="45180" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -1723,7 +1723,7 @@
 					<!--Note: 나-;-->
 					<textCharAction unicode="45208" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -1814,7 +1814,7 @@
 					<!--Note: 내-;-->
 					<textCharAction unicode="45236" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -1865,7 +1865,7 @@
 					<!--Note: 냐-;-->
 					<textCharAction unicode="45264" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -1901,7 +1901,7 @@
 					<!--Note: 너-;-->
 					<textCharAction unicode="45320" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -1972,7 +1972,7 @@
 					<!--Note: 네-;-->
 					<textCharAction unicode="45348" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -2023,7 +2023,7 @@
 					<!--Note: 녀-;-->
 					<textCharAction unicode="45376" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -2074,7 +2074,7 @@
 					<!--Note: 녜-;-->
 					<textCharAction unicode="45404" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆫ">
 						<!--Old Char Color: 109-->
@@ -2090,7 +2090,7 @@
 					<!--Note: 노-;-->
 					<textCharAction unicode="45432" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -2151,7 +2151,7 @@
 					<!--Note: 놔-;-->
 					<textCharAction unicode="45460" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆫ">
 						<!--Old Char Color: 109-->
@@ -2177,7 +2177,7 @@
 					<!--Note: 뇌-;-->
 					<textCharAction unicode="45516" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆫ">
 						<!--Old Char Color: 109-->
@@ -2213,7 +2213,7 @@
 					<!--Note: 뇨-;-->
 					<textCharAction unicode="45544" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -2254,7 +2254,7 @@
 					<!--Note: 누-;-->
 					<textCharAction unicode="45572" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -2305,7 +2305,7 @@
 					<!--Note: 눠-;-->
 					<textCharAction unicode="45600" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆻ">
 						<!--Old Char Color: 105-->
@@ -2321,7 +2321,7 @@
 					<!--Note: 눼-;-->
 					<textCharAction unicode="45628" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 				</group>
 			</group>
@@ -2332,7 +2332,7 @@
 					<!--Note: 뉘-;-->
 					<textCharAction unicode="45656" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆫ">
 						<!--Old Char Color: 109-->
@@ -2363,7 +2363,7 @@
 					<!--Note: 뉴-;-->
 					<textCharAction unicode="45684" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -2399,7 +2399,7 @@
 					<!--Note: 느-;-->
 					<textCharAction unicode="45712" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -2465,7 +2465,7 @@
 					<!--Note: 늬-;-->
 					<textCharAction unicode="45740" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆫ">
 						<!--Old Char Color: 109-->
@@ -2486,7 +2486,7 @@
 					<!--Note: 니-;-->
 					<textCharAction unicode="45768" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -2545,7 +2545,7 @@
 					<!--Note: 다-;-->
 					<textCharAction unicode="45796" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -2641,7 +2641,7 @@
 					<!--Note: 대-;-->
 					<textCharAction unicode="45824" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -2692,7 +2692,7 @@
 					<!--Note: 댜-;-->
 					<textCharAction unicode="45852" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 				</group>
 			</group>
@@ -2703,7 +2703,7 @@
 					<!--Note: 더-;-->
 					<textCharAction unicode="45908" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -2779,7 +2779,7 @@
 					<!--Note: 데-;-->
 					<textCharAction unicode="45936" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -2830,7 +2830,7 @@
 					<!--Note: 뎌-;-->
 					<textCharAction unicode="45964" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆫ">
 						<!--Old Char Color: 109-->
@@ -2861,7 +2861,7 @@
 					<!--Note: 뎨-;-->
 					<textCharAction unicode="45992" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆫ">
 						<!--Old Char Color: 109-->
@@ -2877,7 +2877,7 @@
 					<!--Note: 도-;-->
 					<textCharAction unicode="46020" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -2948,7 +2948,7 @@
 					<!--Note: 돠-;-->
 					<textCharAction unicode="46048" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆫ">
 						<!--Old Char Color: 109-->
@@ -2969,7 +2969,7 @@
 					<!--Note: 돼-;-->
 					<textCharAction unicode="46076" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆻ">
 						<!--Old Char Color: 105-->
@@ -2985,7 +2985,7 @@
 					<!--Note: 되-;-->
 					<textCharAction unicode="46104" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆫ">
 						<!--Old Char Color: 109-->
@@ -3021,7 +3021,7 @@
 					<!--Note: 됴-;-->
 					<textCharAction unicode="46132" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 				</group>
 			</group>
@@ -3032,7 +3032,7 @@
 					<!--Note: 두-;-->
 					<textCharAction unicode="46160" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -3078,7 +3078,7 @@
 					<!--Note: 둬-;-->
 					<textCharAction unicode="46188" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆻ">
 						<!--Old Char Color: 105-->
@@ -3094,7 +3094,7 @@
 					<!--Note: 뒈-;-->
 					<textCharAction unicode="46216" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆼ">
 						<!--Old Char Color: 106-->
@@ -3110,7 +3110,7 @@
 					<!--Note: 뒤-;-->
 					<textCharAction unicode="46244" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆫ">
 						<!--Old Char Color: 109-->
@@ -3146,7 +3146,7 @@
 					<!--Note: 듀-;-->
 					<textCharAction unicode="46272" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆫ">
 						<!--Old Char Color: 109-->
@@ -3177,7 +3177,7 @@
 					<!--Note: 드-;-->
 					<textCharAction unicode="46300" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -3233,7 +3233,7 @@
 					<!--Note: 듸-;-->
 					<textCharAction unicode="46328" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 				</group>
 			</group>
@@ -3244,7 +3244,7 @@
 					<!--Note: 디-;-->
 					<textCharAction unicode="46356" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -3308,7 +3308,7 @@
 					<!--Note: 따-;-->
 					<textCharAction unicode="46384" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -3364,7 +3364,7 @@
 					<!--Note: 때-;-->
 					<textCharAction unicode="46412" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -3415,7 +3415,7 @@
 					<!--Note: 떠-;-->
 					<textCharAction unicode="46496" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -3481,7 +3481,7 @@
 					<!--Note: 떼-;-->
 					<textCharAction unicode="46524" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -3532,7 +3532,7 @@
 					<!--Note: 뗘-;-->
 					<textCharAction unicode="46552" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆻ">
 						<!--Old Char Color: 105-->
@@ -3548,7 +3548,7 @@
 					<!--Note: 또-;-->
 					<textCharAction unicode="46608" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -3579,7 +3579,7 @@
 					<!--Note: 똬-;-->
 					<textCharAction unicode="46636" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆯ">
 						<!--Old Char Color: 108-->
@@ -3595,7 +3595,7 @@
 					<!--Note: 뙈-;-->
 					<textCharAction unicode="46664" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 				</group>
 			</group>
@@ -3606,7 +3606,7 @@
 					<!--Note: 뙤-;-->
 					<textCharAction unicode="46692" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆫ">
 						<!--Old Char Color: 109-->
@@ -3622,7 +3622,7 @@
 					<!--Note: 뚜-;-->
 					<textCharAction unicode="46748" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -3663,7 +3663,7 @@
 					<!--Note: 뛔-;-->
 					<textCharAction unicode="46804" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 				</group>
 			</group>
@@ -3674,7 +3674,7 @@
 					<!--Note: 뛰-;-->
 					<textCharAction unicode="46832" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆫ">
 						<!--Old Char Color: 109-->
@@ -3710,7 +3710,7 @@
 					<!--Note: 뜨-;-->
 					<textCharAction unicode="46888" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -3756,7 +3756,7 @@
 					<!--Note: 띄-;-->
 					<textCharAction unicode="46916" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆫ">
 						<!--Old Char Color: 109-->
@@ -3787,7 +3787,7 @@
 					<!--Note: 띠-;-->
 					<textCharAction unicode="46944" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆫ">
 						<!--Old Char Color: 109-->
@@ -3831,7 +3831,7 @@
 					<!--Note: 라-;-->
 					<textCharAction unicode="46972" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -3897,7 +3897,7 @@
 					<!--Note: 래-;-->
 					<textCharAction unicode="47000" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -3948,7 +3948,7 @@
 					<!--Note: 랴-;-->
 					<textCharAction unicode="47028" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -3979,7 +3979,7 @@
 					<!--Note: 러-;-->
 					<textCharAction unicode="47084" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -4035,7 +4035,7 @@
 					<!--Note: 레-;-->
 					<textCharAction unicode="47112" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -4081,7 +4081,7 @@
 					<!--Note: 려-;-->
 					<textCharAction unicode="47140" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -4132,7 +4132,7 @@
 					<!--Note: 례-;-->
 					<textCharAction unicode="47168" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆫ">
 						<!--Old Char Color: 109-->
@@ -4158,7 +4158,7 @@
 					<!--Note: 로-;-->
 					<textCharAction unicode="47196" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -4204,7 +4204,7 @@
 					<!--Note: 롸-;-->
 					<textCharAction unicode="47224" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆫ">
 						<!--Old Char Color: 109-->
@@ -4233,7 +4233,7 @@
 					<!--Note: 뢰-;-->
 					<textCharAction unicode="47280" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆫ">
 						<!--Old Char Color: 109-->
@@ -4274,7 +4274,7 @@
 					<!--Note: 료-;-->
 					<textCharAction unicode="47308" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆫ">
 						<!--Old Char Color: 109-->
@@ -4310,7 +4310,7 @@
 					<!--Note: 루-;-->
 					<textCharAction unicode="47336" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -4356,7 +4356,7 @@
 					<!--Note: 뤄-;-->
 					<textCharAction unicode="47364" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆻ">
 						<!--Old Char Color: 105-->
@@ -4372,7 +4372,7 @@
 					<!--Note: 뤠-;-->
 					<textCharAction unicode="47392" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 				</group>
 			</group>
@@ -4383,7 +4383,7 @@
 					<!--Note: 뤼-;-->
 					<textCharAction unicode="47420" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -4424,7 +4424,7 @@
 					<!--Note: 류-;-->
 					<textCharAction unicode="47448" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -4470,7 +4470,7 @@
 					<!--Note: 르-;-->
 					<textCharAction unicode="47476" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -4531,7 +4531,7 @@
 					<!--Note: 리-;-->
 					<textCharAction unicode="47532" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -4580,7 +4580,7 @@
 					<!--Note: 마-;-->
 					<textCharAction unicode="47560" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -4661,7 +4661,7 @@
 					<!--Note: 매-;-->
 					<textCharAction unicode="47588" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -4717,7 +4717,7 @@
 					<!--Note: 먀-;-->
 					<textCharAction unicode="47616" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -4743,7 +4743,7 @@
 					<!--Note: 머-;-->
 					<textCharAction unicode="47672" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -4804,7 +4804,7 @@
 					<!--Note: 메-;-->
 					<textCharAction unicode="47700" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -4855,7 +4855,7 @@
 					<!--Note: 며-;-->
 					<textCharAction unicode="47728" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -4901,7 +4901,7 @@
 					<!--Note: 몌-;-->
 					<textCharAction unicode="47756" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 				</group>
 			</group>
@@ -4912,7 +4912,7 @@
 					<!--Note: 모-;-->
 					<textCharAction unicode="47784" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -4968,7 +4968,7 @@
 					<!--Note: 뫄-;-->
 					<textCharAction unicode="47812" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆫ">
 						<!--Old Char Color: 109-->
@@ -4994,7 +4994,7 @@
 					<!--Note: 뫼-;-->
 					<textCharAction unicode="47868" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆫ">
 						<!--Old Char Color: 109-->
@@ -5030,7 +5030,7 @@
 					<!--Note: 묘-;-->
 					<textCharAction unicode="47896" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆫ">
 						<!--Old Char Color: 109-->
@@ -5061,7 +5061,7 @@
 					<!--Note: 무-;-->
 					<textCharAction unicode="47924" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -5137,7 +5137,7 @@
 					<!--Note: 뭐-;-->
 					<textCharAction unicode="47952" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆫ">
 						<!--Old Char Color: 109-->
@@ -5168,7 +5168,7 @@
 					<!--Note: 뭬-;-->
 					<textCharAction unicode="47980" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 				</group>
 			</group>
@@ -5179,7 +5179,7 @@
 					<!--Note: 뮈-;-->
 					<textCharAction unicode="48008" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆫ">
 						<!--Old Char Color: 109-->
@@ -5200,7 +5200,7 @@
 					<!--Note: 뮤-;-->
 					<textCharAction unicode="48036" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆫ">
 						<!--Old Char Color: 109-->
@@ -5231,7 +5231,7 @@
 					<!--Note: 므-;-->
 					<textCharAction unicode="48064" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆫ">
 						<!--Old Char Color: 109-->
@@ -5262,7 +5262,7 @@
 					<!--Note: 미-;-->
 					<textCharAction unicode="48120" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -5336,7 +5336,7 @@
 					<!--Note: 바-;-->
 					<textCharAction unicode="48148" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -5417,7 +5417,7 @@
 					<!--Note: 배-;-->
 					<textCharAction unicode="48176" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -5473,7 +5473,7 @@
 					<!--Note: 뱌-;-->
 					<textCharAction unicode="48204" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -5499,7 +5499,7 @@
 					<!--Note: 버-;-->
 					<textCharAction unicode="48260" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -5560,7 +5560,7 @@
 					<!--Note: 베-;-->
 					<textCharAction unicode="48288" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -5616,7 +5616,7 @@
 					<!--Note: 벼-;-->
 					<textCharAction unicode="48316" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -5667,7 +5667,7 @@
 					<!--Note: 볘-;-->
 					<textCharAction unicode="48344" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆫ">
 						<!--Old Char Color: 109-->
@@ -5683,7 +5683,7 @@
 					<!--Note: 보-;-->
 					<textCharAction unicode="48372" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -5734,7 +5734,7 @@
 					<!--Note: 봐-;-->
 					<textCharAction unicode="48400" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆫ">
 						<!--Old Char Color: 109-->
@@ -5755,7 +5755,7 @@
 					<!--Note: 봬-;-->
 					<textCharAction unicode="48428" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆻ">
 						<!--Old Char Color: 105-->
@@ -5771,7 +5771,7 @@
 					<!--Note: 뵈-;-->
 					<textCharAction unicode="48456" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -5807,7 +5807,7 @@
 					<!--Note: 뵤-;-->
 					<textCharAction unicode="48484" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆫ">
 						<!--Old Char Color: 109-->
@@ -5823,7 +5823,7 @@
 					<!--Note: 부-;-->
 					<textCharAction unicode="48512" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -5894,7 +5894,7 @@
 					<!--Note: 붜-;-->
 					<textCharAction unicode="48540" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆯ">
 						<!--Old Char Color: 108-->
@@ -5915,7 +5915,7 @@
 					<!--Note: 붸-;-->
 					<textCharAction unicode="48568" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 				</group>
 			</group>
@@ -5926,7 +5926,7 @@
 					<!--Note: 뷔-;-->
 					<textCharAction unicode="48596" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -5957,7 +5957,7 @@
 					<!--Note: 뷰-;-->
 					<textCharAction unicode="48624" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆫ">
 						<!--Old Char Color: 109-->
@@ -5993,7 +5993,7 @@
 					<!--Note: 브-;-->
 					<textCharAction unicode="48652" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -6034,7 +6034,7 @@
 					<!--Note: 비-;-->
 					<textCharAction unicode="48708" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -6098,7 +6098,7 @@
 					<!--Note: 빠-;-->
 					<textCharAction unicode="48736" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -6159,7 +6159,7 @@
 					<!--Note: 빼-;-->
 					<textCharAction unicode="48764" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -6210,7 +6210,7 @@
 					<!--Note: 뺘-;-->
 					<textCharAction unicode="48792" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -6231,7 +6231,7 @@
 					<!--Note: 뻐-;-->
 					<textCharAction unicode="48848" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -6282,7 +6282,7 @@
 					<!--Note: 뻬-;-->
 					<textCharAction unicode="48876" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆼ">
 						<!--Old Char Color: 106-->
@@ -6298,7 +6298,7 @@
 					<!--Note: 뼈-;-->
 					<textCharAction unicode="48904" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -6339,7 +6339,7 @@
 					<!--Note: 뽀-;-->
 					<textCharAction unicode="48960" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -6380,7 +6380,7 @@
 					<!--Note: 뾔-;-->
 					<textCharAction unicode="49044" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 				</group>
 			</group>
@@ -6391,7 +6391,7 @@
 					<!--Note: 뾰-;-->
 					<textCharAction unicode="49072" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆼ">
 						<!--Old Char Color: 106-->
@@ -6407,7 +6407,7 @@
 					<!--Note: 뿌-;-->
 					<textCharAction unicode="49100" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -6448,7 +6448,7 @@
 					<!--Note: 쀼-;-->
 					<textCharAction unicode="49212" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆼ">
 						<!--Old Char Color: 106-->
@@ -6464,7 +6464,7 @@
 					<!--Note: 쁘-;-->
 					<textCharAction unicode="49240" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆫ">
 						<!--Old Char Color: 109-->
@@ -6495,7 +6495,7 @@
 					<!--Note: 삐-;-->
 					<textCharAction unicode="49296" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -6544,7 +6544,7 @@
 					<!--Note: 사-;-->
 					<textCharAction unicode="49324" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -6620,7 +6620,7 @@
 					<!--Note: 새-;-->
 					<textCharAction unicode="49352" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -6671,7 +6671,7 @@
 					<!--Note: 샤-;-->
 					<textCharAction unicode="49380" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -6717,7 +6717,7 @@
 					<!--Note: 섀-;-->
 					<textCharAction unicode="49408" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆫ">
 						<!--Old Char Color: 109-->
@@ -6748,7 +6748,7 @@
 					<!--Note: 서-;-->
 					<textCharAction unicode="49436" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -6829,7 +6829,7 @@
 					<!--Note: 세-;-->
 					<textCharAction unicode="49464" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -6880,7 +6880,7 @@
 					<!--Note: 셔-;-->
 					<textCharAction unicode="49492" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -6931,7 +6931,7 @@
 					<!--Note: 셰-;-->
 					<textCharAction unicode="49520" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆫ">
 						<!--Old Char Color: 109-->
@@ -6957,7 +6957,7 @@
 					<!--Note: 소-;-->
 					<textCharAction unicode="49548" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -7018,7 +7018,7 @@
 					<!--Note: 솨-;-->
 					<textCharAction unicode="49576" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -7049,7 +7049,7 @@
 					<!--Note: 쇄-;-->
 					<textCharAction unicode="49604" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆫ">
 						<!--Old Char Color: 109-->
@@ -7085,7 +7085,7 @@
 					<!--Note: 쇠-;-->
 					<textCharAction unicode="49632" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆫ">
 						<!--Old Char Color: 109-->
@@ -7121,7 +7121,7 @@
 					<!--Note: 쇼-;-->
 					<textCharAction unicode="49660" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -7167,7 +7167,7 @@
 					<!--Note: 수-;-->
 					<textCharAction unicode="49688" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -7233,7 +7233,7 @@
 					<!--Note: 숴-;-->
 					<textCharAction unicode="49716" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆻ">
 						<!--Old Char Color: 105-->
@@ -7249,7 +7249,7 @@
 					<!--Note: 쉐-;-->
 					<textCharAction unicode="49744" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -7285,7 +7285,7 @@
 					<!--Note: 쉬-;-->
 					<textCharAction unicode="49772" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -7331,7 +7331,7 @@
 					<!--Note: 슈-;-->
 					<textCharAction unicode="49800" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -7367,7 +7367,7 @@
 					<!--Note: 스-;-->
 					<textCharAction unicode="49828" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -7418,7 +7418,7 @@
 					<!--Note: 시-;-->
 					<textCharAction unicode="49884" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -7482,7 +7482,7 @@
 					<!--Note: 싸-;-->
 					<textCharAction unicode="49912" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -7538,7 +7538,7 @@
 					<!--Note: 쌔-;-->
 					<textCharAction unicode="49940" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -7592,7 +7592,7 @@
 					<!--Note: 써-;-->
 					<textCharAction unicode="50024" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -7643,7 +7643,7 @@
 					<!--Note: 쎄-;-->
 					<textCharAction unicode="50052" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆫ">
 						<!--Old Char Color: 109-->
@@ -7672,7 +7672,7 @@
 					<!--Note: 쏘-;-->
 					<textCharAction unicode="50136" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -7723,7 +7723,7 @@
 					<!--Note: 쏴-;-->
 					<textCharAction unicode="50164" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -7749,7 +7749,7 @@
 					<!--Note: 쐐-;-->
 					<textCharAction unicode="50192" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆻ">
 						<!--Old Char Color: 105-->
@@ -7765,7 +7765,7 @@
 					<!--Note: 쐬-;-->
 					<textCharAction unicode="50220" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆫ">
 						<!--Old Char Color: 109-->
@@ -7796,7 +7796,7 @@
 					<!--Note: 쑈-;-->
 					<textCharAction unicode="50248" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 				</group>
 			</group>
@@ -7807,7 +7807,7 @@
 					<!--Note: 쑤-;-->
 					<textCharAction unicode="50276" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -7848,7 +7848,7 @@
 					<!--Note: 쒀-;-->
 					<textCharAction unicode="50304" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆻ">
 						<!--Old Char Color: 105-->
@@ -7864,7 +7864,7 @@
 					<!--Note: 쒜-;-->
 					<textCharAction unicode="50332" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 				</group>
 			</group>
@@ -7875,7 +7875,7 @@
 					<!--Note: 쒸-;-->
 					<textCharAction unicode="50360" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆫ">
 						<!--Old Char Color: 109-->
@@ -7899,7 +7899,7 @@
 					<!--Note: 쓰-;-->
 					<textCharAction unicode="50416" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -7945,7 +7945,7 @@
 					<!--Note: 씌-;-->
 					<textCharAction unicode="50444" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆫ">
 						<!--Old Char Color: 109-->
@@ -7971,7 +7971,7 @@
 					<!--Note: 씨-;-->
 					<textCharAction unicode="50472" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -8020,7 +8020,7 @@
 					<!--Note: 아-;-->
 					<textCharAction unicode="50500" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -8106,7 +8106,7 @@
 					<!--Note: 애-;-->
 					<textCharAction unicode="50528" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -8157,7 +8157,7 @@
 					<!--Note: 야-;-->
 					<textCharAction unicode="50556" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -8218,7 +8218,7 @@
 					<!--Note: 얘-;-->
 					<textCharAction unicode="50584" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆫ">
 						<!--Old Char Color: 109-->
@@ -8244,7 +8244,7 @@
 					<!--Note: 어-;-->
 					<textCharAction unicode="50612" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -8335,7 +8335,7 @@
 					<!--Note: 에-;-->
 					<textCharAction unicode="50640" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -8381,7 +8381,7 @@
 					<!--Note: 여-;-->
 					<textCharAction unicode="50668" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -8467,7 +8467,7 @@
 					<!--Note: 예-;-->
 					<textCharAction unicode="50696" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆫ">
 						<!--Old Char Color: 109-->
@@ -8508,7 +8508,7 @@
 					<!--Note: 오-;-->
 					<textCharAction unicode="50724" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -8579,7 +8579,7 @@
 					<!--Note: 와-;-->
 					<textCharAction unicode="50752" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -8630,7 +8630,7 @@
 					<!--Note: 왜-;-->
 					<textCharAction unicode="50780" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -8666,7 +8666,7 @@
 					<!--Note: 외-;-->
 					<textCharAction unicode="50808" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -8712,7 +8712,7 @@
 					<!--Note: 요-;-->
 					<textCharAction unicode="50836" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -8758,7 +8758,7 @@
 					<!--Note: 우-;-->
 					<textCharAction unicode="50864" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -8814,7 +8814,7 @@
 					<!--Note: 워-;-->
 					<textCharAction unicode="50892" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -8860,7 +8860,7 @@
 					<!--Note: 웨-;-->
 					<textCharAction unicode="50920" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -8901,7 +8901,7 @@
 					<!--Note: 위-;-->
 					<textCharAction unicode="50948" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -8947,7 +8947,7 @@
 					<!--Note: 유-;-->
 					<textCharAction unicode="50976" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -8998,7 +8998,7 @@
 					<!--Note: 으-;-->
 					<textCharAction unicode="51004" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -9079,7 +9079,7 @@
 					<!--Note: 의-;-->
 					<textCharAction unicode="51032" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆫ">
 						<!--Old Char Color: 109-->
@@ -9110,7 +9110,7 @@
 					<!--Note: 이-;-->
 					<textCharAction unicode="51060" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -9189,7 +9189,7 @@
 					<!--Note: 자-;-->
 					<textCharAction unicode="51088" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -9260,7 +9260,7 @@
 					<!--Note: 재-;-->
 					<textCharAction unicode="51116" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -9311,7 +9311,7 @@
 					<!--Note: 쟈-;-->
 					<textCharAction unicode="51144" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -9352,7 +9352,7 @@
 					<!--Note: 쟤-;-->
 					<textCharAction unicode="51172" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆫ">
 						<!--Old Char Color: 109-->
@@ -9373,7 +9373,7 @@
 					<!--Note: 저-;-->
 					<textCharAction unicode="51200" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -9429,7 +9429,7 @@
 					<!--Note: 제-;-->
 					<textCharAction unicode="51228" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -9475,7 +9475,7 @@
 					<!--Note: 져-;-->
 					<textCharAction unicode="51256" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆫ">
 						<!--Old Char Color: 109-->
@@ -9516,7 +9516,7 @@
 					<!--Note: 졔-;-->
 					<textCharAction unicode="51284" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 				</group>
 			</group>
@@ -9527,7 +9527,7 @@
 					<!--Note: 조-;-->
 					<textCharAction unicode="51312" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -9593,7 +9593,7 @@
 					<!--Note: 좌-;-->
 					<textCharAction unicode="51340" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -9629,7 +9629,7 @@
 					<!--Note: 좨-;-->
 					<textCharAction unicode="51368" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆻ">
 						<!--Old Char Color: 105-->
@@ -9650,7 +9650,7 @@
 					<!--Note: 죄-;-->
 					<textCharAction unicode="51396" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆫ">
 						<!--Old Char Color: 109-->
@@ -9691,7 +9691,7 @@
 					<!--Note: 죠-;-->
 					<textCharAction unicode="51424" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -9717,7 +9717,7 @@
 					<!--Note: 주-;-->
 					<textCharAction unicode="51452" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -9773,7 +9773,7 @@
 					<!--Note: 줘-;-->
 					<textCharAction unicode="51480" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆻ">
 						<!--Old Char Color: 105-->
@@ -9789,7 +9789,7 @@
 					<!--Note: 줴-;-->
 					<textCharAction unicode="51508" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 				</group>
 			</group>
@@ -9800,7 +9800,7 @@
 					<!--Note: 쥐-;-->
 					<textCharAction unicode="51536" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -9841,7 +9841,7 @@
 					<!--Note: 쥬-;-->
 					<textCharAction unicode="51564" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆫ">
 						<!--Old Char Color: 109-->
@@ -9867,7 +9867,7 @@
 					<!--Note: 즈-;-->
 					<textCharAction unicode="51592" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -9913,7 +9913,7 @@
 					<!--Note: 지-;-->
 					<textCharAction unicode="51648" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -9987,7 +9987,7 @@
 					<!--Note: 짜-;-->
 					<textCharAction unicode="51676" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -10048,7 +10048,7 @@
 					<!--Note: 째-;-->
 					<textCharAction unicode="51704" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -10099,7 +10099,7 @@
 					<!--Note: 쨔-;-->
 					<textCharAction unicode="51732" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆫ">
 						<!--Old Char Color: 109-->
@@ -10120,7 +10120,7 @@
 					<!--Note: 쩌-;-->
 					<textCharAction unicode="51788" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -10171,7 +10171,7 @@
 					<!--Note: 쩨-;-->
 					<textCharAction unicode="51816" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆼ">
 						<!--Old Char Color: 106-->
@@ -10187,7 +10187,7 @@
 					<!--Note: 쪄-;-->
 					<textCharAction unicode="51844" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆻ">
 						<!--Old Char Color: 105-->
@@ -10203,7 +10203,7 @@
 					<!--Note: 쪼-;-->
 					<textCharAction unicode="51900" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -10254,7 +10254,7 @@
 					<!--Note: 쫘-;-->
 					<textCharAction unicode="51928" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -10280,7 +10280,7 @@
 					<!--Note: 쫴-;-->
 					<textCharAction unicode="51956" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆻ">
 						<!--Old Char Color: 105-->
@@ -10296,7 +10296,7 @@
 					<!--Note: 쬐-;-->
 					<textCharAction unicode="51984" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆫ">
 						<!--Old Char Color: 109-->
@@ -10335,7 +10335,7 @@
 					<!--Note: 쭈-;-->
 					<textCharAction unicode="52040" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -10376,7 +10376,7 @@
 					<!--Note: 쭤-;-->
 					<textCharAction unicode="52068" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆻ">
 						<!--Old Char Color: 105-->
@@ -10397,7 +10397,7 @@
 					<!--Note: 쮜-;-->
 					<textCharAction unicode="52124" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 				</group>
 			</group>
@@ -10408,7 +10408,7 @@
 					<!--Note: 쮸-;-->
 					<textCharAction unicode="52152" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 				</group>
 			</group>
@@ -10419,7 +10419,7 @@
 					<!--Note: 쯔-;-->
 					<textCharAction unicode="52180" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆷ">
 						<!--Old Char Color: 106-->
@@ -10445,7 +10445,7 @@
 					<!--Note: 찌-;-->
 					<textCharAction unicode="52236" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -10499,7 +10499,7 @@
 					<!--Note: 차-;-->
 					<textCharAction unicode="52264" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -10560,7 +10560,7 @@
 					<!--Note: 채-;-->
 					<textCharAction unicode="52292" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -10611,7 +10611,7 @@
 					<!--Note: 챠-;-->
 					<textCharAction unicode="52320" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆫ">
 						<!--Old Char Color: 109-->
@@ -10647,7 +10647,7 @@
 					<!--Note: 처-;-->
 					<textCharAction unicode="52376" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -10698,7 +10698,7 @@
 					<!--Note: 체-;-->
 					<textCharAction unicode="52404" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -10744,7 +10744,7 @@
 					<!--Note: 쳐-;-->
 					<textCharAction unicode="52432" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆫ">
 						<!--Old Char Color: 109-->
@@ -10765,7 +10765,7 @@
 					<!--Note: 쳬-;-->
 					<textCharAction unicode="52460" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆫ">
 						<!--Old Char Color: 109-->
@@ -10786,7 +10786,7 @@
 					<!--Note: 초-;-->
 					<textCharAction unicode="52488" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -10832,7 +10832,7 @@
 					<!--Note: 촤-;-->
 					<textCharAction unicode="52516" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆫ">
 						<!--Old Char Color: 109-->
@@ -10858,7 +10858,7 @@
 					<!--Note: 최-;-->
 					<textCharAction unicode="52572" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆫ">
 						<!--Old Char Color: 109-->
@@ -10899,7 +10899,7 @@
 					<!--Note: 쵸-;-->
 					<textCharAction unicode="52600" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆷ">
 						<!--Old Char Color: 106-->
@@ -10915,7 +10915,7 @@
 					<!--Note: 추-;-->
 					<textCharAction unicode="52628" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -10961,7 +10961,7 @@
 					<!--Note: 춰-;-->
 					<textCharAction unicode="52656" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆻ">
 						<!--Old Char Color: 105-->
@@ -10977,7 +10977,7 @@
 					<!--Note: 췌-;-->
 					<textCharAction unicode="52684" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆫ">
 						<!--Old Char Color: 109-->
@@ -10993,7 +10993,7 @@
 					<!--Note: 취-;-->
 					<textCharAction unicode="52712" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆫ">
 						<!--Old Char Color: 109-->
@@ -11034,7 +11034,7 @@
 					<!--Note: 츄-;-->
 					<textCharAction unicode="52740" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆫ">
 						<!--Old Char Color: 109-->
@@ -11065,7 +11065,7 @@
 					<!--Note: 츠-;-->
 					<textCharAction unicode="52768" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -11111,7 +11111,7 @@
 					<!--Note: 치-;-->
 					<textCharAction unicode="52824" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -11170,7 +11170,7 @@
 					<!--Note: 카-;-->
 					<textCharAction unicode="52852" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -11216,7 +11216,7 @@
 					<!--Note: 캐-;-->
 					<textCharAction unicode="52880" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -11267,7 +11267,7 @@
 					<!--Note: 캬-;-->
 					<textCharAction unicode="52908" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -11288,7 +11288,7 @@
 					<!--Note: 커-;-->
 					<textCharAction unicode="52964" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -11344,7 +11344,7 @@
 					<!--Note: 케-;-->
 					<textCharAction unicode="52992" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -11390,7 +11390,7 @@
 					<!--Note: 켜-;-->
 					<textCharAction unicode="53020" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆫ">
 						<!--Old Char Color: 109-->
@@ -11436,7 +11436,7 @@
 					<!--Note: 켸-;-->
 					<textCharAction unicode="53048" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 				</group>
 			</group>
@@ -11447,7 +11447,7 @@
 					<!--Note: 코-;-->
 					<textCharAction unicode="53076" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -11493,7 +11493,7 @@
 					<!--Note: 콰-;-->
 					<textCharAction unicode="53104" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -11529,7 +11529,7 @@
 					<!--Note: 쾌-;-->
 					<textCharAction unicode="53132" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆼ">
 						<!--Old Char Color: 106-->
@@ -11545,7 +11545,7 @@
 					<!--Note: 쾨-;-->
 					<textCharAction unicode="53160" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆯ">
 						<!--Old Char Color: 108-->
@@ -11561,7 +11561,7 @@
 					<!--Note: 쿄-;-->
 					<textCharAction unicode="53188" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 				</group>
 			</group>
@@ -11572,7 +11572,7 @@
 					<!--Note: 쿠-;-->
 					<textCharAction unicode="53216" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -11618,7 +11618,7 @@
 					<!--Note: 쿼-;-->
 					<textCharAction unicode="53244" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆫ">
 						<!--Old Char Color: 109-->
@@ -11644,7 +11644,7 @@
 					<!--Note: 퀘-;-->
 					<textCharAction unicode="53272" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆼ">
 						<!--Old Char Color: 106-->
@@ -11660,7 +11660,7 @@
 					<!--Note: 퀴-;-->
 					<textCharAction unicode="53300" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -11706,7 +11706,7 @@
 					<!--Note: 큐-;-->
 					<textCharAction unicode="53328" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆫ">
 						<!--Old Char Color: 109-->
@@ -11732,7 +11732,7 @@
 					<!--Note: 크-;-->
 					<textCharAction unicode="53356" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -11773,7 +11773,7 @@
 					<!--Note: 키-;-->
 					<textCharAction unicode="53412" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -11822,7 +11822,7 @@
 					<!--Note: 타-;-->
 					<textCharAction unicode="53440" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -11878,7 +11878,7 @@
 					<!--Note: 태-;-->
 					<textCharAction unicode="53468" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -11929,7 +11929,7 @@
 					<!--Note: 탸-;-->
 					<textCharAction unicode="53496" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆼ">
 						<!--Old Char Color: 106-->
@@ -11945,7 +11945,7 @@
 					<!--Note: 터-;-->
 					<textCharAction unicode="53552" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -12001,7 +12001,7 @@
 					<!--Note: 테-;-->
 					<textCharAction unicode="53580" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -12047,7 +12047,7 @@
 					<!--Note: 텨-;-->
 					<textCharAction unicode="53608" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆫ">
 						<!--Old Char Color: 109-->
@@ -12068,7 +12068,7 @@
 					<!--Note: 톄-;-->
 					<textCharAction unicode="53636" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆫ">
 						<!--Old Char Color: 109-->
@@ -12084,7 +12084,7 @@
 					<!--Note: 토-;-->
 					<textCharAction unicode="53664" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -12135,7 +12135,7 @@
 					<!--Note: 톼-;-->
 					<textCharAction unicode="53692" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆫ">
 						<!--Old Char Color: 109-->
@@ -12151,7 +12151,7 @@
 					<!--Note: 퇘-;-->
 					<textCharAction unicode="53720" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 				</group>
 			</group>
@@ -12162,7 +12162,7 @@
 					<!--Note: 퇴-;-->
 					<textCharAction unicode="53748" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆫ">
 						<!--Old Char Color: 109-->
@@ -12188,7 +12188,7 @@
 					<!--Note: 툐-;-->
 					<textCharAction unicode="53776" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 				</group>
 			</group>
@@ -12199,7 +12199,7 @@
 					<!--Note: 투-;-->
 					<textCharAction unicode="53804" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -12245,7 +12245,7 @@
 					<!--Note: 퉈-;-->
 					<textCharAction unicode="53832" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆻ">
 						<!--Old Char Color: 105-->
@@ -12261,7 +12261,7 @@
 					<!--Note: 퉤-;-->
 					<textCharAction unicode="53860" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 				</group>
 			</group>
@@ -12272,7 +12272,7 @@
 					<!--Note: 튀-;-->
 					<textCharAction unicode="53888" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -12313,7 +12313,7 @@
 					<!--Note: 튜-;-->
 					<textCharAction unicode="53916" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆫ">
 						<!--Old Char Color: 109-->
@@ -12344,7 +12344,7 @@
 					<!--Note: 트-;-->
 					<textCharAction unicode="53944" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -12395,7 +12395,7 @@
 					<!--Note: 틔-;-->
 					<textCharAction unicode="53972" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆫ">
 						<!--Old Char Color: 109-->
@@ -12426,7 +12426,7 @@
 					<!--Note: 티-;-->
 					<textCharAction unicode="54000" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -12475,7 +12475,7 @@
 					<!--Note: 파-;-->
 					<textCharAction unicode="54028" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -12541,7 +12541,7 @@
 					<!--Note: 패-;-->
 					<textCharAction unicode="54056" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -12592,7 +12592,7 @@
 					<!--Note: 퍄-;-->
 					<textCharAction unicode="54084" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -12608,7 +12608,7 @@
 					<!--Note: 퍼-;-->
 					<textCharAction unicode="54140" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -12659,7 +12659,7 @@
 					<!--Note: 페-;-->
 					<textCharAction unicode="54168" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -12705,7 +12705,7 @@
 					<!--Note: 펴-;-->
 					<textCharAction unicode="54196" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆫ">
 						<!--Old Char Color: 109-->
@@ -12746,7 +12746,7 @@
 					<!--Note: 폐-;-->
 					<textCharAction unicode="54224" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆯ">
 						<!--Old Char Color: 108-->
@@ -12772,7 +12772,7 @@
 					<!--Note: 포-;-->
 					<textCharAction unicode="54252" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -12818,7 +12818,7 @@
 					<!--Note: 퐈-;-->
 					<textCharAction unicode="54280" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆼ">
 						<!--Old Char Color: 106-->
@@ -12834,7 +12834,7 @@
 					<!--Note: 푀-;-->
 					<textCharAction unicode="54336" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆫ">
 						<!--Old Char Color: 109-->
@@ -12850,7 +12850,7 @@
 					<!--Note: 표-;-->
 					<textCharAction unicode="54364" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆫ">
 						<!--Old Char Color: 109-->
@@ -12881,7 +12881,7 @@
 					<!--Note: 푸-;-->
 					<textCharAction unicode="54392" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -12937,7 +12937,7 @@
 					<!--Note: 풔-;-->
 					<textCharAction unicode="54420" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆼ">
 						<!--Old Char Color: 106-->
@@ -12953,7 +12953,7 @@
 					<!--Note: 퓌-;-->
 					<textCharAction unicode="54476" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆫ">
 						<!--Old Char Color: 109-->
@@ -12984,7 +12984,7 @@
 					<!--Note: 퓨-;-->
 					<textCharAction unicode="54504" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆫ">
 						<!--Old Char Color: 109-->
@@ -13020,7 +13020,7 @@
 					<!--Note: 프-;-->
 					<textCharAction unicode="54532" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆫ">
 						<!--Old Char Color: 109-->
@@ -13056,7 +13056,7 @@
 					<!--Note: 피-;-->
 					<textCharAction unicode="54588" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -13105,7 +13105,7 @@
 					<!--Note: 하-;-->
 					<textCharAction unicode="54616" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -13156,7 +13156,7 @@
 					<!--Note: 해-;-->
 					<textCharAction unicode="54644" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -13207,7 +13207,7 @@
 					<!--Note: 햐-;-->
 					<textCharAction unicode="54672" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆼ">
 						<!--Old Char Color: 106-->
@@ -13223,7 +13223,7 @@
 					<!--Note: 허-;-->
 					<textCharAction unicode="54728" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -13274,7 +13274,7 @@
 					<!--Note: 헤-;-->
 					<textCharAction unicode="54756" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -13320,7 +13320,7 @@
 					<!--Note: 혀-;-->
 					<textCharAction unicode="54784" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -13371,7 +13371,7 @@
 					<!--Note: 혜-;-->
 					<textCharAction unicode="54812" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆫ">
 						<!--Old Char Color: 109-->
@@ -13397,7 +13397,7 @@
 					<!--Note: 호-;-->
 					<textCharAction unicode="54840" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -13453,7 +13453,7 @@
 					<!--Note: 화-;-->
 					<textCharAction unicode="54868" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -13489,7 +13489,7 @@
 					<!--Note: 홰-;-->
 					<textCharAction unicode="54896" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -13520,7 +13520,7 @@
 					<!--Note: 회-;-->
 					<textCharAction unicode="54924" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -13561,7 +13561,7 @@
 					<!--Note: 효-;-->
 					<textCharAction unicode="54952" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆫ">
 						<!--Old Char Color: 109-->
@@ -13592,7 +13592,7 @@
 					<!--Note: 후-;-->
 					<textCharAction unicode="54980" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -13638,7 +13638,7 @@
 					<!--Note: 훠-;-->
 					<textCharAction unicode="55008" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆫ">
 						<!--Old Char Color: 109-->
@@ -13669,7 +13669,7 @@
 					<!--Note: 훼-;-->
 					<textCharAction unicode="55036" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -13700,7 +13700,7 @@
 					<!--Note: 휘-;-->
 					<textCharAction unicode="55064" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -13746,7 +13746,7 @@
 					<!--Note: 휴-;-->
 					<textCharAction unicode="55092" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -13787,7 +13787,7 @@
 					<!--Note: 흐-;-->
 					<textCharAction unicode="55120" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->
@@ -13853,7 +13853,7 @@
 					<!--Note: 희-;-->
 					<textCharAction unicode="55148" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆫ">
 						<!--Old Char Color: 109-->
@@ -13889,7 +13889,7 @@
 					<!--Note: 히-;-->
 					<textCharAction unicode="55176" />
 				</node>
-				<group name="Korean trailing consonants" colorInfoName="korean trailing consonants">
+				<group name="Korean trailing consonants" colorInfoName="lowercase">
 					<!--Old Group Color: 129-->
 					<node label="ᆨ">
 						<!--Old Char Color: 106-->

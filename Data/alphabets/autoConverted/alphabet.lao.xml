@@ -23,7 +23,7 @@
 			<textCharAction unicode="3787" />
 		</node>
 	</group>
-	<group name="Lao letters" colorInfoName="lao letters">
+	<group name="Lao letters" colorInfoName="lowercase">
 		<!--Old Group Color: 0-->
 		<node label="ກ">
 			<!--Note:  LAO LETTER KO  -->
@@ -134,7 +134,7 @@
 			<textCharAction />
 		</node>
 	</group>
-	<group name="lao vowels (combining)" colorInfoName="lao vowels (combining)">
+	<group name="lao vowels (combining)" colorInfoName="accents">
 		<!--Old Group Color: 111-->
 		<node label="◌ະ">
 			<!--Note:  LAO VOWEL SIGN A  -->
@@ -209,7 +209,7 @@
 			<textCharAction unicode="3780" />
 		</node>
 	</group>
-	<group name="Punctuation?" colorInfoName="punctuation?">
+	<group name="Punctuation?" colorInfoName="punctuation">
 		<!--Old Group Color: 112-->
 		<node label="ຯ">
 			<!--Note:  LAO ELLIPSIS  -->

@@ -27,7 +27,7 @@
 			<textCharAction />
 		</node>
 	</group>
-	<group name="GA" colorInfoName="ga">
+	<group name="GA" colorInfoName="lowercase">
 		<!--Old Group Color: 191-->
 		<node label="Ꭶ">
 			<!--Note:  CHEROKEE LETTER GA  -->
@@ -58,7 +58,7 @@
 			<textCharAction />
 		</node>
 	</group>
-	<group name="HA" colorInfoName="ha">
+	<group name="HA" colorInfoName="lowercase">
 		<!--Old Group Color: 192-->
 		<node label="Ꭽ">
 			<!--Note:  CHEROKEE LETTER HA  -->
@@ -85,7 +85,7 @@
 			<textCharAction />
 		</node>
 	</group>
-	<group name="LA" colorInfoName="la">
+	<group name="LA" colorInfoName="lowercase">
 		<!--Old Group Color: 193-->
 		<node label="Ꮃ">
 			<!--Note:  CHEROKEE LETTER LA  -->
@@ -112,7 +112,7 @@
 			<textCharAction />
 		</node>
 	</group>
-	<group name="MA" colorInfoName="ma">
+	<group name="MA" colorInfoName="lowercase">
 		<!--Old Group Color: 194-->
 		<node label="Ꮉ">
 			<!--Note:  CHEROKEE LETTER MA  -->
@@ -135,7 +135,7 @@
 			<textCharAction />
 		</node>
 	</group>
-	<group name="NA" colorInfoName="na">
+	<group name="NA" colorInfoName="lowercase">
 		<!--Old Group Color: 195-->
 		<node label="Ꮎ">
 			<!--Note:  CHEROKEE LETTER NA  -->
@@ -170,7 +170,7 @@
 			<textCharAction />
 		</node>
 	</group>
-	<group name="QUA" colorInfoName="qua">
+	<group name="QUA" colorInfoName="lowercase">
 		<!--Old Group Color: 196-->
 		<node label="Ꮖ">
 			<!--Note:  CHEROKEE LETTER QUA  -->
@@ -197,7 +197,7 @@
 			<textCharAction />
 		</node>
 	</group>
-	<group name="SA" colorInfoName="sa">
+	<group name="SA" colorInfoName="lowercase">
 		<!--Old Group Color: 197-->
 		<node label="Ꮜ">
 			<!--Note:  CHEROKEE LETTER SA  -->
@@ -228,7 +228,7 @@
 			<textCharAction />
 		</node>
 	</group>
-	<group name="DA" colorInfoName="da">
+	<group name="DA" colorInfoName="lowercase">
 		<!--Old Group Color: 198-->
 		<node label="Ꮣ">
 			<!--Note:  CHEROKEE LETTER DA  -->
@@ -267,7 +267,7 @@
 			<textCharAction />
 		</node>
 	</group>
-	<group name="DL" colorInfoName="dl">
+	<group name="DL" colorInfoName="lowercase">
 		<!--Old Group Color: 199-->
 		<node label="Ꮬ">
 			<!--Note:  CHEROKEE LETTER DLA  -->
@@ -298,7 +298,7 @@
 			<textCharAction />
 		</node>
 	</group>
-	<group name="TS" colorInfoName="ts">
+	<group name="TS" colorInfoName="lowercase">
 		<!--Old Group Color: 190-->
 		<node label="Ꮳ">
 			<!--Note:  CHEROKEE LETTER TSA  -->
@@ -325,7 +325,7 @@
 			<textCharAction />
 		</node>
 	</group>
-	<group name="WA" colorInfoName="wa">
+	<group name="WA" colorInfoName="lowercase">
 		<!--Old Group Color: 191-->
 		<node label="Ꮹ">
 			<!--Note:  CHEROKEE LETTER WA  -->
@@ -352,7 +352,7 @@
 			<textCharAction />
 		</node>
 	</group>
-	<group name="YA" colorInfoName="ya">
+	<group name="YA" colorInfoName="lowercase">
 		<!--Old Group Color: 192-->
 		<node label="Ꮿ">
 			<!--Note:  CHEROKEE LETTER YA  -->

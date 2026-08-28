@@ -192,9 +192,14 @@ void CAlphabetMap::AddParagraphSymbol(symbol Value) {
 }
 
 void CAlphabetMap::Add(const std::string& Key, symbol Value) {
-    // Only single unicode-characters should be added...
-    DASHER_ASSERT(m_utf8_count_array[Key[0]] == Key.length());
-    if (Key.length() == 1) {
+    // Single-byte characters live in the direct-lookup table. Everything
+    // else — proper multi-byte UTF-8 AND the multi-character digraph
+    // outputs some shipped alphabets define (lam-alef ligatures, ...) —
+    // goes through the hash. The old DASHER_ASSERT here demanded strict
+    // single-codepoint keys and aborted on real data (see the duplicate
+    // note below); digraph keys simply won't match the lead-byte slicing
+    // in text import, which is harmless degradation compared to crashing.
+    if (Key.length() == 1 && m_utf8_count_array[static_cast<unsigned char>(Key[0])] == 1) {
         m_pSingleChars[static_cast<unsigned char>(Key[0])] = Value;
         return;
     }
@@ -203,7 +208,13 @@ void CAlphabetMap::Add(const std::string& Key, symbol Value) {
     // Loop through Entries with the correct Hash value,
     //  to check the key is not already present
     for (Entry* i = HashEntry; i; i = i->Next) {
-        DASHER_ASSERT(i->Key != Key);
+        // Tolerate duplicate symbols rather than aborting: 132 shipped
+        // alphabet files define some symbols twice (autoconverted files
+        // applied Latin case groups to caseless scripts, Mandarin tone
+        // routings share outputs, ...). First definition wins; the old
+        // DASHER_ASSERT here crashed the process (SIGABRT) the moment a
+        // user selected one of those alphabets from the menu.
+        if (i->Key == Key) return;
     }
 
     // When hash table gets 1/2 full...
@@ -231,8 +242,9 @@ void CAlphabetMap::Add(const std::string& Key, symbol Value) {
 }
 
 symbol CAlphabetMap::Get(const std::string& Key) const {
-    DASHER_ASSERT(m_utf8_count_array[Key[0]] == Key.length());
-    if (Key.length() == 1) {
+    // Mirror Add's dispatch: single-byte keys via the direct table, all
+    // others (multi-byte UTF-8, digraph outputs) via the hash.
+    if (Key.length() == 1 && m_utf8_count_array[static_cast<unsigned char>(Key[0])] == 1) {
         return GetSingleChar(Key[0]);
     }
     // Loop through Entries with the correct Hash value.

@@ -207,7 +207,7 @@
 			<textCharAction />
 		</node>
 	</group>
-	<group name="GURMUKHI vowels" colorInfoName="gurmukhi vowels">
+	<group name="GURMUKHI vowels" colorInfoName="lowercase">
 		<!--Old Group Color: 111-->
 		<node label="◌ਾ">
 			<!--Note: GURMUKHI VOWEL SIGN AA -->

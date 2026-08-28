@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE alphabet SYSTEM "../alphabet.dtd">
 <alphabet name="Hiragana ひらがな 60" orientation="LR" trainingFilename="training_hiragana60_JP.txt" colorsName="European/Asian">
-	<group name="Diacriticals" colorInfoName="diacriticals">
+	<group name="Diacriticals" colorInfoName="accents">
 		<!-- I'd like to replace 443,444 below by 441 and 442, which would be 
      correct Unicode; but it seems that it renders wrong on my laptop;
      441,442 are the combining, nonspacing marks
@@ -23,7 +23,7 @@
 			<textCharAction />
 		</node>
 	</group>
-	<group name="60 Letters (actually 55 plus two diacriticals)" colorInfoName="60 letters (actually 55 plus two diacriticals)">
+	<group name="60 Letters (actually 55 plus two diacriticals)" colorInfoName="accents">
 		<!--Old Group Color: 0-->
 		<node label="ぁ">
 			<!--Old Char Color: 70-->

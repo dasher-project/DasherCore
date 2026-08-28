@@ -2,7 +2,7 @@
 <!DOCTYPE alphabet SYSTEM "../alphabet.dtd">
 <alphabet name="Ethiopic with punctuation and numerals" orientation="LR" trainingFilename="training_ethiopic_ET.txt" colorsName="European/Asian">
 	<!-- identical alphabet used for Tigrinya, Amharic and Ethiopic (extinct language) -->
-	<group name="ethiopic letters" colorInfoName="ethiopic letters">
+	<group name="ethiopic letters" colorInfoName="lowercase">
 		<node label="ሀ">
 			<!--Old Char Color: 70-->
 			<!--Note: ETHIOPIC SYLLABLE HA  -->

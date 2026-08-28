@@ -5,7 +5,7 @@
 	<!-- <s d="&#x2CA;" t="&#x2CA;" />  2 -->
 	<!-- <s d="&#x2C7;" t="&#x2C7;" />  3 -->
 	<!-- <s d="&#x2CB;" t="&#x2CB;" />  4 -->
-	<group name="pin yin roman letters" colorInfoName="pin yin roman letters">
+	<group name="pin yin roman letters" colorInfoName="lowercase">
 		<node label="a">
 			<!--Old Char Color: 10-->
 			<textCharAction />
@@ -121,7 +121,7 @@
 			<textCharAction />
 		</node>
 	</group>
-	<group name="combining diacritics" colorInfoName="combining diacritics">
+	<group name="combining diacritics" colorInfoName="accents">
 		<!--Old Group Color: 110-->
 		<node label="◌̄">
 			<!--Old Char Color: 90-->

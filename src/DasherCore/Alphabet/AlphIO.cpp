@@ -20,11 +20,91 @@
 
 #include "AlphIO.h"
 #include "DasherCore/ControlManager.h"
+#include "DasherCore/FileUtils.h"
 
+#include <filesystem>
+#include <fstream>
 #include <string>
 #include <cstring>
 #include <algorithm>
 #include <sstream>
+
+namespace {
+// Corpus tier for duplicate-ID resolution: the shipped data defines one
+// alphabet in up to three places (maintained root file, autoConverted
+// WorldAlphabets export, oldAlphabets v5 original). When two files declare
+// the same AlphID, the runtime index must pick deterministically and prefer
+// the authoritative definition — matching the index generator's tier order
+// (maintained > worldalphabets > legacy). Before this, the winner was
+// whichever file the filesystem traversal happened to visit last.
+//
+// Tier is decided by the file's IMMEDIATE PARENT directory only — the corpus
+// layout convention — never by substrings elsewhere in the path: a data
+// directory that merely lives inside a folder called "oldAlphabets" (or
+// "autoConverted") must not collapse every scanned file to that tier and
+// fall back to traversal order.
+int corpusTier(const std::string& path) {
+    const size_t sep = path.find_last_of("/\\");
+    if (sep == std::string::npos || sep == 0) return 0;
+    const size_t start = path.find_last_of("/\\", sep - 1);
+    const std::string parent =
+        path.substr(start == std::string::npos ? 0 : start + 1, sep - (start == std::string::npos ? 0 : start + 1));
+    if (parent == "oldAlphabets") return 2;
+    if (parent == "autoConverted") return 1;
+    return 0;
+}
+
+// Cheap indexer: extracts each file's alphabet NAME via a real (but
+// result-discarding) pugixml parse — no CAlphInfo build, no groups, no
+// characters. Using pugixml itself keeps indexing semantics identical to
+// the full parser: XML character references decoded (42 shipped files
+// carry entity-encoded names like "Latvie&#353;u" — a raw string scan
+// indexed the encoded bytes, so selecting them from the menu silently
+// activated Default), single- and double-quoted attributes both accepted,
+// and arbitrarily long prologs/DOCTYPEs handled (no fixed prefix window).
+class AlphabetIndexer : public AbstractParser {
+  public:
+    explicit AlphabetIndexer(Dasher::CAlphIO* owner) : AbstractParser(nullptr), m_owner(owner) {}
+
+    bool ParseFile(const std::string& strPath, bool /*bUser*/) override {
+        std::ifstream in(strPath, std::ios::binary);
+        if (!in) return true; // unreadable: skip, not fatal for an index
+        const std::string buf((std::istreambuf_iterator<char>(in)), std::istreambuf_iterator<char>());
+
+        pugi::xml_document doc;
+        // Corrupt files fail here and are skipped — the same outcome the
+        // full scan gives them.
+        if (!doc.load_buffer(buf.data(), buf.size())) return true;
+
+        // Mirror CAlphIO::Parse's root handling: v5 <alphabets> wrapper →
+        // first <alphabet> child; v6 <alphabet> root directly.
+        pugi::xml_node alphabet = doc.document_element();
+        if (std::strcmp(alphabet.name(), "alphabets") == 0) {
+            alphabet = alphabet.child("alphabet");
+            if (!alphabet) return true;
+        }
+        if (std::strcmp(alphabet.name(), "alphabet") != 0) return true;
+
+        const std::string name = alphabet.attribute("name").as_string();
+        // Absolutize: when the data directory itself is relative (GTK passes
+        // "Data" and runs CWD-dependent), ScanFiles hands us relative paths.
+        // RememberFileName entries are later fed to LoadAlphabetFile, whose
+        // single-file fast path only triggers for absolute paths — a relative
+        // path would be compiled as a regex, match nothing, and silently
+        // fall back to the builtin Default alphabet (the "flat, unweighted
+        // letters" symptom on every relative-data-dir frontend).
+        std::error_code ec;
+        const std::string absolute = std::filesystem::absolute(strPath, ec).string();
+        if (!name.empty()) m_owner->RememberFileName(name, ec ? strPath : absolute);
+        return true;
+    }
+
+    bool Parse(const std::string&, std::istream&, bool) override { return true; }
+
+  private:
+    Dasher::CAlphIO* m_owner;
+};
+} // namespace
 
 using namespace Dasher;
 
@@ -238,9 +318,47 @@ bool Dasher::CAlphIO::Parse(pugi::xml_document& document, const std::string, boo
 void CAlphIO::GetAlphabets(std::vector<std::string>* AlphabetList) const {
     AlphabetList->clear();
 
+    // Menu listing: union of the name index
+    // (all known alphabet files) and the fully-parsed set (selected alphabet,
+    // Default, user-dir overrides). A parsed entry wins over an indexed one.
+    for (const auto& [AlphabetID, filename] : AlphabetFiles) {
+        if (Alphabets.count(AlphabetID) == 0) AlphabetList->push_back(AlphabetID);
+    }
     for (const auto& [AlphabetID, Alphabet] : Alphabets) {
         AlphabetList->push_back(Alphabet->AlphID);
     }
+}
+
+bool CAlphIO::HasInfo(const std::string& AlphID) const {
+    return Alphabets.count(AlphID) != 0;
+}
+
+void CAlphIO::RememberFileName(const std::string& AlphID, const std::string& filename) {
+    // Duplicate-ID resolution: keep the best-tier definition seen; within a
+    // tier the first file wins (stable). E.g. "English with limited
+    // punctuation" exists as the maintained v6 file AND as a v5 original in
+    // oldAlphabets — the index must hold the maintained one regardless of
+    // traversal order.
+    const auto it = AlphabetFiles.find(AlphID);
+    if (it == AlphabetFiles.end() || corpusTier(filename) < corpusTier(it->second)) {
+        AlphabetFiles[AlphID] = filename;
+    }
+}
+
+std::string CAlphIO::FileNameFor(const std::string& AlphID) const {
+    auto it = AlphabetFiles.find(AlphID);
+    return it == AlphabetFiles.end() ? std::string() : it->second;
+}
+
+void CAlphIO::ScanNameIndex() {
+    AlphabetIndexer indexer(this);
+    Dasher::FileUtils::ScanFiles(&indexer, "alphabet.*.xml");
+}
+
+bool CAlphIO::LoadAlphabetFile(const std::string& filename) {
+    if (filename.empty()) return false;
+    Dasher::FileUtils::ScanFiles(this, filename);
+    return true;
 }
 
 std::string CAlphIO::GetDefault() const {
