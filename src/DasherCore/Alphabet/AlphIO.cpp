@@ -29,8 +29,14 @@
 #include <sstream>
 
 namespace {
-// Cheap indexer: reads the first bytes of each alphabet file and extracts the
-// root <alphabet name="..."> attribute — no XML parse, no CAlphInfo build.
+// Cheap indexer: extracts each file's alphabet NAME via a real (but
+// result-discarding) pugixml parse — no CAlphInfo build, no groups, no
+// characters. Using pugixml itself keeps indexing semantics identical to
+// the full parser: XML character references decoded (42 shipped files
+// carry entity-encoded names like "Latvie&#353;u" — a raw string scan
+// indexed the encoded bytes, so selecting them from the menu silently
+// activated Default), single- and double-quoted attributes both accepted,
+// and arbitrarily long prologs/DOCTYPEs handled (no fixed prefix window).
 class AlphabetIndexer : public AbstractParser {
   public:
     explicit AlphabetIndexer(Dasher::CAlphIO* owner) : AbstractParser(nullptr), m_owner(owner) {}
@@ -38,19 +44,23 @@ class AlphabetIndexer : public AbstractParser {
     bool ParseFile(const std::string& strPath, bool /*bUser*/) override {
         std::ifstream in(strPath, std::ios::binary);
         if (!in) return true; // unreadable: skip, not fatal for an index
-        std::string head(2048, '\0');
-        in.read(head.data(), static_cast<std::streamsize>(head.size()));
-        head.resize(static_cast<size_t>(in.gcount()));
+        const std::string buf((std::istreambuf_iterator<char>(in)), std::istreambuf_iterator<char>());
 
-        // v6 root: <alphabet name="...">; v5 wrapper: <alphabets><alphabet ...>
-        size_t pos = head.find("<alphabet");
-        if (pos == std::string::npos) return true;
-        pos = head.find("name=\"", pos);
-        if (pos == std::string::npos) return true;
-        pos += 6; // strlen("name=\"")
-        const size_t end = head.find('"', pos);
-        if (end == std::string::npos) return true;
-        std::string name = head.substr(pos, end - pos);
+        pugi::xml_document doc;
+        // Corrupt files fail here and are skipped — the same outcome the
+        // full scan gives them.
+        if (!doc.load_buffer(buf.data(), buf.size())) return true;
+
+        // Mirror CAlphIO::Parse's root handling: v5 <alphabets> wrapper →
+        // first <alphabet> child; v6 <alphabet> root directly.
+        pugi::xml_node alphabet = doc.document_element();
+        if (std::strcmp(alphabet.name(), "alphabets") == 0) {
+            alphabet = alphabet.child("alphabet");
+            if (!alphabet) return true;
+        }
+        if (std::strcmp(alphabet.name(), "alphabet") != 0) return true;
+
+        const std::string name = alphabet.attribute("name").as_string();
         if (!name.empty()) m_owner->RememberFileName(name, strPath);
         return true;
     }

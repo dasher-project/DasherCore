@@ -63,8 +63,11 @@ class Dasher::CAlphIO : public AbstractXMLParser {
     /// Filename recorded by the index for an AlphID ("" when unknown).
     std::string FileNameFor(const std::string& AlphID) const;
 
-    /// Build the name index: scan alphabet.*.xml and read only each file's
-    /// root <alphabet name="..."> attribute — no full XML parse.
+    /// Build the name index: scan alphabet.*.xml and extract each file's
+    /// root <alphabet name="..."> via a result-discarding pugixml parse —
+    /// same parsing semantics as the full loader (entity references
+    /// decoded, both quote styles, any prolog length) without building
+    /// any CAlphInfo.
     void ScanNameIndex();
 
     /// Full-parse one alphabet file by (absolute or pattern) filename.

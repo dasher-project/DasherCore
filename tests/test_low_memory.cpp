@@ -138,6 +138,70 @@ TEST(alphabet_switch_to_duplicate_symbol_file) {
     dasher_destroy(ctx);
 }
 
+TEST(alphabet_index_scanner_edge_cases) {
+    // Regression (PR #68 review): the runtime name index used a raw string
+    // scan that (a) missed single-quoted attributes, (b) stored XML
+    // character references undecoded — 42 shipped files have entity-encoded
+    // names like "Latvie&#353;u", which indexed under the encoded bytes and
+    // then silently activated Default when selected — and (c) truncated at
+    // a 2048-byte prefix. The indexer now uses pugixml itself. All three
+    // edge cases live in one file: single quotes, numeric character
+    // references, and a prolog pushing the root past 2048 bytes.
+    char dataDir[256], userDir[256], path[512];
+    static int counter = 0;
+    snprintf(dataDir, sizeof(dataDir), "%s/idx_edge_data_%d_%d", dasher_temp_dir(), dasher_getpid(), counter);
+    snprintf(userDir, sizeof(userDir), "%s/idx_edge_user_%d_%d", dasher_temp_dir(), dasher_getpid(), counter);
+    counter++;
+    dasher_mkdir(dataDir);
+    dasher_mkdir(userDir);
+    snprintf(path, sizeof(path), "%s/alphabet.turkmen.entity.xml", dataDir);
+
+    FILE* f = fopen(path, "w");
+    ASSERT(f != nullptr);
+    fputs("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n", f);
+    // >2048 bytes of comment padding before the root element.
+    for (int i = 0; i < 60; i++)
+        fputs("<!-- padding padding padding padding padding padding padding padding -->\n", f);
+    // Single-quoted attributes + numeric character references in the name:
+    // decodes to "Türkänçe entity-test". (26 letters — the engine's node
+    // expansion expects a non-degenerate alphabet.)
+    fputs("<alphabet name='T&#x00FC;rk&#x00E4;n&#x00E7;e entity-test' orientation='LR'>\n", f);
+    fputs("  <group name='Letters'>\n", f);
+    for (char c = 'a'; c <= 'z'; c++)
+        fprintf(f, "    <node label='%c'><textCharAction /></node>\n", c);
+    fputs("  </group>\n", f);
+    fputs("</alphabet>\n", f);
+    fclose(f);
+
+    dasher_ctx* ctx = dasher_create(dataDir, userDir, nullptr);
+    ASSERT(ctx != nullptr);
+    dasher_set_screen_size(ctx, 800, 600);
+
+    // The menu must list the DECODED name, not the encoded bytes.
+    // (Plain UTF-8 literal: the source file is UTF-8, so the string bytes
+    // are the UTF-8 encoding of "Turkmance with diacritics".)
+    const std::string expected = "T\xc3\xbc"
+                                 "rk\xc3\xa4"
+                                 "n\xc3\xa7"
+                                 "e entity-test";
+    bool listed = false;
+    const int count = dasher_get_alphabet_count(ctx);
+    for (int i = 0; i < count; i++) {
+        if (expected == dasher_get_alphabet_name(ctx, i)) listed = true;
+    }
+    printf("  index edge-case alphabet listed with decoded name: %d (of %d)\n", listed, count);
+    ASSERT(listed);
+
+    // Selecting it must load it — not fall back to Default.
+    dasher_set_alphabet_id(ctx, expected.c_str());
+    const char* current = dasher_get_alphabet_id(ctx);
+    printf("  selected '%s'\n", current ? current : "(null)");
+    ASSERT(current != nullptr);
+    ASSERT(std::string(current) == expected);
+
+    dasher_destroy(ctx);
+}
+
 TEST(low_memory_frame_commands) {
     // Frame should still produce valid draw commands in low-memory mode
     dasher_ctx* ctx = create_isolated_context();
