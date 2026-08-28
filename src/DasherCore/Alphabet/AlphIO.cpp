@@ -20,11 +20,47 @@
 
 #include "AlphIO.h"
 #include "DasherCore/ControlManager.h"
+#include "DasherCore/FileUtils.h"
 
+#include <fstream>
 #include <string>
 #include <cstring>
 #include <algorithm>
 #include <sstream>
+
+namespace {
+// Cheap indexer: reads the first bytes of each alphabet file and extracts the
+// root <alphabet name="..."> attribute — no XML parse, no CAlphInfo build.
+class AlphabetIndexer : public AbstractParser {
+  public:
+    explicit AlphabetIndexer(Dasher::CAlphIO* owner) : AbstractParser(nullptr), m_owner(owner) {}
+
+    bool ParseFile(const std::string& strPath, bool /*bUser*/) override {
+        std::ifstream in(strPath, std::ios::binary);
+        if (!in) return true; // unreadable: skip, not fatal for an index
+        std::string head(2048, '\0');
+        in.read(head.data(), static_cast<std::streamsize>(head.size()));
+        head.resize(static_cast<size_t>(in.gcount()));
+
+        // v6 root: <alphabet name="...">; v5 wrapper: <alphabets><alphabet ...>
+        size_t pos = head.find("<alphabet");
+        if (pos == std::string::npos) return true;
+        pos = head.find("name=\"", pos);
+        if (pos == std::string::npos) return true;
+        pos += 6; // strlen("name=\"")
+        const size_t end = head.find('"', pos);
+        if (end == std::string::npos) return true;
+        std::string name = head.substr(pos, end - pos);
+        if (!name.empty()) m_owner->RememberFileName(name, strPath);
+        return true;
+    }
+
+    bool Parse(const std::string&, std::istream&, bool) override { return true; }
+
+  private:
+    Dasher::CAlphIO* m_owner;
+};
+} // namespace
 
 using namespace Dasher;
 
@@ -238,9 +274,39 @@ bool Dasher::CAlphIO::Parse(pugi::xml_document& document, const std::string, boo
 void CAlphIO::GetAlphabets(std::vector<std::string>* AlphabetList) const {
     AlphabetList->clear();
 
+    // Menu listing: union of the name index
+    // (all known alphabet files) and the fully-parsed set (selected alphabet,
+    // Default, user-dir overrides). A parsed entry wins over an indexed one.
+    for (const auto& [AlphabetID, filename] : AlphabetFiles) {
+        if (Alphabets.count(AlphabetID) == 0) AlphabetList->push_back(AlphabetID);
+    }
     for (const auto& [AlphabetID, Alphabet] : Alphabets) {
         AlphabetList->push_back(Alphabet->AlphID);
     }
+}
+
+bool CAlphIO::HasInfo(const std::string& AlphID) const {
+    return Alphabets.count(AlphID) != 0;
+}
+
+void CAlphIO::RememberFileName(const std::string& AlphID, const std::string& filename) {
+    AlphabetFiles[AlphID] = filename;
+}
+
+std::string CAlphIO::FileNameFor(const std::string& AlphID) const {
+    auto it = AlphabetFiles.find(AlphID);
+    return it == AlphabetFiles.end() ? std::string() : it->second;
+}
+
+void CAlphIO::ScanNameIndex() {
+    AlphabetIndexer indexer(this);
+    Dasher::FileUtils::ScanFiles(&indexer, "alphabet.*.xml");
+}
+
+bool CAlphIO::LoadAlphabetFile(const std::string& filename) {
+    if (filename.empty()) return false;
+    Dasher::FileUtils::ScanFiles(this, filename);
+    return true;
 }
 
 std::string CAlphIO::GetDefault() const {

@@ -52,8 +52,27 @@ class Dasher::CAlphIO : public AbstractXMLParser {
     const CAlphInfo* GetInfo(const std::string& AlphID) const;
     std::string GetDefault() const;
 
+    /// True when the alphabet's full definition is parsed and loaded.
+    /// (GetInfo silently falls back to Default for unknown IDs — callers
+    /// deciding whether to load need this instead.)
+    bool HasInfo(const std::string& AlphID) const;
+
+    /// Record AlphID → filename from the cheap name index scan.
+    void RememberFileName(const std::string& AlphID, const std::string& filename);
+
+    /// Filename recorded by the index for an AlphID ("" when unknown).
+    std::string FileNameFor(const std::string& AlphID) const;
+
+    /// Build the name index: scan alphabet.*.xml and read only each file's
+    /// root <alphabet name="..."> attribute — no full XML parse.
+    void ScanNameIndex();
+
+    /// Full-parse one alphabet file by (absolute or pattern) filename.
+    bool LoadAlphabetFile(const std::string& filename);
+
   private:
     std::map<std::string, const CAlphInfo*> Alphabets; // map AlphabetID to AlphabetInfo.
+    std::map<std::string, std::string> AlphabetFiles;  // name index: AlphID → filename
     static CAlphInfo*
     CreateDefault(); // Give the user an English alphabet rather than nothing if anything goes horribly wrong.
 

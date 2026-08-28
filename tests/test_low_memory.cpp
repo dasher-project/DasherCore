@@ -1,7 +1,12 @@
 // Low-memory mode tests: verify reduced memory footprint
 #include "test_common.h"
 TEST(low_memory_alphabet_count) {
-    // In low-memory mode, only 1-2 alphabets should be loaded
+    // Lazy alphabet loading (all modes): the alphabet MENU lists every
+    // known alphabet via the cheap name index; only the selected alphabet
+    // is fully parsed. The old "count <= 2" asserted the menu reflected
+    // the parsed set — that semantic is gone. What stays testable from
+    // the CAPI: the full inventory is listed, identically in low-memory
+    // and normal modes (parsing differs, the menu does not).
     dasher_ctx* ctx = create_isolated_context();
     ASSERT(ctx != nullptr);
 
@@ -10,18 +15,18 @@ TEST(low_memory_alphabet_count) {
 
     int count = dasher_get_alphabet_count(ctx);
     printf("  Low-memory alphabet count: %d\n", count);
-    ASSERT(count <= 2); // Default + selected at most
+    ASSERT(count > 100); // full inventory via the name index
 
     dasher_destroy(ctx);
 
-    // Compare with normal mode
+    // Compare with normal mode — identical menu, parsing differs
     ctx = create_isolated_context();
     ASSERT(ctx != nullptr);
     dasher_set_screen_size(ctx, 800, 600);
 
     int normal_count = dasher_get_alphabet_count(ctx);
     printf("  Normal alphabet count: %d\n", normal_count);
-    ASSERT(normal_count > count);
+    ASSERT_EQ(normal_count, count);
 
     dasher_destroy(ctx);
 }
