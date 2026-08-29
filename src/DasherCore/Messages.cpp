@@ -25,3 +25,22 @@ void CMessageDisplay::FormatMessage(const char* format, ...) {
     FormatMessage(format, args);
     va_end(args);
 }
+
+void CMessageDisplay::FormatInfoMessage(const char* format, ...) {
+    if (format == nullptr) return;
+
+    std::string lineToPrint;
+
+    va_list args;
+    va_start(args, format);
+    va_list args_copy;
+    va_copy(args_copy, args);
+    const int length = vsnprintf(nullptr, 0, format, args_copy);
+    va_end(args_copy);
+
+    lineToPrint.resize(length);
+    vsnprintf(&lineToPrint[0], length + 1, format, args);
+    va_end(args);
+
+    Message(lineToPrint, false);
+}
