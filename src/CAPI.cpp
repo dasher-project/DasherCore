@@ -950,14 +950,23 @@ DASHER_API void dasher_set_screen_size(dasher_ctx* ctx, int width, int height) {
 
     if (!ctx->realized) {
         // On a fresh install (no settings file existed at create time),
-        // reset to the canonical default BEFORE Realize() — ResetParameter
-        // doesn't broadcast OnParameterChanged, so running it after would
-        // leave the live filter built from a pre-realize programmatic set
-        // while the stored parameter reports the default (value/behaviour
-        // mismatch). Before Realize(), the value is already correct when
-        // CreateInputFilter() runs.
+        // apply the canonical default BEFORE Realize(). We use
+        // SetStringParameter with the parameter-table default — NOT
+        // ResetParameter, which only changes the in-memory value. A
+        // pre-realize programmatic set (dasher_set_string_parameter)
+        // persists to disk via SAVE_IMMEDIATELY; an in-memory-only reset
+        // would leave that stale entry, and the supposedly discarded
+        // filter would resurrect on the next restart. SetStringParameter
+        // overwrites the disk entry, broadcasts the change, and the
+        // value is correct when Realize()->CreateInputFilter() runs.
         if (!ctx->settingsFileExisted) {
-            ctx->settings->ResetParameter(Dasher::SP_INPUT_FILTER);
+            const auto defaultIt = Dasher::Settings::parameter_defaults.find(Dasher::SP_INPUT_FILTER);
+            if (defaultIt != Dasher::Settings::parameter_defaults.end()) {
+                const auto* defaultValue = std::get_if<std::string>(&defaultIt->second.value);
+                if (defaultValue) {
+                    ctx->settings->SetStringParameter(Dasher::SP_INPUT_FILTER, *defaultValue);
+                }
+            }
         }
 
         try {

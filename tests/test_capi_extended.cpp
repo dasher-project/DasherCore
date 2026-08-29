@@ -699,17 +699,32 @@ TEST(input_filter_stylus_control_survives_restart) {
 
 TEST(input_filter_fresh_install_gets_default) {
     // No settings file → the engine resets SP_INPUT_FILTER to the
-    // canonical default via ResetParameter (no hardcoded string in the
-    // CAPI layer).
-    ScopedTempDir userDir; // fresh, no settings file written
+    // canonical default. The reset uses SetStringParameter (which persists
+    // and broadcasts), NOT ResetParameter (which is in-memory only) —
+    // otherwise a pre-realize programmatic set would write to disk, the
+    // reset wouldn't overwrite it, and the discarded filter would
+    // resurrect on the next restart.
+    ScopedTempDir userDir;
     const int key = dasher_find_parameter_key("SP_INPUT_FILTER");
     ASSERT(key >= 0);
 
+    // Phase 1: pre-realize set on fresh install, then realize
     dasher_ctx* ctx = dasher_create(TEST_DATA_DIR, userDir.c_str(), nullptr);
     ASSERT(ctx != nullptr);
-    dasher_set_screen_size(ctx, 800, 600);
+    dasher_set_string_parameter(ctx, key, "Press Mode"); // pre-realize, persisted
+    dasher_set_screen_size(ctx, 800, 600);                // fresh install reset fires
     ASSERT(std::string(dasher_get_string_parameter(ctx, key)).size() > 0);
+    ASSERT(std::string(dasher_get_string_parameter(ctx, key)) != "Press Mode");
+    dasher_save_settings(ctx); // ensure file has the reset value
     dasher_destroy(ctx);
+
+    // Phase 2: restart — the discarded "Press Mode" must NOT resurrect
+    dasher_ctx* ctx2 = dasher_create(TEST_DATA_DIR, userDir.c_str(), nullptr);
+    ASSERT(ctx2 != nullptr);
+    dasher_set_screen_size(ctx2, 800, 600);
+    const char* after = dasher_get_string_parameter(ctx2, key);
+    ASSERT(std::string(after) != "Press Mode"); // Greptile P1: discarded filter must not return
+    dasher_destroy(ctx2);
 }
 
 TEST(input_filter_empty_string_in_file_survives) {
