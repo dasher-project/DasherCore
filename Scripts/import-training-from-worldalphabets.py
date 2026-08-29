@@ -91,10 +91,26 @@ def main() -> int:
 
     if args.retarget and imported:
         done = 0
-        legacy_to_wa: dict[str, str] = {}
+        # Key by (lang, script) AND by lang — lookup prefers an exact
+        # script match (a Bopomofo alphabet must train on the Bopo corpus,
+        # not whatever Latin one was imported last for the same language)
+        # and falls back to lang-only when the alphabet's script has no
+        # corpus of its own.
+        by_lang: dict[str, list[tuple[str, str]]] = {}
         for name in imported:
             lang, script = name[len("training_wa_"):-len(".txt")].rsplit("_", 1)
-            legacy_to_wa[lang] = name
+            by_lang.setdefault(lang, []).append((script, name))
+
+        def corpus_for(lang: str, script: str | None) -> str | None:
+            cands = by_lang.get(lang)
+            if not cands:
+                return None
+            if script:
+                exact = next((f for s, f in cands if s == script), None)
+                if exact:
+                    return exact
+            return cands[0][1]
+
         for path in list(ALPHABETS.rglob("alphabet*.xml")):
             text = path.read_text(encoding="utf-8")
             changed = False
@@ -103,7 +119,7 @@ def main() -> int:
                 if not old or old.startswith("training_wa_"):
                     continue
                 lang = (a.get("lang") or "").split("-")[0]
-                new = legacy_to_wa.get(lang)
+                new = corpus_for(lang, a.get("script"))
                 if new and old in text:
                     text = text.replace(old, new)
                     changed = True
