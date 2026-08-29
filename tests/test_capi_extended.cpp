@@ -647,6 +647,34 @@ TEST(reload_settings) {
     }
 }
 
+TEST(input_filter_persists_across_restart) {
+    // Regression: dasher_set_screen_size unconditionally forced
+    // SP_INPUT_FILTER to "Normal Control" on first realize — clobbering the
+    // user's saved preference on every restart. Now the persisted value is
+    // honoured; only empty/Stylus (non-actionable defaults) are overridden.
+    ScopedTempDir userDir;
+    const int key = dasher_find_parameter_key("SP_INPUT_FILTER");
+    ASSERT(key >= 0);
+
+    // Phase 1: set a non-default filter and save
+    dasher_ctx* ctx = dasher_create(TEST_DATA_DIR, userDir.c_str(), nullptr);
+    ASSERT(ctx != nullptr);
+    dasher_set_screen_size(ctx, 800, 600);
+    dasher_set_string_parameter(ctx, key, "Press Mode");
+    ASSERT_EQ(std::string(dasher_get_string_parameter(ctx, key)), "Press Mode");
+    dasher_save_settings(ctx);
+    dasher_destroy(ctx);
+
+    // Phase 2: recreate — the preference must survive
+    dasher_ctx* ctx2 = dasher_create(TEST_DATA_DIR, userDir.c_str(), nullptr);
+    ASSERT(ctx2 != nullptr);
+    dasher_set_screen_size(ctx2, 800, 600);
+    const char* restored = dasher_get_string_parameter(ctx2, key);
+    printf("  filter after restart: '%s'\n", restored);
+    ASSERT_EQ(std::string(restored), "Press Mode");
+    dasher_destroy(ctx2);
+}
+
 TEST(save_settings) {
     static int save_test_counter = 0;
     char shared_dir[256];

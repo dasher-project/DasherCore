@@ -119,11 +119,11 @@ TEST_CASE("filters/invalid name silently falls back") {
     CHECK(cc > 0);
 }
 
-TEST_CASE("filters/setting SP_INPUT_FILTER before realize is lost") {
-    // CHARACTERIZATION: dasher_set_screen_size force-sets SP_INPUT_FILTER
-    // to "Normal Control" exactly once during realize (CAPI.cpp:724). Any
-    // earlier setting is overwritten. This is documented behavior we
-    // characterize so a future change to the force-set is visible.
+TEST_CASE("filters/setting SP_INPUT_FILTER before realize is preserved") {
+    // The old behavior: dasher_set_screen_size unconditionally force-set
+    // SP_INPUT_FILTER to "Normal Control" during realize, clobbering any
+    // preference the user saved. Now the persisted value is honoured;
+    // only empty/Stylus (non-actionable defaults) are overridden.
     ScopedTempDir dir;
     dasher_ctx* ctx = dasher_create(get_test_data_dir(), dir.c_str(), nullptr);
     REQUIRE(ctx != nullptr);
@@ -131,9 +131,9 @@ TEST_CASE("filters/setting SP_INPUT_FILTER before realize is lost") {
     set_filter(ctx, "Click Mode");
     CHECK(std::string(dasher_get_string_parameter(ctx, sp_input_filter_key())) == "Click Mode");
 
-    // set_screen_size realizes and overwrites.
+    // set_screen_size realizes — the preference must survive.
     dasher_set_screen_size(ctx, 800, 600);
-    CHECK(std::string(dasher_get_string_parameter(ctx, sp_input_filter_key())) == "Normal Control");
+    CHECK(std::string(dasher_get_string_parameter(ctx, sp_input_filter_key())) == "Click Mode");
 
     dasher_destroy(ctx);
 }

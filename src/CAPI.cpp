@@ -1,5 +1,9 @@
 #include "dasher.h"
 
+#ifdef __ANDROID__
+#include <android/log.h>
+#endif
+
 #include "DasherCore/DashIntfScreenMsgs.h"
 #include "DasherCore/DasherInput.h"
 #include "DasherCore/DasherScreen.h"
@@ -951,8 +955,16 @@ DASHER_API void dasher_set_screen_size(dasher_ctx* ctx, int width, int height) {
         }
         ctx->realized = true;
 
-        // Force Normal Control filter for continuous mouse input
-        ctx->intf->SetStringParameter(Dasher::SP_INPUT_FILTER, "Normal Control");
+        // The persisted SP_INPUT_FILTER (loaded from dasher_settings.xml) is
+        // the user's choice — honour it. Only fall back to Normal Control
+        // when no preference was saved (the parameter is still at a
+        // non-actionable compiled-in default). The old unconditional
+        // override meant every restart clobbered the user's saved input
+        // filter with "Normal Control".
+        const std::string filter = ctx->intf->GetStringParameter(Dasher::SP_INPUT_FILTER);
+        if (filter.empty() || filter == "Stylus Control") {
+            ctx->intf->SetStringParameter(Dasher::SP_INPUT_FILTER, "Normal Control");
+        }
 
         if (!ctx->pendingAlphabet.empty()) {
             std::string pending = ctx->pendingAlphabet;
@@ -1610,6 +1622,9 @@ DASHER_API void dasher_set_user_palette(dasher_ctx* ctx, const char* name) {
 DASHER_API int dasher_get_alphabet_count(dasher_ctx* ctx) {
     if (!ctx || !ctx->intf) return 0;
     auto names = ctx->intf->GetPermittedValues(Dasher::SP_ALPHABET_ID);
+#ifdef __ANDROID__
+    __android_log_print(ANDROID_LOG_INFO, "DasherJNI", "get_alphabet_count: %zu", names.size());
+#endif
     return static_cast<int>(names.size());
 }
 
