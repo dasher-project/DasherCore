@@ -949,6 +949,17 @@ DASHER_API void dasher_set_screen_size(dasher_ctx* ctx, int width, int height) {
     }
 
     if (!ctx->realized) {
+        // On a fresh install (no settings file existed at create time),
+        // reset to the canonical default BEFORE Realize() — ResetParameter
+        // doesn't broadcast OnParameterChanged, so running it after would
+        // leave the live filter built from a pre-realize programmatic set
+        // while the stored parameter reports the default (value/behaviour
+        // mismatch). Before Realize(), the value is already correct when
+        // CreateInputFilter() runs.
+        if (!ctx->settingsFileExisted) {
+            ctx->settings->ResetParameter(Dasher::SP_INPUT_FILTER);
+        }
+
         try {
             ctx->intf->Realize(nowMs());
         } catch (const std::exception& e) {
@@ -957,17 +968,6 @@ DASHER_API void dasher_set_screen_size(dasher_ctx* ctx, int width, int height) {
             log_boundary_error(ctx, "dasher_set_screen_size: Realize failed", "unknown exception");
         }
         ctx->realized = true;
-
-        // The persisted SP_INPUT_FILTER (loaded from dasher_settings.xml) is
-        // the user's choice — honour it, whatever the value. Only when no
-        // settings file existed at create time (fresh install) do we reset
-        // to the canonical default. A value-based comparison can't
-        // distinguish "compiled-in default" from "user deliberately chose
-        // this" — the old unconditional override meant every restart
-        // clobbered the user's saved input filter.
-        if (!ctx->settingsFileExisted) {
-            ctx->intf->ResetParameter(Dasher::SP_INPUT_FILTER);
-        }
 
         if (!ctx->pendingAlphabet.empty()) {
             std::string pending = ctx->pendingAlphabet;
