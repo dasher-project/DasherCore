@@ -227,7 +227,7 @@ const std::unordered_map<Parameter, const Parameter_Value> parameter_defaults = 
                                     "Control",
                                     "Input"}},
     {LP_UNIFORM, Parameter_Value{"UniformTimes1000", PARAM_LONG, Persistence::PERSISTENT, 50l,
-                                 "Uniform probability weight (×1000). Higher values make less-probable symbols larger.",
+                                 "Uniform probability weight (Ã—1000). Higher values make less-probable symbols larger.",
                                  "Uniform Probability", Settings::UIControlType::Slider, 0, 1000, 1, 10, true,
                                  "LP_UNIFORM", "Advanced", "Input"}},
     {LP_MOUSEPOSDIST,
