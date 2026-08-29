@@ -11,7 +11,7 @@
 <orientation type="LR"/>
 <encoding type="Western"/>
 <palette>European/Asian</palette>
-<train>training_korean2350_KR.txt</train>
+<train>training_wa_ko_Hang.txt</train>
 <space d="&#x25a1;" t=" " b="9" note="box" />
 <control d="Control"/>
 <paragraph d="&#182;" b="9"/>

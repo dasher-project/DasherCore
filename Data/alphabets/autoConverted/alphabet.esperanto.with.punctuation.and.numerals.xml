@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE alphabet SYSTEM "../alphabet.dtd">
-<alphabet name="Esperanto with punctuation and numerals" orientation="LR" trainingFilename="training_Esperanto_XX.txt" colorsName="Default">
+<alphabet name="Esperanto with punctuation and numerals" orientation="LR" trainingFilename="training_wa_eo_Latn.txt" colorsName="Default">
 	<group name="lower case letters">
 		<node label="a">
 			<textCharAction />

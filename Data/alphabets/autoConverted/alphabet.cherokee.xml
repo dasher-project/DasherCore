@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE alphabet SYSTEM "../alphabet.dtd">
-<alphabet name="Cherokee" orientation="LR" trainingFilename="training_cherokee_US.txt" colorsName="European/Asian">
+<alphabet name="Cherokee" orientation="LR" trainingFilename="training_wa_chr_Cher.txt" colorsName="European/Asian">
 	<group name="A">
 		<node label="Ꭰ">
 			<!--Note:  CHEROKEE LETTER A  -->

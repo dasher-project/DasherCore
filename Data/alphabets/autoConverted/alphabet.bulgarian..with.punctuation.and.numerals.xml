@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE alphabet SYSTEM "../alphabet.dtd">
-<alphabet name="Bulgarian / Български with punctuation and numerals" orientation="LR" trainingFilename="training_Bulgarian_BG.txt" colorsName="Default">
+<alphabet name="Bulgarian / Български with punctuation and numerals" orientation="LR" trainingFilename="training_wa_bg_Cyrl.txt" colorsName="Default">
 	<group name="lower case letters">
 		<node label="а">
 			<textCharAction />

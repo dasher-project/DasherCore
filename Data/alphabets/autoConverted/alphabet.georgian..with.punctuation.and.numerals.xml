@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE alphabet SYSTEM "../alphabet.dtd">
-<alphabet name="Georgian / ქართული ენა with punctuation and numerals" orientation="LR" trainingFilename="training_georgian_GE.txt" colorsName="Default">
+<alphabet name="Georgian / ქართული ენა with punctuation and numerals" orientation="LR" trainingFilename="training_wa_ka_Geor.txt" colorsName="Default">
 	<!-- Mkhedruli is used to write Georgian, Mingrelian -->
 	<!-- see http://www.omniglot.com/writing/georgian2.htm -->
 	<group name="lower case georgian letters (Mkhedruli) ">

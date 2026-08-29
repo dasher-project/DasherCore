@@ -10,7 +10,7 @@ Zulu is one of the official languages of South Africa and is a member of the Ban
 <encoding type="Western"/>
 <control d="Control" t=""/>
 <palette>Default</palette>
-<train>training_Zulu_ZA.txt</train>
+<train>training_wa_zu_Latn.txt</train>
 <space d="&#x25a1;" t=" " b="9" />
 <paragraph d="&#182;" b="9"/>
 <group name="lower case letters" b="0">

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE alphabet SYSTEM "../alphabet.dtd">
-<alphabet name="Sinhala with punctuation and numerals" orientation="LR" trainingFilename="training_Sinhala_IN.txt" colorsName="Default">
+<alphabet name="Sinhala with punctuation and numerals" orientation="LR" trainingFilename="training_wa_si_Sinh.txt" colorsName="Default">
 	<group name="SINHALA letters">
 		<node label="අ">
 			<!--Note: SINHALA LETTER AYANNA  -->

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE alphabet SYSTEM "../alphabet.dtd">
-<alphabet name="Galego / Galician with punctuation and numerals" orientation="LR" trainingFilename="training_galician_ES.txt" colorsName="Default">
+<alphabet name="Galego / Galician with punctuation and numerals" orientation="LR" trainingFilename="training_wa_gl_Latn.txt" colorsName="Default">
 	<!--
 Galician is a Romance language spoken by about 3 million people in Galicia, in the north-west corner of Spain. Galician is more or less mutually intelligible with Portuguese.
 -->

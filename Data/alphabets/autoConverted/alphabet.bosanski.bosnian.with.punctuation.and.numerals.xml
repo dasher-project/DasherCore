@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE alphabet SYSTEM "../alphabet.dtd">
-<alphabet name="Bosanski / Bosnian with punctuation and numerals" orientation="LR" trainingFilename="training_bosnian_BA.txt" colorsName="Default">
+<alphabet name="Bosanski / Bosnian with punctuation and numerals" orientation="LR" trainingFilename="training_wa_bs_Latn.txt" colorsName="Default">
 	<group name="lower case letters">
 		<node label="a">
 			<!--Note:  A -->

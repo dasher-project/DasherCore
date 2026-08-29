@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE alphabet SYSTEM "../alphabet.dtd">
-<alphabet name="Korean 한국어 2350 syllables (Nested)" orientation="LR" trainingFilename="training_korean2350_KR.txt" colorsName="European/Asian">
+<alphabet name="Korean 한국어 2350 syllables (Nested)" orientation="LR" trainingFilename="training_wa_ko_Hang.txt" colorsName="European/Asian">
 	<!-- Note: Many fonts support 
  2350 Hangul syllables out of 11,172 modern syllables
  Wed 8/6/05 by David J.C. MacKay, Thu 5/4/07

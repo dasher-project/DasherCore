@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE alphabet SYSTEM "../alphabet.dtd">
-<alphabet name="Zulu / isiZulu with punctuation and numerals" orientation="LR" trainingFilename="training_Zulu_ZA.txt" colorsName="Default">
+<alphabet name="Zulu / isiZulu with punctuation and numerals" orientation="LR" trainingFilename="training_wa_zu_Latn.txt" colorsName="Default">
 	<!--
 Zulu is one of the official languages of South Africa and is a member of the Bantu/Nguni family of languages. It is spoken by about 9 million people mainly in Zululand and northern Natal in South Africa and also in Botswana, Lesotho, Malawi, Mozambique and Swaziland.
 -->

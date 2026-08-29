@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE alphabet SYSTEM "../alphabet.dtd">
-<alphabet name="Français / French (combining accents) with numerals and punctuation" orientation="LR" trainingFilename="training_frenchC_FR.txt" colorsName="European/Asian">
+<alphabet name="Français / French (combining accents) with numerals and punctuation" orientation="LR" trainingFilename="training_wa_la_Latn.txt" colorsName="European/Asian">
 	<group name="Combining accents" colorInfoName="accents">
 		<node label="◌̀">
 			<!--Old Char Color: 72-->

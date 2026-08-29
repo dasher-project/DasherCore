@@ -113,6 +113,43 @@ def main() -> int:
                 done += 1
         print(f"{'would retarget' if args.dry_run else 'retargeted'} legacy declarations in {done} alphabet files")
 
+    # Undeclared alphabets: WA exports never set trainingFilename, so the
+    # engine trains them uniform forever. Where an imported corpus matches
+    # the alphabet's language (exact script preferred), inject the
+    # declaration — the single biggest coverage win for the WA corpus tail.
+    # Runs on every --retarget invocation (idempotent: skips files that
+    # already declare a corpus), not only when new corpora arrived.
+    if args.retarget:
+        by_lang: dict[str, list[tuple[str, str]]] = {}
+        # Every wa corpus on disk (not just this run's imports — idempotent
+        # re-runs must still inject into newly-noticed undeclared alphabets).
+        for path in sorted(TRAINING.glob("training_wa_*.txt")):
+            lang, script = path.name[len("training_wa_"):-len(".txt")].rsplit("_", 1)
+            by_lang.setdefault(lang, []).append((script, path.name))
+        injected = 0
+        for a in index["alphabets"]:
+            if a.get("training"):
+                continue
+            lang = (a.get("lang") or "").split("-")[0]
+            cands = by_lang.get(lang)
+            if not cands:
+                continue
+            script = a.get("script") or ""
+            corpus = next((f for s, f in cands if s == script), cands[0][1])
+            path = ALPHABETS / a["file"]
+            text = path.read_text(encoding="utf-8")
+            if 'trainingFilename=""' in text:
+                # WA exports emit an EMPTY attribute — fill it
+                text = text.replace('trainingFilename=""', f'trainingFilename="{corpus}"', 1)
+            elif "trainingFilename" not in text:
+                text = text.replace("<alphabet ", f'<alphabet trainingFilename="{corpus}" ', 1)
+            else:
+                continue  # already declares something real
+            if not args.dry_run:
+                path.write_text(text, encoding="utf-8")
+            injected += 1
+        print(f"{'would inject' if args.dry_run else 'injected'} trainingFilename into {injected} undeclared alphabets")
+
     if imported and not args.dry_run:
         print("\nNext: regenerate the index (Scripts/generate-alphabet-index.py) and commit")
     return 0

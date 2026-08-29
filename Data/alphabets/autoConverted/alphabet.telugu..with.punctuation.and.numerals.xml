@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE alphabet SYSTEM "../alphabet.dtd">
-<alphabet name="Telugu / తెలుగు with punctuation and numerals" orientation="LR" trainingFilename="training_Telugu_IN.txt" colorsName="European/Asian">
+<alphabet name="Telugu / తెలుగు with punctuation and numerals" orientation="LR" trainingFilename="training_wa_te_Telu.txt" colorsName="European/Asian">
 	<group name="TELUGU letters">
 		<group name="vowel signs etc" colorInfoName="accents">
 			<!--Old Group Color: 110-->

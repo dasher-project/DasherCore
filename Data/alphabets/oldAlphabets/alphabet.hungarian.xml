@@ -5,7 +5,7 @@
 <alphabet name="Magyar / Hungarian / nagybet&#369;ssel, r&#246;vid">
 <orientation type="LR"/>
 <encoding type="Western"/>
-<train>training_hungarian_HU.txt</train>
+<train>training_wa_hu_Latn.txt</train>
 <paragraph d="&#182;" b="9"/>
 <space d="&#x25a1;" t=" " b="9" note="box" />
 <control d="Control" t="" b="8"/>
@@ -133,7 +133,7 @@
 <alphabet name="Magyar, kisbet&#369;s, r&#246;vid / Hungarian lowercase only">
 <orientation type="LR"/>
 <encoding type="Western"/>
-<train>training_hungarian_HU.txt</train>
+<train>training_wa_hu_Latn.txt</train>
 <paragraph d="&#182;" b="9"/>
 <space d="&#x25a1;" t=" " b="9" note="box" />
 <control d="Control" t="" b="8"/>

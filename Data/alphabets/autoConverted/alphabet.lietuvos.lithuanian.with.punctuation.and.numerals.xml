@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE alphabet SYSTEM "../alphabet.dtd">
-<alphabet name="Lietuvos / Lithuanian with punctuation and numerals" orientation="LR" trainingFilename="training_lithuanian_LT.txt" colorsName="Default">
+<alphabet name="Lietuvos / Lithuanian with punctuation and numerals" orientation="LR" trainingFilename="training_wa_lt_Latn.txt" colorsName="Default">
 	<!-- Lithuanian is a Baltic language related to Latvian and Old Prussian 
       with about 3.5 million speakers in Lithuania. There are also Lithuanian
       speakers in Poland, the USA, Brazil, Argentina, Canada, the UK and Uruguay.

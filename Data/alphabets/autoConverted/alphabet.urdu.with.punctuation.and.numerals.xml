@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE alphabet SYSTEM "../alphabet.dtd">
-<alphabet name="Urdu with punctuation and numerals" orientation="RL" trainingFilename="training_Urdu_PK.txt" colorsName="European/Asian">
+<alphabet name="Urdu with punctuation and numerals" orientation="RL" trainingFilename="training_wa_ur_Arab.txt" colorsName="European/Asian">
 	<group name="letters">
 		<group name="Vowels etc" colorInfoName="lowercase">
 			<!--Old Group Color: 110-->

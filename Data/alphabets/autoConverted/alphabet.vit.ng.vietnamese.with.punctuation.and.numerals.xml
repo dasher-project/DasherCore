@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE alphabet SYSTEM "../alphabet.dtd">
-<alphabet name="Việt ngữ / Vietnamese with punctuation and numerals" orientation="LR" trainingFilename="training_Vietnamese_VN.txt" colorsName="Default">
+<alphabet name="Việt ngữ / Vietnamese with punctuation and numerals" orientation="LR" trainingFilename="training_wa_vi_Latn.txt" colorsName="Default">
 	<group name="lower case letters">
 		<node label="a">
 			<textCharAction />

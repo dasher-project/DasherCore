@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE alphabet SYSTEM "../alphabet.dtd">
-<alphabet name="Tamil with punctuation and numerals" orientation="LR" trainingFilename="training_Tamil_IN.txt" colorsName="Default">
+<alphabet name="Tamil with punctuation and numerals" orientation="LR" trainingFilename="training_wa_ta_Taml.txt" colorsName="Default">
 	<group name="TAMIL letters">
 		<node label="ஃ">
 			<!--Note: TAMIL SIGN VISARGA  class(p)-->

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE alphabet SYSTEM "../alphabet.dtd">
-<alphabet name="Lao" orientation="LR" trainingFilename="training_lao_LA.txt" colorsName="European/Asian">
+<alphabet name="Lao" orientation="LR" trainingFilename="training_wa_lo_Laoo.txt" colorsName="European/Asian">
 	<group name="lao tones (combining)">
 		<node label="◌ໆ">
 			<!--Note:  LAO KO LA  -->

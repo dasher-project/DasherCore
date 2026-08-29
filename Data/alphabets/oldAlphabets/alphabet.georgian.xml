@@ -8,7 +8,7 @@
 <orientation type="LR"/>
 <encoding type="Western"/>
 <palette>Default</palette>
-<train>training_georgian_GE.txt</train>
+<train>training_wa_ka_Geor.txt</train>
 <space d="&#x25a1;" t=" " b="9" note="box" />
 <paragraph d="&#182;" b="9"/>
 <control d="Control" t="" b="8"/>

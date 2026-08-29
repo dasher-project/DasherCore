@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE alphabet SYSTEM "../alphabet.dtd">
-<alphabet name="Ewe with lots of punctuation" orientation="LR" trainingFilename="training_ewe_GH.txt" colorsName="European/Asian">
+<alphabet name="Ewe with lots of punctuation" orientation="LR" trainingFilename="training_wa_ee_Latn.txt" colorsName="European/Asian">
 	<!--  needs accents too?
   None used here:
     http://developer.mimer.com/collations/charts/ewe.htm -->

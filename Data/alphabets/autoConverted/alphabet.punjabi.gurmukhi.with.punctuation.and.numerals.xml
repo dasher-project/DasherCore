@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE alphabet SYSTEM "../alphabet.dtd">
-<alphabet name="Punjabi (Gurmukhi) with punctuation and numerals" orientation="LR" trainingFilename="training_Punjabi_IN.txt" colorsName="Default">
+<alphabet name="Punjabi (Gurmukhi) with punctuation and numerals" orientation="LR" trainingFilename="training_wa_pa_Guru.txt" colorsName="Default">
 	<group name="GURMUKHI letters">
 		<node label="ੴ">
 			<!--Note: GURMUKHI EK ONKAR -->

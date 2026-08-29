@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE alphabet SYSTEM "../alphabet.dtd">
-<alphabet name="Kirghiz / Кыргыз with punctuation and numerals" orientation="LR" trainingFilename="training_kirghiz_KG.txt" colorsName="Default">
+<alphabet name="Kirghiz / Кыргыз with punctuation and numerals" orientation="LR" trainingFilename="training_wa_ky_Cyrl.txt" colorsName="Default">
 	<group name="lower case letters">
 		<node label="а">
 			<!--Note: CYRILLIC SMALL LETTER A -->

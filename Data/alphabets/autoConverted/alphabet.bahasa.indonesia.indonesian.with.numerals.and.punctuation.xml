@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE alphabet SYSTEM "../alphabet.dtd">
-<alphabet name="Bahasa Indonesia / Indonesian with numerals and punctuation" orientation="LR" trainingFilename="training_Indonesian_ID.txt" colorsName="Default">
+<alphabet name="Bahasa Indonesia / Indonesian with numerals and punctuation" orientation="LR" trainingFilename="training_wa_id_Latn.txt" colorsName="Default">
 	<group name="Lower case Latin letters">
 		<node label="a">
 			<textCharAction />

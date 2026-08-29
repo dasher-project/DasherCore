@@ -259,6 +259,10 @@ def main():
         print(f"error: {ALPHABETS_DIR} not found", file=sys.stderr)
         return 1
 
+    # Corpus availability: which declared training files actually ship.
+    training_dir = ALPHABETS_DIR.parent / "training"
+    TRAINING_FILES = {p.name for p in training_dir.glob("training_*")} if training_dir.is_dir() else set()
+
     alphabets = []
     errors = []
     for path in sorted(ALPHABETS_DIR.rglob("alphabet*.xml")):
@@ -332,6 +336,10 @@ def main():
             "script": script,
             "script_name": script_name or det_script_name,
             "training": training,
+            # Whether the declared corpus file actually ships in Data/training
+            # (alphabets without one train uniform until a corpus is imported
+            # from WorldAlphabets — Scripts/import-training-from-worldalphabets.py).
+            "training_available": bool(training) and training in TRAINING_FILES,
             "palette": palette,
             "conversion": conversion,
             "chars": len(texts),
@@ -380,6 +388,8 @@ def main():
     script_summary = Counter(a["script"] or "unknown" for a in alphabets)
     orientation_summary = Counter(a["orientation"] for a in alphabets)
     lang_coverage = sum(1 for a in alphabets if a["lang"])
+    with_corpus = sum(1 for a in alphabets if a["training_available"])
+    declaring = sum(1 for a in alphabets if a["training"])
 
     out = {
         "generator": "generate-alphabet-index.py",
@@ -390,6 +400,10 @@ def main():
             "by_orientation": dict(sorted(orientation_summary.items())),
             "with_lang_code": lang_coverage,
             "without_lang_code": len(alphabets) - lang_coverage,
+            "declaring_training": declaring,
+            "training_available": with_corpus,
+            "training_missing": declaring - with_corpus,
+            "no_training_declared": len(alphabets) - declaring,
         },
         "alphabets": alphabets,
     }

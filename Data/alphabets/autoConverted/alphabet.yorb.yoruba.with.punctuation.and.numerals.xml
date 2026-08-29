@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE alphabet SYSTEM "../alphabet.dtd">
-<alphabet name="Yorùbá / Yoruba with punctuation and numerals" orientation="LR" trainingFilename="training_Yoruba_NG.txt" colorsName="Default">
+<alphabet name="Yorùbá / Yoruba with punctuation and numerals" orientation="LR" trainingFilename="training_wa_yo_Latn.txt" colorsName="Default">
 	<group name="lower case letters">
 		<node label="a">
 			<textCharAction />

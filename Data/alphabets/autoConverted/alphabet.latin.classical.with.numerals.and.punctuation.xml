@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE alphabet SYSTEM "../alphabet.dtd">
-<alphabet name="Latin (classical) with numerals and punctuation" orientation="LR" trainingFilename="training_latin_XX.txt" colorsName="European/Asian">
+<alphabet name="Latin (classical) with numerals and punctuation" orientation="LR" trainingFilename="training_wa_la_Latn.txt" colorsName="European/Asian">
 	<group name="Lower case Latin letters" colorInfoName="lowercase">
 		<node label="a">
 			<!--Old Char Color: 10-->
