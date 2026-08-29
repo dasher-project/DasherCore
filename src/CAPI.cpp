@@ -1,9 +1,5 @@
 #include "dasher.h"
 
-#ifdef __ANDROID__
-#include <android/log.h>
-#endif
-
 #include "DasherCore/DashIntfScreenMsgs.h"
 #include "DasherCore/DasherInput.h"
 #include "DasherCore/DasherScreen.h"
@@ -464,6 +460,12 @@ static unsigned long nowMs() {
 struct dasher_ctx {
     struct Interface;
     std::unique_ptr<Dasher::XmlSettingsStore> settings;
+    // True when dasher_settings.xml existed in the user dir at create time.
+    // Used to distinguish "no saved preference, use a sensible default"
+    // from "the user deliberately saved this value" — a value-based
+    // comparison can't tell them apart (the compiled-in default IS a
+    // legitimate user choice).
+    bool settingsFileExisted = false;
     std::unique_ptr<CommandScreen> screen;
     PointerInput* input = nullptr;
     Dasher::CDashIntfScreenMsgs* intf = nullptr;
@@ -895,6 +897,7 @@ DASHER_API dasher_ctx* dasher_create(const char* data_dir, const char* user_dir,
 #endif
 
     try {
+        ctx->settingsFileExisted = std::filesystem::exists(settingsPath);
         ctx->settings = std::make_unique<Dasher::XmlSettingsStore>(settingsPath, nullptr);
         ctx->settings->Load();
         ctx->intf = new dasher_ctx::Interface(ctx->settings.get(), ctx);
@@ -956,14 +959,14 @@ DASHER_API void dasher_set_screen_size(dasher_ctx* ctx, int width, int height) {
         ctx->realized = true;
 
         // The persisted SP_INPUT_FILTER (loaded from dasher_settings.xml) is
-        // the user's choice — honour it. Only fall back to Normal Control
-        // when no preference was saved (the parameter is still at a
-        // non-actionable compiled-in default). The old unconditional
-        // override meant every restart clobbered the user's saved input
-        // filter with "Normal Control".
-        const std::string filter = ctx->intf->GetStringParameter(Dasher::SP_INPUT_FILTER);
-        if (filter.empty() || filter == "Stylus Control") {
-            ctx->intf->SetStringParameter(Dasher::SP_INPUT_FILTER, "Normal Control");
+        // the user's choice — honour it, whatever the value. Only when no
+        // settings file existed at create time (fresh install) do we reset
+        // to the canonical default. A value-based comparison can't
+        // distinguish "compiled-in default" from "user deliberately chose
+        // this" — the old unconditional override meant every restart
+        // clobbered the user's saved input filter.
+        if (!ctx->settingsFileExisted) {
+            ctx->intf->ResetParameter(Dasher::SP_INPUT_FILTER);
         }
 
         if (!ctx->pendingAlphabet.empty()) {
@@ -1622,9 +1625,6 @@ DASHER_API void dasher_set_user_palette(dasher_ctx* ctx, const char* name) {
 DASHER_API int dasher_get_alphabet_count(dasher_ctx* ctx) {
     if (!ctx || !ctx->intf) return 0;
     auto names = ctx->intf->GetPermittedValues(Dasher::SP_ALPHABET_ID);
-#ifdef __ANDROID__
-    __android_log_print(ANDROID_LOG_INFO, "DasherJNI", "get_alphabet_count: %zu", names.size());
-#endif
     return static_cast<int>(names.size());
 }
 

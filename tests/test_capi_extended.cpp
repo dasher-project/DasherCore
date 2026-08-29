@@ -651,7 +651,8 @@ TEST(input_filter_persists_across_restart) {
     // Regression: dasher_set_screen_size unconditionally forced
     // SP_INPUT_FILTER to "Normal Control" on first realize — clobbering the
     // user's saved preference on every restart. Now the persisted value is
-    // honoured; only empty/Stylus (non-actionable defaults) are overridden.
+    // honoured whenever a settings file existed; only a fresh install
+    // (no file) gets the Normal Control default.
     ScopedTempDir userDir;
     const int key = dasher_find_parameter_key("SP_INPUT_FILTER");
     ASSERT(key >= 0);
@@ -669,10 +670,73 @@ TEST(input_filter_persists_across_restart) {
     dasher_ctx* ctx2 = dasher_create(TEST_DATA_DIR, userDir.c_str(), nullptr);
     ASSERT(ctx2 != nullptr);
     dasher_set_screen_size(ctx2, 800, 600);
-    const char* restored = dasher_get_string_parameter(ctx2, key);
-    printf("  filter after restart: '%s'\n", restored);
-    ASSERT_EQ(std::string(restored), "Press Mode");
+    ASSERT_EQ(std::string(dasher_get_string_parameter(ctx2, key)), "Press Mode");
     dasher_destroy(ctx2);
+}
+
+TEST(input_filter_stylus_control_survives_restart) {
+    // "Stylus Control" is a REAL filter the user can deliberately select —
+    // a value-based fallback would clobber it (the same bug this PR fixes,
+    // for one specific value). The file-existence check handles it: if the
+    // settings file has it, it stays.
+    ScopedTempDir userDir;
+    const int key = dasher_find_parameter_key("SP_INPUT_FILTER");
+    ASSERT(key >= 0);
+
+    dasher_ctx* ctx = dasher_create(TEST_DATA_DIR, userDir.c_str(), nullptr);
+    ASSERT(ctx != nullptr);
+    dasher_set_screen_size(ctx, 800, 600);
+    dasher_set_string_parameter(ctx, key, "Stylus Control");
+    dasher_save_settings(ctx);
+    dasher_destroy(ctx);
+
+    dasher_ctx* ctx2 = dasher_create(TEST_DATA_DIR, userDir.c_str(), nullptr);
+    ASSERT(ctx2 != nullptr);
+    dasher_set_screen_size(ctx2, 800, 600);
+    ASSERT_EQ(std::string(dasher_get_string_parameter(ctx2, key)), "Stylus Control");
+    dasher_destroy(ctx2);
+}
+
+TEST(input_filter_fresh_install_gets_default) {
+    // No settings file → the engine resets SP_INPUT_FILTER to the
+    // canonical default via ResetParameter (no hardcoded string in the
+    // CAPI layer).
+    ScopedTempDir userDir; // fresh, no settings file written
+    const int key = dasher_find_parameter_key("SP_INPUT_FILTER");
+    ASSERT(key >= 0);
+
+    dasher_ctx* ctx = dasher_create(TEST_DATA_DIR, userDir.c_str(), nullptr);
+    ASSERT(ctx != nullptr);
+    dasher_set_screen_size(ctx, 800, 600);
+    ASSERT(std::string(dasher_get_string_parameter(ctx, key)).size() > 0);
+    dasher_destroy(ctx);
+}
+
+TEST(input_filter_empty_string_in_file_survives) {
+    // A settings file that explicitly persists SP_INPUT_FILTER="" exists
+    // (settingsFileExisted=true), so the engine honours it — the stored
+    // parameter stays empty while CreateInputFilter's fallback handles the
+    // unusable value internally. The engine must remain functional.
+    ScopedTempDir userDir;
+    char path[512];
+    snprintf(path, sizeof(path), "%s/dasher_settings.xml", userDir.c_str());
+    FILE* f = fopen(path, "w");
+    ASSERT(f != nullptr);
+    fputs("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n"
+          "<settings>\n<string name=\"InputFilter\" value=\"\" />\n</settings>\n", f);
+    fclose(f);
+
+    const int key = dasher_find_parameter_key("SP_INPUT_FILTER");
+    ASSERT(key >= 0);
+    dasher_ctx* ctx = dasher_create(TEST_DATA_DIR, userDir.c_str(), nullptr);
+    ASSERT(ctx != nullptr);
+    dasher_set_screen_size(ctx, 800, 600);
+    // The stored value is honoured as-is (empty); the engine's internal
+    // fallback provides a working filter. Verify functionality:
+    int* cmds = nullptr; int cc = 0; char** strs = nullptr; int sc = 0;
+    dasher_frame(ctx, 1000, &cmds, &cc, &strs, &sc);
+    ASSERT(cc > 0); // engine produces frames with the fallback filter
+    dasher_destroy(ctx);
 }
 
 TEST(save_settings) {
