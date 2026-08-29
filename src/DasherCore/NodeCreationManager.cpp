@@ -103,20 +103,23 @@ CNodeCreationManager::CNodeCreationManager(CSettingsStore* pSettingsStore, CDash
             /// TRANSLATORS: These 3 messages will be displayed when the user has just chosen a new alphabet. The %s
             /// parameter will be the name of the alphabet.
             if (pn.has_parsed_from_system_dir()) {
-                pInterface->FormatMessage("No user training text found - if you have written in \"%s\" before, this "
-                                          "means Dasher may not be learning from previous sessions",
-                                          pAlphInfo->GetID().c_str());
+                pInterface->FormatInfoMessage(
+                    "No user training text found - if you have written in \"%s\" before, this "
+                    "means Dasher may not be learning from previous sessions",
+                    pAlphInfo->GetID().c_str());
             } else {
-                pInterface->FormatMessage("No training text (user or system) found for \"%s\". Dasher will still work "
-                                          "but entry will be slower. We suggest downloading a training text file from "
-                                          "the Dasher website, or constructing your own.",
-                                          pAlphInfo->GetID().c_str());
+                pInterface->FormatInfoMessage(
+                    "No training text (user or system) found for \"%s\". Dasher will still work "
+                    "but entry will be slower. We suggest downloading a training text file from "
+                    "the Dasher website, or constructing your own.",
+                    pAlphInfo->GetID().c_str());
             }
         }
     } else {
-        pInterface->FormatMessage("\"%s\" does not specify training file. Dasher will work but entry will be slower. "
-                                  "Check you have the latest version of the alphabet definition.",
-                                  pAlphInfo->GetID().c_str());
+        pInterface->FormatInfoMessage(
+            "\"%s\" does not specify training file. Dasher will work but entry will be slower. "
+            "Check you have the latest version of the alphabet definition.",
+            pAlphInfo->GetID().c_str());
     }
 
     HandleParameterChange(LP_ORIENTATION);

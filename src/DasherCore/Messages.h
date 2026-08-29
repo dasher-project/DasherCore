@@ -47,6 +47,15 @@ class CMessageDisplay {
     /// Utility method for common case of displaying a modal message with a format
     void FormatMessage(const char* format, va_list args);
     void FormatMessage(const char* format, ...);
+
+    /// Non-modal (asynchronous) variant: formatted, but does NOT interrupt
+    /// text entry. Informational diagnostics — e.g. the trainer's
+    /// "no training text" warnings — must use this: a modal message pauses
+    /// the input filter, and the unpause path is only reachable after the
+    /// model moves, so a modal warning at engine startup deadlocks Dasher
+    /// permanently (#70: 148 shipped alphabets declare training corpora we
+    /// don't ship, and every one of them froze on first input).
+    void FormatInfoMessage(const char* format, ...);
 };
 
 /// @}

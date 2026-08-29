@@ -302,6 +302,63 @@ TEST(alphabet_index_scanner_edge_cases) {
     dasher_destroy(ctx);
 }
 
+TEST(alphabet_without_training_file_stays_writable) {
+    // Regression (#70): the trainer's "does not specify training file"
+    // warning used FormatMessage — the MODAL path, which pauses the input
+    // filter. The unpause path is only reachable after the model moves, so
+    // a modal warning at engine start deadlocked Dasher permanently: every
+    // alphabet without a (shipped) training corpus froze on first input —
+    // 148 shipped alphabets. Informational warnings now use the
+    // non-modal FormatInfoMessage; steering must keep working.
+    char dataDir[256], userDir[256];
+    static int counter = 0;
+    snprintf(dataDir, sizeof(dataDir), "%s/notrain_data_%d_%d", dasher_temp_dir(), dasher_getpid(), counter);
+    snprintf(userDir, sizeof(userDir), "%s/notrain_user_%d_%d", dasher_temp_dir(), dasher_getpid(), counter);
+    counter++;
+    dasher_mkdir(dataDir);
+    dasher_mkdir(userDir);
+
+    // Deliberately NO trainingFilename (and no corpus shipped for it).
+    // Paragraph + space nodes included: the model's offset accounting
+    // needs them (same shape as the shipped alphabets).
+    FILE* f = fopen((std::string(dataDir) + "/alphabet.notrain.xml").c_str(), "w");
+    ASSERT(f != nullptr);
+    fputs("<alphabet name='NoTrain Test' orientation='LR'><group name='Letters'>\n", f);
+    for (char c = 'a'; c <= 'z'; c++)
+        fprintf(f, "<node label='%c'><textCharAction /></node>\n", c);
+    fputs("</group>\n", f);
+    fputs("<group name='paragraphSpace'>\n", f);
+    fputs("<node label='&#182;' text='&#10;'><textCharAction /></node>\n", f);
+    fputs("<node label='&#9633;'><textCharAction unicode='32' /></node>\n", f);
+    fputs("</group></alphabet>\n", f);
+    fclose(f);
+
+    dasher_ctx* ctx = dasher_create(dataDir, userDir, nullptr);
+    ASSERT(ctx != nullptr);
+    // Select explicitly: without this the engine starts on the builtin
+    // Default alphabet (the only alternative in a one-alphabet data dir),
+    // which is a different test.
+    dasher_set_alphabet_id(ctx, "NoTrain Test");
+    dasher_set_screen_size(ctx, 800, 600);
+
+    // The canonical steering pattern (as low_memory_text_output): if the
+    // modal-pause deadlock returns, no frames move and output stays empty.
+    dasher_mouse_move(ctx, 700.0f, 300.0f);
+    dasher_mouse_down(ctx);
+    for (int i = 0; i < 100; i++) {
+        dasher_mouse_move(ctx, 700.0f, 280.0f);
+        run_frames(ctx, 1, 1000, 20);
+    }
+    dasher_mouse_up(ctx);
+
+    const char* text = dasher_get_output_text(ctx);
+    printf("  no-training output: '%s'\n", text ? text : "(null)");
+    ASSERT(text != nullptr);
+    ASSERT(strlen(text) > 0);
+
+    dasher_destroy(ctx);
+}
+
 TEST(low_memory_frame_commands) {
     // Frame should still produce valid draw commands in low-memory mode
     dasher_ctx* ctx = create_isolated_context();
