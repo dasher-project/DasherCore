@@ -145,15 +145,13 @@ TEST(alphabet_index_duplicate_ids_prefer_maintained) {
     // the authoritative definition: maintained root file over the
     // autoConverted export over the oldAlphabets v5 original. Both orders
     // are created here explicitly so the test cannot depend on readdir luck.
-    char dataDir[256], userDir[256];
-    static int counter = 0;
-    snprintf(dataDir, sizeof(dataDir), "%s/dup_data_%d_%d", dasher_temp_dir(), dasher_getpid(), counter);
-    snprintf(userDir, sizeof(userDir), "%s/dup_user_%d_%d", dasher_temp_dir(), dasher_getpid(), counter);
-    counter++;
+    // ScopedTempDir: stale-dir removal + RAII cleanup (see the scanner
+    // edge-case test for the flakiness this prevents).
+    ScopedTempDir dataDir, userDir;
     char sub[512];
-    snprintf(sub, sizeof(sub), "%s/oldAlphabets", dataDir);
-    dasher_mkdir(dataDir);
-    dasher_mkdir(sub);
+    snprintf(sub, sizeof(sub), "%s/oldAlphabets", dataDir.c_str());
+    std::error_code ec;
+    std::filesystem::create_directories(sub, ec);
 
     // Maintained definition: 30 letters — 31 symbols, deliberately unlike
     // the builtin Default alphabet (26 letters / 27 symbols) so the count
@@ -198,15 +196,20 @@ TEST(alphabet_index_duplicate_ids_prefer_maintained) {
     // the ancestor name must not collapse every file to the legacy tier
     // (the old substring-based tier check did, making the winner traversal
     // luck again).
+    // Stale-state removal first (review): a reused PID with leftovers from
+    // a previous run would resurrect old settings/files. ScopedTempDir
+    // can't be used here — the data dir must live INSIDE a folder literally
+    // named oldAlphabets — so clear the whole nested subtree manually.
     char nested[512], nestedData[512], nestedUser[512], nestedOld[512];
     snprintf(nested, sizeof(nested), "%s/oldAlphabets", dasher_temp_dir());
     snprintf(nestedData, sizeof(nestedData), "%s/nested_data_%d", nested, dasher_getpid());
     snprintf(nestedUser, sizeof(nestedUser), "%s/nested_user_%d", nested, dasher_getpid());
     snprintf(nestedOld, sizeof(nestedOld), "%s/oldAlphabets", nestedData);
-    dasher_mkdir(nested);
-    dasher_mkdir(nestedData);
-    dasher_mkdir(nestedUser);
-    dasher_mkdir(nestedOld);
+    std::filesystem::remove_all(nestedData, ec);
+    std::filesystem::remove_all(nestedUser, ec);
+    std::filesystem::create_directories(nested, ec);
+    std::filesystem::create_directories(nestedOld, ec);
+    std::filesystem::create_directories(nestedUser, ec);
 
     f = fopen((std::string(nestedData) + "/alphabet.dup.xml").c_str(), "w");
     ASSERT(f != nullptr);
@@ -247,14 +250,12 @@ TEST(alphabet_index_scanner_edge_cases) {
     // a 2048-byte prefix. The indexer now uses pugixml itself. All three
     // edge cases live in one file: single quotes, numeric character
     // references, and a prolog pushing the root past 2048 bytes.
-    char dataDir[256], userDir[256], path[512];
-    static int counter = 0;
-    snprintf(dataDir, sizeof(dataDir), "%s/idx_edge_data_%d_%d", dasher_temp_dir(), dasher_getpid(), counter);
-    snprintf(userDir, sizeof(userDir), "%s/idx_edge_user_%d_%d", dasher_temp_dir(), dasher_getpid(), counter);
-    counter++;
-    dasher_mkdir(dataDir);
-    dasher_mkdir(userDir);
-    snprintf(path, sizeof(path), "%s/alphabet.turkmen.entity.xml", dataDir);
+    // ScopedTempDir: stale-dir removal + RAII cleanup (a reused PID with a
+    // leftover dasher_settings.xml made tests non-deterministic — the same
+    // failure mode create_isolated_context() documents).
+    ScopedTempDir dataDir, userDir;
+    char path[512];
+    snprintf(path, sizeof(path), "%s/alphabet.turkmen.entity.xml", dataDir.c_str());
 
     FILE* f = fopen(path, "w");
     ASSERT(f != nullptr);
@@ -310,13 +311,9 @@ TEST(alphabet_without_training_file_stays_writable) {
     // alphabet without a (shipped) training corpus froze on first input —
     // 148 shipped alphabets. Informational warnings now use the
     // non-modal FormatInfoMessage; steering must keep working.
-    char dataDir[256], userDir[256];
-    static int counter = 0;
-    snprintf(dataDir, sizeof(dataDir), "%s/notrain_data_%d_%d", dasher_temp_dir(), dasher_getpid(), counter);
-    snprintf(userDir, sizeof(userDir), "%s/notrain_user_%d_%d", dasher_temp_dir(), dasher_getpid(), counter);
-    counter++;
-    dasher_mkdir(dataDir);
-    dasher_mkdir(userDir);
+    // ScopedTempDir: stale-dir removal + RAII cleanup (same rationale as
+    // the other tests in this file).
+    ScopedTempDir dataDir, userDir;
 
     // Deliberately NO trainingFilename (and no corpus shipped for it).
     // Paragraph + space nodes included: the model's offset accounting
