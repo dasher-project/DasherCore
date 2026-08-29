@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE alphabet SYSTEM "../alphabet.dtd">
-<alphabet name="Hawaiian / ʻŌlelo Hawaiʻi with lots of punctuation" orientation="LR" trainingFilename="training_Hawaiian_US.txt" colorsName="European/Asian">
+<alphabet name="Hawaiian / ʻŌlelo Hawaiʻi with lots of punctuation" orientation="LR" trainingFilename="training_wa_haw_Latn.txt" colorsName="European/Asian">
 	<!-- I included the full English alphabet for convenience of writing mixed Hawaiian and English -->
 	<group name="Lower case Latin letters" colorInfoName="lowercase">
 		<node label="a">

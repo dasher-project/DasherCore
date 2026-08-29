@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE alphabet SYSTEM "../alphabet.dtd">
-<alphabet name="Română / Romanian with punctuation and numerals" orientation="LR" trainingFilename="training_Romanian_RO.txt" colorsName="Default">
+<alphabet name="Română / Romanian with punctuation and numerals" orientation="LR" trainingFilename="training_wa_ro_Latn.txt" colorsName="Default">
 	<!-- Romanian is a Romance language spoken by about 24
       million people in Romania, Moldova and Ukraine.      -->
 	<group name="lower case letters">

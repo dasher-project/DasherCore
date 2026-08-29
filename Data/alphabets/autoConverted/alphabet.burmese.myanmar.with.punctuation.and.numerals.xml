@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE alphabet SYSTEM "../alphabet.dtd">
-<alphabet name="Burmese / Myanmar with punctuation and numerals" orientation="LR" trainingFilename="training_myanmar_MM.txt" colorsName="Default">
+<alphabet name="Burmese / Myanmar with punctuation and numerals" orientation="LR" trainingFilename="training_wa_my_Mymr.txt" colorsName="Default">
 	<group name="Myanmar letters">
 		<node label="က">
 			<!--Note:  KA  -->

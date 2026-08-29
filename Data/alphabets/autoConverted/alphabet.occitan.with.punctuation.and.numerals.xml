@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE alphabet SYSTEM "../alphabet.dtd">
-<alphabet name="Occitan with punctuation and numerals" orientation="LR" trainingFilename="training_occitan_FR.txt" colorsName="Default">
+<alphabet name="Occitan with punctuation and numerals" orientation="LR" trainingFilename="training_wa_oc_Latn.txt" colorsName="Default">
 	<!-- Occitan is a Romance language spoken mainly in southern France and also in Italy and Spain. There are perhaps 1.5 million people who speak Occitan in their daily lives, while 5 or 6 million people are able to speak the language. The majority of speakers are elderly and live in rural areas. There are six dialects of Occitan: Provencal, Gascon, Languedoc, Limousin, Alpine and Auvergne. -->
 	<group name="lower case letters">
 		<node label="a">

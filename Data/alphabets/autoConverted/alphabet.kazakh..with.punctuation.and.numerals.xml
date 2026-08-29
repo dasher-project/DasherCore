@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE alphabet SYSTEM "../alphabet.dtd">
-<alphabet name="Kazakh / Қазақ with punctuation and numerals" orientation="LR" trainingFilename="training_kazakh_KZ.txt" colorsName="Default">
+<alphabet name="Kazakh / Қазақ with punctuation and numerals" orientation="LR" trainingFilename="training_wa_kk_Cyrl.txt" colorsName="Default">
 	<group name="lower case letters">
 		<node label="а">
 			<!--Note: CYRILLIC SMALL LETTER A -->

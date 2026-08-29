@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE alphabet SYSTEM "../alphabet.dtd">
-<alphabet name="Gujarati with punctuation and numerals" orientation="LR" trainingFilename="training_Gujarati_IN.txt" colorsName="Default">
+<alphabet name="Gujarati with punctuation and numerals" orientation="LR" trainingFilename="training_wa_gu_Gujr.txt" colorsName="Default">
 	<group name="Gujarati letters">
 		<node label="ૐ">
 			<!--Note: GUJARATI OM -->

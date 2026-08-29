@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE alphabet SYSTEM "../alphabet.dtd">
-<alphabet name="Tigrinya (ትግርኛ) with punctuation and numerals" orientation="LR" trainingFilename="training_tigrinya_ET.txt" colorsName="European/Asian">
+<alphabet name="Tigrinya (ትግርኛ) with punctuation and numerals" orientation="LR" trainingFilename="training_wa_ti_Ethi.txt" colorsName="European/Asian">
 	<!-- identical alphabet used for Tigrinya, Amharic and Ethiopic -->
 	<group name="ethiopic letters" colorInfoName="lowercase">
 		<node label="ሀ">

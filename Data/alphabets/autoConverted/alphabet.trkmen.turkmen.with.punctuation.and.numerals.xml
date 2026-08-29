@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE alphabet SYSTEM "../alphabet.dtd">
-<alphabet name="Türkmen / Turkmen with punctuation and numerals" orientation="LR" trainingFilename="training_turkmen_TM.txt" colorsName="Default">
+<alphabet name="Türkmen / Turkmen with punctuation and numerals" orientation="LR" trainingFilename="training_wa_tk_Latn.txt" colorsName="Default">
 	<!-- Turkmen is a Turkic language spoken by about 6.4 million people in Turkmenistan, Afghanistan, Germany, Iran, Iraq, Kazakhstan, Kyrgyzstan, Pakistan, Russia (Asia), Tajikistan, Turkey (Asia), USA and Uzbekistan. -->
 	<group name="lower case letters">
 		<node label="a">

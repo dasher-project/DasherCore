@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE alphabet SYSTEM "../alphabet.dtd">
-<alphabet name="Magyar, kisbetűs, rövid / Hungarian lowercase only" orientation="LR" trainingFilename="training_hungarian_HU.txt" colorsName="Default">
+<alphabet name="Magyar, kisbetűs, rövid / Hungarian lowercase only" orientation="LR" trainingFilename="training_wa_hu_Latn.txt" colorsName="Default">
 	<group name="Lower case Hungarian letters">
 		<node label="a">
 			<textCharAction />

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE alphabet SYSTEM "../alphabet.dtd">
-<alphabet name="Thai / ภาษาไทย with punctuation and numerals" orientation="LR" trainingFilename="training_Thai_TH.txt" colorsName="European/Asian">
+<alphabet name="Thai / ภาษาไทย with punctuation and numerals" orientation="LR" trainingFilename="training_wa_th_Thai.txt" colorsName="European/Asian">
 	<group name="Thai letters">
 		<node label="ก">
 			<!--Note: 0E01 KO KAI-->

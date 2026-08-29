@@ -6,7 +6,7 @@
 <orientation type="LR"/>
 <encoding type="Western"/>
 <palette>European/Asian</palette>
-<train>training_cherokee_US.txt</train>
+<train>training_wa_chr_Cher.txt</train>
 <paragraph d="&#182;" b="9"/>
 <space d="&#x25a1;" t=" " b="9"/>
 <control d="Control" t="" b="8"/>

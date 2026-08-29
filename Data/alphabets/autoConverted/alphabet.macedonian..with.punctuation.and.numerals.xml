@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE alphabet SYSTEM "../alphabet.dtd">
-<alphabet name="Macedonian / Македонски with punctuation and numerals" orientation="LR" trainingFilename="training_macedonian_MK.txt" colorsName="Default">
+<alphabet name="Macedonian / Македонски with punctuation and numerals" orientation="LR" trainingFilename="training_wa_mk_Cyrl.txt" colorsName="Default">
 	<group name="lower case letters">
 		<node label="а">
 			<!--Note: CYRILLIC SMALL LETTER A -->

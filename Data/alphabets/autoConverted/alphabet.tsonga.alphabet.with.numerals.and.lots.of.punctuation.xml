@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE alphabet SYSTEM "../alphabet.dtd">
-<alphabet name="Tsonga alphabet with numerals and lots of punctuation" orientation="LR" trainingFilename="training_Tsonga_ZA.txt" colorsName="Default">
+<alphabet name="Tsonga alphabet with numerals and lots of punctuation" orientation="LR" trainingFilename="training_wa_ts_Latn.txt" colorsName="Default">
 	<group name="Lower case Latin letters">
 		<node label="a">
 			<textCharAction />
