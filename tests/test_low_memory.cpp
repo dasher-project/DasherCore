@@ -145,15 +145,13 @@ TEST(alphabet_index_duplicate_ids_prefer_maintained) {
     // the authoritative definition: maintained root file over the
     // autoConverted export over the oldAlphabets v5 original. Both orders
     // are created here explicitly so the test cannot depend on readdir luck.
-    char dataDir[256], userDir[256];
-    static int counter = 0;
-    snprintf(dataDir, sizeof(dataDir), "%s/dup_data_%d_%d", dasher_temp_dir(), dasher_getpid(), counter);
-    snprintf(userDir, sizeof(userDir), "%s/dup_user_%d_%d", dasher_temp_dir(), dasher_getpid(), counter);
-    counter++;
+    // ScopedTempDir: stale-dir removal + RAII cleanup (see the scanner
+    // edge-case test for the flakiness this prevents).
+    ScopedTempDir dataDir, userDir;
     char sub[512];
-    snprintf(sub, sizeof(sub), "%s/oldAlphabets", dataDir);
-    dasher_mkdir(dataDir);
-    dasher_mkdir(sub);
+    snprintf(sub, sizeof(sub), "%s/oldAlphabets", dataDir.c_str());
+    std::error_code ec;
+    std::filesystem::create_directories(sub, ec);
 
     // Maintained definition: 30 letters — 31 symbols, deliberately unlike
     // the builtin Default alphabet (26 letters / 27 symbols) so the count
@@ -198,15 +196,20 @@ TEST(alphabet_index_duplicate_ids_prefer_maintained) {
     // the ancestor name must not collapse every file to the legacy tier
     // (the old substring-based tier check did, making the winner traversal
     // luck again).
+    // Stale-state removal first (review): a reused PID with leftovers from
+    // a previous run would resurrect old settings/files. ScopedTempDir
+    // can't be used here — the data dir must live INSIDE a folder literally
+    // named oldAlphabets — so clear the whole nested subtree manually.
     char nested[512], nestedData[512], nestedUser[512], nestedOld[512];
     snprintf(nested, sizeof(nested), "%s/oldAlphabets", dasher_temp_dir());
     snprintf(nestedData, sizeof(nestedData), "%s/nested_data_%d", nested, dasher_getpid());
     snprintf(nestedUser, sizeof(nestedUser), "%s/nested_user_%d", nested, dasher_getpid());
     snprintf(nestedOld, sizeof(nestedOld), "%s/oldAlphabets", nestedData);
-    dasher_mkdir(nested);
-    dasher_mkdir(nestedData);
-    dasher_mkdir(nestedUser);
-    dasher_mkdir(nestedOld);
+    std::filesystem::remove_all(nestedData, ec);
+    std::filesystem::remove_all(nestedUser, ec);
+    std::filesystem::create_directories(nested, ec);
+    std::filesystem::create_directories(nestedOld, ec);
+    std::filesystem::create_directories(nestedUser, ec);
 
     f = fopen((std::string(nestedData) + "/alphabet.dup.xml").c_str(), "w");
     ASSERT(f != nullptr);
@@ -247,14 +250,12 @@ TEST(alphabet_index_scanner_edge_cases) {
     // a 2048-byte prefix. The indexer now uses pugixml itself. All three
     // edge cases live in one file: single quotes, numeric character
     // references, and a prolog pushing the root past 2048 bytes.
-    char dataDir[256], userDir[256], path[512];
-    static int counter = 0;
-    snprintf(dataDir, sizeof(dataDir), "%s/idx_edge_data_%d_%d", dasher_temp_dir(), dasher_getpid(), counter);
-    snprintf(userDir, sizeof(userDir), "%s/idx_edge_user_%d_%d", dasher_temp_dir(), dasher_getpid(), counter);
-    counter++;
-    dasher_mkdir(dataDir);
-    dasher_mkdir(userDir);
-    snprintf(path, sizeof(path), "%s/alphabet.turkmen.entity.xml", dataDir);
+    // ScopedTempDir: stale-dir removal + RAII cleanup (a reused PID with a
+    // leftover dasher_settings.xml made tests non-deterministic — the same
+    // failure mode create_isolated_context() documents).
+    ScopedTempDir dataDir, userDir;
+    char path[512];
+    snprintf(path, sizeof(path), "%s/alphabet.turkmen.entity.xml", dataDir.c_str());
 
     FILE* f = fopen(path, "w");
     ASSERT(f != nullptr);
@@ -298,6 +299,59 @@ TEST(alphabet_index_scanner_edge_cases) {
     printf("  selected '%s'\n", current ? current : "(null)");
     ASSERT(current != nullptr);
     ASSERT(std::string(current) == expected);
+
+    dasher_destroy(ctx);
+}
+
+TEST(alphabet_without_training_file_stays_writable) {
+    // Regression (#70): the trainer's "does not specify training file"
+    // warning used FormatMessage — the MODAL path, which pauses the input
+    // filter. The unpause path is only reachable after the model moves, so
+    // a modal warning at engine start deadlocked Dasher permanently: every
+    // alphabet without a (shipped) training corpus froze on first input —
+    // 148 shipped alphabets. Informational warnings now use the
+    // non-modal FormatInfoMessage; steering must keep working.
+    // ScopedTempDir: stale-dir removal + RAII cleanup (same rationale as
+    // the other tests in this file).
+    ScopedTempDir dataDir, userDir;
+
+    // Deliberately NO trainingFilename (and no corpus shipped for it).
+    // Paragraph + space nodes included: the model's offset accounting
+    // needs them (same shape as the shipped alphabets).
+    FILE* f = fopen((std::string(dataDir) + "/alphabet.notrain.xml").c_str(), "w");
+    ASSERT(f != nullptr);
+    fputs("<alphabet name='NoTrain Test' orientation='LR'><group name='Letters'>\n", f);
+    for (char c = 'a'; c <= 'z'; c++)
+        fprintf(f, "<node label='%c'><textCharAction /></node>\n", c);
+    fputs("</group>\n", f);
+    fputs("<group name='paragraphSpace'>\n", f);
+    fputs("<node label='&#182;' text='&#10;'><textCharAction /></node>\n", f);
+    fputs("<node label='&#9633;'><textCharAction unicode='32' /></node>\n", f);
+    fputs("</group></alphabet>\n", f);
+    fclose(f);
+
+    dasher_ctx* ctx = dasher_create(dataDir, userDir, nullptr);
+    ASSERT(ctx != nullptr);
+    // Select explicitly: without this the engine starts on the builtin
+    // Default alphabet (the only alternative in a one-alphabet data dir),
+    // which is a different test.
+    dasher_set_alphabet_id(ctx, "NoTrain Test");
+    dasher_set_screen_size(ctx, 800, 600);
+
+    // The canonical steering pattern (as low_memory_text_output): if the
+    // modal-pause deadlock returns, no frames move and output stays empty.
+    dasher_mouse_move(ctx, 700.0f, 300.0f);
+    dasher_mouse_down(ctx);
+    for (int i = 0; i < 100; i++) {
+        dasher_mouse_move(ctx, 700.0f, 280.0f);
+        run_frames(ctx, 1, 1000, 20);
+    }
+    dasher_mouse_up(ctx);
+
+    const char* text = dasher_get_output_text(ctx);
+    printf("  no-training output: '%s'\n", text ? text : "(null)");
+    ASSERT(text != nullptr);
+    ASSERT(strlen(text) > 0);
 
     dasher_destroy(ctx);
 }
