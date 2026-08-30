@@ -712,7 +712,7 @@ TEST(input_filter_fresh_install_gets_default) {
     dasher_ctx* ctx = dasher_create(TEST_DATA_DIR, userDir.c_str(), nullptr);
     ASSERT(ctx != nullptr);
     dasher_set_string_parameter(ctx, key, "Press Mode"); // pre-realize, persisted
-    dasher_set_screen_size(ctx, 800, 600);                // fresh install reset fires
+    dasher_set_screen_size(ctx, 800, 600);               // fresh install reset fires
     ASSERT(std::string(dasher_get_string_parameter(ctx, key)).size() > 0);
     ASSERT(std::string(dasher_get_string_parameter(ctx, key)) != "Press Mode");
     dasher_save_settings(ctx); // ensure file has the reset value
@@ -738,7 +738,8 @@ TEST(input_filter_empty_string_in_file_survives) {
     FILE* f = fopen(path, "w");
     ASSERT(f != nullptr);
     fputs("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n"
-          "<settings>\n<string name=\"InputFilter\" value=\"\" />\n</settings>\n", f);
+          "<settings>\n<string name=\"InputFilter\" value=\"\" />\n</settings>\n",
+          f);
     fclose(f);
 
     const int key = dasher_find_parameter_key("SP_INPUT_FILTER");
@@ -748,7 +749,10 @@ TEST(input_filter_empty_string_in_file_survives) {
     dasher_set_screen_size(ctx, 800, 600);
     // The stored value is honoured as-is (empty); the engine's internal
     // fallback provides a working filter. Verify functionality:
-    int* cmds = nullptr; int cc = 0; char** strs = nullptr; int sc = 0;
+    int* cmds = nullptr;
+    int cc = 0;
+    char** strs = nullptr;
+    int sc = 0;
     dasher_frame(ctx, 1000, &cmds, &cc, &strs, &sc);
     ASSERT(cc > 0); // engine produces frames with the fallback filter
     dasher_destroy(ctx);
