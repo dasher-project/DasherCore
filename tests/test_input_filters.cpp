@@ -119,11 +119,13 @@ TEST_CASE("filters/invalid name silently falls back") {
     CHECK(cc > 0);
 }
 
-TEST_CASE("filters/setting SP_INPUT_FILTER before realize is lost") {
-    // CHARACTERIZATION: dasher_set_screen_size force-sets SP_INPUT_FILTER
-    // to "Normal Control" exactly once during realize (CAPI.cpp:724). Any
-    // earlier setting is overwritten. This is documented behavior we
-    // characterize so a future change to the force-set is visible.
+TEST_CASE("filters/setting SP_INPUT_FILTER before realize on fresh install") {
+    // On a fresh install (no settings file), the engine applies the
+    // canonical default (platform-dependent: "Stylus Control" on Apple,
+    // "Normal Control" elsewhere) regardless of any pre-realize assignment
+    // — a programmatic pre-realize set is not a persisted preference.
+    // The persistence tests (in test_capi_extended) cover the case where
+    // a saved settings file IS present.
     ScopedTempDir dir;
     dasher_ctx* ctx = dasher_create(get_test_data_dir(), dir.c_str(), nullptr);
     REQUIRE(ctx != nullptr);
@@ -131,9 +133,11 @@ TEST_CASE("filters/setting SP_INPUT_FILTER before realize is lost") {
     set_filter(ctx, "Click Mode");
     CHECK(std::string(dasher_get_string_parameter(ctx, sp_input_filter_key())) == "Click Mode");
 
-    // set_screen_size realizes and overwrites.
+    // set_screen_size realizes — fresh install discards the pre-realize
+    // set. Assert it's gone, not a specific default (the default is
+    // "Stylus Control" on Apple platforms, "Normal Control" elsewhere).
     dasher_set_screen_size(ctx, 800, 600);
-    CHECK(std::string(dasher_get_string_parameter(ctx, sp_input_filter_key())) == "Normal Control");
+    CHECK(std::string(dasher_get_string_parameter(ctx, sp_input_filter_key())) != "Click Mode");
 
     dasher_destroy(ctx);
 }

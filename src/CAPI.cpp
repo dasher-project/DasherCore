@@ -460,6 +460,12 @@ static unsigned long nowMs() {
 struct dasher_ctx {
     struct Interface;
     std::unique_ptr<Dasher::XmlSettingsStore> settings;
+    // True when dasher_settings.xml existed in the user dir at create time.
+    // Used to distinguish "no saved preference, use a sensible default"
+    // from "the user deliberately saved this value" — a value-based
+    // comparison can't tell them apart (the compiled-in default IS a
+    // legitimate user choice).
+    bool settingsFileExisted = false;
     std::unique_ptr<CommandScreen> screen;
     PointerInput* input = nullptr;
     Dasher::CDashIntfScreenMsgs* intf = nullptr;
@@ -891,6 +897,7 @@ DASHER_API dasher_ctx* dasher_create(const char* data_dir, const char* user_dir,
 #endif
 
     try {
+        ctx->settingsFileExisted = std::filesystem::exists(settingsPath);
         ctx->settings = std::make_unique<Dasher::XmlSettingsStore>(settingsPath, nullptr);
         ctx->settings->Load();
         ctx->intf = new dasher_ctx::Interface(ctx->settings.get(), ctx);
@@ -942,6 +949,26 @@ DASHER_API void dasher_set_screen_size(dasher_ctx* ctx, int width, int height) {
     }
 
     if (!ctx->realized) {
+        // On a fresh install (no settings file existed at create time),
+        // apply the canonical default BEFORE Realize(). We use
+        // SetStringParameter with the parameter-table default — NOT
+        // ResetParameter, which only changes the in-memory value. A
+        // pre-realize programmatic set (dasher_set_string_parameter)
+        // persists to disk via SAVE_IMMEDIATELY; an in-memory-only reset
+        // would leave that stale entry, and the supposedly discarded
+        // filter would resurrect on the next restart. SetStringParameter
+        // overwrites the disk entry, broadcasts the change, and the
+        // value is correct when Realize()->CreateInputFilter() runs.
+        if (!ctx->settingsFileExisted) {
+            const auto defaultIt = Dasher::Settings::parameter_defaults.find(Dasher::SP_INPUT_FILTER);
+            if (defaultIt != Dasher::Settings::parameter_defaults.end()) {
+                const auto* defaultValue = std::get_if<std::string>(&defaultIt->second.value);
+                if (defaultValue) {
+                    ctx->settings->SetStringParameter(Dasher::SP_INPUT_FILTER, *defaultValue);
+                }
+            }
+        }
+
         try {
             ctx->intf->Realize(nowMs());
         } catch (const std::exception& e) {
@@ -950,9 +977,6 @@ DASHER_API void dasher_set_screen_size(dasher_ctx* ctx, int width, int height) {
             log_boundary_error(ctx, "dasher_set_screen_size: Realize failed", "unknown exception");
         }
         ctx->realized = true;
-
-        // Force Normal Control filter for continuous mouse input
-        ctx->intf->SetStringParameter(Dasher::SP_INPUT_FILTER, "Normal Control");
 
         if (!ctx->pendingAlphabet.empty()) {
             std::string pending = ctx->pendingAlphabet;
