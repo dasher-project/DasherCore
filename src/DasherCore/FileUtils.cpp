@@ -3,6 +3,7 @@
 
 #include <regex>
 #include <filesystem>
+#include <unordered_set>
 #include <fstream>
 
 namespace Dasher {
@@ -90,22 +91,29 @@ void Dasher::FileUtils::ScanFiles(AbstractParser* parser, const std::string& str
             // successfully read entry; a second failure abandons the
             // directory. Siblings and later directories are unaffected.
             bool restarted = false;
-            std::string lastName;
             std::error_code it_ec;
             std::filesystem::directory_iterator it(dir, it_ec);
             const std::filesystem::directory_iterator end;
+            // Identity-based visited set: std::filesystem does not guarantee
+            // iteration order, so the recovery rescan cannot skip "past the
+            // last name" — a different enumeration order would silently skip
+            // unseen entries (review P1 on #77). The set also makes the rescan
+            // idempotent (no double ParseFile).
+            std::unordered_set<std::string> visited;
             while (!it_ec && it != end) {
-                std::error_code ent_ec;
-                const std::filesystem::path p = it->path();
-                lastName = p.filename().string();
-                if (it->is_symlink(ent_ec) || ent_ec) {
-                    // skip; fall through to the increment below
-                } else if (it->is_directory(ent_ec) && !ent_ec) {
-                    pending.push_back(p);
-                } else {
-                    ent_ec.clear();
-                    if (it->is_regular_file(ent_ec) && !ent_ec && std::regex_search(p.filename().string(), pattern)) {
-                        parser->ParseFile(p.string(), IsFileWriteable(p));
+                const std::string name = it->path().filename().string();
+                if (visited.insert(name).second) {
+                    std::error_code ent_ec;
+                    const std::filesystem::path p = it->path();
+                    if (it->is_symlink(ent_ec) || ent_ec) {
+                        // skip symlinks / unreadable entries
+                    } else if (it->is_directory(ent_ec) && !ent_ec) {
+                        pending.push_back(p);
+                    } else {
+                        ent_ec.clear();
+                        if (it->is_regular_file(ent_ec) && !ent_ec && std::regex_search(name, pattern)) {
+                            parser->ParseFile(p.string(), IsFileWriteable(p));
+                        }
                     }
                 }
                 it.increment(it_ec);
@@ -116,10 +124,7 @@ void Dasher::FileUtils::ScanFiles(AbstractParser* parser, const std::string& str
                     std::error_code re_ec;
                     std::filesystem::directory_iterator re(dir, re_ec);
                     if (re_ec) break;
-                    while (re != end && !re_ec && re->path().filename().string() <= lastName)
-                        re.increment(re_ec);
-                    if (re_ec) break;
-                    it = re;
+                    it = re; // full rescan; the visited set skips handled entries
                 }
             }
         }

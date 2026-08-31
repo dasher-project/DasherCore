@@ -949,6 +949,20 @@ DASHER_API void dasher_set_screen_size(dasher_ctx* ctx, int width, int height) {
     }
 
     if (!ctx->realized) {
+        // A previous failed Realize left the interface incrementally mutated
+        // (CreateModules registers onto the existing module manager; other
+        // components are rebuilt in place), so retrying Realize() on it could
+        // retain or duplicate state from the failed attempt. Recreate the
+        // interface first: the settings store and all ctx-level state (screen,
+        // callbacks, pending alphabet) survive; the fresh Realize rebuilds
+        // every component. PointerInput is owned by the old interface's module
+        // manager, so null it before the delete — CreateModules re-establishes.
+        if (ctx->engineError) {
+            ctx->input = nullptr;
+            delete ctx->intf;
+            ctx->intf = new dasher_ctx::Interface(ctx->settings.get(), ctx);
+            ctx->intf->ChangeScreen(ctx->screen.get());
+        }
         // On a fresh install (no settings file existed at create time),
         // apply the canonical default BEFORE Realize(). We use
         // SetStringParameter with the parameter-table default — NOT
