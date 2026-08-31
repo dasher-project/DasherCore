@@ -59,31 +59,45 @@ void Dasher::FileUtils::ScanFiles(AbstractParser* parser, const std::string& str
     // Note: pattern is interpreted as regex, so "alphabet.*.xml" matches "alphabet.English.xml"
     const std::regex pattern = std::regex(strPattern);
 
-    // Search in the specified data directory (or current directory if not set)
-    // Uses recursive_directory_iterator to find files in subdirectories
+    // Search ONLY in the specified data directory. The old fallback to
+    // current_path() turned an empty/missing data dir (frontend passed a bad
+    // bundle path) into an unbounded scan of the user's home directory —
+    // minutes of regex per file while the caller held its engine lock
+    // (watch spike hang, 2026-08-31). No data dir means nothing to scan.
     std::vector<std::filesystem::path> search_paths;
     if (!s_dataDirectory.empty()) {
         search_paths.push_back(std::filesystem::path(s_dataDirectory));
-    } else {
-        search_paths.push_back(std::filesystem::current_path());
     }
 
     for (const std::filesystem::path& current_path : search_paths) {
         std::error_code exists_ec;
         if (!std::filesystem::exists(current_path, exists_ec) || exists_ec) continue;
-        // Use recursive_directory_iterator to search subdirectories. One bad
-        // entry (dangling symlink, permission race, bundle metadata) must not
-        // abort the whole scan: entry.is_regular_file()/iteration use the
-        // error_code overloads and skip on failure. The throwing overloads
-        // here left Realize() half-complete with realized=true and a null
-        // model (watch spike crash, 2026-08-31).
-        std::error_code iter_ec;
-        for (std::filesystem::recursive_directory_iterator it(current_path, iter_ec), end;
-             it != end && !iter_ec; it.increment(iter_ec)) {
-            std::error_code entry_ec;
-            if (it->is_regular_file(entry_ec) && !entry_ec &&
-                std::regex_search(it->path().filename().string(), pattern)) {
-                parser->ParseFile(it->path().string(), IsFileWriteable(it->path()));
+        // Iterative walk that isolates failures PER DIRECTORY: one
+        // inaccessible or transiently failing subtree skips just that
+        // subtree; sibling directories still scan (review P1 on #77 — a
+        // mid-iteration error previously ended the whole search root, and the
+        // throwing overloads before that aborted Realize entirely). Symlinks
+        // are never followed — matches recursive_directory_iterator's default
+        // and avoids cycles.
+        std::vector<std::filesystem::path> pending{current_path};
+        while (!pending.empty()) {
+            const std::filesystem::path dir = pending.back();
+            pending.pop_back();
+            std::error_code it_ec;
+            for (std::filesystem::directory_iterator it(dir, it_ec), end; !it_ec && it != end;
+                 it.increment(it_ec)) {
+                std::error_code ent_ec;
+                const std::filesystem::path p = it->path();
+                if (it->is_symlink(ent_ec) || ent_ec) continue;
+                if (it->is_directory(ent_ec) && !ent_ec) {
+                    pending.push_back(p);
+                    continue;
+                }
+                ent_ec.clear();
+                if (it->is_regular_file(ent_ec) && !ent_ec &&
+                    std::regex_search(p.filename().string(), pattern)) {
+                    parser->ParseFile(p.string(), IsFileWriteable(p));
+                }
             }
         }
     }
