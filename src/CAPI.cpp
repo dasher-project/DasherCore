@@ -986,6 +986,14 @@ DASHER_API void dasher_set_screen_size(dasher_ctx* ctx, int width, int height) {
             return;
         }
         ctx->realized = true;
+        // A successful (re)realize rebuilt the interface from scratch, so an
+        // engineError latched by a previous failed Realize is obsolete. That
+        // failed-Realize path is the only one that latches while !realized
+        // (mid-frame throws leave realized set and never re-enter this
+        // block), so clearing here cannot mask a live fault. Without this,
+        // one failed realize + a successful retry left the engine permanently
+        // no-op'ing (review P1 on #77).
+        ctx->engineError = false;
 
         if (!ctx->pendingAlphabet.empty()) {
             std::string pending = ctx->pendingAlphabet;
