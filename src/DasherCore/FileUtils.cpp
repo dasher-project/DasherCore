@@ -83,18 +83,32 @@ void Dasher::FileUtils::ScanFiles(AbstractParser* parser, const std::string& str
         while (!pending.empty()) {
             const std::filesystem::path dir = pending.back();
             pending.pop_back();
-            // One restart on a transient iteration error: a failed increment
-            // invalidates the iterator, so the directory is re-opened and
-            // scanned past the last successfully read entry (directory order
-            // is a stable per-open sequence on the platforms we ship). The
-            // restart is bounded — a persistently failing directory is
-            // abandoned after it, but its siblings and later directories are
-            // not affected (review P1 on #77).
+            // Increment (and its recovery) live INSIDE the loop body: with
+            // increment in the for-header, a set error_code failed the loop
+            // condition before any recovery could run (review P1 on #77).
+            // Recovery re-opens the directory once and skips past the last
+            // successfully read entry; a second failure abandons the
+            // directory. Siblings and later directories are unaffected.
             bool restarted = false;
             std::string lastName;
             std::error_code it_ec;
-            for (std::filesystem::directory_iterator it(dir, it_ec), end; !it_ec && it != end;
-                 it.increment(it_ec)) {
+            std::filesystem::directory_iterator it(dir, it_ec);
+            const std::filesystem::directory_iterator end;
+            while (!it_ec && it != end) {
+                std::error_code ent_ec;
+                const std::filesystem::path p = it->path();
+                lastName = p.filename().string();
+                if (it->is_symlink(ent_ec) || ent_ec) {
+                    // skip; fall through to the increment below
+                } else if (it->is_directory(ent_ec) && !ent_ec) {
+                    pending.push_back(p);
+                } else {
+                    ent_ec.clear();
+                    if (it->is_regular_file(ent_ec) && !ent_ec && std::regex_search(p.filename().string(), pattern)) {
+                        parser->ParseFile(p.string(), IsFileWriteable(p));
+                    }
+                }
+                it.increment(it_ec);
                 if (it_ec) {
                     if (restarted) break;
                     restarted = true;
@@ -102,23 +116,10 @@ void Dasher::FileUtils::ScanFiles(AbstractParser* parser, const std::string& str
                     std::error_code re_ec;
                     std::filesystem::directory_iterator re(dir, re_ec);
                     if (re_ec) break;
-                    it = re;
-                    while (it != end && it->path().filename().string() <= lastName) it.increment(re_ec);
+                    while (re != end && !re_ec && re->path().filename().string() <= lastName)
+                        re.increment(re_ec);
                     if (re_ec) break;
-                    continue;
-                }
-                std::error_code ent_ec;
-                const std::filesystem::path p = it->path();
-                lastName = p.filename().string();
-                if (it->is_symlink(ent_ec) || ent_ec) continue;
-                if (it->is_directory(ent_ec) && !ent_ec) {
-                    pending.push_back(p);
-                    continue;
-                }
-                ent_ec.clear();
-                if (it->is_regular_file(ent_ec) && !ent_ec &&
-                    std::regex_search(p.filename().string(), pattern)) {
-                    parser->ParseFile(p.string(), IsFileWriteable(p));
+                    it = re;
                 }
             }
         }
