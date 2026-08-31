@@ -239,6 +239,7 @@ if(BUILD_CAPI)
 
         dasher_add_test(dasher_capi_tests test_capi.cpp)
         dasher_add_test(dasher_interaction_tests test_interaction.cpp)
+        dasher_add_test(dasher_direct_mode_shadow_tests test_direct_mode_shadow.cpp)
         dasher_add_test(dasher_low_memory_tests test_low_memory.cpp)
         dasher_add_test(dasher_extended_tests test_capi_extended.cpp)
 dasher_add_test(dasher_text_metrics_tests test_text_metrics.cpp)
