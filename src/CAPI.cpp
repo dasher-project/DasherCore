@@ -973,8 +973,17 @@ DASHER_API void dasher_set_screen_size(dasher_ctx* ctx, int width, int height) {
             ctx->intf->Realize(nowMs());
         } catch (const std::exception& e) {
             log_boundary_error(ctx, "dasher_set_screen_size: Realize failed", e.what());
+            // A half-completed Realize leaves the interface in an
+            // indeterminate state (e.g. a null node model). Setting realized
+            // anyway made the next dasher_frame assert on that null model.
+            // Latch the RFC 0009 error state instead: frame()/input no-op and
+            // dasher_has_engine_error() reports it; the frontend can surface it.
+            ctx->engineError = true;
+            return;
         } catch (...) {
             log_boundary_error(ctx, "dasher_set_screen_size: Realize failed", "unknown exception");
+            ctx->engineError = true;
+            return;
         }
         ctx->realized = true;
 

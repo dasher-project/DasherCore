@@ -69,11 +69,21 @@ void Dasher::FileUtils::ScanFiles(AbstractParser* parser, const std::string& str
     }
 
     for (const std::filesystem::path& current_path : search_paths) {
-        if (!std::filesystem::exists(current_path)) continue;
-        // Use recursive_directory_iterator to search subdirectories
-        for (const auto& entry : std::filesystem::recursive_directory_iterator(current_path)) {
-            if (entry.is_regular_file() && std::regex_search(entry.path().filename().string(), pattern)) {
-                parser->ParseFile(entry.path().string(), IsFileWriteable(entry.path()));
+        std::error_code exists_ec;
+        if (!std::filesystem::exists(current_path, exists_ec) || exists_ec) continue;
+        // Use recursive_directory_iterator to search subdirectories. One bad
+        // entry (dangling symlink, permission race, bundle metadata) must not
+        // abort the whole scan: entry.is_regular_file()/iteration use the
+        // error_code overloads and skip on failure. The throwing overloads
+        // here left Realize() half-complete with realized=true and a null
+        // model (watch spike crash, 2026-08-31).
+        std::error_code iter_ec;
+        for (std::filesystem::recursive_directory_iterator it(current_path, iter_ec), end;
+             it != end && !iter_ec; it.increment(iter_ec)) {
+            std::error_code entry_ec;
+            if (it->is_regular_file(entry_ec) && !entry_ec &&
+                std::regex_search(it->path().filename().string(), pattern)) {
+                parser->ParseFile(it->path().string(), IsFileWriteable(it->path()));
             }
         }
     }
