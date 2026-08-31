@@ -488,6 +488,9 @@ struct dasher_ctx {
     std::deque<std::chrono::steady_clock::time_point> rateTimestamps;
     std::string tlString;
     bool realized = false;
+    // Host's low-memory request, retained on the ctx so the transactional
+    // realize retry can reapply it to a recreated interface (review P1 #77).
+    bool lowMemory = false;
     bool mouseDown = false;
     // Latched true when a C++ exception was caught at the C-API boundary of a
     // per-frame entry point (frame/mouse/key). Once set, those entry points
@@ -931,7 +934,8 @@ DASHER_API void dasher_destroy(dasher_ctx* ctx) {
 
 DASHER_API void dasher_set_low_memory_mode(dasher_ctx* ctx, int enabled) {
     if (!ctx || !ctx->intf) return;
-    ctx->intf->SetLowMemoryMode(enabled != 0);
+    ctx->lowMemory = (enabled != 0);
+    ctx->intf->SetLowMemoryMode(ctx->lowMemory);
 }
 
 DASHER_API void dasher_set_screen_size(dasher_ctx* ctx, int width, int height) {
@@ -961,6 +965,9 @@ DASHER_API void dasher_set_screen_size(dasher_ctx* ctx, int width, int height) {
             ctx->input = nullptr;
             delete ctx->intf;
             ctx->intf = new dasher_ctx::Interface(ctx->settings.get(), ctx);
+            // The host's low-memory request was applied to the old interface;
+            // reapply so the retry honours the memory constraint (review P1).
+            ctx->intf->SetLowMemoryMode(ctx->lowMemory);
             ctx->intf->ChangeScreen(ctx->screen.get());
         }
         // On a fresh install (no settings file existed at create time),
