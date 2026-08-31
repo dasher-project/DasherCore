@@ -488,6 +488,9 @@ struct dasher_ctx {
     std::deque<std::chrono::steady_clock::time_point> rateTimestamps;
     std::string tlString;
     bool realized = false;
+    // Host's low-memory request, retained on the ctx so the transactional
+    // realize retry can reapply it to a recreated interface (review P1 #77).
+    bool lowMemory = false;
     bool mouseDown = false;
     // Latched true when a C++ exception was caught at the C-API boundary of a
     // per-frame entry point (frame/mouse/key). Once set, those entry points
@@ -931,7 +934,8 @@ DASHER_API void dasher_destroy(dasher_ctx* ctx) {
 
 DASHER_API void dasher_set_low_memory_mode(dasher_ctx* ctx, int enabled) {
     if (!ctx || !ctx->intf) return;
-    ctx->intf->SetLowMemoryMode(enabled != 0);
+    ctx->lowMemory = (enabled != 0);
+    ctx->intf->SetLowMemoryMode(ctx->lowMemory);
 }
 
 DASHER_API void dasher_set_screen_size(dasher_ctx* ctx, int width, int height) {
@@ -949,6 +953,23 @@ DASHER_API void dasher_set_screen_size(dasher_ctx* ctx, int width, int height) {
     }
 
     if (!ctx->realized) {
+        // A previous failed Realize left the interface incrementally mutated
+        // (CreateModules registers onto the existing module manager; other
+        // components are rebuilt in place), so retrying Realize() on it could
+        // retain or duplicate state from the failed attempt. Recreate the
+        // interface first: the settings store and all ctx-level state (screen,
+        // callbacks, pending alphabet) survive; the fresh Realize rebuilds
+        // every component. PointerInput is owned by the old interface's module
+        // manager, so null it before the delete — CreateModules re-establishes.
+        if (ctx->engineError) {
+            ctx->input = nullptr;
+            delete ctx->intf;
+            ctx->intf = new dasher_ctx::Interface(ctx->settings.get(), ctx);
+            // The host's low-memory request was applied to the old interface;
+            // reapply so the retry honours the memory constraint (review P1).
+            ctx->intf->SetLowMemoryMode(ctx->lowMemory);
+            ctx->intf->ChangeScreen(ctx->screen.get());
+        }
         // On a fresh install (no settings file existed at create time),
         // apply the canonical default BEFORE Realize(). We use
         // SetStringParameter with the parameter-table default — NOT
@@ -973,10 +994,27 @@ DASHER_API void dasher_set_screen_size(dasher_ctx* ctx, int width, int height) {
             ctx->intf->Realize(nowMs());
         } catch (const std::exception& e) {
             log_boundary_error(ctx, "dasher_set_screen_size: Realize failed", e.what());
+            // A half-completed Realize leaves the interface in an
+            // indeterminate state (e.g. a null node model). Setting realized
+            // anyway made the next dasher_frame assert on that null model.
+            // Latch the RFC 0009 error state instead: frame()/input no-op and
+            // dasher_has_engine_error() reports it; the frontend can surface it.
+            ctx->engineError = true;
+            return;
         } catch (...) {
             log_boundary_error(ctx, "dasher_set_screen_size: Realize failed", "unknown exception");
+            ctx->engineError = true;
+            return;
         }
         ctx->realized = true;
+        // A successful (re)realize rebuilt the interface from scratch, so an
+        // engineError latched by a previous failed Realize is obsolete. That
+        // failed-Realize path is the only one that latches while !realized
+        // (mid-frame throws leave realized set and never re-enter this
+        // block), so clearing here cannot mask a live fault. Without this,
+        // one failed realize + a successful retry left the engine permanently
+        // no-op'ing (review P1 on #77).
+        ctx->engineError = false;
 
         if (!ctx->pendingAlphabet.empty()) {
             std::string pending = ctx->pendingAlphabet;

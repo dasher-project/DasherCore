@@ -3,6 +3,7 @@
 
 #include <regex>
 #include <filesystem>
+#include <unordered_set>
 #include <fstream>
 
 namespace Dasher {
@@ -59,21 +60,72 @@ void Dasher::FileUtils::ScanFiles(AbstractParser* parser, const std::string& str
     // Note: pattern is interpreted as regex, so "alphabet.*.xml" matches "alphabet.English.xml"
     const std::regex pattern = std::regex(strPattern);
 
-    // Search in the specified data directory (or current directory if not set)
-    // Uses recursive_directory_iterator to find files in subdirectories
+    // Search ONLY in the specified data directory. The old fallback to
+    // current_path() turned an empty/missing data dir (frontend passed a bad
+    // bundle path) into an unbounded scan of the user's home directory —
+    // minutes of regex per file while the caller held its engine lock
+    // (watch spike hang, 2026-08-31). No data dir means nothing to scan.
     std::vector<std::filesystem::path> search_paths;
     if (!s_dataDirectory.empty()) {
         search_paths.push_back(std::filesystem::path(s_dataDirectory));
-    } else {
-        search_paths.push_back(std::filesystem::current_path());
     }
 
     for (const std::filesystem::path& current_path : search_paths) {
-        if (!std::filesystem::exists(current_path)) continue;
-        // Use recursive_directory_iterator to search subdirectories
-        for (const auto& entry : std::filesystem::recursive_directory_iterator(current_path)) {
-            if (entry.is_regular_file() && std::regex_search(entry.path().filename().string(), pattern)) {
-                parser->ParseFile(entry.path().string(), IsFileWriteable(entry.path()));
+        std::error_code exists_ec;
+        if (!std::filesystem::exists(current_path, exists_ec) || exists_ec) continue;
+        // Iterative walk that isolates failures PER DIRECTORY: one
+        // inaccessible or transiently failing subtree skips just that
+        // subtree; sibling directories still scan (review P1 on #77 — a
+        // mid-iteration error previously ended the whole search root, and the
+        // throwing overloads before that aborted Realize entirely). Symlinks
+        // are never followed — matches recursive_directory_iterator's default
+        // and avoids cycles.
+        std::vector<std::filesystem::path> pending{current_path};
+        while (!pending.empty()) {
+            const std::filesystem::path dir = pending.back();
+            pending.pop_back();
+            // Increment (and its recovery) live INSIDE the loop body: with
+            // increment in the for-header, a set error_code failed the loop
+            // condition before any recovery could run (review P1 on #77).
+            // Recovery re-opens the directory once and skips past the last
+            // successfully read entry; a second failure abandons the
+            // directory. Siblings and later directories are unaffected.
+            bool restarted = false;
+            std::error_code it_ec;
+            std::filesystem::directory_iterator it(dir, it_ec);
+            const std::filesystem::directory_iterator end;
+            // Identity-based visited set: std::filesystem does not guarantee
+            // iteration order, so the recovery rescan cannot skip "past the
+            // last name" — a different enumeration order would silently skip
+            // unseen entries (review P1 on #77). The set also makes the rescan
+            // idempotent (no double ParseFile).
+            std::unordered_set<std::string> visited;
+            while (!it_ec && it != end) {
+                const std::string name = it->path().filename().string();
+                if (visited.insert(name).second) {
+                    std::error_code ent_ec;
+                    const std::filesystem::path p = it->path();
+                    if (it->is_symlink(ent_ec) || ent_ec) {
+                        // skip symlinks / unreadable entries
+                    } else if (it->is_directory(ent_ec) && !ent_ec) {
+                        pending.push_back(p);
+                    } else {
+                        ent_ec.clear();
+                        if (it->is_regular_file(ent_ec) && !ent_ec && std::regex_search(name, pattern)) {
+                            parser->ParseFile(p.string(), IsFileWriteable(p));
+                        }
+                    }
+                }
+                it.increment(it_ec);
+                if (it_ec) {
+                    if (restarted) break;
+                    restarted = true;
+                    it_ec.clear();
+                    std::error_code re_ec;
+                    std::filesystem::directory_iterator re(dir, re_ec);
+                    if (re_ec) break;
+                    it = re; // full rescan; the visited set skips handled entries
+                }
             }
         }
     }
