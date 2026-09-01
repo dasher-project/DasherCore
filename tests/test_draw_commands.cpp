@@ -305,3 +305,44 @@ TEST(uppercase_group_box_has_distinct_colour) {
 
     dasher_destroy(ctx);
 }
+
+TEST(yellow_on_black_labels_carry_palette_default_label_colour) {
+    // Regression (#47 - "Yellow on Black renders all black, no yellow
+    // anywhere"): the v6 palette files author only defaultLabelColor and no
+    // per-group label sequences. Label resolution fell through the empty
+    // sequences to the PARENT palette's group-specific label colours - the
+    // legacy Default palette supplies black - so labels vanished on the dark
+    // background. The v6 parser now defaults empty group label colours to
+    // the palette's OWN defaultLabel (v5 semantics, mirroring ParseLegacy).
+    dasher_ctx* ctx = create_isolated_context();
+    ASSERT(ctx != nullptr);
+    dasher_set_screen_size(ctx, 800, 600);
+
+    dasher_set_palette(ctx, "Yellow on Black");
+    const char* active = dasher_get_current_palette(ctx);
+    ASSERT_STR_EQ(active, "Yellow on Black");
+
+    run_frames(ctx, 30);
+
+    int* cmds;
+    int cmd_count;
+    char** strs;
+    int str_count;
+    dasher_frame(ctx, 1000 + 31 * 16, &cmds, &cmd_count, &strs, &str_count);
+
+    int text_cmds = 0;
+    int yellow = 0;
+    for (int i = 0; i + 5 < cmd_count; i += 6) {
+        if (cmds[i] != 5) continue; // text
+        text_cmds++;
+        const int argb = cmds[i + 5];
+        if (((argb >> 24) & 0xFF) == 255 && ((argb >> 16) & 0xFF) == 255 && ((argb >> 8) & 0xFF) == 255 &&
+            (argb & 0xFF) == 0)
+            yellow++; // #FFFFFF00
+    }
+    printf("  text cmds=%d yellow=%d\n", text_cmds, yellow);
+    ASSERT(text_cmds > 0);
+    ASSERT(yellow == text_cmds); // every label, not just some
+
+    dasher_destroy(ctx);
+}

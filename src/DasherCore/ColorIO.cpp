@@ -230,6 +230,24 @@ bool CColorIO::Parse(pugi::xml_document& document, const std::string, bool bUser
         group.nodeLabelColorSequence = GetAttributeAsColorList(groupInfo.attribute("nodeLabelColorSequence"));
         group.altNodeLabelColorSequence = GetAttributeAsColorList(groupInfo.attribute("altNodeLabelColorSequence"));
 
+        // A v6 palette authored with only defaultLabelColor expects it to
+        // colour every label (v5 semantics — ParseLegacy does the same when
+        // it builds its groups). Without this, label resolution falls through
+        // the empty sequences to the PARENT palette's group-specific label
+        // colours, which broke "Yellow on Black" (#47): the dark legacy
+        // Default palette supplied black labels that vanished on the dark
+        // background. Defaulting to the palette's own defaultLabel keeps
+        // each file self-contained; explicit per-group sequences still win.
+        if (group.groupLabelColor.first == ColorPalette::undefinedColor &&
+            group.groupLabelColor.second == ColorPalette::undefinedColor) {
+            if (auto it = NamedColors.find(NamedColor::defaultLabel); it != NamedColors.end())
+                group.groupLabelColor.first = it->second;
+        }
+        if (group.nodeLabelColorSequence.empty() && group.altNodeLabelColorSequence.empty()) {
+            if (auto it = NamedColors.find(NamedColor::defaultLabel); it != NamedColors.end())
+                group.nodeLabelColorSequence.push_back(it->second);
+        }
+
         GroupColors[groupInfo.attribute("name").as_string()] = group;
     }
 
