@@ -24,7 +24,8 @@ struct ShadowBuffer {
                 if ((*p & 0xC0) != 0x80) cps++;
             for (int i = 0; i < cps && !buf.empty(); i++) {
                 buf.pop_back();
-                while (!buf.empty() && ((unsigned char)buf.back() & 0xC0) == 0x80) buf.pop_back();
+                while (!buf.empty() && ((unsigned char)buf.back() & 0xC0) == 0x80)
+                    buf.pop_back();
             }
         } else if (type == 2) {
             buf.clear();
@@ -45,8 +46,7 @@ bool check(dasher_ctx* ctx, const char* stage, int& divergences) {
     std::string eng = engine ? engine : "";
     if (eng != g_shadow.buf) {
         divergences++;
-        printf("  DIVERGENCE at %s:\n    engine: '%s'\n    shadow: '%s'\n", stage, eng.c_str(),
-               g_shadow.buf.c_str());
+        printf("  DIVERGENCE at %s:\n    engine: '%s'\n    shadow: '%s'\n", stage, eng.c_str(), g_shadow.buf.c_str());
         const size_t n = g_shadow.log.size();
         for (size_t i = n >= 16 ? n - 16 : 0; i < n; i++)
             printf("    event '%s'\n", g_shadow.log[i].c_str());
@@ -65,14 +65,11 @@ TEST(direct_mode_sweep_reverse_lengths) {
     const int reverseFrames[] = {30, 40, 50, 60, 80, 100, 120, 150, 200, 250};
     for (int rev : reverseFrames) {
         for (int pause = 0; pause <= 1; pause++) {
-            dasher_ctx* ctx = create_isolated_context();
-            ASSERT(ctx != nullptr);
+            ScopedContext sc;
+            dasher_ctx* ctx = sc;
             g_shadow.buf.clear();
             g_shadow.log.clear();
-            dasher_set_output_callback(
-                ctx,
-                [](int e, const char* t, void*) { g_shadow.onEvent(e, t); },
-                nullptr);
+            dasher_set_output_callback(ctx, [](int e, const char* t, void*) { g_shadow.onEvent(e, t); }, nullptr);
             dasher_set_speed_percent(ctx, 300);
             dasher_set_screen_size(ctx, 800, 600);
 
@@ -86,19 +83,13 @@ TEST(direct_mode_sweep_reverse_lengths) {
             steer(ctx, 700.0f, 300.0f, 120, t);
             steer(ctx, 700.0f, 288.0f, 180, t);
             snprintf(stage, sizeof(stage), "rev=%d pause=%d after-forward1", rev, pause);
-            if (!check(ctx, stage, failures)) {
-                dasher_destroy(ctx);
-                continue;
-            }
+            if (!check(ctx, stage, failures)) continue;
 
             if (pause) dasher_mouse_up(ctx);
             steer(ctx, 60.0f, 300.0f, rev, t);
             if (pause) dasher_mouse_down(ctx);
             snprintf(stage, sizeof(stage), "rev=%d pause=%d after-reverse", rev, pause);
-            if (!check(ctx, stage, failures)) {
-                dasher_destroy(ctx);
-                continue;
-            }
+            if (!check(ctx, stage, failures)) continue;
 
             steer(ctx, 700.0f, 285.0f, 160, t);
             steer(ctx, 700.0f, 300.0f, 120, t);
@@ -106,7 +97,6 @@ TEST(direct_mode_sweep_reverse_lengths) {
             check(ctx, stage, failures);
 
             dasher_mouse_up(ctx);
-            dasher_destroy(ctx);
         }
     }
 
