@@ -42,13 +42,19 @@ class CFrameRate {
         // An intentional pause must not be charged as a suspension when
         // recording resumes (and must NOT be zeroed: the first resumed
         // frame would otherwise fold the pause gap into the fresh window).
-        // The guard budget is deliberately NOT cleared here: stale-stamped
-        // input events (t≈1, queued before the first frame) re-trigger
-        // run()/Reset_framerate on every frame in some frontends/tests, and
-        // a budget reset there would re-arm the guard infinitely, freezing
-        // LP_FRAMERATE at its default (CI: low_memory tests produced no
-        // text). With the budget retained, the second stale gap is already
-        // recorded and the estimate converges.
+        //
+        // The guard budget is cleared ONLY for forward-time resets: a
+        // genuine pause deserves fresh suspension protection for the
+        // resumed segment — without this, a session that exhausted the
+        // budget (bursty throttling), paused, then hit one stall before
+        // the resumed window completed would record that stall unguarded
+        // and collapse the estimate (review finding). Backwards-stamped
+        // resets are the harness pathology where stale input events
+        // (t≈1, queued before the first frame) re-trigger run() every
+        // frame — clearing there re-armed the guard infinitely and froze
+        // LP_FRAMERATE at its default (CI: low_memory tests). Time moving
+        // backwards is never a real pause.
+        if (Time >= m_iLastFrameTime) m_iGuardedMs = 0;
         m_iLastFrameTime = Time;
     }
 

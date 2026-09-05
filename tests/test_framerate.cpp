@@ -155,6 +155,44 @@ TEST(framerate_251ms_boundary_is_measured) {
     ASSERT(after < before / 2); // ~4fps measured, not frozen at 62fps
 }
 
+TEST(framerate_pause_restores_an_exhausted_budget) {
+    // Review finding: a session that exhausts the guard budget (bursty
+    // throttling), pauses, then stalls once before the resumed window
+    // completes — that stall must still be guarded. A genuine pause is a
+    // forward-time Reset_framerate and restores the budget; only the
+    // backwards-stamped harness pathology (stale t≈1 input events) must
+    // not (it would re-arm the guard infinitely — the low_memory CI
+    // failure).
+    FramerateFixture f;
+    f.feed(200, 1000, 16); // calibrated at ~62fps
+    const long before = f.lpFramerate();
+
+    // Exhaust the budget with bursty long gaps, never completing a window.
+    unsigned long t = 5000;
+    for (int burst = 0; burst < 3; burst++) {
+        f.feed(1, t, 1);
+        t += 300; // gap guarded, budget 300/600/900
+    }
+    // Genuine pause: forward-time reset, then ONE stall soon after resume
+    // (before any window completes — 3 frames aren't enough at these
+    // sample counts).
+    f.framerate->Reset_framerate(20000);
+    f.feed(1, 20000, 1);
+    f.feed(1, 20700, 1);   // 700ms stall
+    f.feed(60, 20716, 16); // recovery
+    const long afterPauseStall = f.lpFramerate();
+    printf("  exhausted budget + pause + one stall: before=%ld after=%ld\n", before, afterPauseStall);
+    ASSERT(afterPauseStall > before * 4 / 5); // stall was guarded, no collapse
+
+    // The harness pathology must NOT restore the budget: a stale
+    // backwards stamp (t=1 while frames run at ~30k) leaves it exhausted.
+    f.framerate->Reset_framerate(1);
+    f.feed(1, 30000, 1); // giant fake gap — recorded (budget still low), not guarded
+    // (No assertion on the estimate here — recording is correct for a
+    // budget-exhausted session; the point is the guard does not re-arm:
+    // verified by the low_memory suite passing.)
+}
+
 TEST(framerate_scheduler_jitter_is_not_a_suspension) {
     FramerateFixture f;
     f.feed(200, 1000, 16);
