@@ -23,6 +23,42 @@ CFrameRate::~CFrameRate() {
 }
 
 void CFrameRate::RecordFrame(unsigned long Time) {
+    // Suspension guard (Dasher-Android #35): if the previous frame was a
+    // long time ago, the process was stalled (GC pause, OS throttling of a
+    // floating IME, occlusion, debugger). Frames are constant-pace zoom
+    // steps, so the stall itself does no zoom catch-up — but folding the
+    // wall-clock gap into this sampling window would collapse the
+    // framerate estimate, shrink Steps(), and make every post-stall frame
+    // zoom a large fraction at once ("lags, then the letters jump"). Treat
+    // the gap as a suspension: drop the partial window and keep the
+    // pre-stall estimate. 250ms ≈ 15 dropped frames at 60fps — generous
+    // enough never to trigger on scheduler jitter.
+    //
+    // Budget, not counter: guarded gap time accumulates and is only
+    // forgiven when a measurement window COMPLETES. A counter reset by any
+    // single normal frame would freeze the estimate under bursty
+    // throttling (≤3 long gaps + 1 normal frame repeating — the timer-
+    // coalescing shape). Once ~1s has been discarded without a completed
+    // window, long gaps are recorded and the estimate adapts to the real
+    // cadence, however bursty. (Monotonicity is assumed; on platforms
+    // where unsigned long wraps (~49.7 days of ms on LLP64), the first
+    // post-wrap frame records normally and self-corrects via the decay.)
+    if (m_bCalibrated && m_iLastFrameTime != 0 && Time > m_iLastFrameTime && Time - m_iLastFrameTime > 250) {
+        const unsigned long gap = Time - m_iLastFrameTime;
+        if (m_iGuardedMs < kMaxGuardedMs) {
+            m_iGuardedMs += gap;
+            m_iTime = Time;
+            m_iFrames = 0;
+            m_iLastFrameTime = Time;
+            return;
+        }
+        // Budget exhausted without a completed window: this is not an
+        // interrupted cadence, it IS the cadence. Record the frame so
+        // LP_FRAMERATE adapts — otherwise Steps() stays tuned for a
+        // framerate the frontend no longer achieves and text entry stalls.
+    }
+    m_iLastFrameTime = Time;
+
     m_iFrames++;
 
     // Update values once enough samples have been collected
@@ -41,6 +77,16 @@ void CFrameRate::RecordFrame(unsigned long Time) {
         // Calculate the framerate and reset framerate statistics for next
         // sampling period
         if (m_iTime2 - m_iTime > 0) {
+            // A completed window is evidence of a live cadence: forgive the
+            // suspension budget so future one-off stalls are guarded again,
+            // and mark the estimator calibrated — a suspension only has an
+            // estimate to protect once one window has completed. Guarding
+            // the very first frames instead froze the initial calibration
+            // (CI: low_memory tests, whose first frame follows a >250ms gap
+            // from the pre-frame input stamp, never updated LP_FRAMERATE
+            // from its default and zoomed at half speed).
+            m_bCalibrated = true;
+            m_iGuardedMs = 0;
             double dFrNow = m_iFrames * 1000.0 / (m_iTime2 - m_iTime);
             // LP_FRAMERATE records a decaying average, smoothed 50:50 with previous value
             m_pSettingsStore->SetLongParameter(

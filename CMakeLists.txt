@@ -238,6 +238,7 @@ if(BUILD_CAPI)
         endfunction()
 
         dasher_add_test(dasher_capi_tests test_capi.cpp)
+        dasher_add_test_internal(dasher_framerate_tests test_framerate.cpp)
         dasher_add_test(dasher_interaction_tests test_interaction.cpp)
         dasher_add_test(dasher_direct_mode_shadow_tests test_direct_mode_shadow.cpp)
         dasher_add_test(dasher_low_memory_tests test_low_memory.cpp)

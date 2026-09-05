@@ -39,6 +39,23 @@ class CFrameRate {
     void Reset_framerate(unsigned long Time) {
         m_iFrames = 0;
         m_iTime = Time;
+        // An intentional pause must not be charged as a suspension when
+        // recording resumes (and must NOT be zeroed: the first resumed
+        // frame would otherwise fold the pause gap into the fresh window).
+        //
+        // The guard budget is cleared ONLY for forward-time resets: a
+        // genuine pause deserves fresh suspension protection for the
+        // resumed segment — without this, a session that exhausted the
+        // budget (bursty throttling), paused, then hit one stall before
+        // the resumed window completed would record that stall unguarded
+        // and collapse the estimate (review finding). Backwards-stamped
+        // resets are the harness pathology where stale input events
+        // (t≈1, queued before the first frame) re-trigger run() every
+        // frame — clearing there re-armed the guard infinitely and froze
+        // LP_FRAMERATE at its default (CI: low_memory tests). Time moving
+        // backwards is never a real pause.
+        if (Time >= m_iLastFrameTime) m_iGuardedMs = 0;
+        m_iLastFrameTime = Time;
     }
 
     void RecordFrame(unsigned long Time);
@@ -48,6 +65,28 @@ class CFrameRate {
     int m_iFrames;
     /// time at which first sampled frame was rendered
     unsigned long m_iTime;
+    /// time at which the previous frame was recorded. A long gap between
+    /// frames means the process was suspended or starved (GC, OS throttling
+    /// of a background IME, debugger pause) — the wall-clock gap must not
+    /// be folded into the framerate estimate (Dasher-Android #35).
+    unsigned long m_iLastFrameTime = 0;
+    /// total wall-clock time (ms) discarded by the suspension guard since
+    /// the last COMPLETED measurement window. A stall is an outlier, but a
+    /// sustained or bursty pattern of long gaps is a real slow cadence and
+    /// must be measured — so at most ~1s of gap time is discardable per
+    /// window; beyond that the gaps are recorded and the estimate adapts.
+    /// (A counter reset by any single normal frame would freeze the
+    /// estimate under bursty throttling: ≤3 long gaps + 1 normal frame,
+    /// repeating — the classic timer-coalescing shape.) Deliberate blind
+    /// spot: stall clusters interleaved with a full window of normal
+    /// frames are forgiven entirely — repeated outliers never degrade
+    /// the estimate, trading slow-cadence tracking for smoothness.
+    unsigned long m_iGuardedMs = 0;
+    static constexpr unsigned long kMaxGuardedMs = 1000;
+    /// true once at least one sampling window has completed — i.e. an
+    /// estimate exists to protect. Long gaps before that are part of
+    /// initial calibration and are recorded, not guarded.
+    bool m_bCalibrated = false;
     /// number of frames over which we will compute average framerate
     int m_iSamples;
 
