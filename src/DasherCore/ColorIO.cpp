@@ -272,6 +272,42 @@ bool CColorIO::Parse(pugi::xml_document& document, const std::string, bool bUser
     std::array<ColorPalette::Color, 4> uiColorsArray;
     std::copy_n(std::make_move_iterator(UIPreviewColors.begin()), uiColorsArray.size(), uiColorsArray.begin());
 
+    // Group-name alias expansion (colours/ consolidation): alphabets refer
+    // to colour groups by a scattered set of names — the legacy parser
+    // registered aliases for all of them (see ParseLegacy), so a WA
+    // alphabet using "lower case letters" or an Ethiopic alphabet using
+    // "ethiopic letters" resolved on legacy palettes but hit the
+    // group-miss fallback on new-format ones. Apply the same alias table
+    // to new-format palettes at parse time, for any alias the file doesn't
+    // already define itself.
+    {
+        const std::vector<std::pair<std::string, std::string>> aliases = {
+            {"lowercase", "lower case letters"},
+            {"lowercase", "Lower case Latin letters"},
+            {"uppercase", "upper case letters"},
+            {"uppercase", "Upper case Latin letters"},
+            {"punctuation", "Punctuation"},
+            {"punctuation", "limitedPunctuation"},
+            {"punctuation", "ascii punctuation"},
+            {"numbers", "Numbers"},
+            {"numbers", "arabic-indic numbers"},
+            // Scripts without their own group: the letter-cycle fallback,
+            // exactly as ParseLegacy treats them.
+            {"lowercase", "ethiopic letters"},
+            {"lowercase", "vowels etc"},
+            {"lowercase", "vowel signs etc"},
+            {"lowercase", "vowel-like letters"},
+            {"lowercase", "character modifiers?"},
+            {"lowercase", "hamza"},
+            {"lowercase", "joiners"},
+        };
+        for (const auto& [canonical, alias] : aliases) {
+            if (GroupColors.count(alias)) continue; // the file defines it itself
+            auto it = GroupColors.find(canonical);
+            if (it != GroupColors.end()) GroupColors[alias] = it->second;
+        }
+    }
+
     //"HardcodedDefault" is the parent for now, later on the parents get relinked by looking up the parentNames
     auto it2 = KnownPalettes.find(colorSchemeName);
     if (it2 != KnownPalettes.end()) delete it2->second;

@@ -299,7 +299,7 @@ TEST(uppercase_group_box_has_distinct_colour) {
     // ParseLegacy must set the letter-family group colours.
     const int colourKey = dasher_find_parameter_key("SP_COLOUR_ID");
     ASSERT(colourKey >= 0);
-    dasher_set_string_parameter(ctx, colourKey, "European/Asian (Original)");
+    dasher_set_string_parameter(ctx, colourKey, "European/Asian");
     run_frames(ctx, 30);
     ASSERT(frameHasColouredUppercaseBox(255, 255, 0));
 
