@@ -47,7 +47,6 @@ void CFrameRate::RecordFrame(unsigned long Time) {
         const unsigned long gap = Time - m_iLastFrameTime;
         if (m_iGuardedMs < kMaxGuardedMs) {
             m_iGuardedMs += gap;
-            m_iGuardedMs += gap;
             m_iTime = Time;
             m_iFrames = 0;
             m_iLastFrameTime = Time;
