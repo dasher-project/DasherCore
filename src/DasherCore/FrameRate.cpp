@@ -34,10 +34,20 @@ void CFrameRate::RecordFrame(unsigned long Time) {
     // pre-stall estimate. 250ms ≈ 15 dropped frames at 60fps — generous
     // enough never to trigger on scheduler jitter.
     if (m_iLastFrameTime != 0 && Time > m_iLastFrameTime && Time - m_iLastFrameTime > 250) {
-        m_iTime = Time;
-        m_iFrames = 0;
-        m_iLastFrameTime = Time;
-        return;
+        if (m_iSuspensions < kMaxConsecutiveSuspensions) {
+            m_iSuspensions++;
+            m_iTime = Time;
+            m_iFrames = 0;
+            m_iLastFrameTime = Time;
+            return;
+        }
+        // Third-and-later long gaps in a row: this is not an interrupted
+        // cadence, it IS the cadence (a frontend genuinely rendering below
+        // ~4fps). Let the frame record normally so LP_FRAMERATE adapts to
+        // reality — otherwise Steps() stays tuned for a framerate the
+        // frontend no longer achieves and text entry stalls.
+    } else {
+        m_iSuspensions = 0; // a normal-gap frame re-arms the guard
     }
     m_iLastFrameTime = Time;
 

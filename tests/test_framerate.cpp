@@ -81,6 +81,21 @@ TEST(framerate_stall_recovers_without_overshoot) {
     ASSERT(after < before * 2);
 }
 
+TEST(framerate_sustained_slow_cadence_is_still_measured) {
+    FramerateFixture f;
+    f.feed(200, 1000, 16);
+    const long before = f.lpFramerate();
+
+    // A frontend genuinely rendering at ~3.3fps (300ms/frame): the first
+    // few long gaps are treated as suspensions, but the cadence must then
+    // be measured — otherwise Steps() stays tuned for 60fps and text entry
+    // stalls at the true bit-rate's fraction (review finding on the guard).
+    f.feed(200, 5000, 300);
+    const long after = f.lpFramerate();
+    printf("  sustained 3.3fps: before=%ld after=%ld\n", before, after);
+    ASSERT(after < before / 2); // adapted well down toward the real rate
+}
+
 TEST(framerate_scheduler_jitter_is_not_a_suspension) {
     FramerateFixture f;
     f.feed(200, 1000, 16);

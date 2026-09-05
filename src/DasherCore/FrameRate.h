@@ -53,6 +53,12 @@ class CFrameRate {
     /// of a background IME, debugger pause) — the wall-clock gap must not
     /// be folded into the framerate estimate (Dasher-Android #35).
     unsigned long m_iLastFrameTime = 0;
+    /// consecutive >250ms gaps seen without a normal frame between them.
+    /// A stall is an outlier; a sustained run of long gaps is a real slow
+    /// cadence and must be measured, so only the first few are treated as
+    /// suspensions.
+    int m_iSuspensions = 0;
+    static constexpr int kMaxConsecutiveSuspensions = 3;
     /// number of frames over which we will compute average framerate
     int m_iSamples;
 
