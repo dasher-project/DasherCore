@@ -42,8 +42,14 @@ class CFrameRate {
         // An intentional pause must not be charged as a suspension when
         // recording resumes (and must NOT be zeroed: the first resumed
         // frame would otherwise fold the pause gap into the fresh window).
+        // The guard budget is deliberately NOT cleared here: stale-stamped
+        // input events (t≈1, queued before the first frame) re-trigger
+        // run()/Reset_framerate on every frame in some frontends/tests, and
+        // a budget reset there would re-arm the guard infinitely, freezing
+        // LP_FRAMERATE at its default (CI: low_memory tests produced no
+        // text). With the budget retained, the second stale gap is already
+        // recorded and the estimate converges.
         m_iLastFrameTime = Time;
-        m_iGuardedMs = 0; // a fresh session starts with a full budget
     }
 
     void RecordFrame(unsigned long Time);
@@ -71,6 +77,10 @@ class CFrameRate {
     /// the estimate, trading slow-cadence tracking for smoothness.
     unsigned long m_iGuardedMs = 0;
     static constexpr unsigned long kMaxGuardedMs = 1000;
+    /// true once at least one sampling window has completed — i.e. an
+    /// estimate exists to protect. Long gaps before that are part of
+    /// initial calibration and are recorded, not guarded.
+    bool m_bCalibrated = false;
     /// number of frames over which we will compute average framerate
     int m_iSamples;
 

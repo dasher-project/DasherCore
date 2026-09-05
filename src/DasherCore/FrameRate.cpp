@@ -43,9 +43,10 @@ void CFrameRate::RecordFrame(unsigned long Time) {
     // cadence, however bursty. (Monotonicity is assumed; on platforms
     // where unsigned long wraps (~49.7 days of ms on LLP64), the first
     // post-wrap frame records normally and self-corrects via the decay.)
-    if (m_iLastFrameTime != 0 && Time > m_iLastFrameTime && Time - m_iLastFrameTime > 250) {
+    if (m_bCalibrated && m_iLastFrameTime != 0 && Time > m_iLastFrameTime && Time - m_iLastFrameTime > 250) {
         const unsigned long gap = Time - m_iLastFrameTime;
         if (m_iGuardedMs < kMaxGuardedMs) {
+            m_iGuardedMs += gap;
             m_iGuardedMs += gap;
             m_iTime = Time;
             m_iFrames = 0;
@@ -78,7 +79,14 @@ void CFrameRate::RecordFrame(unsigned long Time) {
         // sampling period
         if (m_iTime2 - m_iTime > 0) {
             // A completed window is evidence of a live cadence: forgive the
-            // suspension budget so future one-off stalls are guarded again.
+            // suspension budget so future one-off stalls are guarded again,
+            // and mark the estimator calibrated — a suspension only has an
+            // estimate to protect once one window has completed. Guarding
+            // the very first frames instead froze the initial calibration
+            // (CI: low_memory tests, whose first frame follows a >250ms gap
+            // from the pre-frame input stamp, never updated LP_FRAMERATE
+            // from its default and zoomed at half speed).
+            m_bCalibrated = true;
             m_iGuardedMs = 0;
             double dFrNow = m_iFrames * 1000.0 / (m_iTime2 - m_iTime);
             // LP_FRAMERATE records a decaying average, smoothed 50:50 with previous value
