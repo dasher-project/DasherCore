@@ -53,18 +53,15 @@ TEST(palette_catalogue_is_exact_and_duplicate_free) {
     // Every currently-shipped name must survive the consolidation
     // (update this list deliberately as palettes are merged/renamed —
     // that is the point of the pin).
-    // Pre-consolidation reality (21): both European/Asian spellings ship
-    // side by side. The consolidation's target list drops
-    // "European/Asian (Original)" and renames "(Original) Dark" — update
-    // EXPECTED to the target the moment those renames land.
+    // Post-consolidation set (21): legacy "(Original)" spelling dropped,
+    // dark companion renamed to match; Jamie's second palette ported.
     const std::set<std::string> expected = {
         "Blue on Dark Green",
         "Blue on Light Green",
         "Default",
         "Default Dark",
         "European/Asian",
-        "European/Asian (Original)",
-        "European/Asian (Original) Dark",
+        "European/Asian Dark",
         "European/Asian for Colourblind",
         "European/Asian for Colourblind Dark",
         "Rainbow",
