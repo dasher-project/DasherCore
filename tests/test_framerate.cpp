@@ -122,18 +122,22 @@ TEST(framerate_bursty_throttling_is_eventually_measured) {
 }
 
 TEST(framerate_intentional_pause_survives_reset_framerate) {
-    // Reset_framerate (engine pause) sets m_iLastFrameTime, so a long
-    // intentional pause is not a suspension and — critically — is not
-    // folded into the fresh window either. Pins the Reset_framerate
-    // interaction the review asked about.
+    // Reset_framerate (engine pause) stamps m_iLastFrameTime and clears
+    // the guard budget. The discriminating sequence (loop-3 review): a
+    // 56s pause followed by a genuine 700ms stall. Without the stamp,
+    // the pause gap would be folded into the fresh window (estimate
+    // collapses); without the budget clear, the stall would land on an
+    // exhausted budget and fold in too. With both, the estimate survives.
     FramerateFixture f;
     f.feed(200, 1000, 16);
     const long before = f.lpFramerate();
 
-    f.framerate->Reset_framerate(60000); // 56s pause while unpaused engine
-    f.feed(60, 60000, 16);
+    f.framerate->Reset_framerate(60000); // 56s intentional pause
+    f.feed(20, 60000, 16);               // resumed session running normally
+    f.feed(1, 60320 + 700, 1);           // a genuine 700ms stall mid-session
+    f.feed(60, 61036, 16);               // and recovery
     const long after = f.lpFramerate();
-    printf("  after 56s pause via Reset_framerate: before=%ld after=%ld\n", before, after);
+    printf("  pause + stall + recover: before=%ld after=%ld\n", before, after);
     ASSERT(after > before * 4 / 5);
     ASSERT(after < before * 6 / 5);
 }

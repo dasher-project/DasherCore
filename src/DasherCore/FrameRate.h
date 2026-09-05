@@ -43,6 +43,7 @@ class CFrameRate {
         // recording resumes (and must NOT be zeroed: the first resumed
         // frame would otherwise fold the pause gap into the fresh window).
         m_iLastFrameTime = Time;
+        m_iGuardedMs = 0; // a fresh session starts with a full budget
     }
 
     void RecordFrame(unsigned long Time);
@@ -64,7 +65,10 @@ class CFrameRate {
     /// window; beyond that the gaps are recorded and the estimate adapts.
     /// (A counter reset by any single normal frame would freeze the
     /// estimate under bursty throttling: ≤3 long gaps + 1 normal frame,
-    /// repeating — the classic timer-coalescing shape.)
+    /// repeating — the classic timer-coalescing shape.) Deliberate blind
+    /// spot: stall clusters interleaved with a full window of normal
+    /// frames are forgiven entirely — repeated outliers never degrade
+    /// the estimate, trading slow-cadence tracking for smoothness.
     unsigned long m_iGuardedMs = 0;
     static constexpr unsigned long kMaxGuardedMs = 1000;
     /// number of frames over which we will compute average framerate
