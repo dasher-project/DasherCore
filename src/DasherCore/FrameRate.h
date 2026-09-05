@@ -48,6 +48,11 @@ class CFrameRate {
     int m_iFrames;
     /// time at which first sampled frame was rendered
     unsigned long m_iTime;
+    /// time at which the previous frame was recorded. A long gap between
+    /// frames means the process was suspended or starved (GC, OS throttling
+    /// of a background IME, debugger pause) — the wall-clock gap must not
+    /// be folded into the framerate estimate (Dasher-Android #35).
+    unsigned long m_iLastFrameTime = 0;
     /// number of frames over which we will compute average framerate
     int m_iSamples;
 

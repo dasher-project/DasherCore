@@ -23,6 +23,24 @@ CFrameRate::~CFrameRate() {
 }
 
 void CFrameRate::RecordFrame(unsigned long Time) {
+    // Suspension guard (Dasher-Android #35): if the previous frame was a
+    // long time ago, the process was stalled (GC pause, OS throttling of a
+    // floating IME, occlusion, debugger). Frames are constant-pace zoom
+    // steps, so the stall itself does no zoom catch-up — but folding the
+    // wall-clock gap into this sampling window would collapse the
+    // framerate estimate, shrink Steps(), and make every post-stall frame
+    // zoom a large fraction at once ("lags, then the letters jump"). Treat
+    // the gap as a suspension: drop the partial window and keep the
+    // pre-stall estimate. 250ms ≈ 15 dropped frames at 60fps — generous
+    // enough never to trigger on scheduler jitter.
+    if (m_iLastFrameTime != 0 && Time > m_iLastFrameTime && Time - m_iLastFrameTime > 250) {
+        m_iTime = Time;
+        m_iFrames = 0;
+        m_iLastFrameTime = Time;
+        return;
+    }
+    m_iLastFrameTime = Time;
+
     m_iFrames++;
 
     // Update values once enough samples have been collected
