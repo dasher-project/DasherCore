@@ -239,6 +239,10 @@ if(BUILD_CAPI)
 
         dasher_add_test(dasher_capi_tests test_capi.cpp)
         dasher_add_test_internal(dasher_framerate_tests test_framerate.cpp)
+        dasher_add_test(dasher_palette_tests test_palettes.cpp)
+        dasher_add_test_internal(dasher_palette_diff_report_tests test_palette_diff_report.cpp)
+        # One-off audit tool: ColorIO.h pulls in pugixml.hpp directly.
+        target_include_directories(dasher_palette_diff_report_tests PRIVATE ${CMAKE_CURRENT_LIST_DIR}/Thirdparty/pugixml/src)
         dasher_add_test(dasher_interaction_tests test_interaction.cpp)
         dasher_add_test(dasher_direct_mode_shadow_tests test_direct_mode_shadow.cpp)
         dasher_add_test(dasher_low_memory_tests test_low_memory.cpp)

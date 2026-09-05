@@ -119,6 +119,10 @@ class ColorPalette {
 
     const std::array<Color, 4>& GetUIPreviewColors() const;
 
+    // Read access for tests/tools (palette diffing, consolidation audits).
+    const std::unordered_map<std::string, GroupColorInfo>& GetGroupColorsMap() const { return GroupColors; }
+    const std::unordered_map<NamedColor::knownColorName, Color>& GetNamedColorsMap() const { return NamedColors; }
+
     const Color& GetGroupColor(const std::string& GroupName, const bool& UseAltColor) const;
     const Color& GetGroupOutlineColor(const std::string& GroupName, const bool& UseAltColor,
                                       bool UseDefaultColor = true) const;
