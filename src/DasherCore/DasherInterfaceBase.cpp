@@ -124,9 +124,8 @@ void CDasherInterfaceBase::Realize(unsigned long ulTime) {
     m_ColorIO = std::make_unique<CColorIO>(this);
     // All shipped palettes live in Data/colours/ now (British spelling,
     // one file per palette, new-format roots; the parser dispatches on the
-    // root element so legacy-rooted files in a user dir still load). The
-    // old colour.*.xml glob stayed for nothing — it matched no shipped
-    // file after the consolidation.
+    // root element). The old color.*.xml glob matched nothing after the
+    // consolidation and is gone.
     Dasher::FileUtils::ScanFiles(m_ColorIO.get(), "colour.*.xml");
     m_ColorIO->RelinkParents();
 

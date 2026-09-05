@@ -13,12 +13,11 @@
 //      as floating letters, Dasher-Windows #47).
 #include "test_common.h"
 
+#include <utility>
+#include <vector>
+
 #include <filesystem>
 
-// Fails (deliberately) while Data/colors/ still ships — the consolidation
-// flips it green. doctest may_fail keeps CI green either way, but the
-// failure text shows in the logs as the pending work item.
-#define TEST_MAY_FAIL(name) DOCTEST_TEST_CASE(#name* doctest::may_fail())
 #include <set>
 #include <string>
 #include <vector>
@@ -53,7 +52,7 @@ TEST(palette_catalogue_is_exact_and_duplicate_free) {
     // Every currently-shipped name must survive the consolidation
     // (update this list deliberately as palettes are merged/renamed —
     // that is the point of the pin).
-    // Post-consolidation set (21): legacy "(Original)" spelling dropped,
+    // Post-consolidation set (20): legacy "(Original)" spelling dropped,
     // dark companion renamed to match; Jamie's second palette ported.
     const std::set<std::string> expected = {
         "Blue on Dark Green",
@@ -89,9 +88,7 @@ TEST(palette_catalogue_is_exact_and_duplicate_free) {
     ASSERT(got.empty()); // nothing unexpected appeared either
 }
 
-TEST_MAY_FAIL(no_american_spelled_palette_files_ship) {
-    // *may_fail: fails while Data/colors/ still ships; flips green when the
-    // consolidation deletes it, and stays green forever after.
+TEST(no_american_spelled_palette_files_ship) {
     // The surviving convention is Data/colours/colour*.xml (British). This
     // fails the moment a color*.xml file reappears in the tree.
     // TEST_DATA_DIR is the project root; the palette dirs live under Data/.

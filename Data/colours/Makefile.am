@@ -1,12 +1,12 @@
-dist_pkgdata_DATA = colour.dtd	\
+dist_pkgdata_DATA = color.dtd	\
 	colour.blue.on.dark.green.xml	\
 	colour.blue.on.light.green.xml	\
 	colour.default.xml	\
 	colour.default.dark.xml	\
 	colour.europeasian.xml	\
 	colour.europeasian2.xml	\
-	colour.europeasian.dark.xml	\
-	colour.europeasian2.dark.xml	\
+	colour.euroasian.dark.xml	\
+	colour.euroasian2.dark.xml	\
 	colour.rainbow.xml	\
 	colour.rainbow.dark.xml	\
 	colour.thai.xml	\

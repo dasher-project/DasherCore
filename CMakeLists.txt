@@ -240,9 +240,12 @@ if(BUILD_CAPI)
         dasher_add_test(dasher_capi_tests test_capi.cpp)
         dasher_add_test_internal(dasher_framerate_tests test_framerate.cpp)
         dasher_add_test(dasher_palette_tests test_palettes.cpp)
-        dasher_add_test_internal(dasher_palette_diff_report_tests test_palette_diff_report.cpp)
-        # One-off audit tool: ColorIO.h pulls in pugixml.hpp directly.
-        target_include_directories(dasher_palette_diff_report_tests PRIVATE ${CMAKE_CURRENT_LIST_DIR}/Thirdparty/pugixml/src)
+        # Internal: drives CColorIO/ColorPalette directly. CAPI-only tests
+        # live in test_palettes.cpp (shared lib); mixing both link styles in
+        # one binary duplicates every static (Settings::parameter_defaults
+        # et al) and corrupts the heap at static-destruction time.
+        dasher_add_test_internal(dasher_palette_alias_tests test_palette_aliases.cpp)
+        target_include_directories(dasher_palette_alias_tests PRIVATE ${CMAKE_CURRENT_LIST_DIR}/Thirdparty/pugixml/src)
         dasher_add_test(dasher_interaction_tests test_interaction.cpp)
         dasher_add_test(dasher_direct_mode_shadow_tests test_direct_mode_shadow.cpp)
         dasher_add_test(dasher_low_memory_tests test_low_memory.cpp)
