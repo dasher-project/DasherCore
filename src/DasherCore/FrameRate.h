@@ -39,6 +39,10 @@ class CFrameRate {
     void Reset_framerate(unsigned long Time) {
         m_iFrames = 0;
         m_iTime = Time;
+        // An intentional pause must not be charged as a suspension when
+        // recording resumes (and must NOT be zeroed: the first resumed
+        // frame would otherwise fold the pause gap into the fresh window).
+        m_iLastFrameTime = Time;
     }
 
     void RecordFrame(unsigned long Time);
@@ -53,12 +57,16 @@ class CFrameRate {
     /// of a background IME, debugger pause) — the wall-clock gap must not
     /// be folded into the framerate estimate (Dasher-Android #35).
     unsigned long m_iLastFrameTime = 0;
-    /// consecutive >250ms gaps seen without a normal frame between them.
-    /// A stall is an outlier; a sustained run of long gaps is a real slow
-    /// cadence and must be measured, so only the first few are treated as
-    /// suspensions.
-    int m_iSuspensions = 0;
-    static constexpr int kMaxConsecutiveSuspensions = 3;
+    /// total wall-clock time (ms) discarded by the suspension guard since
+    /// the last COMPLETED measurement window. A stall is an outlier, but a
+    /// sustained or bursty pattern of long gaps is a real slow cadence and
+    /// must be measured — so at most ~1s of gap time is discardable per
+    /// window; beyond that the gaps are recorded and the estimate adapts.
+    /// (A counter reset by any single normal frame would freeze the
+    /// estimate under bursty throttling: ≤3 long gaps + 1 normal frame,
+    /// repeating — the classic timer-coalescing shape.)
+    unsigned long m_iGuardedMs = 0;
+    static constexpr unsigned long kMaxGuardedMs = 1000;
     /// number of frames over which we will compute average framerate
     int m_iSamples;
 

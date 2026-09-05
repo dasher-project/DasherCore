@@ -77,8 +77,9 @@ TEST(framerate_stall_recovers_without_overshoot) {
     f.feed(400, 5000, 16);
     const long after = f.lpFramerate();
     printf("  steady after stall: before=%ld after=%ld\n", before, after);
-    ASSERT(after > before / 2);
-    ASSERT(after < before * 2);
+    // Tight band: the estimate re-converges to the same cadence, ±20%.
+    ASSERT(after > before * 4 / 5);
+    ASSERT(after < before * 6 / 5);
 }
 
 TEST(framerate_sustained_slow_cadence_is_still_measured) {
@@ -96,16 +97,70 @@ TEST(framerate_sustained_slow_cadence_is_still_measured) {
     ASSERT(after < before / 2); // adapted well down toward the real rate
 }
 
+TEST(framerate_bursty_throttling_is_eventually_measured) {
+    // Review probe: <=3 long gaps + 1 normal frame, repeating (~4.4fps
+    // effective — the classic timer-coalescing / IME-throttling shape).
+    // A counter re-armed by any normal frame froze the estimate at 62fps
+    // forever under this pattern; the time-weighted budget must let the
+    // cadence through.
+    FramerateFixture f;
+    f.feed(200, 1000, 16);
+    const long before = f.lpFramerate();
+
+    unsigned long t = 5000;
+    for (int burst = 0; burst < 60; burst++) {
+        for (int i = 0; i < 3; i++) {
+            f.feed(1, t, 1);
+            t += 300; // long gap after this frame
+        }
+        f.feed(1, t, 1);
+        t += 16; // the lone normal frame
+    }
+    const long after = f.lpFramerate();
+    printf("  bursty 3x300+16ms pattern: before=%ld after=%ld\n", before, after);
+    ASSERT(after < before / 2); // the ~4.4fps reality got measured
+}
+
+TEST(framerate_intentional_pause_survives_reset_framerate) {
+    // Reset_framerate (engine pause) sets m_iLastFrameTime, so a long
+    // intentional pause is not a suspension and — critically — is not
+    // folded into the fresh window either. Pins the Reset_framerate
+    // interaction the review asked about.
+    FramerateFixture f;
+    f.feed(200, 1000, 16);
+    const long before = f.lpFramerate();
+
+    f.framerate->Reset_framerate(60000); // 56s pause while unpaused engine
+    f.feed(60, 60000, 16);
+    const long after = f.lpFramerate();
+    printf("  after 56s pause via Reset_framerate: before=%ld after=%ld\n", before, after);
+    ASSERT(after > before * 4 / 5);
+    ASSERT(after < before * 6 / 5);
+}
+
+TEST(framerate_251ms_boundary_is_measured) {
+    // 251ms > 250ms threshold: guarded at first, but the budget must let
+    // the true ~4fps cadence through (boundary probe from the review).
+    FramerateFixture f;
+    f.feed(200, 1000, 16);
+    const long before = f.lpFramerate();
+
+    f.feed(120, 5000, 251);
+    const long after = f.lpFramerate();
+    printf("  steady 251ms cadence: before=%ld after=%ld\n", before, after);
+    ASSERT(after < before / 2); // ~4fps measured, not frozen at 62fps
+}
+
 TEST(framerate_scheduler_jitter_is_not_a_suspension) {
     FramerateFixture f;
     f.feed(200, 1000, 16);
     const long before = f.lpFramerate();
 
-    // Normal jitter — occasional 100ms hiccup — must still be measured
-    // (this is genuinely slow rendering, not a suspension).
+    // Genuinely slow rendering (216ms gaps between 16ms frame pairs —
+    // ~8.6fps effective, every gap under the 250ms threshold) must still
+    // be measured: this is a slow cadence, not a suspension.
     for (int i = 0; i < 60; i++) {
         f.feed(2, 10000 + i * 232, 16);
-        // (2 frames per 232ms window ≈ 8.6fps average)
     }
     const long after = f.lpFramerate();
     printf("  genuine slowdown measured: before=%ld after=%ld\n", before, after);
