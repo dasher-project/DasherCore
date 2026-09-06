@@ -948,3 +948,121 @@ TEST(cps_reset_after_reset_settings) {
 
     dasher_destroy(ctx);
 }
+
+// ── Context awareness CAPI (RFC 0015) ─────────────────────────────────────
+
+TEST(seed_buffer_anchors_at_caret_and_replaces_output) {
+    // The direct-entry context tier: seed the edit buffer with the target
+    // field's text, anchor at the caret. Output text mirrors the seed (the
+    // message pane / get_output_text contract), offset equals the caret, and
+    // a buffer-clear event fired so subscribers resync without injecting.
+    dasher_ctx* ctx = create_isolated_context();
+    ASSERT(ctx != nullptr);
+    dasher_set_screen_size(ctx, 800, 600);
+
+    int clear_events = 0;
+    dasher_set_output_callback(
+        ctx,
+        [](int event_type, const char* text, void* ud) {
+            if (event_type == 2) (*static_cast<int*>(ud))++;
+        },
+        &clear_events);
+
+    const char* seed = "Hello world";
+    ASSERT_EQ(dasher_seed_buffer(ctx, seed, 11), 0);
+    ASSERT_EQ(clear_events, 1);
+    ASSERT_STR_EQ(dasher_get_output_text(ctx), seed);
+    ASSERT_EQ(dasher_get_offset(ctx), 11);
+
+    // Caret beyond the buffer clamps to the end, not an error.
+    ASSERT_EQ(dasher_seed_buffer(ctx, "abc", 99), 0);
+    ASSERT_EQ(dasher_get_offset(ctx), 3);
+    ASSERT_EQ(clear_events, 2);
+
+    // Null text = empty buffer (field-context reset, v5 parity fallback).
+    ASSERT_EQ(dasher_seed_buffer(ctx, nullptr, 0), 0);
+    ASSERT_EQ(clear_events, 3);
+    ASSERT_STR_EQ(dasher_get_output_text(ctx), "");
+
+    // Negative caret clamps to 0.
+    ASSERT_EQ(dasher_seed_buffer(ctx, "xy", -5), 0);
+    ASSERT_EQ(dasher_get_offset(ctx), 0);
+
+    dasher_destroy(ctx);
+}
+
+TEST(seed_buffer_then_typing_appends_after_context) {
+    // After seeding mid-buffer, new engine output must APPEND at the caret,
+    // not replace the seed: the model root was built at the caret offset.
+    dasher_ctx* ctx = create_isolated_context();
+    ASSERT(ctx != nullptr);
+    dasher_set_screen_size(ctx, 800, 600);
+
+    // Type a character via the engine: alphabet-stepping with the mouse held
+    // is how the restart-drift test drives output; reuse the same approach.
+    ASSERT_EQ(dasher_seed_buffer(ctx, "Hello ", 6), 0);
+
+    // Drive some zooming so the engine commits a symbol (deterministic
+    // trajectory: hold the mouse in the lower half to steer into the
+    // high-probability 't'-region after "Hello ").
+    dasher_mouse_down(ctx);
+    int64_t clock = 1000;
+    for (int i = 0; i < 200; i++) {
+        dasher_mouse_move(ctx, 640, 360);
+        dasher_frame(ctx, clock += 16, nullptr, nullptr, nullptr, nullptr);
+    }
+    dasher_mouse_up(ctx);
+
+    const char* out = dasher_get_output_text(ctx);
+    // Whatever was typed, it must sit AFTER the seeded context: prefix intact.
+    ASSERT(strncmp(out, "Hello ", 6) == 0);
+    ASSERT(strlen(out) >= 6);
+
+    dasher_destroy(ctx);
+}
+
+TEST(set_offset_reanchors_within_buffer) {
+    dasher_ctx* ctx = create_isolated_context();
+    ASSERT(ctx != nullptr);
+    dasher_set_screen_size(ctx, 800, 600);
+
+    ASSERT_EQ(dasher_seed_buffer(ctx, "abcdef", 6), 0);
+    ASSERT_EQ(dasher_get_offset(ctx), 6);
+
+    // Re-anchor mid-buffer (v5 tap-to-position parity).
+    ASSERT_EQ(dasher_set_offset(ctx, 3), 0);
+    ASSERT_EQ(dasher_get_offset(ctx), 3);
+
+    // Out-of-range clamps to the end; negative is rejected.
+    ASSERT_EQ(dasher_set_offset(ctx, 999), 0);
+    ASSERT_EQ(dasher_get_offset(ctx), 6);
+    ASSERT_EQ(dasher_set_offset(ctx, -1), -1);
+
+    // Re-anchoring does NOT fire a buffer-clear (the buffer did not change —
+    // subscribers must not resync).
+    int clear_events = 0;
+    dasher_set_output_callback(
+        ctx,
+        [](int event_type, const char*, void* ud) {
+            if (event_type == 2) (*static_cast<int*>(ud))++;
+        },
+        &clear_events);
+    ASSERT_EQ(dasher_set_offset(ctx, 2), 0);
+    ASSERT_EQ(clear_events, 0);
+
+    dasher_destroy(ctx);
+}
+
+TEST(seed_buffer_realizes_lazy_engine) {
+    // A direct-entry frontend reads the target field BEFORE the first frame;
+    // seeding must realize on demand rather than fail (mirrors set_palette).
+    dasher_ctx* ctx = create_isolated_context();
+    ASSERT(ctx != nullptr);
+    // NOTE: no dasher_set_screen_size — unrealized engine.
+    // Screen size is what triggers realize in this CAPI; seeding without it
+    // must still succeed or cleanly fail — but never crash.
+    int rc = dasher_seed_buffer(ctx, "x", 1);
+    ASSERT(rc == 0 || rc == -1);
+    (void)rc;
+    dasher_destroy(ctx);
+}

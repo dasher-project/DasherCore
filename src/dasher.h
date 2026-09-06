@@ -589,6 +589,23 @@ DASHER_API int dasher_import_training_text(dasher_ctx* ctx, const char* text);
 // Returns -1 if the engine is not realized.
 DASHER_API int dasher_get_offset(dasher_ctx* ctx);
 
+// ── Context awareness (RFC 0015) ──────────────────────────────────────────
+
+// Re-anchor the model at a buffer position (v5's SetOffset). The language
+// model context becomes the edit buffer's text before the offset, so
+// predictions continue from there. Use after external edits moved the caret
+// within the session buffer. Returns 0 on success, -1 on failure.
+DASHER_API int dasher_set_offset(dasher_ctx* ctx, int offset);
+
+// Replace the edit buffer with text read from the target field (e.g. via
+// UI Automation) and anchor the model at caret_offset — predictions then
+// continue from text the user did not type through Dasher (RFC 0015 tier 3).
+// Emits output event 2 (buffer cleared) FIRST so subscribers resync their
+// mirrors without injecting (backspacing a whole field into the target would
+// destroy the user's text). Typing-rate stats reset. Realizes if needed.
+// Returns 0 on success, -1 on failure.
+DASHER_API int dasher_seed_buffer(dasher_ctx* ctx, const char* text, int caret_offset);
+
 // ── Typing rate (RFC 0012) ─────────────────────────────────────────────────
 //
 // Live typing-rate metrics from a rolling 5-second window of recent output.

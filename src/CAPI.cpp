@@ -2107,6 +2107,74 @@ DASHER_API int dasher_get_offset(dasher_ctx* ctx) {
     return model->GetOffset();
 }
 
+// ── Context awareness (RFC 0015) ──────────────────────────────────────────
+
+// Realize on demand: seeding/re-anchoring can happen when a direct-entry
+// frontend reads the target field before the first frame (e.g. on mode
+// entry). Mirrors the deferred-Realize handling dasher_set_palette uses.
+static bool ensure_realized_for_context(dasher_ctx* ctx) {
+    if (ctx->realized) return true;
+    if (!ctx->screen) return false;
+    try {
+        ctx->intf->Realize(nowMs());
+        ctx->realized = true;
+        return true;
+    } catch (...) {
+        return false;
+    }
+}
+
+DASHER_API int dasher_set_offset(dasher_ctx* ctx, int offset) {
+    if (!ctx || !ctx->intf) return -1;
+    if (offset < 0) return -1;
+    if (!ensure_realized_for_context(ctx)) return -1;
+    try {
+        // offset is a byte-ish position into the edit buffer by historical
+        // convention (v5 used EDIT-control character offsets against UTF-8
+        // strings); clamp to the buffer so out-of-range values anchor at
+        // the end rather than asserting.
+        const auto clamped = std::min(static_cast<size_t>(offset), ctx->editBuffer.size());
+        ctx->cursorPos = clamped;
+        ctx->intf->SetOffset(static_cast<unsigned int>(clamped), true);
+        return 0;
+    } catch (const std::exception& e) {
+        log_boundary_error(ctx, "dasher_set_offset", e.what());
+        return -1;
+    } catch (...) {
+        log_boundary_error(ctx, "dasher_set_offset", "unknown exception");
+        return -1;
+    }
+}
+
+DASHER_API int dasher_seed_buffer(dasher_ctx* ctx, const char* text, int caret_offset) {
+    if (!ctx || !ctx->intf) return -1;
+    if (!ensure_realized_for_context(ctx)) return -1;
+    try {
+        // Replace the buffer with the target field's text.
+        ctx->editBuffer.assign(text ? text : "");
+        const auto clamped = std::min(static_cast<size_t>(std::max(caret_offset, 0)), ctx->editBuffer.size());
+        ctx->cursorPos = clamped;
+        ctx->rateTimestamps.clear();
+
+        // Subscribers must resync their mirrors WITHOUT injecting (RFC 0015:
+        // backspacing a whole field into the target would destroy the user's
+        // text — the same reasoning as Dasher-Windows #45's event-2 contract).
+        notify_buffer_cleared(ctx);
+
+        // Rebuild the model anchored at the caret: GetRoot seeds the LM from
+        // GetContext (the CAPI Interface reads ctx->editBuffer), so
+        // predictions continue from the text before the caret.
+        ctx->intf->SetOffset(static_cast<unsigned int>(clamped), true);
+        return 0;
+    } catch (const std::exception& e) {
+        log_boundary_error(ctx, "dasher_seed_buffer", e.what());
+        return -1;
+    } catch (...) {
+        log_boundary_error(ctx, "dasher_seed_buffer", "unknown exception");
+        return -1;
+    }
+}
+
 // ── Custom rendering, Strand 2 (RFC 0013) ──────────────────────────────────
 
 DASHER_API int dasher_set_visible_nodes_enabled(dasher_ctx* ctx, int enabled) {
