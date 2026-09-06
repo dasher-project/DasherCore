@@ -330,7 +330,7 @@ const std::unordered_map<Parameter, const Parameter_Value> parameter_defaults = 
                      "Target (min) number of node objects to maintain.", "Node Budget", Settings::UIControlType::Step,
                      100, 10000, 1, 100, true, "LP_NODE_BUDGET", "Advanced", "Input"}},
 #endif
-    {LP_OUTLINE_WIDTH, Parameter_Value{"OutlineWidth", PARAM_LONG, Persistence::PERSISTENT, 0l,
+    {LP_OUTLINE_WIDTH, Parameter_Value{"OutlineWidth", PARAM_LONG, Persistence::PERSISTENT, 1l,
                                        "Absolute value is line width to draw boxes (fill iff >=0).", "Outline Width",
                                        Settings::UIControlType::Step, -10, 100, 1, 1, true, "LP_OUTLINE_WIDTH",
                                        "Appearance", "Customization"}},
