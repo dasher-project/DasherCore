@@ -2161,17 +2161,19 @@ static int byte_offset_from_count(const char* utf8_text, int target, bool count_
     int byte_pos = 0;
     while (*p) {
         unsigned char c = *p;
+        // Lead-byte masks are mutually exclusive, so the check order is
+        // free; grouping both one-unit cases (ASCII and stray
+        // continuation/invalid) into the else keeps clang-tidy's
+        // branch-clone check happy.
         int cp_bytes;
-        if (c < 0x80)
-            cp_bytes = 1;
-        else if ((c & 0xE0) == 0xC0)
-            cp_bytes = 2;
+        if ((c & 0xF8) == 0xF0)
+            cp_bytes = 4;
         else if ((c & 0xF0) == 0xE0)
             cp_bytes = 3;
-        else if ((c & 0xF8) == 0xF0)
-            cp_bytes = 4;
+        else if ((c & 0xE0) == 0xC0)
+            cp_bytes = 2;
         else
-            cp_bytes = 1; // stray continuation/invalid: degrade to one unit
+            cp_bytes = 1; // ASCII (< 0x80) or stray continuation/invalid
 
         // UTF-16 units for this codepoint: 2 if it encodes >= U+10000.
         const int units = (count_utf16 && cp_bytes == 4) ? 2 : 1;
