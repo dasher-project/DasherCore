@@ -948,3 +948,294 @@ TEST(cps_reset_after_reset_settings) {
 
     dasher_destroy(ctx);
 }
+
+// ── Context awareness CAPI (RFC 0015) ─────────────────────────────────────
+
+TEST(seed_buffer_anchors_at_caret_and_replaces_output) {
+    // The direct-entry context tier: seed the edit buffer with the target
+    // field's text, anchor at the caret. Output text mirrors the seed (the
+    // message pane / get_output_text contract), offset equals the caret, and
+    // a buffer-clear event fired so subscribers resync without injecting.
+    dasher_ctx* ctx = create_isolated_context();
+    ASSERT(ctx != nullptr);
+    dasher_set_screen_size(ctx, 800, 600);
+
+    int clear_events = 0;
+    dasher_set_output_callback(
+        ctx,
+        [](int event_type, const char* text, void* ud) {
+            if (event_type == 2) (*static_cast<int*>(ud))++;
+        },
+        &clear_events);
+
+    const char* seed = "Hello world";
+    ASSERT_EQ(dasher_seed_buffer(ctx, seed, 11), 0);
+    ASSERT_EQ(clear_events, 1);
+    ASSERT_STR_EQ(dasher_get_output_text(ctx), seed);
+    ASSERT_EQ(dasher_get_offset(ctx), 11);
+
+    // Caret beyond the buffer clamps to the end, not an error.
+    ASSERT_EQ(dasher_seed_buffer(ctx, "abc", 99), 0);
+    ASSERT_EQ(dasher_get_offset(ctx), 3);
+    ASSERT_EQ(clear_events, 2);
+
+    // Null text = empty buffer (field-context reset, v5 parity fallback).
+    ASSERT_EQ(dasher_seed_buffer(ctx, nullptr, 0), 0);
+    ASSERT_EQ(clear_events, 3);
+    ASSERT_STR_EQ(dasher_get_output_text(ctx), "");
+
+    // Negative caret clamps to 0.
+    ASSERT_EQ(dasher_seed_buffer(ctx, "xy", -5), 0);
+    ASSERT_EQ(dasher_get_offset(ctx), 0);
+
+    dasher_destroy(ctx);
+}
+
+TEST(seed_buffer_then_typing_appends_after_context) {
+    // After seeding mid-buffer, new engine output must APPEND at the caret,
+    // not replace the seed: the model root was built at the caret offset.
+    dasher_ctx* ctx = create_isolated_context();
+    ASSERT(ctx != nullptr);
+    dasher_set_screen_size(ctx, 800, 600);
+
+    // Type a character via the engine: alphabet-stepping with the mouse held
+    // is how the restart-drift test drives output; reuse the same approach.
+    ASSERT_EQ(dasher_seed_buffer(ctx, "Hello ", 6), 0);
+
+    // Drive some zooming so the engine commits a symbol (deterministic
+    // trajectory: hold the mouse in the lower half to steer into the
+    // high-probability 't'-region after "Hello ").
+    dasher_mouse_down(ctx);
+    int64_t clock = 1000;
+    for (int i = 0; i < 200; i++) {
+        dasher_mouse_move(ctx, 640, 360);
+        dasher_frame(ctx, clock += 16, nullptr, nullptr, nullptr, nullptr);
+    }
+    dasher_mouse_up(ctx);
+
+    const char* out = dasher_get_output_text(ctx);
+    // Whatever was typed, it must sit AFTER the seeded context: prefix intact.
+    ASSERT(strncmp(out, "Hello ", 6) == 0);
+    ASSERT(strlen(out) >= 6);
+
+    dasher_destroy(ctx);
+}
+
+TEST(set_offset_reanchors_within_buffer) {
+    dasher_ctx* ctx = create_isolated_context();
+    ASSERT(ctx != nullptr);
+    dasher_set_screen_size(ctx, 800, 600);
+
+    ASSERT_EQ(dasher_seed_buffer(ctx, "abcdef", 6), 0);
+    ASSERT_EQ(dasher_get_offset(ctx), 6);
+
+    // Re-anchor mid-buffer (v5 tap-to-position parity).
+    ASSERT_EQ(dasher_set_offset(ctx, 3), 0);
+    ASSERT_EQ(dasher_get_offset(ctx), 3);
+
+    // Out-of-range clamps to the end; negative is rejected.
+    ASSERT_EQ(dasher_set_offset(ctx, 999), 0);
+    ASSERT_EQ(dasher_get_offset(ctx), 6);
+    ASSERT_EQ(dasher_set_offset(ctx, -1), -1);
+
+    // Re-anchoring does NOT fire a buffer-clear (the buffer did not change —
+    // subscribers must not resync).
+    int clear_events = 0;
+    dasher_set_output_callback(
+        ctx,
+        [](int event_type, const char*, void* ud) {
+            if (event_type == 2) (*static_cast<int*>(ud))++;
+        },
+        &clear_events);
+    ASSERT_EQ(dasher_set_offset(ctx, 2), 0);
+    ASSERT_EQ(clear_events, 0);
+
+    dasher_destroy(ctx);
+}
+
+TEST(seed_buffer_realizes_lazy_engine) {
+    // A direct-entry frontend reads the target field BEFORE the first frame;
+    // seeding must realize on demand rather than fail (mirrors set_palette).
+    dasher_ctx* ctx = create_isolated_context();
+    ASSERT(ctx != nullptr);
+    // NOTE: no dasher_set_screen_size — unrealized engine.
+    // Screen size is what triggers realize in this CAPI; seeding without it
+    // must still succeed or cleanly fail — but never crash.
+    int rc = dasher_seed_buffer(ctx, "x", 1);
+    ASSERT(rc == 0 || rc == -1);
+    (void)rc;
+    dasher_destroy(ctx);
+}
+
+TEST(context_offsets_never_split_utf8_codepoints) {
+    // Greptile #83: platform carets arrive in character/UTF-16 units; a raw
+    // conversion to the buffer's UTF-8 bytes can land mid-sequence, which
+    // would corrupt every subsequent edit. Offsets that do land inside a
+    // multibyte sequence must snap DOWN to the codepoint start (the
+    // straddled character stays in the pre-caret context, never dropped).
+    dasher_ctx* ctx = create_isolated_context();
+    ASSERT(ctx != nullptr);
+    dasher_set_screen_size(ctx, 800, 600);
+
+    // "héllo": é is U+00E9 = 2 UTF-8 bytes -> h(1) é(2) l l o = 6 bytes.
+    // Byte 2 is INSIDE é; both 2 and the trailing position must snap to 1
+    // (é's lead byte), keeping é before the caret.
+    ASSERT_EQ(dasher_seed_buffer(ctx, "h\xc3\xa9llo", 2), 0);
+    ASSERT_EQ(dasher_get_offset(ctx), 1);
+
+    // Same via set_offset within an existing buffer.
+    ASSERT_EQ(dasher_set_offset(ctx, 2), 0);
+    ASSERT_EQ(dasher_get_offset(ctx), 1);
+
+    // 3-byte sequence: "a" + U+4E2D (3 bytes) + "b" = 5 bytes total; the
+    // CJK char spans bytes 1-3. Offsets 2 and 3 snap to 1; offset 4 (the
+    // 'b') is a boundary and stays.
+    ASSERT_EQ(dasher_seed_buffer(ctx,
+                                 "a\xe4\xb8\xad"
+                                 "b",
+                                 3),
+              0);
+    ASSERT_EQ(dasher_get_offset(ctx), 1);
+    ASSERT_EQ(dasher_set_offset(ctx, 4), 0);
+    ASSERT_EQ(dasher_get_offset(ctx), 4);
+
+    // Boundary values pass through untouched: 0, and the full length.
+    ASSERT_EQ(dasher_set_offset(ctx, 0), 0);
+    ASSERT_EQ(dasher_get_offset(ctx), 0);
+    ASSERT_EQ(dasher_set_offset(ctx, 999), 0);
+    ASSERT_EQ(dasher_get_offset(ctx), 5);
+
+    dasher_destroy(ctx);
+}
+
+TEST(caret_unit_conversion_translates_to_intended_byte_position) {
+    // Greptile #83 follow-up: snapping prevents corruption but is not
+    // conversion — a UTF-16 count is numerically wrong as a byte offset
+    // (CJK: UTF-16 10 vs byte 30). These helpers are THE conversion path
+    // from platform caret units to the buffer unit.
+    using conv16 = int (*)(const char*, int);
+    using convcp = int (*)(const char*, int);
+    conv16 f16 = dasher_byte_offset_from_utf16;
+    convcp fcp = dasher_byte_offset_from_codepoints;
+
+    // ASCII: all three units coincide.
+    ASSERT_EQ(f16("hello", 3), 3);
+    ASSERT_EQ(fcp("hello", 3), 3);
+
+    // 2-byte e-acute: UTF-8 "h\xC3\xA9llo" is 6 bytes; units: h,e,l,l,o = 5.
+    ASSERT_EQ(f16("h\xc3\xa9llo", 2), 3); // after 'e' (2 units) = byte 3
+    ASSERT_EQ(fcp("h\xc3\xa9llo", 2), 3);
+    ASSERT_EQ(f16("h\xc3\xa9llo", 1), 1); // after 'h' = byte 1
+
+    // 3-byte CJK: UTF-8 "\xE4\xB8\xAD" = 3 bytes, 1 unit in both systems.
+    ASSERT_EQ(f16("\xe4\xb8\xad\xe4\xb8\xad", 2), 6); // two chars = 6 bytes
+    ASSERT_EQ(fcp("\xe4\xb8\xad\xe4\xb8\xad", 2), 6);
+    ASSERT_EQ(f16("\xe4\xb8\xad\xe4\xb8\xad", 1), 3);
+
+    // 4-byte emoji U+1F600: 4 bytes, 1 codepoint but 2 UTF-16 units.
+    const char* emoji = "\xf0\x9f\x98\x80"; // 😀
+    ASSERT_EQ(f16(emoji, 2), 4);            // after the pair = byte 4
+    ASSERT_EQ(f16(emoji, 1), 0);            // MID-PAIR resolves to the pair start
+    ASSERT_EQ(fcp(emoji, 1), 4);            // codepoints: emoji is one = byte 4
+
+    // Mixed "a😀b" (bytes 0..5): units16 = a(1) + emoji(2) + b(1) = 4.
+    const char* mixed = "a\xf0\x9f\x98\x80"
+                        "b";
+    ASSERT_EQ(f16(mixed, 1), 1); // after 'a'
+    ASSERT_EQ(f16(mixed, 2), 1); // mid-pair -> pair start = after 'a'
+    ASSERT_EQ(f16(mixed, 3), 5); // after emoji (before 'b')
+    ASSERT_EQ(f16(mixed, 4), 6); // after 'b' = end
+    ASSERT_EQ(fcp(mixed, 2), 5); // after a + emoji (2 codepoints)
+
+    // Clamping.
+    ASSERT_EQ(f16("abc", 99), 3);
+    ASSERT_EQ(f16("abc", -1), 0);
+    ASSERT_EQ(fcp("", 0), 0);
+    ASSERT_EQ(f16(nullptr, 3), -1); // null text is an error
+
+    // The full pipeline: UIA caret in UTF-16 units -> byte offset -> seed.
+    dasher_ctx* ctx = create_isolated_context();
+    ASSERT(ctx != nullptr);
+    dasher_set_screen_size(ctx, 800, 600);
+    ASSERT_EQ(dasher_seed_buffer(ctx, emoji, f16(emoji, 2)), 0);
+    ASSERT_EQ(dasher_get_offset(ctx), 4); // anchored at the true caret
+    dasher_destroy(ctx);
+}
+
+TEST(caret_conversion_malformed_utf8_degrades_byte_per_byte) {
+    // Greptile #83 (comment 2): a stray lead byte must consume exactly ONE
+    // byte, never swallow the following byte as a phantom continuation -
+    // the documented contract, and what dasher_seed_buffer anchors on.
+    using conv16 = int (*)(const char*, int);
+    conv16 f16 = dasher_byte_offset_from_utf16;
+
+    // The reported case: 0xC2 claims 2 bytes but 0x41 is ASCII.
+    ASSERT_EQ(f16("\xc2\x41", 1), 1); // stray lead = one unit; 'A' is next
+
+    // Truncated lead at end of string: 0xC2 then NUL.
+    ASSERT_EQ(f16("\xc2", 1), 1);
+
+    // Truncated mid-sequence: 0xE0 0x80 (valid start) then NUL - the E0
+    // degrades to one stray, 0x80 is itself a stray continuation.
+    ASSERT_EQ(f16("\xe0\x80", 1), 1);
+    ASSERT_EQ(f16("\xe0\x80", 2), 2);
+
+    // Stray continuation bytes each count one unit.
+    ASSERT_EQ(f16("\x80\x80\x80", 2), 2);
+
+    // A VALID 2-byte sequence still converts exactly (regression guard).
+    ASSERT_EQ(f16("\xc2\xa9", 1), 2); // U+00A9 (c) = 2 bytes, 1 unit
+}
+
+TEST(caret_conversion_rejects_semantically_invalid_utf8) {
+    // Greptile #83 follow-up: continuation-shaped trailing bytes are not
+    // enough - the decoded VALUE must be a valid scalar. Overlongs,
+    // surrogates, and above-U+10FFFF degrade byte-per-byte.
+    using conv16 = int (*)(const char*, int);
+    conv16 f16 = dasher_byte_offset_from_utf16;
+
+    // ED A0 80 = U+D800 (surrogate) - 3 continuation-shaped bytes, but
+    // surrogates are invalid in UTF-8. Degrades to 3 strays.
+    ASSERT_EQ(f16("\xed\xa0\x80", 1), 1); // was 3 pre-fix
+    ASSERT_EQ(f16("\xed\xa0\x80", 3), 3);
+
+    // C0 80 = overlong NUL (2-byte encoding of value < 0x80).
+    ASSERT_EQ(f16("\xc0\x80", 1), 1); // was 2
+
+    // E0 80 80 = overlong NUL (3-byte encoding of value < 0x800).
+    ASSERT_EQ(f16("\xe0\x80\x80", 1), 1); // was 3
+
+    // F4 90 80 80 = U+110000 (above Unicode range).
+    ASSERT_EQ(f16("\xf4\x90\x80\x80", 1), 1); // was 4
+
+    // Valid boundary values still work: F0 9F 98 80 = U+1F600 (emoji).
+    ASSERT_EQ(f16("\xf0\x9f\x98\x80", 2), 4); // 2 UTF-16 units
+
+    // C2 A9 = U+00A9 - the minimum valid 2-byte value.
+    ASSERT_EQ(f16("\xc2\xa9", 1), 2);
+
+    // E0 A0 80 = U+0800 - the minimum valid 3-byte value.
+    ASSERT_EQ(f16("\xe0\xa0\x80", 1), 3);
+}
+
+TEST(clamp_caret_survives_long_stray_continuation_runs) {
+    // Greptile #83 follow-up: the 3-step backward scan can land on another
+    // continuation byte when 4+ strays run together; a correctly converted
+    // boundary must not be moved. Use set_offset (which clamps) with a
+    // buffer of 5 stray continuations + valid text.
+    dasher_ctx* ctx = create_isolated_context();
+    ASSERT(ctx != nullptr);
+    dasher_set_screen_size(ctx, 800, 600);
+
+    // 5 stray continuation bytes + "AB"
+    // Bytes: 80 80 80 80 80 41 42 (indices 0-6)
+    // A caret at byte 3 (still mid-stray-run) should stay at 3.
+    ASSERT_EQ(dasher_seed_buffer(ctx,
+                                 "\x80\x80\x80\x80\x80"
+                                 "AB",
+                                 3),
+              0);
+    ASSERT_EQ(dasher_get_offset(ctx), 3); // not snapped to 0 (still stray)
+
+    dasher_destroy(ctx);
+}
