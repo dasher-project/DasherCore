@@ -2130,9 +2130,9 @@ static bool ensure_realized_for_context(dasher_ctx* ctx) {
 // CAPI), but platform carets arrive in character/UTF-16 units — a raw
 // conversion can land mid-sequence, which would corrupt every subsequent
 // edit. Snapping backward keeps the straddled codepoint in the pre-caret
-// context rather than dropping it (greptile #83: "caret offsets split
-// UTF-8"). Frontends should still convert UTF-16 -> UTF-8 properly; this is
-// the guard that makes a sloppy conversion degrade instead of corrupt.
+// context rather than dropping it. Frontends convert units with
+// dasher_byte_offset_from_utf16 / _from_codepoints; this is the guard that
+// makes a sloppy conversion degrade instead of corrupt.
 static size_t clamp_caret_to_codepoint(const std::string& buf, ptrdiff_t offset) {
     if (offset <= 0) return 0;
     const auto size = static_cast<ptrdiff_t>(buf.size());
@@ -2144,6 +2144,63 @@ static size_t clamp_caret_to_codepoint(const std::string& buf, ptrdiff_t offset)
         ++back;
     }
     return pos;
+}
+
+// Shared UTF-8 walker for the unit-conversion helpers: decodes text forward,
+// tracking byte position, codepoint count and UTF-16 unit count, stopping
+// when the requested count is reached. count_utf16 selects the unit;
+// target < 0 clamps to 0; a UTF-16 target landing mid-surrogate-pair
+// resolves to the pair's start (the boundary BEFORE the second unit).
+// Malformed sequences degrade byte-per-byte (each stray byte = one
+// codepoint = one UTF-16 unit), so conversion never runs off the text.
+static int byte_offset_from_count(const char* utf8_text, int target, bool count_utf16) {
+    if (!utf8_text) return -1;
+    if (target <= 0) return 0;
+    long remaining = target;
+    const unsigned char* p = reinterpret_cast<const unsigned char*>(utf8_text);
+    int byte_pos = 0;
+    while (*p) {
+        unsigned char c = *p;
+        int cp_bytes;
+        if (c < 0x80)
+            cp_bytes = 1;
+        else if ((c & 0xE0) == 0xC0)
+            cp_bytes = 2;
+        else if ((c & 0xF0) == 0xE0)
+            cp_bytes = 3;
+        else if ((c & 0xF8) == 0xF0)
+            cp_bytes = 4;
+        else
+            cp_bytes = 1; // stray continuation/invalid: degrade to one unit
+
+        // UTF-16 units for this codepoint: 2 if it encodes >= U+10000.
+        const int units = (count_utf16 && cp_bytes == 4) ? 2 : 1;
+        if (remaining < units) {
+            // UTF-16 target lands mid-surrogate-pair: resolve to the pair's
+            // start (the boundary before this codepoint's second unit).
+            break;
+        }
+        remaining -= units;
+        // Skip the codepoint's bytes (or one stray byte). NB: guard against
+        // running past NUL for truncated sequences — measure from the
+        // sequence start, never from the advancing pointer (p[i] would
+        // double-advance the lookahead and drop a byte).
+        const unsigned char* seq = p;
+        while (*p && (p - seq) < cp_bytes) {
+            ++p;
+            ++byte_pos;
+        }
+        if (remaining == 0) break;
+    }
+    return byte_pos;
+}
+
+DASHER_API int dasher_byte_offset_from_utf16(const char* utf8_text, int utf16_offset) {
+    return byte_offset_from_count(utf8_text, utf16_offset, true);
+}
+
+DASHER_API int dasher_byte_offset_from_codepoints(const char* utf8_text, int codepoint_offset) {
+    return byte_offset_from_count(utf8_text, codepoint_offset, false);
 }
 
 DASHER_API int dasher_set_offset(dasher_ctx* ctx, int offset) {

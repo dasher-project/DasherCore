@@ -1107,3 +1107,57 @@ TEST(context_offsets_never_split_utf8_codepoints) {
 
     dasher_destroy(ctx);
 }
+
+TEST(caret_unit_conversion_translates_to_intended_byte_position) {
+    // Greptile #83 follow-up: snapping prevents corruption but is not
+    // conversion — a UTF-16 count is numerically wrong as a byte offset
+    // (CJK: UTF-16 10 vs byte 30). These helpers are THE conversion path
+    // from platform caret units to the buffer unit.
+    using conv16 = int (*)(const char*, int);
+    using convcp = int (*)(const char*, int);
+    conv16 f16 = dasher_byte_offset_from_utf16;
+    convcp fcp = dasher_byte_offset_from_codepoints;
+
+    // ASCII: all three units coincide.
+    ASSERT_EQ(f16("hello", 3), 3);
+    ASSERT_EQ(fcp("hello", 3), 3);
+
+    // 2-byte e-acute: UTF-8 "h\xC3\xA9llo" is 6 bytes; units: h,e,l,l,o = 5.
+    ASSERT_EQ(f16("h\xc3\xa9llo", 2), 3); // after 'e' (2 units) = byte 3
+    ASSERT_EQ(fcp("h\xc3\xa9llo", 2), 3);
+    ASSERT_EQ(f16("h\xc3\xa9llo", 1), 1); // after 'h' = byte 1
+
+    // 3-byte CJK: UTF-8 "\xE4\xB8\xAD" = 3 bytes, 1 unit in both systems.
+    ASSERT_EQ(f16("\xe4\xb8\xad\xe4\xb8\xad", 2), 6); // two chars = 6 bytes
+    ASSERT_EQ(fcp("\xe4\xb8\xad\xe4\xb8\xad", 2), 6);
+    ASSERT_EQ(f16("\xe4\xb8\xad\xe4\xb8\xad", 1), 3);
+
+    // 4-byte emoji U+1F600: 4 bytes, 1 codepoint but 2 UTF-16 units.
+    const char* emoji = "\xf0\x9f\x98\x80"; // 😀
+    ASSERT_EQ(f16(emoji, 2), 4);            // after the pair = byte 4
+    ASSERT_EQ(f16(emoji, 1), 0);            // MID-PAIR resolves to the pair start
+    ASSERT_EQ(fcp(emoji, 1), 4);            // codepoints: emoji is one = byte 4
+
+    // Mixed "a😀b" (bytes 0..5): units16 = a(1) + emoji(2) + b(1) = 4.
+    const char* mixed = "a\xf0\x9f\x98\x80"
+                        "b";
+    ASSERT_EQ(f16(mixed, 1), 1); // after 'a'
+    ASSERT_EQ(f16(mixed, 2), 1); // mid-pair -> pair start = after 'a'
+    ASSERT_EQ(f16(mixed, 3), 5); // after emoji (before 'b')
+    ASSERT_EQ(f16(mixed, 4), 6); // after 'b' = end
+    ASSERT_EQ(fcp(mixed, 2), 5); // after a + emoji (2 codepoints)
+
+    // Clamping.
+    ASSERT_EQ(f16("abc", 99), 3);
+    ASSERT_EQ(f16("abc", -1), 0);
+    ASSERT_EQ(fcp("", 0), 0);
+    ASSERT_EQ(f16(nullptr, 3), -1); // null text is an error
+
+    // The full pipeline: UIA caret in UTF-16 units -> byte offset -> seed.
+    dasher_ctx* ctx = create_isolated_context();
+    ASSERT(ctx != nullptr);
+    dasher_set_screen_size(ctx, 800, 600);
+    ASSERT_EQ(dasher_seed_buffer(ctx, emoji, f16(emoji, 2)), 0);
+    ASSERT_EQ(dasher_get_offset(ctx), 4); // anchored at the true caret
+    dasher_destroy(ctx);
+}

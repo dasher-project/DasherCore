@@ -591,21 +591,35 @@ DASHER_API int dasher_get_offset(dasher_ctx* ctx);
 
 // ── Context awareness (RFC 0015) ──────────────────────────────────────────
 
+// Convert a platform caret position into the UTF-8 byte unit used by
+// dasher_set_offset / dasher_seed_buffer. utf16_offset counts UTF-16 code
+// units (Windows UIA / EDIT controls). A surrogate pair counts as two
+// units; an offset landing inside a pair resolves to the pair's start.
+// Malformed UTF-8 degrades byte-per-byte. Returns the byte offset; negative
+// and out-of-range values clamp to 0 / strlen. Returns -1 if text is NULL.
+DASHER_API int dasher_byte_offset_from_utf16(const char* utf8_text, int utf16_offset);
+
+// Codepoint-unit variant (macOS AX and GTK atspi report character counts;
+// emoji count as one here, two in UTF-16). Same clamping rules.
+DASHER_API int dasher_byte_offset_from_codepoints(const char* utf8_text, int codepoint_offset);
+
 // Re-anchor the model at a buffer position (v5's SetOffset). The language
 // model context becomes the edit buffer's text before the offset, so
 // predictions continue from there. Use after external edits moved the caret
 // within the session buffer. OFFSET IS A UTF-8 BYTE POSITION (the buffer's
-// unit throughout this CAPI) — frontends reading platform carets in
-// character/UTF-16 units must convert; a value that lands mid-codepoint
-// snaps down to the codepoint start rather than corrupting output.
+// unit throughout this CAPI) — convert platform carets with
+// dasher_byte_offset_from_utf16 / _from_codepoints; a value that lands
+// mid-codepoint snaps down to the codepoint start rather than corrupting
+// output.
 // Returns 0 on success, -1 on failure.
 DASHER_API int dasher_set_offset(dasher_ctx* ctx, int offset);
 
 // Replace the edit buffer with text read from the target field (e.g. via
 // UI Automation) and anchor the model at caret_offset — predictions then
 // continue from text the user did not type through Dasher (RFC 0015 tier 3).
-// caret_offset is a UTF-8 byte position (see dasher_set_offset for the unit
-// contract and mid-codepoint snapping). Emits output event 2 (buffer
+// caret_offset is a UTF-8 byte position — convert platform carets with
+// dasher_byte_offset_from_utf16 / _from_codepoints (see dasher_set_offset
+// for the full unit contract). Emits output event 2 (buffer
 // cleared) FIRST so subscribers resync their mirrors without injecting
 // (backspacing a whole field into the target would destroy the user's
 // text). Typing-rate stats reset. Realizes if needed.
