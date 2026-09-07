@@ -1066,3 +1066,44 @@ TEST(seed_buffer_realizes_lazy_engine) {
     (void)rc;
     dasher_destroy(ctx);
 }
+
+TEST(context_offsets_never_split_utf8_codepoints) {
+    // Greptile #83: platform carets arrive in character/UTF-16 units; a raw
+    // conversion to the buffer's UTF-8 bytes can land mid-sequence, which
+    // would corrupt every subsequent edit. Offsets that do land inside a
+    // multibyte sequence must snap DOWN to the codepoint start (the
+    // straddled character stays in the pre-caret context, never dropped).
+    dasher_ctx* ctx = create_isolated_context();
+    ASSERT(ctx != nullptr);
+    dasher_set_screen_size(ctx, 800, 600);
+
+    // "héllo": é is U+00E9 = 2 UTF-8 bytes -> h(1) é(2) l l o = 6 bytes.
+    // Byte 2 is INSIDE é; both 2 and the trailing position must snap to 1
+    // (é's lead byte), keeping é before the caret.
+    ASSERT_EQ(dasher_seed_buffer(ctx, "h\xc3\xa9llo", 2), 0);
+    ASSERT_EQ(dasher_get_offset(ctx), 1);
+
+    // Same via set_offset within an existing buffer.
+    ASSERT_EQ(dasher_set_offset(ctx, 2), 0);
+    ASSERT_EQ(dasher_get_offset(ctx), 1);
+
+    // 3-byte sequence: "a" + U+4E2D (3 bytes) + "b" = 5 bytes total; the
+    // CJK char spans bytes 1-3. Offsets 2 and 3 snap to 1; offset 4 (the
+    // 'b') is a boundary and stays.
+    ASSERT_EQ(dasher_seed_buffer(ctx,
+                                 "a\xe4\xb8\xad"
+                                 "b",
+                                 3),
+              0);
+    ASSERT_EQ(dasher_get_offset(ctx), 1);
+    ASSERT_EQ(dasher_set_offset(ctx, 4), 0);
+    ASSERT_EQ(dasher_get_offset(ctx), 4);
+
+    // Boundary values pass through untouched: 0, and the full length.
+    ASSERT_EQ(dasher_set_offset(ctx, 0), 0);
+    ASSERT_EQ(dasher_get_offset(ctx), 0);
+    ASSERT_EQ(dasher_set_offset(ctx, 999), 0);
+    ASSERT_EQ(dasher_get_offset(ctx), 5);
+
+    dasher_destroy(ctx);
+}

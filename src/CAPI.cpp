@@ -2124,16 +2124,38 @@ static bool ensure_realized_for_context(dasher_ctx* ctx) {
     }
 }
 
+// Clamp a caret offset for anchoring: clamp to the buffer, then snap DOWN
+// to the start of the containing codepoint. Offsets are UTF-8 bytes (the
+// buffer's unit, matching GetContext/edit-output everywhere else in this
+// CAPI), but platform carets arrive in character/UTF-16 units — a raw
+// conversion can land mid-sequence, which would corrupt every subsequent
+// edit. Snapping backward keeps the straddled codepoint in the pre-caret
+// context rather than dropping it (greptile #83: "caret offsets split
+// UTF-8"). Frontends should still convert UTF-16 -> UTF-8 properly; this is
+// the guard that makes a sloppy conversion degrade instead of corrupt.
+static size_t clamp_caret_to_codepoint(const std::string& buf, ptrdiff_t offset) {
+    if (offset <= 0) return 0;
+    const auto size = static_cast<ptrdiff_t>(buf.size());
+    if (offset >= size) return buf.size();
+    size_t pos = static_cast<size_t>(offset);
+    int back = 0;
+    while (pos > 0 && (static_cast<unsigned char>(buf[pos]) & 0xC0) == 0x80 && back < 3) {
+        --pos;
+        ++back;
+    }
+    return pos;
+}
+
 DASHER_API int dasher_set_offset(dasher_ctx* ctx, int offset) {
     if (!ctx || !ctx->intf) return -1;
     if (offset < 0) return -1;
     if (!ensure_realized_for_context(ctx)) return -1;
     try {
-        // offset is a byte-ish position into the edit buffer by historical
-        // convention (v5 used EDIT-control character offsets against UTF-8
-        // strings); clamp to the buffer so out-of-range values anchor at
-        // the end rather than asserting.
-        const auto clamped = std::min(static_cast<size_t>(offset), ctx->editBuffer.size());
+        // Offsets are UTF-8 byte positions into the edit buffer (the CAPI's
+        // universal unit); mid-sequence values from platform caret
+        // conversions snap down to the codepoint start instead of
+        // corrupting subsequent output (see clamp_caret_to_codepoint).
+        const auto clamped = clamp_caret_to_codepoint(ctx->editBuffer, offset);
         ctx->cursorPos = clamped;
         ctx->intf->SetOffset(static_cast<unsigned int>(clamped), true);
         return 0;
@@ -2152,7 +2174,11 @@ DASHER_API int dasher_seed_buffer(dasher_ctx* ctx, const char* text, int caret_o
     try {
         // Replace the buffer with the target field's text.
         ctx->editBuffer.assign(text ? text : "");
-        const auto clamped = std::min(static_cast<size_t>(std::max(caret_offset, 0)), ctx->editBuffer.size());
+        // caret_offset is a UTF-8 byte position; platform caret units
+        // (characters / UTF-16) must be converted by the frontend, and a
+        // mid-codepoint value snaps down rather than corrupting output
+        // (see clamp_caret_to_codepoint).
+        const auto clamped = clamp_caret_to_codepoint(ctx->editBuffer, caret_offset);
         ctx->cursorPos = clamped;
         ctx->rateTimestamps.clear();
 
