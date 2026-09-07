@@ -2143,6 +2143,14 @@ static size_t clamp_caret_to_codepoint(const std::string& buf, ptrdiff_t offset)
         --pos;
         ++back;
     }
+    // Verify the landing is a lead byte (or ASCII), not still inside a run
+    // of stray continuation bytes: with 4+ consecutive stray continuations
+    // the 3-step scan can land on another continuation, and a correctly
+    // converted boundary would be moved to the wrong byte (greptile #83
+    // follow-up). Under the byte-per-byte degradation contract every stray
+    // byte is its own unit, so the original position IS a valid boundary
+    // when the scan can't find a real lead byte.
+    if ((static_cast<unsigned char>(buf[pos]) & 0xC0) == 0x80) return static_cast<size_t>(offset);
     return pos;
 }
 
@@ -2156,12 +2164,40 @@ static size_t clamp_caret_to_codepoint(const std::string& buf, ptrdiff_t offset)
 // A lead byte's declared width is only real if the declared-1 following
 // bytes are actual continuations (and not NUL). Otherwise this is a stray
 // lead byte and degrades to ONE unit, so the walker re-examines the next
-// byte as a fresh unit — byte-per-byte, as documented (greptile #83:
-// "\xC2\x41" with offset 1 must be 1, not 2).
+// byte as a fresh unit - byte-per-byte, as documented (greptile #83:
+// "\xC2\x41" with offset 1 must be 1, not 2). The decoded VALUE is also
+// validated: overlong encodings (2-byte < U+80, 3-byte < U+800, 4-byte
+// < U+10000), UTF-16 surrogates (U+D800..U+DFFF), and values above
+// U+10FFFF are malformed despite having continuation-shaped trailing
+// bytes, and degrade the same way (greptile follow-up: "\xED\xA0\x80"
+// with offset 1 must be 1, not 3).
 static int ValidatedSequenceLength(const unsigned char* p, int declared) {
     for (int i = 1; i < declared; ++i) {
         if ((p[i] & 0xC0) != 0x80) return 1; // not a continuation (covers NUL)
     }
+    // Decode the value for semantic validation.
+    unsigned long cp;
+    switch (declared) {
+    case 2:
+        cp = ((p[0] & 0x1FUL) << 6) | (p[1] & 0x3FUL);
+        break;
+    case 3:
+        cp = ((p[0] & 0x0FUL) << 12) | ((p[1] & 0x3FUL) << 6) | (p[2] & 0x3FUL);
+        break;
+    case 4:
+        cp = ((p[0] & 0x07UL) << 18) | ((p[1] & 0x3FUL) << 12) | ((p[2] & 0x3FUL) << 6) | (p[3] & 0x3FUL);
+        break;
+    default:
+        return 1;
+    }
+    // Overlong: the value could have been encoded shorter.
+    if (declared == 2 && cp < 0x80) return 1;
+    if (declared == 3 && cp < 0x800) return 1;
+    if (declared == 4 && cp < 0x10000) return 1;
+    // Surrogates are not valid codepoints in UTF-8.
+    if (cp >= 0xD800 && cp <= 0xDFFF) return 1;
+    // Above the Unicode range.
+    if (cp > 0x10FFFF) return 1;
     return declared;
 }
 

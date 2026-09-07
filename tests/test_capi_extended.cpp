@@ -1186,3 +1186,56 @@ TEST(caret_conversion_malformed_utf8_degrades_byte_per_byte) {
     // A VALID 2-byte sequence still converts exactly (regression guard).
     ASSERT_EQ(f16("\xc2\xa9", 1), 2); // U+00A9 (c) = 2 bytes, 1 unit
 }
+
+TEST(caret_conversion_rejects_semantically_invalid_utf8) {
+    // Greptile #83 follow-up: continuation-shaped trailing bytes are not
+    // enough - the decoded VALUE must be a valid scalar. Overlongs,
+    // surrogates, and above-U+10FFFF degrade byte-per-byte.
+    using conv16 = int (*)(const char*, int);
+    conv16 f16 = dasher_byte_offset_from_utf16;
+
+    // ED A0 80 = U+D800 (surrogate) - 3 continuation-shaped bytes, but
+    // surrogates are invalid in UTF-8. Degrades to 3 strays.
+    ASSERT_EQ(f16("\xed\xa0\x80", 1), 1); // was 3 pre-fix
+    ASSERT_EQ(f16("\xed\xa0\x80", 3), 3);
+
+    // C0 80 = overlong NUL (2-byte encoding of value < 0x80).
+    ASSERT_EQ(f16("\xc0\x80", 1), 1); // was 2
+
+    // E0 80 80 = overlong NUL (3-byte encoding of value < 0x800).
+    ASSERT_EQ(f16("\xe0\x80\x80", 1), 1); // was 3
+
+    // F4 90 80 80 = U+110000 (above Unicode range).
+    ASSERT_EQ(f16("\xf4\x90\x80\x80", 1), 1); // was 4
+
+    // Valid boundary values still work: F0 9F 98 80 = U+1F600 (emoji).
+    ASSERT_EQ(f16("\xf0\x9f\x98\x80", 2), 4); // 2 UTF-16 units
+
+    // C2 A9 = U+00A9 - the minimum valid 2-byte value.
+    ASSERT_EQ(f16("\xc2\xa9", 1), 2);
+
+    // E0 A0 80 = U+0800 - the minimum valid 3-byte value.
+    ASSERT_EQ(f16("\xe0\xa0\x80", 1), 3);
+}
+
+TEST(clamp_caret_survives_long_stray_continuation_runs) {
+    // Greptile #83 follow-up: the 3-step backward scan can land on another
+    // continuation byte when 4+ strays run together; a correctly converted
+    // boundary must not be moved. Use set_offset (which clamps) with a
+    // buffer of 5 stray continuations + valid text.
+    dasher_ctx* ctx = create_isolated_context();
+    ASSERT(ctx != nullptr);
+    dasher_set_screen_size(ctx, 800, 600);
+
+    // 5 stray continuation bytes + "AB"
+    // Bytes: 80 80 80 80 80 41 42 (indices 0-6)
+    // A caret at byte 3 (still mid-stray-run) should stay at 3.
+    ASSERT_EQ(dasher_seed_buffer(ctx,
+                                 "\x80\x80\x80\x80\x80"
+                                 "AB",
+                                 3),
+              0);
+    ASSERT_EQ(dasher_get_offset(ctx), 3); // not snapped to 0 (still stray)
+
+    dasher_destroy(ctx);
+}
