@@ -2153,6 +2153,18 @@ static size_t clamp_caret_to_codepoint(const std::string& buf, ptrdiff_t offset)
 // resolves to the pair's start (the boundary BEFORE the second unit).
 // Malformed sequences degrade byte-per-byte (each stray byte = one
 // codepoint = one UTF-16 unit), so conversion never runs off the text.
+// A lead byte's declared width is only real if the declared-1 following
+// bytes are actual continuations (and not NUL). Otherwise this is a stray
+// lead byte and degrades to ONE unit, so the walker re-examines the next
+// byte as a fresh unit — byte-per-byte, as documented (greptile #83:
+// "\xC2\x41" with offset 1 must be 1, not 2).
+static int ValidatedSequenceLength(const unsigned char* p, int declared) {
+    for (int i = 1; i < declared; ++i) {
+        if ((p[i] & 0xC0) != 0x80) return 1; // not a continuation (covers NUL)
+    }
+    return declared;
+}
+
 static int byte_offset_from_count(const char* utf8_text, int target, bool count_utf16) {
     if (!utf8_text) return -1;
     if (target <= 0) return 0;
@@ -2164,14 +2176,15 @@ static int byte_offset_from_count(const char* utf8_text, int target, bool count_
         // Lead-byte masks are mutually exclusive, so the check order is
         // free; grouping both one-unit cases (ASCII and stray
         // continuation/invalid) into the else keeps clang-tidy's
-        // branch-clone check happy.
+        // branch-clone check happy. Declared widths are validated — a
+        // truncated or corrupt sequence degrades to one stray byte.
         int cp_bytes;
         if ((c & 0xF8) == 0xF0)
-            cp_bytes = 4;
+            cp_bytes = ValidatedSequenceLength(p, 4);
         else if ((c & 0xF0) == 0xE0)
-            cp_bytes = 3;
+            cp_bytes = ValidatedSequenceLength(p, 3);
         else if ((c & 0xE0) == 0xC0)
-            cp_bytes = 2;
+            cp_bytes = ValidatedSequenceLength(p, 2);
         else
             cp_bytes = 1; // ASCII (< 0x80) or stray continuation/invalid
 

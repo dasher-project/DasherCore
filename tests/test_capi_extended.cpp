@@ -1161,3 +1161,28 @@ TEST(caret_unit_conversion_translates_to_intended_byte_position) {
     ASSERT_EQ(dasher_get_offset(ctx), 4); // anchored at the true caret
     dasher_destroy(ctx);
 }
+
+TEST(caret_conversion_malformed_utf8_degrades_byte_per_byte) {
+    // Greptile #83 (comment 2): a stray lead byte must consume exactly ONE
+    // byte, never swallow the following byte as a phantom continuation -
+    // the documented contract, and what dasher_seed_buffer anchors on.
+    using conv16 = int (*)(const char*, int);
+    conv16 f16 = dasher_byte_offset_from_utf16;
+
+    // The reported case: 0xC2 claims 2 bytes but 0x41 is ASCII.
+    ASSERT_EQ(f16("\xc2\x41", 1), 1); // stray lead = one unit; 'A' is next
+
+    // Truncated lead at end of string: 0xC2 then NUL.
+    ASSERT_EQ(f16("\xc2", 1), 1);
+
+    // Truncated mid-sequence: 0xE0 0x80 (valid start) then NUL - the E0
+    // degrades to one stray, 0x80 is itself a stray continuation.
+    ASSERT_EQ(f16("\xe0\x80", 1), 1);
+    ASSERT_EQ(f16("\xe0\x80", 2), 2);
+
+    // Stray continuation bytes each count one unit.
+    ASSERT_EQ(f16("\x80\x80\x80", 2), 2);
+
+    // A VALID 2-byte sequence still converts exactly (regression guard).
+    ASSERT_EQ(f16("\xc2\xa9", 1), 2); // U+00A9 (c) = 2 bytes, 1 unit
+}
