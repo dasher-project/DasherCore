@@ -2133,6 +2133,7 @@ static bool ensure_realized_for_context(dasher_ctx* ctx) {
 // context rather than dropping it. Frontends convert units with
 // dasher_byte_offset_from_utf16 / _from_codepoints; this is the guard that
 // makes a sloppy conversion degrade instead of corrupt.
+static int ValidatedSequenceLength(const unsigned char* p, int declared);
 static size_t clamp_caret_to_codepoint(const std::string& buf, ptrdiff_t offset) {
     if (offset <= 0) return 0;
     const auto size = static_cast<ptrdiff_t>(buf.size());
@@ -2143,15 +2144,34 @@ static size_t clamp_caret_to_codepoint(const std::string& buf, ptrdiff_t offset)
         --pos;
         ++back;
     }
-    // Verify the landing is a lead byte (or ASCII), not still inside a run
-    // of stray continuation bytes: with 4+ consecutive stray continuations
-    // the 3-step scan can land on another continuation, and a correctly
-    // converted boundary would be moved to the wrong byte (greptile #83
-    // follow-up). Under the byte-per-byte degradation contract every stray
-    // byte is its own unit, so the original position IS a valid boundary
-    // when the scan can't find a real lead byte.
+    if (back == 0) return pos; // already on a boundary
+    // Landing on buf[pos]. If it's still a continuation (long stray run),
+    // the original offset is a valid boundary (greptile: 4+ strays).
     if ((static_cast<unsigned char>(buf[pos]) & 0xC0) == 0x80) return static_cast<size_t>(offset);
-    return pos;
+    // The candidate lead byte at pos must form a VALID sequence with the
+    // continuation bytes we walked over. In a malformed run (e.g. the
+    // surrogate ED A0 80), the bytes look like lead + continuations but
+    // are semantically stray — byte 1 is already a valid boundary under
+    // the byte-per-byte contract, and snapping to 0 moves the anchor
+    // BEFORE the wrong prefix (greptile: "malformed-byte boundary snaps
+    // backward").
+    const auto* p = reinterpret_cast<const unsigned char*>(buf.data()) + pos;
+    unsigned char c = *p;
+    int declared;
+    if ((c & 0xF8) == 0xF0)
+        declared = 4;
+    else if ((c & 0xF0) == 0xE0)
+        declared = 3;
+    else if ((c & 0xE0) == 0xC0)
+        declared = 2;
+    else
+        declared = 1;
+    // If the lead isn't multi-byte, or declares fewer bytes than we walked
+    // over, those "continuations" are strays — don't snap.
+    if (declared <= 1 || declared < back + 1) return static_cast<size_t>(offset);
+    // Semantically validate: overlong, surrogate, above-range all reject.
+    if (ValidatedSequenceLength(p, declared) != declared) return static_cast<size_t>(offset);
+    return pos; // valid sequence — snap to its start
 }
 
 // Shared UTF-8 walker for the unit-conversion helpers: decodes text forward,
