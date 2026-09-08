@@ -56,18 +56,29 @@ void Dasher::FileUtils::ScanFiles(AbstractParser* parser, const std::string& str
         return;
     }
 
+    ScanDirectory(parser, strPattern, s_dataDirectory);
+}
+
+void Dasher::FileUtils::ScanDirectory(AbstractParser* parser, const std::string& strPattern, const std::string& dir) {
+    // Same absolute-path contract as ScanFiles: one specific file, no glob.
+    std::error_code error_code;
+    std::filesystem::path p(strPattern);
+    if (p.is_absolute()) {
+        if (std::filesystem::exists(p, error_code) && std::filesystem::is_regular_file(p, error_code)) {
+            parser->ParseFile(strPattern, IsFileWriteable(strPattern));
+        }
+        return;
+    }
+
     // Replace * with .* for actual regex matching
     // Note: pattern is interpreted as regex, so "alphabet.*.xml" matches "alphabet.English.xml"
     const std::regex pattern = std::regex(strPattern);
 
-    // Search ONLY in the specified data directory. The old fallback to
-    // current_path() turned an empty/missing data dir (frontend passed a bad
-    // bundle path) into an unbounded scan of the user's home directory —
-    // minutes of regex per file while the caller held its engine lock
-    // (watch spike hang, 2026-08-31). No data dir means nothing to scan.
+    // Search ONLY in the specified directory; empty means nothing to scan
+    // (same rationale as ScanFiles — never fall back to current_path()).
     std::vector<std::filesystem::path> search_paths;
-    if (!s_dataDirectory.empty()) {
-        search_paths.push_back(std::filesystem::path(s_dataDirectory));
+    if (!dir.empty()) {
+        search_paths.push_back(std::filesystem::path(dir));
     }
 
     for (const std::filesystem::path& current_path : search_paths) {
@@ -129,6 +140,27 @@ void Dasher::FileUtils::ScanFiles(AbstractParser* parser, const std::string& str
             }
         }
     }
+}
+
+bool Dasher::FileUtils::IsSameDirectory(const std::string& a, const std::string& b) {
+    if (a.empty() || b.empty()) return false;
+    std::error_code ec;
+    std::filesystem::path pa(a), pb(b);
+    if (std::filesystem::exists(pa, ec) && !ec && std::filesystem::exists(pb, ec) && !ec) {
+        // Resolves symlinks / junctions and (on Windows) case-insensitivity.
+        ec.clear();
+        bool eq = std::filesystem::equivalent(pa, pb, ec);
+        if (!ec) return eq;
+        // exists() said yes but equivalent() failed (e.g. permission on a
+        // parent) — fall through to the lexical comparison below.
+    }
+    ec.clear();
+    const auto na = std::filesystem::weakly_canonical(pa, ec);
+    if (ec) return false;
+    ec.clear();
+    const auto nb = std::filesystem::weakly_canonical(pb, ec);
+    if (ec) return false;
+    return na == nb;
 }
 
 bool Dasher::FileUtils::WriteUserDataFile(const std::string& filename, const std::string& strNewText, bool append) {

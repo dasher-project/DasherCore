@@ -24,6 +24,19 @@ class FileUtils {
     // Open File with the filename strPattern in the project directory
     static void ScanFiles(AbstractParser* parser, const std::string& strPattern);
 
+    // Scan a specific directory (recursively) instead of the process-global
+    // data directory. Same pattern semantics as ScanFiles; an empty dir
+    // scans nothing. Lets per-context callers (NodeCreationManager training
+    // load, dasher-project/DasherCore#84) avoid the last-created-context
+    // globals that ScanFiles consults.
+    static void ScanDirectory(AbstractParser* parser, const std::string& strPattern, const std::string& dir);
+
+    // True when two directory paths name the same location: uses
+    // std::filesystem::equivalent when both exist (symlinks, junctions,
+    // case-insensitive roots), falling back to weakly_canonical lexical
+    // comparison for not-yet-created dirs. Empty paths never match.
+    static bool IsSameDirectory(const std::string& a, const std::string& b);
+
     // Writes into the user file
     static bool WriteUserDataFile(const std::string& filename, const std::string& strNewText, bool append);
 

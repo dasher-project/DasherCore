@@ -909,6 +909,9 @@ DASHER_API dasher_ctx* dasher_create(const char* data_dir, const char* user_dir,
         // created later (the FileUtils globals are process-wide,
         // last-create-wins — see CDasherInterfaceBase::WriteTrainFile).
         ctx->intf->SetUserDataDirectory(writableDir);
+        // Per-context data dir, same rationale: the startup training scan
+        // reads THIS context's bundled corpus, not the global's (#84).
+        ctx->intf->SetDataDirectory(dir);
     } catch (const std::exception& e) {
         s_errorString = std::string("Failed to create Dasher session: ") + e.what();
         if (out_error) *out_error = s_errorString.data();
@@ -2139,6 +2142,10 @@ DASHER_API const char* dasher_get_training_path(dasher_ctx* ctx) {
         ctx->tlString.clear();
     }
     return ctx->tlString.c_str();
+}
+
+DASHER_API int dasher_capi_version(void) {
+    return DASHER_CAPI_VERSION;
 }
 
 DASHER_API int dasher_get_offset(dasher_ctx* ctx) {
