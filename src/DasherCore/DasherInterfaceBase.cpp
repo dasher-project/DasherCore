@@ -738,8 +738,12 @@ void CDasherInterfaceBase::WriteTrainFile(const std::string& filename, const std
     // the global belongs to whichever context was created last, so two live
     // contexts with different dirs would otherwise append to (and the
     // getter dasher_get_training_path would report) different files.
-    // Falls back to the historical global path when no per-context dir was
-    // set (embedded/simple hosts).
+    // When a per-context dir IS configured but cannot be opened (unwritable,
+    // deleted), dropping THIS context's text is the recoverable failure —
+    // falling through to the global writer would append to ANOTHER context's
+    // training file ("failed writes cross contexts"), which is worse.
+    // The global fallback applies only to hosts that never configured a
+    // per-context dir (embedded/simple).
     if (!m_userDataDir.empty()) {
         std::filesystem::path p(filename);
         if (p.is_relative()) {
@@ -748,6 +752,7 @@ void CDasherInterfaceBase::WriteTrainFile(const std::string& filename, const std
                 File << strNewText;
                 return;
             }
+            return; // per-context write failed — never cross to the global
         }
     }
     Dasher::FileUtils::WriteUserDataFile(filename, strNewText, true);
