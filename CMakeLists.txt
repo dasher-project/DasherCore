@@ -250,6 +250,11 @@ if(BUILD_CAPI)
         dasher_add_test(dasher_direct_mode_shadow_tests test_direct_mode_shadow.cpp)
         dasher_add_test(dasher_low_memory_tests test_low_memory.cpp)
         dasher_add_test(dasher_extended_tests test_capi_extended.cpp)
+        # The extended suite creates many engines (each parses the full
+        # training corpus); under sanitizers that runs several times slower
+        # and crossed the default 300s budget (CI Sanitize job timeout).
+        # Generous headroom rather than trimming tests: coverage is the point.
+        set_tests_properties(dasher_extended_tests PROPERTIES TIMEOUT 900)
 dasher_add_test(dasher_text_metrics_tests test_text_metrics.cpp)
         dasher_add_test(dasher_language_model_tests test_language_models.cpp)
         dasher_add_test(dasher_parameter_tests test_parameters.cpp)
