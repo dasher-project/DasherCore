@@ -370,12 +370,14 @@ class Dasher::CDasherInterfaceBase : public CMessageDisplay, private NoClones {
 
     void ImportTrainingText(const std::string& strPath);
 
-    /// Absolute path of the current alphabet's user training file — the file
-    /// adaptive learning appends to (via WriteTrainFileFull) and the single
-    /// location frontends should read/export/reset. Returns "" when no model
-    /// is realized or the alphabet declares no training file. The file may
-    /// not exist yet (nothing learned); the path is where it WILL be written.
-    std::string GetTrainingFilePath();
+    /// Relative filename of the current alphabet's user training file (e.g.
+    /// "training_english_GB.txt"), or "" when no model is realized or the
+    /// alphabet declares no training file. Callers resolve it against THEIR
+    /// OWN user directory — deliberately NOT resolved here against the
+    /// process-global FileUtils directory, which belongs to whichever
+    /// context was created last (two live contexts with different user
+    /// dirs would otherwise get each other's paths).
+    std::string GetAlphabetTrainingFile();
 
     /// Flush the/all currently-written text to the user's training file(s).
     /// Just calls through to WriteTrainFileFull(this) on the AlphabetManager;

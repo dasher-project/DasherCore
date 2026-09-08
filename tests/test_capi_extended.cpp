@@ -1301,3 +1301,27 @@ TEST(import_training_leaves_no_temp_file) {
 
     dasher_destroy(ctx);
 }
+
+TEST(training_path_is_per_context_not_global) {
+    // Greptile #85: dasher_get_training_path must resolve against the
+    // CALLING context's user dir. The FileUtils user directory is a
+    // process-global owned by whichever context was created LAST — the
+    // getter must not route through it, or ctx A would report ctx B's path.
+    ScopedTempDir dirA, dirB;
+    dasher_ctx* a = dasher_create(TEST_DATA_DIR, dirA.c_str(), nullptr);
+    dasher_ctx* b = dasher_create(TEST_DATA_DIR, dirB.c_str(), nullptr);
+    ASSERT(a != nullptr);
+    ASSERT(b != nullptr);
+    dasher_set_screen_size(a, 800, 600);
+    dasher_set_screen_size(b, 800, 600);
+
+    // Snapshot both before any further engine calls (tlString contract).
+    const std::string pathA = dasher_get_training_path(a);
+    const std::string pathB = dasher_get_training_path(b);
+
+    ASSERT(pathA.rfind(dirA.path, 0) == 0); // A inside A's dir
+    ASSERT(pathB.rfind(dirB.path, 0) == 0); // B inside B's dir — not A's
+
+    dasher_destroy(b);
+    dasher_destroy(a);
+}

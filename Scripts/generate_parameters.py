@@ -66,7 +66,27 @@ namespace Dasher{{
 
 
 def escape_cpp_string(s):
-    return s.replace('\\', '\\\\').replace('"', '\\"')
+    # Non-ASCII characters are emitted as \ooo OCTAL escapes of their UTF-8
+    # bytes. Two reasons:
+    #   1. open(..., 'w') without encoding= writes the Windows locale codepage
+    #      (cp1252), turning e.g. U+00D7 (x, C3 97 in UTF-8) into a lone
+    #      invalid 0xD7 byte in the generated .cpp — the "Android JNI abort"
+    #      regression that kept coming back because every regeneration
+    #      re-mangled any hand fix. Octal keeps the file pure ASCII.
+    #   2. Octal stops after 3 digits, unlike \x which greedily eats following
+    #      hex-looking characters ("\xC3" + "1000" would parse as one escape).
+    out = []
+    for ch in s:
+        if ch == '\\':
+            out.append('\\\\')
+        elif ch == '"':
+            out.append('\\"')
+        elif ord(ch) < 0x80:
+            out.append(ch)
+        else:
+            for b in ch.encode('utf-8'):
+                out.append('\\%03o' % b)
+    return ''.join(out)
 
 
 def fmt_bool_default(val):
@@ -193,7 +213,10 @@ def generate_entry(param):
 
 
 def generate(manifest_path, output_path):
-    with open(manifest_path, 'r') as f:
+    # encoding='utf-8' on BOTH handles: the manifest is UTF-8 (json.load with
+    # an explicit codec), and the output must be deterministic across
+    # platforms instead of inheriting the Windows locale codepage.
+    with open(manifest_path, 'r', encoding='utf-8') as f:
         manifest = json.load(f)
 
     entries = ""
@@ -203,7 +226,7 @@ def generate(manifest_path, output_path):
     content = TEMPLATE.format(header=AUTOGEN_HEADER, entries=entries)
 
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
-    with open(output_path, 'w') as f:
+    with open(output_path, 'w', encoding='utf-8', newline='\n') as f:
         f.write(content)
 
     # Run clang-format on the generated file so it matches the project's

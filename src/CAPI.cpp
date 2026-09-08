@@ -2107,7 +2107,15 @@ DASHER_API int dasher_import_training_text(dasher_ctx* ctx, const char* text) {
 DASHER_API const char* dasher_get_training_path(dasher_ctx* ctx) {
     if (!ctx || !ctx->intf) return "";
     try {
-        ctx->tlString = ctx->intf->GetTrainingFilePath();
+        // Resolve against THIS context's user dir, not the process-global
+        // FileUtils directory (owned by whichever context was created last —
+        // two live contexts with different dirs must not see each other's
+        // training files).
+        const std::string file = ctx->intf->GetAlphabetTrainingFile();
+        if (file.empty() || ctx->userDir.empty())
+            ctx->tlString.clear();
+        else
+            ctx->tlString = (std::filesystem::path(ctx->userDir) / file).string();
     } catch (...) {
         ctx->tlString.clear();
     }

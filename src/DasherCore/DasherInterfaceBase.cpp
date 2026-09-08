@@ -721,11 +721,11 @@ void CDasherInterfaceBase::ImportTrainingText(const std::string& strPath) {
     if (m_pNCManager) m_pNCManager->ImportTrainingText(strPath);
 }
 
-std::string CDasherInterfaceBase::GetTrainingFilePath() {
+std::string CDasherInterfaceBase::GetAlphabetTrainingFile() {
     if (!m_pNCManager) return "";
     const auto* alphInfo = m_pNCManager->GetAlphabetManager()->GetAlphabet();
-    if (!alphInfo || alphInfo->GetTrainingFile().empty()) return "";
-    return Dasher::FileUtils::ResolveUserDataPath(alphInfo->GetTrainingFile());
+    if (!alphInfo) return "";
+    return alphInfo->GetTrainingFile();
 }
 
 void CDasherInterfaceBase::WriteTrainFile(const std::string& filename, const std::string& strNewText) {
