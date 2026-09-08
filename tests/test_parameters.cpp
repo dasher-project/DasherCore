@@ -276,19 +276,30 @@ namespace {
 bool is_valid_utf8(const char* s) {
     const unsigned char* p = (const unsigned char*)s;
     while (*p) {
-        if (*p < 0x80) { p++; continue; }
-        int len; unsigned cp;
-        if ((*p & 0xE0) == 0xC0) { len = 2; cp = *p & 0x1F; }
-        else if ((*p & 0xF0) == 0xE0) { len = 3; cp = *p & 0x0F; }
-        else if ((*p & 0xF8) == 0xF0) { len = 4; cp = *p & 0x07; }
-        else return false; // continuation or invalid lead
+        if (*p < 0x80) {
+            p++;
+            continue;
+        }
+        int len;
+        unsigned cp;
+        if ((*p & 0xE0) == 0xC0) {
+            len = 2;
+            cp = *p & 0x1F;
+        } else if ((*p & 0xF0) == 0xE0) {
+            len = 3;
+            cp = *p & 0x0F;
+        } else if ((*p & 0xF8) == 0xF0) {
+            len = 4;
+            cp = *p & 0x07;
+        } else
+            return false; // continuation or invalid lead
         for (int i = 1; i < len; i++) {
             if ((p[i] & 0xC0) != 0x80) return false;
             cp = (cp << 6) | (p[i] & 0x3F);
         }
-        if (len == 2 && cp < 0x80) return false;      // overlong
-        if (len == 3 && cp < 0x800) return false;     // overlong
-        if (len == 4 && cp < 0x10000) return false;   // overlong
+        if (len == 2 && cp < 0x80) return false;        // overlong
+        if (len == 3 && cp < 0x800) return false;       // overlong
+        if (len == 4 && cp < 0x10000) return false;     // overlong
         if (cp >= 0xD800 && cp <= 0xDFFF) return false; // surrogate
         if (cp > 0x10FFFF) return false;
         p += len;
@@ -312,7 +323,8 @@ TEST(param_metadata_strict_utf8) {
             REQUIRE_MESSAGE(false, (std::string("invalid UTF-8 name: '") + info.name + "'").c_str());
         if (info.desc != nullptr && info.desc[0] != '\0') {
             if (!is_valid_utf8(info.desc))
-                REQUIRE_MESSAGE(false, (std::string("invalid UTF-8 desc for '") + info.name + "': " + info.desc).c_str());
+                REQUIRE_MESSAGE(false,
+                                (std::string("invalid UTF-8 desc for '") + info.name + "': " + info.desc).c_str());
         }
     }
 }
