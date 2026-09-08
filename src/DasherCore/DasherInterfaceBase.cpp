@@ -27,6 +27,7 @@
 #include "DasherModel.h"
 #include "Event.h"
 #include "NodeCreationManager.h"
+#include "FileUtils.h"
 #include "GameModule.h"
 
 // Input filters
@@ -718,6 +719,13 @@ const char* CDasherInterfaceBase::ClSet(const std::string& strKey, const std::st
 
 void CDasherInterfaceBase::ImportTrainingText(const std::string& strPath) {
     if (m_pNCManager) m_pNCManager->ImportTrainingText(strPath);
+}
+
+std::string CDasherInterfaceBase::GetTrainingFilePath() {
+    if (!m_pNCManager) return "";
+    const auto* alphInfo = m_pNCManager->GetAlphabetManager()->GetAlphabet();
+    if (!alphInfo || alphInfo->GetTrainingFile().empty()) return "";
+    return Dasher::FileUtils::ResolveUserDataPath(alphInfo->GetTrainingFile());
 }
 
 void CDasherInterfaceBase::WriteTrainFile(const std::string& filename, const std::string& strNewText) {

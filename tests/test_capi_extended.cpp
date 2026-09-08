@@ -1239,3 +1239,65 @@ TEST(clamp_caret_survives_long_stray_continuation_runs) {
 
     dasher_destroy(ctx);
 }
+
+TEST(training_path_resolves_into_user_dir) {
+    // DasherCore#84 / Dasher-Windows#53: frontends need the ONE path the
+    // engine appends adaptive learning to. It must resolve inside the user
+    // dir and carry the current alphabet's training filename — even before
+    // anything has been learned (file need not exist yet).
+    ScopedTempDir dir;
+    dasher_ctx* ctx = dasher_create(TEST_DATA_DIR, dir.c_str(), nullptr);
+    ASSERT(ctx != nullptr);
+    dasher_set_screen_size(ctx, 800, 600);
+
+    const char* path_raw = dasher_get_training_path(ctx);
+    ASSERT(path_raw != nullptr);
+    // tlString contract: valid until the NEXT API call on this context —
+    // snapshot before any further dasher_* calls.
+    const std::string path = path_raw;
+    ASSERT(path.length() > 0);
+    printf("  training path: '%s'\n", path.c_str());
+
+    // Inside the user dir (the caller supplied dir.c_str()).
+    ASSERT(path.rfind(dir.path, 0) == 0);
+
+    // Carries a training_ filename for the current alphabet, not a
+    // subdirectory layout the engine never writes.
+    ASSERT(path.find("training_") != std::string::npos);
+    ASSERT(path.find("/training/") == std::string::npos);
+    ASSERT(path.find("\\training\\") == std::string::npos);
+
+    // Default English alphabet declares a training file.
+    const char* alph = dasher_get_alphabet_id(ctx);
+    ASSERT(alph != nullptr && strlen(alph) > 0);
+    ASSERT(path.find("training_english_GB.txt") != std::string::npos);
+
+    dasher_destroy(ctx);
+}
+
+TEST(training_path_empty_without_model) {
+    // No realize (no screen size, no frames) — the getter must not crash
+    // and may legitimately return "".
+    ScopedTempDir dir;
+    dasher_ctx* ctx = dasher_create(TEST_DATA_DIR, dir.c_str(), nullptr);
+    ASSERT(ctx != nullptr);
+    const char* path = dasher_get_training_path(ctx);
+    ASSERT(path != nullptr); // possibly "" — contract allows it
+    dasher_destroy(ctx);
+}
+
+TEST(import_training_leaves_no_temp_file) {
+    // The import temp file (.dasher_training_tmp.txt) must be removed after
+    // the synchronous parse — it used to linger in the user dir forever.
+    ScopedTempDir dir;
+    dasher_ctx* ctx = dasher_create(TEST_DATA_DIR, dir.c_str(), nullptr);
+    ASSERT(ctx != nullptr);
+    dasher_set_screen_size(ctx, 800, 600);
+
+    ASSERT_EQ(dasher_import_training_text(ctx, "the quick brown fox"), 0);
+
+    std::error_code ec;
+    ASSERT(!std::filesystem::exists(std::filesystem::path(dir.path) / ".dasher_training_tmp.txt", ec));
+
+    dasher_destroy(ctx);
+}

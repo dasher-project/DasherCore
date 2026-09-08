@@ -2094,10 +2094,24 @@ DASHER_API int dasher_import_training_text(dasher_ctx* ctx, const char* text) {
         out << text;
         out.close();
         ctx->intf->ImportTrainingText(tmpfile);
+        // ParseFile is synchronous — remove the temp file instead of
+        // littering the user dir (it would also show up in user-dir scans).
+        std::error_code ec;
+        std::filesystem::remove(tmpfile, ec);
         return 0;
     } catch (...) {
         return -1;
     }
+}
+
+DASHER_API const char* dasher_get_training_path(dasher_ctx* ctx) {
+    if (!ctx || !ctx->intf) return "";
+    try {
+        ctx->tlString = ctx->intf->GetTrainingFilePath();
+    } catch (...) {
+        ctx->tlString.clear();
+    }
+    return ctx->tlString.c_str();
 }
 
 DASHER_API int dasher_get_offset(dasher_ctx* ctx) {
