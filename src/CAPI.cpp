@@ -950,9 +950,6 @@ DASHER_API void dasher_destroy(dasher_ctx* ctx) {
     delete ctx->intf;
     delete ctx;
 }
-delete ctx->intf;
-delete ctx;
-}
 
 DASHER_API void dasher_set_low_memory_mode(dasher_ctx* ctx, int enabled) {
     if (!ctx || !ctx->intf) return;
