@@ -933,16 +933,25 @@ DASHER_API dasher_ctx* dasher_create(const char* data_dir, const char* user_dir,
 
 DASHER_API void dasher_destroy(dasher_ctx* ctx) {
     if (!ctx) return;
-    // Flush pending adaptive-training text before teardown — unflushed
+    // Flush pending adaptive-training text before teardown - unflushed
     // learning used to be silently lost on the CAPI path (the interface
     // header documents frontends like iPhone flushing on background for
     // exactly this reason). Resolves against the per-context user dir.
+    // A flush failure must never block destruction: surface it through the
+    // diagnostic log callback if one is registered, then proceed.
     try {
         if (ctx->intf) ctx->intf->WriteTrainFileFull();
+    } catch (const std::exception& e) {
+        if (ctx->logCb && 3 /*ERROR*/ >= ctx->logCbMinLevel) ctx->logCb(3, e.what(), ctx->logCbUserData);
     } catch (...) {
+        if (ctx->logCb && 3 /*ERROR*/ >= ctx->logCbMinLevel)
+            ctx->logCb(3, "dasher_destroy: training flush failed: unknown exception", ctx->logCbUserData);
     }
     delete ctx->intf;
     delete ctx;
+}
+delete ctx->intf;
+delete ctx;
 }
 
 DASHER_API void dasher_set_low_memory_mode(dasher_ctx* ctx, int enabled) {
