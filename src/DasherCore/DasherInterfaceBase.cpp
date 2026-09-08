@@ -27,6 +27,10 @@
 #include "DasherModel.h"
 #include "Event.h"
 #include "NodeCreationManager.h"
+#include "FileUtils.h"
+
+#include <filesystem>
+#include <fstream>
 #include "GameModule.h"
 
 // Input filters
@@ -299,6 +303,7 @@ void CDasherInterfaceBase::editProtect(CDasherNode* pCause) {
 }
 
 void CDasherInterfaceBase::WriteTrainFileFull() {
+    if (!m_pNCManager) return;
     m_pNCManager->GetAlphabetManager()->WriteTrainFileFull(this);
 }
 
@@ -720,6 +725,35 @@ void CDasherInterfaceBase::ImportTrainingText(const std::string& strPath) {
     if (m_pNCManager) m_pNCManager->ImportTrainingText(strPath);
 }
 
+std::string CDasherInterfaceBase::GetAlphabetTrainingFile() {
+    if (!m_pNCManager) return "";
+    const auto* alphInfo = m_pNCManager->GetAlphabetManager()->GetAlphabet();
+    if (!alphInfo) return "";
+    return alphInfo->GetTrainingFile();
+}
+
 void CDasherInterfaceBase::WriteTrainFile(const std::string& filename, const std::string& strNewText) {
+    // Per-context resolution: a relative training filename goes to THIS
+    // interface's user dir, not the process-global FileUtils directory —
+    // the global belongs to whichever context was created last, so two live
+    // contexts with different dirs would otherwise append to (and the
+    // getter dasher_get_training_path would report) different files.
+    // When a per-context dir IS configured but cannot be opened (unwritable,
+    // deleted), dropping THIS context's text is the recoverable failure —
+    // falling through to the global writer would append to ANOTHER context's
+    // training file ("failed writes cross contexts"), which is worse.
+    // The global fallback applies only to hosts that never configured a
+    // per-context dir (embedded/simple).
+    if (!m_userDataDir.empty()) {
+        std::filesystem::path p(filename);
+        if (p.is_relative()) {
+            std::ofstream File(std::filesystem::path(m_userDataDir) / p, std::ios_base::app);
+            if (File.is_open()) {
+                File << strNewText;
+                return;
+            }
+            return; // per-context write failed — never cross to the global
+        }
+    }
     Dasher::FileUtils::WriteUserDataFile(filename, strNewText, true);
 };

@@ -1239,3 +1239,134 @@ TEST(clamp_caret_survives_long_stray_continuation_runs) {
 
     dasher_destroy(ctx);
 }
+
+TEST(training_path_resolves_into_user_dir) {
+    // DasherCore#84 / Dasher-Windows#53: frontends need the ONE path the
+    // engine appends adaptive learning to. It must resolve inside the user
+    // dir and carry the current alphabet's training filename — even before
+    // anything has been learned (file need not exist yet).
+    ScopedTempDir dir;
+    dasher_ctx* ctx = dasher_create(TEST_DATA_DIR, dir.c_str(), nullptr);
+    ASSERT(ctx != nullptr);
+    dasher_set_screen_size(ctx, 800, 600);
+
+    const char* path_raw = dasher_get_training_path(ctx);
+    ASSERT(path_raw != nullptr);
+    // tlString contract: valid until the NEXT API call on this context —
+    // snapshot before any further dasher_* calls.
+    const std::string path = path_raw;
+    ASSERT(path.length() > 0);
+    printf("  training path: '%s'\n", path.c_str());
+
+    // Inside the user dir (the caller supplied dir.c_str()).
+    ASSERT(path.rfind(dir.path, 0) == 0);
+
+    // Carries a training_ filename for the current alphabet, not a
+    // subdirectory layout the engine never writes.
+    ASSERT(path.find("training_") != std::string::npos);
+    ASSERT(path.find("/training/") == std::string::npos);
+    ASSERT(path.find("\\training\\") == std::string::npos);
+
+    // Default English alphabet declares a training file.
+    const char* alph = dasher_get_alphabet_id(ctx);
+    ASSERT(alph != nullptr && strlen(alph) > 0);
+    ASSERT(path.find("training_english_GB.txt") != std::string::npos);
+
+    dasher_destroy(ctx);
+}
+
+TEST(training_path_empty_without_model) {
+    // No realize (no screen size, no frames) — the getter must not crash
+    // and may legitimately return "".
+    ScopedTempDir dir;
+    dasher_ctx* ctx = dasher_create(TEST_DATA_DIR, dir.c_str(), nullptr);
+    ASSERT(ctx != nullptr);
+    const char* path = dasher_get_training_path(ctx);
+    ASSERT(path != nullptr); // possibly "" — contract allows it
+    dasher_destroy(ctx);
+}
+
+TEST(import_training_leaves_no_temp_file) {
+    // The import temp file (.dasher_training_tmp.txt) must be removed after
+    // the synchronous parse — it used to linger in the user dir forever.
+    ScopedTempDir dir;
+    dasher_ctx* ctx = dasher_create(TEST_DATA_DIR, dir.c_str(), nullptr);
+    ASSERT(ctx != nullptr);
+    dasher_set_screen_size(ctx, 800, 600);
+
+    ASSERT_EQ(dasher_import_training_text(ctx, "the quick brown fox"), 0);
+
+    std::error_code ec;
+    ASSERT(!std::filesystem::exists(std::filesystem::path(dir.path) / ".dasher_training_tmp.txt", ec));
+
+    dasher_destroy(ctx);
+}
+
+TEST(training_path_is_per_context_not_global) {
+    // Greptile #85: dasher_get_training_path must resolve against the
+    // CALLING context's user dir. The FileUtils user directory is a
+    // process-global owned by whichever context was created LAST — the
+    // getter must not route through it, or ctx A would report ctx B's path.
+    ScopedTempDir dirA, dirB;
+    dasher_ctx* a = dasher_create(TEST_DATA_DIR, dirA.c_str(), nullptr);
+    dasher_ctx* b = dasher_create(TEST_DATA_DIR, dirB.c_str(), nullptr);
+    ASSERT(a != nullptr);
+    ASSERT(b != nullptr);
+    dasher_set_screen_size(a, 800, 600);
+    dasher_set_screen_size(b, 800, 600);
+
+    // Snapshot both before any further engine calls (tlString contract).
+    const std::string pathA = dasher_get_training_path(a);
+    const std::string pathB = dasher_get_training_path(b);
+
+    ASSERT(pathA.rfind(dirA.path, 0) == 0); // A inside A's dir
+    ASSERT(pathB.rfind(dirB.path, 0) == 0); // B inside B's dir — not A's
+
+    dasher_destroy(b);
+    dasher_destroy(a);
+}
+
+TEST(adaptive_training_writes_to_own_context_dir) {
+    // Greptile #85 ("training write path stays global"): adaptive appends
+    // resolved through the process-global FileUtils dir, which belongs to
+    // whichever context was created LAST — A's learning would land in B's
+    // directory. The write path now resolves per-context; destroy also
+    // flushes pending learning (previously silently lost on the CAPI path).
+    ScopedTempDir dirA, dirB;
+    dasher_ctx* a = dasher_create(TEST_DATA_DIR, dirA.c_str(), nullptr);
+    ASSERT(a != nullptr);
+    dasher_set_screen_size(a, 800, 600);
+    int adaptiveKey = dasher_find_parameter_key("BP_LM_ADAPTIVE");
+    ASSERT(adaptiveKey >= 0);
+    dasher_set_bool_parameter(a, adaptiveKey, 1);
+
+    // Type something: steer right so symbols are entered, accumulating
+    // adaptive-training text (same pattern as the direct-mode shadow tests).
+    unsigned long t = 1000;
+    dasher_mouse_move(a, 700.0f, 300.0f);
+    dasher_mouse_down(a);
+    for (int phase = 0; phase < 5; phase++) {
+        dasher_mouse_move(a, 700.0f, 285.0f + (phase % 2) * 14.0f);
+        run_frames(a, 200, t);
+        t += 200 * 16;
+    }
+    dasher_mouse_up(a);
+    const char* out = dasher_get_output_text(a);
+    ASSERT(out != nullptr && strlen(out) > 0); // symbols actually entered
+
+    // Create B AFTER A has typed: B owns the process-global from here.
+    dasher_ctx* b = dasher_create(TEST_DATA_DIR, dirB.c_str(), nullptr);
+    ASSERT(b != nullptr);
+    dasher_set_screen_size(b, 800, 600);
+
+    // Destroy A — flush must land in A's dir, not B's.
+    dasher_destroy(a);
+
+    std::error_code ec;
+    const auto fileA = std::filesystem::path(dirA.path) / "training_english_GB.txt";
+    const auto fileB = std::filesystem::path(dirB.path) / "training_english_GB.txt";
+    ASSERT(std::filesystem::exists(fileA, ec)); // the fix
+    ASSERT(!std::filesystem::exists(fileB, ec));
+
+    dasher_destroy(b);
+}

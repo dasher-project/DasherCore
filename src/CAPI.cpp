@@ -904,6 +904,11 @@ DASHER_API dasher_ctx* dasher_create(const char* data_dir, const char* user_dir,
         ctx->settings = std::make_unique<Dasher::XmlSettingsStore>(settingsPath, nullptr);
         ctx->settings->Load();
         ctx->intf = new dasher_ctx::Interface(ctx->settings.get(), ctx);
+        // Per-context user dir: this interface's training appends must
+        // resolve against ITS OWN user dir even if another context is
+        // created later (the FileUtils globals are process-wide,
+        // last-create-wins — see CDasherInterfaceBase::WriteTrainFile).
+        ctx->intf->SetUserDataDirectory(writableDir);
     } catch (const std::exception& e) {
         s_errorString = std::string("Failed to create Dasher session: ") + e.what();
         if (out_error) *out_error = s_errorString.data();
@@ -928,6 +933,20 @@ DASHER_API dasher_ctx* dasher_create(const char* data_dir, const char* user_dir,
 
 DASHER_API void dasher_destroy(dasher_ctx* ctx) {
     if (!ctx) return;
+    // Flush pending adaptive-training text before teardown - unflushed
+    // learning used to be silently lost on the CAPI path (the interface
+    // header documents frontends like iPhone flushing on background for
+    // exactly this reason). Resolves against the per-context user dir.
+    // A flush failure must never block destruction: surface it through the
+    // diagnostic log callback if one is registered, then proceed.
+    try {
+        if (ctx->intf) ctx->intf->WriteTrainFileFull();
+    } catch (const std::exception& e) {
+        if (ctx->logCb && 3 /*ERROR*/ >= ctx->logCbMinLevel) ctx->logCb(3, e.what(), ctx->logCbUserData);
+    } catch (...) {
+        if (ctx->logCb && 3 /*ERROR*/ >= ctx->logCbMinLevel)
+            ctx->logCb(3, "dasher_destroy: training flush failed: unknown exception", ctx->logCbUserData);
+    }
     delete ctx->intf;
     delete ctx;
 }
@@ -2094,10 +2113,32 @@ DASHER_API int dasher_import_training_text(dasher_ctx* ctx, const char* text) {
         out << text;
         out.close();
         ctx->intf->ImportTrainingText(tmpfile);
+        // ParseFile is synchronous — remove the temp file instead of
+        // littering the user dir (it would also show up in user-dir scans).
+        std::error_code ec;
+        std::filesystem::remove(tmpfile, ec);
         return 0;
     } catch (...) {
         return -1;
     }
+}
+
+DASHER_API const char* dasher_get_training_path(dasher_ctx* ctx) {
+    if (!ctx || !ctx->intf) return "";
+    try {
+        // Resolve against THIS context's user dir, not the process-global
+        // FileUtils directory (owned by whichever context was created last —
+        // two live contexts with different dirs must not see each other's
+        // training files).
+        const std::string file = ctx->intf->GetAlphabetTrainingFile();
+        if (file.empty() || ctx->userDir.empty())
+            ctx->tlString.clear();
+        else
+            ctx->tlString = (std::filesystem::path(ctx->userDir) / file).string();
+    } catch (...) {
+        ctx->tlString.clear();
+    }
+    return ctx->tlString.c_str();
 }
 
 DASHER_API int dasher_get_offset(dasher_ctx* ctx) {

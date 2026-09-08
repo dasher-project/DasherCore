@@ -370,6 +370,23 @@ class Dasher::CDasherInterfaceBase : public CMessageDisplay, private NoClones {
 
     void ImportTrainingText(const std::string& strPath);
 
+    /// Per-context user data directory. The process-global FileUtils
+    /// directory belongs to whichever context was created LAST; a context
+    /// with its own user dir must resolve its relative mutable-file paths
+    /// (training appends) here instead, or two live contexts would write
+    /// each other's training files. Empty = fall back to the global.
+    void SetUserDataDirectory(const std::string& dir) { m_userDataDir = dir; }
+    const std::string& GetUserDataDirectory() const { return m_userDataDir; }
+
+    /// Relative filename of the current alphabet's user training file (e.g.
+    /// "training_english_GB.txt"), or "" when no model is realized or the
+    /// alphabet declares no training file. Callers resolve it against THEIR
+    /// OWN user directory — deliberately NOT resolved here against the
+    /// process-global FileUtils directory, which belongs to whichever
+    /// context was created last (two live contexts with different user
+    /// dirs would otherwise get each other's paths).
+    std::string GetAlphabetTrainingFile();
+
     /// Flush the/all currently-written text to the user's training file(s).
     /// Just calls through to WriteTrainFileFull(this) on the AlphabetManager;
     /// public so e.g. iPhone can flush the buffer when app is backgrounded.
@@ -491,6 +508,9 @@ class Dasher::CDasherInterfaceBase : public CMessageDisplay, private NoClones {
 
     void CreateModel(int iOffset);
     void CreateNCManager();
+
+    /// Per-context user dir — see SetUserDataDirectory.
+    std::string m_userDataDir;
 
     void ChangeAlphabet();
     void ChangeColors();

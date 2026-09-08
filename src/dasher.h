@@ -585,6 +585,14 @@ DASHER_API int dasher_get_alphabet_symbol_image(dasher_ctx* ctx, int index, char
 // Returns 0 on success, -1 on failure.
 DASHER_API int dasher_import_training_text(dasher_ctx* ctx, const char* text);
 
+// Absolute path of the current alphabet's user training file — the single
+// file adaptive learning appends to and frontends should read/export/reset.
+// Empty string when no model is realized or the alphabet has no training
+// file. The file may not exist yet (nothing learned). Returned pointer is
+// valid until the next API call on this context (dasher-project/DasherCore#84,
+// dasher-project/Dasher-Windows#53).
+DASHER_API const char* dasher_get_training_path(dasher_ctx* ctx);
+
 // Get the current Dasher offset (character position in the output).
 // Returns -1 if the engine is not realized.
 DASHER_API int dasher_get_offset(dasher_ctx* ctx);
