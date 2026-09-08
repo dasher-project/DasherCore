@@ -904,6 +904,11 @@ DASHER_API dasher_ctx* dasher_create(const char* data_dir, const char* user_dir,
         ctx->settings = std::make_unique<Dasher::XmlSettingsStore>(settingsPath, nullptr);
         ctx->settings->Load();
         ctx->intf = new dasher_ctx::Interface(ctx->settings.get(), ctx);
+        // Per-context user dir: this interface's training appends must
+        // resolve against ITS OWN user dir even if another context is
+        // created later (the FileUtils globals are process-wide,
+        // last-create-wins — see CDasherInterfaceBase::WriteTrainFile).
+        ctx->intf->SetUserDataDirectory(writableDir);
     } catch (const std::exception& e) {
         s_errorString = std::string("Failed to create Dasher session: ") + e.what();
         if (out_error) *out_error = s_errorString.data();
@@ -928,6 +933,14 @@ DASHER_API dasher_ctx* dasher_create(const char* data_dir, const char* user_dir,
 
 DASHER_API void dasher_destroy(dasher_ctx* ctx) {
     if (!ctx) return;
+    // Flush pending adaptive-training text before teardown — unflushed
+    // learning used to be silently lost on the CAPI path (the interface
+    // header documents frontends like iPhone flushing on background for
+    // exactly this reason). Resolves against the per-context user dir.
+    try {
+        if (ctx->intf) ctx->intf->WriteTrainFileFull();
+    } catch (...) {
+    }
     delete ctx->intf;
     delete ctx;
 }

@@ -28,6 +28,9 @@
 #include "Event.h"
 #include "NodeCreationManager.h"
 #include "FileUtils.h"
+
+#include <filesystem>
+#include <fstream>
 #include "GameModule.h"
 
 // Input filters
@@ -300,6 +303,7 @@ void CDasherInterfaceBase::editProtect(CDasherNode* pCause) {
 }
 
 void CDasherInterfaceBase::WriteTrainFileFull() {
+    if (!m_pNCManager) return;
     m_pNCManager->GetAlphabetManager()->WriteTrainFileFull(this);
 }
 
@@ -729,5 +733,22 @@ std::string CDasherInterfaceBase::GetAlphabetTrainingFile() {
 }
 
 void CDasherInterfaceBase::WriteTrainFile(const std::string& filename, const std::string& strNewText) {
+    // Per-context resolution: a relative training filename goes to THIS
+    // interface's user dir, not the process-global FileUtils directory —
+    // the global belongs to whichever context was created last, so two live
+    // contexts with different dirs would otherwise append to (and the
+    // getter dasher_get_training_path would report) different files.
+    // Falls back to the historical global path when no per-context dir was
+    // set (embedded/simple hosts).
+    if (!m_userDataDir.empty()) {
+        std::filesystem::path p(filename);
+        if (p.is_relative()) {
+            std::ofstream File(std::filesystem::path(m_userDataDir) / p, std::ios_base::app);
+            if (File.is_open()) {
+                File << strNewText;
+                return;
+            }
+        }
+    }
     Dasher::FileUtils::WriteUserDataFile(filename, strNewText, true);
 };

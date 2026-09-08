@@ -1325,3 +1325,48 @@ TEST(training_path_is_per_context_not_global) {
     dasher_destroy(b);
     dasher_destroy(a);
 }
+
+TEST(adaptive_training_writes_to_own_context_dir) {
+    // Greptile #85 ("training write path stays global"): adaptive appends
+    // resolved through the process-global FileUtils dir, which belongs to
+    // whichever context was created LAST — A's learning would land in B's
+    // directory. The write path now resolves per-context; destroy also
+    // flushes pending learning (previously silently lost on the CAPI path).
+    ScopedTempDir dirA, dirB;
+    dasher_ctx* a = dasher_create(TEST_DATA_DIR, dirA.c_str(), nullptr);
+    ASSERT(a != nullptr);
+    dasher_set_screen_size(a, 800, 600);
+    int adaptiveKey = dasher_find_parameter_key("BP_LM_ADAPTIVE");
+    ASSERT(adaptiveKey >= 0);
+    dasher_set_bool_parameter(a, adaptiveKey, 1);
+
+    // Type something: steer right so symbols are entered, accumulating
+    // adaptive-training text (same pattern as the direct-mode shadow tests).
+    unsigned long t = 1000;
+    dasher_mouse_move(a, 700.0f, 300.0f);
+    dasher_mouse_down(a);
+    for (int phase = 0; phase < 5; phase++) {
+        dasher_mouse_move(a, 700.0f, 285.0f + (phase % 2) * 14.0f);
+        run_frames(a, 200, t);
+        t += 200 * 16;
+    }
+    dasher_mouse_up(a);
+    const char* out = dasher_get_output_text(a);
+    ASSERT(out != nullptr && strlen(out) > 0); // symbols actually entered
+
+    // Create B AFTER A has typed: B owns the process-global from here.
+    dasher_ctx* b = dasher_create(TEST_DATA_DIR, dirB.c_str(), nullptr);
+    ASSERT(b != nullptr);
+    dasher_set_screen_size(b, 800, 600);
+
+    // Destroy A — flush must land in A's dir, not B's.
+    dasher_destroy(a);
+
+    std::error_code ec;
+    const auto fileA = std::filesystem::path(dirA.path) / "training_english_GB.txt";
+    const auto fileB = std::filesystem::path(dirB.path) / "training_english_GB.txt";
+    ASSERT(std::filesystem::exists(fileA, ec)); // the fix
+    ASSERT(!std::filesystem::exists(fileB, ec));
+
+    dasher_destroy(b);
+}
