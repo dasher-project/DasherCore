@@ -98,7 +98,25 @@ CNodeCreationManager::CNodeCreationManager(CSettingsStore* pSettingsStore, CDash
 
     if (!pAlphInfo->GetTrainingFile().empty()) {
         ProgressNotifier pn(pInterface, m_pTrainer);
-        Dasher::FileUtils::ScanFiles(&pn, pAlphInfo->GetTrainingFile());
+        // Per-context dirs (#84): train from the bundled corpus in THIS
+        // context's data dir, then from the user's accumulated training in
+        // THIS context's user dir. Adaptive appends land in the user dir
+        // (ResolveUserDataPath), so skipping it silently discarded all
+        // learning from previous sessions on every frontend that separates
+        // the two dirs (Android, GTK, Apple) — only Windows survived, by
+        // passing one dir for both. User-dir scan runs LAST so the
+        // ProgressNotifier's user/system flags describe the newest file
+        // (they reset per Parse) and the "may not be learning" hint stays
+        // accurate. Skipped entirely when the dirs are one and the same, so
+        // single-dir setups never double-train.
+        const std::string& dataDir = pInterface->GetDataDirectory();
+        const std::string& userDir = pInterface->GetUserDataDirectory();
+        if (!dataDir.empty())
+            Dasher::FileUtils::ScanDirectory(&pn, pAlphInfo->GetTrainingFile(), dataDir);
+        else
+            Dasher::FileUtils::ScanFiles(&pn, pAlphInfo->GetTrainingFile()); // legacy: global data dir
+        if (!userDir.empty() && !Dasher::FileUtils::IsSameDirectory(userDir, dataDir))
+            Dasher::FileUtils::ScanDirectory(&pn, pAlphInfo->GetTrainingFile(), userDir);
         if (!pn.has_parsed_from_user_dir()) {
             /// TRANSLATORS: These 3 messages will be displayed when the user has just chosen a new alphabet. The %s
             /// parameter will be the name of the alphabet.

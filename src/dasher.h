@@ -593,6 +593,19 @@ DASHER_API int dasher_import_training_text(dasher_ctx* ctx, const char* text);
 // dasher-project/Dasher-Windows#53).
 DASHER_API const char* dasher_get_training_path(dasher_ctx* ctx);
 
+// C API version, incremented when a behavioural change frontends might
+// condition on lands. Frontends should gate compatibility workarounds on
+// this rather than probing for symbols.
+//
+//   1 — startup training load scans the per-context USER data directory in
+//       addition to the bundled data dir, so split-dir frontends (Android,
+//       GTK, Apple) finally load learning accumulated in previous sessions
+//       (DasherCore#84). A frontend that re-imports the training file after
+//       create as a stopgap MUST skip that re-import at version >= 1 or the
+//       text would be counted twice.
+DASHER_API int dasher_capi_version(void);
+#define DASHER_CAPI_VERSION 1
+
 // Get the current Dasher offset (character position in the output).
 // Returns -1 if the engine is not realized.
 DASHER_API int dasher_get_offset(dasher_ctx* ctx);

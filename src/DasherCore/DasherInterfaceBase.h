@@ -378,6 +378,13 @@ class Dasher::CDasherInterfaceBase : public CMessageDisplay, private NoClones {
     void SetUserDataDirectory(const std::string& dir) { m_userDataDir = dir; }
     const std::string& GetUserDataDirectory() const { return m_userDataDir; }
 
+    /// Per-context bundled data directory (read-only corpora), same
+    /// last-created-context rationale as SetUserDataDirectory: the startup
+    /// training scan must read THIS context's data dir, not the global.
+    /// Empty = fall back to the global (legacy single-context embedders).
+    void SetDataDirectory(const std::string& dir) { m_dataDir = dir; }
+    const std::string& GetDataDirectory() const { return m_dataDir; }
+
     /// Relative filename of the current alphabet's user training file (e.g.
     /// "training_english_GB.txt"), or "" when no model is realized or the
     /// alphabet declares no training file. Callers resolve it against THEIR
@@ -511,6 +518,9 @@ class Dasher::CDasherInterfaceBase : public CMessageDisplay, private NoClones {
 
     /// Per-context user dir — see SetUserDataDirectory.
     std::string m_userDataDir;
+
+    /// Per-context bundled data dir — see SetDataDirectory.
+    std::string m_dataDir;
 
     void ChangeAlphabet();
     void ChangeColors();

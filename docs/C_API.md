@@ -651,6 +651,17 @@ Resets every parameter to its built-in default value (from `Parameters.h`). It r
 
 This only affects the **in-memory** session — it does not delete the persisted files. Frontends that want persisted defaults should delete `dasher_settings.xml` (and `appearance_settings.xml` for the RFC 0007 appearance sidecar) from the user directory before calling, so defaults also load on the next launch. Null-safe: a no-op for `NULL ctx`.
 
+### Training data
+
+```c
+const char* dasher_get_training_path(dasher_ctx* ctx);   // absolute path, engine-owned
+int dasher_import_training_text(dasher_ctx* ctx, const char* text);
+int dasher_capi_version(void);                           // 1 = user-dir training scan
+```
+
+- `dasher_get_training_path` — the single file adaptive learning appends to for the current alphabet (`<user_dir>/training_<alphabet>.txt` at the user-dir **root**). Frontend training UIs (export / size / reset) must read this path, never a derived one. Empty when no model is realized. Pointer valid until the next API call on the context.
+- Since CAPI version 1, the startup training load scans the per-context **user data directory** (in addition to the bundled data dir) — learning accumulated in previous sessions is loaded automatically for split-dir frontends (Android, GTK, Apple). Single-dir setups (`data_dir == user_dir`, Windows today) are scanned once, never double-trained. Frontends that previously re-imported the training file after `dasher_create` as a stopgap **must** gate that on `dasher_capi_version() >= 1` being false, or the same text will be counted twice.
+
 ## Frontend Integration Examples
 
 ### Swift (iOS)
