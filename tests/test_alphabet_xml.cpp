@@ -531,3 +531,39 @@ TEST(retired_default_heals_in_custom_data_dir_without_preferred) {
     printf("  output after drive: '%s'\n", text);
     dasher_destroy(ctx);
 }
+
+TEST(retired_default_heal_uses_own_context_data_dir) {
+    // Greptile P1 #2 on #88: with two contexts alive (created A-custom then
+    // B-full), realizing A must bulk-scan A's data dir — not the
+    // process-global (last-create-wins) directory, which is B's. Without the
+    // per-context scan A would heal to B's preferred alphabet, selecting an
+    // id unavailable in its own bundle.
+    ScopedTempDir dataRootCustom;
+    std::filesystem::path custom = std::filesystem::path(dataRootCustom.path) / "Data";
+    std::filesystem::create_directories(custom / "alphabets");
+    std::filesystem::create_directories(custom / "training");
+    std::error_code ec;
+    std::filesystem::copy_file(std::filesystem::path(TEST_DATA_DIR) / "Data" / "alphabets" /
+                                   "alphabet.english.without.punctuation.xml",
+                               custom / "alphabets" / "alphabet.english.without.punctuation.xml", ec);
+    std::filesystem::copy_file(std::filesystem::path(TEST_DATA_DIR) / "Data" / "training" / "training_english_GB.txt",
+                               custom / "training" / "training_english_GB.txt", ec);
+
+    ScopedTempDir userA, userB;
+    {
+        std::ofstream out(std::filesystem::path(userA.path) / "dasher_settings.xml");
+        out << "<?xml version=\"1.0\"?>\n<settings>\n"
+            << "  <string name=\"AlphabetID\" value=\"Default\" />\n</settings>\n";
+    }
+
+    // Create A (custom), then B (full) — the global now points at B's dir.
+    dasher_ctx* a = dasher_create(custom.string().c_str(), userA.c_str(), nullptr);
+    dasher_ctx* b = dasher_create(TEST_DATA_DIR, userB.c_str(), nullptr);
+    ASSERT(a && b);
+    dasher_set_screen_size(a, 800, 600); // realize A LAST-created-other: must still use A's dir
+    const char* alphA = dasher_get_alphabet_id(a);
+    printf("  A healed to: '%s'\n", alphA);
+    ASSERT_STR_EQ(alphA, "English without punctuation"); // A's own, not B's preferred
+    dasher_destroy(a);
+    dasher_destroy(b);
+}

@@ -357,9 +357,12 @@ std::string CAlphIO::FileNameFor(const std::string& AlphID) const {
     return it == AlphabetFiles.end() ? std::string() : it->second;
 }
 
-void CAlphIO::ScanNameIndex() {
+void CAlphIO::ScanNameIndex(const std::string& dir) {
     AlphabetIndexer indexer(this);
-    Dasher::FileUtils::ScanFiles(&indexer, "alphabet.*.xml");
+    if (!dir.empty())
+        Dasher::FileUtils::ScanDirectory(&indexer, "alphabet.*.xml", dir);
+    else
+        Dasher::FileUtils::ScanFiles(&indexer, "alphabet.*.xml");
 }
 
 bool CAlphIO::LoadAlphabetFile(const std::string& filename) {

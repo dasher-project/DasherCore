@@ -68,7 +68,10 @@ class Dasher::CAlphIO : public AbstractXMLParser {
     /// same parsing semantics as the full loader (entity references
     /// decoded, both quote styles, any prolog length) without building
     /// any CAlphInfo.
-    void ScanNameIndex();
+    // Index every alphabet name cheaply. With an explicit dir, scans THAT
+    // directory (per-context); without, falls back to FileUtils' process-
+    // global data directory (last-create-wins — legacy single-context hosts).
+    void ScanNameIndex(const std::string& dir = std::string());
 
     /// Full-parse one alphabet file by (absolute or pattern) filename.
     bool LoadAlphabetFile(const std::string& filename);

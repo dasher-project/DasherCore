@@ -112,11 +112,19 @@ void CDasherInterfaceBase::Realize(unsigned long ulTime) {
     // Android, 270ms → 10–23ms on GTK — full data in
     // dasher-startup-timing-report.md.
     m_AlphIO = std::make_unique<CAlphIO>(this);
-    m_AlphIO->ScanNameIndex();
+    // Per-context index + loads: ScanFiles routes through FileUtils' global
+    // data dir (last-create-wins), so a second context's create would make
+    // THIS realize read the other bundle (greptile P1 #2 on #88 — pinned by
+    // retired_default_heal_uses_own_context_data_dir).
+    m_AlphIO->ScanNameIndex(m_dataDir);
     const auto loadById = [this](const std::string& alphId) {
         std::string fn = m_AlphIO->FileNameFor(alphId);
         if (fn.empty()) fn = alphabetIdToFilename(alphId);
-        m_AlphIO->LoadAlphabetFile(fn);
+        fn = std::filesystem::path(fn).filename().string(); // index entries can be dir-relative
+        if (!m_dataDir.empty())
+            Dasher::FileUtils::ScanDirectory(m_AlphIO.get(), fn, m_dataDir);
+        else
+            m_AlphIO->LoadAlphabetFile(fn);
     };
     {
         std::string alphId = m_pSettingsStore->GetStringParameter(SP_ALPHABET_ID);
@@ -148,10 +156,17 @@ void CDasherInterfaceBase::Realize(unsigned long ulTime) {
         } else {
             // Preferred unavailable (custom data dir). The lazy name index
             // is empty here (nothing has loaded), so listing candidates
-            // cannot work — bulk-load whatever alphabet files the data dir
-            // holds (ScanFiles basename-glob; bounded by the custom dir's
-            // contents) and heal to the first real id that parsed.
-            m_AlphIO->LoadAlphabetFile("alphabet.*.xml");
+            // cannot work — bulk-load whatever alphabet files THIS context's
+            // data dir holds and heal to the first real id that parsed.
+            // ScanDirectory takes the explicit dir: LoadAlphabetFile routes
+            // through ScanFiles' process-global data directory, which belongs
+            // to whichever context was created LAST — realizing a "Default"
+            // profile after creating another context would load (and heal
+            // to) the OTHER context's bundle (greptile P1 #2 on #88).
+            if (!m_dataDir.empty())
+                Dasher::FileUtils::ScanDirectory(m_AlphIO.get(), "alphabet.*.xml", m_dataDir);
+            else
+                m_AlphIO->LoadAlphabetFile("alphabet.*.xml");
             std::vector<std::string> listed;
             m_AlphIO->GetAlphabets(&listed);
             for (const std::string& candidate : listed) {
