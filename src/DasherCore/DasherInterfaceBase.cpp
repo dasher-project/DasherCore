@@ -128,13 +128,39 @@ void CDasherInterfaceBase::Realize(unsigned long ulTime) {
     // Heal the RETIRED emergency alphabet id (DasherCore#88): settings from
     // older builds can name "Default" — the bare a-z fallback, which is
     // structurally dead (the engine renders but commits no output however
-    // long you drive; the "no text goes into the output area" report). The
-    // lazy block above already loads the preferred alphabet as the running
-    // one; rewrite SP so pickers and the next settings save hold the healed
-    // id. The parameter event runs ChangeAlphabet on the LOADED id — the
-    // same path as any post-realize alphabet switch.
+    // long you drive; the "no text goes into the output area" report).
+    // The heal must land on an alphabet that ACTUALLY LOADED (greptile P1:
+    // with a custom data dir lacking the preferred English alphabet,
+    // GetDefault() itself returns "Default" and the assignment would no-op
+    // back into the dead id): the preferred, else the first index entry
+    // that parses, else nothing (a data dir with no loadable alphabets
+    // keeps the original last-ditch behaviour). The parameter event runs
+    // ChangeAlphabet on the LOADED id — the same path as any post-realize
+    // alphabet switch.
+    {
+        std::vector<std::string> probe;
+        m_AlphIO->GetAlphabets(&probe);
+    }
     if (m_pSettingsStore->GetStringParameter(SP_ALPHABET_ID) == "Default") {
-        m_pSettingsStore->SetStringParameter(SP_ALPHABET_ID, m_AlphIO->GetDefault());
+        std::string healed;
+        if (m_AlphIO->HasInfo("English with limited punctuation")) {
+            healed = "English with limited punctuation";
+        } else {
+            // Preferred unavailable (custom data dir). The lazy name index
+            // is empty here (nothing has loaded), so listing candidates
+            // cannot work — bulk-load whatever alphabet files the data dir
+            // holds (ScanFiles basename-glob; bounded by the custom dir's
+            // contents) and heal to the first real id that parsed.
+            m_AlphIO->LoadAlphabetFile("alphabet.*.xml");
+            std::vector<std::string> listed;
+            m_AlphIO->GetAlphabets(&listed);
+            for (const std::string& candidate : listed) {
+                if (candidate == "Default") continue;
+                healed = candidate;
+                break;
+            }
+        }
+        if (!healed.empty()) m_pSettingsStore->SetStringParameter(SP_ALPHABET_ID, healed);
     }
 
     m_ColorIO = std::make_unique<CColorIO>(this);

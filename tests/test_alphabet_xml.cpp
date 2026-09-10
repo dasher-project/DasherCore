@@ -477,3 +477,57 @@ TEST(retired_default_alphabet_id_heals_to_real_alphabet) {
     printf("  output after drive: '%s'\n", text);
     dasher_destroy(ctx);
 }
+
+TEST(retired_default_heals_in_custom_data_dir_without_preferred) {
+    // Greptile P1 on #88: a custom data dir with alphabets but WITHOUT the
+    // preferred "English with limited punctuation" — GetDefault() returns
+    // the literal "Default", so the heal must fall back to the first index
+    // entry that actually parses, not no-op back into the dead id.
+    ScopedTempDir dataRoot;
+    std::filesystem::path data = std::filesystem::path(dataRoot.path) / "Data";
+    std::filesystem::create_directories(data / "alphabets");
+    std::filesystem::create_directories(data / "training");
+    // Only one alphabet, deliberately NOT the preferred English one, plus
+    // the training corpus it names.
+    std::error_code ec;
+    // TEST_DATA_DIR is the REPO ROOT (CMakeLists sets it to
+    // CMAKE_CURRENT_LIST_DIR); the shipped files live under Data/.
+    std::filesystem::copy_file(std::filesystem::path(TEST_DATA_DIR) / "Data" / "alphabets" /
+                                   "alphabet.english.without.punctuation.xml",
+                               data / "alphabets" / "alphabet.english.without.punctuation.xml", ec);
+    ec.clear();
+    std::filesystem::copy_file(std::filesystem::path(TEST_DATA_DIR) / "Data" / "training" / "training_english_GB.txt",
+                               data / "training" / "training_english_GB.txt", ec);
+
+    ScopedTempDir user;
+    {
+        std::ofstream out(std::filesystem::path(user.path) / "dasher_settings.xml");
+        out << "<?xml version=\"1.0\"?>\n<settings>\n"
+            << "  <string name=\"AlphabetID\" value=\"Default\" />\n</settings>\n";
+    }
+    // NOTE: dasher_create's data_dir is the DATA directory itself (TEST_DATA_DIR
+    // is "./Data"), not its parent.
+    dasher_ctx* ctx = dasher_create(data.string().c_str(), user.c_str(), nullptr);
+    ASSERT(ctx);
+    dasher_set_screen_size(ctx, 800, 600);
+    const char* alph = dasher_get_alphabet_id(ctx);
+    printf("  healed in custom dir: '%s'\n", alph);
+    ASSERT(strcmp(alph, "Default") != 0); // healed to the one available alphabet
+
+    dasher_set_speed_percent(ctx, 300);
+    dasher_mouse_move(ctx, 700.0f, 300.0f);
+    dasher_mouse_down(ctx);
+    for (int i = 0; i < 500; i++) {
+        dasher_mouse_move(ctx, 700.0f, 280.0f);
+        int* c = nullptr;
+        int cc = 0;
+        char** s2 = nullptr;
+        int sc = 0;
+        dasher_frame(ctx, 1000 + i * 20, &c, &cc, &s2, &sc);
+    }
+    dasher_mouse_up(ctx);
+    const char* text = dasher_get_output_text(ctx);
+    ASSERT(text && strlen(text) > 0);
+    printf("  output after drive: '%s'\n", text);
+    dasher_destroy(ctx);
+}
