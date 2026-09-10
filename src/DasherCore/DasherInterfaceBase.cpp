@@ -125,6 +125,18 @@ void CDasherInterfaceBase::Realize(unsigned long ulTime) {
         if (!m_AlphIO->HasInfo(alphId)) loadById("English with limited punctuation");
     }
 
+    // Heal the RETIRED emergency alphabet id (DasherCore#88): settings from
+    // older builds can name "Default" — the bare a-z fallback, which is
+    // structurally dead (the engine renders but commits no output however
+    // long you drive; the "no text goes into the output area" report). The
+    // lazy block above already loads the preferred alphabet as the running
+    // one; rewrite SP so pickers and the next settings save hold the healed
+    // id. The parameter event runs ChangeAlphabet on the LOADED id — the
+    // same path as any post-realize alphabet switch.
+    if (m_pSettingsStore->GetStringParameter(SP_ALPHABET_ID) == "Default") {
+        m_pSettingsStore->SetStringParameter(SP_ALPHABET_ID, m_AlphIO->GetDefault());
+    }
+
     m_ColorIO = std::make_unique<CColorIO>(this);
     // All shipped palettes live in Data/colours/ now (British spelling,
     // one file per palette, new-format roots; the parser dispatches on the
@@ -232,6 +244,13 @@ void CDasherInterfaceBase::HandleParameterChange(Parameter parameter) {
             new AmortizedPolicy(m_pDasherModel.get(), m_pSettingsStore->GetLongParameter(LP_NODE_BUDGET)));
         break;
     case BP_CONTROL_MODE:
+        // Pre-realize (no NCManager/model yet — e.g. a parameter set before
+        // the first dasher_set_screen_size): nothing to rebuild; the NCManager
+        // ctor calls CreateControlBox() itself and reads the flag, so the
+        // choice applies at realize. (Unguarded this was a latent null-deref,
+        // exposed by the retired "Default" registration shifting create-time
+        // NCManager setup — dasher-project/DasherCore#88.)
+        if (!m_pNCManager || !m_pDasherModel) break;
         // Rebuild control box first (deletes old CControlManager/templates),
         // then rebuild node tree — order is critical to avoid dangling
         // template pointers in live CContNodes during AddExtras().

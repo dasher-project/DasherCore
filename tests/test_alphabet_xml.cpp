@@ -440,3 +440,40 @@ TEST(alphabet_v5_special_chars_as_direct_children) {
 
     dasher_destroy(ctx);
 }
+
+TEST(retired_default_alphabet_id_heals_to_real_alphabet) {
+    // The bare a-z "Default" emergency alphabet is no longer registered
+    // eagerly: it was selectable/persistable and structurally dead (driving
+    // committed no output — "no text goes into the output area" report).
+    // A saved Default id must heal to a real alphabet AND drive.
+    ScopedTempDir user;
+    {
+        std::ofstream out(std::filesystem::path(user.path) / "dasher_settings.xml");
+        out << "<?xml version=\"1.0\"?>\n<settings>\n"
+            << "  <string name=\"AlphabetID\" value=\"Default\" />\n</settings>\n";
+    }
+    dasher_ctx* ctx = dasher_create(TEST_DATA_DIR, user.c_str(), nullptr);
+    ASSERT(ctx);
+    dasher_set_screen_size(ctx, 800, 600);
+    const char* alph = dasher_get_alphabet_id(ctx);
+    printf("  healed alphabet: '%s'\n", alph);
+    ASSERT(strcmp(alph, "Default") != 0); // healed to a real alphabet
+
+    // And it drives (canonical interaction recipe).
+    dasher_set_speed_percent(ctx, 300);
+    dasher_mouse_move(ctx, 700.0f, 300.0f);
+    dasher_mouse_down(ctx);
+    for (int i = 0; i < 500; i++) {
+        dasher_mouse_move(ctx, 700.0f, 280.0f);
+        int* c = nullptr;
+        int cc = 0;
+        char** s = nullptr;
+        int sc = 0;
+        dasher_frame(ctx, 1000 + i * 20, &c, &cc, &s, &sc);
+    }
+    dasher_mouse_up(ctx);
+    const char* text = dasher_get_output_text(ctx);
+    ASSERT(text && strlen(text) > 0);
+    printf("  output after drive: '%s'\n", text);
+    dasher_destroy(ctx);
+}
