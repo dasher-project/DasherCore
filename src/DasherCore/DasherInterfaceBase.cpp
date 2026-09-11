@@ -545,7 +545,17 @@ void CDasherInterfaceBase::ChangeAlphabet() {
         if (!m_AlphIO->HasInfo(alphId)) {
             std::string fn = m_AlphIO->FileNameFor(alphId);
             if (fn.empty()) fn = alphabetIdToFilename(alphId);
-            m_AlphIO->LoadAlphabetFile(fn);
+            // Per-context, like the realize path: LoadAlphabetFile scans
+            // FileUtils' global data directory (last-create-wins), which
+            // under multiple live contexts loads the OTHER context's file
+            // under this id (greptile follow-up on #88 — same class the
+            // realize-path fix addressed). Basename-normalise: index entries
+            // can be dir-relative and ScanFiles matches basenames.
+            fn = std::filesystem::path(fn).filename().string();
+            if (!m_dataDir.empty())
+                Dasher::FileUtils::ScanDirectory(m_AlphIO.get(), fn, m_dataDir);
+            else
+                m_AlphIO->LoadAlphabetFile(fn);
         }
     }
 
