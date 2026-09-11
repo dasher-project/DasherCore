@@ -219,6 +219,7 @@ if(BUILD_CAPI)
     add_library(dasher SHARED
         ${CMAKE_CURRENT_LIST_DIR}/src/CAPI.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/CAPI_appearance.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/CAPI_locale.cpp
     )
 
     target_include_directories(dasher PRIVATE
@@ -386,7 +387,8 @@ dasher_add_test(dasher_text_metrics_tests test_text_metrics.cpp)
         add_executable(dasher_control_action_tests
             ${CMAKE_CURRENT_LIST_DIR}/tests/test_control_actions.cpp
             ${CMAKE_CURRENT_LIST_DIR}/src/CAPI.cpp
-            ${CMAKE_CURRENT_LIST_DIR}/src/CAPI_appearance.cpp)
+            ${CMAKE_CURRENT_LIST_DIR}/src/CAPI_appearance.cpp
+            ${CMAKE_CURRENT_LIST_DIR}/src/CAPI_locale.cpp)
         target_include_directories(dasher_control_action_tests PRIVATE
             ${CMAKE_CURRENT_LIST_DIR}/src/
             ${CMAKE_CURRENT_LIST_DIR}/tests/

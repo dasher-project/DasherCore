@@ -28,6 +28,7 @@
 #include <stdexcept>
 #include <string>
 #include <type_traits>
+#include <unordered_map>
 #include <vector>
 
 // Defined in CAPI_screen.h (Phase 2.3): the command-buffer screen and the
@@ -246,7 +247,7 @@ namespace capi {
 // per-site handlers logged first). Only observable to a re-entrant callback
 // that queries dasher_has_engine_error() mid-log — and latch-first is the
 // safer order: the fault is recorded even if the callback itself throws.
-inline void boundary_error(dasher_ctx* ctx, const char* context, const char* detail, bool latch) noexcept {
+DASHER_LOCAL inline void boundary_error(dasher_ctx* ctx, const char* context, const char* detail, bool latch) noexcept {
     if (latch && ctx) ctx->engineError = true;
     if (!ctx || !ctx->callbacks.logCb || 3 /*ERROR*/ < ctx->callbacks.logCbMinLevel) return;
     char buf[256];
@@ -318,6 +319,17 @@ DASHER_LOCAL void resolveAppearance(dasher_ctx* ctx);
 // any error; load is once-only (ctx->appearance.loaded).
 DASHER_LOCAL void loadAppearanceSettings(dasher_ctx* ctx);
 DASHER_LOCAL void saveAppearanceSettings(dasher_ctx* ctx);
+} // namespace capi
+
+// ── Locale tables (implemented in CAPI_locale.cpp) ─────────────────────────
+//
+// Process-global by design (see CAPI_locale.cpp's header comment and
+// todo.md 5.2). Read by parameter introspection for localized names, so
+// they cross the TU boundary via accessors rather than externs.
+namespace capi {
+DASHER_LOCAL const std::string& localeCode();
+DASHER_LOCAL const std::unordered_map<std::string, std::string>& localeStrings();
+DASHER_LOCAL const std::unordered_map<std::string, std::string>& overrideStrings();
 } // namespace capi
 
 #endif // DASHER_CAPI_INTERNAL_H

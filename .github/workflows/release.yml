@@ -170,6 +170,7 @@ jobs:
           em++ -O3 -DNDEBUG -fwasm-exceptions \
               src/CAPI.cpp \
               src/CAPI_appearance.cpp \
+              src/CAPI_locale.cpp \
               -I src \
               -I Thirdparty/pugixml/src \
               build-wasm/libDasherCore.a \

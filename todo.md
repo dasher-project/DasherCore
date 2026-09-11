@@ -5,6 +5,17 @@ without breaking ABI or regressing behaviour.
 
 Source review: session of 2026-09-11 (see git history / DasherCore-Review.txt).
 
+## Release plan (agreed 2026-09-11)
+
+- PR #1: everything through Phase 3 (Phases 0–3). After our own review-loop,
+  watch for Greptile's PR review and run a loop addressing its findings
+  (it may skip such a large diff — then our review stands).
+- PR #2: Phase 4 (small consistency fixes, one commit each, version-gated).
+- PR #3: Phase 5 (JSON parser, per-context locale, getter deprecation).
+  Stacked on PR #2. Merge the stack, release, then Will builds a frontend
+  against it as the real-world test.
+- Every step: own review-loop; build [100%] + full ctest + symbol freeze.
+
 ---
 
 ## Phase 0 — regression safety net (do this FIRST, before any refactor)
@@ -154,9 +165,15 @@ Target layout (internal only; `dasher.h` unchanged, still one public header):
         dasher_control_action_tests (compiles CAPI.cpp directly), and the
         release.yml WASM em++ link
       - CAPI.cpp: 2059 → 1839 lines. 45/45, freeze 110
-- [ ] 2.5 Extract `src/CAPI_locale.cpp` — locale, overrides, string tables.
+- [x] 2.5 Extract `src/CAPI_locale.cpp` — locale, overrides, string tables.
       Delete the dead `State` enum + `(void)state` in `parseStringsJson`
       while touching it. (Replacing the hand-rolled JSON parser is Phase 5.)
+      - done 2026-09-11: statics + 4 exported functions moved verbatim;
+        dead State enum deleted; tables exposed to the params TU via
+        DASHER_LOCAL accessors (capi::localeCode/localeStrings/
+        overrideStrings); get_parameter_info rewired; boundary_error also
+        hidden (weak inline was leaking to dynsym)
+      - CAPI.cpp: 1839 → 1715 lines. 45/45, freeze 110, no capi::* in dynsym
 - [ ] 2.6 Extract `src/CAPI_params.cpp` — parameter introspection, enum
       values, string values, LM registry accessors. Delete dead
       `s_enumEntries`.
