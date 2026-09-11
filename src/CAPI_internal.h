@@ -328,7 +328,6 @@ DASHER_LOCAL void saveAppearanceSettings(dasher_ctx* ctx);
 // todo.md 5.2). Read by parameter introspection for localized names, so
 // they cross the TU boundary via accessors rather than externs.
 namespace capi {
-DASHER_LOCAL const std::string& localeCode();
 DASHER_LOCAL const std::unordered_map<std::string, std::string>& localeStrings();
 DASHER_LOCAL const std::unordered_map<std::string, std::string>& overrideStrings();
 } // namespace capi

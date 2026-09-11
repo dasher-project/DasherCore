@@ -9,6 +9,7 @@
 
 #include "CAPI_internal.h"
 
+#include <algorithm>
 #include <cstring>
 #include <string>
 

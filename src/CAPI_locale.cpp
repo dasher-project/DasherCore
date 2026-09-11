@@ -24,9 +24,6 @@ std::unordered_map<std::string, std::string> s_localeStrings;
 std::unordered_map<std::string, std::string> s_overrideStrings;
 } // namespace
 
-const std::string& capi::localeCode() {
-    return s_localeCode;
-}
 const std::unordered_map<std::string, std::string>& capi::localeStrings() {
     return s_localeStrings;
 }

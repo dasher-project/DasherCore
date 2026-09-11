@@ -182,9 +182,13 @@ Target layout (internal only; `dasher.h` unchanged, still one public header):
         ctx-typed get/set_language_model_id stayed with the typed parameter
         family in CAPI.cpp; LMRegistry.h include dropped from CAPI.cpp
       - CAPI.cpp: 1715 → 1540 lines. 45/45, freeze 110
-- [ ] 2.7 Extract `src/CAPI_edit.cpp` — UTF-8 helpers (`getRange`,
+- [x] 2.7 Extract `src/CAPI_edit.cpp` — UTF-8 helpers (`getRange`,
       `findAfter`/`findBefore`, `clamp_caret_to_codepoint`,
       `ValidatedSequenceLength`, `byte_offset_from_count`), seed/set-offset.
+      - done 2026-09-11: moved verbatim by line-slicing (one missing closing
+        brace at the seed_buffer seam caught before commit); getRange shared
+        via DASHER_LOCAL; notify_buffer_cleared now an inline in the header
+      - CAPI.cpp: 1540 → 1194 lines. 45/45, freeze 110
 - [x] 2.8 `src/CAPI.cpp` keeps: create/destroy, frame, input events,
       game mode, callbacks registration, Strand 2, typing rate.
       - that is the post-2.7 state: 1194 lines, everything else extracted

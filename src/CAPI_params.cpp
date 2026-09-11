@@ -107,13 +107,17 @@ DASHER_API int dasher_get_parameter_info(int index, dasher_parameter_info* out) 
     const auto& val = it->second;
     out->key = static_cast<int>(key);
 
+    // Bind each table once: the iterator comparisons are only valid
+    // because the accessors return references to process-global tables.
+    const auto& overrides = capi::overrideStrings();
+    const auto& locale = capi::localeStrings();
     std::string nameKey = val.enumKeyName + ".label";
-    auto nameIt = capi::overrideStrings().find(nameKey);
-    if (nameIt != capi::overrideStrings().end()) {
+    auto nameIt = overrides.find(nameKey);
+    if (nameIt != overrides.end()) {
         s_paramInfoName = nameIt->second;
     } else {
-        nameIt = capi::localeStrings().find(nameKey);
-        if (nameIt != capi::localeStrings().end()) {
+        nameIt = locale.find(nameKey);
+        if (nameIt != locale.end()) {
             s_paramInfoName = nameIt->second;
         } else {
             s_paramInfoName = val.humanName.empty() ? val.storageName : val.humanName;
@@ -122,12 +126,12 @@ DASHER_API int dasher_get_parameter_info(int index, dasher_parameter_info* out) 
     out->name = s_paramInfoName.c_str();
 
     std::string descKey = val.enumKeyName + ".description";
-    auto descIt = capi::overrideStrings().find(descKey);
-    if (descIt != capi::overrideStrings().end()) {
+    auto descIt = overrides.find(descKey);
+    if (descIt != overrides.end()) {
         s_paramInfoDesc = descIt->second;
     } else {
-        descIt = capi::localeStrings().find(descKey);
-        if (descIt != capi::localeStrings().end()) {
+        descIt = locale.find(descKey);
+        if (descIt != locale.end()) {
             s_paramInfoDesc = descIt->second;
         } else {
             s_paramInfoDesc = val.humanDescription;
