@@ -109,7 +109,14 @@ class AlphabetIndexer : public AbstractParser {
 using namespace Dasher;
 
 CAlphIO::CAlphIO(CMessageDisplay* pMsgs) : AbstractXMLParser(pMsgs) {
-    Alphabets["Default"] = CreateDefault();
+    // The bare a-z "Default" emergency alphabet is NO LONGER registered
+    // eagerly. Registered, it was selectable in pickers and persistable in
+    // settings — and it is structurally dead (no space, no newline, no
+    // groups): an engine loaded with it renders, reports no error, and
+    // commits no output however long you drive (reported as "no text goes
+    // into the output area"). GetInfo now falls back to the preferred real
+    // alphabet, and fabricates the emergency one only when nothing at all
+    // loaded — the last-ditch case it was written for.
 }
 
 SGroupInfo* CAlphIO::ParseGroupRecursive(pugi::xml_node& group_node, CAlphInfo* CurrentAlphabet,
@@ -350,9 +357,12 @@ std::string CAlphIO::FileNameFor(const std::string& AlphID) const {
     return it == AlphabetFiles.end() ? std::string() : it->second;
 }
 
-void CAlphIO::ScanNameIndex() {
+void CAlphIO::ScanNameIndex(const std::string& dir) {
     AlphabetIndexer indexer(this);
-    Dasher::FileUtils::ScanFiles(&indexer, "alphabet.*.xml");
+    if (!dir.empty())
+        Dasher::FileUtils::ScanDirectory(&indexer, "alphabet.*.xml", dir);
+    else
+        Dasher::FileUtils::ScanFiles(&indexer, "alphabet.*.xml");
 }
 
 bool CAlphIO::LoadAlphabetFile(const std::string& filename) {
@@ -372,9 +382,22 @@ std::string CAlphIO::GetDefault() const {
 
 const CAlphInfo* CAlphIO::GetInfo(const std::string& AlphabetID) const {
     auto it = Alphabets.find(AlphabetID);
-    if (it == Alphabets.end())             // if we don't have the alphabet they ask for,
-        it = Alphabets.find(GetDefault()); // give them default - it's better than nothing
-    return it->second;
+    if (it == Alphabets.end()) {
+        // Unknown (or the retired emergency "Default") id: fall back to the
+        // preferred real alphabet — silently, so pickers and saved settings
+        // self-heal on load.
+        it = Alphabets.find("English with limited punctuation");
+        if (it == Alphabets.end() && !Alphabets.empty()) {
+            // Preferred default missing (custom data dir): any loaded
+            // alphabet beats the emergency one.
+            it = Alphabets.begin();
+        }
+    }
+    if (it != Alphabets.end()) return it->second;
+    // True last-ditch: nothing loaded at all. Fabricate the emergency
+    // alphabet once. Leaks by design (process-lifetime singleton).
+    static CAlphInfo* emergency = CreateDefault();
+    return emergency;
 }
 
 CAlphInfo* CAlphIO::CreateDefault() {

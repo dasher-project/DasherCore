@@ -112,17 +112,62 @@ void CDasherInterfaceBase::Realize(unsigned long ulTime) {
     // Android, 270ms → 10–23ms on GTK — full data in
     // dasher-startup-timing-report.md.
     m_AlphIO = std::make_unique<CAlphIO>(this);
-    m_AlphIO->ScanNameIndex();
-    const auto loadById = [this](const std::string& alphId) {
-        std::string fn = m_AlphIO->FileNameFor(alphId);
-        if (fn.empty()) fn = alphabetIdToFilename(alphId);
-        m_AlphIO->LoadAlphabetFile(fn);
-    };
+    // Per-context index + loads: ScanFiles routes through FileUtils' global
+    // data dir (last-create-wins), so a second context's create would make
+    // THIS realize read the other bundle (greptile P1 #2 on #88 — pinned by
+    // retired_default_heal_uses_own_context_data_dir).
+    m_AlphIO->ScanNameIndex(m_dataDir);
+    const auto loadById = [this](const std::string& alphId) { LoadAlphabetById(alphId); };
     {
         std::string alphId = m_pSettingsStore->GetStringParameter(SP_ALPHABET_ID);
         if (alphId.empty()) alphId = "English with limited punctuation";
         loadById(alphId);
         if (!m_AlphIO->HasInfo(alphId)) loadById("English with limited punctuation");
+    }
+
+    // Heal the RETIRED emergency alphabet id (DasherCore#88): settings from
+    // older builds can name "Default" — the bare a-z fallback, which is
+    // structurally dead (the engine renders but commits no output however
+    // long you drive; the "no text goes into the output area" report).
+    // The heal must land on an alphabet that ACTUALLY LOADED (greptile P1:
+    // with a custom data dir lacking the preferred English alphabet,
+    // GetDefault() itself returns "Default" and the assignment would no-op
+    // back into the dead id): the preferred, else the first index entry
+    // that parses, else nothing (a data dir with no loadable alphabets
+    // keeps the original last-ditch behaviour). The parameter event runs
+    // ChangeAlphabet on the LOADED id — the same path as any post-realize
+    // alphabet switch.
+    {
+        std::vector<std::string> probe;
+        m_AlphIO->GetAlphabets(&probe);
+    }
+    if (m_pSettingsStore->GetStringParameter(SP_ALPHABET_ID) == "Default") {
+        std::string healed;
+        if (m_AlphIO->HasInfo("English with limited punctuation")) {
+            healed = "English with limited punctuation";
+        } else {
+            // Preferred unavailable (custom data dir). The lazy name index
+            // is empty here (nothing has loaded), so listing candidates
+            // cannot work — bulk-load whatever alphabet files THIS context's
+            // data dir holds and heal to the first real id that parsed.
+            // ScanDirectory takes the explicit dir: LoadAlphabetFile routes
+            // through ScanFiles' process-global data directory, which belongs
+            // to whichever context was created LAST — realizing a "Default"
+            // profile after creating another context would load (and heal
+            // to) the OTHER context's bundle (greptile P1 #2 on #88).
+            if (!m_dataDir.empty())
+                Dasher::FileUtils::ScanDirectory(m_AlphIO.get(), "alphabet.*.xml", m_dataDir);
+            else
+                m_AlphIO->LoadAlphabetFile("alphabet.*.xml");
+            std::vector<std::string> listed;
+            m_AlphIO->GetAlphabets(&listed);
+            for (const std::string& candidate : listed) {
+                if (candidate == "Default") continue;
+                healed = candidate;
+                break;
+            }
+        }
+        if (!healed.empty()) m_pSettingsStore->SetStringParameter(SP_ALPHABET_ID, healed);
     }
 
     m_ColorIO = std::make_unique<CColorIO>(this);
@@ -232,6 +277,13 @@ void CDasherInterfaceBase::HandleParameterChange(Parameter parameter) {
             new AmortizedPolicy(m_pDasherModel.get(), m_pSettingsStore->GetLongParameter(LP_NODE_BUDGET)));
         break;
     case BP_CONTROL_MODE:
+        // Pre-realize (no NCManager/model yet — e.g. a parameter set before
+        // the first dasher_set_screen_size): nothing to rebuild; the NCManager
+        // ctor calls CreateControlBox() itself and reads the flag, so the
+        // choice applies at realize. (Unguarded this was a latent null-deref,
+        // exposed by the retired "Default" registration shifting create-time
+        // NCManager setup — dasher-project/DasherCore#88.)
+        if (!m_pNCManager || !m_pDasherModel) break;
         // Rebuild control box first (deletes old CControlManager/templates),
         // then rebuild node tree — order is critical to avoid dangling
         // template pointers in live CContNodes during AddExtras().
@@ -467,6 +519,34 @@ bool CDasherInterfaceBase::Redraw(unsigned long ulTime, bool bRedrawNodes, CExpa
     return bRedrawNodes;
 }
 
+// On-demand alphabet load for [alphId]. The name index resolves tier
+// preferences (maintained v6 over legacy copies, user-dir overrides) and may
+// hold a directory-qualified path — load THAT file exactly; a basename glob
+// would re-parse every same-named file in traversal order and let the
+// filesystem decide which definition wins (greptile P1 "indexed path
+// selection discarded"). Only a synthesized fallback filename scans by
+// basename, and per-context (ScanDirectory on m_dataDir) — LoadAlphabetFile
+// routes through the process-global data directory.
+void CDasherInterfaceBase::LoadAlphabetById(const std::string& alphId) {
+    const std::string indexed = m_AlphIO->FileNameFor(alphId);
+    if (!indexed.empty()) {
+        std::filesystem::path exact(indexed);
+        if (exact.is_relative()) exact = std::filesystem::weakly_canonical(exact);
+        std::error_code ec;
+        if (std::filesystem::exists(exact, ec)) {
+            Dasher::FileUtils::ScanDirectory(m_AlphIO.get(), exact.string(), m_dataDir);
+            return;
+        }
+        // Indexed file vanished (bundle edited under us): fall through to
+        // the synthesized-name scan below.
+    }
+    const std::string synth = alphabetIdToFilename(alphId);
+    if (!m_dataDir.empty())
+        Dasher::FileUtils::ScanDirectory(m_AlphIO.get(), synth, m_dataDir);
+    else
+        m_AlphIO->LoadAlphabetFile(synth);
+}
+
 void CDasherInterfaceBase::ChangeAlphabet() {
     if (m_pSettingsStore->GetStringParameter(SP_ALPHABET_ID) == "") {
         m_pSettingsStore->SetStringParameter(SP_ALPHABET_ID, m_AlphIO->GetDefault());
@@ -482,11 +562,7 @@ void CDasherInterfaceBase::ChangeAlphabet() {
     // to an unparsed alphabet silently gave the user Default instead.)
     if (m_AlphIO) {
         std::string alphId = m_pSettingsStore->GetStringParameter(SP_ALPHABET_ID);
-        if (!m_AlphIO->HasInfo(alphId)) {
-            std::string fn = m_AlphIO->FileNameFor(alphId);
-            if (fn.empty()) fn = alphabetIdToFilename(alphId);
-            m_AlphIO->LoadAlphabetFile(fn);
-        }
+        if (!m_AlphIO->HasInfo(alphId)) LoadAlphabetById(alphId);
     }
 
     if (m_pNCManager) WriteTrainFileFull(); // can't/don't before creating first NCManager

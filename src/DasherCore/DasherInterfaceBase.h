@@ -515,6 +515,7 @@ class Dasher::CDasherInterfaceBase : public CMessageDisplay, private NoClones {
 
     void CreateModel(int iOffset);
     void CreateNCManager();
+    void LoadAlphabetById(const std::string& alphId);
 
     /// Per-context user dir — see SetUserDataDirectory.
     std::string m_userDataDir;
