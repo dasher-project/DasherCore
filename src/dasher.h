@@ -21,6 +21,40 @@
 //
 // Thread safety: a dasher_ctx is NOT thread-safe. One thread per context.
 
+// ── Error conventions ──────────────────────────────────────────────────────
+//
+// The API predates a unified status type, so conventions vary by return
+// type. Pinned by tests/test_capi_contracts.cpp; unifying them (where it
+// changes observable returns) requires a DASHER_CAPI_VERSION bump.
+//
+//  Status ints (0 = success):
+//    0 / -1          — dasher_enter_game_mode, dasher_set_offset,
+//                      dasher_seed_buffer, dasher_get_parameter_info,
+//                      dasher_get_palette_preview_colors, dasher_set_locale,
+//                      dasher_screen_to_dasher / dasher_dasher_to_screen,
+//                      dasher_get_alphabet_symbol_text/display/image,
+//                      dasher_get_viewport, dasher_get_root_child_bounds
+//    -1 also means "invalid state / not realized / not in game mode" for
+//                      the state-query getters (dasher_get_offset,
+//                      dasher_get_probabilities, game counters, coordinate
+//                      converters, Strand 2 queries).
+//    counts >= 0     — list/getters return 0 for "none or invalid", never -1
+//                      (dasher_get_palette_count, dasher_get_alphabet_count,
+//                      dasher_get_parameter_string_values, ...).
+//
+//  String returns (copy before the next API call):
+//    ""              — the normal "no value / error" result (most getters).
+//    NULL            — two outliers only: dasher_find_companion_palette
+//                      (no companion) and dasher_get_localized_string
+//                      (no translation). Everything else returns "".
+//    "Unknown"       — dasher_get_language_model_name for an unknown id
+//                      (its description counterpart returns "").
+//
+//  Failure of the engine itself:
+//    dasher_has_engine_error() returns 1 after a C++ exception escaped a
+//    per-frame entry point; per-frame calls then no-op until the context
+//    is destroyed and recreated (see that function's comment).
+
 #include <stdint.h>
 
 #ifdef _WIN32
@@ -32,6 +66,73 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+// ── Constants ──────────────────────────────────────────────────────────────
+//
+// Named values for every integer the API passes or reports. They are plain
+// #defines (no ABI impact, no exported symbols) so every language binding
+// can declare the same names instead of hand-copying magic numbers. Values
+// are frozen: adding new values is allowed, renumbering is an ABI break.
+
+// Draw-command opcodes — each command in the dasher_frame() buffer is 6 ints
+// [opcode, a, b, c, d, argb]; see dasher_frame() for the operand meaning.
+#define DASHER_CMD_CLEAR 0        // argb = background colour
+#define DASHER_CMD_CIRCLE 1       // a=x, b=y, c=radius, d=1 filled / 0 outline
+#define DASHER_CMD_LINE 2         // a=x1, b=y1, c=x2, d=y2
+#define DASHER_CMD_RECT_OUTLINE 3 // a=x1, b=y1, c=x2, d=y2
+#define DASHER_CMD_RECT_FILL 4    // a=x1, b=y1, c=x2, d=y2
+#define DASHER_CMD_TEXT 5         // a=x, b=y, c=fontSize, d=stringIndex
+#define DASHER_CMD_LINE_WIDTH 6   // a=lineWidth (applies to subsequent DASHER_CMD_LINE)
+
+// Output-callback event types (dasher_set_output_callback).
+#define DASHER_EVENT_OUTPUT 0       // text inserted
+#define DASHER_EVENT_DELETE 1       // text removed (backspace)
+#define DASHER_EVENT_BUFFER_CLEAR 2 // whole buffer discarded; resync mirrors
+
+// Message-callback types (dasher_set_message_callback).
+#define DASHER_MESSAGE_INFO 0    // non-modal; user can continue writing
+#define DASHER_MESSAGE_WARNING 1 // modal; text entry paused until dismissed
+
+// Log levels (dasher_set_log_callback, level-ordering only, not bitmasks).
+#define DASHER_LOG_DEBUG 0
+#define DASHER_LOG_INFO 1
+#define DASHER_LOG_WARN 2
+#define DASHER_LOG_ERROR 3
+
+// Appearance modes (dasher_get/set_appearance_mode) and palette
+// classification (dasher_get_palette_appearance,
+// dasher_set_system_appearance input).
+#define DASHER_APPEARANCE_MODE_SYSTEM 0
+#define DASHER_APPEARANCE_MODE_LIGHT 1
+#define DASHER_APPEARANCE_MODE_DARK 2
+#define DASHER_PALETTE_APPEARANCE_UNSPECIFIED 0
+#define DASHER_PALETTE_APPEARANCE_LIGHT 1
+#define DASHER_PALETTE_APPEARANCE_DARK 2
+
+// Key codes for dasher_key_event. The engine accepts the full VirtualKey
+// range (buttons up to 16); these are the codes frontends commonly need.
+#define DASHER_KEY_START_STOP 0 // typically Space
+#define DASHER_KEY_BUTTON_1 1
+#define DASHER_KEY_BUTTON_2 2
+#define DASHER_KEY_BUTTON_3 3
+#define DASHER_KEY_BUTTON_4 4
+#define DASHER_KEY_PRIMARY 100   // typically mouse left
+#define DASHER_KEY_SECONDARY 101 // typically mouse right
+#define DASHER_KEY_TERTIARY 102  // typically third mouse button
+
+// Parameter schema types (dasher_parameter_info.type).
+#define DASHER_PARAM_TYPE_INVALID -1
+#define DASHER_PARAM_TYPE_BOOL 0
+#define DASHER_PARAM_TYPE_LONG 1
+#define DASHER_PARAM_TYPE_STRING 2
+
+// Suggested UI control types (dasher_parameter_info.ui_type).
+#define DASHER_UI_NONE 0
+#define DASHER_UI_SWITCH 1
+#define DASHER_UI_SLIDER 2
+#define DASHER_UI_STEP 3
+#define DASHER_UI_ENUM 4
+#define DASHER_UI_TEXTFIELD 5
 
 // Opaque session handle.
 typedef struct dasher_ctx dasher_ctx;
@@ -68,7 +169,9 @@ DASHER_API void dasher_mouse_down(dasher_ctx* ctx);
 DASHER_API void dasher_mouse_up(dasher_ctx* ctx);
 
 // Send a key event (for switch access, keyboard, or button input).
-// key values: 0=Start/Stop, 1-4=Buttons, 100=Primary, 101=Secondary, 102=Tertiary.
+// key values: DASHER_KEY_START_STOP, DASHER_KEY_BUTTON_1..4,
+// DASHER_KEY_PRIMARY/SECONDARY/TERTIARY (the engine accepts the full
+// VirtualKey button range 0-16).
 // pressed: 1 for key down, 0 for key up.
 // The active input filter determines how keys are interpreted.
 DASHER_API void dasher_key_event(dasher_ctx* ctx, int key, int pressed);
@@ -80,21 +183,21 @@ DASHER_API void dasher_key_event(dasher_ctx* ctx, int key, int pressed);
 //
 // Command format: each command is 6 ints: [opcode, a, b, c, d, argb]
 //
-//   0: Clear screen          — argb = background colour
-//   1: Circle                — a=x, b=y, c=radius, d=1 filled / 0 outline, argb
-//   2: Line                  — a=x1, b=y1, c=x2, d=y2, argb
-//   3: Rectangle outline     — a=x1, b=y1, c=x2, d=y2, argb
-//   4: Rectangle filled      — a=x1, b=y1, c=x2, d=y2, argb
-//   5: Text                  — a=x, b=y, c=fontSize, d=stringIndex, argb
-//   6: Set line width        — a=lineWidth (applies to subsequent opcode 2 lines)
+//   DASHER_CMD_CLEAR        — argb = background colour
+//   DASHER_CMD_CIRCLE       — a=x, b=y, c=radius, d=1 filled / 0 outline, argb
+//   DASHER_CMD_LINE         — a=x1, b=y1, c=x2, d=y2, argb
+//   DASHER_CMD_RECT_OUTLINE — a=x1, b=y1, c=x2, d=y2, argb
+//   DASHER_CMD_RECT_FILL    — a=x1, b=y1, c=x2, d=y2, argb
+//   DASHER_CMD_TEXT         — a=x, b=y, c=fontSize, d=stringIndex, argb
+//   DASHER_CMD_LINE_WIDTH   — a=lineWidth (applies to subsequent DASHER_CMD_LINE commands)
 //
-// For opcode 5, d is an index into the strings array.
+// For DASHER_CMD_TEXT, d is an index into the strings array.
 //
-// LP_SHAPE_TYPE == CUBE (6) renders through the same opcode-3/4/5 commands:
-// each cube face is an opcode-4 filled rectangle (with an opcode-3 outline when
-// the node has one), the crosshair bar is an opcode-4 rectangle, and cube-mode
-// labels are opcode-5 text. The flat buffer carries no 3D extrusion, so cube
-// mode looks like flat rectangles over this API.
+// LP_SHAPE_TYPE == CUBE renders through the same rect/text commands:
+// each cube face is a DASHER_CMD_RECT_FILL (with a DASHER_CMD_RECT_OUTLINE
+// when the node has one), the crosshair bar is a filled rectangle, and cube
+// mode labels are text commands. The flat buffer carries no 3D extrusion,
+// so cube mode looks like flat rectangles over this API.
 //
 // argb format: (alpha << 24) | (red << 16) | (green << 8) | blue
 DASHER_API void dasher_frame(dasher_ctx* ctx, int64_t time_ms, int** out_commands, int* out_command_count,
@@ -185,15 +288,17 @@ DASHER_API int dasher_color_get_blue(int argb);
 // The DasherCore engine has a self-describing parameter schema. Frontends
 // can use these functions to build settings UIs dynamically.
 //
-// Parameter types: 0=bool, 1=long, 2=string, -1=invalid
-// UI control types: 0=none, 1=switch, 2=slider, 3=step, 4=enum, 5=textField
+// Parameter types (dasher_parameter_info.type): DASHER_PARAM_TYPE_BOOL /
+// LONG / STRING / INVALID
+// UI control types (dasher_parameter_info.ui_type): DASHER_UI_NONE /
+// SWITCH / SLIDER / STEP / ENUM / TEXTFIELD
 
 typedef struct dasher_parameter_info {
     int key;              // BP_*/LP_*/SP_* enum value
     const char* name;     // human-readable name (valid until next call)
     const char* desc;     // human-readable description (valid until next call)
-    int type;             // parameter type (0=bool, 1=long, 2=string)
-    int ui_type;          // suggested UI control type
+    int type;             // parameter type (DASHER_PARAM_TYPE_*)
+    int ui_type;          // suggested UI control type (DASHER_UI_*)
     long min_val;         // minimum value (for numeric controls)
     long max_val;         // maximum value (for numeric controls)
     long step;            // step size (for step/slider controls)
@@ -254,7 +359,8 @@ DASHER_API void dasher_set_palette(dasher_ctx* ctx, const char* palette_name);
 // so legacy palettes without metadata are still paired with a dark companion
 // that names them.
 
-// Classify a palette. Returns: 0 = unspecified, 1 = light, 2 = dark, -1 = oor.
+// Classify a palette. Returns: DASHER_PALETTE_APPEARANCE_UNSPECIFIED /
+// LIGHT / DARK, or -1 if index out of range.
 DASHER_API int dasher_get_palette_appearance(dasher_ctx* ctx, int index);
 
 // Find the companion (opposite-appearance) palette for the given name.
@@ -263,12 +369,13 @@ DASHER_API int dasher_get_palette_appearance(dasher_ctx* ctx, int index);
 DASHER_API const char* dasher_find_companion_palette(dasher_ctx* ctx, const char* palette_name);
 
 // Appearance mode (persisted). SYSTEM follows dasher_set_system_appearance;
-// LIGHT/DARK are explicit overrides. Returns 0=system, 1=light, 2=dark.
+// LIGHT/DARK are explicit overrides. Returns DASHER_APPEARANCE_MODE_*.
 DASHER_API int dasher_get_appearance_mode(dasher_ctx* ctx);
 DASHER_API void dasher_set_appearance_mode(dasher_ctx* ctx, int mode);
 
 // Transient OS appearance input (not persisted). Frontends call this when the
-// OS reports a change. Consulted only when mode == SYSTEM. 1=light, 2=dark.
+// OS reports a change. Consulted only when mode == SYSTEM. Input values are
+// DASHER_PALETTE_APPEARANCE_LIGHT / DARK.
 DASHER_API int dasher_get_system_appearance(dasher_ctx* ctx);
 DASHER_API void dasher_set_system_appearance(dasher_ctx* ctx, int appearance);
 
@@ -350,14 +457,14 @@ DASHER_API void dasher_reset_settings(dasher_ctx* ctx);
 // This enables Direct Mode (text injection into other apps) and other
 // reactive behaviours without polling dasher_get_output_text().
 //
-// Event types:
-//   0 = text output   — text is the string being inserted
-//   1 = text delete   — text is the string being removed (backspace)
-//   2 = buffer clear  — text is empty; the whole buffer was discarded
-//                       (dasher_reset, dasher_reset_output_text, or an
-//                       alphabet change). Deltas alone cannot express this,
-//                       so subscribers maintaining a shadow buffer must
-//                       treat this as "clear your copy".
+// Event types (DASHER_EVENT_*):
+//   DASHER_EVENT_OUTPUT       — text is the string being inserted
+//   DASHER_EVENT_DELETE       — text is the string being removed (backspace)
+//   DASHER_EVENT_BUFFER_CLEAR — text is empty; the whole buffer was discarded
+//                               (dasher_reset, dasher_reset_output_text, or an
+//                               alphabet change). Deltas alone cannot express
+//                               this, so subscribers maintaining a shadow
+//                               buffer must treat this as "clear your copy".
 //
 // The callback fires on the thread that calls dasher_frame(). Event type 2
 // may also fire from the thread calling the reset function itself.
@@ -375,7 +482,7 @@ DASHER_API void dasher_set_output_callback(dasher_ctx* ctx, dasher_output_callba
 // chain and deep-zoom text degenerates into overlapping jumbles (issue #56).
 //
 // Register this callback to supply real measurements made with the SAME font
-// the canvas draws text commands (opcode 5) with (see SP_DASHER_FONT and the
+// the canvas draws text commands (DASHER_CMD_TEXT) with (see SP_DASHER_FONT and the
 // per-command font size). `text` is UTF-8. Fill *out_width and *out_height in
 // pixels and return 0. Return non-zero (or pass a null callback) to fall back
 // to the engine's built-in estimate.
@@ -404,9 +511,9 @@ DASHER_API void dasher_text_metrics_changed(dasher_ctx* ctx);
 // These are the same messages that appear as yellow/white text on the canvas.
 // Frontends can use this to display messages in native UI (alerts, toasts, etc).
 //
-// Message types:
-//   0 = informational  — non-modal, user can continue writing
-//   1 = warning        — modal, text entry is paused until dismissed
+// Message types (DASHER_MESSAGE_*):
+//   DASHER_MESSAGE_INFO    — non-modal, user can continue writing
+//   DASHER_MESSAGE_WARNING — modal, text entry is paused until dismissed
 //
 // The callback fires on the thread that calls dasher_frame() or any API method
 // that triggers a message (e.g. dasher_enter_game_mode).
@@ -424,11 +531,11 @@ DASHER_API void dasher_set_message_callback(dasher_ctx* ctx, dasher_message_call
 // When no callback is registered, log messages are discarded (zero overhead).
 // When registered, only messages at or above min_level are delivered.
 //
-// Log levels:
-//   0 = debug    — verbose tracing (per-frame details, LM state)
-//   1 = info     — normal operation (alphabet loaded, training complete)
-//   2 = warning  — recoverable problems (missing file, bad parameter)
-//   3 = error    — unrecoverable problems (assertion-level)
+// Log levels (DASHER_LOG_*):
+//   DASHER_LOG_DEBUG   — verbose tracing (per-frame details, LM state)
+//   DASHER_LOG_INFO    — normal operation (alphabet loaded, training complete)
+//   DASHER_LOG_WARN    — recoverable problems (missing file, bad parameter)
+//   DASHER_LOG_ERROR   — unrecoverable problems (assertion-level)
 //
 // The callback fires on the thread that calls dasher_frame() or any API
 // method that produces a log message.

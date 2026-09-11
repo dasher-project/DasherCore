@@ -162,12 +162,12 @@ void dasher_mouse_up(dasher_ctx* ctx);
 void dasher_key_event(dasher_ctx* ctx, int key, int pressed);
 ```
 
-For switch access, keyboard, or button input. Key values:
+For switch access, keyboard, or button input. Key values (`DASHER_KEY_*` constants in `dasher.h`):
 
-| Key | Value |
-|-----|-------|
-| Start/Stop | 0 |
-| Button 1–4 | 1–4 |
+| Key | Constant | Value |
+|-----|----------|-------|
+| Start/Stop | `DASHER_KEY_START_STOP` | 0 |
+| Buttons 1–4 | `DASHER_KEY_BUTTON_1..4` | 1–4 |
 | Primary | 100 |
 | Secondary | 101 |
 | Tertiary | 102 |
@@ -194,16 +194,16 @@ Advances one frame and returns draw commands.
 
 ### Draw Command Format
 
-Each command is 6 `int32_t` values: `[opcode, a, b, c, d, argb]`
+Each command is 6 `int32_t` values: `[opcode, a, b, c, d, argb]`. Opcode constants (`DASHER_CMD_*`) are defined in `dasher.h` — prefer them over raw numbers.
 
-| Opcode | Name | Fields | Description |
-|--------|------|--------|-------------|
-| 0 | Clear screen | argb = background colour | Fill entire canvas |
-| 1 | Circle | a=x, b=y, c=radius, d=1 filled / 0 outline, argb | Circle shape |
-| 2 | Line | a=x1, b=y1, c=x2, d=y2, argb | Line segment |
-| 3 | Rectangle outline | a=x1, b=y1, c=x2, d=y2, argb | Rectangle outline |
-| 4 | Rectangle filled | a=x1, b=y1, c=x2, d=y2, argb | Filled rectangle |
-| 5 | Text | a=x, b=y, c=fontSize, d=stringIndex, argb | Render string from strings array |
+| Opcode | Constant | Fields | Description |
+|--------|----------|--------|-------------|
+| 0 | `DASHER_CMD_CLEAR` | argb = background colour | Fill entire canvas |
+| 1 | `DASHER_CMD_CIRCLE` | a=x, b=y, c=radius, d=1 filled / 0 outline, argb | Circle shape |
+| 2 | `DASHER_CMD_LINE` | a=x1, b=y1, c=x2, d=y2, argb | Line segment |
+| 3 | `DASHER_CMD_RECT_OUTLINE` | a=x1, b=y1, c=x2, d=y2, argb | Rectangle outline |
+| 4 | `DASHER_CMD_RECT_FILL` | a=x1, b=y1, c=x2, d=y2, argb | Filled rectangle |
+| 5 | `DASHER_CMD_TEXT` | a=x, b=y, c=fontSize, d=stringIndex, argb | Render string from strings array |
 
 **ARGB format:** `(alpha << 24) | (red << 16) | (green << 8) | blue`
 
@@ -216,12 +216,12 @@ for (int i = 0; i < cmd_count; i += 6) {
     int argb = cmds[i+5];
 
     switch (opcode) {
-        case 0: fill_background(argb); break;
-        case 1: draw_circle(a, b, c, d == 1, argb); break;
-        case 2: draw_line(a, b, c, d, argb); break;
-        case 3: draw_rect_outline(a, b, c, d, argb); break;
-        case 4: draw_rect_filled(a, b, c, d, argb); break;
-        case 5: draw_text(a, b, c, strs[d], argb); break;
+        case DASHER_CMD_CLEAR: fill_background(argb); break;
+        case DASHER_CMD_CIRCLE: draw_circle(a, b, c, d == 1, argb); break;
+        case DASHER_CMD_LINE: draw_line(a, b, c, d, argb); break;
+        case DASHER_CMD_RECT_OUTLINE: draw_rect_outline(a, b, c, d, argb); break;
+        case DASHER_CMD_RECT_FILL: draw_rect_filled(a, b, c, d, argb); break;
+        case DASHER_CMD_TEXT: draw_text(a, b, c, strs[d], argb); break;
     }
 }
 ```
@@ -282,7 +282,7 @@ int dasher_get_visible_nodes(dasher_ctx* ctx, dasher_node_info* out_nodes, int m
                              char*** out_strings, int* out_string_count);
 ```
 
-The captured node set matches **exactly** what the Strand 1 command buffer draws for the same frame (Strand 1/Strand 2 parity), so a frontend can mix strands without drift. `screen_x1..y2` use the same clip formula as the opcode-4 filled-rectangle draw. `depth` is the source for cube extrusion (deeper nodes recede); `symbol`/`label_index` identify what each node represents.
+The captured node set matches **exactly** what the Strand 1 command buffer draws for the same frame (Strand 1/Strand 2 parity), so a frontend can mix strands without drift. `screen_x1..y2` use the same clip formula as the `DASHER_CMD_RECT_FILL` draw. `depth` is the source for cube extrusion (deeper nodes recede); `symbol`/`label_index` identify what each node represents.
 
 ### `dasher_get_viewport`
 
@@ -341,15 +341,15 @@ typedef void (*dasher_output_callback)(int event_type, const char* text, void* u
 void dasher_set_output_callback(dasher_ctx* ctx, dasher_output_callback callback, void* user_data);
 ```
 
-Receives real-time text events without polling. Event types:
+Receives real-time text events without polling. Event types (`DASHER_EVENT_*` constants in `dasher.h`):
 
 | Type | Meaning |
 |------|---------|
-| 0 | Text output (insertion) |
-| 1 | Text delete (backspace) |
-| 2 | Buffer cleared wholesale — `dasher_reset`, `dasher_reset_output_text`, or an alphabet change (which clears the buffer). `text` is empty; shadow buffers must be cleared, not diffed |
+| `DASHER_EVENT_OUTPUT` (0) | Text output (insertion) |
+| `DASHER_EVENT_DELETE` (1) | Text delete (backspace) |
+| `DASHER_EVENT_BUFFER_CLEAR` (2) | Buffer cleared wholesale — `dasher_reset`, `dasher_reset_output_text`, or an alphabet change (which clears the buffer). `text` is empty; shadow buffers must be cleared, not diffed |
 
-The callback fires on the thread calling `dasher_frame()`. Event type 2 may
+The callback fires on the thread calling `dasher_frame()`. `DASHER_EVENT_BUFFER_CLEAR` may
 also fire on the thread calling the reset function itself.
 
 ### Text Measurement Callback
@@ -568,12 +568,12 @@ void        dasher_set_palette(dasher_ctx* ctx, const char* palette_name);
 DasherCore owns a light/dark appearance model so frontends don't each reinvent the System/Light/Dark toggle, the companion lookup, or the palette-preference storage. State persists to `<user_dir>/appearance_settings.xml`. The active palette (returned by `dasher_get_current_palette`) is *derived* from mode + system input + preferences, so an auto-switch can never overwrite the user's explicit choice across restarts.
 
 ```c
-int         dasher_get_palette_appearance(dasher_ctx* ctx, int index);   // 0=unspecified,1=light,2=dark,-1=oor
+int         dasher_get_palette_appearance(dasher_ctx* ctx, int index);   // DASHER_PALETTE_APPEARANCE_*; -1=oor
 const char* dasher_find_companion_palette(dasher_ctx* ctx, const char* palette_name); // NULL if none
 
-int         dasher_get_appearance_mode(dasher_ctx* ctx);                 // 0=system,1=light,2=dark
+int         dasher_get_appearance_mode(dasher_ctx* ctx);                 // DASHER_APPEARANCE_MODE_*
 void        dasher_set_appearance_mode(dasher_ctx* ctx, int mode);
-int         dasher_get_system_appearance(dasher_ctx* ctx);               // 1=light,2=dark (transient)
+int         dasher_get_system_appearance(dasher_ctx* ctx);               // DASHER_PALETTE_APPEARANCE_LIGHT/DARK (transient)
 void        dasher_set_system_appearance(dasher_ctx* ctx, int appearance);
 
 const char* dasher_get_light_palette(dasher_ctx* ctx);                   // persisted preferences
@@ -591,10 +591,10 @@ Typical frontend usage:
 
 ```c
 // On launch and whenever the OS appearance changes:
-dasher_set_system_appearance(ctx, os_is_dark ? 2 : 1);
+dasher_set_system_appearance(ctx, os_is_dark ? DASHER_PALETTE_APPEARANCE_DARK : DASHER_PALETTE_APPEARANCE_LIGHT);
 
 // Settings UI: System / Light / Dark control
-dasher_set_appearance_mode(ctx, mode);  // 0=system,1=light,2=dark
+dasher_set_appearance_mode(ctx, mode);  // DASHER_APPEARANCE_MODE_*
 ```
 
 ## Game Mode
@@ -704,6 +704,6 @@ dasher_frame(ctx, System.currentTimeMillis(), cmds, cmdCount, null, null)
 4. **Localization state is global** — changing locale in one context affects all contexts (shared static state).
 5. **Speed percent mapping** — 100% = `LP_MAX_BITRATE` of 160, clamped to the engine's declared `LP_MAX_BITRATE` range (not a fixed percent cap).
 6. **Language model ID gap** — IDs are 0, 2, 3, 4 (no ID 1). Historical.
-7. **No font rendering — but text measurement is frontend-supplied** — the engine never rasterises text; frontends draw opcode-5 commands with a real font. Register `dasher_set_text_size_callback` so label layout uses that font's actual metrics; without it, width is estimated as `utf8_codepoints × fontSize / 2` (see [Text Measurement Callback](#text-measurement-callback), issue #56).
+7. **No font rendering — but text measurement is frontend-supplied** — the engine never rasterises text; frontends draw `DASHER_CMD_TEXT` commands with a real font. Register `dasher_set_text_size_callback` so label layout uses that font's actual metrics; without it, width is estimated as `utf8_codepoints × fontSize / 2` (see [Text Measurement Callback](#text-measurement-callback), issue #56).
 8. **Polygons are decomposed into line segments** — no filled polygon opcode.
 9. **Fully transparent elements are skipped** — commands with alpha=0 are not emitted.
