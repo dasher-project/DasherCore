@@ -20,7 +20,6 @@
 #include "DasherCore/DasherView.h"
 #include "DasherCore/NodeCreationManager.h"
 #include "DasherCore/ControlManager.h"
-#include "DasherCore/LanguageModelling/LMRegistry.h"
 
 #include <algorithm>
 #include <chrono>
@@ -657,53 +656,6 @@ DASHER_API void dasher_set_language_model_id(dasher_ctx* ctx, int model_id) {
     ctx->intf->SetLongParameter(Dasher::LP_LANGUAGE_MODEL_ID, static_cast<long>(model_id));
 }
 
-DASHER_API int dasher_get_language_model_count(void) {
-    return Dasher::LMRegistry::instance().count();
-}
-
-DASHER_API int dasher_get_language_model_id_at(int index) {
-    const auto& all = Dasher::LMRegistry::instance().all();
-    if (index < 0 || index >= static_cast<int>(all.size())) return -1;
-    return all[index].id;
-}
-
-DASHER_API const char* dasher_get_language_model_name(int id) {
-    static std::string s_buf;
-    auto* desc = Dasher::LMRegistry::instance().get(id);
-    if (!desc) return "Unknown";
-    s_buf = desc->name;
-    return s_buf.c_str();
-}
-
-DASHER_API const char* dasher_get_language_model_description(int id) {
-    static std::string s_buf;
-    auto* desc = Dasher::LMRegistry::instance().get(id);
-    if (!desc) return "";
-    s_buf = desc->description;
-    return s_buf.c_str();
-}
-
-DASHER_API int dasher_get_language_model_param_count(int id) {
-    auto* desc = Dasher::LMRegistry::instance().get(id);
-    if (!desc) return 0;
-    return static_cast<int>(desc->paramKeys.size());
-}
-
-DASHER_API int dasher_get_language_model_param_key(int id, int index) {
-    auto* desc = Dasher::LMRegistry::instance().get(id);
-    if (!desc || index < 0 || index >= static_cast<int>(desc->paramKeys.size())) return -1;
-    return desc->paramKeys[index];
-}
-
-DASHER_API int dasher_find_parameter_key(const char* enum_key_name) {
-    if (!enum_key_name) return -1;
-    std::string target(enum_key_name);
-    for (const auto& [key, val] : Dasher::Settings::parameter_defaults) {
-        if (val.enumKeyName == target) return static_cast<int>(key);
-    }
-    return -1;
-}
-
 DASHER_API int dasher_get_speed_percent(dasher_ctx* ctx) {
     if (!ctx || !ctx->intf) return 100;
     const double base = 160.0;
@@ -809,133 +761,6 @@ DASHER_API int dasher_color_get_blue(int argb) {
     return argb & 0xFF;
 }
 
-// ── Static schema data ────────────────────────────────────────────────────
-
-static std::vector<Dasher::Parameter> s_paramKeys;
-static std::string s_paramInfoName;
-static std::string s_paramInfoDesc;
-static std::string s_paramInfoGroup;
-static std::string s_paramInfoSubgroup;
-static std::vector<std::string> s_enumStrings;
-static std::vector<std::pair<std::string, int>> s_enumEntries;
-
-static void ensureParamKeys() {
-    if (!s_paramKeys.empty()) return;
-    for (const auto& [key, val] : Dasher::Settings::parameter_defaults) {
-        s_paramKeys.push_back(key);
-    }
-    std::sort(s_paramKeys.begin(), s_paramKeys.end());
-}
-
-DASHER_API int dasher_get_parameter_count(void) {
-    return static_cast<int>(Dasher::Settings::parameter_defaults.size());
-}
-
-DASHER_API int dasher_get_parameter_info(int index, dasher_parameter_info* out) {
-    if (!out) return -1;
-    ensureParamKeys();
-    if (index < 0 || index >= static_cast<int>(s_paramKeys.size())) return -1;
-
-    auto key = s_paramKeys[index];
-    auto it = Dasher::Settings::parameter_defaults.find(key);
-    if (it == Dasher::Settings::parameter_defaults.end()) return -1;
-
-    const auto& val = it->second;
-    out->key = static_cast<int>(key);
-
-    std::string nameKey = val.enumKeyName + ".label";
-    auto nameIt = capi::overrideStrings().find(nameKey);
-    if (nameIt != capi::overrideStrings().end()) {
-        s_paramInfoName = nameIt->second;
-    } else {
-        nameIt = capi::localeStrings().find(nameKey);
-        if (nameIt != capi::localeStrings().end()) {
-            s_paramInfoName = nameIt->second;
-        } else {
-            s_paramInfoName = val.humanName.empty() ? val.storageName : val.humanName;
-        }
-    }
-    out->name = s_paramInfoName.c_str();
-
-    std::string descKey = val.enumKeyName + ".description";
-    auto descIt = capi::overrideStrings().find(descKey);
-    if (descIt != capi::overrideStrings().end()) {
-        s_paramInfoDesc = descIt->second;
-    } else {
-        descIt = capi::localeStrings().find(descKey);
-        if (descIt != capi::localeStrings().end()) {
-            s_paramInfoDesc = descIt->second;
-        } else {
-            s_paramInfoDesc = val.humanDescription;
-        }
-    }
-    out->desc = s_paramInfoDesc.c_str();
-    out->type = static_cast<int>(val.type);
-    out->ui_type = static_cast<int>(val.suggestedUI);
-    out->min_val = val.min;
-    out->max_val = val.max;
-    out->step = val.step;
-    out->advanced = val.advancedSetting ? 1 : 0;
-    s_paramInfoGroup = val.group;
-    out->group = s_paramInfoGroup.c_str();
-    s_paramInfoSubgroup = val.subgroup;
-    out->subgroup = s_paramInfoSubgroup.c_str();
-    return 0;
-}
-
-DASHER_API int dasher_get_parameter_enum_count(int key) {
-    auto it = Dasher::Settings::parameter_defaults.find(static_cast<Dasher::Parameter>(key));
-    if (it == Dasher::Settings::parameter_defaults.end()) return 0;
-    return static_cast<int>(it->second.possibleValues.size());
-}
-
-DASHER_API const char* dasher_get_parameter_enum_name(int key, int index) {
-    auto it = Dasher::Settings::parameter_defaults.find(static_cast<Dasher::Parameter>(key));
-    if (it == Dasher::Settings::parameter_defaults.end()) return "";
-    int i = 0;
-    for (const auto& [name, value] : it->second.possibleValues) {
-        if (i == index) {
-            s_enumStrings.push_back(name);
-            return s_enumStrings.back().c_str();
-        }
-        i++;
-    }
-    return "";
-}
-
-DASHER_API int dasher_get_parameter_enum_value(int key, int index) {
-    auto it = Dasher::Settings::parameter_defaults.find(static_cast<Dasher::Parameter>(key));
-    if (it == Dasher::Settings::parameter_defaults.end()) return 0;
-    int i = 0;
-    for (const auto& [name, value] : it->second.possibleValues) {
-        if (i == index) return value;
-        i++;
-    }
-    return 0;
-}
-
-DASHER_API int dasher_get_parameter_string_values(dasher_ctx* ctx, int key, const char** out_names, int max_out) {
-    if (!ctx) return 0;
-    ctx->scratch.stringValues.clear();
-
-    if (ctx->intf) {
-        ctx->scratch.stringValues = ctx->intf->GetPermittedValues(static_cast<Dasher::Parameter>(key));
-    }
-
-    // Probe call (null buffer / zero capacity): return the full count so
-    // callers can size a buffer and call again. Previously this returned 0
-    // before ever querying the engine, so every permitted-value list (e.g.
-    // the 622 alphabets) came back empty and frontends rendered blank
-    // pickers.
-    if (!out_names || max_out <= 0) return static_cast<int>(ctx->scratch.stringValues.size());
-
-    int count = static_cast<int>(ctx->scratch.stringValues.size());
-    if (count > max_out) count = max_out;
-    for (int i = 0; i < count; i++) {
-        out_names[i] = ctx->scratch.stringValues[i].c_str();
-    }
-    return count;
-}
 
 // ── Colour palettes ───────────────────────────────────────────────────────
 

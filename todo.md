@@ -174,9 +174,14 @@ Target layout (internal only; `dasher.h` unchanged, still one public header):
         overrideStrings); get_parameter_info rewired; boundary_error also
         hidden (weak inline was leaking to dynsym)
       - CAPI.cpp: 1839 → 1715 lines. 45/45, freeze 110, no capi::* in dynsym
-- [ ] 2.6 Extract `src/CAPI_params.cpp` — parameter introspection, enum
+- [x] 2.6 Extract `src/CAPI_params.cpp` — parameter introspection, enum
       values, string values, LM registry accessors. Delete dead
       `s_enumEntries`.
+      - done 2026-09-11: static schema + introspection + LM registry
+        (ctx-less) functions moved verbatim; dead s_enumEntries deleted;
+        ctx-typed get/set_language_model_id stayed with the typed parameter
+        family in CAPI.cpp; LMRegistry.h include dropped from CAPI.cpp
+      - CAPI.cpp: 1715 → 1540 lines. 45/45, freeze 110
 - [ ] 2.7 Extract `src/CAPI_edit.cpp` — UTF-8 helpers (`getRange`,
       `findAfter`/`findBefore`, `clamp_caret_to_codepoint`,
       `ValidatedSequenceLength`, `byte_offset_from_count`), seed/set-offset.
