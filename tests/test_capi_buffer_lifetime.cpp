@@ -218,24 +218,37 @@ TEST_CASE("getters/consecutive same-getter calls return stable address") {
 
 TEST_CASE("getters/different getters share one scratch buffer") {
     // CHARACTERIZATION: two DIFFERENT tlString-backed getters alias the same
-    // buffer. Calling the second getter clobbers the first result — this is
-    // the documented "copy immediately" obligation for frontends.
+    // buffer — the documented "copy immediately" obligation for frontends.
+    //
+    // UB discipline (greptile, PR #90): the old shape read the first
+    // pointer after the second call, which is only defined when the second
+    // assignment provably does not reallocate — an implementation detail.
+    // This shape observes the same mechanism without ever dereferencing
+    // (or even comparing) a pointer that a later call may have invalidated:
+    // fresh consecutive calls of DIFFERENT getters must return the SAME
+    // address when the second value fits the buffer's capacity.
     ScopedContext ctx(800, 600);
 
     const std::string alphabet = dasher_get_alphabet_id(ctx);
     const std::string palette = dasher_get_current_palette(ctx);
-    REQUIRE(alphabet != palette); // distinct values, else the clobber is invisible
+    REQUIRE(alphabet != palette); // distinct values, else the aliasing is invisible
 
-    // Call the longer-valued getter FIRST. Assigning a shorter-or-equal value
-    // never grows std::string capacity, so the first pointer stays valid to
-    // read after the second call (no reallocation → no dangling).
+    // Longer-valued getter FIRST so the shorter assignment cannot grow
+    // capacity (libstdc++/libc++/MSVC all reuse capacity here — the
+    // assumption is now confined to address reuse, and a violation fails
+    // the CHECK below rather than invoking UB).
     const bool alphabet_first = alphabet.size() >= palette.size();
-    const char* first = alphabet_first ? dasher_get_alphabet_id(ctx) : dasher_get_current_palette(ctx);
     const char* second = alphabet_first ? dasher_get_current_palette(ctx) : dasher_get_alphabet_id(ctx);
-    const std::string second_value = alphabet_first ? palette : alphabet;
+    const char* first_again = alphabet_first ? dasher_get_alphabet_id(ctx) : dasher_get_current_palette(ctx);
 
-    CHECK(first == second);                    // one shared buffer, reused in place
-    CHECK(std::string(first) == second_value); // first result was CLOBBERED
+    // Two live pointers from consecutive different-getter calls: comparing
+    // them is fully defined. Same address == one shared buffer.
+    CHECK(first_again == second);
+
+    // The shared-buffer state survives round-trips: each getter still
+    // reports its own value (no cross-contamination of the sources).
+    CHECK(std::string(dasher_get_alphabet_id(ctx)) == alphabet);
+    CHECK(std::string(dasher_get_current_palette(ctx)) == palette);
 }
 
 TEST_CASE("getters/locale getter uses a separate buffer") {

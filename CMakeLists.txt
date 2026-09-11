@@ -187,6 +187,13 @@ list(REMOVE_ITEM SOURCE_FILES
     "${CMAKE_CURRENT_LIST_DIR}/src/DasherCore/Common/Unicode/original_harness.c"
 )
 
+# The C API implementation (src/CAPI*.cpp) is compiled by the `dasher`
+# target, the direct-link control-actions test, and the WASM em++ link —
+# never into the DasherCore archive itself. Compiling it twice only links
+# today because lazy archive extraction never pulls the duplicate members
+# in; that is an ODR landmine, not isolation (greptile, PR #90).
+list(FILTER SOURCE_FILES EXCLUDE REGEX "/src/CAPI[^/]*\.(cpp|h)$")
+
 ADD_library(DasherCore STATIC
 	${HEADER_FILES}
 	${SOURCE_FILES}
