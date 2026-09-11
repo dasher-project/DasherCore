@@ -138,8 +138,12 @@ Target layout (internal only; `dasher.h` unchanged, still one public header):
       - one diagnostic delta: reset_settings failure messages now carry a
         "dasher_reset_settings: " prefix via the shared guard (was raw
         e.what()); log text only, no pinned behaviour affected
-- [ ] 2.3 Extract `src/CAPI_screen.cpp` — CommandScreen + CachingLabel +
-      PointerInput (~450 lines).
+- [x] 2.3 Extract the command-buffer screen — CommandScreen + CachingLabel +
+      PointerInput (~260 lines, todo said ~450: estimate was high).
+      - done 2026-09-11 as `src/CAPI_screen.h` (header-only): both classes
+        are fully inline, so a .cpp would have been an empty anchor. Moved
+        verbatim; utf8_codepoint_count moved with them (static→inline).
+        CAPI.cpp: 2316 → 2058 lines. 45/45, freeze 110.
 - [ ] 2.4 Extract `src/CAPI_appearance.cpp` — appearance model, companion
       lookup, sidecar load/save (~200 lines).
 - [ ] 2.5 Extract `src/CAPI_locale.cpp` — locale, overrides, string tables.

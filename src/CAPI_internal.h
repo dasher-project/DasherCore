@@ -30,7 +30,8 @@
 #include <type_traits>
 #include <vector>
 
-// Defined in CAPI.cpp until the Phase 2.3 extraction moves them out.
+// Defined in CAPI_screen.h (Phase 2.3): the command-buffer screen and the
+// pointer input device.
 class CommandScreen;
 class PointerInput;
 
