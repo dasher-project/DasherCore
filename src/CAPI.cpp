@@ -178,25 +178,8 @@ struct dasher_ctx::Interface : public Dasher::CDashIntfScreenMsgs {
         std::vector<std::pair<std::string, Dasher::CustomActionCallback>> GetPendingCustomActions() override {
             std::vector<std::pair<std::string, Dasher::CustomActionCallback>> result;
             for (auto& entry : m_owner->customActions) {
-                auto cb = entry.callback;
-                auto ud = entry.userData;
-                result.emplace_back(
-                    entry.name, [cb, ud](const std::string& name, const std::map<std::string, std::string>& attrs) {
-                        if (!cb) return;
-                        std::vector<std::string> keys, values;
-                        for (const auto& [k, v] : attrs) {
-                            keys.push_back(k);
-                            values.push_back(v);
-                        }
-                        std::vector<const char*> keyPtrs, valPtrs;
-                        keyPtrs.reserve(keys.size());
-                        valPtrs.reserve(values.size());
-                        for (auto& k : keys)
-                            keyPtrs.push_back(k.c_str());
-                        for (auto& v : values)
-                            valPtrs.push_back(v.c_str());
-                        cb(name.c_str(), static_cast<int>(keyPtrs.size()), keyPtrs.data(), valPtrs.data(), ud);
-                    });
+                result.emplace_back(entry.name,
+                                    capi::make_custom_action_adapter(entry.callback, entry.userData));
             }
             return result;
         }
@@ -498,6 +481,16 @@ DASHER_API const char* dasher_get_alphabet_id(dasher_ctx* ctx) {
     return ctx->scratch.tlString.c_str();
 }
 
+// Release a held pointer press before a state-changing call (alphabet or
+// palette switch): both rebuild engine state that an active zoom would
+// corrupt mid-flight (todo.md 3.2 — was duplicated inline at both sites).
+static void release_mouse_if_down(dasher_ctx* ctx) {
+    if (ctx->mouseDown) {
+        ctx->intf->KeyUp(inputTime(ctx), Dasher::Keys::Primary_Input);
+        ctx->mouseDown = false;
+    }
+}
+
 DASHER_API void dasher_set_alphabet_id(dasher_ctx* ctx, const char* alphabet_id) {
     if (!ctx || !ctx->intf || !alphabet_id) return;
     ctx->editBuffer.clear();
@@ -508,10 +501,7 @@ DASHER_API void dasher_set_alphabet_id(dasher_ctx* ctx, const char* alphabet_id)
         return;
     }
     if (ctx->intf->GetStringParameter(Dasher::SP_ALPHABET_ID) == alphabet_id) return;
-    if (ctx->mouseDown) {
-        ctx->intf->KeyUp(inputTime(ctx), Dasher::Keys::Primary_Input);
-        ctx->mouseDown = false;
-    }
+    release_mouse_if_down(ctx);
     ctx->intf->SetStringParameter(Dasher::SP_ALPHABET_ID, alphabet_id);
 }
 
@@ -670,10 +660,7 @@ DASHER_API int dasher_get_palette_preview_colors(dasher_ctx* ctx, int index, int
 
 DASHER_API void dasher_set_palette(dasher_ctx* ctx, const char* palette_name) {
     if (!ctx || !ctx->intf || !palette_name) return;
-    if (ctx->mouseDown) {
-        ctx->intf->KeyUp(inputTime(ctx), Dasher::Keys::Primary_Input);
-        ctx->mouseDown = false;
-    }
+    release_mouse_if_down(ctx);
     // Route through the appearance model (RFC 0007): this sets the user's
     // preference for the current effective appearance (and defaults the other
     // side to the companion), then resolves. This keeps palette selection
@@ -1139,25 +1126,8 @@ DASHER_API void dasher_register_action(dasher_ctx* ctx, const char* name, dasher
     if (ctx->intf) {
         auto* cm = ctx->intf->GetControlManager();
         if (cm) {
-            auto cb = callback;
-            auto ud = user_data;
-            cm->GetActionRegistry()->registerCustomAction(
-                std::string(name),
-                [cb, ud](const std::string& actionName, const std::map<std::string, std::string>& attrs) {
-                    std::vector<std::string> keys, values;
-                    for (const auto& [k, v] : attrs) {
-                        keys.push_back(k);
-                        values.push_back(v);
-                    }
-                    std::vector<const char*> keyPtrs, valPtrs;
-                    keyPtrs.reserve(keys.size());
-                    valPtrs.reserve(values.size());
-                    for (auto& k : keys)
-                        keyPtrs.push_back(k.c_str());
-                    for (auto& v : values)
-                        valPtrs.push_back(v.c_str());
-                    cb(actionName.c_str(), static_cast<int>(keyPtrs.size()), keyPtrs.data(), valPtrs.data(), ud);
-                });
+            cm->GetActionRegistry()->registerCustomAction(std::string(name),
+                                                          capi::make_custom_action_adapter(callback, user_data));
         }
     }
 }

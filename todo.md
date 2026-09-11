@@ -202,13 +202,19 @@ Target layout (internal only; `dasher.h` unchanged, still one public header):
 
 ## Phase 3 — dedupe + dead code (behaviour-preserving)
 
-- [ ] 3.1 Custom-action marshalling lambda exists twice (CAPI.cpp Interface
+- [x] 3.1 Custom-action marshalling lambda exists twice (CAPI.cpp Interface
       `GetPendingCustomActions` ~line 686 and `dasher_register_action`
       ~line 2505). Extract one shared helper.
-- [ ] 3.2 Mouse-up release duplication (`dasher_set_alphabet_id`,
+      - done: `capi::make_custom_action_adapter` (CAPI_internal.h, inline);
+        both sites now one-liners
+- [x] 3.2 Mouse-up release duplication (`dasher_set_alphabet_id`,
       `dasher_set_palette`) — one `release_mouse_if_down(ctx)` helper.
-- [ ] 3.3 Tests: `test_control_actions.cpp` must still pass unchanged after
+- [x] 3.3 Tests: `test_control_actions.cpp` must still pass unchanged after
       3.1 (that's the regression guard for the lambda merge).
+      - passed unchanged — and it mattered: the first 3.2 draft had an
+        infinite recursion (bulk-replace clobbered the new helper's own
+        body); dasher_capi_tests hung, caught by the build-to-100%-then-
+        test rule before commit
 
 ## Phase 4 — consistency fixes (small, test-visible — decide each one)
 

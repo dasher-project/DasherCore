@@ -26,6 +26,7 @@
 #include <cstdint>
 #include <deque>
 #include <memory>
+#include <map>
 #include <stdexcept>
 #include <string>
 #include <type_traits>
@@ -351,5 +352,35 @@ DASHER_LOCAL void getRange(const std::string& buf, bool bForwards, Dasher::EditD
 inline void notify_buffer_cleared(dasher_ctx* ctx) {
     if (ctx->callbacks.outputCb) ctx->callbacks.outputCb(DASHER_EVENT_BUFFER_CLEAR, "", ctx->callbacks.outputCbUserData);
 }
+
+// ── Custom-action adapter ───────────────────────────────────────────────────
+
+// Adapt a C-API action callback to the engine's C++ custom-action callback:
+// marshals the attribute map into the parallel key/value char* arrays the C
+// signature needs. One definition for both registration paths — the
+// Interface's GetPendingCustomActions (actions registered before the
+// control manager exists) and dasher_register_action's direct registration
+// into a live manager — which previously carried identical copies of this
+// lambda (todo.md 3.1).
+namespace capi {
+inline Dasher::CustomActionCallback make_custom_action_adapter(dasher_action_callback cb, void* ud) {
+    return [cb, ud](const std::string& name, const std::map<std::string, std::string>& attrs) {
+        if (!cb) return;
+        std::vector<std::string> keys, values;
+        for (const auto& [k, v] : attrs) {
+            keys.push_back(k);
+            values.push_back(v);
+        }
+        std::vector<const char*> keyPtrs, valPtrs;
+        keyPtrs.reserve(keys.size());
+        valPtrs.reserve(values.size());
+        for (auto& k : keys)
+            keyPtrs.push_back(k.c_str());
+        for (auto& v : values)
+            valPtrs.push_back(v.c_str());
+        cb(name.c_str(), static_cast<int>(keyPtrs.size()), keyPtrs.data(), valPtrs.data(), ud);
+    };
+}
+} // namespace capi
 
 #endif // DASHER_CAPI_INTERNAL_H
