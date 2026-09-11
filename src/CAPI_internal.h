@@ -25,6 +25,7 @@
 #include <cstdint>
 #include <deque>
 #include <memory>
+#include <stdexcept>
 #include <string>
 #include <type_traits>
 #include <vector>
@@ -146,6 +147,13 @@ struct dasher_ctx {
     void* logCbUserData = nullptr;
     int logCbMinLevel = 0;
 
+    // Test-only failure injection (todo.md 0.6): set via
+    // dasher_test_inject_failure; capi::test_inject throws at the armed
+    // entry point so tests can drive the Rule-4 boundary and the
+    // engineError lifecycle end to end. Never set by production frontends;
+    // zero cost when disarmed (one integer compare per guarded body).
+    int failInjectSite = DASHER_FAIL_INJECT_NONE;
+
     struct CustomActionEntry {
         std::string name;
         dasher_action_callback callback;
@@ -266,6 +274,12 @@ inline Result guarded_result(dasher_ctx* ctx, const char* context, Result error_
         boundary_error(ctx, context, "unknown exception", /*latch=*/false);
         return error_result;
     }
+}
+
+// Test-only: throws when the context's armed injection site matches. Called
+// as the first line of guarded bodies (see dasher_test_inject_failure).
+inline void test_inject(const dasher_ctx* ctx, int site) {
+    if (ctx->failInjectSite == site) throw std::runtime_error("test-injected failure");
 }
 
 } // namespace capi

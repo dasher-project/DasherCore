@@ -106,4 +106,5 @@ dasher_set_system_appearance
 dasher_set_text_size_callback
 dasher_set_user_palette
 dasher_set_visible_nodes_enabled
+dasher_test_inject_failure
 dasher_text_metrics_changed

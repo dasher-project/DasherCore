@@ -863,6 +863,7 @@ DASHER_API void dasher_set_screen_size(dasher_ctx* ctx, int width, int height) {
         // dasher_has_engine_error() reports it; the frontend can surface it.
         if (!capi::guarded_result(ctx, "dasher_set_screen_size: Realize failed", false,
                                   [&]() -> bool {
+                                      capi::test_inject(ctx, DASHER_FAIL_INJECT_REALIZE);
                                       ctx->intf->Realize(nowMs());
                                       return true;
                                   })) {
@@ -892,7 +893,10 @@ DASHER_API void dasher_set_screen_size(dasher_ctx* ctx, int width, int height) {
 DASHER_API void dasher_mouse_move(dasher_ctx* ctx, float x, float y) {
     if (!ctx || !ctx->input) return;
     if (ctx->engineError) return;
-    capi::guarded(ctx, "dasher_mouse_move", /*latch=*/true, [&] { ctx->input->SetPosition(x, y); });
+    capi::guarded(ctx, "dasher_mouse_move", /*latch=*/true, [&] {
+        capi::test_inject(ctx, DASHER_FAIL_INJECT_MOUSE_MOVE);
+        ctx->input->SetPosition(x, y);
+    });
 }
 
 DASHER_API void dasher_mouse_down(dasher_ctx* ctx) {
@@ -901,6 +905,7 @@ DASHER_API void dasher_mouse_down(dasher_ctx* ctx) {
     if (ctx->mouseDown) return;
     ctx->mouseDown = true;
     capi::guarded(ctx, "dasher_mouse_down", /*latch=*/true, [&] {
+        capi::test_inject(ctx, DASHER_FAIL_INJECT_MOUSE_DOWN);
         // In circle start mode, clicking should NOT start/stop Dasher —
         // only hovering inside the circle should. (Steve Saling feedback)
         if (ctx->intf->GetLongParameter(Dasher::LP_START_MODE) == Dasher::Options::StartMode::circle_start) return;
@@ -914,14 +919,17 @@ DASHER_API void dasher_mouse_up(dasher_ctx* ctx) {
     if (ctx->engineError) return;
     if (!ctx->mouseDown) return;
     ctx->mouseDown = false;
-    capi::guarded(ctx, "dasher_mouse_up", /*latch=*/true,
-                  [&] { ctx->intf->KeyUp(inputTime(ctx), Dasher::Keys::Primary_Input); });
+    capi::guarded(ctx, "dasher_mouse_up", /*latch=*/true, [&] {
+        capi::test_inject(ctx, DASHER_FAIL_INJECT_MOUSE_UP);
+        ctx->intf->KeyUp(inputTime(ctx), Dasher::Keys::Primary_Input);
+    });
 }
 
 DASHER_API void dasher_key_event(dasher_ctx* ctx, int key, int pressed) {
     if (!ctx || !ctx->intf) return;
     if (ctx->engineError) return;
     capi::guarded(ctx, "dasher_key_event", /*latch=*/true, [&] {
+        capi::test_inject(ctx, DASHER_FAIL_INJECT_KEY_EVENT);
         auto vk = static_cast<Dasher::Keys::VirtualKey>(key);
         if (pressed) {
             ctx->intf->KeyDown(inputTime(ctx), vk);
@@ -946,6 +954,7 @@ DASHER_API void dasher_frame(dasher_ctx* ctx, int64_t time_ms, int** out_command
     if (ctx->engineError) return;
 
     capi::guarded(ctx, "dasher_frame", /*latch=*/true, [&] {
+        capi::test_inject(ctx, DASHER_FAIL_INJECT_FRAME);
         ctx->screen->BeginFrame();
         ctx->intf->NewFrame(static_cast<unsigned long>((time_ms > 0) ? time_ms : 0), true);
         ctx->screen->BuildStringPtrs();
@@ -1905,6 +1914,14 @@ DASHER_API const char* dasher_get_training_path(dasher_ctx* ctx) {
 
 DASHER_API int dasher_capi_version(void) {
     return DASHER_CAPI_VERSION;
+}
+
+// Test hook: arm/disarm deterministic failure injection (todo.md 0.6).
+// One integer store; the throw itself lives in capi::test_inject at each
+// guarded entry point.
+DASHER_API void dasher_test_inject_failure(dasher_ctx* ctx, int site) {
+    if (!ctx) return;
+    ctx->failInjectSite = site;
 }
 
 DASHER_API int dasher_get_offset(dasher_ctx* ctx) {

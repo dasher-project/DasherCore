@@ -67,10 +67,16 @@ alphabet id ("English" is not a shipped id — AlphIO silently falls back, so
 the switch test was a no-op); valid-id LM static pin; LC_ALL=C collation;
 stale line refs.
 
-- [ ] 0.6 DEFERRED gap (reviewer-flagged, needs a way to force a C++
-      exception through the boundary): engine-error lifecycle pin —
-      dasher_frame/mouse/key throw → has_engine_error()==1 → subsequent
-      calls no-op → recreate clears. Only null/healthy paths are pinned.
+- [x] 0.6 Engine-error lifecycle pin (was deferred — done 2026-09-11,
+      before Phase 2 extractions, since the boundary guard now owns these
+      semantics): `dasher_test_inject_failure` test hook (test/diagnostic
+      section, DASHER_FAIL_INJECT_* sites: frame, mouse×3, key, Realize)
+      drives a real C++ exception through the boundary guard. Contracts
+      suite pins: outputs zeroed on failed frame, DASHER_LOG_ERROR via log
+      callback with entry-point context, engineError latches, disarmed
+      calls still no-op, dasher_reset does NOT clear, recreate clears,
+      failed-Realize → retry recovers (review-P1-#77 scenario).
+      - baseline updated deliberately: 109 → 110 exported C API symbols.
 
 ## Phase 1 — constants + error-convention docs (header only, zero ABI risk)
 

@@ -700,6 +700,22 @@ DASHER_API int dasher_import_training_text(dasher_ctx* ctx, const char* text);
 // dasher-project/Dasher-Windows#53).
 DASHER_API const char* dasher_get_training_path(dasher_ctx* ctx);
 
+// Test hook (todo.md 0.6): deterministically inject a C++ exception at a C
+// API entry point. Exercises the Rule-4 boundary end to end — the exception
+// is caught by the boundary guard, reported through the log callback at
+// DASHER_LOG_ERROR, and the engine fault flag latches
+// (dasher_has_engine_error() == 1; per-frame calls then no-op until the
+// context is recreated). NOT for production frontends.
+// site: one of the DASHER_FAIL_INJECT_* values; NONE disarms.
+DASHER_API void dasher_test_inject_failure(dasher_ctx* ctx, int site);
+#define DASHER_FAIL_INJECT_NONE 0
+#define DASHER_FAIL_INJECT_FRAME 1
+#define DASHER_FAIL_INJECT_MOUSE_MOVE 2
+#define DASHER_FAIL_INJECT_MOUSE_DOWN 3
+#define DASHER_FAIL_INJECT_MOUSE_UP 4
+#define DASHER_FAIL_INJECT_KEY_EVENT 5
+#define DASHER_FAIL_INJECT_REALIZE 6
+
 // C API version, incremented when a behavioural change frontends might
 // condition on lands. Frontends should gate compatibility workarounds on
 // this rather than probing for symbols.

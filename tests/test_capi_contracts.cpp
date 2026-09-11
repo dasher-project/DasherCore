@@ -340,3 +340,109 @@ TEST_CASE("contracts/buffer-clear event fires on every buffer reset path") {
 
     dasher_set_output_callback(ctx, nullptr, nullptr);
 }
+
+// ---------------------------------------------------------------------------
+// Engine-error lifecycle (RFC 0009 Amendment 2; todo.md 0.6, previously
+// deferred). Uses the dasher_test_inject_failure hook to drive a real C++
+// exception through the boundary guard and pins the full contract:
+//   throw at a per-frame entry point → caught at the boundary →
+//   DASHER_LOG_ERROR via the log callback → engineError latches →
+//   frame/mouse/key no-op (outputs zeroed) → NOT cleared by dasher_reset →
+//   cleared only by destroying and recreating the context.
+// ---------------------------------------------------------------------------
+
+namespace {
+struct LogCapture {
+    std::vector<int> levels;
+    std::vector<std::string> messages;
+};
+void capture_log(int level, const char* message, void* user_data) {
+    auto* log = static_cast<LogCapture*>(user_data);
+    log->levels.push_back(level);
+    log->messages.push_back(message ? message : "");
+}
+} // namespace
+
+TEST_CASE("contracts/engine-error lifecycle: frame throw latches, no-ops, recreate clears") {
+    ScopedContext ctx(800, 600);
+    REQUIRE(ctx.ctx != nullptr);
+
+    // Healthy baseline: frame produces commands, no fault.
+    int* cmds = nullptr;
+    int cc = 0;
+    char** strs = nullptr;
+    int sc = 0;
+    dasher_frame(ctx, 1000, &cmds, &cc, &strs, &sc);
+    REQUIRE(cc >= 6);
+    CHECK(dasher_has_engine_error(ctx) == 0);
+
+    LogCapture log;
+    dasher_set_log_callback(ctx, capture_log, &log, 0);
+
+    // Inject + trigger: outputs must come back zeroed, fault latched.
+    dasher_test_inject_failure(ctx, DASHER_FAIL_INJECT_FRAME);
+    cmds = reinterpret_cast<int*>(0x1);
+    cc = -1;
+    dasher_frame(ctx, 1016, &cmds, &cc, &strs, &sc);
+    CHECK(cmds == nullptr);
+    CHECK(cc == 0);
+    CHECK(dasher_has_engine_error(ctx) == 1);
+
+    // The failure reached the log callback at ERROR level with the
+    // entry-point context.
+    REQUIRE(log.levels.size() >= 1);
+    CHECK(log.levels.back() == DASHER_LOG_ERROR);
+    CHECK(log.messages.back().find("dasher_frame") != std::string::npos);
+    CHECK(log.messages.back().find("test-injected failure") != std::string::npos);
+
+    // Disarmed but still latched: frame and input entry points no-op
+    // (no crash, no engine mutation, outputs still zeroed).
+    dasher_test_inject_failure(ctx, DASHER_FAIL_INJECT_NONE);
+    dasher_frame(ctx, 1032, &cmds, &cc, &strs, &sc);
+    CHECK(cc == 0);
+    dasher_mouse_move(ctx, 400.0f, 300.0f);
+    dasher_mouse_down(ctx);
+    dasher_mouse_up(ctx);
+    dasher_key_event(ctx, DASHER_KEY_PRIMARY, 1);
+    dasher_key_event(ctx, DASHER_KEY_PRIMARY, 0);
+    CHECK(dasher_has_engine_error(ctx) == 1);
+
+    // dasher_reset must NOT clear the fault (documented: only recreation).
+    dasher_reset(ctx);
+    CHECK(dasher_has_engine_error(ctx) == 1);
+
+    // Recreate: fresh context is healthy and frames again.
+    dasher_destroy(ctx.ctx);
+    ctx.ctx = dasher_create(TEST_DATA_DIR, ctx.dir.c_str(), nullptr);
+    REQUIRE(ctx.ctx != nullptr);
+    CHECK(dasher_has_engine_error(ctx.ctx) == 0);
+    dasher_set_screen_size(ctx.ctx, 800, 600);
+    cmds = nullptr;
+    cc = 0;
+    dasher_frame(ctx.ctx, 1048, &cmds, &cc, &strs, &sc);
+    CHECK(cc >= 6);
+    CHECK(dasher_has_engine_error(ctx.ctx) == 0);
+}
+
+TEST_CASE("contracts/engine-error lifecycle: failed Realize latches, retry recovers") {
+    // The review-P1-#77 scenario: a failed Realize latches engineError
+    // while !realized; a subsequent dasher_set_screen_size must recreate
+    // the interface and clear the fault (not no-op forever).
+    ScopedContext ctx; // never realized
+    REQUIRE(ctx.ctx != nullptr);
+
+    dasher_test_inject_failure(ctx, DASHER_FAIL_INJECT_REALIZE);
+    dasher_set_screen_size(ctx, 800, 600);
+    CHECK(dasher_has_engine_error(ctx) == 1);
+
+    dasher_test_inject_failure(ctx, DASHER_FAIL_INJECT_NONE);
+    dasher_set_screen_size(ctx, 800, 600); // retry recreates the interface
+    CHECK(dasher_has_engine_error(ctx) == 0);
+
+    int* cmds = nullptr;
+    int cc = 0;
+    char** strs = nullptr;
+    int sc = 0;
+    dasher_frame(ctx, 1000, &cmds, &cc, &strs, &sc);
+    CHECK(cc >= 6);
+}
