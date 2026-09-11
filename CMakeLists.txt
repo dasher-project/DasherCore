@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.12)
 
-project("DasherCore")
+project("DasherCore" VERSION 0.2.23)
 
 enable_testing()
 
@@ -185,6 +185,21 @@ if(BUILD_CAPI)
     if(WIN32)
         target_compile_definitions(dasher PRIVATE DASHER_BUILDING)
         target_compile_options(dasher PRIVATE /EHa)
+
+        # VERSIONINFO resource (Dasher-Windows #59): an unversioned DLL let
+        # MSI upgrade heuristics keep stale copies under a new EXE; a
+        # FILEVERSION makes newer-always-wins deterministic. Keep project()
+        # VERSION in lockstep with the release tag.
+        string(REPLACE "." ";" _dasher_ver_list ${PROJECT_VERSION})
+        list(GET _dasher_ver_list 0 DASHER_VERSION_MAJOR)
+        list(GET _dasher_ver_list 1 DASHER_VERSION_MINOR)
+        list(GET _dasher_ver_list 2 DASHER_VERSION_PATCH)
+        set(DASHER_VERSION_STRING "${PROJECT_VERSION}.0")
+        configure_file(
+            ${CMAKE_CURRENT_LIST_DIR}/src/dasher_version.rc.in
+            ${CMAKE_CURRENT_BINARY_DIR}/dasher_version.rc
+            @ONLY)
+        target_sources(dasher PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/dasher_version.rc)
     endif()
 
     set_target_properties(dasher PROPERTIES
