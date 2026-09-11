@@ -16,6 +16,7 @@
 
 #include "dasher.h"
 
+#include "DasherCore/ControlManager.h"
 #include "DasherCore/DashIntfScreenMsgs.h"
 #include "DasherCore/ColorPalette.h"
 #include "DasherCore/XmlSettingsStore.h"
@@ -331,5 +332,25 @@ DASHER_LOCAL const std::string& localeCode();
 DASHER_LOCAL const std::unordered_map<std::string, std::string>& localeStrings();
 DASHER_LOCAL const std::unordered_map<std::string, std::string>& overrideStrings();
 } // namespace capi
+
+// ── Edit-buffer helpers (implemented in CAPI_edit.cpp) ─────────────────────
+
+// Word/sentence/paragraph/char range walker over a UTF-8 buffer — the
+// engine's ctrlMove/ctrlDelete/GetTextAroundCursor arithmetic. Shared with
+// the Interface overrides in CAPI.cpp.
+namespace capi {
+DASHER_LOCAL void getRange(const std::string& buf, bool bForwards, Dasher::EditDistance dist, size_t& ioStart,
+                           size_t& ioEnd);
+} // namespace capi
+
+// Notify subscribers that the edit buffer was cleared wholesale (event
+// DASHER_EVENT_BUFFER_CLEAR). Insert/delete deltas can't express this;
+// without the event every frontend must know which API calls clear the
+// buffer and re-sync manually (Dasher-GTK's stale output pane after "New"
+// was exactly this bug). Fires from CAPI.cpp's reset paths and
+// CAPI_edit.cpp's seed_buffer.
+inline void notify_buffer_cleared(dasher_ctx* ctx) {
+    if (ctx->callbacks.outputCb) ctx->callbacks.outputCb(DASHER_EVENT_BUFFER_CLEAR, "", ctx->callbacks.outputCbUserData);
+}
 
 #endif // DASHER_CAPI_INTERNAL_H

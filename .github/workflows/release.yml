@@ -172,6 +172,7 @@ jobs:
               src/CAPI_appearance.cpp \
               src/CAPI_locale.cpp \
               src/CAPI_params.cpp \
+              src/CAPI_edit.cpp \
               -I src \
               -I Thirdparty/pugixml/src \
               build-wasm/libDasherCore.a \
