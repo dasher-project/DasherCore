@@ -54,141 +54,141 @@
 // behaviour overrides are defined here, out-of-line.
 
 struct dasher_ctx::Interface : public Dasher::CDashIntfScreenMsgs {
-        Interface(Dasher::CSettingsStore* s, dasher_ctx* owner) : CDashIntfScreenMsgs(s), m_owner(owner) {
-            s->OnParameterChanged.Subscribe(m_owner, [this](Dasher::Parameter param) {
-                if (m_owner->callbacks.paramCb) m_owner->callbacks.paramCb(static_cast<int>(param), m_owner->callbacks.paramCbUserData);
-            });
-        }
-        ~Interface() { m_pSettingsStore->OnParameterChanged.Unsubscribe(m_owner); }
-        void CreateModules() override {
-            CDashIntfScreenMsgs::CreateModules();
-            auto inp = std::make_unique<PointerInput>();
-            m_owner->input = inp.get();
-            GetModuleManager()->RegisterInputDeviceModule(std::move(inp), true);
-        }
+    Interface(Dasher::CSettingsStore* s, dasher_ctx* owner) : CDashIntfScreenMsgs(s), m_owner(owner) {
+        s->OnParameterChanged.Subscribe(m_owner, [this](Dasher::Parameter param) {
+            if (m_owner->callbacks.paramCb)
+                m_owner->callbacks.paramCb(static_cast<int>(param), m_owner->callbacks.paramCbUserData);
+        });
+    }
+    ~Interface() { m_pSettingsStore->OnParameterChanged.Unsubscribe(m_owner); }
+    void CreateModules() override {
+        CDashIntfScreenMsgs::CreateModules();
+        auto inp = std::make_unique<PointerInput>();
+        m_owner->input = inp.get();
+        GetModuleManager()->RegisterInputDeviceModule(std::move(inp), true);
+    }
 
-        void Message(const std::string& strText, bool bInterrupt) override {
-            // Route user-facing messages to the message callback (for UI display)
-            if (m_owner->callbacks.messageCb && !strText.empty())
-                m_owner->callbacks.messageCb(bInterrupt ? 1 : 0, strText.c_str(), m_owner->callbacks.messageCbUserData);
-            if (!m_owner->callbacks.messageCb) CDashIntfScreenMsgs::Message(strText, bInterrupt);
+    void Message(const std::string& strText, bool bInterrupt) override {
+        // Route user-facing messages to the message callback (for UI display)
+        if (m_owner->callbacks.messageCb && !strText.empty())
+            m_owner->callbacks.messageCb(bInterrupt ? 1 : 0, strText.c_str(), m_owner->callbacks.messageCbUserData);
+        if (!m_owner->callbacks.messageCb) CDashIntfScreenMsgs::Message(strText, bInterrupt);
 
-            // Also route to the log callback for diagnostic logging.
-            // Modal/interrupt messages are WARN level; async are INFO.
-            // This ensures frontends that registered dasher_set_log_callback
-            // receive engine messages even if they didn't register the
-            // message callback separately.
-            if (m_owner->callbacks.logCb && !strText.empty()) {
-                int level = bInterrupt ? 2 /*WARN*/ : 1 /*INFO*/;
-                if (level >= m_owner->callbacks.logCbMinLevel) m_owner->callbacks.logCb(level, strText.c_str(), m_owner->callbacks.logCbUserData);
-            }
+        // Also route to the log callback for diagnostic logging.
+        // Modal/interrupt messages are WARN level; async are INFO.
+        // This ensures frontends that registered dasher_set_log_callback
+        // receive engine messages even if they didn't register the
+        // message callback separately.
+        if (m_owner->callbacks.logCb && !strText.empty()) {
+            int level = bInterrupt ? 2 /*WARN*/ : 1 /*INFO*/;
+            if (level >= m_owner->callbacks.logCbMinLevel)
+                m_owner->callbacks.logCb(level, strText.c_str(), m_owner->callbacks.logCbUserData);
         }
+    }
 
-        unsigned int ctrlOffsetAfterMove(unsigned int offsetBefore, bool bForwards,
-                                         Dasher::EditDistance dist) override {
-            // offsetBefore is the model's node offset, which can exceed editBuffer.size()
-            // because control nodes have offsets but produce no edit buffer characters.
-            // Clamp to buffer bounds before using as an index.
-            size_t bufLen = m_owner->editBuffer.size();
-            size_t clamped = std::min(static_cast<size_t>(offsetBefore), bufLen);
-            size_t start = clamped, end = clamped;
-            capi::getRange(m_owner->editBuffer, bForwards, dist, start, end);
-            return static_cast<unsigned int>(bForwards ? end : start);
-        }
+    unsigned int ctrlOffsetAfterMove(unsigned int offsetBefore, bool bForwards, Dasher::EditDistance dist) override {
+        // offsetBefore is the model's node offset, which can exceed editBuffer.size()
+        // because control nodes have offsets but produce no edit buffer characters.
+        // Clamp to buffer bounds before using as an index.
+        size_t bufLen = m_owner->editBuffer.size();
+        size_t clamped = std::min(static_cast<size_t>(offsetBefore), bufLen);
+        size_t start = clamped, end = clamped;
+        capi::getRange(m_owner->editBuffer, bForwards, dist, start, end);
+        return static_cast<unsigned int>(bForwards ? end : start);
+    }
 
-        unsigned int ctrlMove(bool bForwards, Dasher::EditDistance dist) override {
-            size_t start = m_owner->cursorPos, end = m_owner->cursorPos;
-            capi::getRange(m_owner->editBuffer, bForwards, dist, start, end);
-            m_owner->cursorPos = bForwards ? end : start;
+    unsigned int ctrlMove(bool bForwards, Dasher::EditDistance dist) override {
+        size_t start = m_owner->cursorPos, end = m_owner->cursorPos;
+        capi::getRange(m_owner->editBuffer, bForwards, dist, start, end);
+        m_owner->cursorPos = bForwards ? end : start;
+        return static_cast<unsigned int>(m_owner->cursorPos);
+    }
+
+    unsigned int ctrlDelete(bool bForwards, Dasher::EditDistance dist) override {
+        size_t start = m_owner->cursorPos, end = m_owner->cursorPos;
+        capi::getRange(m_owner->editBuffer, bForwards, dist, start, end);
+        if (start == end) {
             return static_cast<unsigned int>(m_owner->cursorPos);
         }
 
-        unsigned int ctrlDelete(bool bForwards, Dasher::EditDistance dist) override {
-            size_t start = m_owner->cursorPos, end = m_owner->cursorPos;
-            capi::getRange(m_owner->editBuffer, bForwards, dist, start, end);
-            if (start == end) {
-                return static_cast<unsigned int>(m_owner->cursorPos);
-            }
+        const auto len = static_cast<size_t>(std::abs(static_cast<long>(end) - static_cast<long>(start)));
+        const auto pos = std::min(start, end);
+        const std::string deleted = m_owner->editBuffer.substr(pos, len);
+        m_owner->editBuffer.erase(pos, len);
+        m_owner->cursorPos = pos;
 
-            const auto len = static_cast<size_t>(std::abs(static_cast<long>(end) - static_cast<long>(start)));
-            const auto pos = std::min(start, end);
-            const std::string deleted = m_owner->editBuffer.substr(pos, len);
-            m_owner->editBuffer.erase(pos, len);
-            m_owner->cursorPos = pos;
-
-            if (m_owner->callbacks.outputCb && !deleted.empty()) {
-                m_owner->callbacks.outputCb(1, deleted.c_str(), m_owner->callbacks.outputCbUserData);
-            }
-
-            return static_cast<unsigned int>(m_owner->cursorPos);
-        }
-        void editOutput(const std::string& strText, Dasher::CDasherNode* pCause) override {
-            if (m_owner->cursorPos > m_owner->editBuffer.size()) {
-                m_owner->cursorPos = m_owner->editBuffer.size();
-            }
-            m_owner->editBuffer.insert(m_owner->cursorPos, strText);
-            m_owner->cursorPos += strText.size();
-            if (m_owner->callbacks.outputCb && !strText.empty()) m_owner->callbacks.outputCb(0, strText.c_str(), m_owner->callbacks.outputCbUserData);
-            m_owner->rateTimestamps.push_back(std::chrono::steady_clock::now());
-            CDashIntfScreenMsgs::editOutput(strText, pCause);
-        }
-        void editDelete(const std::string& strText, Dasher::CDasherNode* pCause) override {
-            if (!strText.empty() && m_owner->editBuffer.size() >= strText.size() &&
-                m_owner->cursorPos >= strText.size()) {
-                m_owner->cursorPos -= strText.size();
-                m_owner->editBuffer.erase(m_owner->cursorPos, strText.size());
-            }
-            if (m_owner->callbacks.outputCb && !strText.empty()) m_owner->callbacks.outputCb(1, strText.c_str(), m_owner->callbacks.outputCbUserData);
-            CDashIntfScreenMsgs::editDelete(strText, pCause);
-        }
-        std::string GetContext(unsigned int start, unsigned int len) override {
-            if (start >= m_owner->editBuffer.size()) return {};
-            return m_owner->editBuffer.substr(start, len);
-        }
-        std::string GetAllContext() override { return m_owner->editBuffer; }
-        int GetAllContextLenght() override { return static_cast<int>(m_owner->editBuffer.size()); }
-
-        bool SupportsSpeech() override { return m_owner->callbacks.speakCb != nullptr; }
-
-        void Speak(const std::string& text, bool bInterrupt) override {
-            if (m_owner->callbacks.speakCb && !text.empty())
-                m_owner->callbacks.speakCb(text.c_str(), bInterrupt ? 1 : 0, m_owner->callbacks.speakCbUserData);
+        if (m_owner->callbacks.outputCb && !deleted.empty()) {
+            m_owner->callbacks.outputCb(1, deleted.c_str(), m_owner->callbacks.outputCbUserData);
         }
 
-        bool SupportsClipboard() override { return m_owner->callbacks.clipboardCb != nullptr; }
-
-        void CopyToClipboard(const std::string& text) override {
-            if (m_owner->callbacks.clipboardCb && !text.empty()) {
-                m_owner->callbacks.clipboardCb(text.c_str(), m_owner->callbacks.clipboardCbUserData);
-            }
+        return static_cast<unsigned int>(m_owner->cursorPos);
+    }
+    void editOutput(const std::string& strText, Dasher::CDasherNode* pCause) override {
+        if (m_owner->cursorPos > m_owner->editBuffer.size()) {
+            m_owner->cursorPos = m_owner->editBuffer.size();
         }
-
-        std::string GetTextAroundCursor(Dasher::EditDistance dist) override {
-            const std::string& buf = m_owner->editBuffer;
-            size_t start = m_owner->cursorPos, end = m_owner->cursorPos;
-            // Find the extent of text around cursor: forward then backward
-            capi::getRange(buf, true, dist, start, end);
-            start = m_owner->cursorPos;
-            capi::getRange(buf, false, dist, start, end);
-            return buf.substr(start, end > start ? end - start : 0);
+        m_owner->editBuffer.insert(m_owner->cursorPos, strText);
+        m_owner->cursorPos += strText.size();
+        if (m_owner->callbacks.outputCb && !strText.empty())
+            m_owner->callbacks.outputCb(0, strText.c_str(), m_owner->callbacks.outputCbUserData);
+        m_owner->rateTimestamps.push_back(std::chrono::steady_clock::now());
+        CDashIntfScreenMsgs::editOutput(strText, pCause);
+    }
+    void editDelete(const std::string& strText, Dasher::CDasherNode* pCause) override {
+        if (!strText.empty() && m_owner->editBuffer.size() >= strText.size() && m_owner->cursorPos >= strText.size()) {
+            m_owner->cursorPos -= strText.size();
+            m_owner->editBuffer.erase(m_owner->cursorPos, strText.size());
         }
+        if (m_owner->callbacks.outputCb && !strText.empty())
+            m_owner->callbacks.outputCb(1, strText.c_str(), m_owner->callbacks.outputCbUserData);
+        CDashIntfScreenMsgs::editDelete(strText, pCause);
+    }
+    std::string GetContext(unsigned int start, unsigned int len) override {
+        if (start >= m_owner->editBuffer.size()) return {};
+        return m_owner->editBuffer.substr(start, len);
+    }
+    std::string GetAllContext() override { return m_owner->editBuffer; }
+    int GetAllContextLenght() override { return static_cast<int>(m_owner->editBuffer.size()); }
 
-        dasher_ctx* m_owner;
+    bool SupportsSpeech() override { return m_owner->callbacks.speakCb != nullptr; }
 
-        std::vector<std::pair<std::string, Dasher::CustomActionCallback>> GetPendingCustomActions() override {
-            std::vector<std::pair<std::string, Dasher::CustomActionCallback>> result;
-            for (auto& entry : m_owner->customActions) {
-                result.emplace_back(entry.name,
-                                    capi::make_custom_action_adapter(entry.callback, entry.userData));
-            }
-            return result;
+    void Speak(const std::string& text, bool bInterrupt) override {
+        if (m_owner->callbacks.speakCb && !text.empty())
+            m_owner->callbacks.speakCb(text.c_str(), bInterrupt ? 1 : 0, m_owner->callbacks.speakCbUserData);
+    }
+
+    bool SupportsClipboard() override { return m_owner->callbacks.clipboardCb != nullptr; }
+
+    void CopyToClipboard(const std::string& text) override {
+        if (m_owner->callbacks.clipboardCb && !text.empty()) {
+            m_owner->callbacks.clipboardCb(text.c_str(), m_owner->callbacks.clipboardCbUserData);
         }
+    }
+
+    std::string GetTextAroundCursor(Dasher::EditDistance dist) override {
+        const std::string& buf = m_owner->editBuffer;
+        size_t start = m_owner->cursorPos, end = m_owner->cursorPos;
+        // Find the extent of text around cursor: forward then backward
+        capi::getRange(buf, true, dist, start, end);
+        start = m_owner->cursorPos;
+        capi::getRange(buf, false, dist, start, end);
+        return buf.substr(start, end > start ? end - start : 0);
+    }
+
+    dasher_ctx* m_owner;
+
+    std::vector<std::pair<std::string, Dasher::CustomActionCallback>> GetPendingCustomActions() override {
+        std::vector<std::pair<std::string, Dasher::CustomActionCallback>> result;
+        for (auto& entry : m_owner->customActions) {
+            result.emplace_back(entry.name, capi::make_custom_action_adapter(entry.callback, entry.userData));
+        }
+        return result;
+    }
 };
 
 // inputTime and the boundary-exception guard live in CAPI_internal.h.
 
 // ── C API implementation ──────────────────────────────────────────────────
-
 
 extern "C" {
 
@@ -271,10 +271,12 @@ DASHER_API void dasher_destroy(dasher_ctx* ctx) {
     try {
         if (ctx->intf) ctx->intf->WriteTrainFileFull();
     } catch (const std::exception& e) {
-        if (ctx->callbacks.logCb && 3 /*ERROR*/ >= ctx->callbacks.logCbMinLevel) ctx->callbacks.logCb(3, e.what(), ctx->callbacks.logCbUserData);
+        if (ctx->callbacks.logCb && 3 /*ERROR*/ >= ctx->callbacks.logCbMinLevel)
+            ctx->callbacks.logCb(3, e.what(), ctx->callbacks.logCbUserData);
     } catch (...) {
         if (ctx->callbacks.logCb && 3 /*ERROR*/ >= ctx->callbacks.logCbMinLevel)
-            ctx->callbacks.logCb(3, "dasher_destroy: training flush failed: unknown exception", ctx->callbacks.logCbUserData);
+            ctx->callbacks.logCb(3, "dasher_destroy: training flush failed: unknown exception",
+                                 ctx->callbacks.logCbUserData);
     }
     delete ctx->intf;
     delete ctx;
@@ -293,7 +295,8 @@ DASHER_API void dasher_set_screen_size(dasher_ctx* ctx, int width, int height) {
         ctx->screen = std::make_unique<CommandScreen>(width, height);
         // Forward any text measurement callback registered before the screen
         // existed (frontends commonly wire callbacks before starting the engine).
-        if (ctx->callbacks.textSizeCb) ctx->screen->SetTextSizeCallback(ctx->callbacks.textSizeCb, ctx->callbacks.textSizeCbUserData);
+        if (ctx->callbacks.textSizeCb)
+            ctx->screen->SetTextSizeCallback(ctx->callbacks.textSizeCb, ctx->callbacks.textSizeCbUserData);
         ctx->intf->ChangeScreen(ctx->screen.get());
     } else {
         ctx->screen->SetSize(width, height);
@@ -343,12 +346,11 @@ DASHER_API void dasher_set_screen_size(dasher_ctx* ctx, int width, int height) {
         // anyway made the next dasher_frame assert on that null model.
         // Latch the RFC 0009 error state instead: frame()/input no-op and
         // dasher_has_engine_error() reports it; the frontend can surface it.
-        if (!capi::guarded_result(ctx, "dasher_set_screen_size: Realize failed", false,
-                                  [&]() -> bool {
-                                      capi::test_inject(ctx, DASHER_FAIL_INJECT_REALIZE);
-                                      ctx->intf->Realize(nowMs());
-                                      return true;
-                                  })) {
+        if (!capi::guarded_result(ctx, "dasher_set_screen_size: Realize failed", false, [&]() -> bool {
+                capi::test_inject(ctx, DASHER_FAIL_INJECT_REALIZE);
+                ctx->intf->Realize(nowMs());
+                return true;
+            })) {
             ctx->engineError = true;
             return;
         }
@@ -554,25 +556,22 @@ DASHER_API int dasher_get_bool_parameter(dasher_ctx* ctx, int key) {
 
 DASHER_API void dasher_set_bool_parameter(dasher_ctx* ctx, int key, int value) {
     if (!ctx || !ctx->intf) return;
-    capi::guarded(ctx, "dasher_set_bool_parameter", /*latch=*/false, [&] {
-        ctx->intf->SetBoolParameter(static_cast<Dasher::Parameter>(key), value != 0);
-    });
+    capi::guarded(ctx, "dasher_set_bool_parameter", /*latch=*/false,
+                  [&] { ctx->intf->SetBoolParameter(static_cast<Dasher::Parameter>(key), value != 0); });
 }
 
 DASHER_API long dasher_get_long_parameter(dasher_ctx* ctx, int key) {
     if (!ctx || !ctx->intf) return 0;
     char context[96];
     snprintf(context, sizeof(context), "dasher_get_long_parameter key=%d", key);
-    return capi::guarded_result(ctx, context, 0L, [&]() -> long {
-        return ctx->intf->GetLongParameter(static_cast<Dasher::Parameter>(key));
-    });
+    return capi::guarded_result(
+        ctx, context, 0L, [&]() -> long { return ctx->intf->GetLongParameter(static_cast<Dasher::Parameter>(key)); });
 }
 
 DASHER_API void dasher_set_long_parameter(dasher_ctx* ctx, int key, long value) {
     if (!ctx || !ctx->intf) return;
-    capi::guarded(ctx, "dasher_set_long_parameter", /*latch=*/false, [&] {
-        ctx->intf->SetLongParameter(static_cast<Dasher::Parameter>(key), value);
-    });
+    capi::guarded(ctx, "dasher_set_long_parameter", /*latch=*/false,
+                  [&] { ctx->intf->SetLongParameter(static_cast<Dasher::Parameter>(key), value); });
 }
 
 DASHER_API const char* dasher_get_string_parameter(dasher_ctx* ctx, int key) {
@@ -590,9 +589,8 @@ DASHER_API const char* dasher_get_string_parameter(dasher_ctx* ctx, int key) {
 
 DASHER_API void dasher_set_string_parameter(dasher_ctx* ctx, int key, const char* value) {
     if (!ctx || !ctx->intf || !value) return;
-    capi::guarded(ctx, "dasher_set_string_parameter", /*latch=*/false, [&] {
-        ctx->intf->SetStringParameter(static_cast<Dasher::Parameter>(key), value);
-    });
+    capi::guarded(ctx, "dasher_set_string_parameter", /*latch=*/false,
+                  [&] { ctx->intf->SetStringParameter(static_cast<Dasher::Parameter>(key), value); });
 }
 
 // Color utility functions
@@ -619,7 +617,6 @@ DASHER_API int dasher_color_get_green(int argb) {
 DASHER_API int dasher_color_get_blue(int argb) {
     return argb & 0xFF;
 }
-
 
 // ── Colour palettes ───────────────────────────────────────────────────────
 
@@ -792,7 +789,6 @@ DASHER_API void dasher_reset_settings(dasher_ctx* ctx) {
         }
     });
 }
-
 
 DASHER_API void dasher_set_output_callback(dasher_ctx* ctx, dasher_output_callback callback, void* user_data) {
     if (!ctx) return;
@@ -1003,7 +999,6 @@ DASHER_API void dasher_test_inject_failure(dasher_ctx* ctx, int site) {
     if (!ctx) return;
     ctx->failInjectSite = site;
 }
-
 
 // ── Custom rendering, Strand 2 (RFC 0013) ──────────────────────────────────
 

@@ -336,7 +336,8 @@ TEST_CASE("contracts/buffer-clear event fires on every buffer reset path") {
     CHECK(std::string(dasher_get_output_text(ctx)) == "hello world");
 
     // No other stray events during the above.
-    for (int e : log.events) CHECK(e == 2);
+    for (int e : log.events)
+        CHECK(e == 2);
 
     dasher_set_output_callback(ctx, nullptr, nullptr);
 }

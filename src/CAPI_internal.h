@@ -140,10 +140,10 @@ struct dasher_ctx {
     // derived from these via resolveAppearance(), so an auto-switch can never
     // overwrite the user's explicit preference.
     struct Appearance {
-        int mode = 0;               // DASHER_APPEARANCE_MODE_SYSTEM/LIGHT/DARK
-        int systemAppearance = 1;   // transient OS input: DASHER_PALETTE_APPEARANCE_LIGHT/DARK
-        std::string lightPalette;   // user's preferred palette for light appearance
-        std::string darkPalette;    // user's preferred palette for dark appearance
+        int mode = 0;             // DASHER_APPEARANCE_MODE_SYSTEM/LIGHT/DARK
+        int systemAppearance = 1; // transient OS input: DASHER_PALETTE_APPEARANCE_LIGHT/DARK
+        std::string lightPalette; // user's preferred palette for light appearance
+        std::string darkPalette;  // user's preferred palette for dark appearance
         bool loaded = false;
     } appearance;
 
@@ -351,7 +351,8 @@ DASHER_LOCAL void getRange(const std::string& buf, bool bForwards, Dasher::EditD
 // was exactly this bug). Fires from CAPI.cpp's reset paths and
 // CAPI_edit.cpp's seed_buffer.
 inline DASHER_LOCAL void notify_buffer_cleared(dasher_ctx* ctx) {
-    if (ctx->callbacks.outputCb) ctx->callbacks.outputCb(DASHER_EVENT_BUFFER_CLEAR, "", ctx->callbacks.outputCbUserData);
+    if (ctx->callbacks.outputCb)
+        ctx->callbacks.outputCb(DASHER_EVENT_BUFFER_CLEAR, "", ctx->callbacks.outputCbUserData);
 }
 
 // ── Custom-action adapter ───────────────────────────────────────────────────

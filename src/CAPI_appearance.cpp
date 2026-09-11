@@ -43,7 +43,7 @@ const Dasher::ColorPalette* companionLookup(Dasher::CColorIO* colorIO, const std
 int effectiveAppearanceValue(const dasher_ctx* ctx) {
     if (ctx->appearance.mode == 1) return 1; // forced light
     if (ctx->appearance.mode == 2) return 2; // forced dark
-    return ctx->appearance.systemAppearance;           // follow system (defaults to light)
+    return ctx->appearance.systemAppearance; // follow system (defaults to light)
 }
 
 std::string appearanceSettingsPath(const dasher_ctx* ctx) {

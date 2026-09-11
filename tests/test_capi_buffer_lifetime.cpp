@@ -234,8 +234,8 @@ TEST_CASE("getters/different getters share one scratch buffer") {
     const char* second = alphabet_first ? dasher_get_current_palette(ctx) : dasher_get_alphabet_id(ctx);
     const std::string second_value = alphabet_first ? palette : alphabet;
 
-    CHECK(first == second);                     // one shared buffer, reused in place
-    CHECK(std::string(first) == second_value);  // first result was CLOBBERED
+    CHECK(first == second);                    // one shared buffer, reused in place
+    CHECK(std::string(first) == second_value); // first result was CLOBBERED
 }
 
 TEST_CASE("getters/locale getter uses a separate buffer") {
