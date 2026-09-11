@@ -158,7 +158,6 @@ void getRange(const std::string& buf, bool bForwards, Dasher::EditDistance dist,
 #include <memory>
 #include <sstream>
 #include <string>
-#include <unordered_map>
 #include <utility>
 #include <vector>
 
