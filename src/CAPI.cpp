@@ -1136,6 +1136,9 @@ DASHER_API const char* dasher_get_string_parameter(dasher_ctx* ctx, int key) {
     if (!ctx || !ctx->intf) return "";
     char context[96];
     snprintf(context, sizeof(context), "dasher_get_string_parameter key=%d", key);
+    // Error path note: returns the "" literal and leaves tlString stale
+    // (the old code cleared it first). Unobservable — every tlString-backed
+    // getter overwrites the buffer before returning it.
     return capi::guarded_result(ctx, context, "", [&]() -> const char* {
         ctx->tlString = ctx->intf->GetStringParameter(static_cast<Dasher::Parameter>(key));
         return ctx->tlString.c_str();

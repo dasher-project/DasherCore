@@ -22,9 +22,11 @@
 
 #include <chrono>
 #include <cstdio>
+#include <cstdint>
 #include <deque>
 #include <memory>
 #include <string>
+#include <type_traits>
 #include <vector>
 
 // Defined in CAPI.cpp until the Phase 2.3 extraction moves them out.
@@ -210,6 +212,11 @@ namespace capi {
 
 // Logs the failure (when a callback is registered) and optionally latches the
 // engine fault flag. Context strings are stable literals from call sites.
+//
+// Ordering note: the flag latches BEFORE the log callback fires (the old
+// per-site handlers logged first). Only observable to a re-entrant callback
+// that queries dasher_has_engine_error() mid-log — and latch-first is the
+// safer order: the fault is recorded even if the callback itself throws.
 inline void boundary_error(dasher_ctx* ctx, const char* context, const char* detail, bool latch) noexcept {
     if (latch && ctx) ctx->engineError = true;
     if (!ctx || !ctx->logCb || 3 /*ERROR*/ < ctx->logCbMinLevel) return;
@@ -246,6 +253,10 @@ inline void guarded(dasher_ctx* ctx, const char* context, bool latch, Body&& bod
 //   });
 template <typename Result, typename Body>
 inline Result guarded_result(dasher_ctx* ctx, const char* context, Result error_result, Body&& body) {
+    // Guard against the classic trap: guarded_result(ctx, c, 0, [&]() -> long {...})
+    // would deduce Result=int and silently truncate a long success value.
+    static_assert(std::is_convertible_v<std::invoke_result_t<Body&>, Result>,
+                  "guard error_result type must match the body's return type");
     try {
         return body();
     } catch (const std::exception& e) {
