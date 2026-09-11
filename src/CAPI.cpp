@@ -177,13 +177,14 @@ struct dasher_ctx::Interface : public Dasher::CDashIntfScreenMsgs {
 
     dasher_ctx* m_owner;
 
-    std::vector<std::pair<std::string, Dasher::CustomActionCallback>> GetPendingCustomActions() override {
-        std::vector<std::pair<std::string, Dasher::CustomActionCallback>> result;
-        for (auto& entry : m_owner->customActions) {
-            result.emplace_back(entry.name, capi::make_custom_action_adapter(entry.callback, entry.userData));
+        std::vector<std::pair<std::string, Dasher::CustomActionCallback>> GetPendingCustomActions() override {
+            std::vector<std::pair<std::string, Dasher::CustomActionCallback>> result;
+            result.reserve(m_owner->customActions.size());
+            for (auto& entry : m_owner->customActions) {
+                result.emplace_back(entry.name, capi::make_custom_action_adapter(entry.callback, entry.userData));
+            }
+            return result;
         }
-        return result;
-    }
 };
 
 // inputTime and the boundary-exception guard live in CAPI_internal.h.

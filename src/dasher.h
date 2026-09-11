@@ -121,7 +121,7 @@ extern "C" {
 #define DASHER_KEY_TERTIARY 102  // typically third mouse button
 
 // Parameter schema types (dasher_parameter_info.type).
-#define DASHER_PARAM_TYPE_INVALID -1
+#define DASHER_PARAM_TYPE_INVALID (-1)
 #define DASHER_PARAM_TYPE_BOOL 0
 #define DASHER_PARAM_TYPE_LONG 1
 #define DASHER_PARAM_TYPE_STRING 2
