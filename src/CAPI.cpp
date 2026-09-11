@@ -1,4 +1,5 @@
 #include "dasher.h"
+#include "CAPI_internal.h"
 
 #include "DasherCore/DashIntfScreenMsgs.h"
 #include "DasherCore/DasherInput.h"
@@ -160,34 +161,17 @@ void getRange(const std::string& buf, bool bForwards, Dasher::EditDistance dist,
 #include <utility>
 #include <vector>
 
-static int lround_int(double v) {
-    int i = static_cast<int>(v);
-    return (v - i >= 0.5) ? i + 1 : (v - i <= -0.5) ? i - 1 : i;
-}
-
-static int clamp_int(int v, int lo, int hi) {
-    if (v < lo) return lo;
-    if (v > hi) return hi;
-    return v;
-}
-
-static int32_t colorToARGB(const Dasher::ColorPalette::Color& c) {
-    int a = c.Alpha, r = c.Red, g = c.Green, b = c.Blue;
-
-    if (a >= 0 && a <= 1 && r >= 0 && r <= 1 && g >= 0 && g <= 1 && b >= 0 && b <= 1) {
-        a = a * 255;
-        r = r * 255;
-        g = g * 255;
-        b = b * 255;
-    }
-
-    a = clamp_int(a, 0, 255);
-    r = clamp_int(r, 0, 255);
-    g = clamp_int(g, 0, 255);
-    b = clamp_int(b, 0, 255);
-
-    return (a << 24) | (r << 16) | (g << 8) | b;
-}
+// lround_int / clamp_int / colorToARGB / nowMs / inputTime live in
+// CAPI_internal.h.
+//
+// Boundary-exception policy: uniform log(+latch) sites use
+// capi::guarded / capi::guarded_result from CAPI_internal.h. Functions with
+// bespoke failure handling keep explicit try/catch: dasher_create (error
+// string + cleanup), dasher_destroy (raw log messages), and the
+// deliberately-silent catches (ensure_realized_for_context,
+// set_visible_nodes_enabled, get_visible_nodes, get_viewport,
+// import_training_text, get_training_path) which return a sentinel without
+// logging — preserved as-is so this refactor is behaviour-identical.
 
 // ── Command-buffer screen ──────────────────────────────────────────────────
 
@@ -447,116 +431,12 @@ class PointerInput : public Dasher::CScreenCoordInput {
     bool m_hasPos = false;
 };
 
-// ── Helpers ────────────────────────────────────────────────────────────────
+// ── Session context: Interface ─────────────────────────────────────────────
+//
+// struct dasher_ctx itself lives in CAPI_internal.h. Its engine-side
+// behaviour overrides are defined here, out-of-line.
 
-static unsigned long nowMs() {
-    return static_cast<unsigned long>(
-        std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now().time_since_epoch())
-            .count());
-}
-
-// ── Session context ───────────────────────────────────────────────────────
-
-struct dasher_ctx {
-    struct Interface;
-    std::unique_ptr<Dasher::XmlSettingsStore> settings;
-    // True when dasher_settings.xml existed in the user dir at create time.
-    // Used to distinguish "no saved preference, use a sensible default"
-    // from "the user deliberately saved this value" — a value-based
-    // comparison can't tell them apart (the compiled-in default IS a
-    // legitimate user choice).
-    bool settingsFileExisted = false;
-    std::unique_ptr<CommandScreen> screen;
-    PointerInput* input = nullptr;
-    Dasher::CDashIntfScreenMsgs* intf = nullptr;
-    std::string editBuffer;
-    size_t cursorPos = 0;
-    // The engine's own timeline: the timestamp of the most recent
-    // dasher_frame(). Input events (mouse/key) are stamped with this so the
-    // engine never subtracts across clocks — frontends pass their own
-    // timeline to dasher_frame (compositor frame time, uptime, anything),
-    // and mixing that with a steady_clock stamp here poisoned
-    // LP_FRAMERATE/slow-start at every stop/restart (the Windows + Android
-    // restart drift, #60). v5 never had this because its frontends embedded
-    // the engine on one clock.
-    int64_t lastFrameMs = 0;
-    // Last input-event stamp (see inputTime): strictly increasing across
-    // consecutive inputs within one frame window, so intra-frame gesture
-    // ordering/durations survive.
-    int64_t lastInputMs = 0;
-    // Typing rate tracker (RFC 0012): timestamps of recent character outputs.
-    std::deque<std::chrono::steady_clock::time_point> rateTimestamps;
-    std::string tlString;
-    bool realized = false;
-    // Host's low-memory request, retained on the ctx so the transactional
-    // realize retry can reapply it to a recreated interface (review P1 #77).
-    bool lowMemory = false;
-    bool mouseDown = false;
-    // Latched true when a C++ exception was caught at the C-API boundary of a
-    // per-frame entry point (frame/mouse/key). Once set, those entry points
-    // no-op until the engine is destroyed and recreated — the engine state is
-    // indeterminate after a mid-frame throw. Frontends query this via
-    // dasher_has_engine_error(). Per RFC 0009 Amendment 2; not cleared by
-    // dasher_reset (only by recreating the context).
-    bool engineError = false;
-    std::string pendingAlphabet;
-    std::string dataDir;
-    std::string userDir;
-    std::string stringBuf;
-
-    // Buffers backing const char* returns from various getters. These
-    // MUST live in dasher_ctx (not file-scope static) so that two
-    // contexts don't trample each other's returned pointers — a real
-    // cross-context bug noted in the codebase review (Tier 1 #4).
-    std::vector<std::string> stringValues; // dasher_get_palette_name / alphabet_name / parameter_string_values
-    std::string gameTextBuf;               // dasher_game_get_target_text
-
-    // Strand 2 (RFC 0013): label strings for dasher_get_visible_nodes. Owned
-    // here so the returned char** is stable until the next visible_nodes/frame
-    // call, mirroring the command-buffer ownership contract.
-    std::vector<std::string> nodeLabelStrings;
-    std::vector<char*> nodeLabelPtrs;
-
-    // Appearance model state (RFC 0007). Lives at the C API layer — appearance
-    // is a shell/canvas concern, not a DasherCore engine parameter. Persisted to
-    // <userDir>/appearance_settings.xml. The active palette (SP_COLOUR_ID) is
-    // derived from these via resolveAppearance(), so an auto-switch can never
-    // overwrite the user's explicit preference.
-    int appearanceMode = 0;   // 0=system, 1=light, 2=dark
-    int systemAppearance = 1; // transient OS input: 1=light, 2=dark
-    std::string lightPalette; // user's preferred palette for light appearance
-    std::string darkPalette;  // user's preferred palette for dark appearance
-    bool appearanceLoaded = false;
-    dasher_output_callback outputCb = nullptr;
-    // Pending text measurement callback: kept here (not only on the screen)
-    // because frontends register callbacks before dasher_set_screen_size
-    // creates the CommandScreen; set_screen_size forwards it.
-    dasher_text_size_callback textSizeCb = nullptr;
-    void* textSizeCbUserData = nullptr;
-    void* outputCbUserData = nullptr;
-    dasher_message_callback messageCb = nullptr;
-    void* messageCbUserData = nullptr;
-    dasher_speak_callback speakCb = nullptr;
-    void* speakCbUserData = nullptr;
-    dasher_clipboard_callback clipboardCb = nullptr;
-    void* clipboardCbUserData = nullptr;
-    dasher_parameter_callback paramCb = nullptr;
-    void* paramCbUserData = nullptr;
-
-    // Diagnostic log callback (replaces the former CFileLogger/CBasicLog/UserLog
-    // systems). When null, log messages are silently discarded.
-    dasher_log_callback logCb = nullptr;
-    void* logCbUserData = nullptr;
-    int logCbMinLevel = 0;
-
-    struct CustomActionEntry {
-        std::string name;
-        dasher_action_callback callback;
-        void* userData;
-    };
-    std::vector<CustomActionEntry> customActions;
-
-    struct Interface : public Dasher::CDashIntfScreenMsgs {
+struct dasher_ctx::Interface : public Dasher::CDashIntfScreenMsgs {
         Interface(Dasher::CSettingsStore* s, dasher_ctx* owner) : CDashIntfScreenMsgs(s), m_owner(owner) {
             s->OnParameterChanged.Subscribe(m_owner, [this](Dasher::Parameter param) {
                 if (m_owner->paramCb) m_owner->paramCb(static_cast<int>(param), m_owner->paramCbUserData);
@@ -703,45 +583,9 @@ struct dasher_ctx {
             }
             return result;
         }
-    };
 };
 
-// Stamp for input events arriving between frames: the engine's own timeline
-// (the most recent dasher_frame time), never steady_clock — the engine
-// subtracts input stamps from frame times, so mixing clocks corrupts
-// framerate/slow-start state at every stop/restart (#60). Multiple inputs
-// within one frame window get strictly increasing stamps so gesture timing
-// (stylus tap vs hold, multi-press) still sees distinct timestamps — but
-// capped 2ms past the frame time, so a burst of same-frame inputs can never
-// outrun the next frame stamp and underflow the unsigned elapsed-time math
-// downstream (slow-start).
-static unsigned long inputTime(dasher_ctx* ctx) {
-    if (ctx->lastInputMs < ctx->lastFrameMs)
-        ctx->lastInputMs = ctx->lastFrameMs;
-    else if (ctx->lastInputMs < ctx->lastFrameMs + 2)
-        ctx->lastInputMs += 1;
-    return static_cast<unsigned long>(ctx->lastInputMs);
-}
-
-// ── C API Boundary Exception Helpers ────────────────────────────────────────
-// Enforces Rule 4: never throw across the C API boundary. All exceptions are
-// caught and reported via the log callback at level 3 (ERROR) when registered
-// and at/above min_level; otherwise silently discarded.
-//
-// noexcept and allocation-free (fixed buffer + snprintf). A catch handler that
-// itself throws — e.g. a std::string concat hitting bad_alloc — re-violates the
-// boundary and, for void setters, cannot recover. RFC 0009 Amendment 2 requires
-// this property so engine fault context reliably reaches the frontend ring
-// buffer before the function returns.
-
-static void log_boundary_error(dasher_ctx* ctx, const char* context, const char* detail) noexcept {
-    if (!ctx || !ctx->logCb || 3 /*ERROR*/ < ctx->logCbMinLevel) return;
-    char buf[256];
-    const int n = snprintf(buf, sizeof(buf), "%s: %s", context ? context : "", detail ? detail : "");
-    if (n < 0) return; // encoding error — nothing useful to report
-    // snprintf always null-terminates (size > 0), so buf is valid even if truncated.
-    ctx->logCb(3, buf, ctx->logCbUserData);
-}
+// inputTime and the boundary-exception guard live in CAPI_internal.h.
 
 // ── C API implementation ──────────────────────────────────────────────────
 
@@ -1012,19 +856,16 @@ DASHER_API void dasher_set_screen_size(dasher_ctx* ctx, int width, int height) {
             }
         }
 
-        try {
-            ctx->intf->Realize(nowMs());
-        } catch (const std::exception& e) {
-            log_boundary_error(ctx, "dasher_set_screen_size: Realize failed", e.what());
-            // A half-completed Realize leaves the interface in an
-            // indeterminate state (e.g. a null node model). Setting realized
-            // anyway made the next dasher_frame assert on that null model.
-            // Latch the RFC 0009 error state instead: frame()/input no-op and
-            // dasher_has_engine_error() reports it; the frontend can surface it.
-            ctx->engineError = true;
-            return;
-        } catch (...) {
-            log_boundary_error(ctx, "dasher_set_screen_size: Realize failed", "unknown exception");
+        // A half-completed Realize leaves the interface in an
+        // indeterminate state (e.g. a null node model). Setting realized
+        // anyway made the next dasher_frame assert on that null model.
+        // Latch the RFC 0009 error state instead: frame()/input no-op and
+        // dasher_has_engine_error() reports it; the frontend can surface it.
+        if (!capi::guarded_result(ctx, "dasher_set_screen_size: Realize failed", false,
+                                  [&]() -> bool {
+                                      ctx->intf->Realize(nowMs());
+                                      return true;
+                                  })) {
             ctx->engineError = true;
             return;
         }
@@ -1051,15 +892,7 @@ DASHER_API void dasher_set_screen_size(dasher_ctx* ctx, int width, int height) {
 DASHER_API void dasher_mouse_move(dasher_ctx* ctx, float x, float y) {
     if (!ctx || !ctx->input) return;
     if (ctx->engineError) return;
-    try {
-        ctx->input->SetPosition(x, y);
-    } catch (const std::exception& e) {
-        log_boundary_error(ctx, "dasher_mouse_move", e.what());
-        ctx->engineError = true;
-    } catch (...) {
-        log_boundary_error(ctx, "dasher_mouse_move", "unknown exception");
-        ctx->engineError = true;
-    }
+    capi::guarded(ctx, "dasher_mouse_move", /*latch=*/true, [&] { ctx->input->SetPosition(x, y); });
 }
 
 DASHER_API void dasher_mouse_down(dasher_ctx* ctx) {
@@ -1067,19 +900,13 @@ DASHER_API void dasher_mouse_down(dasher_ctx* ctx) {
     if (ctx->engineError) return;
     if (ctx->mouseDown) return;
     ctx->mouseDown = true;
-    try {
+    capi::guarded(ctx, "dasher_mouse_down", /*latch=*/true, [&] {
         // In circle start mode, clicking should NOT start/stop Dasher —
         // only hovering inside the circle should. (Steve Saling feedback)
         if (ctx->intf->GetLongParameter(Dasher::LP_START_MODE) == Dasher::Options::StartMode::circle_start) return;
         ctx->intf->SetBoolParameter(Dasher::BP_START_MOUSE, true);
         ctx->intf->KeyDown(inputTime(ctx), Dasher::Keys::Primary_Input);
-    } catch (const std::exception& e) {
-        log_boundary_error(ctx, "dasher_mouse_down", e.what());
-        ctx->engineError = true;
-    } catch (...) {
-        log_boundary_error(ctx, "dasher_mouse_down", "unknown exception");
-        ctx->engineError = true;
-    }
+    });
 }
 
 DASHER_API void dasher_mouse_up(dasher_ctx* ctx) {
@@ -1087,34 +914,21 @@ DASHER_API void dasher_mouse_up(dasher_ctx* ctx) {
     if (ctx->engineError) return;
     if (!ctx->mouseDown) return;
     ctx->mouseDown = false;
-    try {
-        ctx->intf->KeyUp(inputTime(ctx), Dasher::Keys::Primary_Input);
-    } catch (const std::exception& e) {
-        log_boundary_error(ctx, "dasher_mouse_up", e.what());
-        ctx->engineError = true;
-    } catch (...) {
-        log_boundary_error(ctx, "dasher_mouse_up", "unknown exception");
-        ctx->engineError = true;
-    }
+    capi::guarded(ctx, "dasher_mouse_up", /*latch=*/true,
+                  [&] { ctx->intf->KeyUp(inputTime(ctx), Dasher::Keys::Primary_Input); });
 }
 
 DASHER_API void dasher_key_event(dasher_ctx* ctx, int key, int pressed) {
     if (!ctx || !ctx->intf) return;
     if (ctx->engineError) return;
-    try {
+    capi::guarded(ctx, "dasher_key_event", /*latch=*/true, [&] {
         auto vk = static_cast<Dasher::Keys::VirtualKey>(key);
         if (pressed) {
             ctx->intf->KeyDown(inputTime(ctx), vk);
         } else {
             ctx->intf->KeyUp(inputTime(ctx), vk);
         }
-    } catch (const std::exception& e) {
-        log_boundary_error(ctx, "dasher_key_event", e.what());
-        ctx->engineError = true;
-    } catch (...) {
-        log_boundary_error(ctx, "dasher_key_event", "unknown exception");
-        ctx->engineError = true;
-    }
+    });
 }
 
 DASHER_API void dasher_frame(dasher_ctx* ctx, int64_t time_ms, int** out_commands, int* out_command_count,
@@ -1131,7 +945,7 @@ DASHER_API void dasher_frame(dasher_ctx* ctx, int64_t time_ms, int** out_command
     if (!ctx || !ctx->intf || !ctx->screen || !ctx->realized) return;
     if (ctx->engineError) return;
 
-    try {
+    capi::guarded(ctx, "dasher_frame", /*latch=*/true, [&] {
         ctx->screen->BeginFrame();
         ctx->intf->NewFrame(static_cast<unsigned long>((time_ms > 0) ? time_ms : 0), true);
         ctx->screen->BuildStringPtrs();
@@ -1140,13 +954,7 @@ DASHER_API void dasher_frame(dasher_ctx* ctx, int64_t time_ms, int** out_command
         if (out_command_count) *out_command_count = ctx->screen->GetCommandCount();
         if (out_strings) *out_strings = const_cast<char**>(ctx->screen->GetStringPtrs());
         if (out_string_count) *out_string_count = ctx->screen->GetStringCount();
-    } catch (const std::exception& e) {
-        log_boundary_error(ctx, "dasher_frame", e.what());
-        ctx->engineError = true;
-    } catch (...) {
-        log_boundary_error(ctx, "dasher_frame", "unknown exception");
-        ctx->engineError = true;
-    }
+    });
 }
 
 DASHER_API int dasher_has_engine_error(dasher_ctx* ctx) {
@@ -1272,7 +1080,7 @@ DASHER_API int dasher_get_speed_percent(dasher_ctx* ctx) {
 
 DASHER_API void dasher_set_speed_percent(dasher_ctx* ctx, int percent) {
     if (!ctx || !ctx->intf) return;
-    try {
+    capi::guarded(ctx, "dasher_set_speed_percent", /*latch=*/false, [&] {
         const double base = 160.0;
         // Clamp to the engine's declared LP_MAX_BITRATE range rather than the
         // historic 20–400 %: that cap was raw 32–640, which silently truncated
@@ -1289,96 +1097,56 @@ DASHER_API void dasher_set_speed_percent(dasher_ctx* ctx, int percent) {
         if (bitrate < min_bitrate) bitrate = min_bitrate;
         if (bitrate > max_bitrate) bitrate = max_bitrate;
         ctx->intf->SetLongParameter(Dasher::LP_MAX_BITRATE, bitrate);
-    } catch (const std::exception& e) {
-        log_boundary_error(ctx, "dasher_set_speed_percent", e.what());
-    } catch (...) {
-        log_boundary_error(ctx, "dasher_set_speed_percent", "unknown exception");
-    }
+    });
 }
 
 DASHER_API int dasher_get_bool_parameter(dasher_ctx* ctx, int key) {
     if (!ctx || !ctx->intf) return 0;
-    try {
+    char context[96];
+    snprintf(context, sizeof(context), "dasher_get_bool_parameter key=%d", key);
+    return capi::guarded_result(ctx, context, 0, [&]() -> int {
         return ctx->intf->GetBoolParameter(static_cast<Dasher::Parameter>(key)) ? 1 : 0;
-    } catch (const std::exception& e) {
-        char context[96];
-        snprintf(context, sizeof(context), "dasher_get_bool_parameter key=%d", key);
-        log_boundary_error(ctx, context, e.what());
-        return 0;
-    } catch (...) {
-        char context[96];
-        snprintf(context, sizeof(context), "dasher_get_bool_parameter key=%d", key);
-        log_boundary_error(ctx, context, "unknown exception");
-        return 0;
-    }
+    });
 }
 
 DASHER_API void dasher_set_bool_parameter(dasher_ctx* ctx, int key, int value) {
     if (!ctx || !ctx->intf) return;
-    try {
+    capi::guarded(ctx, "dasher_set_bool_parameter", /*latch=*/false, [&] {
         ctx->intf->SetBoolParameter(static_cast<Dasher::Parameter>(key), value != 0);
-    } catch (const std::exception& e) {
-        log_boundary_error(ctx, "dasher_set_bool_parameter", e.what());
-    } catch (...) {
-        log_boundary_error(ctx, "dasher_set_bool_parameter", "unknown exception");
-    }
+    });
 }
 
 DASHER_API long dasher_get_long_parameter(dasher_ctx* ctx, int key) {
     if (!ctx || !ctx->intf) return 0;
-    try {
+    char context[96];
+    snprintf(context, sizeof(context), "dasher_get_long_parameter key=%d", key);
+    return capi::guarded_result(ctx, context, 0L, [&]() -> long {
         return ctx->intf->GetLongParameter(static_cast<Dasher::Parameter>(key));
-    } catch (const std::exception& e) {
-        char context[96];
-        snprintf(context, sizeof(context), "dasher_get_long_parameter key=%d", key);
-        log_boundary_error(ctx, context, e.what());
-        return 0;
-    } catch (...) {
-        char context[96];
-        snprintf(context, sizeof(context), "dasher_get_long_parameter key=%d", key);
-        log_boundary_error(ctx, context, "unknown exception");
-        return 0;
-    }
+    });
 }
 
 DASHER_API void dasher_set_long_parameter(dasher_ctx* ctx, int key, long value) {
     if (!ctx || !ctx->intf) return;
-    try {
+    capi::guarded(ctx, "dasher_set_long_parameter", /*latch=*/false, [&] {
         ctx->intf->SetLongParameter(static_cast<Dasher::Parameter>(key), value);
-    } catch (const std::exception& e) {
-        log_boundary_error(ctx, "dasher_set_long_parameter", e.what());
-    } catch (...) {
-        log_boundary_error(ctx, "dasher_set_long_parameter", "unknown exception");
-    }
+    });
 }
 
 DASHER_API const char* dasher_get_string_parameter(dasher_ctx* ctx, int key) {
     if (!ctx || !ctx->intf) return "";
-    try {
+    char context[96];
+    snprintf(context, sizeof(context), "dasher_get_string_parameter key=%d", key);
+    return capi::guarded_result(ctx, context, "", [&]() -> const char* {
         ctx->tlString = ctx->intf->GetStringParameter(static_cast<Dasher::Parameter>(key));
-    } catch (const std::exception& e) {
-        char context[96];
-        snprintf(context, sizeof(context), "dasher_get_string_parameter key=%d", key);
-        log_boundary_error(ctx, context, e.what());
-        ctx->tlString = "";
-    } catch (...) {
-        char context[96];
-        snprintf(context, sizeof(context), "dasher_get_string_parameter key=%d", key);
-        log_boundary_error(ctx, context, "unknown exception");
-        ctx->tlString = "";
-    }
-    return ctx->tlString.c_str();
+        return ctx->tlString.c_str();
+    });
 }
 
 DASHER_API void dasher_set_string_parameter(dasher_ctx* ctx, int key, const char* value) {
     if (!ctx || !ctx->intf || !value) return;
-    try {
+    capi::guarded(ctx, "dasher_set_string_parameter", /*latch=*/false, [&] {
         ctx->intf->SetStringParameter(static_cast<Dasher::Parameter>(key), value);
-    } catch (const std::exception& e) {
-        log_boundary_error(ctx, "dasher_set_string_parameter", e.what());
-    } catch (...) {
-        log_boundary_error(ctx, "dasher_set_string_parameter", "unknown exception");
-    }
+    });
 }
 
 // Color utility functions
@@ -1779,7 +1547,7 @@ DASHER_API void dasher_save_settings(dasher_ctx* ctx) {
 
 DASHER_API void dasher_reload_settings(dasher_ctx* ctx) {
     if (!ctx || !ctx->settings) return;
-    try {
+    capi::guarded(ctx, "dasher_reload_settings", /*latch=*/false, [&] {
         // Re-read dasher_settings.xml and apply changes through the normal
         // parameter path — fires OnParameterChanged so the engine rebuilds
         // derived state (alphabet, colours, input filter) and the frontend
@@ -1787,11 +1555,7 @@ DASHER_API void dasher_reload_settings(dasher_ctx* ctx) {
         // are applied. Use cases: settings file changed externally (IME
         // service shared directory, migration, another process).
         ctx->settings->ReloadFromFile();
-    } catch (const std::exception& e) {
-        log_boundary_error(ctx, "dasher_reload_settings", e.what());
-    } catch (...) {
-        log_boundary_error(ctx, "dasher_reload_settings", "unknown exception");
-    }
+    });
 }
 
 // Reset every parameter to its built-in default value (from Parameters.h).
@@ -1802,7 +1566,7 @@ DASHER_API void dasher_reload_settings(dasher_ctx* ctx) {
 // themselves before calling.
 DASHER_API void dasher_reset_settings(dasher_ctx* ctx) {
     if (!ctx || !ctx->intf) return;
-    try {
+    capi::guarded(ctx, "dasher_reset_settings", /*latch=*/false, [&] {
         for (const auto& [param, entry] : Dasher::Settings::parameter_defaults) {
             const auto& value = entry.value;
             if (std::holds_alternative<bool>(value)) {
@@ -1813,15 +1577,7 @@ DASHER_API void dasher_reset_settings(dasher_ctx* ctx) {
                 ctx->intf->SetStringParameter(param, std::get<std::string>(value));
             }
         }
-    } catch (const std::exception& e) {
-        // C API boundary: never propagate C++ exceptions to the caller. Surface
-        // the failure through the diagnostic log callback (level 3 = ERROR)
-        // registered via dasher_set_log_callback, if any.
-        if (ctx->logCb && 3 /*ERROR*/ >= ctx->logCbMinLevel) ctx->logCb(3, e.what(), ctx->logCbUserData);
-    } catch (...) {
-        if (ctx->logCb && 3 /*ERROR*/ >= ctx->logCbMinLevel)
-            ctx->logCb(3, "dasher_reset_settings: unknown exception", ctx->logCbUserData);
-    }
+    });
 }
 
 // ── Localization ──────────────────────────────────────────────────────────
@@ -2326,7 +2082,7 @@ DASHER_API int dasher_set_offset(dasher_ctx* ctx, int offset) {
     if (!ctx || !ctx->intf) return -1;
     if (offset < 0) return -1;
     if (!ensure_realized_for_context(ctx)) return -1;
-    try {
+    return capi::guarded_result(ctx, "dasher_set_offset", -1, [&]() -> int {
         // Offsets are UTF-8 byte positions into the edit buffer (the CAPI's
         // universal unit); mid-sequence values from platform caret
         // conversions snap down to the codepoint start instead of
@@ -2335,19 +2091,13 @@ DASHER_API int dasher_set_offset(dasher_ctx* ctx, int offset) {
         ctx->cursorPos = clamped;
         ctx->intf->SetOffset(static_cast<unsigned int>(clamped), true);
         return 0;
-    } catch (const std::exception& e) {
-        log_boundary_error(ctx, "dasher_set_offset", e.what());
-        return -1;
-    } catch (...) {
-        log_boundary_error(ctx, "dasher_set_offset", "unknown exception");
-        return -1;
-    }
+    });
 }
 
 DASHER_API int dasher_seed_buffer(dasher_ctx* ctx, const char* text, int caret_offset) {
     if (!ctx || !ctx->intf) return -1;
     if (!ensure_realized_for_context(ctx)) return -1;
-    try {
+    return capi::guarded_result(ctx, "dasher_seed_buffer", -1, [&]() -> int {
         // Replace the buffer with the target field's text.
         ctx->editBuffer.assign(text ? text : "");
         // caret_offset is a UTF-8 byte position; platform caret units
@@ -2368,13 +2118,7 @@ DASHER_API int dasher_seed_buffer(dasher_ctx* ctx, const char* text, int caret_o
         // predictions continue from the text before the caret.
         ctx->intf->SetOffset(static_cast<unsigned int>(clamped), true);
         return 0;
-    } catch (const std::exception& e) {
-        log_boundary_error(ctx, "dasher_seed_buffer", e.what());
-        return -1;
-    } catch (...) {
-        log_boundary_error(ctx, "dasher_seed_buffer", "unknown exception");
-        return -1;
-    }
+    });
 }
 
 // ── Custom rendering, Strand 2 (RFC 0013) ──────────────────────────────────
