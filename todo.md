@@ -214,8 +214,11 @@ with tests, NOT bundled with the refactor.
 ### Per-step checklist (copy into each PR/commit)
 
 ```
-[ ] built clean
-[ ] ctest --test-dir build --output-on-failure  (all pass)
+[ ] BUILD: cmake --build build -j reaches [100%] AND greps clean for errors
+    (a failed build + stale binaries can still "pass" ctest — verify both,
+    never trust one alone; piping builds through head/truncation SIGPIPEs
+    them mid-run)
+[ ] ctest --test-dir build --output-on-failure  (all pass, 45+ tests)
 [ ] exported symbols unchanged vs baseline_symbols.txt
 [ ] no new warnings in CI for touched files
 [ ] clang-tidy clean for touched files (see .clang-tidy)
