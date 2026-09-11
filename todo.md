@@ -185,10 +185,14 @@ Target layout (internal only; `dasher.h` unchanged, still one public header):
 - [ ] 2.7 Extract `src/CAPI_edit.cpp` — UTF-8 helpers (`getRange`,
       `findAfter`/`findBefore`, `clamp_caret_to_codepoint`,
       `ValidatedSequenceLength`, `byte_offset_from_count`), seed/set-offset.
-- [ ] 2.8 `src/CAPI.cpp` keeps: create/destroy, frame, input events,
+- [x] 2.8 `src/CAPI.cpp` keeps: create/destroy, frame, input events,
       game mode, callbacks registration, Strand 2, typing rate.
-- [ ] 2.9 Fix the mid-file `#include` block (CAPI.cpp:154) — all includes
+      - that is the post-2.7 state: 1194 lines, everything else extracted
+- [x] 2.9 Fix the mid-file `#include` block (CAPI.cpp:154) — all includes
       move to file tops during the split.
+      - done: single include block at the top; <cmath>/<sstream> dropped
+        (their users moved to other TUs); boundary-policy comment updated
+        for where the silent catches now live
 - [ ] 2.10 Each extraction = one commit. After EACH commit: rebuild, full
       ctest, symbol-list diff from 0.2 must be empty.
 

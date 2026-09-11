@@ -23,16 +23,13 @@
 
 #include <algorithm>
 #include <chrono>
-#include <cmath>
 #include <cstdio>
 #include <cstring>
 #include <deque>
 #include <filesystem>
-
 #include <fstream>
 #include <locale.h>
 #include <memory>
-#include <sstream>
 #include <string>
 #include <utility>
 #include <vector>
@@ -44,10 +41,11 @@
 // capi::guarded / capi::guarded_result from CAPI_internal.h. Functions with
 // bespoke failure handling keep explicit try/catch: dasher_create (error
 // string + cleanup), dasher_destroy (raw log messages), and the
-// deliberately-silent catches (ensure_realized_for_context,
-// set_visible_nodes_enabled, get_visible_nodes, get_viewport,
-// import_training_text, get_training_path) which return a sentinel without
-// logging — preserved as-is so this refactor is behaviour-identical.
+// deliberately-silent catches (set_visible_nodes_enabled,
+// get_visible_nodes, get_viewport, import_training_text,
+// get_training_path) which return a sentinel without logging — preserved
+// as-is so this refactor is behaviour-identical. CAPI_edit.cpp owns its
+// own silent catch (ensure_realized_for_context).
 
 // ── Session context: Interface ─────────────────────────────────────────────
 //
