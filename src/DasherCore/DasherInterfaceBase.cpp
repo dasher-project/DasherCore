@@ -117,15 +117,7 @@ void CDasherInterfaceBase::Realize(unsigned long ulTime) {
     // THIS realize read the other bundle (greptile P1 #2 on #88 — pinned by
     // retired_default_heal_uses_own_context_data_dir).
     m_AlphIO->ScanNameIndex(m_dataDir);
-    const auto loadById = [this](const std::string& alphId) {
-        std::string fn = m_AlphIO->FileNameFor(alphId);
-        if (fn.empty()) fn = alphabetIdToFilename(alphId);
-        fn = std::filesystem::path(fn).filename().string(); // index entries can be dir-relative
-        if (!m_dataDir.empty())
-            Dasher::FileUtils::ScanDirectory(m_AlphIO.get(), fn, m_dataDir);
-        else
-            m_AlphIO->LoadAlphabetFile(fn);
-    };
+    const auto loadById = [this](const std::string& alphId) { LoadAlphabetById(alphId); };
     {
         std::string alphId = m_pSettingsStore->GetStringParameter(SP_ALPHABET_ID);
         if (alphId.empty()) alphId = "English with limited punctuation";
@@ -527,6 +519,34 @@ bool CDasherInterfaceBase::Redraw(unsigned long ulTime, bool bRedrawNodes, CExpa
     return bRedrawNodes;
 }
 
+// On-demand alphabet load for [alphId]. The name index resolves tier
+// preferences (maintained v6 over legacy copies, user-dir overrides) and may
+// hold a directory-qualified path — load THAT file exactly; a basename glob
+// would re-parse every same-named file in traversal order and let the
+// filesystem decide which definition wins (greptile P1 "indexed path
+// selection discarded"). Only a synthesized fallback filename scans by
+// basename, and per-context (ScanDirectory on m_dataDir) — LoadAlphabetFile
+// routes through the process-global data directory.
+void CDasherInterfaceBase::LoadAlphabetById(const std::string& alphId) {
+    const std::string indexed = m_AlphIO->FileNameFor(alphId);
+    if (!indexed.empty()) {
+        std::filesystem::path exact(indexed);
+        if (exact.is_relative()) exact = std::filesystem::weakly_canonical(exact);
+        std::error_code ec;
+        if (std::filesystem::exists(exact, ec)) {
+            Dasher::FileUtils::ScanDirectory(m_AlphIO.get(), exact.string(), m_dataDir);
+            return;
+        }
+        // Indexed file vanished (bundle edited under us): fall through to
+        // the synthesized-name scan below.
+    }
+    const std::string synth = alphabetIdToFilename(alphId);
+    if (!m_dataDir.empty())
+        Dasher::FileUtils::ScanDirectory(m_AlphIO.get(), synth, m_dataDir);
+    else
+        m_AlphIO->LoadAlphabetFile(synth);
+}
+
 void CDasherInterfaceBase::ChangeAlphabet() {
     if (m_pSettingsStore->GetStringParameter(SP_ALPHABET_ID) == "") {
         m_pSettingsStore->SetStringParameter(SP_ALPHABET_ID, m_AlphIO->GetDefault());
@@ -542,21 +562,7 @@ void CDasherInterfaceBase::ChangeAlphabet() {
     // to an unparsed alphabet silently gave the user Default instead.)
     if (m_AlphIO) {
         std::string alphId = m_pSettingsStore->GetStringParameter(SP_ALPHABET_ID);
-        if (!m_AlphIO->HasInfo(alphId)) {
-            std::string fn = m_AlphIO->FileNameFor(alphId);
-            if (fn.empty()) fn = alphabetIdToFilename(alphId);
-            // Per-context, like the realize path: LoadAlphabetFile scans
-            // FileUtils' global data directory (last-create-wins), which
-            // under multiple live contexts loads the OTHER context's file
-            // under this id (greptile follow-up on #88 — same class the
-            // realize-path fix addressed). Basename-normalise: index entries
-            // can be dir-relative and ScanFiles matches basenames.
-            fn = std::filesystem::path(fn).filename().string();
-            if (!m_dataDir.empty())
-                Dasher::FileUtils::ScanDirectory(m_AlphIO.get(), fn, m_dataDir);
-            else
-                m_AlphIO->LoadAlphabetFile(fn);
-        }
+        if (!m_AlphIO->HasInfo(alphId)) LoadAlphabetById(alphId);
     }
 
     if (m_pNCManager) WriteTrainFileFull(); // can't/don't before creating first NCManager
