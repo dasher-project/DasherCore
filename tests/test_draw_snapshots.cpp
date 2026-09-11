@@ -165,3 +165,101 @@ TEST(snapshot_output_text_deterministic) {
     ASSERT_EQ(strcmp(outputs[0], outputs[2]), 0);
     printf("  Output is deterministic across 3 runs\n");
 }
+
+// ---------------------------------------------------------------------------
+// Mid-session reconfiguration snapshots (todo.md Phase 0.4).
+//
+// The CAPI refactor moves the alphabet/palette/appearance code between
+// translation units. These cases pin that a mid-session switch followed by
+// more input produces the identical command stream across runs — the switch
+// itself must not introduce nondeterminism (state rebuild, file IO, colour
+// resolution all happen inside the switch call).
+// ---------------------------------------------------------------------------
+
+TEST(snapshot_alphabet_switch_deterministic) {
+    unsigned long hashes[3];
+    char outputs[3][256];
+
+    for (int run = 0; run < 3; run++) {
+        dasher_ctx* ctx = create_isolated_context();
+        ASSERT(ctx);
+        dasher_set_screen_size(ctx, 800, 600);
+        dasher_set_speed_percent(ctx, 200);
+
+        // Fixed target (a real shipped id — "English" is NOT one: AlphIO
+        // silently falls back to "English with limited punctuation" for
+        // unknown ids, which would make this a no-op switch). Picking
+        // "first different" instead would depend on unsorted directory
+        // iteration order.
+        const std::string current = dasher_get_alphabet_id(ctx);
+        const std::string target = "English, lower case";
+        ASSERT(target != current); // default alphabet differs
+
+        // Pre-switch frames, then the switch, then post-switch input.
+        run_frames(ctx, 5);
+        dasher_set_alphabet_id(ctx, target.c_str());
+        ASSERT_EQ(std::string(dasher_get_alphabet_id(ctx)), target);
+        dasher_mouse_move(ctx, 650.0f, 300.0f);
+        dasher_mouse_down(ctx);
+        int* cmds = nullptr;
+        int cc = 0;
+        char** s = nullptr;
+        int sc = 0;
+        for (int f = 0; f < 20; f++) {
+            dasher_mouse_move(ctx, 650.0f, 290.0f);
+            dasher_frame(ctx, 1080 + f * 16, &cmds, &cc, &s, &sc);
+        }
+        dasher_mouse_up(ctx);
+
+        hashes[run] = hash_commands(cmds, cc);
+        strncpy(outputs[run], dasher_get_output_text(ctx), 255);
+        outputs[run][255] = '\0';
+        dasher_destroy(ctx);
+    }
+
+    ASSERT_EQ(hashes[1], hashes[0]);
+    ASSERT_EQ(hashes[2], hashes[0]);
+    ASSERT_EQ(strcmp(outputs[0], outputs[1]), 0);
+    ASSERT_EQ(strcmp(outputs[0], outputs[2]), 0);
+    printf("  Post-alphabet-switch hash: %lu (deterministic across 3 runs)\n", hashes[0]);
+}
+
+TEST(snapshot_palette_switch_deterministic) {
+    unsigned long hashes[3];
+
+    for (int run = 0; run < 3; run++) {
+        dasher_ctx* ctx = create_isolated_context();
+        ASSERT(ctx);
+        dasher_set_screen_size(ctx, 800, 600);
+        dasher_set_speed_percent(ctx, 200);
+
+        // Find a palette different from the active one. The command stream
+        // embeds ARGB colours, so a palette switch must change the hash
+        // WITHIN a run but stay identical ACROSS runs.
+        const std::string current = dasher_get_current_palette(ctx);
+        const std::string target = "Yellow on Black"; // fixed, see above
+        ASSERT(target != current);
+
+        run_frames(ctx, 5);
+        dasher_set_palette(ctx, target.c_str());
+        ASSERT_EQ(std::string(dasher_get_current_palette(ctx)), target);
+        dasher_mouse_move(ctx, 650.0f, 300.0f);
+        dasher_mouse_down(ctx);
+        int* cmds = nullptr;
+        int cc = 0;
+        char** s = nullptr;
+        int sc = 0;
+        for (int f = 0; f < 20; f++) {
+            dasher_mouse_move(ctx, 650.0f, 290.0f);
+            dasher_frame(ctx, 1080 + f * 16, &cmds, &cc, &s, &sc);
+        }
+        dasher_mouse_up(ctx);
+
+        hashes[run] = hash_commands(cmds, cc);
+        dasher_destroy(ctx);
+    }
+
+    ASSERT_EQ(hashes[1], hashes[0]);
+    ASSERT_EQ(hashes[2], hashes[0]);
+    printf("  Post-palette-switch hash: %lu (deterministic across 3 runs)\n", hashes[0]);
+}

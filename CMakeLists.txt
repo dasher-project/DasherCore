@@ -346,6 +346,19 @@ dasher_add_test(dasher_text_metrics_tests test_text_metrics.cpp)
         #   - input_filters:   all 14 registered filters (12 previously untested)
         #   - xml_error_paths: malformed alphabet/color/settings XML
         dasher_add_test(dasher_capi_buffer_lifetime_tests test_capi_buffer_lifetime.cpp)
+        # todo.md Phase 0.5 — error/return conventions, NULL-ctx tolerance,
+        # process-global locale state. Characterization: pins current
+        # behaviour so the Phase 4 unification is deliberate.
+        dasher_add_test(dasher_capi_contracts_tests test_capi_contracts.cpp)
+
+        # todo.md Phase 0.3 — exported C API symbol freeze (dasher_* only).
+        # Linux-only: the script uses nm/bash (see header comment). Runs as
+        # a ctest so the gate is enforced in CI, not by memory.
+        if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+            add_test(NAME dasher_symbol_freeze
+                     COMMAND bash ${CMAKE_CURRENT_LIST_DIR}/tests/check_symbols.sh $<TARGET_FILE:dasher>)
+            set_tests_properties(dasher_symbol_freeze PROPERTIES TIMEOUT 30)
+        endif()
         dasher_add_test(dasher_lm_correctness_tests test_lm_correctness.cpp)
         dasher_add_test(dasher_view_geometry_tests test_view_geometry.cpp)
         dasher_add_test(dasher_circle_geometry_tests test_circle_geometry.cpp)
