@@ -26,6 +26,7 @@
 #include <cstdint>
 #include <deque>
 #include <memory>
+#include <functional>
 #include <map>
 #include <stdexcept>
 #include <string>
@@ -220,7 +221,7 @@ inline int32_t colorToARGB(const Dasher::ColorPalette::Color& c) {
 // capped 2ms past the frame time, so a burst of same-frame inputs can never
 // outrun the next frame stamp and underflow the unsigned elapsed-time math
 // downstream (slow-start).
-inline unsigned long inputTime(dasher_ctx* ctx) {
+inline DASHER_LOCAL unsigned long inputTime(dasher_ctx* ctx) {
     if (ctx->lastInputMs < ctx->lastFrameMs)
         ctx->lastInputMs = ctx->lastFrameMs;
     else if (ctx->lastInputMs < ctx->lastFrameMs + 2)
@@ -349,7 +350,7 @@ DASHER_LOCAL void getRange(const std::string& buf, bool bForwards, Dasher::EditD
 // buffer and re-sync manually (Dasher-GTK's stale output pane after "New"
 // was exactly this bug). Fires from CAPI.cpp's reset paths and
 // CAPI_edit.cpp's seed_buffer.
-inline void notify_buffer_cleared(dasher_ctx* ctx) {
+inline DASHER_LOCAL void notify_buffer_cleared(dasher_ctx* ctx) {
     if (ctx->callbacks.outputCb) ctx->callbacks.outputCb(DASHER_EVENT_BUFFER_CLEAR, "", ctx->callbacks.outputCbUserData);
 }
 
@@ -363,7 +364,7 @@ inline void notify_buffer_cleared(dasher_ctx* ctx) {
 // into a live manager — which previously carried identical copies of this
 // lambda (todo.md 3.1).
 namespace capi {
-inline Dasher::CustomActionCallback make_custom_action_adapter(dasher_action_callback cb, void* ud) {
+inline DASHER_LOCAL Dasher::CustomActionCallback make_custom_action_adapter(dasher_action_callback cb, void* ud) {
     return [cb, ud](const std::string& name, const std::map<std::string, std::string>& attrs) {
         if (!cb) return;
         std::vector<std::string> keys, values;
