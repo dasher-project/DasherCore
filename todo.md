@@ -120,8 +120,11 @@ Target layout (internal only; `dasher.h` unchanged, still one public header):
       - done 2026-09-11 (commit e113e678 follow-up): ctx + utils moved
         VERBATIM (comment archaeology preserved); Interface now defined
         out-of-line as `dasher_ctx::Interface` in CAPI.cpp
-      - REMAINING: sub-struct grouping (Callbacks/Appearance/scratch) —
-        deferred to its own mechanical commit so this one stays reviewable
+      - done (follow-up commit): sub-struct grouping — `callbacks`
+        (7 callback+userdata pairs + log level), `appearance` (RFC 0007
+        model state), `scratch` (5 string-buffer families with documented
+        lifetimes). Member-access rewrite was mechanical (\b-bounded sed);
+        compiler-verified, 45/45, freeze 110
 - [x] 2.2 Exception guard helper (single template/macro) replaces the ~25
       duplicated try/catch blocks. Behaviour identical: catch, log via
       callback if registered, latch engineError where the old code did.

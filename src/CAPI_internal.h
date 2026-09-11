@@ -84,7 +84,6 @@ struct dasher_ctx {
     int64_t lastInputMs = 0;
     // Typing rate tracker (RFC 0012): timestamps of recent character outputs.
     std::deque<std::chrono::steady_clock::time_point> rateTimestamps;
-    std::string tlString;
     bool realized = false;
     // Host's low-memory request, retained on the ctx so the transactional
     // realize retry can reapply it to a recreated interface (review P1 #77).
@@ -100,52 +99,62 @@ struct dasher_ctx {
     std::string pendingAlphabet;
     std::string dataDir;
     std::string userDir;
-    std::string stringBuf;
 
-    // Buffers backing const char* returns from various getters. These
+    // Buffers backing const char*/char** returns from various getters. These
     // MUST live in dasher_ctx (not file-scope static) so that two
     // contexts don't trample each other's returned pointers — a real
     // cross-context bug noted in the codebase review (Tier 1 #4).
-    std::vector<std::string> stringValues; // dasher_get_palette_name / alphabet_name / parameter_string_values
-    std::string gameTextBuf;               // dasher_game_get_target_text
-
-    // Strand 2 (RFC 0013): label strings for dasher_get_visible_nodes. Owned
-    // here so the returned char** is stable until the next visible_nodes/frame
-    // call, mirroring the command-buffer ownership contract.
-    std::vector<std::string> nodeLabelStrings;
-    std::vector<char*> nodeLabelPtrs;
+    // Distinct families, distinct lifetimes: tlString is the shared scratch
+    // for most string getters (see the "valid until next API call" contract
+    // in dasher.h); stringBuf backs the locale getters independently;
+    // gameTextBuf the game getters; stringValues the permitted-value lists;
+    // nodeLabel* Strand 2 labels.
+    struct StringScratch {
+        std::string tlString;                      // shared scratch: most string getters
+        std::string stringBuf;                     // locale / localized-string getters
+        std::string gameTextBuf;                   // dasher_game_get_target_text / wrong_text
+        std::vector<std::string> stringValues;     // palette / alphabet / parameter string values
+        std::vector<std::string> nodeLabelStrings; // Strand 2 (RFC 0013) node labels
+        std::vector<char*> nodeLabelPtrs;
+    } scratch;
 
     // Appearance model state (RFC 0007). Lives at the C API layer — appearance
     // is a shell/canvas concern, not a DasherCore engine parameter. Persisted to
     // <userDir>/appearance_settings.xml. The active palette (SP_COLOUR_ID) is
     // derived from these via resolveAppearance(), so an auto-switch can never
     // overwrite the user's explicit preference.
-    int appearanceMode = 0;   // 0=system, 1=light, 2=dark
-    int systemAppearance = 1; // transient OS input: 1=light, 2=dark
-    std::string lightPalette; // user's preferred palette for light appearance
-    std::string darkPalette;  // user's preferred palette for dark appearance
-    bool appearanceLoaded = false;
-    dasher_output_callback outputCb = nullptr;
-    // Pending text measurement callback: kept here (not only on the screen)
-    // because frontends register callbacks before dasher_set_screen_size
-    // creates the CommandScreen; set_screen_size forwards it.
-    dasher_text_size_callback textSizeCb = nullptr;
-    void* textSizeCbUserData = nullptr;
-    void* outputCbUserData = nullptr;
-    dasher_message_callback messageCb = nullptr;
-    void* messageCbUserData = nullptr;
-    dasher_speak_callback speakCb = nullptr;
-    void* speakCbUserData = nullptr;
-    dasher_clipboard_callback clipboardCb = nullptr;
-    void* clipboardCbUserData = nullptr;
-    dasher_parameter_callback paramCb = nullptr;
-    void* paramCbUserData = nullptr;
+    struct Appearance {
+        int mode = 0;               // DASHER_APPEARANCE_MODE_SYSTEM/LIGHT/DARK
+        int systemAppearance = 1;   // transient OS input: DASHER_PALETTE_APPEARANCE_LIGHT/DARK
+        std::string lightPalette;   // user's preferred palette for light appearance
+        std::string darkPalette;    // user's preferred palette for dark appearance
+        bool loaded = false;
+    } appearance;
 
-    // Diagnostic log callback (replaces the former CFileLogger/CBasicLog/UserLog
-    // systems). When null, log messages are silently discarded.
-    dasher_log_callback logCb = nullptr;
-    void* logCbUserData = nullptr;
-    int logCbMinLevel = 0;
+    // Frontend callbacks (all optional; null = feature disabled).
+    struct Callbacks {
+        dasher_output_callback outputCb = nullptr;
+        void* outputCbUserData = nullptr;
+        // Pending text measurement callback: kept here (not only on the screen)
+        // because frontends register callbacks before dasher_set_screen_size
+        // creates the CommandScreen; set_screen_size forwards it.
+        dasher_text_size_callback textSizeCb = nullptr;
+        void* textSizeCbUserData = nullptr;
+        dasher_message_callback messageCb = nullptr;
+        void* messageCbUserData = nullptr;
+        dasher_speak_callback speakCb = nullptr;
+        void* speakCbUserData = nullptr;
+        dasher_clipboard_callback clipboardCb = nullptr;
+        void* clipboardCbUserData = nullptr;
+        dasher_parameter_callback paramCb = nullptr;
+        void* paramCbUserData = nullptr;
+        // Diagnostic log callback (replaces the former
+        // CFileLogger/CBasicLog/UserLog systems). When null, log messages
+        // are silently discarded.
+        dasher_log_callback logCb = nullptr;
+        void* logCbUserData = nullptr;
+        int logCbMinLevel = 0;
+    } callbacks;
 
     // Test-only failure injection (todo.md 0.6): set via
     // dasher_test_inject_failure; capi::test_inject throws at the armed
@@ -227,12 +236,12 @@ namespace capi {
 // safer order: the fault is recorded even if the callback itself throws.
 inline void boundary_error(dasher_ctx* ctx, const char* context, const char* detail, bool latch) noexcept {
     if (latch && ctx) ctx->engineError = true;
-    if (!ctx || !ctx->logCb || 3 /*ERROR*/ < ctx->logCbMinLevel) return;
+    if (!ctx || !ctx->callbacks.logCb || 3 /*ERROR*/ < ctx->callbacks.logCbMinLevel) return;
     char buf[256];
     const int n = snprintf(buf, sizeof(buf), "%s: %s", context ? context : "", detail ? detail : "");
     if (n < 0) return; // encoding error — nothing useful to report
     // snprintf always null-terminates (size > 0), so buf is valid even if truncated.
-    ctx->logCb(3, buf, ctx->logCbUserData);
+    ctx->callbacks.logCb(3, buf, ctx->callbacks.logCbUserData);
 }
 
 // Void-bodied guard. latch selects the per-frame entry-point behaviour
