@@ -10,6 +10,11 @@ Source review: session of 2026-09-11 (see git history / DasherCore-Review.txt).
 - PR #1: everything through Phase 3 (Phases 0–3). After our own review-loop,
   watch for Greptile's PR review and run a loop addressing its findings
   (it may skip such a large diff — then our review stands).
+  - **DONE — PR #90**, all 15 checks green (4-OS/toolchain matrix, ASan+
+    UBSan, clang-tidy, clang-format, DCO, Greptile). Own review-loop ran at
+    every stage (9/10 each). Greptile loop: 3×P2 → double-compile fixed
+    (CMake glob excluded CAPI TUs from the DasherCore archive), buffer-
+    lifetime test de-UB'd, test-hook-in-ABI declined with documented reply.
 - PR #2: Phase 4 (small consistency fixes, one commit each, version-gated).
 - PR #3: Phase 5 (JSON parser, per-context locale, getter deprecation).
   Stacked on PR #2. Merge the stack, release, then Will builds a frontend
