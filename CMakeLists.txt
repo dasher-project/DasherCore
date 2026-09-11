@@ -218,6 +218,7 @@ option(BUILD_CAPI "Build the C API shared library (dasher.dll / libdasher.so)" O
 if(BUILD_CAPI)
     add_library(dasher SHARED
         ${CMAKE_CURRENT_LIST_DIR}/src/CAPI.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/CAPI_appearance.cpp
     )
 
     target_include_directories(dasher PRIVATE
@@ -384,7 +385,8 @@ dasher_add_test(dasher_text_metrics_tests test_text_metrics.cpp)
         # AND C API functions, so we compile CAPI.cpp directly and link DasherCore
         add_executable(dasher_control_action_tests
             ${CMAKE_CURRENT_LIST_DIR}/tests/test_control_actions.cpp
-            ${CMAKE_CURRENT_LIST_DIR}/src/CAPI.cpp)
+            ${CMAKE_CURRENT_LIST_DIR}/src/CAPI.cpp
+            ${CMAKE_CURRENT_LIST_DIR}/src/CAPI_appearance.cpp)
         target_include_directories(dasher_control_action_tests PRIVATE
             ${CMAKE_CURRENT_LIST_DIR}/src/
             ${CMAKE_CURRENT_LIST_DIR}/tests/

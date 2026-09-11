@@ -144,8 +144,16 @@ Target layout (internal only; `dasher.h` unchanged, still one public header):
         are fully inline, so a .cpp would have been an empty anchor. Moved
         verbatim; utf8_codepoint_count moved with them (static→inline).
         CAPI.cpp: 2316 → 2058 lines. 45/45, freeze 110.
-- [ ] 2.4 Extract `src/CAPI_appearance.cpp` — appearance model, companion
+- [x] 2.4 Extract `src/CAPI_appearance.cpp` — appearance model, companion
       lookup, sidecar load/save (~200 lines).
+      - done 2026-09-11: helpers + 11 exported appearance functions moved
+        verbatim; the 3 shared helpers (resolveAppearance /
+        load/saveAppearanceSettings) declared in CAPI_internal.h `capi` ns,
+        rest TU-local anonymous namespace
+      - all THREE CAPI.cpp compile sites updated: dasher lib target,
+        dasher_control_action_tests (compiles CAPI.cpp directly), and the
+        release.yml WASM em++ link
+      - CAPI.cpp: 2059 → 1839 lines. 45/45, freeze 110
 - [ ] 2.5 Extract `src/CAPI_locale.cpp` — locale, overrides, string tables.
       Delete the dead `State` enum + `(void)state` in `parseStringsJson`
       while touching it. (Replacing the hand-rolled JSON parser is Phase 5.)

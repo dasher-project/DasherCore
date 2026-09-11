@@ -294,4 +294,19 @@ inline void test_inject(const dasher_ctx* ctx, int site) {
 
 } // namespace capi
 
+// ── Appearance model (implemented in CAPI_appearance.cpp; RFC 0007) ────────
+//
+// Shared with CAPI.cpp: dasher_create seeds + resolves the model at
+// startup; dasher_save_settings persists the sidecar alongside settings.
+namespace capi {
+// Recompute the active palette from mode + system + preferences and write
+// it to SP_COLOUR_ID (what the canvas renders). Never clobbers the user's
+// persisted preference.
+void resolveAppearance(dasher_ctx* ctx);
+// Sidecar persistence (<userDir>/appearance_settings.xml). Non-fatal on
+// any error; load is once-only (ctx->appearance.loaded).
+void loadAppearanceSettings(dasher_ctx* ctx);
+void saveAppearanceSettings(dasher_ctx* ctx);
+} // namespace capi
+
 #endif // DASHER_CAPI_INTERNAL_H
