@@ -14,9 +14,9 @@
 #include "CAPI_internal.h"
 
 #include "DasherCore/ColorIO.h"
+#include "pugixml.hpp"
 
 #include <string>
-#include "pugixml.hpp"
 
 namespace {
 // Bidirectional companion lookup. Returns the opposite-appearance partner
@@ -82,7 +82,7 @@ void ensureAppearanceInitialised(dasher_ctx* ctx) {
 // Recompute the active palette from mode + system + preferences and write it to
 // SP_COLOUR_ID (what the canvas renders). The persisted preferences are the
 // source of truth, so this can never clobber the user's explicit choice.
-void capi::resolveAppearance(dasher_ctx* ctx) {
+DASHER_LOCAL void capi::resolveAppearance(dasher_ctx* ctx) {
     if (!ctx || !ctx->intf) return;
 
     // Late seed: ensureAppearanceInitialised may have run before Realize,
@@ -105,7 +105,7 @@ void capi::resolveAppearance(dasher_ctx* ctx) {
 }
 
 // Load mode + light/dark preferences from the sidecar. Non-fatal on any error.
-void capi::loadAppearanceSettings(dasher_ctx* ctx) {
+DASHER_LOCAL void capi::loadAppearanceSettings(dasher_ctx* ctx) {
     if (ctx->appearance.loaded) return;
     ctx->appearance.loaded = true;
     std::string path = appearanceSettingsPath(ctx);
@@ -121,7 +121,7 @@ void capi::loadAppearanceSettings(dasher_ctx* ctx) {
 }
 
 // Persist mode + light/dark preferences to the sidecar. Non-fatal on any error.
-void capi::saveAppearanceSettings(dasher_ctx* ctx) {
+DASHER_LOCAL void capi::saveAppearanceSettings(dasher_ctx* ctx) {
     if (!ctx || ctx->userDir.empty()) return;
     pugi::xml_document doc;
     pugi::xml_node root = doc.append_child("appearance");

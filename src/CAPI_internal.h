@@ -35,6 +35,17 @@
 class CommandScreen;
 class PointerInput;
 
+// Internal-linkage intent for cross-TU helpers: keeps them out of the
+// shared library's dynamic symbol table (the C API surface is dasher.h's
+// DASHER_API functions, nothing else). No effect on static/direct compiles.
+#ifdef _WIN32
+#define DASHER_LOCAL
+#elif defined(__GNUC__)
+#define DASHER_LOCAL __attribute__((visibility("hidden")))
+#else
+#define DASHER_LOCAL
+#endif
+
 // ── Small shared utilities ─────────────────────────────────────────────────
 
 inline unsigned long nowMs() {
@@ -302,11 +313,11 @@ namespace capi {
 // Recompute the active palette from mode + system + preferences and write
 // it to SP_COLOUR_ID (what the canvas renders). Never clobbers the user's
 // persisted preference.
-void resolveAppearance(dasher_ctx* ctx);
+DASHER_LOCAL void resolveAppearance(dasher_ctx* ctx);
 // Sidecar persistence (<userDir>/appearance_settings.xml). Non-fatal on
 // any error; load is once-only (ctx->appearance.loaded).
-void loadAppearanceSettings(dasher_ctx* ctx);
-void saveAppearanceSettings(dasher_ctx* ctx);
+DASHER_LOCAL void loadAppearanceSettings(dasher_ctx* ctx);
+DASHER_LOCAL void saveAppearanceSettings(dasher_ctx* ctx);
 } // namespace capi
 
 #endif // DASHER_CAPI_INTERNAL_H
