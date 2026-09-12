@@ -232,9 +232,16 @@ Shipped as PR #2 (branch capi/phase-4-consistency), one commit per change:
       DASHER_CAPI_VERSION 1 → 2 with the full behavioural note (both 4.1
       and 4.2) in dasher.h.
 - [x] 4.3 Permitted-value memoization on the ctx (capi::permittedValues),
-      invalidated by key change or ANY parameter change; all five list
-      getters routed through it. Cache test: stable double iteration,
-      snapshot coherence, post-switch invalidation.
+      invalidated by key change, ANY parameter change, AND every realize
+      boundary (Realize populates the lists without firing
+      OnParameterChanged — low-memory mode and the AlphIO/ColorIO scans
+      are parameter-silent). Seven functions across five list families
+      routed through it. HONESTY NOTE: the first cut (fd943e6b) shipped
+      the cache with an invalidation mechanism that existed only in its
+      commit message (a text-replace silently no-op'd against
+      clang-formatted code) and a vacuous test; review loop 1 scored the
+      branch 5/10 and proved the bug. Fixed in the follow-up commit with
+      real boundary tests (pre-realize growth, retry path, low-memory).
 
 ## Phase 5 — bigger cleanups (only after 1–4 land)
 

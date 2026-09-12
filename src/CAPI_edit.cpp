@@ -148,6 +148,7 @@ static bool ensure_realized_for_context(dasher_ctx* ctx) {
     try {
         ctx->intf->Realize(nowMs());
         ctx->realized = true;
+        capi::invalidatePermittedCache(ctx); // lists repopulated silently
         return true;
     } catch (...) {
         return false;

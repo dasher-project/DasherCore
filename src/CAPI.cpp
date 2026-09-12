@@ -56,6 +56,12 @@
 struct dasher_ctx::Interface : public Dasher::CDashIntfScreenMsgs {
     Interface(Dasher::CSettingsStore* s, dasher_ctx* owner) : CDashIntfScreenMsgs(s), m_owner(owner) {
         s->OnParameterChanged.Subscribe(m_owner, [this](Dasher::Parameter param) {
+            // Invalidate the permitted-value cache (todo.md 4.3): any
+            // parameter change may have rebuilt engine-side lists. The
+            // base class subscribes its own handler BEFORE this lambda
+            // fires, so alphabet on-demand loads triggered by the change
+            // are already complete when the generation bumps.
+            ++m_owner->paramGeneration;
             if (m_owner->callbacks.paramCb)
                 m_owner->callbacks.paramCb(static_cast<int>(param), m_owner->callbacks.paramCbUserData);
         });
@@ -356,6 +362,11 @@ DASHER_API void dasher_set_screen_size(dasher_ctx* ctx, int width, int height) {
             return;
         }
         ctx->realized = true;
+        // Realize (re)populated the permitted-value lists silently — see
+        // capi::invalidatePermittedCache. Covers both first realize and the
+        // failed-realize retry path above (the cache outlives the recreated
+        // Interface because it lives on the ctx).
+        capi::invalidatePermittedCache(ctx);
         // A successful (re)realize rebuilt the interface from scratch, so an
         // engineError latched by a previous failed Realize is obsolete. That
         // failed-Realize path is the only one that latches while !realized

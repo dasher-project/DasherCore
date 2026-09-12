@@ -378,6 +378,16 @@ inline DASHER_LOCAL void notify_buffer_cleared(dasher_ctx* ctx) {
 // shared by CAPI.cpp's palette/alphabet getters and CAPI_params.cpp's
 // dasher_get_parameter_string_values (todo.md 4.3).
 namespace capi {
+// Force a refill on the next permittedValues() call. Called at every
+// realize boundary: Realize() populates the alphabet/colour/filter lists
+// WITHOUT firing OnParameterChanged (CreateModules registers ~10 input
+// filters, the AlphIO/ColorIO scans, and low-memory mode shrinks the
+// filter list — all parameter-change-silent), so generation bumps alone
+// cannot cover the pre->post-Realize transition (review loop 1, PR #2).
+DASHER_LOCAL inline void invalidatePermittedCache(dasher_ctx* ctx) {
+    ctx->permitted.key = -1;
+}
+
 DASHER_LOCAL inline const std::vector<std::string>& permittedValues(dasher_ctx* ctx, Dasher::Parameter key) {
     if (ctx->permitted.key != static_cast<int>(key) || ctx->permitted.generation != ctx->paramGeneration) {
         ctx->permitted.values = ctx->intf->GetPermittedValues(key);
