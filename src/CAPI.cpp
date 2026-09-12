@@ -56,8 +56,20 @@
 struct dasher_ctx::Interface : public Dasher::CDashIntfScreenMsgs {
     Interface(Dasher::CSettingsStore* s, dasher_ctx* owner) : CDashIntfScreenMsgs(s), m_owner(owner) {
         s->OnParameterChanged.Subscribe(m_owner, [this](Dasher::Parameter param) {
+            // Permitted-cache invalidation (todo.md 4.3), split around the
+            // frontend callback so BOTH re-entrancy hazards are covered without
+            // depending on Event::Broadcast call order (which Event.h
+            // explicitly disclaims):
+            // - invalidatePermittedCache BEFORE the callback: a frontend that
+            //   re-queries a list from inside the notification gets a fresh
+            //   refill, not the pre-change cached value (greptile, PR #91).
+            // - ++paramGeneration AFTER: any refill that happened during a
+            //   re-entrant callback is flagged stale, so the next query after
+            //   the whole broadcast settles re-reads once more.
+            capi::invalidatePermittedCache(m_owner);
             if (m_owner->callbacks.paramCb)
                 m_owner->callbacks.paramCb(static_cast<int>(param), m_owner->callbacks.paramCbUserData);
+            ++m_owner->paramGeneration;
         });
     }
     ~Interface() { m_pSettingsStore->OnParameterChanged.Unsubscribe(m_owner); }
@@ -356,6 +368,11 @@ DASHER_API void dasher_set_screen_size(dasher_ctx* ctx, int width, int height) {
             return;
         }
         ctx->realized = true;
+        // Realize (re)populated the permitted-value lists silently — see
+        // capi::invalidatePermittedCache. Covers both first realize and the
+        // failed-realize retry path above (the cache outlives the recreated
+        // Interface because it lives on the ctx).
+        capi::invalidatePermittedCache(ctx);
         // A successful (re)realize rebuilt the interface from scratch, so an
         // engineError latched by a previous failed Realize is obsolete. That
         // failed-Realize path is the only one that latches while !realized
@@ -620,19 +637,18 @@ DASHER_API int dasher_color_get_blue(int argb) {
 }
 
 // ── Colour palettes ───────────────────────────────────────────────────────
+// (List getters share the permittedValues cache — CAPI_internal.h.)
 
 DASHER_API int dasher_get_palette_count(dasher_ctx* ctx) {
     if (!ctx || !ctx->intf) return 0;
-    auto names = ctx->intf->GetPermittedValues(Dasher::SP_COLOUR_ID);
-    return static_cast<int>(names.size());
+    return static_cast<int>(capi::permittedValues(ctx, Dasher::SP_COLOUR_ID).size());
 }
 
 DASHER_API const char* dasher_get_palette_name(dasher_ctx* ctx, int index) {
     if (!ctx || !ctx->intf) return "";
-    auto names = ctx->intf->GetPermittedValues(Dasher::SP_COLOUR_ID);
+    const auto& names = capi::permittedValues(ctx, Dasher::SP_COLOUR_ID);
     if (index < 0 || index >= static_cast<int>(names.size())) return "";
-    ctx->scratch.stringValues = std::move(names);
-    return ctx->scratch.stringValues[index].c_str();
+    return names[index].c_str();
 }
 
 DASHER_API const char* dasher_get_current_palette(dasher_ctx* ctx) {
@@ -645,7 +661,7 @@ DASHER_API int dasher_get_palette_preview_colors(dasher_ctx* ctx, int index, int
     if (!ctx || !ctx->intf || !out_colors) return -1;
     auto colorIO = ctx->intf->GetColorIO();
     if (!colorIO) return -1;
-    auto names = ctx->intf->GetPermittedValues(Dasher::SP_COLOUR_ID);
+    const auto& names = capi::permittedValues(ctx, Dasher::SP_COLOUR_ID);
     if (index < 0 || index >= static_cast<int>(names.size())) return -1;
     const auto* palette = colorIO->FindPalette(names[index]);
     if (!palette) return -1;
@@ -672,16 +688,14 @@ DASHER_API void dasher_set_palette(dasher_ctx* ctx, const char* palette_name) {
 
 DASHER_API int dasher_get_alphabet_count(dasher_ctx* ctx) {
     if (!ctx || !ctx->intf) return 0;
-    auto names = ctx->intf->GetPermittedValues(Dasher::SP_ALPHABET_ID);
-    return static_cast<int>(names.size());
+    return static_cast<int>(capi::permittedValues(ctx, Dasher::SP_ALPHABET_ID).size());
 }
 
 DASHER_API const char* dasher_get_alphabet_name(dasher_ctx* ctx, int index) {
     if (!ctx || !ctx->intf) return "";
-    auto names = ctx->intf->GetPermittedValues(Dasher::SP_ALPHABET_ID);
+    const auto& names = capi::permittedValues(ctx, Dasher::SP_ALPHABET_ID);
     if (index < 0 || index >= static_cast<int>(names.size())) return "";
-    ctx->scratch.stringValues = std::move(names);
-    return ctx->scratch.stringValues[index].c_str();
+    return names[index].c_str();
 }
 
 // ── Game Mode ───────────────────────────────────────────────────────────────

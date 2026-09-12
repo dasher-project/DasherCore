@@ -139,7 +139,7 @@ DASHER_API int dasher_get_palette_appearance(dasher_ctx* ctx, int index) {
     if (!ctx || !ctx->intf) return -1;
     auto colorIO = ctx->intf->GetColorIO();
     if (!colorIO) return -1;
-    auto names = ctx->intf->GetPermittedValues(Dasher::SP_COLOUR_ID);
+    const auto& names = capi::permittedValues(ctx, Dasher::SP_COLOUR_ID);
     if (index < 0 || index >= static_cast<int>(names.size())) return -1;
     const Dasher::ColorPalette* p = colorIO->FindPalette(names[index]);
     if (!p || p->PaletteName != names[index]) return 0; // not found -> unspecified
@@ -147,11 +147,13 @@ DASHER_API int dasher_get_palette_appearance(dasher_ctx* ctx, int index) {
 }
 
 DASHER_API const char* dasher_find_companion_palette(dasher_ctx* ctx, const char* palette_name) {
-    if (!ctx || !ctx->intf || !palette_name) return nullptr;
+    // "" (not NULL) for "no companion" since CAPI version 2 — the standard
+    // string failure value; see the error-conventions section in dasher.h.
+    if (!ctx || !ctx->intf || !palette_name) return "";
     auto colorIO = ctx->intf->GetColorIO();
-    if (!colorIO) return nullptr;
+    if (!colorIO) return "";
     const Dasher::ColorPalette* comp = companionLookup(colorIO, palette_name);
-    if (!comp) return nullptr;
+    if (!comp) return "";
     ctx->scratch.tlString = comp->PaletteName;
     return ctx->scratch.tlString.c_str();
 }

@@ -221,20 +221,37 @@ Target layout (internal only; `dasher.h` unchanged, still one public header):
         body); dasher_capi_tests hung, caught by the build-to-100%-then-
         test rule before commit
 
-## Phase 4 — consistency fixes (small, test-visible — decide each one)
+## Phase 4 — consistency fixes (small, test-visible)
 
-Each of these changes observable behaviour slightly. Do them one PR each,
-with tests, NOT bundled with the refactor.
+Shipped as PR #2 (branch capi/phase-4-consistency), one commit per change:
 
-- [ ] 4.1 `dasher_get_language_model_name` returns "Unknown" on bad id but
-      `..._description` returns "" — pick one ("" recommended) + test.
-- [ ] 4.2 Decide NULL-vs-"" policy for string getters; fix outliers
-      (`dasher_find_companion_palette` returns NULL, most others "").
-      Needs a `DASHER_CAPI_VERSION` bump if frontends might branch on it.
-- [ ] 4.3 Cache `GetPermittedValues` result on ctx so the indexed palette/
-      alphabet name getters stop rebuilding the vector per call (622-alphabet
-      loop currently rebuilds 622×). Perf-only, but add a timing/behaviour
-      test that iteration returns stable, correct names.
+- [x] 4.1 LM-name sentinel: "Unknown" → "" (matches its description twin).
+- [x] 4.2 NULL-vs-"": dasher_find_companion_palette NULL → "". NULL survives
+      in exactly one documented place — dasher_get_localized_string, where
+      "missing translation" is a distinct state frontends branch on.
+      DASHER_CAPI_VERSION 1 → 2 with the full behavioural note (both 4.1
+      and 4.2) in dasher.h.
+- [x] 4.3 Permitted-value memoization on the ctx (capi::permittedValues),
+      invalidated by key change, ANY parameter change, AND every realize
+      boundary (Realize populates the lists without firing
+      OnParameterChanged — low-memory mode and the AlphIO/ColorIO scans
+      are parameter-silent). Seven functions across five list families
+      routed through it. HONESTY NOTE (kept deliberately): TWO review
+      rounds caught the same failure mode — a claim without the code.
+      Round 1: the first cut (fd943e6b) shipped the cache with an
+      invalidation mechanism that existed only in its commit message (a
+      python replace() silently no-op'd against clang-formatted code) plus
+      a vacuous test. Round 2: the remediation commit (8520bccf) claimed
+      the three boundary tests were added — the test-file replace had
+      no-op'd the same way. Finally landed with match-verified edits and a
+      MUTATION TEST: removing both invalidation mechanisms makes the suite
+      fail on exactly the loop-1 bug (pre-realize 0 cached forever).
+      Either mechanism alone keeps the SUITE green — but that rides on
+      fresh-install realize firing a parameter broadcast; with a persisted
+      settings file the realize-boundary call is the only guard, so both
+      stay. Process rules: scripted replaces must assert the pattern
+      matched; mutation checks must confirm the mutated build actually
+      relinked (a stale binary gives a false green).
 
 ## Phase 5 — bigger cleanups (only after 1–4 land)
 

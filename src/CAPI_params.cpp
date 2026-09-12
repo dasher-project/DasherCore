@@ -55,7 +55,7 @@ DASHER_API int dasher_get_language_model_id_at(int index) {
 DASHER_API const char* dasher_get_language_model_name(int id) {
     static std::string s_buf;
     auto* desc = Dasher::LMRegistry::instance().get(id);
-    if (!desc) return "Unknown";
+    if (!desc) return "";
     s_buf = desc->name;
     return s_buf.c_str();
 }
@@ -183,24 +183,24 @@ DASHER_API int dasher_get_parameter_enum_value(int key, int index) {
 }
 
 DASHER_API int dasher_get_parameter_string_values(dasher_ctx* ctx, int key, const char** out_names, int max_out) {
-    if (!ctx) return 0;
-    ctx->scratch.stringValues.clear();
+    if (!ctx || !ctx->intf) return 0;
 
-    if (ctx->intf) {
-        ctx->scratch.stringValues = ctx->intf->GetPermittedValues(static_cast<Dasher::Parameter>(key));
-    }
+    // Through the shared memoization cache (todo.md 4.3): returned pointers
+    // address the cached vector — valid at least until the next API call,
+    // like every string return in this API.
+    const auto& values = capi::permittedValues(ctx, static_cast<Dasher::Parameter>(key));
 
     // Probe call (null buffer / zero capacity): return the full count so
     // callers can size a buffer and call again. Previously this returned 0
     // before ever querying the engine, so every permitted-value list (e.g.
     // the 622 alphabets) came back empty and frontends rendered blank
     // pickers.
-    if (!out_names || max_out <= 0) return static_cast<int>(ctx->scratch.stringValues.size());
+    if (!out_names || max_out <= 0) return static_cast<int>(values.size());
 
-    int count = static_cast<int>(ctx->scratch.stringValues.size());
+    int count = static_cast<int>(values.size());
     if (count > max_out) count = max_out;
     for (int i = 0; i < count; i++) {
-        out_names[i] = ctx->scratch.stringValues[i].c_str();
+        out_names[i] = values[i].c_str();
     }
     return count;
 }

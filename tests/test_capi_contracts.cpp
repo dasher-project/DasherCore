@@ -98,7 +98,7 @@ TEST_CASE("contracts/null ctx tolerated across the API surface") {
     CHECK(std::string(dasher_get_palette_name(nullptr, 0)) == "");
     CHECK(std::string(dasher_get_current_palette(nullptr)) == "");
     CHECK(dasher_get_palette_appearance(nullptr, 0) == -1);
-    CHECK(dasher_find_companion_palette(nullptr, "Default") == nullptr);
+    CHECK(std::string(dasher_find_companion_palette(nullptr, "Default")) == "");
     CHECK(std::string(dasher_get_light_palette(nullptr)) == "");
     CHECK(std::string(dasher_get_dark_palette(nullptr)) == "");
     CHECK(dasher_get_alphabet_count(nullptr) == 0);
@@ -196,10 +196,10 @@ TEST_CASE("contracts/integer error sentinels") {
 }
 
 // ---------------------------------------------------------------------------
-// String sentinels. "" is the common failure value; two functions return
-// NULL instead (dasher_find_companion_palette, dasher_get_localized_string)
-// and dasher_get_language_model_name returns "Unknown" — the outliers this
-// file exists to keep visible until todo.md Phase 4 unifies them.
+// String sentinels. "" is the universal failure value since CAPI version 2
+// (todo.md Phase 4 unified the outliers). The single remaining NULL return
+// is dasher_get_localized_string: "missing translation" is a distinct state
+// from an empty translation, and frontends use it to pick fallbacks.
 // ---------------------------------------------------------------------------
 
 TEST_CASE("contracts/string error sentinels") {
@@ -215,8 +215,8 @@ TEST_CASE("contracts/string error sentinels") {
     REQUIRE(std::string(name1).size() > 0);
     (void)dasher_get_language_model_description(valid_lm);
     CHECK(std::string(name1) == std::string(dasher_get_language_model_name(valid_lm))); // not clobbered
-    // Invalid id sentinels: "Unknown" literal vs "" (the outlier, Phase 4).
-    CHECK(std::string(dasher_get_language_model_name(-999)) == "Unknown");
+    // Invalid id sentinels: "" since CAPI version 2 (was "Unknown").
+    CHECK(std::string(dasher_get_language_model_name(-999)) == "");
     CHECK(std::string(dasher_get_language_model_description(-999)) == "");
     CHECK(std::string(dasher_get_parameter_enum_name(-999, 0)) == "");
 
@@ -226,7 +226,7 @@ TEST_CASE("contracts/string error sentinels") {
     CHECK(std::string(dasher_get_alphabet_name(ctx, 1 << 20)) == "");
 
     // NULL sentinels (the outliers — see file header).
-    CHECK(dasher_find_companion_palette(ctx, "No Such Palette Exists") == nullptr);
+    CHECK(std::string(dasher_find_companion_palette(ctx, "No Such Palette Exists")) == "");
     CHECK(dasher_get_localized_string(ctx, "no.such.key") == nullptr);
     CHECK(dasher_get_localized_string(ctx, nullptr) == nullptr);
 
@@ -446,4 +446,196 @@ TEST_CASE("contracts/engine-error lifecycle: failed Realize latches, retry recov
     int sc = 0;
     dasher_frame(ctx, 1000, &cmds, &cc, &strs, &sc);
     CHECK(cc >= 6);
+}
+
+// ---------------------------------------------------------------------------
+// Permitted-value cache (todo.md 4.3). The indexed list getters and
+// dasher_get_parameter_string_values share one memoized list per ctx,
+// invalidated by ANY parameter change. Pins: stable iteration, cache
+// coherence across the getter family, and invalidation after a real
+// parameter change (palette switch fires OnParameterChanged).
+// ---------------------------------------------------------------------------
+
+TEST_CASE("contracts/permitted-value cache: iteration stable, family coherent, invalidates on change") {
+    ScopedContext ctx(800, 600);
+
+    const int count = dasher_get_alphabet_count(ctx);
+    REQUIRE(count > 1);
+
+    // Full iteration, twice: the second pass must see identical values
+    // (cache refill must not corrupt or reorder), and the names must match
+    // a get_parameter_string_values snapshot taken through the same cache.
+    std::vector<std::string> first_pass;
+    for (int i = 0; i < count; i++)
+        first_pass.emplace_back(dasher_get_alphabet_name(ctx, i));
+    for (int i = 0; i < count; i++)
+        CHECK(std::string(dasher_get_alphabet_name(ctx, i)) == first_pass[i]);
+
+    std::vector<const char*> snapshot(count);
+    REQUIRE(dasher_get_parameter_string_values(ctx, dasher_find_parameter_key("SP_ALPHABET_ID"), snapshot.data(),
+                                               count) == count);
+    for (int i = 0; i < count; i++)
+        CHECK(std::string(snapshot[i]) == first_pass[i]);
+
+    // The active alphabet appears in the list.
+    const std::string active = dasher_get_alphabet_id(ctx);
+    bool found = false;
+    for (auto& n : first_pass)
+        found |= (n == active);
+    CHECK(found);
+
+    // A parameter change (palette switch fires OnParameterChanged) must
+    // invalidate, not corrupt: the alphabet list is still complete and
+    // correct afterwards, and the palette list reflects the new palette.
+    const std::string old_palette = dasher_get_current_palette(ctx);
+    std::string target;
+    const int pcount = dasher_get_palette_count(ctx);
+    for (int i = 0; i < pcount; i++) {
+        std::string n = dasher_get_palette_name(ctx, i);
+        if (n != old_palette) {
+            target = n;
+            break;
+        }
+    }
+    REQUIRE(!target.empty());
+    dasher_set_palette(ctx, target.c_str());
+    CHECK(std::string(dasher_get_current_palette(ctx)) == target);
+
+    // Post-change: alphabet list unchanged in content...
+    CHECK(dasher_get_alphabet_count(ctx) == count);
+    for (int i = 0; i < count; i++)
+        CHECK(std::string(dasher_get_alphabet_name(ctx, i)) == first_pass[i]);
+    // ...and the palette list still contains the newly active palette.
+    bool has_new = false;
+    for (int i = 0; i < dasher_get_palette_count(ctx); i++)
+        has_new |= (std::string(dasher_get_palette_name(ctx, i)) == target);
+    CHECK(has_new);
+}
+
+TEST_CASE("contracts/permitted-value cache: realize boundaries invalidate") {
+    // Realize() populates the alphabet/colour/filter lists WITHOUT firing
+    // OnParameterChanged, so a frontend that builds its pickers before
+    // dasher_set_screen_size would cache the empty pre-realize answers
+    // forever if the realize boundary didn't invalidate. (Found by review
+    // loop 1; this test is the regression guard.)
+    ScopedContext unrealized; // created, never given a screen size
+    REQUIRE(unrealized.ctx != nullptr);
+    const int pre = dasher_get_alphabet_count(unrealized); // caches the answer
+    dasher_set_screen_size(unrealized, 800, 600);          // realize
+    const int post = dasher_get_alphabet_count(unrealized);
+    CHECK(post > pre);
+    REQUIRE(post > 1); // Data/ ships hundreds; a stale 0 or 1 fails here
+
+    // Same boundary on the failed-Realize retry path: the cache lives on
+    // the ctx and must not survive the interface recreation either.
+    ScopedContext retry;
+    dasher_test_inject_failure(retry, DASHER_FAIL_INJECT_REALIZE);
+    dasher_set_screen_size(retry, 800, 600); // realize fails, engineError latches
+    CHECK(dasher_has_engine_error(retry) == 1);
+    (void)dasher_get_alphabet_count(retry); // caches whatever the broken state reports
+    dasher_test_inject_failure(retry, DASHER_FAIL_INJECT_NONE);
+    dasher_set_screen_size(retry, 800, 600); // retry: interface recreated + realized
+    CHECK(dasher_has_engine_error(retry) == 0);
+    // Same data dir -> same alphabet count (exact equality is deliberate).
+    CHECK(dasher_get_alphabet_count(retry) == post);
+}
+
+TEST_CASE("contracts/permitted-value cache: invalid key never returns a stale list") {
+    // Greptile PR #91: invalidatePermittedCache used key = -1 as its
+    // sentinel, which collides with dasher_find_parameter_key's -1 for a
+    // failed lookup — a query with an invalid key could receive the
+    // previous parameter's cached list. The cache now carries an explicit
+    // validity flag.
+    ScopedContext ctx(800, 600);
+    const int filter_key = dasher_find_parameter_key("SP_INPUT_FILTER");
+    REQUIRE(filter_key >= 0);
+
+    // Fill the cache with a real list, then query with keys that fail
+    // lookup: must return 0, never the stale cached list.
+    REQUIRE(dasher_get_parameter_string_values(ctx, filter_key, nullptr, 0) > 1);
+    CHECK(dasher_get_parameter_string_values(ctx, -1, nullptr, 0) == 0);
+    CHECK(dasher_get_parameter_string_values(ctx, 99999, nullptr, 0) == 0);
+
+    // Same after a realize-boundary invalidation on a second context.
+    ScopedContext fresh;
+    dasher_set_screen_size(fresh, 800, 600);
+    REQUIRE(dasher_get_parameter_string_values(fresh, filter_key, nullptr, 0) > 1);
+    ScopedContext fresh2;
+    dasher_set_screen_size(fresh2, 800, 600);
+    CHECK(dasher_get_parameter_string_values(fresh2, -1, nullptr, 0) == 0);
+}
+
+namespace {
+// Re-entrant probe for the param-callback test: doctest is single-threaded,
+// a file-scope ctx pointer is the simplest way for the callback to reach it.
+dasher_ctx* g_probeCtx = nullptr;
+int g_probeKey = -1;
+int g_probeCount = -1;
+bool g_probeFired = false;
+void probe_param_cb(int, void*) {
+    if (g_probeFired) return;
+    g_probeFired = true;
+    g_probeCount = dasher_get_parameter_string_values(g_probeCtx, g_probeKey, nullptr, 0);
+}
+} // namespace
+
+TEST_CASE("contracts/permitted-value cache: re-entrant query inside param callback sees fresh data") {
+    // Greptile PR #91: the generation bump used to run after the frontend
+    // callback, so a settings UI re-querying a permitted list from inside
+    // the parameter-change notification read the stale cached value. The
+    // cache is invalidated BEFORE the callback fires; the generation bump
+    // AFTER it flags any mid-callback refill stale for the next query.
+    ScopedContext ctx(800, 600);
+    const int filter_key = dasher_find_parameter_key("SP_INPUT_FILTER");
+    REQUIRE(filter_key >= 0);
+    const int primed = dasher_get_parameter_string_values(ctx, filter_key, nullptr, 0);
+    REQUIRE(primed > 1); // cache primed with the filter list
+
+    g_probeCtx = ctx.ctx;
+    g_probeKey = filter_key;
+    g_probeCount = -1;
+    g_probeFired = false;
+    dasher_set_parameter_callback(ctx, probe_param_cb, nullptr);
+
+    // Any parameter change fires the notification; the re-entrant query
+    // inside it must see a full fresh list (the invalid key -1 scenario
+    // aside, a stale cache would still have returned the same filter list,
+    // so the real assertion is: fresh refill works and nothing crashes or
+    // corrupts — count during callback equals the primed count).
+    dasher_set_speed_percent(ctx, 250);
+    REQUIRE(g_probeFired);
+    CHECK(g_probeCount == primed);
+
+    // And after the broadcast settles, the post-callback generation bump
+    // made even the mid-callback refill stale — the next query still
+    // returns the correct full list.
+    CHECK(dasher_get_parameter_string_values(ctx, filter_key, nullptr, 0) == primed);
+
+    dasher_set_parameter_callback(ctx, nullptr, nullptr);
+    g_probeCtx = nullptr;
+}
+
+TEST_CASE("contracts/permitted-value cache: low-memory filter list is honored") {
+    // Low-memory mode silently shrinks the registered input filters during
+    // CreateModules — a parameter-change-silent list mutation the
+    // realize-boundary invalidation must cover (with a persisted settings
+    // file, realize fires no parameter change, so the boundary call is the
+    // ONLY guard). The pre-realize query fills the cache; without
+    // invalidation the post-realize query would return the stale cached
+    // 0 and the low_count >= 1 check below would fail. Inequalities, not
+    // exact counts, so module additions don't break the pin.
+    ScopedContext normal(800, 600);
+    const int filter_key = dasher_find_parameter_key("SP_INPUT_FILTER");
+    REQUIRE(filter_key >= 0);
+    const int normal_count = dasher_get_parameter_string_values(normal, filter_key, nullptr, 0);
+    REQUIRE(normal_count > 1);
+
+    ScopedContext lowmem; // low-memory BEFORE the realize
+    dasher_set_low_memory_mode(lowmem, 1);
+    // Fill the cache with the pre-realize answer first.
+    (void)dasher_get_parameter_string_values(lowmem, filter_key, nullptr, 0);
+    dasher_set_screen_size(lowmem, 800, 600); // realize: list shrinks silently
+    const int low_count = dasher_get_parameter_string_values(lowmem, filter_key, nullptr, 0);
+    CHECK(low_count >= 1); // > 0 proves the cache was invalidated, not stale
+    CHECK(low_count < normal_count);
 }

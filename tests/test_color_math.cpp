@@ -146,9 +146,10 @@ TEST(color_palette_companion_lookup) {
     ASSERT(comp_of_dark);
     ASSERT_STR_EQ(comp_of_dark, "Rainbow");
 
-    // A palette with no companion (Yellow on Blue is inherently dark) returns NULL.
+    // A palette with no companion (Yellow on Blue is inherently dark) returns ""
+    // (CAPI version 2; was NULL).
     const char* none = dasher_find_companion_palette(ctx, "Yellow on Blue");
-    ASSERT(none == nullptr);
+    ASSERT_STR_EQ(none, "");
 
     dasher_destroy(ctx);
 }

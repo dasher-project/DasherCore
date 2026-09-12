@@ -569,7 +569,7 @@ DasherCore owns a light/dark appearance model so frontends don't each reinvent t
 
 ```c
 int         dasher_get_palette_appearance(dasher_ctx* ctx, int index);   // DASHER_PALETTE_APPEARANCE_*; -1=oor
-const char* dasher_find_companion_palette(dasher_ctx* ctx, const char* palette_name); // NULL if none
+const char* dasher_find_companion_palette(dasher_ctx* ctx, const char* palette_name); // "" if none (v2; was NULL)
 
 int         dasher_get_appearance_mode(dasher_ctx* ctx);                 // DASHER_APPEARANCE_MODE_*
 void        dasher_set_appearance_mode(dasher_ctx* ctx, int mode);
