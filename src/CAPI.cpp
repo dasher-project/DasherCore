@@ -56,14 +56,19 @@
 struct dasher_ctx::Interface : public Dasher::CDashIntfScreenMsgs {
     Interface(Dasher::CSettingsStore* s, dasher_ctx* owner) : CDashIntfScreenMsgs(s), m_owner(owner) {
         s->OnParameterChanged.Subscribe(m_owner, [this](Dasher::Parameter param) {
+            // Permitted-cache invalidation (todo.md 4.3), split around the
+            // frontend callback so BOTH re-entrancy hazards are covered without
+            // depending on Event::Broadcast call order (which Event.h
+            // explicitly disclaims):
+            // - invalidatePermittedCache BEFORE the callback: a frontend that
+            //   re-queries a list from inside the notification gets a fresh
+            //   refill, not the pre-change cached value (greptile, PR #91).
+            // - ++paramGeneration AFTER: any refill that happened during a
+            //   re-entrant callback is flagged stale, so the next query after
+            //   the whole broadcast settles re-reads once more.
+            capi::invalidatePermittedCache(m_owner);
             if (m_owner->callbacks.paramCb)
                 m_owner->callbacks.paramCb(static_cast<int>(param), m_owner->callbacks.paramCbUserData);
-            // Invalidate the permitted-value cache (todo.md 4.3). Deliberately
-            // AFTER the frontend callback: Event::Broadcast does not guarantee
-            // subscriber call order (see Event.h), so robustness here comes
-            // from laziness of refill — permittedValues() re-queries on the
-            // NEXT call, after every handler and re-entrant frontend access
-            // have settled — never from ordering assumptions.
             ++m_owner->paramGeneration;
         });
     }

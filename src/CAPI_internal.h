@@ -145,6 +145,7 @@ struct dasher_ctx {
     // "valid until the next API call" contract.
     struct PermittedCache {
         int key = -1;
+        bool valid = false; // invalidated state must not match ANY key, incl. -1
         uint64_t generation = 0;
         std::vector<std::string> values;
     } permitted;
@@ -385,14 +386,16 @@ namespace capi {
 // filter list — all parameter-change-silent), so generation bumps alone
 // cannot cover the pre->post-Realize transition (review loop 1, PR #2).
 DASHER_LOCAL inline void invalidatePermittedCache(dasher_ctx* ctx) {
-    ctx->permitted.key = -1;
+    ctx->permitted.valid = false;
 }
 
 DASHER_LOCAL inline const std::vector<std::string>& permittedValues(dasher_ctx* ctx, Dasher::Parameter key) {
-    if (ctx->permitted.key != static_cast<int>(key) || ctx->permitted.generation != ctx->paramGeneration) {
+    if (!ctx->permitted.valid || ctx->permitted.key != static_cast<int>(key) ||
+        ctx->permitted.generation != ctx->paramGeneration) {
         ctx->permitted.values = ctx->intf->GetPermittedValues(key);
         ctx->permitted.key = static_cast<int>(key);
         ctx->permitted.generation = ctx->paramGeneration;
+        ctx->permitted.valid = true;
     }
     return ctx->permitted.values;
 }

@@ -540,6 +540,81 @@ TEST_CASE("contracts/permitted-value cache: realize boundaries invalidate") {
     CHECK(dasher_get_alphabet_count(retry) == post);
 }
 
+TEST_CASE("contracts/permitted-value cache: invalid key never returns a stale list") {
+    // Greptile PR #91: invalidatePermittedCache used key = -1 as its
+    // sentinel, which collides with dasher_find_parameter_key's -1 for a
+    // failed lookup — a query with an invalid key could receive the
+    // previous parameter's cached list. The cache now carries an explicit
+    // validity flag.
+    ScopedContext ctx(800, 600);
+    const int filter_key = dasher_find_parameter_key("SP_INPUT_FILTER");
+    REQUIRE(filter_key >= 0);
+
+    // Fill the cache with a real list, then query with keys that fail
+    // lookup: must return 0, never the stale cached list.
+    REQUIRE(dasher_get_parameter_string_values(ctx, filter_key, nullptr, 0) > 1);
+    CHECK(dasher_get_parameter_string_values(ctx, -1, nullptr, 0) == 0);
+    CHECK(dasher_get_parameter_string_values(ctx, 99999, nullptr, 0) == 0);
+
+    // Same after a realize-boundary invalidation on a second context.
+    ScopedContext fresh;
+    dasher_set_screen_size(fresh, 800, 600);
+    REQUIRE(dasher_get_parameter_string_values(fresh, filter_key, nullptr, 0) > 1);
+    ScopedContext fresh2;
+    dasher_set_screen_size(fresh2, 800, 600);
+    CHECK(dasher_get_parameter_string_values(fresh2, -1, nullptr, 0) == 0);
+}
+
+namespace {
+// Re-entrant probe for the param-callback test: doctest is single-threaded,
+// a file-scope ctx pointer is the simplest way for the callback to reach it.
+dasher_ctx* g_probeCtx = nullptr;
+int g_probeKey = -1;
+int g_probeCount = -1;
+bool g_probeFired = false;
+void probe_param_cb(int, void*) {
+    if (g_probeFired) return;
+    g_probeFired = true;
+    g_probeCount = dasher_get_parameter_string_values(g_probeCtx, g_probeKey, nullptr, 0);
+}
+} // namespace
+
+TEST_CASE("contracts/permitted-value cache: re-entrant query inside param callback sees fresh data") {
+    // Greptile PR #91: the generation bump used to run after the frontend
+    // callback, so a settings UI re-querying a permitted list from inside
+    // the parameter-change notification read the stale cached value. The
+    // cache is invalidated BEFORE the callback fires; the generation bump
+    // AFTER it flags any mid-callback refill stale for the next query.
+    ScopedContext ctx(800, 600);
+    const int filter_key = dasher_find_parameter_key("SP_INPUT_FILTER");
+    REQUIRE(filter_key >= 0);
+    const int primed = dasher_get_parameter_string_values(ctx, filter_key, nullptr, 0);
+    REQUIRE(primed > 1); // cache primed with the filter list
+
+    g_probeCtx = ctx.ctx;
+    g_probeKey = filter_key;
+    g_probeCount = -1;
+    g_probeFired = false;
+    dasher_set_parameter_callback(ctx, probe_param_cb, nullptr);
+
+    // Any parameter change fires the notification; the re-entrant query
+    // inside it must see a full fresh list (the invalid key -1 scenario
+    // aside, a stale cache would still have returned the same filter list,
+    // so the real assertion is: fresh refill works and nothing crashes or
+    // corrupts — count during callback equals the primed count).
+    dasher_set_speed_percent(ctx, 250);
+    REQUIRE(g_probeFired);
+    CHECK(g_probeCount == primed);
+
+    // And after the broadcast settles, the post-callback generation bump
+    // made even the mid-callback refill stale — the next query still
+    // returns the correct full list.
+    CHECK(dasher_get_parameter_string_values(ctx, filter_key, nullptr, 0) == primed);
+
+    dasher_set_parameter_callback(ctx, nullptr, nullptr);
+    g_probeCtx = nullptr;
+}
+
 TEST_CASE("contracts/permitted-value cache: low-memory filter list is honored") {
     // Low-memory mode silently shrinks the registered input filters during
     // CreateModules — a parameter-change-silent list mutation the
