@@ -187,6 +187,13 @@ list(REMOVE_ITEM SOURCE_FILES
     "${CMAKE_CURRENT_LIST_DIR}/src/DasherCore/Common/Unicode/original_harness.c"
 )
 
+# The C API implementation (src/CAPI*.cpp) is compiled by the `dasher`
+# target, the direct-link control-actions test, and the WASM em++ link —
+# never into the DasherCore archive itself. Compiling it twice only links
+# today because lazy archive extraction never pulls the duplicate members
+# in; that is an ODR landmine, not isolation (greptile, PR #90).
+list(FILTER SOURCE_FILES EXCLUDE REGEX "/src/CAPI[^/]*\.(cpp|h)$")
+
 ADD_library(DasherCore STATIC
 	${HEADER_FILES}
 	${SOURCE_FILES}
@@ -218,6 +225,10 @@ option(BUILD_CAPI "Build the C API shared library (dasher.dll / libdasher.so)" O
 if(BUILD_CAPI)
     add_library(dasher SHARED
         ${CMAKE_CURRENT_LIST_DIR}/src/CAPI.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/CAPI_appearance.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/CAPI_locale.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/CAPI_params.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/CAPI_edit.cpp
     )
 
     target_include_directories(dasher PRIVATE
@@ -346,6 +357,19 @@ dasher_add_test(dasher_text_metrics_tests test_text_metrics.cpp)
         #   - input_filters:   all 14 registered filters (12 previously untested)
         #   - xml_error_paths: malformed alphabet/color/settings XML
         dasher_add_test(dasher_capi_buffer_lifetime_tests test_capi_buffer_lifetime.cpp)
+        # todo.md Phase 0.5 — error/return conventions, NULL-ctx tolerance,
+        # process-global locale state. Characterization: pins current
+        # behaviour so the Phase 4 unification is deliberate.
+        dasher_add_test(dasher_capi_contracts_tests test_capi_contracts.cpp)
+
+        # todo.md Phase 0.3 — exported C API symbol freeze (dasher_* only).
+        # Linux-only: the script uses nm/bash (see header comment). Runs as
+        # a ctest so the gate is enforced in CI, not by memory.
+        if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+            add_test(NAME dasher_symbol_freeze
+                     COMMAND bash ${CMAKE_CURRENT_LIST_DIR}/tests/check_symbols.sh $<TARGET_FILE:dasher>)
+            set_tests_properties(dasher_symbol_freeze PROPERTIES TIMEOUT 30)
+        endif()
         dasher_add_test(dasher_lm_correctness_tests test_lm_correctness.cpp)
         dasher_add_test(dasher_view_geometry_tests test_view_geometry.cpp)
         dasher_add_test(dasher_circle_geometry_tests test_circle_geometry.cpp)
@@ -371,7 +395,11 @@ dasher_add_test(dasher_text_metrics_tests test_text_metrics.cpp)
         # AND C API functions, so we compile CAPI.cpp directly and link DasherCore
         add_executable(dasher_control_action_tests
             ${CMAKE_CURRENT_LIST_DIR}/tests/test_control_actions.cpp
-            ${CMAKE_CURRENT_LIST_DIR}/src/CAPI.cpp)
+            ${CMAKE_CURRENT_LIST_DIR}/src/CAPI.cpp
+            ${CMAKE_CURRENT_LIST_DIR}/src/CAPI_appearance.cpp
+            ${CMAKE_CURRENT_LIST_DIR}/src/CAPI_locale.cpp
+            ${CMAKE_CURRENT_LIST_DIR}/src/CAPI_params.cpp
+            ${CMAKE_CURRENT_LIST_DIR}/src/CAPI_edit.cpp)
         target_include_directories(dasher_control_action_tests PRIVATE
             ${CMAKE_CURRENT_LIST_DIR}/src/
             ${CMAKE_CURRENT_LIST_DIR}/tests/

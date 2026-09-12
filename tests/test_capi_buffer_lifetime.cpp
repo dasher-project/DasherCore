@@ -69,16 +69,11 @@ TEST_CASE("frame/output_text pointer stable until next call") {
 
     const char* text1 = dasher_get_output_text(ctx);
     REQUIRE(text1 != nullptr);
+    // Output is deterministic given the fixed Data/ corpus: hover at
+    // (700,300) at speed 300 for 200 frames MUST produce text. A silent
+    // fallback to a weaker assertion here would be false comfort.
     const size_t len1 = std::string(text1).size();
-    if (len1 == 0) {
-        // If hover-at-(700,300) didn't produce text on this platform, the
-        // pointer-lifetime assertion below is vacuous. Still, the contract
-        // is "valid until next call" — verify by checking that the pointer
-        // compares equal on a second call without an intervening frame.
-        const char* text1_again = dasher_get_output_text(ctx);
-        CHECK(text1 == text1_again);
-        return;
-    }
+    REQUIRE(len1 > 0);
 
     // Without an intervening frame, the pointer must be stable.
     const char* text1_again = dasher_get_output_text(ctx);
@@ -132,7 +127,7 @@ TEST_CASE("frame/pointers may differ between successive frames") {
 
 TEST_CASE("frame/output_text content stable across non-frame calls") {
     // CHARACTERIZATION: dasher_get_output_text reassigns ctx->tlString on
-    // every call (CAPI.cpp:791), so the returned pointer is NOT guaranteed
+    // every call (CAPI.cpp:1158), so the returned pointer is NOT guaranteed
     // stable across successive calls. But the CONTENT must be preserved
     // across non-frame API calls (getters/setters don't change the buffer).
     // The real contract is: the content at the returned address is valid
@@ -188,4 +183,87 @@ TEST_CASE("frame/separate contexts do not share buffers") {
 
     // The two contexts must not return the same buffer address.
     CHECK(cmds_a != cmds_b);
+}
+
+// ---------------------------------------------------------------------------
+// Shared tlString scratch buffer (todo.md Phase 0.5)
+//
+// Several string getters all return ctx->tlString.c_str() — ONE shared
+// scratch per context: get_output_text, get_alphabet_id, get_string_parameter,
+// get_current_palette, find_companion_palette, get_light/dark_palette,
+// get_training_path. The header documents "valid until the next API call";
+// these tests pin what that means concretely, so a future move to per-getter
+// buffers (a deliberate contract change, todo.md Phase 4) shows up here
+// first instead of silently changing frontend behaviour.
+//
+// UB discipline: reading a stale pointer is only done where the second
+// assignment cannot reallocate IN PRACTICE — assigning a shorter-or-equal
+// value reuses existing capacity on libstdc++, libc++ and MSVC (an
+// implementation detail, not guaranteed by the standard). Never read a
+// pointer after assigning a LONGER value through the same getter family.
+// ---------------------------------------------------------------------------
+
+TEST_CASE("getters/consecutive same-getter calls return stable address") {
+    ScopedContext ctx(800, 600);
+
+    const char* a1 = dasher_get_alphabet_id(ctx);
+    const char* a2 = dasher_get_alphabet_id(ctx);
+    REQUIRE(a1 != nullptr);
+    CHECK(a1 == a2); // identical value reassigned in place
+
+    const char* p1 = dasher_get_current_palette(ctx);
+    const char* p2 = dasher_get_current_palette(ctx);
+    CHECK(p1 == p2);
+}
+
+TEST_CASE("getters/different getters share one scratch buffer") {
+    // CHARACTERIZATION: two DIFFERENT tlString-backed getters alias the same
+    // buffer — the documented "copy immediately" obligation for frontends.
+    //
+    // UB discipline (greptile, PR #90): the old shape read the first
+    // pointer after the second call, which is only defined when the second
+    // assignment provably does not reallocate — an implementation detail.
+    // This shape observes the same mechanism without ever dereferencing
+    // (or even comparing) a pointer that a later call may have invalidated:
+    // fresh consecutive calls of DIFFERENT getters must return the SAME
+    // address when the second value fits the buffer's capacity.
+    ScopedContext ctx(800, 600);
+
+    const std::string alphabet = dasher_get_alphabet_id(ctx);
+    const std::string palette = dasher_get_current_palette(ctx);
+    REQUIRE(alphabet != palette); // distinct values, else the aliasing is invisible
+
+    // Longer-valued getter FIRST so the shorter assignment cannot grow
+    // capacity (libstdc++/libc++/MSVC all reuse capacity here — the
+    // assumption is now confined to address reuse, and a violation fails
+    // the CHECK below rather than invoking UB).
+    const bool alphabet_first = alphabet.size() >= palette.size();
+    const char* second = alphabet_first ? dasher_get_current_palette(ctx) : dasher_get_alphabet_id(ctx);
+    const char* first_again = alphabet_first ? dasher_get_alphabet_id(ctx) : dasher_get_current_palette(ctx);
+
+    // Two live pointers from consecutive different-getter calls: comparing
+    // them is fully defined. Same address == one shared buffer.
+    CHECK(first_again == second);
+
+    // The shared-buffer state survives round-trips: each getter still
+    // reports its own value (no cross-contamination of the sources).
+    CHECK(std::string(dasher_get_alphabet_id(ctx)) == alphabet);
+    CHECK(std::string(dasher_get_current_palette(ctx)) == palette);
+}
+
+TEST_CASE("getters/locale getter uses a separate buffer") {
+    // CHARACTERIZATION: dasher_get_locale / dasher_get_localized_string write
+    // ctx->stringBuf, NOT tlString — a tlString-backed result survives an
+    // intervening locale call. Documents the multi-buffer split (tlString vs
+    // stringBuf vs gameTextBuf vs stringValues); if the buffers are ever
+    // unified or re-split, this pins the observable difference.
+    ScopedContext ctx(800, 600);
+
+    const char* p = dasher_get_alphabet_id(ctx);
+    const std::string snapshot = p;
+
+    (void)dasher_get_locale(ctx);
+    CHECK(std::string(p) == snapshot); // untouched: different scratch buffer
+
+    CHECK(std::string(dasher_get_alphabet_id(ctx)) == snapshot); // state intact
 }

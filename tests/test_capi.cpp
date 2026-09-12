@@ -5,6 +5,85 @@
 
 #include <string>
 
+// ---------------------------------------------------------------------------
+// Header constants (todo.md Phase 1.4). The values are ABI — frontends
+// hand-copy these numbers into per-language bindings, so any change here is
+// a breaking change. static_asserts make a silent renumber a compile error
+// in the test suite.
+// ---------------------------------------------------------------------------
+
+static_assert(DASHER_CMD_CLEAR == 0, "draw opcode values are ABI");
+static_assert(DASHER_CMD_CIRCLE == 1, "draw opcode values are ABI");
+static_assert(DASHER_CMD_LINE == 2, "draw opcode values are ABI");
+static_assert(DASHER_CMD_RECT_OUTLINE == 3, "draw opcode values are ABI");
+static_assert(DASHER_CMD_RECT_FILL == 4, "draw opcode values are ABI");
+static_assert(DASHER_CMD_TEXT == 5, "draw opcode values are ABI");
+static_assert(DASHER_CMD_LINE_WIDTH == 6, "draw opcode values are ABI");
+
+static_assert(DASHER_EVENT_OUTPUT == 0, "output event values are ABI");
+static_assert(DASHER_EVENT_DELETE == 1, "output event values are ABI");
+static_assert(DASHER_EVENT_BUFFER_CLEAR == 2, "output event values are ABI");
+
+static_assert(DASHER_MESSAGE_INFO == 0, "message type values are ABI");
+static_assert(DASHER_MESSAGE_WARNING == 1, "message type values are ABI");
+
+static_assert(DASHER_LOG_DEBUG == 0, "log level values are ABI");
+static_assert(DASHER_LOG_INFO == 1, "log level values are ABI");
+static_assert(DASHER_LOG_WARN == 2, "log level values are ABI");
+static_assert(DASHER_LOG_ERROR == 3, "log level values are ABI");
+
+static_assert(DASHER_APPEARANCE_MODE_SYSTEM == 0, "appearance mode values are ABI");
+static_assert(DASHER_APPEARANCE_MODE_LIGHT == 1, "appearance mode values are ABI");
+static_assert(DASHER_APPEARANCE_MODE_DARK == 2, "appearance mode values are ABI");
+static_assert(DASHER_PALETTE_APPEARANCE_UNSPECIFIED == 0, "palette appearance values are ABI");
+static_assert(DASHER_PALETTE_APPEARANCE_LIGHT == 1, "palette appearance values are ABI");
+static_assert(DASHER_PALETTE_APPEARANCE_DARK == 2, "palette appearance values are ABI");
+
+static_assert(DASHER_KEY_START_STOP == 0, "key code values are ABI");
+static_assert(DASHER_KEY_BUTTON_1 == 1, "key code values are ABI");
+static_assert(DASHER_KEY_BUTTON_4 == 4, "key code values are ABI");
+static_assert(DASHER_KEY_PRIMARY == 100, "key code values are ABI");
+static_assert(DASHER_KEY_SECONDARY == 101, "key code values are ABI");
+static_assert(DASHER_KEY_TERTIARY == 102, "key code values are ABI");
+
+static_assert(DASHER_PARAM_TYPE_INVALID == -1, "parameter type values are ABI");
+static_assert(DASHER_PARAM_TYPE_BOOL == 0, "parameter type values are ABI");
+static_assert(DASHER_PARAM_TYPE_LONG == 1, "parameter type values are ABI");
+static_assert(DASHER_PARAM_TYPE_STRING == 2, "parameter type values are ABI");
+
+static_assert(DASHER_UI_NONE == 0, "ui type values are ABI");
+static_assert(DASHER_UI_SWITCH == 1, "ui type values are ABI");
+static_assert(DASHER_UI_SLIDER == 2, "ui type values are ABI");
+static_assert(DASHER_UI_STEP == 3, "ui type values are ABI");
+static_assert(DASHER_UI_ENUM == 4, "ui type values are ABI");
+static_assert(DASHER_UI_TEXTFIELD == 5, "ui type values are ABI");
+
+TEST(header_constants_match_runtime_behaviour) {
+    // The constants must describe what the engine actually emits: every
+    // frame starts with a clear command, and a realized context reports a
+    // valid parameter-type range for its schema.
+    ScopedContext ctx(800, 600);
+    int* cmds = nullptr;
+    int cc = 0;
+    char** strs = nullptr;
+    int sc = 0;
+    dasher_frame(ctx, 1000, &cmds, &cc, &strs, &sc);
+    REQUIRE(cc >= 6);
+    CHECK(cmds[0] == DASHER_CMD_CLEAR);
+
+    for (int i = 0; i < dasher_get_parameter_count(); i++) {
+        dasher_parameter_info info{};
+        REQUIRE(dasher_get_parameter_info(i, &info) == 0);
+        CHECK(info.type >= DASHER_PARAM_TYPE_BOOL);
+        CHECK(info.type <= DASHER_PARAM_TYPE_STRING);
+        CHECK(info.ui_type >= DASHER_UI_NONE);
+        CHECK(info.ui_type <= DASHER_UI_TEXTFIELD);
+    }
+
+    CHECK(dasher_get_appearance_mode(ctx) == DASHER_APPEARANCE_MODE_SYSTEM);
+    CHECK(dasher_get_system_appearance(ctx) == DASHER_PALETTE_APPEARANCE_LIGHT); // default
+}
+
 TEST(color_utilities) {
     // Test basic color creation
     int white = dasher_color_rgb(255, 255, 255);
