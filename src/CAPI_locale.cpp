@@ -85,13 +85,22 @@ void appendUtf8(std::string& out, unsigned long cp) {
 // controlled, so documented rather than defended against): \u0000 embeds
 // a NUL (c_str() consumers see truncation); a lone surrogate emits CESU-8
 // bytes rather than a replacement character.
-std::unordered_map<std::string, std::string> parseStringsJson(const std::string& content) {
+// ok reports structural validity: a file is accepted only if it is ONE
+// complete flat object — balanced braces, no unterminated string or escape,
+// no key left without a value, no content (beyond whitespace) after the
+// top-level close, no strings outside the object. A truncated or otherwise
+// malformed file is rejected WHOLE (greptile, PR #92): installing the
+// entries that happened to parse before the break would silently mix
+// translated and English strings with no diagnostic.
+std::unordered_map<std::string, std::string> parseStringsJson(const std::string& content, bool& ok) {
     std::unordered_map<std::string, std::string> result;
     std::string key, value;
     bool inString = false;
     bool escape = false;
     bool buildingKey = true;
+    bool topClosed = false;
     int depth = 0;
+    ok = true;
 
     // Append one decoded escape-sequence character (the char after the
     // backslash, or a decoded \uXXXX run) to the key or value being built.
@@ -197,9 +206,16 @@ std::unordered_map<std::string, std::string> parseStringsJson(const std::string&
                     value.clear();
                     buildingKey = true;
                 }
-            } else {
+            } else if (depth >= 1) {
                 inString = true;
+            } else {
+                ok = false; // string outside the top-level object
             }
+            continue;
+        }
+
+        if (topClosed) {
+            if (c != ' ' && c != '\t' && c != '\r' && c != '\n') ok = false; // trailing content
             continue;
         }
 
@@ -211,12 +227,20 @@ std::unordered_map<std::string, std::string> parseStringsJson(const std::string&
             continue;
         }
 
-        if (c == '{')
+        if (c == '{') {
             depth++;
-        else if (c == '}')
+        } else if (c == '}') {
             depth--;
+            if (depth == 0) {
+                topClosed = true;
+            } else if (depth < 0) {
+                ok = false; // more closes than opens
+            }
+        }
     }
 
+    // Whole-file validity: exactly one complete object, nowhere mid-token.
+    if (depth != 0 || !topClosed || inString || escape || !buildingKey) ok = false;
     return result;
 }
 } // namespace
@@ -249,7 +273,10 @@ DASHER_API int dasher_set_locale(dasher_ctx* ctx, const char* locale) {
 
     std::stringstream ss;
     ss << file.rdbuf();
-    ctx->locale.strings = parseStringsJson(ss.str());
+    bool ok = true;
+    auto parsed = parseStringsJson(ss.str(), ok);
+    if (!ok) return -1; // malformed: rejected whole, ctx locale untouched
+    ctx->locale.strings = std::move(parsed);
     ctx->locale.code = localeStr;
     // The ctx-less parameter introspection follows the most recent locale
     // (see the file header — ABI: dasher_get_parameter_info takes no ctx).

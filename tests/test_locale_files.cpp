@@ -8,7 +8,7 @@
 //   2. escape handling is correct on a fixture file exercising the full
 //      JSON escape set (the original reader passed escapes through
 //      verbatim — "\n" parsed as 'n', and \" broke framing);
-//   3. a malformed file degrades to "no translations", never a crash.
+//   3. a malformed file is rejected atomically — never half-installed.
 //
 // A malformed or format-drifting translation drop therefore fails here,
 // at the door, instead of reaching users.
@@ -110,16 +110,33 @@ TEST(locale_escape_fixture) {
     dasher_destroy(ctx);
 }
 
-TEST(locale_malformed_degrades) {
-    // Truncated / structurally broken files must yield "no translations",
-    // never a crash: lookups miss and the engine keeps its English
-    // built-ins (missing translation = the documented NULL sentinel).
-    const ScopedTempDir tmp;
-    const std::string root =
-        build_locale_data_dir(tmp, "{ \"broken\": \"unterminated\n{\"deeper\": {\"nested\": \"ignored\"}}");
-    dasher_ctx* ctx = dasher_create(root.c_str(), tmp.c_str(), nullptr);
-    ASSERT(ctx != nullptr);
-    ASSERT_EQ(dasher_set_locale(ctx, "zz"), 0);
-    CHECK(dasher_get_localized_string(ctx, "no.such.key") == nullptr);
-    dasher_destroy(ctx);
+TEST(locale_malformed_rejected_atomically) {
+    // Structurally broken files must be REJECTED WHOLE (greptile, PR #92):
+    // a truncated drop must not half-install — mixing translated and
+    // English strings with no diagnostic. set_locale returns -1, the
+    // locale is untouched, lookups keep the English/NULL behaviour.
+    struct Case {
+        const char* name;
+        std::string content;
+    };
+    const Case cases[] = {
+        {"unterminated-string", "{ \"broken\": \"unterminated\n{\"deeper\": {\"nested\": \"ignored\"}}"},
+        {"truncated-mid-value", "{ \"a\": \"one\", \"b\": \"tw"},
+        {"truncated-after-key", "{ \"a\": \"one\", \"b\""},
+        {"no-top-object", "\"just a string\""},
+        {"trailing-content", "{ \"a\": \"one\" } garbage"},
+        {"stray-close", "{ \"a\": \"one\" } }"},
+        {"empty-file", ""},
+    };
+    for (const auto& tc : cases) {
+        ScopedTempDir tmp;
+        const std::string root = build_locale_data_dir(tmp, tc.content);
+        dasher_ctx* ctx = dasher_create(root.c_str(), tmp.c_str(), nullptr);
+        REQUIRE(ctx != nullptr);
+        INFO("case: ", tc.name);
+        CHECK(dasher_set_locale(ctx, "zz") == -1);               // rejected
+        CHECK(std::string(dasher_get_locale(ctx)) == "en");      // untouched
+        CHECK(dasher_get_localized_string(ctx, "a") == nullptr); // nothing half-installed
+        dasher_destroy(ctx);
+    }
 }

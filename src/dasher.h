@@ -612,7 +612,9 @@ DASHER_API void dasher_set_parameter_callback(dasher_ctx* ctx, dasher_parameter_
 // Set the active locale for parameter names, descriptions, and enum labels.
 // Looks for strings_{locale}.json in the data_dir/Strings/ directory.
 // Pass NULL or "en" to reset to English (built-in defaults).
-// Returns 0 on success, -1 if locale file not found.
+// Returns 0 on success, -1 if the locale file was not found or is
+// structurally malformed — partially-valid files are rejected whole, never
+// half-installed (a truncated drop must not silently mix languages).
 DASHER_API int dasher_set_locale(dasher_ctx* ctx, const char* locale);
 
 // Get the currently active locale code (e.g. "en", "de", "fr").
