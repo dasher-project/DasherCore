@@ -139,7 +139,7 @@ DASHER_API int dasher_get_palette_appearance(dasher_ctx* ctx, int index) {
     if (!ctx || !ctx->intf) return -1;
     auto colorIO = ctx->intf->GetColorIO();
     if (!colorIO) return -1;
-    auto names = ctx->intf->GetPermittedValues(Dasher::SP_COLOUR_ID);
+    const auto& names = capi::permittedValues(ctx, Dasher::SP_COLOUR_ID);
     if (index < 0 || index >= static_cast<int>(names.size())) return -1;
     const Dasher::ColorPalette* p = colorIO->FindPalette(names[index]);
     if (!p || p->PaletteName != names[index]) return 0; // not found -> unspecified

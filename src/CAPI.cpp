@@ -620,19 +620,18 @@ DASHER_API int dasher_color_get_blue(int argb) {
 }
 
 // ── Colour palettes ───────────────────────────────────────────────────────
+// (List getters share the permittedValues cache — CAPI_internal.h.)
 
 DASHER_API int dasher_get_palette_count(dasher_ctx* ctx) {
     if (!ctx || !ctx->intf) return 0;
-    auto names = ctx->intf->GetPermittedValues(Dasher::SP_COLOUR_ID);
-    return static_cast<int>(names.size());
+    return static_cast<int>(capi::permittedValues(ctx, Dasher::SP_COLOUR_ID).size());
 }
 
 DASHER_API const char* dasher_get_palette_name(dasher_ctx* ctx, int index) {
     if (!ctx || !ctx->intf) return "";
-    auto names = ctx->intf->GetPermittedValues(Dasher::SP_COLOUR_ID);
+    const auto& names = capi::permittedValues(ctx, Dasher::SP_COLOUR_ID);
     if (index < 0 || index >= static_cast<int>(names.size())) return "";
-    ctx->scratch.stringValues = std::move(names);
-    return ctx->scratch.stringValues[index].c_str();
+    return names[index].c_str();
 }
 
 DASHER_API const char* dasher_get_current_palette(dasher_ctx* ctx) {
@@ -645,7 +644,7 @@ DASHER_API int dasher_get_palette_preview_colors(dasher_ctx* ctx, int index, int
     if (!ctx || !ctx->intf || !out_colors) return -1;
     auto colorIO = ctx->intf->GetColorIO();
     if (!colorIO) return -1;
-    auto names = ctx->intf->GetPermittedValues(Dasher::SP_COLOUR_ID);
+    const auto& names = capi::permittedValues(ctx, Dasher::SP_COLOUR_ID);
     if (index < 0 || index >= static_cast<int>(names.size())) return -1;
     const auto* palette = colorIO->FindPalette(names[index]);
     if (!palette) return -1;
@@ -672,16 +671,14 @@ DASHER_API void dasher_set_palette(dasher_ctx* ctx, const char* palette_name) {
 
 DASHER_API int dasher_get_alphabet_count(dasher_ctx* ctx) {
     if (!ctx || !ctx->intf) return 0;
-    auto names = ctx->intf->GetPermittedValues(Dasher::SP_ALPHABET_ID);
-    return static_cast<int>(names.size());
+    return static_cast<int>(capi::permittedValues(ctx, Dasher::SP_ALPHABET_ID).size());
 }
 
 DASHER_API const char* dasher_get_alphabet_name(dasher_ctx* ctx, int index) {
     if (!ctx || !ctx->intf) return "";
-    auto names = ctx->intf->GetPermittedValues(Dasher::SP_ALPHABET_ID);
+    const auto& names = capi::permittedValues(ctx, Dasher::SP_ALPHABET_ID);
     if (index < 0 || index >= static_cast<int>(names.size())) return "";
-    ctx->scratch.stringValues = std::move(names);
-    return ctx->scratch.stringValues[index].c_str();
+    return names[index].c_str();
 }
 
 // ── Game Mode ───────────────────────────────────────────────────────────────

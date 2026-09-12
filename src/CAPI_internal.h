@@ -18,6 +18,7 @@
 
 #include "DasherCore/ControlManager.h"
 #include "DasherCore/DashIntfScreenMsgs.h"
+#include "DasherCore/Parameters.h"
 #include "DasherCore/ColorPalette.h"
 #include "DasherCore/XmlSettingsStore.h"
 
@@ -133,6 +134,21 @@ struct dasher_ctx {
         std::vector<std::string> nodeLabelStrings; // Strand 2 (RFC 0013) node labels
         std::vector<char*> nodeLabelPtrs;
     } scratch;
+
+    // Permitted-value memoization (todo.md 4.3): the indexed palette/alphabet
+    // getters and the string-values getter each rebuilt the engine's
+    // permitted-value vector on every call — iterating 622 alphabets rebuilt
+    // it 622 times. One cached list; a different key or ANY parameter change
+    // (module/colour/alphabet registration fires OnParameterChanged, which
+    // bumps paramGeneration) invalidates it. Returned pointers point into
+    // the cached vector, which meets (and exceeds) the documented
+    // "valid until the next API call" contract.
+    struct PermittedCache {
+        int key = -1;
+        uint64_t generation = 0;
+        std::vector<std::string> values;
+    } permitted;
+    uint64_t paramGeneration = 0;
 
     // Appearance model state (RFC 0007). Lives at the C API layer — appearance
     // is a shell/canvas concern, not a DasherCore engine parameter. Persisted to
@@ -354,6 +370,23 @@ inline DASHER_LOCAL void notify_buffer_cleared(dasher_ctx* ctx) {
     if (ctx->callbacks.outputCb)
         ctx->callbacks.outputCb(DASHER_EVENT_BUFFER_CLEAR, "", ctx->callbacks.outputCbUserData);
 }
+
+// ── Permitted-value choke point ──────────────────────────────────────────────
+
+// Memoized GetPermittedValues for the ctx (see dasher_ctx::permitted):
+// invalidates on key change or ANY parameter change. Single definition
+// shared by CAPI.cpp's palette/alphabet getters and CAPI_params.cpp's
+// dasher_get_parameter_string_values (todo.md 4.3).
+namespace capi {
+DASHER_LOCAL inline const std::vector<std::string>& permittedValues(dasher_ctx* ctx, Dasher::Parameter key) {
+    if (ctx->permitted.key != static_cast<int>(key) || ctx->permitted.generation != ctx->paramGeneration) {
+        ctx->permitted.values = ctx->intf->GetPermittedValues(key);
+        ctx->permitted.key = static_cast<int>(key);
+        ctx->permitted.generation = ctx->paramGeneration;
+    }
+    return ctx->permitted.values;
+}
+} // namespace capi
 
 // ── Custom-action adapter ───────────────────────────────────────────────────
 

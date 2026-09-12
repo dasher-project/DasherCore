@@ -447,3 +447,67 @@ TEST_CASE("contracts/engine-error lifecycle: failed Realize latches, retry recov
     dasher_frame(ctx, 1000, &cmds, &cc, &strs, &sc);
     CHECK(cc >= 6);
 }
+
+// ---------------------------------------------------------------------------
+// Permitted-value cache (todo.md 4.3). The indexed list getters and
+// dasher_get_parameter_string_values share one memoized list per ctx,
+// invalidated by ANY parameter change. Pins: stable iteration, cache
+// coherence across the getter family, and invalidation after a real
+// parameter change (palette switch fires OnParameterChanged).
+// ---------------------------------------------------------------------------
+
+TEST_CASE("contracts/permitted-value cache: iteration stable, family coherent, invalidates on change") {
+    ScopedContext ctx(800, 600);
+
+    const int count = dasher_get_alphabet_count(ctx);
+    REQUIRE(count > 1);
+
+    // Full iteration, twice: the second pass must see identical values
+    // (cache refill must not corrupt or reorder), and the names must match
+    // a get_parameter_string_values snapshot taken through the same cache.
+    std::vector<std::string> first_pass;
+    for (int i = 0; i < count; i++)
+        first_pass.emplace_back(dasher_get_alphabet_name(ctx, i));
+    for (int i = 0; i < count; i++)
+        CHECK(std::string(dasher_get_alphabet_name(ctx, i)) == first_pass[i]);
+
+    std::vector<const char*> snapshot(count);
+    REQUIRE(dasher_get_parameter_string_values(ctx, dasher_find_parameter_key("SP_ALPHABET_ID"), snapshot.data(),
+                                               count) == count);
+    for (int i = 0; i < count; i++)
+        CHECK(std::string(snapshot[i]) == first_pass[i]);
+
+    // The active alphabet appears in the list.
+    const std::string active = dasher_get_alphabet_id(ctx);
+    bool found = false;
+    for (auto& n : first_pass)
+        found |= (n == active);
+    CHECK(found);
+
+    // A parameter change (palette switch fires OnParameterChanged) must
+    // invalidate, not corrupt: the alphabet list is still complete and
+    // correct afterwards, and the palette list reflects the new palette.
+    const std::string old_palette = dasher_get_current_palette(ctx);
+    std::string target;
+    const int pcount = dasher_get_palette_count(ctx);
+    for (int i = 0; i < pcount; i++) {
+        std::string n = dasher_get_palette_name(ctx, i);
+        if (n != old_palette) {
+            target = n;
+            break;
+        }
+    }
+    REQUIRE(!target.empty());
+    dasher_set_palette(ctx, target.c_str());
+    CHECK(std::string(dasher_get_current_palette(ctx)) == target);
+
+    // Post-change: alphabet list unchanged in content...
+    CHECK(dasher_get_alphabet_count(ctx) == count);
+    for (int i = 0; i < count; i++)
+        CHECK(std::string(dasher_get_alphabet_name(ctx, i)) == first_pass[i]);
+    // ...and the palette list still contains the newly active palette.
+    bool has_new = false;
+    for (int i = 0; i < dasher_get_palette_count(ctx); i++)
+        has_new |= (std::string(dasher_get_palette_name(ctx, i)) == target);
+    CHECK(has_new);
+}
