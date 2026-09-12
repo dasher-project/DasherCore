@@ -12,9 +12,8 @@
 //     change rather than a silent surprise for frontends.
 //
 // Also covers: NULL-ctx tolerance (the whole API accepts a null ctx without
-// crashing) and the process-global locale/override state (two contexts share
-// one locale — a known wart, documented deliberately here so a future
-// per-context fix is a deliberate change).
+// crashing) and the locale semantics above (per-context since v3, with the
+// ctx-less introspection snapshot).
 
 #include "test_common.h"
 
@@ -244,46 +243,127 @@ TEST_CASE("contracts/string error sentinels") {
 }
 
 // ---------------------------------------------------------------------------
-// Locale / string overrides are PROCESS-GLOBAL (known wart, todo.md 5.2).
-// dasher_set_locale takes a ctx but writes shared state: a locale set on
-// context A is immediately visible on context B. Pinned deliberately —
-// when this is fixed, this test fails and the fix ships with a
-// DASHER_CAPI_VERSION bump.
+// Locale semantics (CAPI v3): the four locale functions are per-context;
+// the ctx-less dasher_get_parameter_info reads a process-global snapshot
+// updated by the most recent set_locale / set_string_override ("last
+// context wins" — an ABI constraint, documented in dasher.h).
 // ---------------------------------------------------------------------------
 
-TEST_CASE("contracts/locale is process-global across contexts") {
+TEST_CASE("contracts/locale is per-context (CAPI v3)") {
+    // Was process-global (pinned here as a wart in earlier versions); v3
+    // made the four locale functions operate on the calling ctx only.
     ScopedContext a(800, 600);
     ScopedContext b(800, 600);
 
-    // Reset on scope exit (even on assertion failure) so later test cases in
-    // this binary observe the default locale.
-    struct LocaleReset {
-        dasher_ctx* ctx;
-        ~LocaleReset() { dasher_set_locale(ctx, "en"); }
-    } reset{a};
-
-    // Default state.
+    // Default state on both.
     CHECK(std::string(dasher_get_locale(a)) == "en");
     CHECK(std::string(dasher_get_locale(b)) == "en");
 
-    // strings_de.json ships in Strings/ — setting on A must succeed.
+    // strings_de.json ships in Strings/ — setting on A must succeed and
+    // affect ONLY A. B stays English.
     REQUIRE(dasher_set_locale(a, "de") == 0);
+    CHECK(std::string(dasher_get_locale(a)) == "de");
+    CHECK(std::string(dasher_get_locale(b)) == "en");
+    CHECK(dasher_get_localized_string(b, "BP_DRAW_MOUSE_LINE.label") == nullptr);
 
-    // ...and is immediately visible on B: one shared process-global.
-    CHECK(std::string(dasher_get_locale(b)) == "de");
+    // Translations resolve on the context that loaded them.
+    const char* de_label = dasher_get_localized_string(a, "BP_DRAW_MOUSE_LINE.label");
+    CHECK(de_label != nullptr);
 
-    // Overrides are equally global: set via A, readable via B.
+    // Overrides are equally per-context.
     dasher_set_string_override(a, "test.contracts.override", "viaA");
-    CHECK(std::string(dasher_get_localized_string(b, "test.contracts.override")) == "viaA");
+    CHECK(std::string(dasher_get_localized_string(a, "test.contracts.override")) == "viaA");
+    CHECK(dasher_get_localized_string(b, "test.contracts.override") == nullptr);
     dasher_set_string_override(a, "test.contracts.override", nullptr); // clear
 
-    // Unknown locale: refused, previous locale retained.
+    // Unknown locale: refused, previous locale retained on A.
     CHECK(dasher_set_locale(a, "zz-nonexistent") == -1);
-    CHECK(std::string(dasher_get_locale(b)) == "de");
+    CHECK(std::string(dasher_get_locale(a)) == "de");
 
-    // Reset via NULL-or-"en" normalises both contexts.
+    // Reset on A leaves A English.
     REQUIRE(dasher_set_locale(a, "en") == 0);
+    CHECK(std::string(dasher_get_locale(a)) == "en");
     CHECK(std::string(dasher_get_locale(b)) == "en");
+}
+
+TEST_CASE("contracts/locale: introspection snapshot is last-context-wins across contexts") {
+    // Two live contexts, different locales: the ctx-less introspection
+    // reflects whichever set_locale ran LAST (an ABI constraint —
+    // dasher_get_parameter_info takes no ctx). Overrides union across
+    // contexts per key and persist until cleared (documented in
+    // CAPI_locale.cpp); pinned here so the trap is visible, not latent.
+    ScopedContext a(800, 600);
+    ScopedContext b(800, 600);
+
+    auto first_label = [&]() {
+        for (int i = 0; i < dasher_get_parameter_count(); i++) {
+            dasher_parameter_info info{};
+            if (dasher_get_parameter_info(i, &info) == 0 && info.name[0] != '\0') return std::string(info.name);
+        }
+        return std::string();
+    };
+
+    REQUIRE(dasher_set_locale(b, "de") == 0); // B last -> German
+    const std::string via_b = first_label();
+    REQUIRE(dasher_set_locale(a, "fr") == 0); // A last -> French
+    const std::string via_a = first_label();
+    CHECK(via_a != via_b); // snapshot followed the most recent setter
+
+    // Overrides union per key (across contexts) and survive the writing
+    // context's death — the snapshot is process state, documented in
+    // CAPI_locale.cpp. Pinned so the trap is visible, not latent.
+    dasher_set_string_override(b, "BP_DRAW_MOUSE_LINE.label", "override-via-b");
+    auto snapshot_has_override = [&]() {
+        dasher_parameter_info info{};
+        for (int i = 0; i < dasher_get_parameter_count(); i++) {
+            if (dasher_get_parameter_info(i, &info) != 0) continue;
+            if (std::string(info.name) == "override-via-b") return true;
+        }
+        return false;
+    };
+    CHECK(snapshot_has_override());                               // visible through the ctx-less path
+    dasher_destroy(b.ctx);                                        // writer gone...
+    CHECK(snapshot_has_override());                               // ...snapshot keeps the override
+    b.ctx = dasher_create(TEST_DATA_DIR, b.dir.c_str(), nullptr); // fresh B
+    // Clean up the union entry for later cases in this binary.
+    ScopedContext cleaner;
+    dasher_set_string_override(cleaner, "BP_DRAW_MOUSE_LINE.label", nullptr);
+    dasher_set_locale(cleaner, "en");
+}
+
+TEST_CASE("contracts/locale: ctx-less introspection follows the most recent locale") {
+    // ABI constraint, documented in dasher.h: dasher_get_parameter_info
+    // takes no ctx, so its localized names read a process-global snapshot
+    // updated by the most recent set_locale ("last context wins").
+    ScopedContext a(800, 600);
+
+    // Find a parameter whose German label differs from the English one.
+    auto label_of = [&](int index) {
+        dasher_parameter_info info{};
+        REQUIRE(dasher_get_parameter_info(index, &info) == 0);
+        return std::string(info.name);
+    };
+    int differing = -1;
+    const int count = dasher_get_parameter_count();
+    std::string en_label;
+    for (int i = 0; i < count && differing < 0; i++) {
+        en_label = label_of(i);
+        if (!en_label.empty() && en_label.find(' ') != std::string::npos) differing = i; // heuristic
+    }
+    REQUIRE(differing >= 0);
+
+    // Set German on the (only) context: the snapshot updates, so the
+    // ctx-less introspection now returns the localized name.
+    REQUIRE(dasher_set_locale(a, "de") == 0);
+    dasher_parameter_info info{};
+    REQUIRE(dasher_get_parameter_info(differing, &info) == 0);
+    // German differs from English for the sampled label (translations
+    // exist per test_locale_files' corpus guard).
+    CHECK(std::string(info.name) != en_label);
+
+    REQUIRE(dasher_set_locale(a, "en") == 0);
+    REQUIRE(dasher_get_parameter_info(differing, &info) == 0);
+    CHECK(std::string(info.name) == en_label);
 }
 
 // ---------------------------------------------------------------------------

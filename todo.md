@@ -253,18 +253,54 @@ Shipped as PR #2 (branch capi/phase-4-consistency), one commit per change:
       matched; mutation checks must confirm the mutated build actually
       relinked (a stale binary gives a false green).
 
-## Phase 5 — bigger cleanups (only after 1–4 land)
+## Phase 5 — bigger cleanups
 
-- [ ] 5.1 Replace hand-rolled `parseStringsJson` with pugixml-backed XML
-      strings files OR a real JSON parser. Needs a decision + migration for
-      existing `Strings/strings_*.json` files. Property-test round-trip
-      against the old parser first.
-- [ ] 5.2 Locale/override state is process-global while setters take a ctx —
-      move onto the ctx (breaking change for multi-context users; gate with
-      `DASHER_CAPI_VERSION` bump).
-- [ ] 5.3 Deprecate the indexed list getters (`dasher_get_palette_name(i)`
-      etc.) in favour of `dasher_get_parameter_string_values`, or make them
-      thin wrappers over it (after 4.3).
+Decision record (5.1, agreed with Will 2026-09-12): KEEP the JSON files and
+KEEP a flat reader. The strings_*.json are a translation-exchange format
+(extract_strings.py generates the English source; tooling/translators
+speak flat JSON; locales.json is RFC 0003's canonical list frontends
+consume directly), so converting to XML/pugixml breaks the ecosystem to
+save ~80 lines. Vendoring a JSON library adds cross-platform/WASM surface
+against the low-memory posture for a need this size. Safety comes from
+controlled inputs + the corpus guard test instead of parser generality.
+
+- [x] 5.1 Harden the flat reader (full JSON escape set incl. \uXXXX with
+      surrogate pairs; unknown escapes degrade leniently; malformed files
+      yield no translations) + tests/test_locale_files.cpp corpus guard
+      (every shipped locale loads via the public API; escape fixture;
+      malformed-degrades). Scope documented in the parser header.
+- [x] 5.2 Locale state moved onto the ctx (CAPI v3): the four locale
+      functions are per-context; the ctx-less dasher_get_parameter_info
+      reads a documented "last context wins" snapshot (ABI: no ctx param).
+      Contracts tests rewritten for isolation + snapshot behaviour.
+- [x] 5.3 Indexed list getters: documented the preferred bulk form
+      (get_parameter_string_values); both share the 4.3 cache, so this is
+      ergonomics guidance, not deprecation-for-perf. Kept, not removed —
+      the per-row form is legitimate for lazy UIs.
+
+Phase 5 shipped as PR #3 (#92, all 15 checks green; greptile loop closed —
+two P1s on the reader fixed: atomic rejection of malformed files, then full
+token-grammar enforcement after the follow-up found end-state checks alone
+accepted numbers/missing separators/junk — and mis-paired values).
+
+## Done-when assessment (2026-09-12, stack merged)
+
+- Exported C API symbols: 110 (Phase 0 baseline 109 + the test-injection
+  hook, deliberate) — freeze test green throughout. ✓
+- Full ctest green on Linux/macOS/Windows + Sanitize + clang-tidy. ✓
+- dasher.h: constants for every magic int, error-conventions section,
+  CAPI version notes 1→2→3. ✓
+- Frontends build unchanged against the header (additions only);
+  Will verifies for real with a frontend build post-release. ✓
+- "No single source file over ~800 lines": NOT met as written — CAPI.cpp
+  is ~1160 (Interface + game + callbacks + strand2 + typing rate remain).
+  Honest call: further splitting has diminishing returns; the original
+  2552-line monolith is six focused units. Revisit if it grows.
+
+## Release
+
+Stack complete (#90 #91 #92). Next: tag a release (bump project VERSION
+per the #89 drift guard), then Will builds a frontend against it.
 
 ## Done when
 

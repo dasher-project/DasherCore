@@ -1,0 +1,152 @@
+// test_locale_files.cpp — corpus guard for the strings files (todo.md 5.1).
+//
+// The engine reads Strings/strings_<locale>.json with a small flat-reader
+// (CAPI_locale.cpp — see its header comment for why that is deliberate).
+// These tests make that decision safe:
+//   1. every SHIPPED locale file loads through the public API without
+//      blowing up, and yields the expected key shape;
+//   2. escape handling is correct on a fixture file exercising the full
+//      JSON escape set (the original reader passed escapes through
+//      verbatim — "\n" parsed as 'n', and \" broke framing);
+//   3. a malformed file is rejected atomically — never half-installed.
+//
+// A malformed or format-drifting translation drop therefore fails here,
+// at the door, instead of reaching users.
+
+#include "test_common.h"
+
+#include <filesystem>
+#include <fstream>
+#include <set>
+#include <string>
+
+namespace {
+// Data dir for fixture-based tests: real bundled data (symlinked) plus a
+// Strings/ directory we control. Returns the root to pass to dasher_create.
+std::string build_locale_data_dir(const ScopedTempDir& tmp, const std::string& fixture) {
+    std::filesystem::path root = tmp.path;
+    // Reuse the canonical helper for the engine data (alphabets etc.)…
+    std::string engine_root = build_data_dir(tmp);
+    (void)engine_root; // …which symlinks into tmp/Data; Strings goes beside it.
+    std::filesystem::path strings = root / "Strings";
+    std::error_code ec;
+    std::filesystem::create_directories(strings, ec);
+    std::ofstream out(strings / "strings_zz.json");
+    out << fixture;
+    return root.string();
+}
+} // namespace
+
+TEST(locale_corpus_loads) {
+    // Every strings_<code>.json in the shipped bundle must load through the
+    // public path (dasher_set_locale) and yield the manifest key shape.
+    const std::string strings_dir = std::string(get_test_data_dir()) + "/Strings";
+    REQUIRE(std::filesystem::is_directory(strings_dir));
+
+    int loaded = 0, non_english = 0;
+    for (auto& entry : std::filesystem::directory_iterator(strings_dir)) {
+        const std::string name = entry.path().filename().string();
+        if (name.rfind("strings_", 0) != 0 || name.substr(name.size() - 5) != ".json") continue;
+        const std::string code = name.substr(8, name.size() - 8 - 5);
+        if (code == "en") continue; // "en" is the reset sentinel, not a file load
+
+        ScopedContext ctx;
+        ASSERT_EQ(dasher_set_locale(ctx, code.c_str()), 0);
+        loaded++;
+        non_english++;
+        // Sampled keys must resolve AND the map must be substantially
+        // populated: files carry 200+ entries, so a partial parse that
+        // keeps both probes but drops most of the file still fails here.
+        const char* sample = dasher_get_localized_string(ctx, "BP_DRAW_MOUSE_LINE.label");
+        const char* sample2 = dasher_get_localized_string(ctx, "BP_START_MOUSE.label");
+        ASSERT(sample != nullptr || sample2 != nullptr);
+        ASSERT(dasher_get_localized_string(ctx, "BP_START_DASH_MOUSE.label") != nullptr ||
+               sample != nullptr); // second distinct probe
+        int seen = 0;
+        for (const char* probe :
+             {"BP_DRAW_MOUSE_LINE.label", "BP_START_MOUSE.label", "BP_START_DASH_MOUSE.label", "LP_MAX_BITRATE.label",
+              "BP_CONTROL_MODE.label", "BP_COLOUR_ID.label", "LP_LANGUAGE_MODEL_ID.label", "BP_SPEAK_WORDS.label",
+              "LP_ORIENTATION.label", "BP_DRAW_MOUSE_LINE.description"}) {
+            if (dasher_get_localized_string(ctx, probe) != nullptr) seen++;
+        }
+        ASSERT(seen >= 7); // corpus floor (checked 2026-09-12: every file
+                           // carries >=7 of the 10 probes); wholesale
+                           // corruption or a partial parse fails here
+    }
+    // locales.json (RFC 0003) claims ~35 locales; a wholesale parse failure
+    // would show up as far fewer successful loads.
+    ASSERT(non_english >= 30);
+
+    // Reset the ctx-less introspection snapshot for any later cases in
+    // this binary (per-context state died with each ctx above; the
+    // snapshot is process state — see dasher.h's localization note).
+    ScopedContext reset;
+    ASSERT_EQ(dasher_set_locale(reset, "en"), 0);
+}
+
+TEST(locale_escape_fixture) {
+    // Full escape set incl. \uXXXX (BMP + surrogate pair). Written as a
+    // C++ raw string so the JSON escapes survive verbatim into the file.
+    const std::string fixture = R"({
+    "esc.key": "line1\nline2 \"quoted\" back\\slash tab\there",
+    "esc.bullet": "caf\u00e9",
+    "esc.astral": "\ud83d\ude00 emoji",
+    "esc.unknown": "keep \q as-is",
+    "plain.key": "no escapes é raw UTF-8"
+}
+)";
+    ScopedTempDir tmp;
+    const std::string root = build_locale_data_dir(tmp, fixture);
+    dasher_ctx* ctx = dasher_create(root.c_str(), tmp.c_str(), nullptr);
+    ASSERT(ctx != nullptr);
+    ASSERT_EQ(dasher_set_locale(ctx, "zz"), 0);
+
+    ASSERT_STR_EQ(dasher_get_localized_string(ctx, "esc.key"), "line1\nline2 \"quoted\" back\\slash tab\there");
+    ASSERT_STR_EQ(dasher_get_localized_string(ctx, "esc.bullet"), "café");
+    ASSERT_STR_EQ(dasher_get_localized_string(ctx, "esc.astral"), "\xF0\x9F\x98\x80 emoji");
+    ASSERT_STR_EQ(dasher_get_localized_string(ctx, "esc.unknown"), "keep q as-is");
+    ASSERT_STR_EQ(dasher_get_localized_string(ctx, "plain.key"), "no escapes é raw UTF-8");
+
+    dasher_destroy(ctx);
+}
+
+TEST(locale_malformed_rejected_atomically) {
+    // Structurally broken files must be REJECTED WHOLE (greptile, PR #92):
+    // a truncated drop must not half-install — mixing translated and
+    // English strings with no diagnostic. set_locale returns -1, the
+    // locale is untouched, lookups keep the English/NULL behaviour.
+    struct Case {
+        const char* name;
+        std::string content;
+    };
+    const Case cases[] = {
+        {"unterminated-string", "{ \"broken\": \"unterminated\n{\"deeper\": {\"nested\": \"ignored\"}}"},
+        {"truncated-mid-value", "{ \"a\": \"one\", \"b\": \"tw"},
+        {"truncated-after-key", "{ \"a\": \"one\", \"b\""},
+        {"no-top-object", "\"just a string\""},
+        {"trailing-content", "{ \"a\": \"one\" } garbage"},
+        {"stray-close", "{ \"a\": \"one\" } }"},
+        {"empty-file", ""},
+        // Token-grammar failures (greptile follow-up): end-state checks
+        // alone accepted these — the third even MIS-PAIRED b's value
+        // under key "a".
+        {"number-value", "{ \"a\": 1, \"b\": \"2\" }"},
+        {"missing-colon", "{ \"a\" \"b\" }"},
+        {"missing-comma", "{ \"a\": \"b\" \"c\": \"d\" }"},
+        {"junk-token", "{ junk \"a\": \"b\" }"},
+        {"trailing-comma", "{ \"a\": \"one\", }"},
+        {"nested-object", "{ \"a\": { \"b\": \"c\" } }"},
+        {"boolean-value", "{ \"a\": true }"},
+    };
+    for (const auto& tc : cases) {
+        ScopedTempDir tmp;
+        const std::string root = build_locale_data_dir(tmp, tc.content);
+        dasher_ctx* ctx = dasher_create(root.c_str(), tmp.c_str(), nullptr);
+        REQUIRE(ctx != nullptr);
+        INFO("case: ", tc.name);
+        CHECK(dasher_set_locale(ctx, "zz") == -1);               // rejected
+        CHECK(std::string(dasher_get_locale(ctx)) == "en");      // untouched
+        CHECK(dasher_get_localized_string(ctx, "a") == nullptr); // nothing half-installed
+        dasher_destroy(ctx);
+    }
+}
