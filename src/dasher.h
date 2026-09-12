@@ -364,7 +364,7 @@ DASHER_API int dasher_get_palette_appearance(dasher_ctx* ctx, int index);
 
 // Find the companion (opposite-appearance) palette for the given name.
 // Bidirectional lookup. Returns the companion name (valid until the next API
-// call), or NULL if the palette has no companion.
+// call), or "" if the palette has no companion (CAPI version 2; was NULL).
 DASHER_API const char* dasher_find_companion_palette(dasher_ctx* ctx, const char* palette_name);
 
 // Appearance mode (persisted). SYSTEM follows dasher_set_system_appearance;

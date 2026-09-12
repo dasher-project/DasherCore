@@ -98,7 +98,7 @@ TEST_CASE("contracts/null ctx tolerated across the API surface") {
     CHECK(std::string(dasher_get_palette_name(nullptr, 0)) == "");
     CHECK(std::string(dasher_get_current_palette(nullptr)) == "");
     CHECK(dasher_get_palette_appearance(nullptr, 0) == -1);
-    CHECK(dasher_find_companion_palette(nullptr, "Default") == nullptr);
+    CHECK(std::string(dasher_find_companion_palette(nullptr, "Default")) == "");
     CHECK(std::string(dasher_get_light_palette(nullptr)) == "");
     CHECK(std::string(dasher_get_dark_palette(nullptr)) == "");
     CHECK(dasher_get_alphabet_count(nullptr) == 0);
@@ -196,9 +196,10 @@ TEST_CASE("contracts/integer error sentinels") {
 }
 
 // ---------------------------------------------------------------------------
-// String sentinels. "" is the common failure value; two functions return
-// NULL instead (dasher_find_companion_palette, dasher_get_localized_string)
-// (unified to "" at CAPI version 2 — todo.md Phase 4).
+// String sentinels. "" is the universal failure value since CAPI version 2
+// (todo.md Phase 4 unified the outliers). The single remaining NULL return
+// is dasher_get_localized_string: "missing translation" is a distinct state
+// from an empty translation, and frontends use it to pick fallbacks.
 // ---------------------------------------------------------------------------
 
 TEST_CASE("contracts/string error sentinels") {
@@ -225,7 +226,7 @@ TEST_CASE("contracts/string error sentinels") {
     CHECK(std::string(dasher_get_alphabet_name(ctx, 1 << 20)) == "");
 
     // NULL sentinels (the outliers — see file header).
-    CHECK(dasher_find_companion_palette(ctx, "No Such Palette Exists") == nullptr);
+    CHECK(std::string(dasher_find_companion_palette(ctx, "No Such Palette Exists")) == "");
     CHECK(dasher_get_localized_string(ctx, "no.such.key") == nullptr);
     CHECK(dasher_get_localized_string(ctx, nullptr) == nullptr);
 
