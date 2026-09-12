@@ -99,6 +99,12 @@ std::unordered_map<std::string, std::string> parseStringsJson(const std::string&
     bool escape = false;
     bool buildingKey = true;
     bool topClosed = false;
+    bool sawEntry = false;
+    // What token the grammar expects next between strings (see the token
+    // switch below): a key after '{' or ',', ':' after a key, a string
+    // value after ':', then ',' or the top-level '}'.
+    enum class Tok { Key, Colon, Value, CommaOrClose };
+    Tok expect = Tok::Key;
     int depth = 0;
     ok = true;
 
@@ -200,14 +206,27 @@ std::unordered_map<std::string, std::string> parseStringsJson(const std::string&
                 inString = false;
                 if (buildingKey && depth == 1) {
                     buildingKey = false;
+                    expect = Tok::Colon; // key finished: a ':' must follow
                 } else if (!buildingKey && depth == 1) {
                     result[key] = value;
                     key.clear();
                     value.clear();
                     buildingKey = true;
+                    sawEntry = true;
+                    expect = Tok::CommaOrClose; // pair finished
                 }
             } else if (depth >= 1) {
-                inString = true;
+                // A string may only open where the grammar expects one:
+                // a key after '{' or ',', a value after ':'.
+                if (expect == Tok::Key) {
+                    buildingKey = true;
+                    inString = true;
+                } else if (expect == Tok::Value) {
+                    buildingKey = false;
+                    inString = true;
+                } else {
+                    ok = false; // string where ':'/','/'}' was expected
+                }
             } else {
                 ok = false; // string outside the top-level object
             }
@@ -227,15 +246,44 @@ std::unordered_map<std::string, std::string> parseStringsJson(const std::string&
             continue;
         }
 
-        if (c == '{') {
-            depth++;
-        } else if (c == '}') {
-            depth--;
-            if (depth == 0) {
-                topClosed = true;
-            } else if (depth < 0) {
-                ok = false; // more closes than opens
+        // Token grammar between strings — flat {"k":"v", ...} files only
+        // (greptile follow-up, PR #92: end-state checks alone accepted
+        // numbers-as-values, missing ':'/',' separators and arbitrary junk
+        // — worse, {"a":1,"b":"2"} mis-paired b's value under key "a").
+        // Outside a string the ONLY legal tokens are braces, one ':' after
+        // each key, one ',' between pairs, and whitespace.
+        switch (c) {
+        case '{':
+            if (++depth > 1) ok = false; // flat format: no nested objects
+            break;
+        case '}':
+            if (--depth == 0) {
+                // Close is legal after a pair, or for the empty object —
+                // never mid-pair and never trailing a comma.
+                if (expect == Tok::CommaOrClose || (expect == Tok::Key && !sawEntry)) {
+                    topClosed = true;
+                } else {
+                    ok = false;
+                }
+            } else {
+                ok = false;
             }
+            break;
+        case ':':
+            if (depth == 1 && expect == Tok::Colon)
+                expect = Tok::Value;
+            else
+                ok = false;
+            break;
+        case ',':
+            if (depth == 1 && expect == Tok::CommaOrClose)
+                expect = Tok::Key;
+            else
+                ok = false;
+            break;
+        default:
+            if (c != ' ' && c != '\t' && c != '\r' && c != '\n') ok = false; // junk token (numbers, words, ...)
+            break;
         }
     }
 

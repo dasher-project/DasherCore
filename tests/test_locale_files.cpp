@@ -127,6 +127,16 @@ TEST(locale_malformed_rejected_atomically) {
         {"trailing-content", "{ \"a\": \"one\" } garbage"},
         {"stray-close", "{ \"a\": \"one\" } }"},
         {"empty-file", ""},
+        // Token-grammar failures (greptile follow-up): end-state checks
+        // alone accepted these — the third even MIS-PAIRED b's value
+        // under key "a".
+        {"number-value", "{ \"a\": 1, \"b\": \"2\" }"},
+        {"missing-colon", "{ \"a\" \"b\" }"},
+        {"missing-comma", "{ \"a\": \"b\" \"c\": \"d\" }"},
+        {"junk-token", "{ junk \"a\": \"b\" }"},
+        {"trailing-comma", "{ \"a\": \"one\", }"},
+        {"nested-object", "{ \"a\": { \"b\": \"c\" } }"},
+        {"boolean-value", "{ \"a\": true }"},
     };
     for (const auto& tc : cases) {
         ScopedTempDir tmp;
