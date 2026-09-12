@@ -511,3 +511,48 @@ TEST_CASE("contracts/permitted-value cache: iteration stable, family coherent, i
         has_new |= (std::string(dasher_get_palette_name(ctx, i)) == target);
     CHECK(has_new);
 }
+
+TEST_CASE("contracts/permitted-value cache: realize boundaries invalidate") {
+    // Realize() populates the alphabet/colour/filter lists WITHOUT firing
+    // OnParameterChanged, so a frontend that builds its pickers before
+    // dasher_set_screen_size would cache the empty pre-realize answers
+    // forever if the realize boundary didn't invalidate. (Found by review
+    // loop 1; this test is the regression guard.)
+    ScopedContext unrealized; // created, never given a screen size
+    REQUIRE(unrealized.ctx != nullptr);
+    const int pre = dasher_get_alphabet_count(unrealized); // caches the answer
+    dasher_set_screen_size(unrealized, 800, 600);          // realize
+    const int post = dasher_get_alphabet_count(unrealized);
+    CHECK(post > pre);
+    REQUIRE(post > 1); // Data/ ships hundreds; a stale 0 or 1 fails here
+
+    // Same boundary on the failed-Realize retry path: the cache lives on
+    // the ctx and must not survive the interface recreation either.
+    ScopedContext retry;
+    dasher_test_inject_failure(retry, DASHER_FAIL_INJECT_REALIZE);
+    dasher_set_screen_size(retry, 800, 600); // realize fails, engineError latches
+    CHECK(dasher_has_engine_error(retry) == 1);
+    (void)dasher_get_alphabet_count(retry); // caches whatever the broken state reports
+    dasher_test_inject_failure(retry, DASHER_FAIL_INJECT_NONE);
+    dasher_set_screen_size(retry, 800, 600); // retry: interface recreated + realized
+    CHECK(dasher_has_engine_error(retry) == 0);
+    CHECK(dasher_get_alphabet_count(retry) == post);
+}
+
+TEST_CASE("contracts/permitted-value cache: low-memory filter list is honored") {
+    // Low-memory mode silently shrinks the registered input filters during
+    // CreateModules — another parameter-change-silent list mutation covered
+    // only by the realize-boundary invalidation. Inequalities, not exact
+    // counts, so module additions don't break the pin.
+    ScopedContext normal(800, 600);
+    const int filter_key = dasher_find_parameter_key("SP_INPUT_FILTER");
+    REQUIRE(filter_key >= 0);
+    const int normal_count = dasher_get_parameter_string_values(normal, filter_key, nullptr, 0);
+    REQUIRE(normal_count > 1);
+
+    ScopedContext lowmem; // low-memory BEFORE the realize
+    dasher_set_low_memory_mode(lowmem, 1);
+    dasher_set_screen_size(lowmem, 800, 600);
+    const int low_count = dasher_get_parameter_string_values(lowmem, filter_key, nullptr, 0);
+    CHECK(low_count < normal_count);
+}

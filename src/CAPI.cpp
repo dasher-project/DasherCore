@@ -54,18 +54,19 @@
 // behaviour overrides are defined here, out-of-line.
 
 struct dasher_ctx::Interface : public Dasher::CDashIntfScreenMsgs {
-    Interface(Dasher::CSettingsStore* s, dasher_ctx* owner) : CDashIntfScreenMsgs(s), m_owner(owner) {
-        s->OnParameterChanged.Subscribe(m_owner, [this](Dasher::Parameter param) {
-            // Invalidate the permitted-value cache (todo.md 4.3): any
-            // parameter change may have rebuilt engine-side lists. The
-            // base class subscribes its own handler BEFORE this lambda
-            // fires, so alphabet on-demand loads triggered by the change
-            // are already complete when the generation bumps.
-            ++m_owner->paramGeneration;
-            if (m_owner->callbacks.paramCb)
-                m_owner->callbacks.paramCb(static_cast<int>(param), m_owner->callbacks.paramCbUserData);
-        });
-    }
+        Interface(Dasher::CSettingsStore* s, dasher_ctx* owner) : CDashIntfScreenMsgs(s), m_owner(owner) {
+            s->OnParameterChanged.Subscribe(m_owner, [this](Dasher::Parameter param) {
+                if (m_owner->callbacks.paramCb)
+                    m_owner->callbacks.paramCb(static_cast<int>(param), m_owner->callbacks.paramCbUserData);
+                // Invalidate the permitted-value cache (todo.md 4.3). Deliberately
+                // AFTER the frontend callback: Event::Broadcast does not guarantee
+                // subscriber call order (see Event.h), so robustness here comes
+                // from laziness of refill — permittedValues() re-queries on the
+                // NEXT call, after every handler and re-entrant frontend access
+                // have settled — never from ordering assumptions.
+                ++m_owner->paramGeneration;
+            });
+        }
     ~Interface() { m_pSettingsStore->OnParameterChanged.Unsubscribe(m_owner); }
     void CreateModules() override {
         CDashIntfScreenMsgs::CreateModules();

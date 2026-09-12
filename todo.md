@@ -236,12 +236,18 @@ Shipped as PR #2 (branch capi/phase-4-consistency), one commit per change:
       boundary (Realize populates the lists without firing
       OnParameterChanged — low-memory mode and the AlphIO/ColorIO scans
       are parameter-silent). Seven functions across five list families
-      routed through it. HONESTY NOTE: the first cut (fd943e6b) shipped
-      the cache with an invalidation mechanism that existed only in its
-      commit message (a text-replace silently no-op'd against
-      clang-formatted code) and a vacuous test; review loop 1 scored the
-      branch 5/10 and proved the bug. Fixed in the follow-up commit with
-      real boundary tests (pre-realize growth, retry path, low-memory).
+      routed through it. HONESTY NOTE (kept deliberately): TWO review
+      rounds caught the same failure mode — a claim without the code.
+      Round 1: the first cut (fd943e6b) shipped the cache with an
+      invalidation mechanism that existed only in its commit message (a
+      python replace() silently no-op'd against clang-formatted code) plus
+      a vacuous test. Round 2: the remediation commit (8520bccf) claimed
+      the three boundary tests were added — the test-file replace had
+      no-op'd the same way. Finally landed with match-verified edits and a
+      MUTATION TEST: removing both invalidation mechanisms makes the suite
+      fail on exactly the loop-1 bug (pre-realize 0 cached forever);
+      either mechanism alone keeps it green. Process rule: scripted
+      replaces must assert the pattern matched.
 
 ## Phase 5 — bigger cleanups (only after 1–4 land)
 

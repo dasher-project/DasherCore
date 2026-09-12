@@ -380,8 +380,8 @@ inline DASHER_LOCAL void notify_buffer_cleared(dasher_ctx* ctx) {
 namespace capi {
 // Force a refill on the next permittedValues() call. Called at every
 // realize boundary: Realize() populates the alphabet/colour/filter lists
-// WITHOUT firing OnParameterChanged (CreateModules registers ~10 input
-// filters, the AlphIO/ColorIO scans, and low-memory mode shrinks the
+// WITHOUT firing OnParameterChanged (CreateModules registers a dozen-plus
+// input filters, the AlphIO/ColorIO scans, and low-memory mode shrinks the
 // filter list — all parameter-change-silent), so generation bumps alone
 // cannot cover the pre->post-Realize transition (review loop 1, PR #2).
 DASHER_LOCAL inline void invalidatePermittedCache(dasher_ctx* ctx) {
