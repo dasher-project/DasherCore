@@ -253,18 +253,32 @@ Shipped as PR #2 (branch capi/phase-4-consistency), one commit per change:
       matched; mutation checks must confirm the mutated build actually
       relinked (a stale binary gives a false green).
 
-## Phase 5 — bigger cleanups (only after 1–4 land)
+## Phase 5 — bigger cleanups
 
-- [ ] 5.1 Replace hand-rolled `parseStringsJson` with pugixml-backed XML
-      strings files OR a real JSON parser. Needs a decision + migration for
-      existing `Strings/strings_*.json` files. Property-test round-trip
-      against the old parser first.
-- [ ] 5.2 Locale/override state is process-global while setters take a ctx —
-      move onto the ctx (breaking change for multi-context users; gate with
-      `DASHER_CAPI_VERSION` bump).
-- [ ] 5.3 Deprecate the indexed list getters (`dasher_get_palette_name(i)`
-      etc.) in favour of `dasher_get_parameter_string_values`, or make them
-      thin wrappers over it (after 4.3).
+Decision record (5.1, agreed with Will 2026-09-12): KEEP the JSON files and
+KEEP a flat reader. The strings_*.json are a translation-exchange format
+(extract_strings.py generates the English source; tooling/translators
+speak flat JSON; locales.json is RFC 0003's canonical list frontends
+consume directly), so converting to XML/pugixml breaks the ecosystem to
+save ~80 lines. Vendoring a JSON library adds cross-platform/WASM surface
+against the low-memory posture for a need this size. Safety comes from
+controlled inputs + the corpus guard test instead of parser generality.
+
+- [x] 5.1 Harden the flat reader (full JSON escape set incl. \uXXXX with
+      surrogate pairs; unknown escapes degrade leniently; malformed files
+      yield no translations) + tests/test_locale_files.cpp corpus guard
+      (every shipped locale loads via the public API; escape fixture;
+      malformed-degrades). Scope documented in the parser header.
+- [x] 5.2 Locale state moved onto the ctx (CAPI v3): the four locale
+      functions are per-context; the ctx-less dasher_get_parameter_info
+      reads a documented "last context wins" snapshot (ABI: no ctx param).
+      Contracts tests rewritten for isolation + snapshot behaviour.
+- [x] 5.3 Indexed list getters: documented the preferred bulk form
+      (get_parameter_string_values); both share the 4.3 cache, so this is
+      ergonomics guidance, not deprecation-for-perf. Kept, not removed —
+      the per-row form is legitimate for lazy UIs.
+
+Phase 5 ships as PR #3 (branch capi/phase-5-cleanups).
 
 ## Done when
 
