@@ -9,10 +9,16 @@
 //
 // One process-global remnant is ABI-forced: dasher_get_parameter_info
 // (localized parameter names/descriptions) takes no ctx, so it reads the
-// SNAPSHOT below, updated by the most recent set_locale /
-// set_string_override from any context ("last context wins"). Frontends
-// with multiple contexts in one process should set the locale on the one
-// whose language the settings UI belongs to.
+// SNAPSHOT below. Semantics, pinned by the contracts tests:
+// - strings: "last context wins" — the most recent successful
+//   dasher_set_locale from any context replaces the snapshot wholesale
+//   (set_locale("en") clears it);
+// - overrides: a PER-KEY union across contexts (each key remembers its
+//   most recent value from whichever context set it) that survives
+//   dasher_destroy of the writing context, until a NULL set clears the
+//   key or a fresh locale load replaces the strings it decorates.
+// Multi-context frontends: set the locale on the context whose language
+// the settings UI shows, and treat overrides as process-wide branding.
 //
 // The strings files are read with the flat-reader in this file — see its
 // header comment for the deliberate scope decision (todo.md 5.1).
@@ -75,7 +81,10 @@ void appendUtf8(std::string& out, unsigned long cp) {
 // Correctness within that scope (todo.md 5.1 — the original reader passed
 // escapes through verbatim, so "\n" parsed as 'n' and a quoted-in-value \"
 // broke the string structurally): the full JSON escape set is honoured,
-// including \uXXXX with surrogate pairs.
+// including \uXXXX with surrogate pairs. Known edge notes (inputs are
+// controlled, so documented rather than defended against): \u0000 embeds
+// a NUL (c_str() consumers see truncation); a lone surrogate emits CESU-8
+// bytes rather than a replacement character.
 std::unordered_map<std::string, std::string> parseStringsJson(const std::string& content) {
     std::unordered_map<std::string, std::string> result;
     std::string key, value;
@@ -140,7 +149,7 @@ std::unordered_map<std::string, std::string> parseStringsJson(const std::string&
                 return;
             }
             i += 4;
-            if (cp >= 0xD800 && cp <= 0xDBFF && i + 7 < end && p[i + 1] == '\\' && p[i + 2] == 'u') {
+            if (cp >= 0xD800 && cp <= 0xDBFF && i + 6 < end && p[i + 1] == '\\' && p[i + 2] == 'u') {
                 unsigned long lo = 0;
                 if (hex4(i + 3, lo) && lo >= 0xDC00 && lo <= 0xDFFF) {
                     // Valid surrogate pair: combine and consume the low half.

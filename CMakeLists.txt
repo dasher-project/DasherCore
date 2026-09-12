@@ -349,8 +349,9 @@ dasher_add_test(dasher_text_metrics_tests test_text_metrics.cpp)
         dasher_add_test(dasher_training_tests test_training.cpp)
         dasher_add_test(dasher_node_tree_tests test_node_tree.cpp)
         dasher_add_test(dasher_locales_sync_tests test_locales_sync.cpp)
-        # todo.md 5.1 — strings-file corpus guard: every shipped locale loads,
-        # full escape set on a fixture, malformed files degrade not crash.
+        # todo.md 5.1 — strings-file corpus guard: every shipped locale loads
+        # (with population probes), full escape set on a fixture, malformed
+        # files degrade to no-translations rather than crashing.
         dasher_add_test(dasher_locale_files_tests test_locale_files.cpp)
 
         # Phase B (characterization) — closes coverage gaps noted in the review.

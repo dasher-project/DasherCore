@@ -54,20 +54,32 @@ TEST(locale_corpus_loads) {
         ASSERT_EQ(dasher_set_locale(ctx, code.c_str()), 0);
         loaded++;
         non_english++;
-        // A translated parameter label must resolve to SOMETHING non-empty
-        // for at least one key (files carry 100+ entries; a parse that
-        // silently produced an empty map fails here).
+        // Sampled keys must resolve AND the map must be substantially
+        // populated: files carry 200+ entries, so a partial parse that
+        // keeps both probes but drops most of the file still fails here.
         const char* sample = dasher_get_localized_string(ctx, "BP_DRAW_MOUSE_LINE.label");
         const char* sample2 = dasher_get_localized_string(ctx, "BP_START_MOUSE.label");
         ASSERT(sample != nullptr || sample2 != nullptr);
-        ASSERT(loaded > 0);
+        ASSERT(dasher_get_localized_string(ctx, "BP_START_DASH_MOUSE.label") != nullptr ||
+               sample != nullptr); // second distinct probe
+        int seen = 0;
+        for (const char* probe :
+             {"BP_DRAW_MOUSE_LINE.label", "BP_START_MOUSE.label", "BP_START_DASH_MOUSE.label", "LP_MAX_BITRATE.label",
+              "BP_CONTROL_MODE.label", "BP_COLOUR_ID.label", "LP_LANGUAGE_MODEL_ID.label", "BP_SPEAK_WORDS.label",
+              "LP_ORIENTATION.label", "BP_DRAW_MOUSE_LINE.description"}) {
+            if (dasher_get_localized_string(ctx, probe) != nullptr) seen++;
+        }
+        ASSERT(seen >= 7); // corpus floor (checked 2026-09-12: every file
+                           // carries >=7 of the 10 probes); wholesale
+                           // corruption or a partial parse fails here
     }
     // locales.json (RFC 0003) claims ~35 locales; a wholesale parse failure
     // would show up as far fewer successful loads.
     ASSERT(non_english >= 30);
 
-    // Reset for any later cases in this binary (locale state is global
-    // today — see todo.md 5.2).
+    // Reset the ctx-less introspection snapshot for any later cases in
+    // this binary (per-context state died with each ctx above; the
+    // snapshot is process state — see dasher.h's localization note).
     ScopedContext reset;
     ASSERT_EQ(dasher_set_locale(reset, "en"), 0);
 }
