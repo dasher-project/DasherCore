@@ -1,0 +1,41 @@
+// VERSIONINFO resource for dasher.dll (Dasher-Windows #59 root-cause fix).
+//
+// The DLL previously shipped UNVERSIONED, so Windows Installer's
+// file-versioning rules fell back to date/hash heuristics on upgrades -
+// which could preserve a stale dasher.dll under a new EXE and crash the app
+// with EntryPointNotFoundException on exports that didn't exist in the old
+// engine. A versioned file is compared by FILEVERSION: newer always wins.
+//
+// Configured by CMake from project(DasherCore VERSION ...); keep the tag and
+// the project() version in lockstep when cutting a release.
+
+#include <windows.h>
+
+1 VERSIONINFO
+FILEVERSION     @DASHER_VERSION_MAJOR@,@DASHER_VERSION_MINOR@,@DASHER_VERSION_PATCH@,0
+PRODUCTVERSION  @DASHER_VERSION_MAJOR@,@DASHER_VERSION_MINOR@,@DASHER_VERSION_PATCH@,0
+FILEFLAGSMASK   0x3fL
+FILEFLAGS       0x0L
+FILEOS          VOS_NT_WINDOWS32
+FILETYPE        VFT_DLL
+FILESUBTYPE     0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904b0"
+        BEGIN
+            VALUE "CompanyName",      "The Dasher Project"
+            VALUE "FileDescription",  "Dasher predictive-text engine"
+            VALUE "FileVersion",      "@DASHER_VERSION_STRING@"
+            VALUE "InternalName",     "dasher"
+            VALUE "LegalCopyright",   "MIT License"
+            VALUE "OriginalFilename", "dasher.dll"
+            VALUE "ProductName",      "DasherCore"
+            VALUE "ProductVersion",   "@DASHER_VERSION_STRING@"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x409, 1200
+    END
+END

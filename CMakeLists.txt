@@ -1,6 +1,54 @@
 cmake_minimum_required(VERSION 3.12)
 
-project("DasherCore")
+project("DasherCore" VERSION 0.2.23)
+
+###############################
+# Release-version drift guard
+###############################
+# The DLL's FILEVERSION comes from project() VERSION above, and MSI upgrade
+# correctness depends on it advancing with EVERY release (#89). Nothing else
+# ties that number to the release tag, so a tag pushed without bumping this
+# line would ship a DLL with the PREVIOUS version — silently reintroducing
+# the stale-DLL upgrade bug this resource exists to fix. When building FROM
+# a release tag, the tag must match project() VERSION exactly or the
+# configure step fails:
+#   - CI tag builds: GITHUB_REF=refs/tags/vX.Y.Z (works in shallow
+#     checkouts where the tag object isn't fetched)
+#   - local tag checkouts: `git describe --tags --exact-match`
+# Non-tag builds (branches, PRs, dev trees) are unconstrained.
+set(_dasher_tag_version "")
+# CI tag builds: GITHUB_REF=refs/tags/vX.Y.Z. ONLY in DasherCore's own CI —
+# when Dasher-Windows' installer workflow builds the submodule, GITHUB_REF is
+# the WINDOWS tag (e.g. v0.1.29), which must not be compared against the
+# engine version. GITHUB_REPOSITORY distinguishes the two.
+if("$ENV{GITHUB_REPOSITORY}" STREQUAL "dasher-project/DasherCore"
+        AND DEFINED ENV{GITHUB_REF}
+        AND "$ENV{GITHUB_REF}" MATCHES "^refs/tags/v([0-9]+\\.[0-9]+\\.[0-9]+)$")
+    set(_dasher_tag_version "${CMAKE_MATCH_1}")
+else()
+    execute_process(
+        COMMAND git describe --tags --exact-match --match "v[0-9]*"
+        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+        OUTPUT_VARIABLE _dasher_git_tag
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+        RESULT_VARIABLE _dasher_git_result
+        ERROR_QUIET
+        # NOTE: do NOT add OUTPUT_QUIET here — on execute_process it
+        # suppresses the variable CAPTURE, not just printing; with it the
+        # tag reads back empty and the guard never fires (found the hard
+        # way: the mismatch test silently passed).
+    )
+    if(_dasher_git_result EQUAL 0 AND _dasher_git_tag MATCHES "^v([0-9]+\\.[0-9]+\\.[0-9]+)$")
+        set(_dasher_tag_version "${CMAKE_MATCH_1}")
+    endif()
+endif()
+
+if(_dasher_tag_version AND NOT _dasher_tag_version STREQUAL PROJECT_VERSION)
+    message(FATAL_ERROR
+        "Release tag v${_dasher_tag_version} does not match project VERSION ${PROJECT_VERSION}. "
+        "Bump project(... VERSION ...) in CMakeLists.txt before tagging — the DLL FILEVERSION "
+        "must advance with every release or MSI upgrades can keep stale DLLs (see #89).")
+endif()
 
 enable_testing()
 
@@ -185,6 +233,21 @@ if(BUILD_CAPI)
     if(WIN32)
         target_compile_definitions(dasher PRIVATE DASHER_BUILDING)
         target_compile_options(dasher PRIVATE /EHa)
+
+        # VERSIONINFO resource (Dasher-Windows #59): an unversioned DLL let
+        # MSI upgrade heuristics keep stale copies under a new EXE; a
+        # FILEVERSION makes newer-always-wins deterministic. Keep project()
+        # VERSION in lockstep with the release tag.
+        string(REPLACE "." ";" _dasher_ver_list ${PROJECT_VERSION})
+        list(GET _dasher_ver_list 0 DASHER_VERSION_MAJOR)
+        list(GET _dasher_ver_list 1 DASHER_VERSION_MINOR)
+        list(GET _dasher_ver_list 2 DASHER_VERSION_PATCH)
+        set(DASHER_VERSION_STRING "${PROJECT_VERSION}.0")
+        configure_file(
+            ${CMAKE_CURRENT_LIST_DIR}/src/dasher_version.rc.in
+            ${CMAKE_CURRENT_BINARY_DIR}/dasher_version.rc
+            @ONLY)
+        target_sources(dasher PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/dasher_version.rc)
     endif()
 
     set_target_properties(dasher PROPERTIES
