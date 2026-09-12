@@ -251,39 +251,76 @@ TEST_CASE("contracts/string error sentinels") {
 // DASHER_CAPI_VERSION bump.
 // ---------------------------------------------------------------------------
 
-TEST_CASE("contracts/locale is process-global across contexts") {
+TEST_CASE("contracts/locale is per-context (CAPI v3)") {
+    // Was process-global (pinned here as a wart in earlier versions); v3
+    // made the four locale functions operate on the calling ctx only.
     ScopedContext a(800, 600);
     ScopedContext b(800, 600);
 
-    // Reset on scope exit (even on assertion failure) so later test cases in
-    // this binary observe the default locale.
-    struct LocaleReset {
-        dasher_ctx* ctx;
-        ~LocaleReset() { dasher_set_locale(ctx, "en"); }
-    } reset{a};
-
-    // Default state.
+    // Default state on both.
     CHECK(std::string(dasher_get_locale(a)) == "en");
     CHECK(std::string(dasher_get_locale(b)) == "en");
 
-    // strings_de.json ships in Strings/ — setting on A must succeed.
+    // strings_de.json ships in Strings/ — setting on A must succeed and
+    // affect ONLY A. B stays English.
     REQUIRE(dasher_set_locale(a, "de") == 0);
+    CHECK(std::string(dasher_get_locale(a)) == "de");
+    CHECK(std::string(dasher_get_locale(b)) == "en");
+    CHECK(dasher_get_localized_string(b, "BP_DRAW_MOUSE_LINE.label") == nullptr);
 
-    // ...and is immediately visible on B: one shared process-global.
-    CHECK(std::string(dasher_get_locale(b)) == "de");
+    // Translations resolve on the context that loaded them.
+    const char* de_label = dasher_get_localized_string(a, "BP_DRAW_MOUSE_LINE.label");
+    CHECK(de_label != nullptr);
 
-    // Overrides are equally global: set via A, readable via B.
+    // Overrides are equally per-context.
     dasher_set_string_override(a, "test.contracts.override", "viaA");
-    CHECK(std::string(dasher_get_localized_string(b, "test.contracts.override")) == "viaA");
+    CHECK(std::string(dasher_get_localized_string(a, "test.contracts.override")) == "viaA");
+    CHECK(dasher_get_localized_string(b, "test.contracts.override") == nullptr);
     dasher_set_string_override(a, "test.contracts.override", nullptr); // clear
 
-    // Unknown locale: refused, previous locale retained.
+    // Unknown locale: refused, previous locale retained on A.
     CHECK(dasher_set_locale(a, "zz-nonexistent") == -1);
-    CHECK(std::string(dasher_get_locale(b)) == "de");
+    CHECK(std::string(dasher_get_locale(a)) == "de");
 
-    // Reset via NULL-or-"en" normalises both contexts.
+    // Reset on A leaves A English.
     REQUIRE(dasher_set_locale(a, "en") == 0);
+    CHECK(std::string(dasher_get_locale(a)) == "en");
     CHECK(std::string(dasher_get_locale(b)) == "en");
+}
+
+TEST_CASE("contracts/locale: ctx-less introspection follows the most recent locale") {
+    // ABI constraint, documented in dasher.h: dasher_get_parameter_info
+    // takes no ctx, so its localized names read a process-global snapshot
+    // updated by the most recent set_locale ("last context wins").
+    ScopedContext a(800, 600);
+
+    // Find a parameter whose German label differs from the English one.
+    auto label_of = [&](int index) {
+        dasher_parameter_info info{};
+        REQUIRE(dasher_get_parameter_info(index, &info) == 0);
+        return std::string(info.name);
+    };
+    int differing = -1;
+    const int count = dasher_get_parameter_count();
+    std::string en_label;
+    for (int i = 0; i < count && differing < 0; i++) {
+        en_label = label_of(i);
+        if (!en_label.empty() && en_label.find(' ') != std::string::npos) differing = i; // heuristic
+    }
+    REQUIRE(differing >= 0);
+
+    // Set German on the (only) context: the snapshot updates, so the
+    // ctx-less introspection now returns the localized name.
+    REQUIRE(dasher_set_locale(a, "de") == 0);
+    dasher_parameter_info info{};
+    REQUIRE(dasher_get_parameter_info(differing, &info) == 0);
+    // German differs from English for the sampled label (translations
+    // exist per test_locale_files' corpus guard).
+    CHECK(std::string(info.name) != en_label);
+
+    REQUIRE(dasher_set_locale(a, "en") == 0);
+    REQUIRE(dasher_get_parameter_info(differing, &info) == 0);
+    CHECK(std::string(info.name) == en_label);
 }
 
 // ---------------------------------------------------------------------------

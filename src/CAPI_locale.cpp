@@ -1,14 +1,21 @@
 // CAPI_locale.cpp — localization: locale loading, per-key overrides and
-// lookup (todo.md Phase 2.5, moved verbatim from CAPI.cpp).
+// lookup (moved from CAPI.cpp in Phase 2.5; made per-context in 5.2).
 //
-// Locale state is PROCESS-GLOBAL by design today: dasher_set_locale takes
-// a ctx but the tables are shared across all contexts — pinned as a known
-// wart by test_capi_contracts.cpp; todo.md 5.2 tracks making it
-// per-context (a versioned, deliberate change).
+// Since CAPI version 3, locale state is PER-CONTEXT: dasher_set_locale /
+// dasher_get_locale / dasher_set_string_override / dasher_get_localized_
+// string all operate on the calling ctx only. (Previously the tables were
+// process-global — a wart pinned by the contracts tests, fixed
+// deliberately with a version note.)
 //
-// The tables are also read by parameter introspection (localized names /
-// descriptions in dasher_get_parameter_info, CAPI_params.cpp), hence the
-// capi:: accessors declared in CAPI_internal.h.
+// One process-global remnant is ABI-forced: dasher_get_parameter_info
+// (localized parameter names/descriptions) takes no ctx, so it reads the
+// SNAPSHOT below, updated by the most recent set_locale /
+// set_string_override from any context ("last context wins"). Frontends
+// with multiple contexts in one process should set the locale on the one
+// whose language the settings UI belongs to.
+//
+// The strings files are read with the flat-reader in this file — see its
+// header comment for the deliberate scope decision (todo.md 5.1).
 
 #include "CAPI_internal.h"
 
@@ -18,17 +25,17 @@
 #include <unordered_map>
 
 namespace {
-// Process-global locale state (see file header).
-std::string s_localeCode = "en";
-std::unordered_map<std::string, std::string> s_localeStrings;
-std::unordered_map<std::string, std::string> s_overrideStrings;
+// Process-global introspection snapshot (see file header): the strings and
+// overrides seen by the ctx-less dasher_get_parameter_info.
+std::unordered_map<std::string, std::string> s_introspectionStrings;
+std::unordered_map<std::string, std::string> s_introspectionOverrides;
 } // namespace
 
 const std::unordered_map<std::string, std::string>& capi::localeStrings() {
-    return s_localeStrings;
+    return s_introspectionStrings;
 }
 const std::unordered_map<std::string, std::string>& capi::overrideStrings() {
-    return s_overrideStrings;
+    return s_introspectionOverrides;
 }
 
 namespace {
@@ -213,8 +220,9 @@ DASHER_API int dasher_set_locale(dasher_ctx* ctx, const char* locale) {
     if (!ctx) return -1;
 
     if (!locale || std::string(locale) == "en" || std::string(locale) == "") {
-        s_localeCode = "en";
-        s_localeStrings.clear();
+        ctx->locale.code = "en";
+        ctx->locale.strings.clear();
+        s_introspectionStrings.clear();
         return 0;
     }
 
@@ -232,35 +240,40 @@ DASHER_API int dasher_set_locale(dasher_ctx* ctx, const char* locale) {
 
     std::stringstream ss;
     ss << file.rdbuf();
-    s_localeStrings = parseStringsJson(ss.str());
-    s_localeCode = localeStr;
+    ctx->locale.strings = parseStringsJson(ss.str());
+    ctx->locale.code = localeStr;
+    // The ctx-less parameter introspection follows the most recent locale
+    // (see the file header — ABI: dasher_get_parameter_info takes no ctx).
+    s_introspectionStrings = ctx->locale.strings;
     return 0;
 }
 
 DASHER_API const char* dasher_get_locale(dasher_ctx* ctx) {
     if (!ctx) return "en";
-    ctx->scratch.stringBuf = s_localeCode;
+    ctx->scratch.stringBuf = ctx->locale.code;
     return ctx->scratch.stringBuf.c_str();
 }
 
 DASHER_API void dasher_set_string_override(dasher_ctx* ctx, const char* key, const char* value) {
     if (!ctx || !key) return;
     if (value) {
-        s_overrideStrings[key] = value;
+        ctx->locale.overrides[key] = value;
+        s_introspectionOverrides[key] = value;
     } else {
-        s_overrideStrings.erase(key);
+        ctx->locale.overrides.erase(key);
+        s_introspectionOverrides.erase(key);
     }
 }
 
 DASHER_API const char* dasher_get_localized_string(dasher_ctx* ctx, const char* key) {
     if (!ctx || !key) return nullptr;
-    auto it = s_overrideStrings.find(key);
-    if (it != s_overrideStrings.end()) {
+    auto it = ctx->locale.overrides.find(key);
+    if (it != ctx->locale.overrides.end()) {
         ctx->scratch.stringBuf = it->second;
         return ctx->scratch.stringBuf.c_str();
     }
-    it = s_localeStrings.find(key);
-    if (it != s_localeStrings.end()) {
+    it = ctx->locale.strings.find(key);
+    if (it != ctx->locale.strings.end()) {
         ctx->scratch.stringBuf = it->second;
         return ctx->scratch.stringBuf.c_str();
     }

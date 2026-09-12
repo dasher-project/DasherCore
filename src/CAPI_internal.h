@@ -135,6 +135,19 @@ struct dasher_ctx {
         std::vector<char*> nodeLabelPtrs;
     } scratch;
 
+    // Locale state (todo.md 5.2): per-context since CAPI version 3 —
+    // loaded strings, the active code, and per-key overrides all live on
+    // the ctx. The ctx-less parameter introspection
+    // (dasher_get_parameter_info takes no ctx in its ABI) reads a
+    // process-global snapshot updated by the most recent
+    // set_locale/set_string_override call ("last context wins") — see
+    // CAPI_locale.cpp.
+    struct LocaleState {
+        std::string code = "en";
+        std::unordered_map<std::string, std::string> strings;
+        std::unordered_map<std::string, std::string> overrides;
+    } locale;
+
     // Permitted-value memoization (todo.md 4.3): the indexed palette/alphabet
     // getters and the string-values getter each rebuilt the engine's
     // permitted-value vector on every call — iterating 622 alphabets rebuilt

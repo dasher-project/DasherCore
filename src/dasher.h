@@ -332,6 +332,11 @@ DASHER_API int dasher_get_parameter_string_values(dasher_ctx* ctx, int key, cons
 DASHER_API int dasher_get_palette_count(dasher_ctx* ctx);
 
 // Get the name of palette at index (0..count-1). Valid until next API call.
+// PREFERRED for bulk access: dasher_get_parameter_string_values(ctx,
+// SP_COLOUR_ID, ...) fetches the whole list in one call — these indexed
+// getters are the convenient per-row form for lazy UIs (both share the
+// same per-context cache since CAPI version 2, so there is no longer a
+// per-call rebuild penalty either way).
 DASHER_API const char* dasher_get_palette_name(dasher_ctx* ctx, int index);
 
 // Get the name of the currently active palette. Valid until next API call.
@@ -396,6 +401,10 @@ DASHER_API void dasher_set_user_palette(dasher_ctx* ctx, const char* name);
 DASHER_API int dasher_get_alphabet_count(dasher_ctx* ctx);
 
 // Get the name of alphabet at index (0..count-1). Valid until next API call.
+// PREFERRED for bulk access: dasher_get_parameter_string_values(ctx,
+// SP_ALPHABET_ID, ...) fetches the whole list in one call — these indexed
+// getters are the convenient per-row form for lazy UIs (same shared cache;
+// see dasher_get_palette_name).
 DASHER_API const char* dasher_get_alphabet_name(dasher_ctx* ctx, int index);
 
 // ── Game Mode ──────────────────────────────────────────────────────────────
@@ -592,6 +601,13 @@ typedef void (*dasher_parameter_callback)(int parameter_key, void* user_data);
 DASHER_API void dasher_set_parameter_callback(dasher_ctx* ctx, dasher_parameter_callback callback, void* user_data);
 
 // ── Localization ──────────────────────────────────────────────────────────
+//
+// Since CAPI version 3, locale state is PER-CONTEXT: the four functions
+// below affect only the ctx they are called on. (Before v3 the tables were
+// process-global.) One ABI-forced exception: dasher_get_parameter_info is
+// ctx-less, so its localized names follow the most recently set locale in
+// the process ("last context wins") — multi-context frontends should set
+// the locale on the context whose language the settings UI shows.
 
 // Set the active locale for parameter names, descriptions, and enum labels.
 // Looks for strings_{locale}.json in the data_dir/Strings/ directory.
@@ -729,8 +745,12 @@ DASHER_API void dasher_test_inject_failure(dasher_ctx* ctx, int site);
 //       (was "Unknown") for an unknown id, and dasher_find_companion_palette
 //       returns "" (was NULL) when no companion exists. Frontends that
 //       branched on those exact values must treat "" as the failure case.
+//   3 — locale state is per-context: dasher_set_locale / get_locale /
+//       set_string_override / get_localized_string operate on the calling
+//       context only (previously process-global). The ctx-less
+//       dasher_get_parameter_info follows the most recently set locale.
 DASHER_API int dasher_capi_version(void);
-#define DASHER_CAPI_VERSION 2
+#define DASHER_CAPI_VERSION 3
 
 // Get the current Dasher offset (character position in the output).
 // Returns -1 if the engine is not realized.
