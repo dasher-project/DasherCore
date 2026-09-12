@@ -55,7 +55,7 @@ DASHER_API int dasher_get_language_model_id_at(int index) {
 DASHER_API const char* dasher_get_language_model_name(int id) {
     static std::string s_buf;
     auto* desc = Dasher::LMRegistry::instance().get(id);
-    if (!desc) return "Unknown";
+    if (!desc) return "";
     s_buf = desc->name;
     return s_buf.c_str();
 }

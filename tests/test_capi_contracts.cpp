@@ -198,8 +198,7 @@ TEST_CASE("contracts/integer error sentinels") {
 // ---------------------------------------------------------------------------
 // String sentinels. "" is the common failure value; two functions return
 // NULL instead (dasher_find_companion_palette, dasher_get_localized_string)
-// and dasher_get_language_model_name returns "Unknown" — the outliers this
-// file exists to keep visible until todo.md Phase 4 unifies them.
+// (unified to "" at CAPI version 2 — todo.md Phase 4).
 // ---------------------------------------------------------------------------
 
 TEST_CASE("contracts/string error sentinels") {
@@ -215,8 +214,8 @@ TEST_CASE("contracts/string error sentinels") {
     REQUIRE(std::string(name1).size() > 0);
     (void)dasher_get_language_model_description(valid_lm);
     CHECK(std::string(name1) == std::string(dasher_get_language_model_name(valid_lm))); // not clobbered
-    // Invalid id sentinels: "Unknown" literal vs "" (the outlier, Phase 4).
-    CHECK(std::string(dasher_get_language_model_name(-999)) == "Unknown");
+    // Invalid id sentinels: "" since CAPI version 2 (was "Unknown").
+    CHECK(std::string(dasher_get_language_model_name(-999)) == "");
     CHECK(std::string(dasher_get_language_model_description(-999)) == "");
     CHECK(std::string(dasher_get_parameter_enum_name(-999, 0)) == "");
 

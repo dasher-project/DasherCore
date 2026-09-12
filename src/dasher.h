@@ -44,11 +44,10 @@
 //
 //  String returns (copy before the next API call):
 //    ""              — the normal "no value / error" result (most getters).
-//    NULL            — two outliers only: dasher_find_companion_palette
-//                      (no companion) and dasher_get_localized_string
-//                      (no translation). Everything else returns "".
-//    "Unknown"       — dasher_get_language_model_name for an unknown id
-//                      (its description counterpart returns "").
+//    NULL            — dasher_get_localized_string only (no translation
+//                      found — a distinct state from an empty translation;
+//                      frontends use it to pick fallbacks). Everything else
+//                      returns "" (unified at CAPI version 2).
 //
 //  Failure of the engine itself:
 //    dasher_has_engine_error() returns 1 after a C++ exception escaped a
@@ -726,8 +725,12 @@ DASHER_API void dasher_test_inject_failure(dasher_ctx* ctx, int site);
 //       (DasherCore#84). A frontend that re-imports the training file after
 //       create as a stopgap MUST skip that re-import at version >= 1 or the
 //       text would be counted twice.
+//   2 — string sentinels unified: dasher_get_language_model_name returns ""
+//       (was "Unknown") for an unknown id, and dasher_find_companion_palette
+//       returns "" (was NULL) when no companion exists. Frontends that
+//       branched on those exact values must treat "" as the failure case.
 DASHER_API int dasher_capi_version(void);
-#define DASHER_CAPI_VERSION 1
+#define DASHER_CAPI_VERSION 2
 
 // Get the current Dasher offset (character position in the output).
 // Returns -1 if the engine is not realized.

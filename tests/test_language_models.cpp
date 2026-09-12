@@ -30,7 +30,7 @@ TEST(lm_list_and_ids) {
 }
 
 TEST(lm_unknown_returns_safe_defaults) {
-    ASSERT_STR_EQ(dasher_get_language_model_name(99999), "Unknown");
+    ASSERT_STR_EQ(dasher_get_language_model_name(99999), "");
     ASSERT_STR_EQ(dasher_get_language_model_description(99999), "");
     ASSERT_EQ(dasher_get_language_model_param_count(99999), 0);
     ASSERT_EQ(dasher_get_language_model_param_key(99999, 0), -1);
