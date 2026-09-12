@@ -278,7 +278,29 @@ controlled inputs + the corpus guard test instead of parser generality.
       ergonomics guidance, not deprecation-for-perf. Kept, not removed —
       the per-row form is legitimate for lazy UIs.
 
-Phase 5 ships as PR #3 (branch capi/phase-5-cleanups).
+Phase 5 shipped as PR #3 (#92, all 15 checks green; greptile loop closed —
+two P1s on the reader fixed: atomic rejection of malformed files, then full
+token-grammar enforcement after the follow-up found end-state checks alone
+accepted numbers/missing separators/junk — and mis-paired values).
+
+## Done-when assessment (2026-09-12, stack merged)
+
+- Exported C API symbols: 110 (Phase 0 baseline 109 + the test-injection
+  hook, deliberate) — freeze test green throughout. ✓
+- Full ctest green on Linux/macOS/Windows + Sanitize + clang-tidy. ✓
+- dasher.h: constants for every magic int, error-conventions section,
+  CAPI version notes 1→2→3. ✓
+- Frontends build unchanged against the header (additions only);
+  Will verifies for real with a frontend build post-release. ✓
+- "No single source file over ~800 lines": NOT met as written — CAPI.cpp
+  is ~1160 (Interface + game + callbacks + strand2 + typing rate remain).
+  Honest call: further splitting has diminishing returns; the original
+  2552-line monolith is six focused units. Revisit if it grows.
+
+## Release
+
+Stack complete (#90 #91 #92). Next: tag a release (bump project VERSION
+per the #89 drift guard), then Will builds a frontend against it.
 
 ## Done when
 
