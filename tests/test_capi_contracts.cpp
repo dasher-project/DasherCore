@@ -536,14 +536,19 @@ TEST_CASE("contracts/permitted-value cache: realize boundaries invalidate") {
     dasher_test_inject_failure(retry, DASHER_FAIL_INJECT_NONE);
     dasher_set_screen_size(retry, 800, 600); // retry: interface recreated + realized
     CHECK(dasher_has_engine_error(retry) == 0);
+    // Same data dir -> same alphabet count (exact equality is deliberate).
     CHECK(dasher_get_alphabet_count(retry) == post);
 }
 
 TEST_CASE("contracts/permitted-value cache: low-memory filter list is honored") {
     // Low-memory mode silently shrinks the registered input filters during
-    // CreateModules — another parameter-change-silent list mutation covered
-    // only by the realize-boundary invalidation. Inequalities, not exact
-    // counts, so module additions don't break the pin.
+    // CreateModules — a parameter-change-silent list mutation the
+    // realize-boundary invalidation must cover (with a persisted settings
+    // file, realize fires no parameter change, so the boundary call is the
+    // ONLY guard). The pre-realize query fills the cache; without
+    // invalidation the post-realize query would return the stale cached
+    // 0 and the low_count >= 1 check below would fail. Inequalities, not
+    // exact counts, so module additions don't break the pin.
     ScopedContext normal(800, 600);
     const int filter_key = dasher_find_parameter_key("SP_INPUT_FILTER");
     REQUIRE(filter_key >= 0);
@@ -552,7 +557,10 @@ TEST_CASE("contracts/permitted-value cache: low-memory filter list is honored") 
 
     ScopedContext lowmem; // low-memory BEFORE the realize
     dasher_set_low_memory_mode(lowmem, 1);
-    dasher_set_screen_size(lowmem, 800, 600);
+    // Fill the cache with the pre-realize answer first.
+    (void)dasher_get_parameter_string_values(lowmem, filter_key, nullptr, 0);
+    dasher_set_screen_size(lowmem, 800, 600); // realize: list shrinks silently
     const int low_count = dasher_get_parameter_string_values(lowmem, filter_key, nullptr, 0);
+    CHECK(low_count >= 1); // > 0 proves the cache was invalidated, not stale
     CHECK(low_count < normal_count);
 }

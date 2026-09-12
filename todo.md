@@ -245,9 +245,13 @@ Shipped as PR #2 (branch capi/phase-4-consistency), one commit per change:
       the three boundary tests were added — the test-file replace had
       no-op'd the same way. Finally landed with match-verified edits and a
       MUTATION TEST: removing both invalidation mechanisms makes the suite
-      fail on exactly the loop-1 bug (pre-realize 0 cached forever);
-      either mechanism alone keeps it green. Process rule: scripted
-      replaces must assert the pattern matched.
+      fail on exactly the loop-1 bug (pre-realize 0 cached forever).
+      Either mechanism alone keeps the SUITE green — but that rides on
+      fresh-install realize firing a parameter broadcast; with a persisted
+      settings file the realize-boundary call is the only guard, so both
+      stay. Process rules: scripted replaces must assert the pattern
+      matched; mutation checks must confirm the mutated build actually
+      relinked (a stale binary gives a false green).
 
 ## Phase 5 — bigger cleanups (only after 1–4 land)
 
