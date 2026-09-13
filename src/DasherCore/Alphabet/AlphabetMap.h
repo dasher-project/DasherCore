@@ -121,6 +121,9 @@ class Dasher::CAlphabetMap {
         off_t pos, len;
         std::istream& in;
         CMessageDisplay* const m_pMsgs;
+        /// Count of invalid UTF-8 bytes skipped so far (aggregated — see
+        /// findNext); flushed as a single summary message on every EOF path.
+        int m_skippedInvalid = 0;
     };
 
     // Fills Symbols with the symbols corresponding to Input. {{{ Note that this

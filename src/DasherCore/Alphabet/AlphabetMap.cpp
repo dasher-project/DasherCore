@@ -94,10 +94,16 @@ inline int CAlphabetMap::SymbolStream::findNext() {
             readMore();
         }
         // if still don't have any chars after attempting to read more...EOF!
-        if (pos == len) return 0; // EOF
+        if (pos == len) {
+            if (m_skippedInvalid && m_pMsgs)
+                m_pMsgs->FormatMessage("Skipped %i invalid UTF-8 byte(s) in training data", m_skippedInvalid);
+            return 0; // EOF
+        }
         if (int numChars = m_utf8_count_array[buf[pos]]) {
             if (pos + numChars > len) {
                 // no more bytes in file (would have tried to read earlier), but not enough for char
+                if (m_skippedInvalid && m_pMsgs)
+                    m_pMsgs->FormatMessage("Skipped %i invalid UTF-8 byte(s) in training data", m_skippedInvalid);
                 if (m_pMsgs)
                     m_pMsgs->FormatMessage(
                         "File ends with incomplete UTF-8 character beginning 0x%x (expecting %i bytes but only %i)",
@@ -106,8 +112,10 @@ inline int CAlphabetMap::SymbolStream::findNext() {
             }
             return numChars;
         }
-        if (m_pMsgs)
-            m_pMsgs->FormatMessage("Read invalid UTF-8 character 0x%x", static_cast<unsigned int>(buf[pos] & 0xff));
+        // Invalid byte — silently skip and count (one summary message on EOF
+        // instead of one per byte; the per-byte toasts were alarming users
+        // whose training data carries pre-v0.1.27 ANSI-marshalling corruption).
+        ++m_skippedInvalid;
         ++pos;
     }
 }
