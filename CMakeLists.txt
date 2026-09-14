@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.12)
 
-project("DasherCore" VERSION 0.2.24)
+project("DasherCore" VERSION 0.2.25)
 
 ###############################
 # Release-version drift guard
