@@ -9,13 +9,18 @@
      node's Text, so a selection commits the entire sequence atomically
      (see ReadCharAttributes: Text = "text" attr, default Display/label).
 
-     Groups are kept to 8 topical clusters plus separators: Dasher's
+     Groups are kept to 9 topical clusters plus separators: Dasher's
      zooming interface needs a shallow tree — two zoom levels to any
      emoji. A flat 200-node root would be unusable.
 
      Frequencies: training_emoji.txt provides mild ordering priors
      (common juxtapositions); without training the engine falls back to
      symbol-order defaults (NodeCreationManager "Dasher will still work").
+     NOTE: the trainer matches ONE code point per symbol lookup, so only
+     single-codepoint emoji are learnable from the corpus. The 31
+     multi-codepoint nodes (ZWJ sequences, VS16 variants like ✈️) always
+     take default frequencies — a longest-match trainer would be needed
+     to train those (engine follow-up, not blocking).
 -->
 <alphabet name="Emoji" orientation="LR" trainingFilename="training_emoji.txt" colorsName="Default">
 	<group name="Smileys and faces" label="😀">

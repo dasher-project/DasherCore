@@ -1,4 +1,5 @@
-dist_pkgdata_DATA =			\
+ dist_pkgdata_DATA =		 \
+	training_emoji.txt		 \
 	training_english_GB.txt		 \
 	training_wa_af_Latn.txt		 \
 	training_wa_am_Ethi.txt		 \

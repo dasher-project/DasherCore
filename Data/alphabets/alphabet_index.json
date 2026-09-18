@@ -1,7 +1,7 @@
 {
  "generator": "generate-alphabet-index.py",
- "generated_utc": "2026-08-29T14:22:40Z",
- "count": 474,
+ "generated_utc": "2026-09-18T16:45:26Z",
+ "count": 475,
  "summaries": {
   "by_script": {
    "Latn": 317,
@@ -12,7 +12,7 @@
    "Ethi": 8,
    "Hani": 7,
    "Beng": 4,
-   "unknown": 3,
+   "unknown": 4,
    "Kana": 3,
    "Orya": 3,
    "Mymr": 2,
@@ -54,14 +54,14 @@
    "Runr": 1
   },
   "by_orientation": {
-   "ltr": 451,
+   "ltr": 452,
    "rtl": 22,
    "ttb": 1
   },
   "with_lang_code": 456,
-  "without_lang_code": 18,
-  "declaring_training": 239,
-  "training_available": 150,
+  "without_lang_code": 19,
+  "declaring_training": 240,
+  "training_available": 151,
   "training_missing": 89,
   "no_training_declared": 235
  },
@@ -2379,6 +2379,32 @@
     "Editing"
    ],
    "source": "worldalphabets"
+  },
+  {
+   "id": "Emoji",
+   "file": "alphabet.emoji.xml",
+   "orientation": "ltr",
+   "lang": null,
+   "script": null,
+   "script_name": null,
+   "training": "training_emoji.txt",
+   "training_available": true,
+   "palette": "Default",
+   "conversion": "none",
+   "chars": 308,
+   "groups": [
+    "Smileys and faces",
+    "Gestures and hands",
+    "Hearts and celebration",
+    "People and family",
+    "Animals and nature",
+    "Food and drink",
+    "Travel and places",
+    "Objects and activities",
+    "Communication and symbols",
+    "Separators"
+   ],
+   "source": "maintained"
   },
   {
    "id": "English (WorldAlphabets)",
