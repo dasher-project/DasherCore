@@ -82,7 +82,9 @@ dasher.log
 # Training files written by the engine to CWD when contexts are destroyed.
 # This is a real bug (Tier 1 item: library should not write to CWD) — for
 # now we ignore the leaked files so they don't pollute git status.
-training_*.txt
+# Root-anchored: Data/training/ holds the SHIPPED corpora and must stay
+# trackable (training_emoji.txt was silently ignored by the bare pattern).
+/training_*.txt
 
 build-san/
 build-tidy/

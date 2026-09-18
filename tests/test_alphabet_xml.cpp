@@ -100,6 +100,67 @@ TEST(alphabet_symbol_out_of_range_returns_error) {
     dasher_destroy(ctx);
 }
 
+// ── Emoji alphabet (Dasher-Android #61, option 2) ─────────────────────────
+// Multi-codepoint nodes: ZWJ sequences (family: 5 codepoints / 18 bytes) and
+// skin-tone modifiers must survive the XML round-trip whole — ReadCharAttributes
+// stores the full label as Text and TextOutputAction commits it atomically.
+
+TEST(alphabet_emoji_loads_and_has_groups) {
+    dasher_ctx* ctx = create_isolated_context();
+    ASSERT(ctx);
+    dasher_set_screen_size(ctx, 800, 600);
+
+    dasher_set_alphabet_id(ctx, "Emoji");
+    const char* loaded = dasher_get_alphabet_id(ctx);
+    printf("  Switched to: '%s'\n", loaded);
+    ASSERT_STR_EQ(loaded, "Emoji");
+
+    int sym_count = dasher_get_alphabet_symbol_count(ctx);
+    printf("  Emoji symbol count: %d\n", sym_count);
+    // 9 topical groups (~230 nodes) + control/terminator symbols
+    ASSERT(sym_count > 150);
+
+    dasher_destroy(ctx);
+}
+
+TEST(alphabet_emoji_zwj_sequence_roundtrip) {
+    dasher_ctx* ctx = create_isolated_context();
+    ASSERT(ctx);
+    dasher_set_screen_size(ctx, 800, 600);
+
+    dasher_set_alphabet_id(ctx, "Emoji");
+    ASSERT_STR_EQ(dasher_get_alphabet_id(ctx), "Emoji");
+
+    const char* family =
+        "\xF0\x9F\x91\xA8\xE2\x80\x8D\xF0\x9F\x91\xA9\xE2\x80\x8D\xF0\x9F\x91\xA7"; // U+1F468 ZWJ U+1F469 ZWJ U+1F467
+    const char* toned = "\xF0\x9F\x91\x8D\xF0\x9F\x8F\xBD";                         // U+1F44D U+1F3FD
+    bool found_family = false, found_toned = false, found_space = false;
+    int sym_count = dasher_get_alphabet_symbol_count(ctx);
+    for (int i = 0; i < sym_count; i++) {
+        char buf[128];
+        if (dasher_get_alphabet_symbol_text(ctx, i, buf, sizeof(buf)) != 0) continue;
+        if (strcmp(buf, family) == 0) found_family = true;
+        if (strcmp(buf, toned) == 0) found_toned = true;
+        if (strcmp(buf, " ") == 0) found_space = true;
+    }
+    printf("  ZWJ family: %d, skin-tone: %d, space: %d\n", found_family, found_toned, found_space);
+    ASSERT(found_family);
+    ASSERT(found_toned);
+    ASSERT(found_space); // separator node: display ␣, text " "
+
+    dasher_destroy(ctx);
+}
+
+TEST(alphabet_emoji_training_file_present) {
+    // The engine tolerates a missing training file, but we ship one for mild
+    // ordering priors — assert the shipped tree still has it next to the
+    // alphabet so release packaging doesn't silently drop it.
+    std::error_code ec;
+    bool ok =
+        std::filesystem::exists(std::filesystem::path(TEST_DATA_DIR) / "Data" / "training" / "training_emoji.txt", ec);
+    ASSERT(ok);
+}
+
 TEST(alphabet_switch_changes_probabilities) {
     dasher_ctx* ctx = create_isolated_context();
     ASSERT(ctx);
