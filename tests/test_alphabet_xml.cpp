@@ -139,7 +139,7 @@ TEST(alphabet_emoji_zwj_sequence_roundtrip) {
     const char* toned = "\xF0\x9F\x91\x8D\xF0\x9F\x8F\xBD";                         // U+1F44D U+1F3FD
     bool found_family = false, found_toned = false, found_space = false;
     int sym_count = dasher_get_alphabet_symbol_count(ctx);
-    for (int i = 0; i < sym_count; i++) {
+    for (int i = 1; i <= sym_count; i++) {
         char buf[128];
         if (dasher_get_alphabet_symbol_text(ctx, i, buf, sizeof(buf)) != 0) continue;
         if (strcmp(buf, family) == 0) found_family = true;
@@ -159,8 +159,8 @@ TEST(alphabet_emoji_training_file_present) {
     // ordering priors — assert the shipped tree still has it next to the
     // alphabet so release packaging doesn't silently drop it.
     std::error_code ec;
-    bool ok = std::filesystem::exists(
-        std::filesystem::path(TEST_DATA_DIR) / "Data" / "training" / "training_emoji.txt", ec);
+    bool ok =
+        std::filesystem::exists(std::filesystem::path(TEST_DATA_DIR) / "Data" / "training" / "training_emoji.txt", ec);
     ASSERT(ok);
 }
 
@@ -178,10 +178,9 @@ TEST(alphabet_emoji_corpus_tokens_are_nodes) {
     dasher_set_alphabet_id(ctx, "Emoji");
     ASSERT_STR_EQ(dasher_get_alphabet_id(ctx), "Emoji");
     int sym_count = dasher_get_alphabet_symbol_count(ctx);
-    for (int i = 0; i < sym_count; i++) {
+    for (int i = 1; i <= sym_count; i++) {
         char buf[128];
-        if (dasher_get_alphabet_symbol_text(ctx, i, buf, sizeof(buf)) == 0 && buf[0] != '\0')
-            nodes.push_back(buf);
+        if (dasher_get_alphabet_symbol_text(ctx, i, buf, sizeof(buf)) == 0 && buf[0] != '\0') nodes.push_back(buf);
     }
     dasher_destroy(ctx);
 
@@ -206,7 +205,8 @@ TEST(alphabet_emoji_corpus_tokens_are_nodes) {
                 }
                 if (!known) {
                     printf("  unknown corpus token (%zu bytes):", tok.size());
-                    for (unsigned char ch : tok) printf(" %02x", ch);
+                    for (unsigned char ch : tok)
+                        printf(" %02x", ch);
                     printf("\n");
                     ASSERT(false);
                 }
@@ -236,10 +236,9 @@ TEST(alphabet_emoji_output_segments_into_whole_nodes) {
 
     std::vector<std::string> symbols;
     int sym_count = dasher_get_alphabet_symbol_count(ctx);
-    for (int i = 0; i < sym_count; i++) {
+    for (int i = 1; i <= sym_count; i++) {
         char buf[128];
-        if (dasher_get_alphabet_symbol_text(ctx, i, buf, sizeof(buf)) == 0 && buf[0] != '\0')
-            symbols.push_back(buf);
+        if (dasher_get_alphabet_symbol_text(ctx, i, buf, sizeof(buf)) == 0 && buf[0] != '\0') symbols.push_back(buf);
     }
     ASSERT(symbols.size() > 100);
 
@@ -247,7 +246,7 @@ TEST(alphabet_emoji_output_segments_into_whole_nodes) {
     dasher_set_output_callback(
         ctx,
         [](int event_type, const char* text, void* user_data) {
-            if (event_type == 0) { // DASHER_EVENT_OUTPUT
+            if (event_type == DASHER_EVENT_OUTPUT) {
                 static_cast<std::vector<std::string>*>(user_data)->push_back(text);
             }
         },
@@ -257,7 +256,9 @@ TEST(alphabet_emoji_output_segments_into_whole_nodes) {
     // with different y-bands and x-depths; every committed event must be a
     // WHOLE node text (byte-level concatenation can't prove atomicity —
     // five separate events for 👨‍👩‍👧 produce identical bytes).
-    const struct { int y0, y1, x; } passes[] = {
+    const struct {
+        int y0, y1, x;
+    } passes[] = {
         {100, 500, 700}, // full safe band (same as test_spell_word)
         {150, 350, 720}, // upper-half dwell
         {300, 540, 680}, // lower-half dwell
@@ -292,7 +293,8 @@ TEST(alphabet_emoji_output_segments_into_whole_nodes) {
         }
         if (!whole) {
             printf("  NON-ATOMIC event (%zu bytes):", ev.size());
-            for (unsigned char ch : ev) printf(" %02x", ch);
+            for (unsigned char ch : ev)
+                printf(" %02x", ch);
             printf("\n");
         }
         ASSERT(whole);
@@ -315,14 +317,12 @@ TEST(alphabet_multicodepoint_commit_is_atomic) {
     // No training file: uniform-ish symbol ordering (the engine's
     // documented no-training fallback).
     std::string xml = std::string("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n") +
-        "<!DOCTYPE alphabet SYSTEM \"../alphabet.dtd\">\n" +
-        "<alphabet name=\"ZWJ Test\" orientation=\"LR\" colorsName=\"Default\">\n" +
-        "  <group name=\"mixed\">\n" +
-        "    <node label=\"&#x1F468;&#x200D;&#x1F469;&#x200D;&#x1F467;\"><textCharAction /></node>\n" +
-        "    <node label=\"&#x2708;&#xFE0F;\"><textCharAction /></node>\n" +
-        "    <node label=\"&#x1F600;\"><textCharAction /></node>\n" +
-        "  </group>\n" +
-        "</alphabet>\n";
+                      "<!DOCTYPE alphabet SYSTEM \"../alphabet.dtd\">\n" +
+                      "<alphabet name=\"ZWJ Test\" orientation=\"LR\" colorsName=\"Default\">\n" +
+                      "  <group name=\"mixed\">\n" +
+                      "    <node label=\"&#x1F468;&#x200D;&#x1F469;&#x200D;&#x1F467;\"><textCharAction /></node>\n" +
+                      "    <node label=\"&#x2708;&#xFE0F;\"><textCharAction /></node>\n" +
+                      "    <node label=\"&#x1F600;\"><textCharAction /></node>\n" + "  </group>\n" + "</alphabet>\n";
     ASSERT(write_data_file(data_dir, "alphabets", "alphabet.zwjtest.xml", xml));
 
     dasher_ctx* ctx = dasher_create(data_dir.c_str(), dataRoot.c_str(), nullptr);
@@ -340,7 +340,9 @@ TEST(alphabet_multicodepoint_commit_is_atomic) {
     dasher_set_output_callback(
         ctx,
         [](int event_type, const char* text, void* user_data) {
-            if (event_type == 0) { static_cast<std::vector<std::string>*>(user_data)->emplace_back(text); }
+            if (event_type == DASHER_EVENT_OUTPUT) {
+                static_cast<std::vector<std::string>*>(user_data)->emplace_back(text);
+            }
         },
         &events);
 
@@ -362,7 +364,8 @@ TEST(alphabet_multicodepoint_commit_is_atomic) {
         bool known = (ev == family || ev == plane || ev == grin);
         if (!known) {
             printf("  NON-ATOMIC event (%zu bytes):", ev.size());
-            for (unsigned char ch : ev) printf(" %02x", ch);
+            for (unsigned char ch : ev)
+                printf(" %02x", ch);
             printf("\n");
         }
         ASSERT(known);
@@ -374,7 +377,6 @@ TEST(alphabet_multicodepoint_commit_is_atomic) {
 
     dasher_destroy(ctx);
 }
-
 
 TEST(alphabet_switch_changes_probabilities) {
     dasher_ctx* ctx = create_isolated_context();
