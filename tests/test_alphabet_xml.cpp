@@ -139,7 +139,7 @@ TEST(alphabet_emoji_zwj_sequence_roundtrip) {
     const char* toned = "\xF0\x9F\x91\x8D\xF0\x9F\x8F\xBD";                         // U+1F44D U+1F3FD
     bool found_family = false, found_toned = false, found_space = false;
     int sym_count = dasher_get_alphabet_symbol_count(ctx);
-    for (int i = 1; i <= sym_count; i++) {
+    for (int i = 1; i < sym_count; i++) {
         char buf[128];
         if (dasher_get_alphabet_symbol_text(ctx, i, buf, sizeof(buf)) != 0) continue;
         if (strcmp(buf, family) == 0) found_family = true;
@@ -178,7 +178,7 @@ TEST(alphabet_emoji_corpus_tokens_are_nodes) {
     dasher_set_alphabet_id(ctx, "Emoji");
     ASSERT_STR_EQ(dasher_get_alphabet_id(ctx), "Emoji");
     int sym_count = dasher_get_alphabet_symbol_count(ctx);
-    for (int i = 1; i <= sym_count; i++) {
+    for (int i = 1; i < sym_count; i++) {
         char buf[128];
         if (dasher_get_alphabet_symbol_text(ctx, i, buf, sizeof(buf)) == 0 && buf[0] != '\0') nodes.push_back(buf);
     }
@@ -210,6 +210,21 @@ TEST(alphabet_emoji_corpus_tokens_are_nodes) {
                     printf("\n");
                     ASSERT(false);
                 }
+                // Greptile P2: membership alone is insufficient — a
+                // multi-codepoint NODE (👨‍👩‍👧) would pass even though the
+                // trainer looks up one code point per symbol and can never
+                // match it. Enforce single-codepoint tokens explicitly:
+                // count UTF-8 lead bytes (non-continuation).
+                int codepoints = 0;
+                for (unsigned char ch : tok)
+                    if ((ch & 0xC0) != 0x80) codepoints++;
+                if (codepoints != 1) {
+                    printf("  multi-codepoint corpus token (%d codepoints):", codepoints);
+                    for (unsigned char ch : tok)
+                        printf(" %02x", ch);
+                    printf("\n");
+                    ASSERT(false);
+                }
             }
             start = end + 1;
         }
@@ -236,7 +251,7 @@ TEST(alphabet_emoji_output_segments_into_whole_nodes) {
 
     std::vector<std::string> symbols;
     int sym_count = dasher_get_alphabet_symbol_count(ctx);
-    for (int i = 1; i <= sym_count; i++) {
+    for (int i = 1; i < sym_count; i++) {
         char buf[128];
         if (dasher_get_alphabet_symbol_text(ctx, i, buf, sizeof(buf)) == 0 && buf[0] != '\0') symbols.push_back(buf);
     }
@@ -459,7 +474,7 @@ TEST(alphabet_v6_space_character_resolves_to_space) {
 
     // Valid symbol indices are 1..sym_count inclusive (index 0 is the sentinel).
     bool found_space = false;
-    for (int i = 1; i <= sym_count; i++) {
+    for (int i = 1; i < sym_count; i++) {
         char buf[128];
         if (dasher_get_alphabet_symbol_text(ctx, i, buf, sizeof(buf)) == 0 && strcmp(buf, " ") == 0) {
             found_space = true;
@@ -504,7 +519,7 @@ TEST(alphabet_v6_paragraph_outputs_newline) {
         ASSERT(sym_count > 0);
 
         bool found_paragraph_display = false, paragraph_is_newline = false;
-        for (int i = 1; i <= sym_count; i++) {
+        for (int i = 1; i < sym_count; i++) {
             char disp[128], text[128];
             if (dasher_get_alphabet_symbol_display(ctx, i, disp, sizeof(disp)) != 0) continue;
             if (strcmp(disp, "\xc2\xb6") != 0) continue; // UTF-8 pilcrow
@@ -598,7 +613,7 @@ TEST(alphabet_v5_symbols_have_correct_text) {
     ASSERT(sym_count >= 3);
 
     bool found_x = false, found_space = false, found_emoji = false;
-    for (int i = 1; i <= sym_count; i++) {
+    for (int i = 1; i < sym_count; i++) {
         char buf[128];
         if (dasher_get_alphabet_symbol_text(ctx, i, buf, sizeof(buf)) != 0) continue;
         std::string s(buf);
@@ -703,7 +718,7 @@ TEST(alphabet_v5_special_chars_as_direct_children) {
 
     // Scan all symbols for the expected text values.
     bool found_letter_a = false, found_space = false, found_newline = false;
-    for (int i = 1; i <= sym_count; i++) {
+    for (int i = 1; i < sym_count; i++) {
         char buf[128];
         if (dasher_get_alphabet_symbol_text(ctx, i, buf, sizeof(buf)) != 0) continue;
         std::string s(buf);
