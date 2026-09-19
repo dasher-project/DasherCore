@@ -1,6 +1,9 @@
 // Alphabet XML parsing tests: verify alphabet loading, switching, and structure
 #include "test_common.h"
 
+#include <string>
+#include <vector>
+
 TEST(alphabet_default_loaded) {
     dasher_ctx* ctx = create_isolated_context();
     ASSERT(ctx);
@@ -100,6 +103,296 @@ TEST(alphabet_symbol_out_of_range_returns_error) {
     dasher_destroy(ctx);
 }
 
+// ── Emoji alphabet (Dasher-Android #61, option 2) ─────────────────────────
+// Multi-codepoint nodes: ZWJ sequences (family: 5 codepoints / 18 bytes) and
+// skin-tone modifiers must survive the XML round-trip whole — ReadCharAttributes
+// stores the full label as Text and TextOutputAction commits it atomically.
+
+TEST(alphabet_emoji_loads_and_has_groups) {
+    dasher_ctx* ctx = create_isolated_context();
+    ASSERT(ctx);
+    dasher_set_screen_size(ctx, 800, 600);
+
+    dasher_set_alphabet_id(ctx, "Emoji");
+    const char* loaded = dasher_get_alphabet_id(ctx);
+    printf("  Switched to: '%s'\n", loaded);
+    ASSERT_STR_EQ(loaded, "Emoji");
+
+    int sym_count = dasher_get_alphabet_symbol_count(ctx);
+    printf("  Emoji symbol count: %d\n", sym_count);
+    // Emoji alphabet loads (expect ~310 symbols: 9 groups, ~307 nodes + control).
+    ASSERT(sym_count > 150);
+
+    dasher_destroy(ctx);
+}
+
+TEST(alphabet_emoji_zwj_sequence_roundtrip) {
+    dasher_ctx* ctx = create_isolated_context();
+    ASSERT(ctx);
+    dasher_set_screen_size(ctx, 800, 600);
+
+    dasher_set_alphabet_id(ctx, "Emoji");
+    ASSERT_STR_EQ(dasher_get_alphabet_id(ctx), "Emoji");
+
+    const char* family =
+        "\xF0\x9F\x91\xA8\xE2\x80\x8D\xF0\x9F\x91\xA9\xE2\x80\x8D\xF0\x9F\x91\xA7"; // U+1F468 ZWJ U+1F469 ZWJ U+1F467
+    const char* toned = "\xF0\x9F\x91\x8D\xF0\x9F\x8F\xBD";                         // U+1F44D U+1F3FD
+    bool found_family = false, found_toned = false, found_space = false;
+    int sym_count = dasher_get_alphabet_symbol_count(ctx);
+    for (int i = 1; i < sym_count; i++) {
+        char buf[128];
+        if (dasher_get_alphabet_symbol_text(ctx, i, buf, sizeof(buf)) != 0) continue;
+        if (strcmp(buf, family) == 0) found_family = true;
+        if (strcmp(buf, toned) == 0) found_toned = true;
+        if (strcmp(buf, " ") == 0) found_space = true;
+    }
+    printf("  ZWJ family: %d, skin-tone: %d, space: %d\n", found_family, found_toned, found_space);
+    ASSERT(found_family);
+    ASSERT(found_toned);
+    ASSERT(found_space); // separator node: display ␣, text " "
+
+    dasher_destroy(ctx);
+}
+
+TEST(alphabet_emoji_training_file_present) {
+    // The engine tolerates a missing training file, but we ship one for mild
+    // ordering priors — assert the shipped tree still has it next to the
+    // alphabet so release packaging doesn't silently drop it.
+    std::error_code ec;
+    bool ok =
+        std::filesystem::exists(std::filesystem::path(TEST_DATA_DIR) / "Data" / "training" / "training_emoji.txt", ec);
+    ASSERT(ok);
+}
+
+TEST(alphabet_emoji_corpus_tokens_are_nodes) {
+    // Greptile P2: corpus tokens that are not alphabet symbols train
+    // UNKNOWN_SYMBOL observations — pure noise. Every whitespace-separated
+    // token must be a whole node text, and (trainer limitation) must be a
+    // SINGLE code point: the trainer looks up one code point per symbol,
+    // so multi-codepoint tokens (ZWJ, VS16) can never match and are
+    // silently split.
+    std::vector<std::string> nodes;
+    dasher_ctx* ctx = create_isolated_context();
+    ASSERT(ctx);
+    dasher_set_screen_size(ctx, 800, 600);
+    dasher_set_alphabet_id(ctx, "Emoji");
+    ASSERT_STR_EQ(dasher_get_alphabet_id(ctx), "Emoji");
+    int sym_count = dasher_get_alphabet_symbol_count(ctx);
+    for (int i = 1; i < sym_count; i++) {
+        char buf[128];
+        if (dasher_get_alphabet_symbol_text(ctx, i, buf, sizeof(buf)) == 0 && buf[0] != '\0') nodes.push_back(buf);
+    }
+    dasher_destroy(ctx);
+
+    std::ifstream in(std::filesystem::path(TEST_DATA_DIR) / "Data" / "training" / "training_emoji.txt");
+    ASSERT(in.is_open());
+    std::string line;
+    int tokens = 0;
+    while (std::getline(in, line)) {
+        size_t start = 0;
+        while (start < line.size()) {
+            size_t end = line.find(' ', start);
+            if (end == std::string::npos) end = line.size();
+            if (end > start) {
+                std::string tok = line.substr(start, end - start);
+                tokens++;
+                bool known = false;
+                for (const auto& n : nodes) {
+                    if (n == tok) {
+                        known = true;
+                        break;
+                    }
+                }
+                if (!known) {
+                    printf("  unknown corpus token (%zu bytes):", tok.size());
+                    for (unsigned char ch : tok)
+                        printf(" %02x", ch);
+                    printf("\n");
+                    ASSERT(false);
+                }
+                // Greptile P2: membership alone is insufficient — a
+                // multi-codepoint NODE (👨‍👩‍👧) would pass even though the
+                // trainer looks up one code point per symbol and can never
+                // match it. Enforce single-codepoint tokens explicitly:
+                // count UTF-8 lead bytes (non-continuation).
+                int codepoints = 0;
+                for (unsigned char ch : tok)
+                    if ((ch & 0xC0) != 0x80) codepoints++;
+                if (codepoints != 1) {
+                    printf("  multi-codepoint corpus token (%d codepoints):", codepoints);
+                    for (unsigned char ch : tok)
+                        printf(" %02x", ch);
+                    printf("\n");
+                    ASSERT(false);
+                }
+            }
+            start = end + 1;
+        }
+    }
+    printf("  %d corpus tokens, all valid single-codepoint nodes\n", tokens);
+    ASSERT(tokens > 100);
+}
+
+TEST(alphabet_emoji_output_segments_into_whole_nodes) {
+    // Greptile P2: prove the OUTPUT path commits multi-codepoint nodes
+    // atomically — at EVENT level, not byte level. A concatenated-bytes
+    // check would pass even if 👨‍👩‍👧 arrived as five separate events
+    // (👨, ZWJ, 👩, ZWJ, 👧); the output callback sees each insert as its
+    // own event, so requiring every event's text to be a WHOLE node text
+    // closes that hole. We also require at least one multi-codepoint
+    // event (>4 bytes ⇒ ZWJ or VS16 carrier) so the multi-byte path is
+    // actually exercised, not vacuously green.
+    dasher_ctx* ctx = create_isolated_context();
+    ASSERT(ctx);
+    dasher_set_screen_size(ctx, 800, 600);
+    dasher_set_alphabet_id(ctx, "Emoji");
+    ASSERT_STR_EQ(dasher_get_alphabet_id(ctx), "Emoji");
+    dasher_set_speed_percent(ctx, 300);
+
+    std::vector<std::string> symbols;
+    int sym_count = dasher_get_alphabet_symbol_count(ctx);
+    for (int i = 1; i < sym_count; i++) {
+        char buf[128];
+        if (dasher_get_alphabet_symbol_text(ctx, i, buf, sizeof(buf)) == 0 && buf[0] != '\0') symbols.push_back(buf);
+    }
+    ASSERT(symbols.size() > 100);
+
+    std::vector<std::string> events;
+    dasher_set_output_callback(
+        ctx,
+        [](int event_type, const char* text, void* user_data) {
+            if (event_type == DASHER_EVENT_OUTPUT) {
+                static_cast<std::vector<std::string>*>(user_data)->push_back(text);
+            }
+        },
+        &events);
+
+    // Sweep sy across varied bands with the button held. Several passes
+    // with different y-bands and x-depths; every committed event must be a
+    // WHOLE node text (byte-level concatenation can't prove atomicity —
+    // five separate events for 👨‍👩‍👧 produce identical bytes).
+    const struct {
+        int y0, y1, x;
+    } passes[] = {
+        {100, 500, 700}, // full safe band (same as test_spell_word)
+        {150, 350, 720}, // upper-half dwell
+        {300, 540, 680}, // lower-half dwell
+        {200, 460, 740}, // deeper zoom
+    };
+    int frame = 0;
+    for (const auto& p : passes) {
+        dasher_mouse_down(ctx);
+        const int span = p.y1 - p.y0;
+        for (int i = 0; i < 500; i++) {
+            int sy = p.y0 + (i % span);
+            dasher_mouse_move(ctx, static_cast<float>(p.x), static_cast<float>(sy));
+            int* c = nullptr;
+            int cc = 0;
+            char** s = nullptr;
+            int sc = 0;
+            dasher_frame(ctx, 1000 + (frame++) * 16, &c, &cc, &s, &sc);
+        }
+        dasher_mouse_up(ctx);
+        if (events.size() > 0) break;
+    }
+
+    size_t total = 0;
+    for (const auto& ev : events) {
+        total += ev.size();
+        bool whole = false;
+        for (const auto& sym : symbols) {
+            if (sym == ev) {
+                whole = true;
+                break;
+            }
+        }
+        if (!whole) {
+            printf("  NON-ATOMIC event (%zu bytes):", ev.size());
+            for (unsigned char ch : ev)
+                printf(" %02x", ch);
+            printf("\n");
+        }
+        ASSERT(whole);
+    }
+    printf("  %zu output events, %zu bytes — every event a whole node text\n", events.size(), total);
+    ASSERT(events.size() > 0);
+
+    dasher_destroy(ctx);
+}
+
+TEST(alphabet_multicodepoint_commit_is_atomic) {
+    // Deterministic multi-codepoint coverage: a purpose-built 3-node test
+    // alphabet (ZWJ sequence, VS16 carrier, plain emoji) where EVERY node
+    // but one is multi-codepoint and each holds ~1/3 of the tree mass —
+    // navigation cannot avoid committing them. Complements the sweep test
+    // above, whose mass distribution follows the training priors and may
+    // not reach the shipped alphabet's low-mass multi-codepoint nodes.
+    ScopedTempDir dataRoot;
+    const std::string data_dir = build_data_dir(dataRoot);
+    // No training file: uniform-ish symbol ordering (the engine's
+    // documented no-training fallback).
+    std::string xml = std::string("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n") +
+                      "<!DOCTYPE alphabet SYSTEM \"../alphabet.dtd\">\n" +
+                      "<alphabet name=\"ZWJ Test\" orientation=\"LR\" colorsName=\"Default\">\n" +
+                      "  <group name=\"mixed\">\n" +
+                      "    <node label=\"&#x1F468;&#x200D;&#x1F469;&#x200D;&#x1F467;\"><textCharAction /></node>\n" +
+                      "    <node label=\"&#x2708;&#xFE0F;\"><textCharAction /></node>\n" +
+                      "    <node label=\"&#x1F600;\"><textCharAction /></node>\n" + "  </group>\n" + "</alphabet>\n";
+    ASSERT(write_data_file(data_dir, "alphabets", "alphabet.zwjtest.xml", xml));
+
+    dasher_ctx* ctx = dasher_create(data_dir.c_str(), dataRoot.c_str(), nullptr);
+    ASSERT(ctx);
+    dasher_set_screen_size(ctx, 800, 600);
+    printf("  custom dir alphabets: %d\n", dasher_get_alphabet_count(ctx));
+    dasher_set_alphabet_id(ctx, "ZWJ Test");
+    ASSERT_STR_EQ(dasher_get_alphabet_id(ctx), "ZWJ Test");
+
+    const std::string family = "\xF0\x9F\x91\xA8\xE2\x80\x8D\xF0\x9F\x91\xA9\xE2\x80\x8D\xF0\x9F\x91\xA7";
+    const std::string plane = "\xE2\x9C\x88\xEF\xB8\x8F";
+    const std::string grin = "\xF0\x9F\x98\x80";
+
+    std::vector<std::string> events;
+    dasher_set_output_callback(
+        ctx,
+        [](int event_type, const char* text, void* user_data) {
+            if (event_type == DASHER_EVENT_OUTPUT) {
+                static_cast<std::vector<std::string>*>(user_data)->emplace_back(text);
+            }
+        },
+        &events);
+
+    dasher_set_speed_percent(ctx, 300);
+    dasher_mouse_down(ctx);
+    for (int i = 0; i < 600; i++) {
+        int sy = 150 + (i % 300);
+        dasher_mouse_move(ctx, 700.0f, static_cast<float>(sy));
+        int* c = nullptr;
+        int cc = 0;
+        char** s = nullptr;
+        int sc = 0;
+        dasher_frame(ctx, 1000 + i * 16, &c, &cc, &s, &sc);
+    }
+    dasher_mouse_up(ctx);
+
+    size_t multi = 0;
+    for (const auto& ev : events) {
+        bool known = (ev == family || ev == plane || ev == grin);
+        if (!known) {
+            printf("  NON-ATOMIC event (%zu bytes):", ev.size());
+            for (unsigned char ch : ev)
+                printf(" %02x", ch);
+            printf("\n");
+        }
+        ASSERT(known);
+        if (ev.size() > 4) multi++;
+    }
+    printf("  %zu events, %zu multi-codepoint commits\n", events.size(), multi);
+    ASSERT(events.size() > 0);
+    ASSERT(multi > 0);
+
+    dasher_destroy(ctx);
+}
+
 TEST(alphabet_switch_changes_probabilities) {
     dasher_ctx* ctx = create_isolated_context();
     ASSERT(ctx);
@@ -181,7 +474,7 @@ TEST(alphabet_v6_space_character_resolves_to_space) {
 
     // Valid symbol indices are 1..sym_count inclusive (index 0 is the sentinel).
     bool found_space = false;
-    for (int i = 1; i <= sym_count; i++) {
+    for (int i = 1; i < sym_count; i++) {
         char buf[128];
         if (dasher_get_alphabet_symbol_text(ctx, i, buf, sizeof(buf)) == 0 && strcmp(buf, " ") == 0) {
             found_space = true;
@@ -226,7 +519,7 @@ TEST(alphabet_v6_paragraph_outputs_newline) {
         ASSERT(sym_count > 0);
 
         bool found_paragraph_display = false, paragraph_is_newline = false;
-        for (int i = 1; i <= sym_count; i++) {
+        for (int i = 1; i < sym_count; i++) {
             char disp[128], text[128];
             if (dasher_get_alphabet_symbol_display(ctx, i, disp, sizeof(disp)) != 0) continue;
             if (strcmp(disp, "\xc2\xb6") != 0) continue; // UTF-8 pilcrow
@@ -320,7 +613,7 @@ TEST(alphabet_v5_symbols_have_correct_text) {
     ASSERT(sym_count >= 3);
 
     bool found_x = false, found_space = false, found_emoji = false;
-    for (int i = 1; i <= sym_count; i++) {
+    for (int i = 1; i < sym_count; i++) {
         char buf[128];
         if (dasher_get_alphabet_symbol_text(ctx, i, buf, sizeof(buf)) != 0) continue;
         std::string s(buf);
@@ -425,7 +718,7 @@ TEST(alphabet_v5_special_chars_as_direct_children) {
 
     // Scan all symbols for the expected text values.
     bool found_letter_a = false, found_space = false, found_newline = false;
-    for (int i = 1; i <= sym_count; i++) {
+    for (int i = 1; i < sym_count; i++) {
         char buf[128];
         if (dasher_get_alphabet_symbol_text(ctx, i, buf, sizeof(buf)) != 0) continue;
         std::string s(buf);
