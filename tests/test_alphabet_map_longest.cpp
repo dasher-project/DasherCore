@@ -179,3 +179,33 @@ TEST(map_peek_ahead_agrees_with_next) {
     ASSERT_EQ(syms.next(&map), 2);
     ASSERT_EQ(syms.next(&map), -1);
 }
+
+TEST(map_raw_mode_protects_delimiters_from_shadowing) {
+    // Greptile P1 (round 3): if a structural delimiter (annotation stop
+    // '>' etc.) is the PREFIX of a multi-codepoint key, longest-match
+    // would swallow it into the key — the annotation loop then misses its
+    // terminator and absorbs the rest of the training file. nextRaw /
+    // peekAheadRaw give annotation/escape readers one codepoint at a time,
+    // exactly the pre-RFC behaviour, so delimiters always terminate.
+    CAlphabetMap map;
+    map.Add(">", 3);  // the stop delimiter IS a symbol (typical)
+    map.Add(">x", 7); // multi-codepoint key sharing the prefix
+    map.Add("b", 2);
+
+    // Raw (structural) mode: '>' terminates one codepoint at a time.
+    std::istringstream in1(">b>x");
+    CAlphabetMap::SymbolStream raw(in1);
+    ASSERT_EQ(raw.nextRaw(&map), 3);
+    ASSERT_EQ(raw.nextRaw(&map), 2);
+    ASSERT(raw.peekAheadRaw() == ">");
+    ASSERT_EQ(raw.nextRaw(&map), 3); // delimiter consumed ALONE, not as ">x"
+    ASSERT_EQ(raw.nextRaw(&map), 0); // the trailing 'x' is now unknown
+
+    // Training mode over the same bytes: longest-match wins — ">x" is one
+    // symbol, the delimiter shadowed. That is the intended behaviour for
+    // symbol streams and precisely why structural readers use the raw form.
+    std::istringstream in2(">x");
+    CAlphabetMap::SymbolStream lm(in2);
+    ASSERT_EQ(lm.next(&map), 7);
+    ASSERT_EQ(lm.next(&map), -1);
+}

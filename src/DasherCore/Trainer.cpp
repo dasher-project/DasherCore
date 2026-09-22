@@ -47,8 +47,8 @@ bool CTrainer::readEscape(CLanguageModel::Context& sContext, symbol sym, CAlphab
 
     // Yes, found escape character....
 
-    std::string delim = syms.peekAhead(m_pAlphabet);
-    syms.next(m_pAlphabet); // peekAhead doesn't read
+    std::string delim = syms.peekAheadRaw();
+    syms.nextRaw(m_pAlphabet); // structural: escape delimiters are grammar, not symbols
 
     // A double escape character means an actual occurrence of the character is wanted...
     if (delim == m_pInfo->GetContextEscapeChar()) {
@@ -63,7 +63,7 @@ bool CTrainer::readEscape(CLanguageModel::Context& sContext, symbol sym, CAlphab
     for (std::vector<symbol>::iterator it = defCtx.begin(); it != defCtx.end(); it++)
         m_pLanguageModel->EnterSymbol(sContext, *it);
     // and read the first delimiter; everything until the second occurrence of this, is _context_ only.
-    for (symbol s; (s = syms.next(m_pAlphabet)) != -1;) {
+    for (symbol s; (s = syms.nextRaw(m_pAlphabet)) != -1;) {
         if (syms.peekBack() == delim) break;
         m_pLanguageModel->EnterSymbol(sContext, s);
     }

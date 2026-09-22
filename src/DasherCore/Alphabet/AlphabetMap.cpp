@@ -172,7 +172,22 @@ symbol CAlphabetMap::SymbolStream::next(const CAlphabetMap* map) {
             return sym;
         }
     }
+    return nextCharLocked(map, numChars);
+}
 
+symbol CAlphabetMap::SymbolStream::nextRaw(const CAlphabetMap* map) {
+    // Structural parsing (annotations, escape delimiters): one codepoint
+    // per call, exactly the pre-RFC behaviour — a multi-codepoint key
+    // sharing a prefix with a grammar delimiter must not shadow it.
+    int numChars = findNext();
+    if (numChars == 0) return -1; // EOF
+    return nextCharLocked(map, numChars);
+}
+
+// Shared single-codepoint consumption tail (paragraph special case, then
+// direct/hash lookup). pos and m_lastConsumed advance by exactly one
+// codepoint ('\r\n' paragraph: two bytes).
+symbol CAlphabetMap::SymbolStream::nextCharLocked(const CAlphabetMap* map, int numChars) {
     if (numChars == 1) {
         if (map->m_ParagraphSymbol != UNKNOWN_SYMBOL && buf[pos] == '\r') {
             DASHER_ASSERT(pos + 1 < len || len < 1024); // there are more characters (we should have read
@@ -190,6 +205,12 @@ symbol CAlphabetMap::SymbolStream::next(const CAlphabetMap* map) {
     m_lastConsumed.assign(&buf[pos], numChars);
     pos += numChars;
     return sym;
+}
+
+std::string CAlphabetMap::SymbolStream::peekAheadRaw() {
+    int numChars = findNext();
+    if (numChars == 0) return "";
+    return std::string(&buf[pos], numChars);
 }
 
 void CAlphabetMap::GetSymbols(std::vector<symbol>& Symbols, const std::string& Input) const {

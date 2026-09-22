@@ -110,6 +110,18 @@ class Dasher::CAlphabetMap {
         ///  \return 0 for unknown symbol (not in map); -1 for EOF; else symbol#.
         symbol next(const CAlphabetMap* map);
 
+        /// RFC 0020 / greptile P1: raw (single-codepoint) variants for
+        /// STRUCTURAL parsing — conversion annotations (<route>, pinyin) and
+        /// context-escape delimiters are grammar, not symbol content: a
+        /// multi-codepoint key sharing a prefix with a delimiter must never
+        /// shadow it. Longest-match applies to symbol training only.
+        symbol nextRaw(const CAlphabetMap* map);
+        /// Single-codepoint peek, ignoring longest-match (see nextRaw).
+        std::string peekAheadRaw();
+
+        /// Shared single-codepoint consumption tail of next/nextRaw.
+        inline symbol nextCharLocked(const CAlphabetMap* map, int numChars);
+
         /// Finds the next complete character in the stream,  but does not advance past it.
         ///  Hence, repeated calls will return the same string. (Always constructs a string,
         ///  which next() avoids for single-octet chars, so may be slower)
