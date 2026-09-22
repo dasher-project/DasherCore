@@ -221,7 +221,7 @@ TEST(alphabet_emoji_corpus_tokens_are_nodes) {
             start = end + 1;
         }
     }
-    printf("  %d corpus tokens, all valid single-codepoint nodes\n", tokens);
+    printf("  %d corpus tokens, all whole alphabet nodes\n", tokens);
     ASSERT(tokens > 100);
 }
 

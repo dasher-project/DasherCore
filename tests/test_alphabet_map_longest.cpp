@@ -78,7 +78,8 @@ TEST(map_longest_match_across_buffer_refill) {
     std::string padded(1020, 'a');
     std::istringstream in(padded + FAMILY + "a");
     CAlphabetMap::SymbolStream syms(in);
-    for (int i = 0; i < 1020; i++) ASSERT_EQ(syms.next(&map), 2);
+    for (int i = 0; i < 1020; i++)
+        ASSERT_EQ(syms.next(&map), 2);
     ASSERT_EQ(syms.next(&map), 5); // straddles the 1024-byte boundary
     ASSERT_EQ(syms.next(&map), 2);
     ASSERT_EQ(syms.next(&map), -1);
@@ -105,9 +106,57 @@ TEST(map_longest_match_unknown_text_stays_unknown) {
     map.Add("a", 2);
     map.Add(FAMILY, 5);
 
-    std::istringstream in("\xF0\x9F\x91\xA8" "a"); // lone 👨, not in the map
+    std::istringstream in("\xF0\x9F\x91\xA8"
+                          "a"); // lone 👨, not in the map
     CAlphabetMap::SymbolStream syms(in);
     ASSERT_EQ(syms.next(&map), 0); // 👨 unknown
     ASSERT_EQ(syms.next(&map), 2);
+    ASSERT_EQ(syms.next(&map), -1);
+}
+
+TEST(map_longest_match_eof_mid_key_degrades_cleanly) {
+    // File ending with a TRUNCATED multi-codepoint key: the probe can't
+    // match (avail < key length), and the per-codepoint path reports the
+    // lead codepoint as unknown — no crash, no bogus symbol.
+    CAlphabetMap map;
+    map.Add("a", 2);
+    map.Add(FAMILY, 5);
+
+    std::istringstream in("a" + FAMILY.substr(0, 7)); // family cut mid-sequence
+    CAlphabetMap::SymbolStream syms(in);
+    ASSERT_EQ(syms.next(&map), 2);
+    Dasher::symbol s;
+    while ((s = syms.next(&map)) != -1)
+        ASSERT_EQ(s, 0); // fragments unknown
+}
+
+TEST(map_longest_match_duplicate_add_registers_once) {
+    // Add tolerates duplicates (first wins) — the multi-codepoint
+    // registration must not double up either.
+    CAlphabetMap map;
+    map.Add(FAMILY, 5);
+    map.Add(FAMILY, 9); // duplicate key, ignored
+
+    std::istringstream in(FAMILY);
+    CAlphabetMap::SymbolStream syms(in);
+    ASSERT_EQ(syms.next(&map), 5); // first registration wins
+    ASSERT_EQ(syms.next(&map), -1);
+}
+
+TEST(map_peek_back_returns_whole_matched_key) {
+    // peekBack's contract ("string representation of the previous symbol")
+    // must survive longest-match: the buffer walk it replaced would have
+    // returned only the FINAL codepoint of a multi-codepoint key.
+    CAlphabetMap map;
+    map.Add("a", 2);
+    map.Add(FAMILY, 5);
+
+    std::istringstream in("a" + FAMILY);
+    CAlphabetMap::SymbolStream syms(in);
+    ASSERT_EQ(syms.next(&map), 2);
+    ASSERT(syms.peekBack() == "a");
+    ASSERT_EQ(syms.next(&map), 5);
+    ASSERT(syms.peekBack() == FAMILY); // the whole 18-byte key, not 👧
+    // peekBack does not advance the stream
     ASSERT_EQ(syms.next(&map), -1);
 }

@@ -127,17 +127,15 @@ TEST(map_longest_match_trains_multi_codepoint) {
     // unknowns and every node stayed at uniform default.
     ScopedTempDir dataRoot;
     const std::string data_dir = build_data_dir(dataRoot);
-    std::string xml = std::string("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n") +
+    std::string xml =
+        std::string("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n") +
         "<!DOCTYPE alphabet SYSTEM \"../alphabet.dtd\">\n" +
         "<alphabet name=\"LM Flat\" orientation=\"LR\" trainingFilename=\"training_lm_flat.txt\" "
         "colorsName=\"Default\">\n" +
-        "  <group name=\"flat\">\n" +
-        "    <node label=\"&#x1F600;\"><textCharAction /></node>\n" +                       // 😀 1 codepoint
+        "  <group name=\"flat\">\n" + "    <node label=\"&#x1F600;\"><textCharAction /></node>\n" + // 😀 1 codepoint
         "    <node label=\"&#x1F468;&#x200D;&#x1F469;&#x200D;&#x1F467;\"><textCharAction /></node>\n" + // family, 5
-        "    <node label=\"&#x2708;&#xFE0F;\"><textCharAction /></node>\n" +                 // ✈️ 2 codepoints
-        "    <node label=\"x\"><textCharAction /></node>\n" +
-        "  </group>\n" +
-        "</alphabet>\n";
+        "    <node label=\"&#x2708;&#xFE0F;\"><textCharAction /></node>\n" + // ✈️ 2 codepoints
+        "    <node label=\"x\"><textCharAction /></node>\n" + "  </group>\n" + "</alphabet>\n";
     ASSERT(write_data_file(data_dir, "alphabets", "alphabet.lmflat.xml", xml));
     // Corpus: ONLY the multi-codepoint tokens (spaces are not symbols here
     // — no space node — so they become unknowns and train nothing).
@@ -175,7 +173,8 @@ TEST(map_longest_match_trains_multi_codepoint) {
     int cc = 0;
     char** s = nullptr;
     int sc = 0;
-    for (int f = 0; f < 30; f++) dasher_frame(ctx, 1000 + f * 16, &c, &cc, &s, &sc);
+    for (int f = 0; f < 30; f++)
+        dasher_frame(ctx, 1000 + f * 16, &c, &cc, &s, &sc);
 
     int lb[64], hb[64];
     int n = dasher_get_probabilities(ctx, lb, hb, 64);
@@ -188,7 +187,8 @@ TEST(map_longest_match_trains_multi_codepoint) {
     // with PPM smoothing; pre-fix the corpus split into per-codepoint
     // unknowns and no child exceeded uniform — the assertion that failed).
     long long best = -1;
-    for (int i = 0; i < n; i++) best = std::max(best, (long long)hb[i] - lb[i]);
+    for (int i = 0; i < n; i++)
+        best = std::max(best, (long long)hb[i] - lb[i]);
     long long uniform = 65536 / n;
     printf("  best child mass %lld vs uniform %lld\n", best, uniform);
     ASSERT(best > 3 * uniform / 2);

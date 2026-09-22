@@ -129,33 +129,15 @@ std::string CAlphabetMap::SymbolStream::peekAhead() {
 }
 
 std::string CAlphabetMap::SymbolStream::peekBack() {
-    bool bSeenHighBit = false;
-    for (int i = pos - 1; i >= 0; i--) {
-        if (buf[i] & 0x80) {
-            // multibyte character...
-            bSeenHighBit = true;
-            if (buf[i] & 0x40) {
-                // START of multibyte character
-                int numChars = m_utf8_count_array[buf[i]];
-                if (i + numChars > pos) {
-                    // last (attempt to read a) symbol was an incomplete UTF8 character (!).
-                    //  We'll have reported an error already when we saw it the first time, so for now just:
-                    return "";
-                }
-                DASHER_ASSERT(i + numChars == pos);
-                return std::string(&buf[i], numChars);
-            }
-            // in middle of multibyte, keep going back...
-        } else {
-            // high bit not set -> single-byte char
-            if (bSeenHighBit)
-                return ""; // followed by a "continuation of multibyte char" without a "first byte of multibyte char"
-                           // before it. (Malformed!)
-            return std::string(&buf[i], 1);
-        }
-    }
-    // fail...relatively gracefully ;-)
-    return "";
+    // RFC 0020: the previous symbol may have been a longest-match key
+    // spanning multiple codepoints (or "\r\n"), which a backward buffer
+    // walk could never reconstruct — it would return only the final
+    // codepoint. next() records exactly what it consumed; replay that.
+    // (The read window may have shifted between the calls, so the copy —
+    // not a buffer slice — is the only safe source. Callers that respect
+    // the documented precondition — no peekAhead() since the last next()
+    // — see the symbol text as consumed; "" before the first next().)
+    return m_lastConsumed;
 }
 
 symbol CAlphabetMap::SymbolStream::next(const CAlphabetMap* map) {
@@ -172,6 +154,7 @@ symbol CAlphabetMap::SymbolStream::next(const CAlphabetMap* map) {
         size_t matched = 0;
         symbol sym = map->LongestMatch(&buf[pos], len - pos, matched);
         if (sym != UNKNOWN_SYMBOL) {
+            m_lastConsumed.assign(&buf[pos], matched);
             pos += matched;
             return sym;
         }
@@ -182,13 +165,16 @@ symbol CAlphabetMap::SymbolStream::next(const CAlphabetMap* map) {
             DASHER_ASSERT(pos + 1 < len || len < 1024); // there are more characters (we should have read
                                                         // utf8...max_length), or else input is exhausted
             if (pos + 1 < len && buf[pos + 1] == '\n') {
+                m_lastConsumed.assign("\r\n");
                 pos += 2;
                 return map->m_ParagraphSymbol;
             }
         }
+        m_lastConsumed.assign(1, buf[pos]);
         return map->GetSingleChar(buf[pos++]);
     }
     int sym = map->Get(std::string(&buf[pos], numChars));
+    m_lastConsumed.assign(&buf[pos], numChars);
     pos += numChars;
     return sym;
 }
@@ -275,7 +261,8 @@ void CAlphabetMap::Add(const std::string& Key, symbol Value) {
     // Entries vector reallocates as it grows. Keep sorted longest-first.
     if (Key.length() > static_cast<size_t>(m_utf8_count_array[static_cast<unsigned char>(Key[0])])) {
         auto it = m_vMultiCharKeys.begin();
-        while (it != m_vMultiCharKeys.end() && it->first.length() >= Key.length()) ++it;
+        while (it != m_vMultiCharKeys.end() && it->first.length() >= Key.length())
+            ++it;
         m_vMultiCharKeys.insert(it, {Key, Value});
         m_iMaxKeyLen = std::max(m_iMaxKeyLen, Key.length());
     }

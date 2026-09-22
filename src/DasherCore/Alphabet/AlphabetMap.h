@@ -34,12 +34,14 @@ class CAlphabetMap;
 /// Ian clearly had reservations about this system, as follows; and I'd add
 /// that much of the fun comes from supporting single unicode characters
 /// which are multiple octets, as we use  std::string (which works in octets)
-/// for everything...note that we do *not* support multi-unicode-character
-/// symbols (such as the "asdf" suggested below) except in the case of "\r\n"
-/// for the paragraph symbol.
+/// for everything. Since RFC 0020 the map also supports MULTI-unicode-
+/// character symbols (digraph outputs, ZWJ emoji sequences, VS16 skin
+/// tones) via longest-match probing in SymbolStream::next — see
+/// LongestMatch(). Keys longer than the stream's 1024-byte window can
+/// never match and are silently unregistered.
 ///
 /// Note that in 2010 we did indeed tailor this to the alphabet more closely,
-/// fast-casing single-octet characters to avoid using a hash etc. - this makes
+/// fast-casing single-octet characters to avoid using a hash etc. - which makes
 /// many common alphabets substantially faster!
 ///
 /// Anyway, Ian writes:
@@ -111,9 +113,14 @@ class Dasher::CAlphabetMap {
         /// Returns the string representation of the previous symbol (i.e. that returned
         ///  by the previous call to next()). Undefined if next() has not been called, or
         ///  if peekAhead() has been called since the last call to next(). Does not change
-        ///  the stream position. (Always constructs a string, which next() avoids for
-        ///  single-octet chars, so may be slower.)
+        ///  the stream position. Returns the full multi-codepoint key when the previous
+        ///  symbol matched one (longest-match, RFC 0020) — not just its final codepoint.
         std::string peekBack();
+
+        /// Bytes consumed by the last next() call — the source of
+        /// peekBack's answer, kept as a copy because the read window can
+        /// shift (ensureLookahead) between the two calls.
+        std::string m_lastConsumed;
 
       protected:
         /// Called periodically to indicate some number of bytes have been read.
@@ -192,7 +199,8 @@ class Dasher::CAlphabetMap {
     std::vector<Entry*> HashTable;
     symbol* m_pSingleChars;
     /// both "\r\n" and "\n" are mapped to this (if not Undefined).
-    /// This is the only case where >1 character can map to a symbol.
+    /// (Historically the only multi-character mapping; multi-codepoint
+    /// keys via Add() now exist too — see LongestMatch.)
     symbol m_ParagraphSymbol;
 
     /// Multi-codepoint keys (copies, with their symbols), sorted longest
