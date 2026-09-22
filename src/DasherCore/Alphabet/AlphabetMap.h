@@ -34,12 +34,14 @@ class CAlphabetMap;
 /// Ian clearly had reservations about this system, as follows; and I'd add
 /// that much of the fun comes from supporting single unicode characters
 /// which are multiple octets, as we use  std::string (which works in octets)
-/// for everything...note that we do *not* support multi-unicode-character
-/// symbols (such as the "asdf" suggested below) except in the case of "\r\n"
-/// for the paragraph symbol.
+/// for everything. Since RFC 0020 the map also supports MULTI-unicode-
+/// character symbols (digraph outputs, ZWJ emoji sequences, VS16 skin
+/// tones) via longest-match probing in SymbolStream::next — see
+/// LongestMatch(). Keys longer than the stream's 1024-byte window can
+/// never match and are silently unregistered.
 ///
 /// Note that in 2010 we did indeed tailor this to the alphabet more closely,
-/// fast-casing single-octet characters to avoid using a hash etc. - this makes
+/// fast-casing single-octet characters to avoid using a hash etc. - which makes
 /// many common alphabets substantially faster!
 ///
 /// Anyway, Ian writes:
@@ -77,9 +79,26 @@ class Dasher::CAlphabetMap {
   public:
     ~CAlphabetMap();
 
+    /// Read-window size of SymbolStream: multi-codepoint keys of this
+    /// length or longer can never be fully buffered for probing and are
+    /// not registered (RFC 0020 — documented at Add).
+    static constexpr size_t STREAM_WINDOW = 1024;
+
     // Return the symbol associated with Key or Undefined.
     symbol Get(const std::string& Key) const;
     symbol GetSingleChar(char key) const;
+
+    /// Longest-match support (RFC 0020 clause 4): probe multi-codepoint
+    /// keys (digraph outputs, ZWJ/VS16 emoji) at a buffer position, longest
+    /// first, before the single-character path in SymbolStream::next().
+    /// \param at buffer position; \param avail bytes readable from it
+    /// \param matchedLen set to the matched key's byte length on success
+    /// \return the symbol, or UNKNOWN_SYMBOL (0) when no key matches.
+    symbol LongestMatch(const char* at, size_t avail, size_t& matchedLen) const;
+
+    /// Longest multi-codepoint key in the map (0 when none) — the
+    /// lookahead SymbolStream must keep buffered.
+    size_t MaxKeyLen() const { return m_iMaxKeyLen; }
 
     class SymbolStream {
       public:
@@ -91,17 +110,38 @@ class Dasher::CAlphabetMap {
         ///  \return 0 for unknown symbol (not in map); -1 for EOF; else symbol#.
         symbol next(const CAlphabetMap* map);
 
+        /// RFC 0020 / greptile P1: raw (single-codepoint) variants for
+        /// STRUCTURAL parsing — conversion annotations (<route>, pinyin) and
+        /// context-escape delimiters are grammar, not symbol content: a
+        /// multi-codepoint key sharing a prefix with a delimiter must never
+        /// shadow it. Longest-match applies to symbol training only.
+        symbol nextRaw(const CAlphabetMap* map);
+        /// Single-codepoint peek, ignoring longest-match (see nextRaw).
+        std::string peekAheadRaw();
+
+        /// Shared single-codepoint consumption tail of next/nextRaw.
+        inline symbol nextCharLocked(const CAlphabetMap* map, int numChars);
+
         /// Finds the next complete character in the stream,  but does not advance past it.
         ///  Hence, repeated calls will return the same string. (Always constructs a string,
         ///  which next() avoids for single-octet chars, so may be slower)
-        std::string peekAhead();
+        ///  RFC 0020: when a multi-codepoint key starts at the current position,
+        ///  returns the WHOLE key — exactly the bytes the next next() call would
+        ///  consume — so annotation readers (Routing/Mandarin escape and route
+        ///  parsing) never record a different token than they advance past.
+        std::string peekAhead(const CAlphabetMap* map);
 
         /// Returns the string representation of the previous symbol (i.e. that returned
         ///  by the previous call to next()). Undefined if next() has not been called, or
         ///  if peekAhead() has been called since the last call to next(). Does not change
-        ///  the stream position. (Always constructs a string, which next() avoids for
-        ///  single-octet chars, so may be slower.)
+        ///  the stream position. Returns the full multi-codepoint key when the previous
+        ///  symbol matched one (longest-match, RFC 0020) — not just its final codepoint.
         std::string peekBack();
+
+        /// Bytes consumed by the last next() call — the source of
+        /// peekBack's answer, kept as a copy because the read window can
+        /// shift (ensureLookahead) between the two calls.
+        std::string m_lastConsumed;
 
       protected:
         /// Called periodically to indicate some number of bytes have been read.
@@ -116,8 +156,13 @@ class Dasher::CAlphabetMap {
         ///  \return the number of octets representing the next character, or 0 for EOF
         ///  (inc. where the file ends with an incomplete character)
         inline int findNext();
+
+        /// Ensure at least `want` bytes are buffered past pos (shifting the
+        /// remaining window to the front and reading more; at EOF the buffer
+        /// simply holds what's left). findNext's refill logic, parameterised.
+        inline void ensureLookahead(size_t want);
         void readMore();
-        char buf[1024];
+        char buf[STREAM_WINDOW];
         off_t pos, len;
         std::istream& in;
         CMessageDisplay* const m_pMsgs;
@@ -175,7 +220,15 @@ class Dasher::CAlphabetMap {
     std::vector<Entry*> HashTable;
     symbol* m_pSingleChars;
     /// both "\r\n" and "\n" are mapped to this (if not Undefined).
-    /// This is the only case where >1 character can map to a symbol.
+    /// (Historically the only multi-character mapping; multi-codepoint
+    /// keys via Add() now exist too — see LongestMatch.)
     symbol m_ParagraphSymbol;
+
+    /// Multi-codepoint keys (copies, with their symbols), sorted longest
+    /// first — copies because Entries vector growth relocates its strings.
+    /// Only keys that the single-character path can never match (more than
+    /// one codepoint) belong here.
+    std::vector<std::pair<std::string, symbol>> m_vMultiCharKeys;
+    size_t m_iMaxKeyLen = 0;
 };
 /// \}

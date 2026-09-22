@@ -79,20 +79,23 @@ void CAlphabetMap::SymbolStream::readMore() {
     }
 }
 
+inline void CAlphabetMap::SymbolStream::ensureLookahead(size_t want) {
+    if (pos + want > len) {
+        if (pos) {
+            // shift remaining bytes to beginning
+            len -= pos; // len of them
+            memmove(buf, &buf[pos], len);
+            bytesRead(pos);
+            pos = 0;
+        }
+        // and look for more
+        readMore();
+    }
+}
+
 inline int CAlphabetMap::SymbolStream::findNext() {
     for (;;) {
-        if (pos + m_utf8_count_array.max_length > len) {
-            // may need more bytes for next char
-            if (pos) {
-                // shift remaining bytes to beginning
-                len -= pos; // len of them
-                memmove(buf, &buf[pos], len);
-                bytesRead(pos);
-                pos = 0;
-            }
-            // and look for more
-            readMore();
-        }
+        ensureLookahead(m_utf8_count_array.max_length);
         // if still don't have any chars after attempting to read more...EOF!
         if (pos == len) {
             if (m_skippedInvalid && m_pMsgs)
@@ -120,58 +123,94 @@ inline int CAlphabetMap::SymbolStream::findNext() {
     }
 }
 
-std::string CAlphabetMap::SymbolStream::peekAhead() {
+std::string CAlphabetMap::SymbolStream::peekAhead(const CAlphabetMap* map) {
     int numChars = findNext();
+    if (numChars == 0) return "";
+
+    // RFC 0020 / greptile P1: the peek must agree with what the next
+    // next(map) call will consume. Annotation readers (Routing/Mandarin
+    // conversion trainers, CTrainer::readEscape) record the peeked token
+    // and then advance via next() — peeking only the FIRST codepoint of a
+    // multi-codepoint key would record a token that never matches the
+    // route/pronunciation table while next() skips the whole key.
+    if (map && map->MaxKeyLen() > 0) {
+        ensureLookahead(map->MaxKeyLen());
+        size_t matched = 0;
+        if (map->LongestMatch(&buf[pos], len - pos, matched) != UNKNOWN_SYMBOL) return std::string(&buf[pos], matched);
+    }
     return std::string(&buf[pos], numChars);
 }
 
 std::string CAlphabetMap::SymbolStream::peekBack() {
-    bool bSeenHighBit = false;
-    for (int i = pos - 1; i >= 0; i--) {
-        if (buf[i] & 0x80) {
-            // multibyte character...
-            bSeenHighBit = true;
-            if (buf[i] & 0x40) {
-                // START of multibyte character
-                int numChars = m_utf8_count_array[buf[i]];
-                if (i + numChars > pos) {
-                    // last (attempt to read a) symbol was an incomplete UTF8 character (!).
-                    //  We'll have reported an error already when we saw it the first time, so for now just:
-                    return "";
-                }
-                DASHER_ASSERT(i + numChars == pos);
-                return std::string(&buf[i], numChars);
-            }
-            // in middle of multibyte, keep going back...
-        } else {
-            // high bit not set -> single-byte char
-            if (bSeenHighBit)
-                return ""; // followed by a "continuation of multibyte char" without a "first byte of multibyte char"
-                           // before it. (Malformed!)
-            return std::string(&buf[i], 1);
-        }
-    }
-    // fail...relatively gracefully ;-)
-    return "";
+    // RFC 0020: the previous symbol may have been a longest-match key
+    // spanning multiple codepoints (or "\r\n"), which a backward buffer
+    // walk could never reconstruct — it would return only the final
+    // codepoint. next() records exactly what it consumed; replay that.
+    // (The read window may have shifted between the calls, so the copy —
+    // not a buffer slice — is the only safe source. Callers that respect
+    // the documented precondition — no peekAhead() since the last next()
+    // — see the symbol text as consumed; "" before the first next().)
+    return m_lastConsumed;
 }
 
 symbol CAlphabetMap::SymbolStream::next(const CAlphabetMap* map) {
     int numChars = findNext();
     if (numChars == 0) return -1; // EOF
+
+    // RFC 0020 clause 4 — longest match first: multi-codepoint symbols
+    // (digraph outputs, ZWJ sequences, skin-tone modifiers) must train as
+    // one symbol. Probe before the single-character path so a multi-
+    // codepoint key that STARTS with a known single character (❤️ over ❤)
+    // still wins.
+    if (map->MaxKeyLen() > 0) {
+        ensureLookahead(map->MaxKeyLen());
+        size_t matched = 0;
+        symbol sym = map->LongestMatch(&buf[pos], len - pos, matched);
+        if (sym != UNKNOWN_SYMBOL) {
+            m_lastConsumed.assign(&buf[pos], matched);
+            pos += matched;
+            return sym;
+        }
+    }
+    return nextCharLocked(map, numChars);
+}
+
+symbol CAlphabetMap::SymbolStream::nextRaw(const CAlphabetMap* map) {
+    // Structural parsing (annotations, escape delimiters): one codepoint
+    // per call, exactly the pre-RFC behaviour — a multi-codepoint key
+    // sharing a prefix with a grammar delimiter must not shadow it.
+    int numChars = findNext();
+    if (numChars == 0) return -1; // EOF
+    return nextCharLocked(map, numChars);
+}
+
+// Shared single-codepoint consumption tail (paragraph special case, then
+// direct/hash lookup). pos and m_lastConsumed advance by exactly one
+// codepoint ('\r\n' paragraph: two bytes).
+symbol CAlphabetMap::SymbolStream::nextCharLocked(const CAlphabetMap* map, int numChars) {
     if (numChars == 1) {
         if (map->m_ParagraphSymbol != UNKNOWN_SYMBOL && buf[pos] == '\r') {
             DASHER_ASSERT(pos + 1 < len || len < 1024); // there are more characters (we should have read
                                                         // utf8...max_length), or else input is exhausted
             if (pos + 1 < len && buf[pos + 1] == '\n') {
+                m_lastConsumed.assign("\r\n");
                 pos += 2;
                 return map->m_ParagraphSymbol;
             }
         }
+        m_lastConsumed.assign(1, buf[pos]);
         return map->GetSingleChar(buf[pos++]);
     }
     int sym = map->Get(std::string(&buf[pos], numChars));
+    m_lastConsumed.assign(&buf[pos], numChars);
     pos += numChars;
     return sym;
+}
+
+std::string CAlphabetMap::SymbolStream::peekAheadRaw() {
+    int numChars = findNext();
+    if (numChars == 0) return "";
+    return std::string(&buf[pos], numChars);
 }
 
 void CAlphabetMap::GetSymbols(std::vector<symbol>& Symbols, const std::string& Input) const {
@@ -247,6 +286,38 @@ void CAlphabetMap::Add(const std::string& Key, symbol Value) {
 
     Entries.push_back(Entry(Key, Value, HashEntry));
     HashEntry = &Entries.back();
+
+    // RFC 0020 clause 4: register multi-codepoint keys for longest-match
+    // probing. A key qualifies when it is longer than its lead byte's
+    // UTF-8 length — i.e. more than one codepoint, unreachable by the
+    // single-character path in next(). (Single-codepoint multi-byte keys
+    // like a 4-byte 😀 already match there.) Copies, not pointers: the
+    // Entries vector reallocates as it grows. Keep sorted longest-first.
+    // Keys of STREAM_WINDOW bytes or more can never be fully buffered for
+    // probing (greptile P2) — leave them unregistered rather than
+    // pretending they train; such keys were equally dead through the
+    // per-codepoint path, so no behaviour regresses.
+    if (Key.length() > static_cast<size_t>(m_utf8_count_array[static_cast<unsigned char>(Key[0])]) &&
+        Key.length() < STREAM_WINDOW) {
+        auto it = m_vMultiCharKeys.begin();
+        while (it != m_vMultiCharKeys.end() && it->first.length() >= Key.length())
+            ++it;
+        m_vMultiCharKeys.insert(it, {Key, Value});
+        m_iMaxKeyLen = std::max(m_iMaxKeyLen, Key.length());
+    }
+}
+
+symbol CAlphabetMap::LongestMatch(const char* at, size_t avail, size_t& matchedLen) const {
+    // m_vMultiCharKeys is sorted longest-first, so the first byte-exact
+    // match is the longest possible.
+    for (const auto& [key, sym] : m_vMultiCharKeys) {
+        if (key.length() > avail) continue;
+        if (std::memcmp(at, key.data(), key.length()) == 0) {
+            matchedLen = key.length();
+            return sym;
+        }
+    }
+    return UNKNOWN_SYMBOL;
 }
 
 symbol CAlphabetMap::Get(const std::string& Key) const {

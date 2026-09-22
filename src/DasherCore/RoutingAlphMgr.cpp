@@ -145,8 +145,8 @@ void CRoutingAlphMgr::CRoutingTrainer::Train(CAlphabetMap::SymbolStream& syms) {
                                            strRoute.c_str());
                 strRoute.clear();
                 bHaveRoute = true;
-                for (std::string s; (s = syms.peekAhead()).length(); strRoute += s) {
-                    syms.next(m_pAlphabet);
+                for (std::string s; (s = syms.peekAheadRaw()).length(); strRoute += s) {
+                    syms.nextRaw(m_pAlphabet); // structural: annotation text, no longest-match
                     if (s == m_pInfo->m_strConversionTrainStop) break;
                 }
                 continue; // read next, hopefully a CH (!)

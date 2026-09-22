@@ -395,6 +395,18 @@ dasher_add_test(dasher_text_metrics_tests test_text_metrics.cpp)
         dasher_add_test(dasher_benchmark_tests test_benchmarks.cpp)
         dasher_add_test(dasher_property_invariant_tests test_property_invariants.cpp)
 
+        # Longest-match symbol lookup (RFC 0020) — internal CAlphabetMap unit
+        # tests; header-only usage against the DasherCore static library.
+        add_executable(dasher_alphabet_map_longest_tests
+            ${CMAKE_CURRENT_LIST_DIR}/tests/test_alphabet_map_longest.cpp)
+        target_include_directories(dasher_alphabet_map_longest_tests PRIVATE
+            ${CMAKE_CURRENT_LIST_DIR}/src/
+            ${CMAKE_CURRENT_LIST_DIR}/tests/
+            ${DOCTEST_INCLUDE_DIR})
+        target_link_libraries(dasher_alphabet_map_longest_tests PRIVATE DasherCore)
+        add_test(NAME dasher_alphabet_map_longest_tests COMMAND dasher_alphabet_map_longest_tests)
+        set_tests_properties(dasher_alphabet_map_longest_tests PROPERTIES TIMEOUT ${DASHER_TEST_TIMEOUT})
+
         # Control action system tests — needs internal DasherCore classes (ActionRegistry)
         # AND C API functions, so we compile CAPI.cpp directly and link DasherCore
         add_executable(dasher_control_action_tests
