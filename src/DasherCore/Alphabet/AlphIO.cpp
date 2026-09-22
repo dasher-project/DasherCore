@@ -120,7 +120,8 @@ CAlphIO::CAlphIO(CMessageDisplay* pMsgs) : AbstractXMLParser(pMsgs) {
 }
 
 SGroupInfo* CAlphIO::ParseGroupRecursive(pugi::xml_node& group_node, CAlphInfo* CurrentAlphabet,
-                                         SGroupInfo* previous_sibling, std::vector<SGroupInfo*> ancestors) {
+                                         SGroupInfo* previous_sibling, std::vector<SGroupInfo*> ancestors,
+                                         const std::string* toneFilter) {
     SGroupInfo* pNewGroup = new SGroupInfo();
     pNewGroup->iNumChildNodes = 0;
     pNewGroup->strName = group_node.attribute("name").as_string("");
@@ -139,6 +140,13 @@ SGroupInfo* CAlphIO::ParseGroupRecursive(pugi::xml_node& group_node, CAlphInfo* 
     for (auto node : group_node.children()) {
         // symbol (v6 "node" or v5 "s")
         if (std::strcmp(node.name(), "node") == 0 || std::strcmp(node.name(), "s") == 0) {
+            // RFC 0020 skin-tone filter: nodes carrying a tone= attribute are
+            // variants; a filter keeps the base (unmarked) nodes plus exactly
+            // the preferred variant.
+            if (toneFilter) {
+                pugi::xml_attribute tone = node.attribute("tone");
+                if (!tone.empty() && tone.as_string() != *toneFilter) continue;
+            }
             CurrentAlphabet->m_vCharacters.resize(CurrentAlphabet->m_vCharacters.size() + 1); // new char
             CurrentAlphabet->m_vCharacterDoActions.resize(CurrentAlphabet->m_vCharacterDoActions.size() +
                                                           1); // new Do Actions
@@ -153,7 +161,7 @@ SGroupInfo* CAlphIO::ParseGroupRecursive(pugi::xml_node& group_node, CAlphInfo* 
         // group
         if (std::strcmp(node.name(), "group") == 0) {
             SGroupInfo* newChildGroup =
-                ParseGroupRecursive(node, CurrentAlphabet, previous_subgroup_sibling, new_ancestors);
+                ParseGroupRecursive(node, CurrentAlphabet, previous_subgroup_sibling, new_ancestors, toneFilter);
             if (newChildGroup == nullptr) continue;
             pNewGroup->iNumChildNodes++;
             pNewGroup->pChild = newChildGroup;
@@ -190,6 +198,30 @@ bool Dasher::CAlphIO::Parse(pugi::xml_document& document, const std::string, boo
 
     if (std::strcmp(alphabet.name(), "alphabet") != 0) return false; // a non <alphabet ...> node
 
+    CAlphInfo* CurrentAlphabet = ParseAlphabet(alphabet, isV5);
+
+    auto it = Alphabets.find(CurrentAlphabet->AlphID);
+    if (it != Alphabets.end()) {
+        // v5 alphabets are legacy (e.g. the bundled oldAlphabets/ files). Never
+        // let them overwrite a v6 alphabet that already loaded under the same
+        // name — the v6 version is authoritative. User-authored v5 files with
+        // unique names still load normally.
+        if (isV5) {
+            delete CurrentAlphabet;
+            return true;
+        }
+        delete it->second;
+    }
+    Alphabets[CurrentAlphabet->AlphID] = CurrentAlphabet;
+
+    return true;
+}
+
+// Parse one <alphabet> element into a fresh, caller-owned CAlphInfo.
+// Extracted from Parse so MakeExtendedInfo (RFC 0020) can obtain a private
+// copy — CAlphInfo's destructor owns its ControlActions, so sharing action
+// pointers between the shared base info and a derived one would double-free.
+CAlphInfo* CAlphIO::ParseAlphabet(pugi::xml_node& alphabet, bool isV5) {
     CAlphInfo* CurrentAlphabet = new CAlphInfo();
     CurrentAlphabet->AlphID = alphabet.attribute("name").as_string();
     CurrentAlphabet->TrainingFile = alphabet.attribute("trainingFilename").as_string();
@@ -305,21 +337,7 @@ bool Dasher::CAlphIO::Parse(pugi::xml_document& document, const std::string, boo
     // child groups were added (to linked list) in reverse order. Put them in (iStart/iEnd) order...
     ReverseChildList(CurrentAlphabet->pChild);
 
-    auto it = Alphabets.find(CurrentAlphabet->AlphID);
-    if (it != Alphabets.end()) {
-        // v5 alphabets are legacy (e.g. the bundled oldAlphabets/ files). Never
-        // let them overwrite a v6 alphabet that already loaded under the same
-        // name — the v6 version is authoritative. User-authored v5 files with
-        // unique names still load normally.
-        if (isV5) {
-            delete CurrentAlphabet;
-            return true;
-        }
-        delete it->second;
-    }
-    Alphabets[CurrentAlphabet->AlphID] = CurrentAlphabet;
-
-    return true;
+    return CurrentAlphabet;
 }
 
 void CAlphIO::GetAlphabets(std::vector<std::string>* AlphabetList) const {
@@ -369,6 +387,61 @@ bool CAlphIO::LoadAlphabetFile(const std::string& filename) {
     if (filename.empty()) return false;
     Dasher::FileUtils::ScanFiles(this, filename);
     return true;
+}
+
+// ── Emoji extension (RFC 0020) ─────────────────────────────────────────────
+
+bool CAlphIO::LoadEmojiExtension(const std::string& filename) {
+    m_emojiExtensionGroups.clear();
+    if (filename.empty()) return false;
+    std::ifstream in(filename.c_str(), std::ios::binary);
+    if (!in.good()) return false;
+    pugi::xml_parse_result result = m_emojiExtensionDoc.load(in);
+    if (!result) return false;
+    pugi::xml_node root = m_emojiExtensionDoc.document_element();
+    if (std::strcmp(root.name(), "emoji-extension") != 0) return false;
+    for (pugi::xml_node& child : root.children())
+        if (std::strcmp(child.name(), "group") == 0) m_emojiExtensionGroups.push_back(child);
+    return !m_emojiExtensionGroups.empty();
+}
+
+const CAlphInfo* CAlphIO::MakeExtendedInfo(const std::string& AlphID, const std::string& skinTone) {
+    const CAlphInfo* base = GetInfo(AlphID);
+    if (m_emojiExtensionGroups.empty()) return base;
+
+    // A derived info owns its ControlActions (the base's destructor deletes
+    // its own), so re-parse the alphabet's file into a private copy rather
+    // than cloning the shared info. The emergency built-in "Default" has no
+    // file — it stays unextended (documented RFC 0020 limitation).
+    const std::string file = FileNameFor(AlphID);
+    if (file.empty() || AlphID == "Default") return base;
+
+    std::ifstream in(file.c_str(), std::ios::binary);
+    if (!in.good()) return base;
+    pugi::xml_document doc;
+    if (!doc.load(in)) return base;
+    pugi::xml_node alphabet = doc.document_element();
+    bool isV5 = (std::strcmp(alphabet.name(), "alphabets") == 0);
+    if (isV5) alphabet = alphabet.child("alphabet");
+    if (!alphabet || std::strcmp(alphabet.name(), "alphabet") != 0) return base;
+
+    CAlphInfo* derived = ParseAlphabet(alphabet, isV5);
+
+    // Append the extension's groups after the alphabet's own (ParseGroupRecursive
+    // appends characters at the end and links groups as reverse siblings).
+    std::string toneFilter(skinTone != "none" ? skinTone : "");
+    const std::string* pToneFilter = toneFilter.empty() ? nullptr : &toneFilter;
+    SGroupInfo* previous_sibling = nullptr;
+    for (pugi::xml_node& group : m_emojiExtensionGroups) {
+        SGroupInfo* newGroup = ParseGroupRecursive(group, derived, previous_sibling, {}, pToneFilter);
+        if (!newGroup) continue;
+        derived->iNumChildNodes++;
+        derived->pChild = newGroup; // last parsed; the reverse below restores order
+        previous_sibling = newGroup;
+    }
+    derived->iEnd = static_cast<int>(derived->m_vCharacters.size()) + 1;
+    ReverseChildList(derived->pChild);
+    return derived;
 }
 
 std::string CAlphIO::GetDefault() const {

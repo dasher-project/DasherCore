@@ -76,16 +76,43 @@ class Dasher::CAlphIO : public AbstractXMLParser {
     /// Full-parse one alphabet file by (absolute or pattern) filename.
     bool LoadAlphabetFile(const std::string& filename);
 
+    /// ── Emoji extension (RFC 0020) ─────────────────────────────────────
+    /// Parse and cache the groups-only extension definition
+    /// (Data/emoji/extension.xml). Safe to call when absent.
+    /// \return true when an extension was loaded.
+    bool LoadEmojiExtension(const std::string& filename);
+
+    /// True when an emoji extension definition is loaded.
+    bool HasEmojiExtension() const { return !m_emojiExtensionGroups.empty(); }
+
+    /// Merge the emoji extension into a DEEP COPY of the named alphabet.
+    /// \param skinTone "none" keeps all tone variants; any other value
+    ///  keeps only base gestures plus that tone's variants.
+    /// \return a caller-owned CAlphInfo (delete when the alphabet
+    ///  changes), or the shared base info when no extension is loaded —
+    ///  callers must treat the result as const and never delete it then.
+    const CAlphInfo* MakeExtendedInfo(const std::string& AlphID, const std::string& skinTone);
+
   private:
     std::map<std::string, const CAlphInfo*> Alphabets; // map AlphabetID to AlphabetInfo.
     std::map<std::string, std::string> AlphabetFiles;  // name index: AlphID → filename
     static CAlphInfo*
     CreateDefault(); // Give the user an English alphabet rather than nothing if anything goes horribly wrong.
 
+    /// Deep-copy src's group tree (incl. nested) into a fresh CAlphInfo
+    /// whose m_vCharacters were copied first; remaps character.parentGroup
+    /// into the cloned tree. Returns the cloned root child chain.
+    SGroupInfo* CloneGroupTree(const SGroupInfo* src, SGroupInfo* prevSibling, CAlphInfo* into, const CAlphInfo* from);
+
+    std::vector<pugi::xml_node> m_emojiExtensionGroups; // cached <group> nodes
+    pugi::xml_document m_emojiExtensionDoc;             // owns the cached nodes
+
     void ReadCharAttributes(pugi::xml_node xml_node, CAlphInfo::character& alphabet_character, SGroupInfo* parentGroup,
                             std::vector<ControlAction*>& DoActions, std::vector<ControlAction*>& UndoActions);
+    CAlphInfo* ParseAlphabet(pugi::xml_node& alphabet, bool isV5);
     SGroupInfo* ParseGroupRecursive(pugi::xml_node& group_node, CAlphInfo* CurrentAlphabet,
-                                    SGroupInfo* previous_sibling, std::vector<SGroupInfo*> ancestors);
+                                    SGroupInfo* previous_sibling, std::vector<SGroupInfo*> ancestors,
+                                    const std::string* toneFilter = nullptr);
     void ReverseChildList(SGroupInfo*& pList);
     // Alphabet types:
     std::map<std::string, Options::AlphabetTypes> AlphabetStringToType;

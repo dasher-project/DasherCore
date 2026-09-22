@@ -477,6 +477,17 @@ const std::unordered_map<Parameter, const Parameter_Value> parameter_defaults = 
     {SP_ALPHABET_4, Parameter_Value{"Alphabet4", PARAM_STRING, Persistence::PERSISTENT, std::string(""),
                                     "Alphabet History 4.", "Alphabet History 4", Settings::UIControlType::Enum, true,
                                     "SP_ALPHABET_4", "History", "Language"}},
+    {BP_EMOJI_GROUP, Parameter_Value{"EmojiGroup", PARAM_BOOL, Persistence::PERSISTENT, true,
+                                     "Add an emoji group to every alphabet, so emoji are available in the node tree "
+                                     "alongside your language (RFC 0020). Emoji are learned in context as you type.",
+                                     "Emoji in Alphabet", Settings::UIControlType::Switch, false, "BP_EMOJI_GROUP",
+                                     "Emoji", "Language"}},
+    {SP_EMOJI_SKIN_TONE,
+     Parameter_Value{"EmojiSkinTone", PARAM_STRING, Persistence::PERSISTENT, std::string("none"),
+                     "When set, only the base gesture and the preferred skin-tone variant are added to the emoji group "
+                     "(RFC 0020). 'None' adds all variants; the tone you use most rises through adaptation either way.",
+                     "Preferred Emoji Skin Tone", Settings::UIControlType::Enum, false, "SP_EMOJI_SKIN_TONE", "Emoji",
+                     "Language"}},
     {SP_COLOUR_ID,
      Parameter_Value{"ColourID", PARAM_STRING, Persistence::PERSISTENT, std::string("Default"), "ColourID.",
                      "Color Palette", Settings::UIControlType::Enum, false, "SP_COLOUR_ID", "Themes", "Customization"}},

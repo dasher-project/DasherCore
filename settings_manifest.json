@@ -1404,6 +1404,31 @@
       "uiType": "Enum"
     },
     {
+      "key": "BP_EMOJI_GROUP",
+      "storageName": "EmojiGroup",
+      "type": "bool",
+      "default": true,
+      "label": "Emoji in Alphabet",
+      "description": "Add an emoji group to every alphabet, so emoji are available in the node tree alongside your language (RFC 0020). Emoji are learned in context as you type.",
+      "uiType": "Switch",
+      "tier": "common",
+      "group": "Language",
+      "subgroup": "Emoji"
+    },
+    {
+      "key": "SP_EMOJI_SKIN_TONE",
+      "storageName": "EmojiSkinTone",
+      "type": "string",
+      "default": "none",
+      "label": "Preferred Emoji Skin Tone",
+      "description": "When set, only the base gesture and the preferred skin-tone variant are added to the emoji group (RFC 0020). 'None' adds all variants; the tone you use most rises through adaptation either way.",
+      "tier": "common",
+      "group": "Language",
+      "subgroup": "Emoji",
+      "uiType": "Enum",
+      "values": ["none", "light", "medium-light", "medium", "medium-dark", "dark"]
+    },
+    {
       "key": "SP_COLOUR_ID",
       "storageName": "ColourID",
       "type": "string",

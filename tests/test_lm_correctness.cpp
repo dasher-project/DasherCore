@@ -156,6 +156,12 @@ TEST_CASE("lm/find English alphabet letters by index") {
     // punctuation) includes lowercase, uppercase, and digit groups.
     // find_symbol_index returns the 1-indexed position of each.
     ScopedContext ctx(800, 600);
+    // RFC 0020: the emoji extension is merged by default — disable it so
+    // this test characterises the BASE English alphabet (the "absent
+    // character" check below needs an alphabet without emoji).
+    int emojiKey = dasher_find_parameter_key("BP_EMOJI_GROUP");
+    REQUIRE(emojiKey >= 0);
+    dasher_set_bool_parameter(ctx, emojiKey, 0);
     CHECK(find_symbol_index(ctx, "a") == 1);
     CHECK(find_symbol_index(ctx, "e") > 0);
     CHECK(find_symbol_index(ctx, "t") > 0);
@@ -165,7 +171,7 @@ TEST_CASE("lm/find English alphabet letters by index") {
     CHECK(find_symbol_index(ctx, "Z") > 0);
 
     // A character genuinely absent from the alphabet returns -1.
-    // Emoji, for instance, is not in the English alphabet.
+    // Emoji, for instance, is not in the base English alphabet.
     CHECK(find_symbol_index(ctx, "\xF0\x9F\x98\x80") == -1); // U+1F600 grinning face
 }
 

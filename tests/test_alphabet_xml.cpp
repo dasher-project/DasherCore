@@ -852,3 +852,72 @@ TEST(retired_default_heal_uses_own_context_data_dir) {
     dasher_destroy(a);
     dasher_destroy(b);
 }
+
+// ── Emoji extension (RFC 0020) ────────────────────────────────────────────
+// The extension merges emoji groups into every loaded alphabet when
+// BP_EMOJI_GROUP is on (default), with SP_EMOJI_SKIN_TONE filtering tone
+// variants. Common (alphabet, tone) helper: count + find symbols.
+
+static int emoji_ext_symbol_count(dasher_ctx* ctx) {
+    return dasher_get_alphabet_symbol_count(ctx);
+}
+
+static bool emoji_ext_has_text(dasher_ctx* ctx, const char* text) {
+    int sym_count = dasher_get_alphabet_symbol_count(ctx);
+    for (int i = 1; i < sym_count; i++) {
+        char buf[128];
+        if (dasher_get_alphabet_symbol_text(ctx, i, buf, sizeof(buf)) == 0 && strcmp(buf, text) == 0) return true;
+    }
+    return false;
+}
+
+TEST(emoji_extension_merged_by_default) {
+    // BP_EMOJI_GROUP defaults true: every alphabet carries the emoji group.
+    const char* alphabets[] = {"English with limited punctuation", "Deutsch / German with limited punctuation",
+                               "Arabic (WorldAlphabets)"};
+    for (const char* alph : alphabets) {
+        dasher_ctx* ctx = create_isolated_context();
+        ASSERT(ctx);
+        dasher_set_screen_size(ctx, 800, 600);
+        dasher_set_alphabet_id(ctx, alph);
+        ASSERT_STR_EQ(dasher_get_alphabet_id(ctx), alph);
+        int n = emoji_ext_symbol_count(ctx);
+        bool hasThumbsUp = emoji_ext_has_text(ctx, "\xF0\x9F\x91\x8D"); // 👍
+        printf("  %s: %d symbols, emoji=%d\n", alph, n, hasThumbsUp);
+        ASSERT(n > 150);
+        ASSERT(hasThumbsUp);
+        dasher_destroy(ctx);
+    }
+}
+
+TEST(emoji_extension_disabled_by_setting) {
+    dasher_ctx* ctx = create_isolated_context();
+    ASSERT(ctx);
+    dasher_set_screen_size(ctx, 800, 600);
+    int key = dasher_find_parameter_key("BP_EMOJI_GROUP");
+    ASSERT(key >= 0);
+    int withExtension = emoji_ext_symbol_count(ctx);
+    dasher_set_bool_parameter(ctx, key, 0);
+    int withoutExtension = emoji_ext_symbol_count(ctx);
+    printf("  with=%d without=%d\n", withExtension, withoutExtension);
+    ASSERT(withoutExtension < withExtension);
+    ASSERT(!emoji_ext_has_text(ctx, "\xF0\x9F\x91\x8D"));
+    dasher_destroy(ctx);
+}
+
+TEST(emoji_extension_skin_tone_filter) {
+    dasher_ctx* ctx = create_isolated_context();
+    ASSERT(ctx);
+    dasher_set_screen_size(ctx, 800, 600);
+    int toneKey = dasher_find_parameter_key("SP_EMOJI_SKIN_TONE");
+    ASSERT(toneKey >= 0);
+    // All variants when "none" (default): light (U+1F3FB) and medium (U+1F3FD).
+    ASSERT(emoji_ext_has_text(ctx, "\xF0\x9F\x91\x8D\xF0\x9F\x8F\xBB")); // 👍🏻
+    ASSERT(emoji_ext_has_text(ctx, "\xF0\x9F\x91\x8D\xF0\x9F\x8F\xBD")); // 👍🏽
+    dasher_set_string_parameter(ctx, toneKey, "medium");
+    ASSERT(emoji_ext_has_text(ctx, "\xF0\x9F\x91\x8D"));                  // base kept
+    ASSERT(emoji_ext_has_text(ctx, "\xF0\x9F\x91\x8D\xF0\x9F\x8F\xBD"));  // preferred kept
+    ASSERT(!emoji_ext_has_text(ctx, "\xF0\x9F\x91\x8D\xF0\x9F\x8F\xBB")); // light dropped
+    ASSERT(!emoji_ext_has_text(ctx, "\xF0\x9F\x91\x8D\xF0\x9F\x8F\xBF")); // dark dropped
+    dasher_destroy(ctx);
+}
