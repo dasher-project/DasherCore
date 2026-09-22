@@ -1,0 +1,362 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- RFC 0020 emoji extension. Groups-only: CAlphIO merges these into
+     every loaded alphabet when BP_EMOJI_GROUP is on. No separators —
+     the host alphabet provides space/paragraph. Nodes marked with a
+     tone= attribute are skin-tone variants; SP_EMOJI_SKIN_TONE filters
+     them (base + preferred tone) when set. -->
+<emoji-extension>
+  <group name="Smileys 😀" label="😀">
+    <node label="😀"><textCharAction /></node>
+    <node label="😃"><textCharAction /></node>
+    <node label="😄"><textCharAction /></node>
+    <node label="😁"><textCharAction /></node>
+    <node label="😆"><textCharAction /></node>
+    <node label="😅"><textCharAction /></node>
+    <node label="🤣"><textCharAction /></node>
+    <node label="😂"><textCharAction /></node>
+    <node label="🙂"><textCharAction /></node>
+    <node label="😉"><textCharAction /></node>
+    <node label="😊"><textCharAction /></node>
+    <node label="😇"><textCharAction /></node>
+    <node label="🥰"><textCharAction /></node>
+    <node label="😍"><textCharAction /></node>
+    <node label="😘"><textCharAction /></node>
+    <node label="😋"><textCharAction /></node>
+    <node label="😜"><textCharAction /></node>
+    <node label="🤪"><textCharAction /></node>
+    <node label="🤨"><textCharAction /></node>
+    <node label="🧐"><textCharAction /></node>
+    <node label="🤓"><textCharAction /></node>
+    <node label="😎"><textCharAction /></node>
+    <node label="🥳"><textCharAction /></node>
+    <node label="😏"><textCharAction /></node>
+    <node label="😒"><textCharAction /></node>
+    <node label="😔"><textCharAction /></node>
+    <node label="🙁"><textCharAction /></node>
+    <node label="☹️"><textCharAction /></node>
+    <node label="🥺"><textCharAction /></node>
+    <node label="😢"><textCharAction /></node>
+    <node label="😭"><textCharAction /></node>
+    <node label="😤"><textCharAction /></node>
+    <node label="😠"><textCharAction /></node>
+    <node label="😡"><textCharAction /></node>
+    <node label="🤯"><textCharAction /></node>
+    <node label="😳"><textCharAction /></node>
+    <node label="🥵"><textCharAction /></node>
+    <node label="🥶"><textCharAction /></node>
+    <node label="😱"><textCharAction /></node>
+    <node label="😨"><textCharAction /></node>
+    <node label="😥"><textCharAction /></node>
+    <node label="🤗"><textCharAction /></node>
+    <node label="🤔"><textCharAction /></node>
+    <node label="🤭"><textCharAction /></node>
+    <node label="🙄"><textCharAction /></node>
+    <node label="😮"><textCharAction /></node>
+    <node label="🥱"><textCharAction /></node>
+    <node label="😴"><textCharAction /></node>
+    <node label="🤤"><textCharAction /></node>
+    <node label="😪"><textCharAction /></node>
+    <node label="🥴"><textCharAction /></node>
+    <node label="🤢"><textCharAction /></node>
+    <node label="🤮"><textCharAction /></node>
+    <node label="🤧"><textCharAction /></node>
+    <node label="😷"><textCharAction /></node>
+    <node label="🤒"><textCharAction /></node>
+    <node label="🤕"><textCharAction /></node>
+    <node label="🥲"><textCharAction /></node>
+  </group>
+  <group name="Gestures 👍" label="👍">
+    <node label="👍"><textCharAction /></node>
+    <node label="👍🏻" tone="light"><textCharAction /></node>
+    <node label="👍🏼" tone="medium-light"><textCharAction /></node>
+    <node label="👍🏽" tone="medium"><textCharAction /></node>
+    <node label="👍🏾" tone="medium-dark"><textCharAction /></node>
+    <node label="👍🏿" tone="dark"><textCharAction /></node>
+    <node label="👎"><textCharAction /></node>
+    <node label="👍🏽"><textCharAction /></node>
+    <node label="👌"><textCharAction /></node>
+    <node label="🤌"><textCharAction /></node>
+    <node label="✌️"><textCharAction /></node>
+    <node label="✌🏻" tone="light"><textCharAction /></node>
+    <node label="✌🏼" tone="medium-light"><textCharAction /></node>
+    <node label="✌🏽" tone="medium"><textCharAction /></node>
+    <node label="✌🏾" tone="medium-dark"><textCharAction /></node>
+    <node label="✌🏿" tone="dark"><textCharAction /></node>
+    <node label="🤞"><textCharAction /></node>
+    <node label="🤟"><textCharAction /></node>
+    <node label="🤘"><textCharAction /></node>
+    <node label="🤙"><textCharAction /></node>
+    <node label="👈"><textCharAction /></node>
+    <node label="👉"><textCharAction /></node>
+    <node label="👆"><textCharAction /></node>
+    <node label="👇"><textCharAction /></node>
+    <node label="☝️"><textCharAction /></node>
+    <node label="👋"><textCharAction /></node>
+    <node label="👋🏻" tone="light"><textCharAction /></node>
+    <node label="👋🏼" tone="medium-light"><textCharAction /></node>
+    <node label="👋🏽" tone="medium"><textCharAction /></node>
+    <node label="👋🏾" tone="medium-dark"><textCharAction /></node>
+    <node label="👋🏿" tone="dark"><textCharAction /></node>
+    <node label="🤚"><textCharAction /></node>
+    <node label="🖐️"><textCharAction /></node>
+    <node label="✋"><textCharAction /></node>
+    <node label="🖖"><textCharAction /></node>
+    <node label="👏"><textCharAction /></node>
+    <node label="👏🏻" tone="light"><textCharAction /></node>
+    <node label="👏🏼" tone="medium-light"><textCharAction /></node>
+    <node label="👏🏽" tone="medium"><textCharAction /></node>
+    <node label="👏🏾" tone="medium-dark"><textCharAction /></node>
+    <node label="👏🏿" tone="dark"><textCharAction /></node>
+    <node label="🙌"><textCharAction /></node>
+    <node label="🤲"><textCharAction /></node>
+    <node label="🤝"><textCharAction /></node>
+    <node label="🙏"><textCharAction /></node>
+    <node label="🙏🏻" tone="light"><textCharAction /></node>
+    <node label="🙏🏼" tone="medium-light"><textCharAction /></node>
+    <node label="🙏🏽" tone="medium"><textCharAction /></node>
+    <node label="🙏🏾" tone="medium-dark"><textCharAction /></node>
+    <node label="🙏🏿" tone="dark"><textCharAction /></node>
+    <node label="💪"><textCharAction /></node>
+    <node label="💪🏻" tone="light"><textCharAction /></node>
+    <node label="💪🏼" tone="medium-light"><textCharAction /></node>
+    <node label="💪🏽" tone="medium"><textCharAction /></node>
+    <node label="💪🏾" tone="medium-dark"><textCharAction /></node>
+    <node label="💪🏿" tone="dark"><textCharAction /></node>
+    <node label="✍️"><textCharAction /></node>
+  </group>
+  <group name="Hearts ❤️" label="❤️">
+    <node label="❤️"><textCharAction /></node>
+    <node label="🧡"><textCharAction /></node>
+    <node label="💛"><textCharAction /></node>
+    <node label="💚"><textCharAction /></node>
+    <node label="💙"><textCharAction /></node>
+    <node label="💜"><textCharAction /></node>
+    <node label="🖤"><textCharAction /></node>
+    <node label="🤍"><textCharAction /></node>
+    <node label="🤎"><textCharAction /></node>
+    <node label="💔"><textCharAction /></node>
+    <node label="❣️"><textCharAction /></node>
+    <node label="💕"><textCharAction /></node>
+    <node label="💞"><textCharAction /></node>
+    <node label="💓"><textCharAction /></node>
+    <node label="💗"><textCharAction /></node>
+    <node label="💖"><textCharAction /></node>
+    <node label="💘"><textCharAction /></node>
+    <node label="💝"><textCharAction /></node>
+    <node label="✨"><textCharAction /></node>
+    <node label="⭐"><textCharAction /></node>
+    <node label="🌟"><textCharAction /></node>
+    <node label="💫"><textCharAction /></node>
+    <node label="🔥"><textCharAction /></node>
+    <node label="🎉"><textCharAction /></node>
+    <node label="🎊"><textCharAction /></node>
+    <node label="🎈"><textCharAction /></node>
+    <node label="🎁"><textCharAction /></node>
+    <node label="✅"><textCharAction /></node>
+    <node label="❌"><textCharAction /></node>
+    <node label="❗"><textCharAction /></node>
+    <node label="❓"><textCharAction /></node>
+    <node label="💯"><textCharAction /></node>
+  </group>
+  <group name="People 👪" label="👪">
+    <node label="👶"><textCharAction /></node>
+    <node label="👧"><textCharAction /></node>
+    <node label="👦"><textCharAction /></node>
+    <node label="👩"><textCharAction /></node>
+    <node label="👨"><textCharAction /></node>
+    <node label="👵"><textCharAction /></node>
+    <node label="👴"><textCharAction /></node>
+    <node label="👮"><textCharAction /></node>
+    <node label="💁"><textCharAction /></node>
+    <node label="🙋"><textCharAction /></node>
+    <node label="🤦"><textCharAction /></node>
+    <node label="🤷"><textCharAction /></node>
+    <node label="💃"><textCharAction /></node>
+    <node label="🕺"><textCharAction /></node>
+    <node label="👫"><textCharAction /></node>
+    <node label="👪"><textCharAction /></node>
+    <node label="👨‍👩‍👧"><textCharAction /></node>
+    <node label="🤰"><textCharAction /></node>
+    <node label="👰"><textCharAction /></node>
+  </group>
+  <group name="Nature 🌈" label="🌈">
+    <node label="🐶"><textCharAction /></node>
+    <node label="🐱"><textCharAction /></node>
+    <node label="🐭"><textCharAction /></node>
+    <node label="🐹"><textCharAction /></node>
+    <node label="🐰"><textCharAction /></node>
+    <node label="🦊"><textCharAction /></node>
+    <node label="🐻"><textCharAction /></node>
+    <node label="🐼"><textCharAction /></node>
+    <node label="🐨"><textCharAction /></node>
+    <node label="🐯"><textCharAction /></node>
+    <node label="🦁"><textCharAction /></node>
+    <node label="🐮"><textCharAction /></node>
+    <node label="🐷"><textCharAction /></node>
+    <node label="🐸"><textCharAction /></node>
+    <node label="🐵"><textCharAction /></node>
+    <node label="🐔"><textCharAction /></node>
+    <node label="🐧"><textCharAction /></node>
+    <node label="🐦"><textCharAction /></node>
+    <node label="🦆"><textCharAction /></node>
+    <node label="🦉"><textCharAction /></node>
+    <node label="🦋"><textCharAction /></node>
+    <node label="🐝"><textCharAction /></node>
+    <node label="🐞"><textCharAction /></node>
+    <node label="🐢"><textCharAction /></node>
+    <node label="🐙"><textCharAction /></node>
+    <node label="🐬"><textCharAction /></node>
+    <node label="🐳"><textCharAction /></node>
+    <node label="🌻"><textCharAction /></node>
+    <node label="🌹"><textCharAction /></node>
+    <node label="🌷"><textCharAction /></node>
+    <node label="🌸"><textCharAction /></node>
+    <node label="💐"><textCharAction /></node>
+    <node label="🌈"><textCharAction /></node>
+    <node label="☀️"><textCharAction /></node>
+    <node label="🌞"><textCharAction /></node>
+    <node label="🌙"><textCharAction /></node>
+    <node label="☁️"><textCharAction /></node>
+    <node label="❄️"><textCharAction /></node>
+    <node label="⚡"><textCharAction /></node>
+  </group>
+  <group name="Food 🍕" label="🍕">
+    <node label="🍏"><textCharAction /></node>
+    <node label="🍎"><textCharAction /></node>
+    <node label="🍐"><textCharAction /></node>
+    <node label="🍊"><textCharAction /></node>
+    <node label="🍋"><textCharAction /></node>
+    <node label="🍌"><textCharAction /></node>
+    <node label="🍉"><textCharAction /></node>
+    <node label="🍇"><textCharAction /></node>
+    <node label="🍓"><textCharAction /></node>
+    <node label="🫐"><textCharAction /></node>
+    <node label="🍒"><textCharAction /></node>
+    <node label="🍑"><textCharAction /></node>
+    <node label="🥭"><textCharAction /></node>
+    <node label="🍍"><textCharAction /></node>
+    <node label="🥥"><textCharAction /></node>
+    <node label="🥝"><textCharAction /></node>
+    <node label="🍅"><textCharAction /></node>
+    <node label="🥑"><textCharAction /></node>
+    <node label="🌽"><textCharAction /></node>
+    <node label="🥕"><textCharAction /></node>
+    <node label="🍞"><textCharAction /></node>
+    <node label="🧀"><textCharAction /></node>
+    <node label="🥚"><textCharAction /></node>
+    <node label="🍳"><textCharAction /></node>
+    <node label="🥓"><textCharAction /></node>
+    <node label="🍔"><textCharAction /></node>
+    <node label="🍟"><textCharAction /></node>
+    <node label="🍕"><textCharAction /></node>
+    <node label="🌭"><textCharAction /></node>
+    <node label="🌮"><textCharAction /></node>
+    <node label="🌯"><textCharAction /></node>
+    <node label="🥗"><textCharAction /></node>
+    <node label="🍜"><textCharAction /></node>
+    <node label="🍣"><textCharAction /></node>
+    <node label="🍚"><textCharAction /></node>
+    <node label="🍛"><textCharAction /></node>
+    <node label="🍦"><textCharAction /></node>
+    <node label="🍰"><textCharAction /></node>
+    <node label="🎂"><textCharAction /></node>
+    <node label="🍫"><textCharAction /></node>
+    <node label="🍬"><textCharAction /></node>
+    <node label="☕"><textCharAction /></node>
+    <node label="🍵"><textCharAction /></node>
+    <node label="🧃"><textCharAction /></node>
+    <node label="🥤"><textCharAction /></node>
+    <node label="🍺"><textCharAction /></node>
+    <node label="🍷"><textCharAction /></node>
+    <node label="🥂"><textCharAction /></node>
+  </group>
+  <group name="Places 🚗" label="🚗">
+    <node label="🚗"><textCharAction /></node>
+    <node label="🚕"><textCharAction /></node>
+    <node label="🚌"><textCharAction /></node>
+    <node label="🚑"><textCharAction /></node>
+    <node label="🚒"><textCharAction /></node>
+    <node label="🚚"><textCharAction /></node>
+    <node label="🚜"><textCharAction /></node>
+    <node label="🛵"><textCharAction /></node>
+    <node label="🚲"><textCharAction /></node>
+    <node label="🚨"><textCharAction /></node>
+    <node label="✈️"><textCharAction /></node>
+    <node label="🚀"><textCharAction /></node>
+    <node label="🚁"><textCharAction /></node>
+    <node label="⛵"><textCharAction /></node>
+    <node label="🚤"><textCharAction /></node>
+    <node label="🗺️"><textCharAction /></node>
+    <node label="🗽"><textCharAction /></node>
+    <node label="🗼"><textCharAction /></node>
+    <node label="🏰"><textCharAction /></node>
+    <node label="🏝️"><textCharAction /></node>
+    <node label="🏔️"><textCharAction /></node>
+    <node label="🏕️"><textCharAction /></node>
+    <node label="🏖️"><textCharAction /></node>
+    <node label="🏜️"><textCharAction /></node>
+    <node label="⛰️"><textCharAction /></node>
+    <node label="🌋"><textCharAction /></node>
+  </group>
+  <group name="Objects 📱" label="📱">
+    <node label="⌚"><textCharAction /></node>
+    <node label="📱"><textCharAction /></node>
+    <node label="💻"><textCharAction /></node>
+    <node label="⌨️"><textCharAction /></node>
+    <node label="🖥️"><textCharAction /></node>
+    <node label="🖨️"><textCharAction /></node>
+    <node label="🖱️"><textCharAction /></node>
+    <node label="📷"><textCharAction /></node>
+    <node label="📸"><textCharAction /></node>
+    <node label="🎥"><textCharAction /></node>
+    <node label="📞"><textCharAction /></node>
+    <node label="🔋"><textCharAction /></node>
+    <node label="🔌"><textCharAction /></node>
+    <node label="💡"><textCharAction /></node>
+    <node label="🔦"><textCharAction /></node>
+    <node label="🕯️"><textCharAction /></node>
+    <node label="💵"><textCharAction /></node>
+    <node label="💰"><textCharAction /></node>
+    <node label="💳"><textCharAction /></node>
+    <node label="💎"><textCharAction /></node>
+    <node label="🔑"><textCharAction /></node>
+    <node label="🔒"><textCharAction /></node>
+    <node label="🔓"><textCharAction /></node>
+    <node label="📌"><textCharAction /></node>
+    <node label="📍"><textCharAction /></node>
+    <node label="✂️"><textCharAction /></node>
+    <node label="📏"><textCharAction /></node>
+    <node label="🔧"><textCharAction /></node>
+    <node label="🔨"><textCharAction /></node>
+    <node label="⚙️"><textCharAction /></node>
+    <node label="🎯"><textCharAction /></node>
+    <node label="🎨"><textCharAction /></node>
+    <node label="🎬"><textCharAction /></node>
+    <node label="🎤"><textCharAction /></node>
+    <node label="🎧"><textCharAction /></node>
+    <node label="🎸"><textCharAction /></node>
+    <node label="🎹"><textCharAction /></node>
+    <node label="🥁"><textCharAction /></node>
+    <node label="🎮"><textCharAction /></node>
+    <node label="🎲"><textCharAction /></node>
+  </group>
+  <group name="Symbols 💬" label="💬">
+    <node label="✉️"><textCharAction /></node>
+    <node label="📧"><textCharAction /></node>
+    <node label="📨"><textCharAction /></node>
+    <node label="📤"><textCharAction /></node>
+    <node label="📥"><textCharAction /></node>
+    <node label="📦"><textCharAction /></node>
+    <node label="📰"><textCharAction /></node>
+    <node label="💬"><textCharAction /></node>
+    <node label="💭"><textCharAction /></node>
+    <node label="🗣️"><textCharAction /></node>
+    <node label="♻️"><textCharAction /></node>
+    <node label="🔱"><textCharAction /></node>
+    <node label="⭕"><textCharAction /></node>
+    <node label="⚠️"><textCharAction /></node>
+    <node label="🚫"><textCharAction /></node>
+    <node label="🔞"><textCharAction /></node>
+    <node label="📵"><textCharAction /></node>
+  </group>
+</emoji-extension>
