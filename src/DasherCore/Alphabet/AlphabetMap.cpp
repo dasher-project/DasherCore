@@ -123,8 +123,21 @@ inline int CAlphabetMap::SymbolStream::findNext() {
     }
 }
 
-std::string CAlphabetMap::SymbolStream::peekAhead() {
+std::string CAlphabetMap::SymbolStream::peekAhead(const CAlphabetMap* map) {
     int numChars = findNext();
+    if (numChars == 0) return "";
+
+    // RFC 0020 / greptile P1: the peek must agree with what the next
+    // next(map) call will consume. Annotation readers (Routing/Mandarin
+    // conversion trainers, CTrainer::readEscape) record the peeked token
+    // and then advance via next() — peeking only the FIRST codepoint of a
+    // multi-codepoint key would record a token that never matches the
+    // route/pronunciation table while next() skips the whole key.
+    if (map && map->MaxKeyLen() > 0) {
+        ensureLookahead(map->MaxKeyLen());
+        size_t matched = 0;
+        if (map->LongestMatch(&buf[pos], len - pos, matched) != UNKNOWN_SYMBOL) return std::string(&buf[pos], matched);
+    }
     return std::string(&buf[pos], numChars);
 }
 
@@ -259,7 +272,12 @@ void CAlphabetMap::Add(const std::string& Key, symbol Value) {
     // single-character path in next(). (Single-codepoint multi-byte keys
     // like a 4-byte 😀 already match there.) Copies, not pointers: the
     // Entries vector reallocates as it grows. Keep sorted longest-first.
-    if (Key.length() > static_cast<size_t>(m_utf8_count_array[static_cast<unsigned char>(Key[0])])) {
+    // Keys of STREAM_WINDOW bytes or more can never be fully buffered for
+    // probing (greptile P2) — leave them unregistered rather than
+    // pretending they train; such keys were equally dead through the
+    // per-codepoint path, so no behaviour regresses.
+    if (Key.length() > static_cast<size_t>(m_utf8_count_array[static_cast<unsigned char>(Key[0])]) &&
+        Key.length() < STREAM_WINDOW) {
         auto it = m_vMultiCharKeys.begin();
         while (it != m_vMultiCharKeys.end() && it->first.length() >= Key.length())
             ++it;

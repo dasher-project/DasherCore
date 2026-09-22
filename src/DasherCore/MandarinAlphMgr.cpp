@@ -214,7 +214,7 @@ void CMandarinAlphMgr::CMandarinTrainer::Train(CAlphabetMap::SymbolStream& syms)
                                            strPy.c_str());
                 strPy.clear();
                 bHavePy = true;
-                for (std::string s; (s = syms.peekAhead()).length(); strPy += s) {
+                for (std::string s; (s = syms.peekAhead(m_pAlphabet)).length(); strPy += s) {
                     syms.next(m_pAlphabet);
                     if (s == m_pInfo->m_strConversionTrainStop) break;
                 }

@@ -79,6 +79,11 @@ class Dasher::CAlphabetMap {
   public:
     ~CAlphabetMap();
 
+    /// Read-window size of SymbolStream: multi-codepoint keys of this
+    /// length or longer can never be fully buffered for probing and are
+    /// not registered (RFC 0020 — documented at Add).
+    static constexpr size_t STREAM_WINDOW = 1024;
+
     // Return the symbol associated with Key or Undefined.
     symbol Get(const std::string& Key) const;
     symbol GetSingleChar(char key) const;
@@ -108,7 +113,11 @@ class Dasher::CAlphabetMap {
         /// Finds the next complete character in the stream,  but does not advance past it.
         ///  Hence, repeated calls will return the same string. (Always constructs a string,
         ///  which next() avoids for single-octet chars, so may be slower)
-        std::string peekAhead();
+        ///  RFC 0020: when a multi-codepoint key starts at the current position,
+        ///  returns the WHOLE key — exactly the bytes the next next() call would
+        ///  consume — so annotation readers (Routing/Mandarin escape and route
+        ///  parsing) never record a different token than they advance past.
+        std::string peekAhead(const CAlphabetMap* map);
 
         /// Returns the string representation of the previous symbol (i.e. that returned
         ///  by the previous call to next()). Undefined if next() has not been called, or
@@ -141,7 +150,7 @@ class Dasher::CAlphabetMap {
         /// simply holds what's left). findNext's refill logic, parameterised.
         inline void ensureLookahead(size_t want);
         void readMore();
-        char buf[1024];
+        char buf[STREAM_WINDOW];
         off_t pos, len;
         std::istream& in;
         CMessageDisplay* const m_pMsgs;

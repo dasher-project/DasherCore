@@ -47,7 +47,7 @@ bool CTrainer::readEscape(CLanguageModel::Context& sContext, symbol sym, CAlphab
 
     // Yes, found escape character....
 
-    std::string delim = syms.peekAhead();
+    std::string delim = syms.peekAhead(m_pAlphabet);
     syms.next(m_pAlphabet); // peekAhead doesn't read
 
     // A double escape character means an actual occurrence of the character is wanted...

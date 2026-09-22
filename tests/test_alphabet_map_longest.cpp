@@ -160,3 +160,22 @@ TEST(map_peek_back_returns_whole_matched_key) {
     // peekBack does not advance the stream
     ASSERT_EQ(syms.next(&map), -1);
 }
+
+TEST(map_peek_ahead_agrees_with_next) {
+    // Greptile P1: annotation readers (Routing/Mandarin conversion
+    // trainers, CTrainer::readEscape) record the peeked token and then
+    // advance via next(). peekAhead must therefore return EXACTLY the
+    // bytes the following next() consumes — including a whole
+    // multi-codepoint key, not just its first codepoint.
+    CAlphabetMap map;
+    map.Add("a", 2);
+    map.Add(FAMILY, 5);
+
+    std::istringstream in(FAMILY + "a");
+    CAlphabetMap::SymbolStream syms(in);
+    ASSERT(syms.peekAhead(&map) == FAMILY);
+    ASSERT_EQ(syms.next(&map), 5);
+    ASSERT(syms.peekAhead(&map) == "a");
+    ASSERT_EQ(syms.next(&map), 2);
+    ASSERT_EQ(syms.next(&map), -1);
+}
