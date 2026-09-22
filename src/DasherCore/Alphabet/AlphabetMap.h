@@ -81,6 +81,18 @@ class Dasher::CAlphabetMap {
     symbol Get(const std::string& Key) const;
     symbol GetSingleChar(char key) const;
 
+    /// Longest-match support (RFC 0020 clause 4): probe multi-codepoint
+    /// keys (digraph outputs, ZWJ/VS16 emoji) at a buffer position, longest
+    /// first, before the single-character path in SymbolStream::next().
+    /// \param at buffer position; \param avail bytes readable from it
+    /// \param matchedLen set to the matched key's byte length on success
+    /// \return the symbol, or UNKNOWN_SYMBOL (0) when no key matches.
+    symbol LongestMatch(const char* at, size_t avail, size_t& matchedLen) const;
+
+    /// Longest multi-codepoint key in the map (0 when none) — the
+    /// lookahead SymbolStream must keep buffered.
+    size_t MaxKeyLen() const { return m_iMaxKeyLen; }
+
     class SymbolStream {
       public:
         virtual ~SymbolStream() = default;
@@ -116,6 +128,11 @@ class Dasher::CAlphabetMap {
         ///  \return the number of octets representing the next character, or 0 for EOF
         ///  (inc. where the file ends with an incomplete character)
         inline int findNext();
+
+        /// Ensure at least `want` bytes are buffered past pos (shifting the
+        /// remaining window to the front and reading more; at EOF the buffer
+        /// simply holds what's left). findNext's refill logic, parameterised.
+        inline void ensureLookahead(size_t want);
         void readMore();
         char buf[1024];
         off_t pos, len;
@@ -177,5 +194,12 @@ class Dasher::CAlphabetMap {
     /// both "\r\n" and "\n" are mapped to this (if not Undefined).
     /// This is the only case where >1 character can map to a symbol.
     symbol m_ParagraphSymbol;
+
+    /// Multi-codepoint keys (copies, with their symbols), sorted longest
+    /// first — copies because Entries vector growth relocates its strings.
+    /// Only keys that the single-character path can never match (more than
+    /// one codepoint) belong here.
+    std::vector<std::pair<std::string, symbol>> m_vMultiCharKeys;
+    size_t m_iMaxKeyLen = 0;
 };
 /// \}

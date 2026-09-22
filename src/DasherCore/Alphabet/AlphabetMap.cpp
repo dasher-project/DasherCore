@@ -79,20 +79,23 @@ void CAlphabetMap::SymbolStream::readMore() {
     }
 }
 
+inline void CAlphabetMap::SymbolStream::ensureLookahead(size_t want) {
+    if (pos + want > len) {
+        if (pos) {
+            // shift remaining bytes to beginning
+            len -= pos; // len of them
+            memmove(buf, &buf[pos], len);
+            bytesRead(pos);
+            pos = 0;
+        }
+        // and look for more
+        readMore();
+    }
+}
+
 inline int CAlphabetMap::SymbolStream::findNext() {
     for (;;) {
-        if (pos + m_utf8_count_array.max_length > len) {
-            // may need more bytes for next char
-            if (pos) {
-                // shift remaining bytes to beginning
-                len -= pos; // len of them
-                memmove(buf, &buf[pos], len);
-                bytesRead(pos);
-                pos = 0;
-            }
-            // and look for more
-            readMore();
-        }
+        ensureLookahead(m_utf8_count_array.max_length);
         // if still don't have any chars after attempting to read more...EOF!
         if (pos == len) {
             if (m_skippedInvalid && m_pMsgs)
@@ -158,6 +161,22 @@ std::string CAlphabetMap::SymbolStream::peekBack() {
 symbol CAlphabetMap::SymbolStream::next(const CAlphabetMap* map) {
     int numChars = findNext();
     if (numChars == 0) return -1; // EOF
+
+    // RFC 0020 clause 4 — longest match first: multi-codepoint symbols
+    // (digraph outputs, ZWJ sequences, skin-tone modifiers) must train as
+    // one symbol. Probe before the single-character path so a multi-
+    // codepoint key that STARTS with a known single character (❤️ over ❤)
+    // still wins.
+    if (map->MaxKeyLen() > 0) {
+        ensureLookahead(map->MaxKeyLen());
+        size_t matched = 0;
+        symbol sym = map->LongestMatch(&buf[pos], len - pos, matched);
+        if (sym != UNKNOWN_SYMBOL) {
+            pos += matched;
+            return sym;
+        }
+    }
+
     if (numChars == 1) {
         if (map->m_ParagraphSymbol != UNKNOWN_SYMBOL && buf[pos] == '\r') {
             DASHER_ASSERT(pos + 1 < len || len < 1024); // there are more characters (we should have read
@@ -247,6 +266,32 @@ void CAlphabetMap::Add(const std::string& Key, symbol Value) {
 
     Entries.push_back(Entry(Key, Value, HashEntry));
     HashEntry = &Entries.back();
+
+    // RFC 0020 clause 4: register multi-codepoint keys for longest-match
+    // probing. A key qualifies when it is longer than its lead byte's
+    // UTF-8 length — i.e. more than one codepoint, unreachable by the
+    // single-character path in next(). (Single-codepoint multi-byte keys
+    // like a 4-byte 😀 already match there.) Copies, not pointers: the
+    // Entries vector reallocates as it grows. Keep sorted longest-first.
+    if (Key.length() > static_cast<size_t>(m_utf8_count_array[static_cast<unsigned char>(Key[0])])) {
+        auto it = m_vMultiCharKeys.begin();
+        while (it != m_vMultiCharKeys.end() && it->first.length() >= Key.length()) ++it;
+        m_vMultiCharKeys.insert(it, {Key, Value});
+        m_iMaxKeyLen = std::max(m_iMaxKeyLen, Key.length());
+    }
+}
+
+symbol CAlphabetMap::LongestMatch(const char* at, size_t avail, size_t& matchedLen) const {
+    // m_vMultiCharKeys is sorted longest-first, so the first byte-exact
+    // match is the longest possible.
+    for (const auto& [key, sym] : m_vMultiCharKeys) {
+        if (key.length() > avail) continue;
+        if (std::memcmp(at, key.data(), key.length()) == 0) {
+            matchedLen = key.length();
+            return sym;
+        }
+    }
+    return UNKNOWN_SYMBOL;
 }
 
 symbol CAlphabetMap::Get(const std::string& Key) const {

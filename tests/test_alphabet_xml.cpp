@@ -210,21 +210,13 @@ TEST(alphabet_emoji_corpus_tokens_are_nodes) {
                     printf("\n");
                     ASSERT(false);
                 }
-                // Greptile P2: membership alone is insufficient — a
-                // multi-codepoint NODE (👨‍👩‍👧) would pass even though the
-                // trainer looks up one code point per symbol and can never
-                // match it. Enforce single-codepoint tokens explicitly:
-                // count UTF-8 lead bytes (non-continuation).
-                int codepoints = 0;
-                for (unsigned char ch : tok)
-                    if ((ch & 0xC0) != 0x80) codepoints++;
-                if (codepoints != 1) {
-                    printf("  multi-codepoint corpus token (%d codepoints):", codepoints);
-                    for (unsigned char ch : tok)
-                        printf(" %02x", ch);
-                    printf("\n");
-                    ASSERT(false);
-                }
+                // Greptile P2 + RFC 0020 clause 4: corpus tokens must be
+                // whole alphabet symbols. Multi-codepoint tokens became
+                // VALID with the longest-match trainer (they train their
+                // node as one symbol), so membership is the constraint —
+                // the historical single-codepoint restriction is lifted.
+                // The shipped corpus simply doesn't use multi-codepoint
+                // tokens yet; future additions may.
             }
             start = end + 1;
         }
