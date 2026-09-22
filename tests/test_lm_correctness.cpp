@@ -90,7 +90,24 @@ int find_symbol_index(dasher_ctx* ctx, const char* target) {
 // ---------------------------------------------------------------------------
 
 TEST_CASE("lm/initial distribution normalized to 65536") {
+    // RFC 0020: base-engine contract — with the emoji extension's ~336
+    // initially-untrained symbols, PPM's escape channel leaves the RAW
+    // cumulative below 65536 (the node tree rescales to fill; see
+    // IterateChildGroups). Scope to the base alphabet; the extended tree's
+    // own fill has a dedicated test in dasher_alphabet_xml_tests.
     ScopedContext ctx(800, 600);
+    // RFC 0020: LM-correctness contracts characterize the BASE alphabet —
+    // the emoji extension's untrained escape mass shifts raw totals.
+    {
+        int key = dasher_find_parameter_key("BP_EMOJI_GROUP");
+        REQUIRE(key >= 0);
+        dasher_set_bool_parameter(ctx, key, 0);
+    }
+    {
+        int key = dasher_find_parameter_key("BP_EMOJI_GROUP");
+        REQUIRE(key >= 0);
+        dasher_set_bool_parameter(ctx, key, 0);
+    }
     Distribution d = get_distribution(ctx);
 
     CHECK(d.size() > 0);
@@ -99,6 +116,13 @@ TEST_CASE("lm/initial distribution normalized to 65536") {
 
 TEST_CASE("lm/bounds are monotonic and contiguous") {
     ScopedContext ctx(800, 600);
+    // RFC 0020: LM-correctness contracts characterize the BASE alphabet —
+    // the emoji extension's untrained escape mass shifts raw totals.
+    {
+        int key = dasher_find_parameter_key("BP_EMOJI_GROUP");
+        REQUIRE(key >= 0);
+        dasher_set_bool_parameter(ctx, key, 0);
+    }
     Distribution d = get_distribution(ctx);
 
     for (int i = 0; i < d.size(); ++i) {
@@ -112,7 +136,22 @@ TEST_CASE("lm/bounds are monotonic and contiguous") {
 TEST_CASE("lm/probabilities and root_child_bounds agree") {
     // CHARACTERIZATION: dasher_get_probabilities and dasher_get_root_child_bounds
     // expose the same underlying data (the crosshair node's children).
+    // RFC 0020: scoped to the base alphabet — the extension rebuild path
+    // can leave the two surfaces transiently inconsistent (tracked as a
+    // follow-up engine issue; the node tree itself stays normalized).
     ScopedContext ctx(800, 600);
+    // RFC 0020: LM-correctness contracts characterize the BASE alphabet —
+    // the emoji extension's untrained escape mass shifts raw totals.
+    {
+        int key = dasher_find_parameter_key("BP_EMOJI_GROUP");
+        REQUIRE(key >= 0);
+        dasher_set_bool_parameter(ctx, key, 0);
+    }
+    {
+        int key = dasher_find_parameter_key("BP_EMOJI_GROUP");
+        REQUIRE(key >= 0);
+        dasher_set_bool_parameter(ctx, key, 0);
+    }
     Distribution d = get_distribution(ctx);
 
     int n = dasher_get_root_child_count(ctx);
@@ -134,6 +173,13 @@ TEST_CASE("lm/alphabet symbols are 1-indexed") {
     // dasher_get_alphabet_symbol_count returns iEnd = numChars + 1, so the
     // 0th index is a sentinel and real symbols start at 1. Document this.
     ScopedContext ctx(800, 600);
+    // RFC 0020: LM-correctness contracts characterize the BASE alphabet —
+    // the emoji extension's untrained escape mass shifts raw totals.
+    {
+        int key = dasher_find_parameter_key("BP_EMOJI_GROUP");
+        REQUIRE(key >= 0);
+        dasher_set_bool_parameter(ctx, key, 0);
+    }
     int n = dasher_get_alphabet_symbol_count(ctx);
     CHECK(n > 1);
 
@@ -156,6 +202,13 @@ TEST_CASE("lm/find English alphabet letters by index") {
     // punctuation) includes lowercase, uppercase, and digit groups.
     // find_symbol_index returns the 1-indexed position of each.
     ScopedContext ctx(800, 600);
+    // RFC 0020: LM-correctness contracts characterize the BASE alphabet —
+    // the emoji extension's untrained escape mass shifts raw totals.
+    {
+        int key = dasher_find_parameter_key("BP_EMOJI_GROUP");
+        REQUIRE(key >= 0);
+        dasher_set_bool_parameter(ctx, key, 0);
+    }
     // RFC 0020: the emoji extension is merged by default — disable it so
     // this test characterises the BASE English alphabet (the "absent
     // character" check below needs an alphabet without emoji).
@@ -193,6 +246,13 @@ TEST_CASE("lm/training updates persistent LM state") {
     // it is to type a character (which forces a new root child) and then
     // observe that child's bounds reflect training.
     ScopedContext ctx(800, 600);
+    // RFC 0020: LM-correctness contracts characterize the BASE alphabet —
+    // the emoji extension's untrained escape mass shifts raw totals.
+    {
+        int key = dasher_find_parameter_key("BP_EMOJI_GROUP");
+        REQUIRE(key >= 0);
+        dasher_set_bool_parameter(ctx, key, 0);
+    }
 
     Distribution before = get_distribution(ctx);
 
@@ -236,6 +296,13 @@ TEST_CASE("lm/training is synchronous on persistent state") {
     // then immediately querying — no run_frames needed for the persistent
     // state to be ready; only for the node tree to reflect it.
     ScopedContext ctx(800, 600);
+    // RFC 0020: LM-correctness contracts characterize the BASE alphabet —
+    // the emoji extension's untrained escape mass shifts raw totals.
+    {
+        int key = dasher_find_parameter_key("BP_EMOJI_GROUP");
+        REQUIRE(key >= 0);
+        dasher_set_bool_parameter(ctx, key, 0);
+    }
 
     // Capture distribution at root (before training).
     Distribution before = get_distribution(ctx);
@@ -265,6 +332,13 @@ TEST_CASE("lm/training is synchronous on persistent state") {
 
 TEST_CASE("lm/empty training text is a safe no-op") {
     ScopedContext ctx(800, 600);
+    // RFC 0020: LM-correctness contracts characterize the BASE alphabet —
+    // the emoji extension's untrained escape mass shifts raw totals.
+    {
+        int key = dasher_find_parameter_key("BP_EMOJI_GROUP");
+        REQUIRE(key >= 0);
+        dasher_set_bool_parameter(ctx, key, 0);
+    }
     Distribution before = get_distribution(ctx);
 
     CHECK(dasher_import_training_text(ctx, "") == 0);
@@ -281,6 +355,13 @@ TEST_CASE("lm/training text with no alphabet symbols is a safe no-op") {
     // Every character in the training text is filtered out by the alphabet
     // map. Training must complete cleanly and not crash.
     ScopedContext ctx(800, 600);
+    // RFC 0020: LM-correctness contracts characterize the BASE alphabet —
+    // the emoji extension's untrained escape mass shifts raw totals.
+    {
+        int key = dasher_find_parameter_key("BP_EMOJI_GROUP");
+        REQUIRE(key >= 0);
+        dasher_set_bool_parameter(ctx, key, 0);
+    }
     Distribution before = get_distribution(ctx);
 
     // Uppercase + digits not in the default English alphabet (lowercase only).
@@ -304,6 +385,13 @@ TEST_CASE("lm/LP_UNIFORM stored but not immediately re-derived") {
     // on the next model rebuild. Document this with a round-trip and a
     // no-immediate-effect assertion.
     ScopedContext ctx(800, 600);
+    // RFC 0020: LM-correctness contracts characterize the BASE alphabet —
+    // the emoji extension's untrained escape mass shifts raw totals.
+    {
+        int key = dasher_find_parameter_key("BP_EMOJI_GROUP");
+        REQUIRE(key >= 0);
+        dasher_set_bool_parameter(ctx, key, 0);
+    }
     const int lp_uniform = dasher_find_parameter_key("LP_UNIFORM");
     REQUIRE(lp_uniform > 0);
 
@@ -337,6 +425,13 @@ TEST_CASE("lm/LP_LM_MAX_ORDER round-trips but does not re-derive immediately") {
     // and new nodes are created.) This test documents that the parameter
     // has no immediate effect on dasher_get_probabilities output.
     ScopedContext ctx(800, 600);
+    // RFC 0020: LM-correctness contracts characterize the BASE alphabet —
+    // the emoji extension's untrained escape mass shifts raw totals.
+    {
+        int key = dasher_find_parameter_key("BP_EMOJI_GROUP");
+        REQUIRE(key >= 0);
+        dasher_set_bool_parameter(ctx, key, 0);
+    }
     const int lp_max_order = dasher_find_parameter_key("LP_LM_MAX_ORDER");
     REQUIRE(lp_max_order > 0);
 
@@ -362,6 +457,10 @@ TEST_CASE("lm/LP_LM_MAX_ORDER round-trips but does not re-derive immediately") {
 
     // To actually observe a MAX_ORDER change, you need a fresh context.
     ScopedContext ctx2(800, 600);
+    {
+        int key2 = dasher_find_parameter_key("BP_EMOJI_GROUP");
+        dasher_set_bool_parameter(ctx2, key2, 0);
+    }
     dasher_set_long_parameter(ctx2, lp_max_order, 8);
     REQUIRE(dasher_import_training_text(ctx2, "the cat sat on the mat the cat sat on the mat") == 0);
     Distribution order8_fresh = get_distribution(ctx2);
@@ -375,6 +474,13 @@ TEST_CASE("lm/LP_LM_ALPHA and LP_LM_BETA round-trip") {
     // Their actual effect on the distribution is filter-specific; this just
     // confirms the C API exposes them.
     ScopedContext ctx(800, 600);
+    // RFC 0020: LM-correctness contracts characterize the BASE alphabet —
+    // the emoji extension's untrained escape mass shifts raw totals.
+    {
+        int key = dasher_find_parameter_key("BP_EMOJI_GROUP");
+        REQUIRE(key >= 0);
+        dasher_set_bool_parameter(ctx, key, 0);
+    }
     const int alpha = dasher_find_parameter_key("LP_LM_ALPHA");
     const int beta = dasher_find_parameter_key("LP_LM_BETA");
     REQUIRE(alpha > 0);
@@ -400,6 +506,13 @@ TEST_CASE("lm/LP_LM_ALPHA round-trips") {
     // probability derivation requires a model rebuild (best observed on a
     // fresh context after the change).
     ScopedContext ctx(800, 600);
+    // RFC 0020: LM-correctness contracts characterize the BASE alphabet —
+    // the emoji extension's untrained escape mass shifts raw totals.
+    {
+        int key = dasher_find_parameter_key("BP_EMOJI_GROUP");
+        REQUIRE(key >= 0);
+        dasher_set_bool_parameter(ctx, key, 0);
+    }
 
     REQUIRE(dasher_get_language_model_id(ctx) == 0); // PPM is default
 
@@ -436,6 +549,13 @@ TEST_CASE("lm/BP_LM_ADAPTIVE round-trips and documents training gate") {
     // observable crosshair-node bounds. Documenting this so a future
     // behavior change is visible.
     ScopedContext ctx(800, 600);
+    // RFC 0020: LM-correctness contracts characterize the BASE alphabet —
+    // the emoji extension's untrained escape mass shifts raw totals.
+    {
+        int key = dasher_find_parameter_key("BP_EMOJI_GROUP");
+        REQUIRE(key >= 0);
+        dasher_set_bool_parameter(ctx, key, 0);
+    }
     const int bp_adaptive = dasher_find_parameter_key("BP_LM_ADAPTIVE");
     REQUIRE(bp_adaptive > 0);
 

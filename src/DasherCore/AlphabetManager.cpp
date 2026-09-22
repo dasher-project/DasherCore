@@ -602,8 +602,16 @@ void CAlphabetManager::IterateChildGroups(CAlphNode* pParent, const SGroupInfo* 
     DASHER_ASSERT((*pCProb)[0] == 0);
     const int iMin(pParentGroup->iStart);
     const int iMax(pParentGroup->iEnd);
-    unsigned int iRange(pParentGroup == m_pBaseGroup ? CDasherModel::NORMALIZATION
-                                                     : ((*pCProb)[iMax - 1] - (*pCProb)[iMin - 1]));
+    // Scale children against the LM's ACTUAL cumulative total rather than
+    // assuming it fills NORMALIZATION: PPM reserves escape/uniform mass for
+    // unseen text, and with a large untrained symbol set (RFC 0020's merged
+    // emoji extension, before adaptation lifts what the user types) that
+    // residual is no longer negligible — assuming 65536 left the last child
+    // short and the tree didn't fill the screen. For fully-trained
+    // alphabets the total IS 65536 and this is a no-op.
+    const unsigned int iActualRange((*pCProb)[iMax - 1] - (*pCProb)[iMin - 1]);
+    DASHER_ASSERT(iActualRange > 0);
+    unsigned int iRange(iActualRange);
 
     // TODO: Think through alphabet file formats etc. to make this class easier.
     // TODO: Throw a warning if parent node already has children

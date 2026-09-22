@@ -98,12 +98,6 @@ class Dasher::CAlphIO : public AbstractXMLParser {
     std::map<std::string, std::string> AlphabetFiles;  // name index: AlphID → filename
     static CAlphInfo*
     CreateDefault(); // Give the user an English alphabet rather than nothing if anything goes horribly wrong.
-
-    /// Deep-copy src's group tree (incl. nested) into a fresh CAlphInfo
-    /// whose m_vCharacters were copied first; remaps character.parentGroup
-    /// into the cloned tree. Returns the cloned root child chain.
-    SGroupInfo* CloneGroupTree(const SGroupInfo* src, SGroupInfo* prevSibling, CAlphInfo* into, const CAlphInfo* from);
-
     std::vector<pugi::xml_node> m_emojiExtensionGroups; // cached <group> nodes
     pugi::xml_document m_emojiExtensionDoc;             // owns the cached nodes
 

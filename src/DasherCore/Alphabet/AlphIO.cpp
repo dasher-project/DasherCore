@@ -426,12 +426,27 @@ const CAlphInfo* CAlphIO::MakeExtendedInfo(const std::string& AlphID, const std:
     if (!alphabet || std::strcmp(alphabet.name(), "alphabet") != 0) return base;
 
     CAlphInfo* derived = ParseAlphabet(alphabet, isV5);
+    // Guard against index/registry divergence (e.g. a user-dir v5 file
+    // shadowing a v6 name in the filename index but not the registry):
+    // the re-parse must produce the requested alphabet, else serve the
+    // registered base rather than a divergent copy.
+    if (derived->AlphID != AlphID) {
+        delete derived;
+        return base;
+    }
 
     // Append the extension's groups after the alphabet's own (ParseGroupRecursive
     // appends characters at the end and links groups as reverse siblings).
     std::string toneFilter(skinTone != "none" ? skinTone : "");
     const std::string* pToneFilter = toneFilter.empty() ? nullptr : &toneFilter;
-    SGroupInfo* previous_sibling = nullptr;
+    // Append the extension's groups AFTER the alphabet's own chain: start
+    // at the base chain's tail so the reverse below yields
+    // base→…→base→ext→…→ext. Starting at nullptr (the original bug) orphaned
+    // the base group chain — leaking its SGroupInfo tree and dropping every
+    // base symbol's group coverage.
+    SGroupInfo* previous_sibling = derived->pChild;
+    if (previous_sibling)
+        for (; previous_sibling->pNext; previous_sibling = previous_sibling->pNext);
     for (pugi::xml_node& group : m_emojiExtensionGroups) {
         SGroupInfo* newGroup = ParseGroupRecursive(group, derived, previous_sibling, {}, pToneFilter);
         if (!newGroup) continue;

@@ -70,7 +70,13 @@ CNodeCreationManager::CNodeCreationManager(CSettingsStore* pSettingsStore, CDash
     : m_pInterface(pInterface), m_pScreen(nullptr), m_pSettingsStore(pSettingsStore) {
     m_pSettingsStore->OnParameterChanged.Subscribe(this, [this](const Parameter p) { HandleParameterChange(p); });
 
-    const Dasher::CAlphInfo* pAlphInfo(pAlphIO->GetInfo(m_pSettingsStore->GetStringParameter(SP_ALPHABET_ID)));
+    // RFC 0020: the ACTIVE alphabet (base + emoji extension when
+    // BP_EMOJI_GROUP is on) — NOT the registered base. GetActiveAlphabet
+    // serves the derived, merged info; building from the registered base
+    // here would render and train a tree the extension never touches,
+    // leaving the CAPI split-brained (symbol count includes emoji, node
+    // tree doesn't).
+    const Dasher::CAlphInfo* pAlphInfo(pInterface->GetActiveAlphabet());
 
     switch (pAlphInfo->m_iConversionID) {
     case CAlphInfo::None: // No conversion required
