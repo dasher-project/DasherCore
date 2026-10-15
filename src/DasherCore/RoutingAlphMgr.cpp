@@ -83,6 +83,12 @@ CDasherNode* CRoutingAlphMgr::CreateSymbolNode(CAlphNode* pParent, symbol iSymbo
     CSymbolNode* pAlphNode = new CRoutedSym(iNewOffset, m_vLabels[iSymbol], this, iSymbol);
 
     pAlphNode->iContext = m_pLanguageModel->CloneContext(pParent->iContext);
+    if (SymbolPrintsNewLine(iSymbol)) {
+        // Paragraph = hard prediction boundary (see CAlphabetManager): the
+        // canonical paragraph-start context replaces the parent chain.
+        m_pLanguageModel->ReleaseContext(pAlphNode->iContext);
+        pAlphNode->iContext = CreateParagraphSeedContext();
+    }
 
     // namely, we want to enter only the BASE symbol into the LM, not the route
     //  (which would be out of range):
@@ -90,6 +96,19 @@ CDasherNode* CRoutingAlphMgr::CreateSymbolNode(CAlphNode* pParent, symbol iSymbo
     // (Unfortunately, we can't make EnterSymbol take route numbers, because
     // it has base symbols passed to it from the alphabet map)
     return pAlphNode;
+}
+
+symbol CRoutingAlphMgr::ContextSymbol(symbol iSymbol) const {
+    return m_vBaseSyms[iSymbol];
+}
+
+bool CRoutingAlphMgr::MapSymbolPrintsNewLine(symbol mapSym) const {
+    // Map symbols are per-unique-text ids here, not alphabet indices:
+    // resolve any route carrying this base, and ask the alphabet about it.
+    if (mapSym <= 0 || static_cast<size_t>(mapSym) >= m_vRoutes.size()) return false;
+    const std::set<symbol>& routes(m_vRoutes[mapSym]);
+    if (routes.empty()) return false;
+    return m_pAlphabet->SymbolPrintsNewLineCharacter(*routes.begin());
 }
 
 CRoutingAlphMgr::CRoutingTrainer::CRoutingTrainer(CMessageDisplay* pMsgs, CRoutingAlphMgr* pMgr)

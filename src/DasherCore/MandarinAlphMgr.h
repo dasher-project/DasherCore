@@ -132,6 +132,12 @@ class CMandarinAlphMgr : public CAlphabetManager {
     // ChineseAlphabet's (hashed) symbols stored in m_map.
     CAlphNode* CreateSymbolRoot(int iOffset, CLanguageModel::Context ctx, symbol sym) override;
 
+    /// Mandarin rehashes symbols (per unique character) in BOTH the map and
+    /// its own nodes, so the paragraph is identified by its hashed id
+    /// (m_iCHpara), not by indexing the original alphabet table.
+    bool MapSymbolPrintsNewLine(symbol mapSym) const override;
+    bool SymbolPrintsNewLine(symbol iSymbol) const override;
+
     class CConvRoot;
     /// Subclass of CSymbolNode for (converted) chinese-alphabet symbols:
     ///  we need to keep track of the pinyin used to enter it, to output

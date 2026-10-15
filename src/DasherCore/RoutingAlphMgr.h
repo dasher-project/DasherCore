@@ -67,6 +67,14 @@ class CRoutingAlphMgr : public CAlphabetManager {
     /// base symbol and route
     virtual CDasherNode* CreateSymbolNode(CAlphNode* pParent, symbol iSymbol) override;
 
+    /// EnterSymbol on the RoutingPPM language model takes base symbols only
+    /// (routes are for LearnSymbol/GetProbs); translate a route symbol down.
+    symbol ContextSymbol(symbol iSymbol) const override;
+
+    /// Routing InitMap renumbers (per-unique-text ids), so map symbols must
+    /// be resolved through the route table before asking the alphabet.
+    bool MapSymbolPrintsNewLine(symbol mapSym) const override;
+
     /// Subclass to override trainText
     class CRoutedSym : public CSymbolNode {
       public:
