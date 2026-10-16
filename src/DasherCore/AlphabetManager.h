@@ -305,6 +305,38 @@ class CAlphabetManager : public CNodeManager {
     std::pair<symbol, CLanguageModel::Context> GetContextSymbols(CDasherNode* pParent, int iRootOffset,
                                                                  const CAlphabetMap* pAlphMap);
 
+    /// Symbols of the canonical paragraph-start context: the alphabet's
+    /// default (fresh-sentence) context with trailing whitespace stripped.
+    /// See the paragraph-boundary notes in AlphabetManager.cpp.
+    void ParagraphSeedSymbols(std::vector<symbol>& vSeed) const;
+
+    /// A fresh LM context holding ParagraphSeedSymbols; the paragraph
+    /// symbol itself is entered by the caller.
+    CLanguageModel::Context CreateParagraphSeedContext() const;
+
+    /// The symbol to hand the LM for CONTEXT purposes (EnterSymbol):
+    /// routing alphabets must translate a (route) symbol down to its base
+    /// symbol — EnterSymbol only accepts base numbers there.
+    virtual symbol ContextSymbol(symbol iSymbol) const;
+
+    /// Whether a symbol in the MAP number space (the values GetContextSymbols
+    /// gets from pAlphMap->GetSymbols) prints a newline. For most alphabets
+    /// the map space IS the alphabet index space; routing alphabets renumber
+    /// (InitMap assigns sequential ids per unique text), so their override
+    /// resolves through the route table, and Mandarin rehashes to sequential
+    /// ids per unique character, so its override compares against m_iCHpara
+    /// (greptile P1s: indexing the alphabet table with a renumbered symbol
+    /// checked the wrong symbol — a mapped SPACE could be misread as a
+    /// newline, erasing the word context on rebuild).
+    virtual bool MapSymbolPrintsNewLine(symbol mapSym) const;
+
+    /// Whether one of this manager's OWN symbol nodes prints a newline —
+    /// iSymbol is in the manager's node number space (alphabet indices for
+    /// base/routing, hashed CH numbers for Mandarin, whose CSymbolNode
+    /// subclasses carry rehashed ids). Used by the paragraph-boundary sites
+    /// in CreateSymbolNode and CSymbolNode::SetFlag.
+    virtual bool SymbolPrintsNewLine(symbol iSymbol) const;
+
     /// Called to create a node for a given symbol (leaf), as a child of a specified parent node
     ///  \param iBkgCol colour behind the new node, i.e. that should show through if the (group) node is transparent
     virtual CDasherNode* CreateSymbolNode(CAlphNode* pParent, symbol iSymbol);

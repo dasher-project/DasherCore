@@ -273,6 +273,14 @@ CAlphNode* CMandarinAlphMgr::CreateSymbolRoot(int iOffset, CLanguageModel::Conte
     return new CMandSym(iOffset, this, chSym, 0);
 }
 
+bool CMandarinAlphMgr::MapSymbolPrintsNewLine(symbol mapSym) const {
+    return mapSym == m_iCHpara;
+}
+
+bool CMandarinAlphMgr::SymbolPrintsNewLine(symbol iSymbol) const {
+    return iSymbol == m_iCHpara;
+}
+
 CDasherNode* CMandarinAlphMgr::CreateSymbolNode(CAlphNode* pParent, symbol iSymbol) {
 
     // For every PY index (group; = syllable+tone or "punctuation"),
@@ -342,6 +350,12 @@ CMandarinAlphMgr::CMandSym* CMandarinAlphMgr::CreateCHSymbol(CDasherNode* pParen
     if (m_vCHtext[iCHsym] == "\r\n") iNewOffset++;
     CMandSym* pNewNode = new CMandSym(iNewOffset, this, iCHsym, iPYparent);
     pNewNode->iContext = m_pLanguageModel->CloneContext(iContext);
+    if (iCHsym == m_iCHpara) {
+        // Paragraph = hard prediction boundary (see CAlphabetManager): the
+        // canonical paragraph-start context replaces the chained context.
+        m_pLanguageModel->ReleaseContext(pNewNode->iContext);
+        pNewNode->iContext = CreateParagraphSeedContext();
+    }
     m_pLanguageModel->EnterSymbol(pNewNode->iContext, iCHsym);
     return pNewNode;
 }

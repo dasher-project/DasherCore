@@ -338,6 +338,45 @@ CAlphNode* CAlphabetManager::CreateSymbolRoot(int iOffset, CLanguageModel::Conte
     return new CSymbolNode(iOffset, m_vLabels[sym], this, sym);
 }
 
+/// Symbols of the canonical paragraph-start context: the alphabet's default
+/// (fresh-sentence) context with trailing whitespace stripped. The bundled
+/// English corpus breaks paragraphs as ".\r\n" — punctuation directly
+/// followed by the newline — so ". " must lose its trailing space to keep
+/// the trained [., ¶] statistics reachable.
+void CAlphabetManager::ParagraphSeedSymbols(vector<symbol>& vSeed) const {
+    std::string strDefault = m_pAlphabet->GetDefaultContext();
+    while (!strDefault.empty() && isspace(static_cast<unsigned char>(strDefault.back())))
+        strDefault.pop_back();
+    if (!strDefault.empty()) m_map.GetSymbols(vSeed, strDefault);
+}
+
+/// A fresh LM context holding the canonical paragraph-start symbols (see
+/// ParagraphSeedSymbols). The paragraph symbol itself is entered by the
+/// caller, leaving the context at [default, ¶].
+CLanguageModel::Context CAlphabetManager::CreateParagraphSeedContext() const {
+    CLanguageModel::Context ctx = m_pLanguageModel->CreateEmptyContext();
+    vector<symbol> vSeed;
+    ParagraphSeedSymbols(vSeed);
+    for (symbol s : vSeed)
+        m_pLanguageModel->EnterSymbol(ctx, s);
+    return ctx;
+}
+
+symbol CAlphabetManager::ContextSymbol(symbol iSymbol) const {
+    return iSymbol; // base implementation: symbol ids are already LM ids
+}
+
+bool CAlphabetManager::MapSymbolPrintsNewLine(symbol mapSym) const {
+    // Base alphabets: the map space is the alphabet index space.
+    return m_pAlphabet->SymbolPrintsNewLineCharacter(mapSym);
+}
+
+bool CAlphabetManager::SymbolPrintsNewLine(symbol iSymbol) const {
+    // Base (and routing — the alphabet table covers every route) alphabets:
+    // node symbols are alphabet indices.
+    return m_pAlphabet->SymbolPrintsNewLineCharacter(iSymbol);
+}
+
 pair<symbol, CLanguageModel::Context> CAlphabetManager::GetContextSymbols(CDasherNode* pParent, int iRootOffset,
                                                                           const CAlphabetMap* pAlphMap) {
     vector<symbol> vContextSymbols;
@@ -356,6 +395,27 @@ pair<symbol, CLanguageModel::Context> CAlphabetManager::GetContextSymbols(CDashe
             if (*(--it) == 0) {
                 // found an impossible symbol! erase from beginning up to it (inclusive)
                 vContextSymbols.erase(vContextSymbols.begin(), ++it);
+                break;
+            }
+        }
+
+        // A paragraph is a hard prediction boundary: everything before the
+        // LAST paragraph symbol is replaced by the alphabet's default
+        // (fresh-sentence) context, so a seeded context is [default, ¶,
+        // ...] no matter what preceded the newline in the buffer (period,
+        // space, bare word, comma...). Without this the PPM context chains
+        // THROUGH the paragraph, and any pre-newline sequence the training
+        // corpus lacks (it has [., ¶] almost exclusively — 94% of
+        // bundled-corpus lines start with a capital after CRLF) degrades
+        // the after-newline predictions to a mid-sentence mixture — the
+        // "Enter remembers the last punctuation / you have to zoom a
+        // capital" report.
+        for (std::vector<symbol>::iterator it = vContextSymbols.end(); it != vContextSymbols.begin();) {
+            if (MapSymbolPrintsNewLine(*(--it))) {
+                vector<symbol> vSeed;
+                ParagraphSeedSymbols(vSeed);
+                vSeed.insert(vSeed.end(), it, vContextSymbols.end());
+                vContextSymbols.swap(vSeed);
                 break;
             }
         }
@@ -558,6 +618,17 @@ CDasherNode* CAlphabetManager::CreateSymbolNode(CAlphNode* pParent, symbol iSymb
     //    pDisplayInfo->strDisplayText = ssLabel.str();
 
     pAlphNode->iContext = m_pLanguageModel->CloneContext(pParent->iContext);
+    if (SymbolPrintsNewLine(iSymbol)) {
+        // Paragraph = hard prediction boundary (mirrors GetContextSymbols):
+        // the paragraph node's context is the canonical paragraph-start
+        // context, not the parent chain extended with ¶. Live-zoom children
+        // of the Enter node therefore predict sentence start (capitals)
+        // regardless of what was typed before the newline.
+        m_pLanguageModel->ReleaseContext(pAlphNode->iContext);
+        pAlphNode->iContext = CreateParagraphSeedContext();
+        m_pLanguageModel->EnterSymbol(pAlphNode->iContext, ContextSymbol(iSymbol));
+        return pAlphNode;
+    }
     m_pLanguageModel->EnterSymbol(pAlphNode->iContext, iSymbol); // TODO: Don't use symbols?
 
     return pAlphNode;
@@ -784,6 +855,18 @@ void CSymbolNode::SetFlag(int iFlag, bool bValue) {
             //  with the new (learned) context: the former was obtained by EnterSymbol rather than LearnSymbol, so
             //  will be different iff this node was the first time its symbol was entered into its parent context.
             //  (Yes, this node's context is unlikely to be used again, but not impossible...)
+            if (m_pMgr->SymbolPrintsNewLine(iSymbol)) {
+                // Paragraph = hard boundary (mirrors GetContextSymbols /
+                // CreateSymbolNode): the trie keeps the learned [x, ¶]
+                // chain, but this node's PREDICTION context is the canonical
+                // paragraph-start context so post-paragraph expansions don't
+                // chain through the newline. ContextSymbol: EnterSymbol
+                // takes BASE symbols — a routing alphabet's iSymbol here is
+                // a route number (greptile P1).
+                pLM->ReleaseContext(ctx);
+                ctx = m_pMgr->CreateParagraphSeedContext();
+                pLM->EnterSymbol(ctx, m_pMgr->ContextSymbol(iSymbol));
+            }
             pLM->ReleaseContext(iContext);
             iContext = ctx;
         }
