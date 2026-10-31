@@ -51,7 +51,7 @@ jobs:
           # from source or run the arm64 build under Rosetta.
           - { os: windows-latest, artifact: dasher-windows-x64 }
           - { os: ubuntu-latest,  artifact: dasher-linux-x64 }
-          - { os: macos-14,       artifact: dasher-macos-arm64 }
+          - { os: macos-15,       artifact: dasher-macos-arm64 }
 
     steps:
       - uses: actions/checkout@v5
