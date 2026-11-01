@@ -7,14 +7,14 @@
 // handler is registered, the subtree must not render AT ALL: a node that
 // silently does nothing when zoomed is worse than no node.
 //
-// The gating rule (ControlManager::Parse): a node is pruned iff
-//  (a) it contained an unregistered action element and retains no other
-//      actions (compound nodes degrade), or
-//  (b) it has no actions/alph/root escape and every template successor was
-//      pruned (the emptied-ancestor cascade, iterated to a fixed point).
+// The gating rule (ControlManager::Parse): a PESSIMISTIC LIVENESS FIXPOINT
+// over the template graph, seeded so that gated actionless nodes are doomed
+// and cannot confer liveness (review loop 2's Case G); live = bears actions,
+// or born-empty-and-ungated, or has a live TEMPLATE successor. An orphan
+// rescue deletes kept templates stranded unreachable by a doom deletion.
 // Refs to pruned named nodes are stripped, not rendered.
 //
-// Assertions are label-based via dasher_get_visible_nodes while steering
+// Assertions are label-based via each frame's TEXT commands while steering
 // into the control box - with a handler the Select labels are findable
 // (positive control), without them they never appear (the actual gate).
 #include "test_common.h"
@@ -263,6 +263,79 @@ TEST_CASE("select/fires through navigation with verbatim attributes" * doctest::
     }
     CHECK(got_forward == "no");
     CHECK(got_dist == "paragraph");
+    dasher_set_bool_parameter(ctx, dasher_find_parameter_key("BP_CONTROL_MODE"), 0);
+    dasher_destroy(ctx);
+}
+
+TEST_CASE("select/mutually-referencing dead groups die (zombie cycle)") {
+    // Review loop 1 P1: two actionless groups whose only content was gated
+    // and that ref each other must NOT keep each other alive - the
+    // pessimistic fixpoint has no base case for them. (Loop 1's optimistic
+    // iteration left them rendering, and navigating the no-escape cycle
+    // latched a fatal engine error.)
+    ScopedTempDir tmp;
+    const std::string data_dir = build_data_dir(tmp);
+    std::filesystem::remove(std::filesystem::path(data_dir) / "Data" / "control" / "control.xml");
+    REQUIRE(write_data_file(data_dir, "control", "control.xml",
+                            custom_control("  <node label=\"Keeper\" color=\"240\">\n"
+                                           "    <stop/>\n"
+                                           "    <alph/>\n"
+                                           "  </node>\n"
+                                           "  <node name=\"ALPHA\" label=\"Alpha\" color=\"-1\">\n"
+                                           "    <node label=\"DeadA\" color=\"-1\">\n"
+                                           "      <select forward=\"yes\" dist=\"word\"/>\n"
+                                           "      <alph/>\n"
+                                           "    </node>\n"
+                                           "    <ref name=\"BETA\"/>\n"
+                                           "  </node>\n"
+                                           "  <node name=\"BETA\" label=\"Beta\" color=\"-1\">\n"
+                                           "    <node label=\"DeadB\" color=\"-1\">\n"
+                                           "      <select forward=\"no\" dist=\"char\"/>\n"
+                                           "      <alph/>\n"
+                                           "    </node>\n"
+                                           "    <ref name=\"ALPHA\"/>\n"
+                                           "  </node>\n")));
+    dasher_ctx* ctx = make_ctx(data_dir, tmp.c_str());
+    dasher_set_bool_parameter(ctx, dasher_find_parameter_key("BP_CONTROL_MODE"), 1);
+    CHECK(steer_and_look_for(ctx, "Keeper", 1800)); // the box works
+    CHECK(!steer_and_look_for(ctx, "Alpha", 1800)); // zombie cycle dead
+    CHECK(!steer_and_look_for(ctx, "Beta", 1800));
+    dasher_set_bool_parameter(ctx, dasher_find_parameter_key("BP_CONTROL_MODE"), 0);
+    dasher_destroy(ctx);
+}
+
+TEST_CASE("select/gated leaf with live external ref leaves no hollow parent") {
+    // Review loop 2, Case G: a gated actionless leaf whose <ref> points at
+    // a LIVE group outside the gated subtree. The leaf is doomed; its
+    // parent's liveness must not flow through the doomed leaf (the post-hoc
+    // rule-(a) variant left the parent as a reachable childless shell).
+    ScopedTempDir tmp;
+    const std::string data_dir = build_data_dir(tmp);
+    std::filesystem::remove(std::filesystem::path(data_dir) / "Data" / "control" / "control.xml");
+    REQUIRE(write_data_file(data_dir, "control", "control.xml",
+                            custom_control("  <node label=\"Keeper\" color=\"240\">\n"
+                                           "    <stop/>\n"
+                                           "    <alph/>\n"
+                                           "  </node>\n"
+                                           "  <node label=\"SelGrp\" color=\"-1\">\n"
+                                           "    <node label=\"DoomedLeaf\" color=\"-1\">\n"
+                                           "      <select forward=\"yes\" dist=\"word\"/>n\n"
+                                           "      <alph/>\n"
+                                           "      <ref name=\"KEEPER\"/>\n"
+                                           "    </node>\n"
+                                           "  </node>\n"
+                                           "  <node name=\"KEEPER2\" label=\"Keeper\" color=\"-1\">\n"
+                                           "  </node>\n"
+                                           "  <node name=\"KEEPER\" label=\"RefTarget\" color=\"-1\">\n"
+                                           "    <alph/>\n"
+                                           "  </node>\n")));
+    // NOTE: the leaf refs KEEPER (a live born-empty node) - the exact
+    // external-live-ref shape of Case G.
+    dasher_ctx* ctx = make_ctx(data_dir, tmp.c_str());
+    dasher_set_bool_parameter(ctx, dasher_find_parameter_key("BP_CONTROL_MODE"), 1);
+    CHECK(steer_and_look_for(ctx, "Keeper", 1800));  // box works (stop node)
+    CHECK(!steer_and_look_for(ctx, "SelGrp", 1800)); // no hollow shell
+    CHECK(!steer_and_look_for(ctx, "DoomedLeaf", 1800));
     dasher_set_bool_parameter(ctx, dasher_find_parameter_key("BP_CONTROL_MODE"), 0);
     dasher_destroy(ctx);
 }

@@ -46,10 +46,14 @@ These are registered automatically by `CControlManager::registerBuiltinActions()
 | `pause` | - | Pause Dasher motion |
 | `move` | `forward`=`yes`\|`no`, `dist`=`char`\|`word`\|`sentence`\|`paragraph`\|`line`\|`page`\|`all` | Move cursor |
 | `delete` | `forward`=`yes`\|`no`, `dist`=(same as move) | Delete text |
-| `select` | `forward`=`yes`\|`no`, `dist`=`char`\|`word`\|`paragraph`\|`all` | **RFC 0021** — frontend-executed text selection (no built-in; see Gating below) |
 | `speak` | `what`=`new`\|`repeat`\|`cancel`\|`all`\|`paragraph`\|`sentence`\|`line`\|`word` | Speak text via TTS callback |
 | `copy` | `what`=(same as speak) | Copy text to clipboard |
 | `speak_cancel` | - | Cancel ongoing speech |
+
+**Not built-in:** `select` (RFC 0021) — frontend-executed text selection with
+attributes `forward`=`yes`\|`no`, `dist`=`char`\|`word`\|`paragraph`\|`all`.
+Nodes carrying `<select>` only appear when the frontend has registered a
+handler — see [Gating](#gating-rfc-0021) below.
 
 ## Gating (RFC 0021)
 

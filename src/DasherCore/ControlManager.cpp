@@ -612,12 +612,24 @@ bool CControlManager::Parse(pugi::xml_document& document, const std::string file
         }
 
         // Pessimistic liveness: iterate from all-dead to the least fixpoint.
+        // Doom seed (review loop 2, Case G): gated actionless nodes are
+        // removed AND cannot confer liveness - even when their own <ref>
+        // navigation aids point at live groups (a Select leaf exists FOR
+        // the action). Folding rule (a) into the fixpoint as a seed,
+        // rather than applying it afterwards, means a parent whose
+        // liveness flowed only through a doomed leaf dies too (the
+        // post-hoc variant left a reachable, childless, actionless shell
+        // that rendered).
+        std::set<NodeTemplate*> doomed;
+        for (auto* t : templates)
+            if (t->m_bGated && t->m_actions.empty()) doomed.insert(t);
+
         std::set<NodeTemplate*> live;
         bool liveChanged = true;
         while (liveChanged) {
             liveChanged = false;
             for (auto* t : templates) {
-                if (live.count(t)) continue;
+                if (live.count(t) || doomed.count(t)) continue;
                 bool isLive = !t->m_actions.empty() || (originalTemplateSuccessors[t] == 0 && !t->m_bGated);
                 if (!isLive)
                     for (auto* s : t->successors) {
@@ -635,7 +647,7 @@ bool CControlManager::Parse(pugi::xml_document& document, const std::string file
 
         std::set<NodeTemplate*> removed;
         for (auto* t : templates)
-            if (!live.count(t) || (t->m_bGated && t->m_actions.empty())) removed.insert(t);
+            if (doomed.count(t) || !live.count(t)) removed.insert(t);
 
         // Orphan rescue: kept templates unreachable from the survivors.
         // (Runs on the post-strip graph, computed below, so build the
