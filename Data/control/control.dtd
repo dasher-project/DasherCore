@@ -2,7 +2,7 @@
 <!ELEMENT control ((node|alph)*)>
 <!ATTLIST control name CDATA #REQUIRED>
 
-<!ELEMENT node ((node|move|delete|copy|speak|pause|stop|ref|root|alph)*)>
+<!ELEMENT node ((node|move|delete|select|copy|speak|pause|stop|ref|root|alph)*)>
 <!--by specifying the name attribute as type ID rather than CDATA, the XML
     validator checks that all IDs are distinct:-->
 <!ATTLIST node name ID #IMPLIED>
@@ -16,6 +16,13 @@
 <!ELEMENT delete EMPTY>
 <!ATTLIST delete forward (yes|no) #REQUIRED>
 <!ATTLIST delete dist (char|word|line|sentence|paragraph|page|all) #REQUIRED>
+
+<!-- RFC 0021: frontend-registered selection action. No built-in execution -
+     the frontend must call dasher_register_action("select", ...) before
+     enabling control mode, or nodes carrying <select> are pruned (gating). -->
+<!ELEMENT select EMPTY>
+<!ATTLIST select forward (yes|no) #REQUIRED>
+<!ATTLIST select dist (char|word|paragraph|all) #REQUIRED>
 
 <!ELEMENT copy EMPTY>
 <!ATTLIST copy what (new|repeat|word|line|sentence|paragraph|page|all) #REQUIRED>

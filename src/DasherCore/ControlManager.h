@@ -335,6 +335,11 @@ class NodeTemplate {
     std::list<NodeTemplate*> successors; ///< nullptr = <alph/> escape
     std::vector<ControlAction*> m_actions;
     CDasherScreen::Label* m_pLabel;
+    /// RFC 0021 capability gating: set during parsing when this node
+    /// contained an action element whose name has no registered handler.
+    /// After parsing, a gated node with no remaining actions (its only
+    /// actions were unregistered) is pruned - see CControlManager::Parse.
+    bool m_bGated = false;
 
     int calculateNewOffset(CDasherInterfaceBase* intf, int offsetBefore) const;
     void executeActions(CDasherInterfaceBase* intf) const;
