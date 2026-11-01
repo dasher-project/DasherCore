@@ -324,8 +324,6 @@ TEST_CASE("select/gated leaf with live external ref leaves no hollow parent") {
                                            "      <ref name=\"KEEPER\"/>\n"
                                            "    </node>\n"
                                            "  </node>\n"
-                                           "  <node name=\"KEEPER2\" label=\"Keeper\" color=\"-1\">\n"
-                                           "  </node>\n"
                                            "  <node name=\"KEEPER\" label=\"RefTarget\" color=\"-1\">\n"
                                            "    <alph/>\n"
                                            "  </node>\n")));
