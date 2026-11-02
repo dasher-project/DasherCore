@@ -44,8 +44,6 @@ These are registered automatically by `CControlManager::registerBuiltinActions()
 |---|---|---|
 | `stop` | - | Stop Dasher and trigger on-stop behaviour (speak/copy on stop) |
 | `pause` | - | Pause Dasher motion |
-| `move` | `forward`=`yes`\|`no`, `dist`=`char`\|`word`\|`sentence`\|`paragraph`\|`line`\|`page`\|`all` | Move cursor |
-| `delete` | `forward`=`yes`\|`no`, `dist`=(same as move) | Delete text |
 | `speak` | `what`=`new`\|`repeat`\|`cancel`\|`all`\|`paragraph`\|`sentence`\|`line`\|`word` | Speak text via TTS callback |
 | `copy` | `what`=(same as speak) | Copy text to clipboard |
 | `speak_cancel` | - | Cancel ongoing speech |
@@ -54,6 +52,20 @@ These are registered automatically by `CControlManager::registerBuiltinActions()
 attributes `forward`=`yes`\|`no`, `dist`=`char`\|`word`\|`paragraph`\|`all`.
 Nodes carrying `<select>` only appear when the frontend has registered a
 handler — see [Gating](#gating-rfc-0021) below.
+
+**Also not built-in (RFC 0021 amendment, 2026-11-02):** `move` and `delete`.
+These were built-ins until Dasher-Windows #88 proved them
+**visible-but-dead on a headless engine**: their implementations
+(`ctrlMove`/`ctrlDelete`) only mutate engine-internal state and notify the
+frontend of nothing, so no platform could make them user-visible. They now
+ride the registered-action surface exactly like `select`, with the same
+attribute shape (`forward`, `dist` — the engine passes values verbatim and
+parses nothing, so `dist` may include `sentence`\|`line`\|`page` for
+frontends that support them). Register `"move"`/`"delete"` via
+`dasher_register_action` and perform the operation natively; without a
+handler the gating prunes the groups. (`MoveAction`/`DeleteAction` classes
+remain in the tree of code for alphabet XML's
+`moveCursorAction`/`deleteTextAction`, which construct them directly.)
 
 ## Gating (RFC 0021)
 

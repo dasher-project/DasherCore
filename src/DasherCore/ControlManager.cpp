@@ -301,61 +301,20 @@ void CControlManager::registerBuiltinActions() {
     m_registry.registerFactory("pause", [](const auto&) { return new PauseAction(); });
     m_registry.registerFactory("speak_cancel", [](const auto&) { return new SpeakCancelAction(); });
 
-    // Move/delete with dist + forward attributes
-    auto distFactory = [](auto createDist) -> ActionFactory {
-        return [createDist](const std::map<std::string, std::string>& attrs) -> ControlAction* {
-            auto it = attrs.find("dist");
-            if (it == attrs.end()) {
-                it = attrs.find("distance");
-                if (it == attrs.end()) return nullptr;
-            }
-
-            // Parse "dist" value. Old control.xml uses: char, word, sentence, paragraph, page, all
-            // Alphabet XML uses: nextChar, previousChar, nextWord, etc.
-            std::string distStr = it->second;
-            bool forwards = true;
-            EditDistance dist = EDIT_CHAR;
-
-            // Check for "next"/"previous" prefix (alphabet XML style)
-            if (distStr.rfind("next", 0) == 0) {
-                forwards = true;
-                distStr = distStr.substr(4); // remove "next"
-            } else if (distStr.rfind("previous", 0) == 0) {
-                forwards = false;
-                distStr = distStr.substr(8); // remove "previous"
-            } else {
-                // control.xml style: check explicit forward attribute
-                auto fwdIt = attrs.find("forward");
-                if (fwdIt != attrs.end()) forwards = (fwdIt->second == "yes" || fwdIt->second == "true");
-            }
-
-            // Parse distance type
-            if (distStr == "Char" || distStr == "char")
-                dist = EDIT_CHAR;
-            else if (distStr == "Word" || distStr == "word")
-                dist = EDIT_WORD;
-            else if (distStr == "Line" || distStr == "line")
-                dist = EDIT_LINE;
-            else if (distStr == "Sent." || distStr == "Sentence" || distStr == "sentence")
-                dist = EDIT_SENTENCE;
-            else if (distStr == "Para." || distStr == "Paragraph" || distStr == "paragraph")
-                dist = EDIT_PARAGRAPH;
-            else if (distStr == "Page" || distStr == "page")
-                dist = EDIT_PAGE;
-            else if (distStr == "All" || distStr == "all")
-                dist = EDIT_FILE;
-            else
-                return nullptr;
-
-            return createDist(forwards, dist);
-        };
-    };
-
-    m_registry.registerFactory(
-        "move", distFactory([](bool f, EditDistance d) -> ControlAction* { return new MoveAction(f, d); }));
-
-    m_registry.registerFactory(
-        "delete", distFactory([](bool f, EditDistance d) -> ControlAction* { return new DeleteAction(f, d); }));
+    // RFC 0021 amendment (2026-11-02): <move>/<delete> are NO LONGER
+    // built-ins — they ride the registered-action surface exactly like
+    // <select>. The old engine-side implementations (ctrlMove/ctrlDelete)
+    // only mutated engine-internal state (cursorPos/editBuffer) with no
+    // way to notify the frontend, so on a headless engine every platform
+    // rendered visible-but-dead Move/Delete groups (field-reported as
+    // Dasher-Windows #88). Now the frontend dasher_register_action(
+    // "move"/"delete", ...) and performs the operation natively; without
+    // a handler the gating fixpoint prunes the groups. The XML attributes
+    // (dist, forward — incl. sentence/page/line values the frontend may
+    // support) pass verbatim to the handler, like <select>'s.
+    // (MoveAction/DeleteAction classes remain: alphabet XML's
+    // moveCursorAction/deleteTextAction construct them directly in
+    // AlphIO with its own parseDistance — not via this registry.)
 
     // Speak/copy with "what" attribute
     auto textActionFactory = [](char mode) -> ActionFactory {

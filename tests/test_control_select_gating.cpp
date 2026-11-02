@@ -346,3 +346,88 @@ TEST_CASE("select/gated leaf with live external ref leaves no hollow parent") {
 // above proves the prune semantics on an identical box shape, and the
 // bundled tree differs only in size. Noted on issue #105 for the async
 // parse/callback interaction.
+
+// ── RFC 0021 amendment: <move>/<delete> left the built-in registry ────────
+// (Dasher-Windows #88: the old built-ins were visible-but-dead on every
+// headless-engine platform - ctrlMove/ctrlDelete mutate engine-internal
+// state only and notify nobody.) Same gating contract as <select>: present
+// with a registered handler, pruned without.
+
+static const char* kMoveDeleteBoxXml = "  <node label=\"Keeper\" color=\"240\">\n"
+                                       "    <stop/>\n"
+                                       "    <alph/>\n"
+                                       "  </node>\n"
+                                       "  <node label=\"Mover\" color=\"-1\">\n"
+                                       "    <move forward=\"yes\" dist=\"word\"/>\n"
+                                       "    <alph/>\n"
+                                       "  </node>\n"
+                                       "  <node label=\"Deleter\" color=\"-1\">\n"
+                                       "    <delete forward=\"no\" dist=\"paragraph\"/>\n"
+                                       "    <alph/>\n"
+                                       "  </node>\n";
+
+static std::string data_dir_with_move_delete_box(ScopedTempDir& tmp) {
+    const std::string data_dir = build_data_dir(tmp);
+    std::filesystem::remove(std::filesystem::path(data_dir) / "Data" / "control" / "control.xml");
+    REQUIRE(write_data_file(data_dir, "control", "control.xml", custom_control(kMoveDeleteBoxXml)));
+    return data_dir;
+}
+
+TEST_CASE("move-delete/gated out when no handler registered") {
+    ScopedTempDir tmp;
+    const std::string data_dir = data_dir_with_move_delete_box(tmp);
+    dasher_ctx* ctx = make_ctx(data_dir, tmp.c_str());
+
+    // Built-ins are gone from the registry: without registered handlers
+    // both groups must be pruned (the pre-amendment behaviour rendered
+    // them as dead nodes - the exact bug class the gating exists for).
+    dasher_set_bool_parameter(ctx, dasher_find_parameter_key("BP_CONTROL_MODE"), 1);
+    CHECK(steer_and_look_for(ctx, "Keeper", 1800));
+    CHECK(!steer_and_look_for(ctx, "Mover", 1800));
+    CHECK(!steer_and_look_for(ctx, "Deleter", 1800));
+
+    dasher_set_bool_parameter(ctx, dasher_find_parameter_key("BP_CONTROL_MODE"), 0);
+    dasher_destroy(ctx);
+}
+
+TEST_CASE("move-delete/present when handlers registered") {
+    ScopedTempDir tmp;
+    const std::string data_dir = data_dir_with_move_delete_box(tmp);
+    dasher_ctx* ctx = make_ctx(data_dir, tmp.c_str());
+
+    dasher_register_action(ctx, "move", null_select_cb, nullptr);
+    dasher_register_action(ctx, "delete", null_select_cb, nullptr);
+    dasher_set_bool_parameter(ctx, dasher_find_parameter_key("BP_CONTROL_MODE"), 1);
+    CHECK(steer_and_look_for(ctx, "Mover", 1800));
+    CHECK(steer_and_look_for(ctx, "Deleter", 1800));
+
+    dasher_set_bool_parameter(ctx, dasher_find_parameter_key("BP_CONTROL_MODE"), 0);
+    dasher_destroy(ctx);
+}
+
+TEST_CASE("move-delete/bundled control.xml grafts with handlers registered") {
+    // Smoke test on the REAL bundled control.xml (CTL_MOVE/CTL_DELETE/
+    // CTL_CLEAR all carry <move>/<delete> elements): with handlers
+    // registered the box grafts and the engine runs clean frames; without
+    // them the groups prune (covered by the custom-box cases above).
+    ScopedTempDir tmp;
+    const std::string data_dir = build_data_dir(tmp);
+    dasher_ctx* ctx = make_ctx(data_dir, tmp.c_str());
+    dasher_register_action(ctx, "move", null_select_cb, nullptr);
+    dasher_register_action(ctx, "delete", null_select_cb, nullptr);
+
+    const int before = dasher_get_root_child_count(ctx);
+    int* cmds = nullptr;
+    int cc = 0;
+    char** strs = nullptr;
+    int sc = 0;
+    dasher_frame(ctx, 1000, &cmds, &cc, &strs, &sc);
+    dasher_set_bool_parameter(ctx, dasher_find_parameter_key("BP_CONTROL_MODE"), 1);
+    dasher_frame(ctx, 1016, &cmds, &cc, &strs, &sc);
+    const int after = dasher_get_root_child_count(ctx);
+    CHECK(after == before + 1);
+    CHECK(dasher_has_engine_error(ctx) == 0);
+
+    dasher_set_bool_parameter(ctx, dasher_find_parameter_key("BP_CONTROL_MODE"), 0);
+    dasher_destroy(ctx);
+}
