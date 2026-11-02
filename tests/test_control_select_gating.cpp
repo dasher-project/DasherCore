@@ -353,19 +353,18 @@ TEST_CASE("select/gated leaf with live external ref leaves no hollow parent") {
 // state only and notify nobody.) Same gating contract as <select>: present
 // with a registered handler, pruned without.
 
-static const char* kMoveDeleteBoxXml =
-    "  <node label=\"Keeper\" color=\"240\">\n"
-    "    <stop/>\n"
-    "    <alph/>\n"
-    "  </node>\n"
-    "  <node label=\"Mover\" color=\"-1\">\n"
-    "    <move forward=\"yes\" dist=\"word\"/>\n"
-    "    <alph/>\n"
-    "  </node>\n"
-    "  <node label=\"Deleter\" color=\"-1\">\n"
-    "    <delete forward=\"no\" dist=\"paragraph\"/>\n"
-    "    <alph/>\n"
-    "  </node>\n";
+static const char* kMoveDeleteBoxXml = "  <node label=\"Keeper\" color=\"240\">\n"
+                                       "    <stop/>\n"
+                                       "    <alph/>\n"
+                                       "  </node>\n"
+                                       "  <node label=\"Mover\" color=\"-1\">\n"
+                                       "    <move forward=\"yes\" dist=\"word\"/>\n"
+                                       "    <alph/>\n"
+                                       "  </node>\n"
+                                       "  <node label=\"Deleter\" color=\"-1\">\n"
+                                       "    <delete forward=\"no\" dist=\"paragraph\"/>\n"
+                                       "    <alph/>\n"
+                                       "  </node>\n";
 
 static std::string data_dir_with_move_delete_box(ScopedTempDir& tmp) {
     const std::string data_dir = build_data_dir(tmp);
