@@ -538,8 +538,19 @@ bool CControlManager::Parse(pugi::xml_document& document, const std::string file
                         m_pMsgs->Message("Failed to create action: " + name, false);
                     }
                 }
+            } else if (!nodeStack.empty() && !name.empty() && xmlNode.type() == pugi::node_element) {
+                // RFC 0021 capability gating: an ELEMENT with no registered
+                // handler (whitespace text / comment nodes have empty names
+                // and non-element types - they must NOT mark the node, or
+                // every node in a normally-formatted control.xml would gate).
+                // The element is dropped as before, but the containing node
+                // is MARKED - after parsing, a node whose only actions were
+                // unregistered is pruned rather than left as a dead end
+                // (unknown elements at top level, outside any node, remain
+                // silently ignored as they always were).
+                nodeStack.back()->m_bGated = true;
             }
-            // Unknown elements are silently ignored
+            // Other non-element/unknown content is silently ignored
         };
 
     pugi::xml_node controlElem = document.child("control");
@@ -554,6 +565,123 @@ bool CControlManager::Parse(pugi::xml_document& document, const std::string file
     for (auto& ref : unresolvedRefs) {
         auto target = namedNodes.find(ref.second);
         if (target != namedNodes.end()) *(ref.first) = target->second;
+    }
+
+    // ── RFC 0021 capability gating: prune gated nodes ────────────────────
+    // Nodes whose only actions were unregistered elements (m_bGated, empty
+    // m_actions) are pruned - a node that silently does nothing when zoomed
+    // is worse than no node. Pruning then cascades over the template graph
+    // as a PESSIMISTIC LIVENESS FIXPOINT (review loop 1): start all-dead
+    // and mark a template live only if it has a base case -
+    //   - it bears at least one registered action, or
+    //   - it is born-empty (never had template successors) and was not
+    //     gated (historical treatment for pure <alph/>/<root/> leaves)
+    //   - or at least one TEMPLATE successor is live (an <alph/> escape or
+    //     <root/> loop is not action-bearing and cannot keep an emptied
+    //     group alive; neither can mutually-referencing dead groups - a
+    //     zombie cycle has no base case and dies).
+    // On top of liveness, rule (a): a gated node with no remaining actions
+    // is pruned EVEN IF live through its successors - a Select leaf's
+    // <ref> navigation aids point at live groups, but the leaf exists FOR
+    // the action. Finally an ORPHAN RESCUE pass deletes any kept template
+    // that became unreachable from the surviving m_parsedNodes (a gated
+    // group deleted under rule (a) can strand live children): unreachable
+    // means unrenderable and undeletable-by-the-destructor, so it must be
+    // removed here, not leaked.
+    {
+        // m_parsedNodes legitimately contains nullptr entries (<alph/>
+        // escapes pushed at the control root) - skip them; they are not
+        // templates and never prune.
+        std::set<NodeTemplate*> templates;
+        std::deque<NodeTemplate*> queue;
+        for (auto* n : m_parsedNodes)
+            if (n && templates.insert(n).second) queue.push_back(n);
+        while (!queue.empty()) {
+            auto* head = queue.front();
+            queue.pop_front();
+            for (auto* child : head->successors)
+                if (child && child != m_pRoot && templates.insert(child).second) queue.push_back(child);
+        }
+
+        std::map<NodeTemplate*, size_t> originalTemplateSuccessors;
+        for (auto* t : templates) {
+            size_t n = 0;
+            for (auto* s : t->successors)
+                if (s && s != m_pRoot) n++;
+            originalTemplateSuccessors[t] = n;
+        }
+
+        // Pessimistic liveness: iterate from all-dead to the least fixpoint.
+        // Doom seed (review loop 2, Case G): gated actionless nodes are
+        // removed AND cannot confer liveness - even when their own <ref>
+        // navigation aids point at live groups (a Select leaf exists FOR
+        // the action). Folding rule (a) into the fixpoint as a seed,
+        // rather than applying it afterwards, means a parent whose
+        // liveness flowed only through a doomed leaf dies too (the
+        // post-hoc variant left a reachable, childless, actionless shell
+        // that rendered).
+        std::set<NodeTemplate*> doomed;
+        for (auto* t : templates)
+            if (t->m_bGated && t->m_actions.empty()) doomed.insert(t);
+
+        std::set<NodeTemplate*> live;
+        bool liveChanged = true;
+        while (liveChanged) {
+            liveChanged = false;
+            for (auto* t : templates) {
+                if (live.count(t) || doomed.count(t)) continue;
+                bool isLive = !t->m_actions.empty() || (originalTemplateSuccessors[t] == 0 && !t->m_bGated);
+                if (!isLive)
+                    for (auto* s : t->successors) {
+                        if (s && s != m_pRoot && live.count(s)) {
+                            isLive = true;
+                            break;
+                        }
+                    }
+                if (isLive) {
+                    live.insert(t);
+                    liveChanged = true;
+                }
+            }
+        }
+
+        std::set<NodeTemplate*> removed;
+        for (auto* t : templates)
+            if (doomed.count(t) || !live.count(t)) removed.insert(t);
+
+        // Orphan rescue: kept templates unreachable from the survivors.
+        // (Runs on the post-strip graph, computed below, so build the
+        // reachable set first and add the difference to removed.)
+        std::set<NodeTemplate*> reachable;
+        std::deque<NodeTemplate*> rqueue;
+        for (auto* n : m_parsedNodes)
+            if (n && !removed.count(n) && reachable.insert(n).second) rqueue.push_back(n);
+        while (!rqueue.empty()) {
+            auto* head = rqueue.front();
+            rqueue.pop_front();
+            for (auto* child : head->successors)
+                if (child && child != m_pRoot && !removed.count(child) && reachable.insert(child).second)
+                    rqueue.push_back(child);
+        }
+        for (auto* t : templates)
+            if (!removed.count(t) && !reachable.count(t)) removed.insert(t);
+
+        if (!removed.empty()) {
+            for (auto* t : templates) {
+                if (removed.count(t)) continue;
+                t->successors.erase(std::remove_if(t->successors.begin(), t->successors.end(),
+                                                   [&](NodeTemplate* s) { return s && removed.count(s); }),
+                                    t->successors.end());
+            }
+            m_parsedNodes.erase(std::remove_if(m_parsedNodes.begin(), m_parsedNodes.end(),
+                                               [&](NodeTemplate* t) { return t && removed.count(t); }),
+                                m_parsedNodes.end());
+            m_pMsgs->Message("Control: " + std::to_string(removed.size()) +
+                                 " node(s) hidden (no registered handler for their action)",
+                             false);
+            for (auto* t : removed)
+                delete t;
+        }
     }
 
     updateActions();

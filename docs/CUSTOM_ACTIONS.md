@@ -42,13 +42,42 @@ These are registered automatically by `CControlManager::registerBuiltinActions()
 
 | XML name | Attributes | Description |
 |---|---|---|
-| `stop` | — | Stop Dasher and trigger on-stop behaviour (speak/copy on stop) |
-| `pause` | — | Pause Dasher motion |
+| `stop` | - | Stop Dasher and trigger on-stop behaviour (speak/copy on stop) |
+| `pause` | - | Pause Dasher motion |
 | `move` | `forward`=`yes`\|`no`, `dist`=`char`\|`word`\|`sentence`\|`paragraph`\|`line`\|`page`\|`all` | Move cursor |
 | `delete` | `forward`=`yes`\|`no`, `dist`=(same as move) | Delete text |
 | `speak` | `what`=`new`\|`repeat`\|`cancel`\|`all`\|`paragraph`\|`sentence`\|`line`\|`word` | Speak text via TTS callback |
 | `copy` | `what`=(same as speak) | Copy text to clipboard |
-| `speak_cancel` | — | Cancel ongoing speech |
+| `speak_cancel` | - | Cancel ongoing speech |
+
+**Not built-in:** `select` (RFC 0021) — frontend-executed text selection with
+attributes `forward`=`yes`\|`no`, `dist`=`char`\|`word`\|`paragraph`\|`all`.
+Nodes carrying `<select>` only appear when the frontend has registered a
+handler — see [Gating](#gating-rfc-0021) below.
+
+## Gating (RFC 0021)
+
+An action element whose name has **no registered handler** (built-in or
+custom) is dropped at parse time, and a node whose only actions were such
+elements is **pruned from the tree entirely** — a node that silently does
+nothing when zoomed is worse than no node. Consequences for control.xml
+authors:
+
+- A node mixing a registered and an unregistered action **degrades**: the
+  registered action survives, the node stays.
+- The prune cascades: a group whose every template child was pruned goes
+  too (an `<alph/>` escape or `<root/>` loop does not keep an emptied group
+  alive; neither do mutually-referencing dead groups).
+- `ref`s to pruned named nodes are stripped, not rendered.
+- One informational message per parse reports the prune:
+  `"Control: N node(s) hidden (no registered handler for their action)"`.
+
+Note that **any** element inside a `<node>` that is not `node`/`ref`/
+`alph`/`root` and has no registered handler counts as an unregistered
+action for gating purposes — including elements a future control.xml
+version might introduce as structural. Frontends that want such nodes to
+render must register a handler (a no-op handler is fine).
+
 
 **Alphabet XML compatibility names** (also registered for backward compatibility):
 
