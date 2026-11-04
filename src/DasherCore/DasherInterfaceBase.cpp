@@ -117,6 +117,15 @@ void CDasherInterfaceBase::Realize(unsigned long ulTime) {
     // THIS realize read the other bundle (greptile P1 #2 on #88 — pinned by
     // retired_default_heal_uses_own_context_data_dir).
     m_AlphIO->ScanNameIndex(m_dataDir);
+    // RFC 0020: load the emoji extension definition (groups-only, merged
+    // into every alphabet when BP_EMOJI_GROUP is on). The engine resolves
+    // data against {dataDir, dataDir/Data} — try both, tolerate absence.
+    {
+        const std::string sep = (m_dataDir.empty() || m_dataDir.back() == '/') ? "" : "/";
+        for (const std::string& sub : {std::string("emoji/extension.xml"), std::string("Data/emoji/extension.xml")}) {
+            if (m_AlphIO->LoadEmojiExtension(m_dataDir + sep + sub)) break;
+        }
+    }
     const auto loadById = [this](const std::string& alphId) { LoadAlphabetById(alphId); };
     {
         std::string alphId = m_pSettingsStore->GetStringParameter(SP_ALPHABET_ID);
@@ -219,6 +228,13 @@ CDasherInterfaceBase::~CDasherInterfaceBase() {
 
     // Clean up cached lock label (created by Redraw when locked)
     delete m_pLockLabel;
+
+    // RFC 0020: derived infos own their ControlActions — free them once the
+    // model (which referenced them) is gone.
+    for (const CAlphInfo* info : m_vExtendedAlphInfos)
+        delete info;
+    m_vExtendedAlphInfos.clear();
+    m_pExtendedAlphInfo = nullptr;
 }
 
 void CDasherInterfaceBase::HandleParameterChange(Parameter parameter) {
@@ -238,6 +254,11 @@ void CDasherInterfaceBase::HandleParameterChange(Parameter parameter) {
         ScheduleRedraw();
         break;
     case SP_ALPHABET_ID:
+        ChangeAlphabet();
+        ScheduleRedraw();
+        break;
+    case BP_EMOJI_GROUP:     // RFC 0020 — the merged emoji group changes the
+    case SP_EMOJI_SKIN_TONE: // alphabet's symbol set; rebuild like a switch
         ChangeAlphabet();
         ScheduleRedraw();
         break;
@@ -646,7 +667,24 @@ double CDasherInterfaceBase::GetCurFPS() {
 }
 
 const CAlphInfo* CDasherInterfaceBase::GetActiveAlphabet() {
-    return m_AlphIO->GetInfo(m_pSettingsStore->GetStringParameter(SP_ALPHABET_ID));
+    const std::string alphId = m_pSettingsStore->GetStringParameter(SP_ALPHABET_ID);
+    if (!m_pSettingsStore->GetBoolParameter(BP_EMOJI_GROUP) || !m_AlphIO->HasEmojiExtension())
+        return m_AlphIO->GetInfo(alphId);
+
+    // RFC 0020: merge the emoji extension into a derived copy. Cached per
+    // (alphabet, tone): GetActiveAlphabet is called per frame by CAPI
+    // consumers, and each merge re-parses the alphabet file.
+    const std::string tone = m_pSettingsStore->GetStringParameter(SP_EMOJI_SKIN_TONE);
+    const std::string key = alphId + '\x1f' + tone;
+    if (m_pExtendedAlphInfo && m_strExtendedKey == key) return m_pExtendedAlphInfo;
+
+    const CAlphInfo* base = m_AlphIO->GetInfo(alphId);
+    const CAlphInfo* derived = m_AlphIO->MakeExtendedInfo(alphId, tone);
+    m_pExtendedAlphInfo = derived;
+    m_strExtendedKey = key;
+    if (derived != base)                         // MakeExtendedInfo falls back to the shared base
+        m_vExtendedAlphInfos.push_back(derived); // info when nothing merged
+    return derived;
 }
 
 // int CDasherInterfaceBase::GetAutoOffset() {

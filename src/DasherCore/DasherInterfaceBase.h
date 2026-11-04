@@ -546,6 +546,17 @@ class Dasher::CDasherInterfaceBase : public CMessageDisplay, private NoClones {
     std::unique_ptr<CColorIO> m_ColorIO;
     std::unique_ptr<CNodeCreationManager> m_pNCManager;
 
+    // ── Emoji extension (RFC 0020) ─────────────────────────────────────
+    // Derived alphabet infos (base + merged emoji groups) are cached per
+    // (alphabetId, skinTone) and kept alive for the process lifetime:
+    // node trees built against a previous info may outlive the switch, and
+    // each derived info owns its ControlActions (the shared base infos'
+    // destructors would double-free them). Bounded by user-driven
+    // alphabet/tone changes.
+    std::vector<const CAlphInfo*> m_vExtendedAlphInfos;
+    const CAlphInfo* m_pExtendedAlphInfo = nullptr;
+    std::string m_strExtendedKey;
+
     // the game mode module - only
     // initialized if game mode is enabled
     std::unique_ptr<CGameModule> m_pGameModule;
