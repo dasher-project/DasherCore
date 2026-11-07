@@ -26,6 +26,14 @@
 
 TEST_CASE("contracts/capi version matches header constant") {
     CHECK(dasher_capi_version() == DASHER_CAPI_VERSION);
+    // RFC 0022 item 4: engine version string is non-empty, NUL-terminated,
+    // and stable across calls (static storage).
+    {
+        const char* v1 = dasher_get_engine_version();
+        const char* v2 = dasher_get_engine_version();
+        CHECK(v1 != nullptr && v1[0] != '\0');
+        CHECK(v1 == v2); // static storage — frontends may hold the pointer
+    }
 }
 
 // ---------------------------------------------------------------------------
