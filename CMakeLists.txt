@@ -247,7 +247,7 @@ if(BUILD_CAPI)
 
         # VERSIONINFO resource (Dasher-Windows #59): an unversioned DLL let
         # MSI upgrade heuristics keep stale copies under a new EXE; a
-        # FILEVERSION makes newer-always-wins deterministic. Keep project()
+                # FILEVERSION makes newer-always-wins deterministic. Keep project()
         # VERSION in lockstep with the release tag.
         string(REPLACE "." ";" _dasher_ver_list ${PROJECT_VERSION})
         list(GET _dasher_ver_list 0 DASHER_VERSION_MAJOR)
@@ -260,6 +260,27 @@ if(BUILD_CAPI)
             @ONLY)
         target_sources(dasher PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/dasher_version.rc)
     endif()
+
+    # RFC 0022 item 4: engine version string for dasher_get_engine_version().
+    # Single source: project(VERSION) (which the release tooling already
+    # enforces equals the tag). Optional git-describe suffix for checkouts.
+    set(DASHER_ENGINE_VERSION_STRING "${PROJECT_VERSION}")
+    find_program(GIT_EXECUTABLE_CORE git)
+    if(GIT_EXECUTABLE_CORE AND EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/.git")
+        execute_process(
+            COMMAND ${GIT_EXECUTABLE_CORE} describe --tags --match "v*" --dirty
+            WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+            OUTPUT_VARIABLE _core_describe
+            OUTPUT_STRIP_TRAILING_WHITESPACE
+            ERROR_QUIET
+            RESULT_VARIABLE _core_describe_rc)
+        if(_core_describe_rc EQUAL 0 AND _core_describe MATCHES "^v[0-9]")
+            string(SUBSTRING "${_core_describe}" 1 -1 _core_describe_bare)
+            set(DASHER_ENGINE_VERSION_STRING "${_core_describe_bare}")
+        endif()
+    endif()
+    message(STATUS "DasherCore engine version: ${DASHER_ENGINE_VERSION_STRING}")
+    target_compile_definitions(dasher PRIVATE DASHER_ENGINE_VERSION=\"${DASHER_ENGINE_VERSION_STRING}\")
 
     set_target_properties(dasher PROPERTIES
         RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"

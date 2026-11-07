@@ -754,6 +754,15 @@ DASHER_API void dasher_test_inject_failure(dasher_ctx* ctx, int site);
 DASHER_API int dasher_capi_version(void);
 #define DASHER_CAPI_VERSION 3
 
+// ── Engine version (RFC 0022 item 4) ────────────────────────────────────────
+//
+// The running engine's version string, from the CMake project(VERSION) the
+// library was built from (e.g. "0.2.26"), optionally with a git-describe
+// suffix on builds configured from a git checkout. Frontends report this as
+// the analytics default property `engine_version` so pin drift is visible
+// in the field. String is static storage — valid for the process lifetime.
+DASHER_API const char* dasher_get_engine_version(void);
+
 // Get the current Dasher offset (character position in the output).
 // Returns -1 if the engine is not realized.
 DASHER_API int dasher_get_offset(dasher_ctx* ctx);

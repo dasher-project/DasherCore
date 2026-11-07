@@ -1007,6 +1007,16 @@ DASHER_API int dasher_capi_version(void) {
     return DASHER_CAPI_VERSION;
 }
 
+// RFC 0022 item 4. Built from project(VERSION) by CMake; tarball or
+// non-CMake builds fall back to "unknown" (frontends should prefer their
+// build-time submodule describe when this returns that).
+DASHER_API const char* dasher_get_engine_version(void) {
+#ifndef DASHER_ENGINE_VERSION
+#define DASHER_ENGINE_VERSION "unknown"
+#endif
+    return DASHER_ENGINE_VERSION;
+}
+
 // Test hook: arm/disarm deterministic failure injection (todo.md 0.6).
 // One integer store; the throw itself lives in capi::test_inject at each
 // guarded entry point.

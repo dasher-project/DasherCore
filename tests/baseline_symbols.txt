@@ -32,6 +32,7 @@ dasher_get_bool_parameter
 dasher_get_cps
 dasher_get_current_palette
 dasher_get_dark_palette
+dasher_get_engine_version
 dasher_get_language_model_count
 dasher_get_language_model_description
 dasher_get_language_model_id
