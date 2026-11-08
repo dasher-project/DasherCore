@@ -18,6 +18,7 @@
 
 #include <algorithm>
 #include <cctype>
+#include <cstdlib>
 #include <deque>
 #include <functional>
 #include <set>
@@ -455,7 +456,7 @@ bool CControlManager::Parse(pugi::xml_document& document, const std::string file
                     else if (attrName == "label")
                         label = attr.value();
                     else if (attrName == "color")
-                        color = std::atoi(attr.value());
+                        color = atoi(attr.value());
                 }
 
                 auto* n = new NodeTemplate(label, color);
