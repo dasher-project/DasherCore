@@ -142,7 +142,11 @@ jobs:
       - name: Setup Emscripten
         uses: emscripten-core/setup-emsdk@v16
         with:
-          version: latest
+          # Pinned: 7.0.0's libc++ dropped more C-library spellings
+          # (labs/llabs/lldiv — issue #113) after the atoi fix got the
+          # build past std::atoi. 6.0.13 is the line dasher-web builds
+          # v0.2.29 with, green (dasher-web#160). Reproducible > floating.
+          version: 6.0.13
 
       - name: Verify emcc
         run: emcc --version
