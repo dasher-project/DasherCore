@@ -306,6 +306,16 @@ if(BUILD_CAPI)
         # (CI can override via `ctest --timeout` on the command line.)
         set(DASHER_TEST_TIMEOUT 300 CACHE STRING "Per-test timeout in seconds")
 
+        # Sanitizer builds run every test several times slower (ASan+UBSan
+        # instrumentation); the native 300s budget made the property-invariant
+        # suite a standing red on CI's Sanitize job — three deterministic
+        # 300.13s timeouts (issue #115, runs 2026-11-08..09). Scale the
+        # DEFAULT under sanitizers rather than cherry-picking suites; the
+        # explicit per-test overrides above still win where set.
+        if(DASHER_SANITIZE)
+            set(DASHER_TEST_TIMEOUT 900)
+        endif()
+
         # Helper function for adding a test executable
         function(dasher_add_test name source)
             add_executable(${name} ${CMAKE_CURRENT_LIST_DIR}/tests/${source})
