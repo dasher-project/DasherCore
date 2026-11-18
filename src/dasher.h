@@ -441,7 +441,11 @@ DASHER_API const char* dasher_game_get_wrong_text(dasher_ctx* ctx);
 
 // ── Persistence ───────────────────────────────────────────────────────────
 
-// Save current settings to disk.
+// Save current settings to disk. A failed write (unwritable destination,
+// full disk) is reported through the message callback (non-modal) and the
+// log callback; the changes are kept in memory and retried by the next
+// save — no parameter change is needed to retry. Returns without saving
+// when nothing changed since the last successful write.
 DASHER_API void dasher_save_settings(dasher_ctx* ctx);
 
 // Re-read dasher_settings.xml and apply any changed parameters through the

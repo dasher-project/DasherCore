@@ -243,6 +243,10 @@ DASHER_API dasher_ctx* dasher_create(const char* data_dir, const char* user_dir,
         ctx->settings = std::make_unique<Dasher::XmlSettingsStore>(settingsPath, nullptr);
         ctx->settings->Load();
         ctx->intf = new dasher_ctx::Interface(ctx->settings.get(), ctx);
+        // The store is created before the interface exists, so it gets a
+        // null message display; attach the interface now so failed settings
+        // writes are reported through the message/log callbacks (#118).
+        ctx->settings->SetMessageDisplay(ctx->intf);
         // Per-context user dir: this interface's training appends must
         // resolve against ITS OWN user dir even if another context is
         // created later (the FileUtils globals are process-wide,
@@ -254,12 +258,16 @@ DASHER_API dasher_ctx* dasher_create(const char* data_dir, const char* user_dir,
     } catch (const std::exception& e) {
         s_errorString = std::string("Failed to create Dasher session: ") + e.what();
         if (out_error) *out_error = s_errorString.data();
+        // Same detach-first discipline as dasher_destroy: the store outlives
+        // the interface being deleted and must not point at it (#118).
+        if (ctx->settings) ctx->settings->SetMessageDisplay(nullptr);
         delete ctx->intf;
         delete ctx;
         return nullptr;
     } catch (...) {
         s_errorString = "Failed to create Dasher session: unknown error";
         if (out_error) *out_error = s_errorString.data();
+        if (ctx->settings) ctx->settings->SetMessageDisplay(nullptr);
         delete ctx->intf;
         delete ctx;
         return nullptr;
@@ -291,6 +299,9 @@ DASHER_API void dasher_destroy(dasher_ctx* ctx) {
             ctx->callbacks.logCb(3, "dasher_destroy: training flush failed: unknown exception",
                                  ctx->callbacks.logCbUserData);
     }
+    // The store can outlive this point (unique_ptr member); make sure it
+    // never dereferences the interface being deleted below (#118).
+    if (ctx->settings) ctx->settings->SetMessageDisplay(nullptr);
     delete ctx->intf;
     delete ctx;
 }
@@ -327,8 +338,15 @@ DASHER_API void dasher_set_screen_size(dasher_ctx* ctx, int width, int height) {
         // manager, so null it before the delete — CreateModules re-establishes.
         if (ctx->engineError) {
             ctx->input = nullptr;
+            // Detach before the delete, mirroring dasher_destroy: the store
+            // outlives the interface, and nothing between here and the
+            // re-attach may dereference it through a save (#118).
+            ctx->settings->SetMessageDisplay(nullptr);
             delete ctx->intf;
             ctx->intf = new dasher_ctx::Interface(ctx->settings.get(), ctx);
+            // The store outlives the interface: re-attach it so save
+            // failures keep reaching the message/log callbacks (#118).
+            ctx->settings->SetMessageDisplay(ctx->intf);
             // The host's low-memory request was applied to the old interface;
             // reapply so the retry honours the memory constraint (review P1).
             ctx->intf->SetLowMemoryMode(ctx->lowMemory);
