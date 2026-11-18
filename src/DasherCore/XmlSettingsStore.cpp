@@ -65,6 +65,20 @@ void XmlSettingsStore::RefreshFromStore() {
     mode_ = EXPLICIT_SAVE;
     LoadPersistent();
     mode_ = SAVE_IMMEDIATELY;
+    // A successful re-parse reconciles the save-failure state (#118): the
+    // frontend explicitly chose the file over memory by reloading, so any
+    // pending changes are already replaced and a prior failure episode is
+    // over — a future failure must be reported as a new one, and the next
+    // Save must not rewrite a store that merely mirrors the file. Note the
+    // file itself is NOT normalized here: keys the file lacks gain their
+    // in-memory defaults (LoadPersistent backfills them via SaveSetting,
+    // which marks modified_ — cleared again below), and those defaults
+    // reach disk only with the next real parameter change (Save serializes
+    // the whole store, so it self-heals). A failed parse keeps all state:
+    // pending changes stay pending and a suppressed episode stays
+    // suppressed until a write or re-parse actually succeeds.
+    modified_ = false;
+    save_failed_ = false;
 }
 
 void XmlSettingsStore::Load() {
@@ -115,8 +129,6 @@ bool XmlSettingsStore::Save() {
         return true;
     }
 
-    modified_ = false;
-
     pugi::xml_document doc;
     pugi::xml_node declaration_node = doc.append_child(pugi::node_declaration);
     declaration_node.append_attribute("version") = "1.0";
@@ -146,7 +158,29 @@ bool XmlSettingsStore::Save() {
         string_node.append_attribute("value") = value.c_str();
     }
 
-    return doc.save_file(last_mutable_filepath.c_str(), "\t", pugi::format_default, pugi::encoding_utf8);
+    // #118: modified_ stays set until the file is actually written. Clearing
+    // it before the write meant a failed save (unwritable destination, full
+    // disk) silently dropped every pending change — a later Save() returned
+    // success without ever retrying them.
+    if (!doc.save_file(last_mutable_filepath.c_str(), "\t", pugi::format_default, pugi::encoding_utf8)) {
+        // Non-modal: a modal message pauses text entry, and in
+        // SAVE_IMMEDIATELY mode this fires from parameter setters.
+        // Report once per failure episode (see save_failed_): a persistent
+        // fault retries on every subsequent change.
+        if (!save_failed_) {
+            save_failed_ = true;
+            if (CMessageDisplay* pMsgs = save_display_ ? save_display_ : m_pMsgs)
+                pMsgs->FormatInfoMessage(
+                    "Unable to save settings to \"%s\" - your changes are kept and Dasher will retry on the next "
+                    "save. Check the directory permissions and disk space.",
+                    last_mutable_filepath.c_str());
+        }
+        return false;
+    }
+
+    modified_ = false;
+    save_failed_ = false;
+    return true;
 }
 
 namespace {

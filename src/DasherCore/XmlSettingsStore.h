@@ -16,8 +16,19 @@ class XmlSettingsStore : public Dasher::CSettingsStore, public AbstractXMLParser
     // Load the XML file and fills in the default values needed.
     // Returns true on success.
     void Load();
-    // Saves the XML file, returns true on success.
+    // Saves the XML file, returns true on success. On failure the store
+    // stays modified so the pending changes are retried by the next Save()
+    // (#118), and the failure is reported through the message display
+    // (see SetMessageDisplay).
     bool Save();
+
+    // Attach the destination for save-failure reports. The store is often
+    // constructed before the engine interface exists (the C API creates the
+    // settings store first and the interface afterwards), so the display
+    // passed to the constructor may be null; owners can attach the real one
+    // once available. Save failures go to this display when set, otherwise
+    // to the constructor's.
+    void SetMessageDisplay(CMessageDisplay* pDisplay) { save_display_ = pDisplay; }
 
     // Re-parse the XML file and repopulate parameters_ in place.
     // Called by ReloadFromFile() to pick up external changes.
@@ -48,6 +59,12 @@ class XmlSettingsStore : public Dasher::CSettingsStore, public AbstractXMLParser
     Mode mode_ = EXPLICIT_SAVE;
     std::string last_mutable_filepath;
     bool modified_ = false;
+    // True while the most recent Save() attempt failed. Suppresses repeat
+    // reports for one failure episode: SAVE_IMMEDIATELY retries on every
+    // parameter change, and a persistent fault must not re-notify on each.
+    bool save_failed_ = false;
+    // Message display attached after construction (see SetMessageDisplay).
+    CMessageDisplay* save_display_ = nullptr;
     // Set by Parse() during a refresh scan to record that the file
     // actually loaded (missing/malformed files never reach Parse).
     bool reload_parse_ok_ = false;
