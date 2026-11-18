@@ -272,12 +272,16 @@ TEST(training_corpora_missing_still_reported) {
 }
 
 TEST(training_spanish_resolves_at_runtime) {
+    // NOTE: the ñ below is a raw UTF-8 source literal, deliberately not a
+    // \u escape — MSVC (no /utf-8 in this project) encodes \u00f1 as a single
+    // CP1252 byte, breaking the API's UTF-8 contract on Windows. Raw UTF-8
+    // round-trips unchanged; same pattern as test_multilingual.cpp.
     MessageCapture cap;
     ScopedContext ctx(800, 600);
     install_message_capture(ctx, &cap);
     cap.clear();
 
-    dasher_set_alphabet_id(ctx, "Espa\u00f1ol / Spanish with punctuation and numerals");
+    dasher_set_alphabet_id(ctx, "Español / Spanish with punctuation and numerals");
     run_frames(ctx, 3);
 
     printf("  missing-training messages: %d\n", cap.missing_training);
@@ -300,7 +304,7 @@ TEST(training_spanish_combining_nfd_resolves_at_runtime) {
     // The NFD variant trains from the NFD-normalized alias
     // (training_spanishC_ES.txt); a normalization mismatch would leave it
     // effectively untrained — the missing-training message stays the signal.
-    dasher_set_alphabet_id(ctx, "Espa\u00f1ol / Spanish  (combining accents) with numerals and punctuation");
+    dasher_set_alphabet_id(ctx, "Español / Spanish  (combining accents) with numerals and punctuation");
     run_frames(ctx, 3);
     ASSERT_EQ(cap.missing_training, 0);
 }
@@ -327,7 +331,7 @@ TEST(training_missing_corpus_still_reports_at_runtime) {
     install_message_capture(ctx, &cap);
     cap.clear();
 
-    dasher_set_alphabet_id(ctx, "Espa\u00f1ol / Spanish with punctuation and numerals");
+    dasher_set_alphabet_id(ctx, "Español / Spanish with punctuation and numerals");
     run_frames(ctx, 3);
     printf("  missing-training messages: %d last='%s'\n", cap.missing_training, cap.last.c_str());
     ASSERT_EQ(cap.missing_training, 1);
