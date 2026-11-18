@@ -1,6 +1,38 @@
  dist_pkgdata_DATA =		 \
+	gamemode_en_Latn.txt		 \
+	gamemode_english_GB.txt		 \
+	training_Afrikaans_ZA.txt		 \
+	training_Slovak_SK.txt		 \
+	training_albanian_SQ.txt		 \
+	training_basque_ES.txt		 \
+	training_canna_JP.txt		 \
+	training_catalanC_ES.txt		 \
+	training_catalan_ES.txt		 \
+	training_croatian_HR.txt		 \
+	training_danish_DK.txt		 \
+	training_dutch_NL.txt		 \
+	training_emma_GB.txt		 \
 	training_emoji.txt		 \
 	training_english_GB.txt		 \
+	training_finnish_FI.txt		 \
+	training_french_FR.txt		 \
+	training_german_DE.txt		 \
+	training_hiragana60_JP.txt		 \
+	training_hiragana83_JP.txt		 \
+	training_italianC_IT.txt		 \
+	training_italian_IT.txt		 \
+	training_latex_GB.txt		 \
+	training_norwegian_NO.txt		 \
+	training_polish_PL.txt		 \
+	training_portugueseC_BR.txt		 \
+	training_portuguese_BR.txt		 \
+	training_russian_RU.txt		 \
+	training_spanishC_ES.txt		 \
+	training_spanish_ES.txt		 \
+	training_swahili_KE.txt		 \
+	training_swedish_SE.txt		 \
+	training_turkish_TR.txt		 \
+	training_ukrainian_UA.txt		 \
 	training_wa_af_Latn.txt		 \
 	training_wa_am_Ethi.txt		 \
 	training_wa_ar_Arab.txt		 \
@@ -91,6 +123,7 @@
 	training_wa_vi_Latn.txt		 \
 	training_wa_xh_Latn.txt		 \
 	training_wa_yo_Latn.txt		 \
-	training_wa_zu_Latn.txt		
+	training_wa_zu_Latn.txt \
+	training_welsh_GB.txt		
 
 EXTRA_DIST =
