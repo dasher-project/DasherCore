@@ -16,21 +16,25 @@ jobs:
 
     strategy:
       fail-fast: false
+      # Include-only: the old cross-product (os x build_type x compiler with
+      # exclude+include rewrites) broke the moment any list/reference drifted
+      # apart — the macos pin changed the os list but not the macos-latest
+      # references in exclude/include, spawning ghost combos (empty
+      # build_type legs running `cmake --build --config ""`, cl-on-macOS)
+      # that masqueraded all day as runner-weather cancellations. Explicit
+      # combos cannot drift.
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
-        build_type: [Release, Debug]
-        compiler: [gcc, clang, cl]
-        exclude:
-          - { os: windows-latest, compiler: gcc }
-          - { os: windows-latest, compiler: clang }
-          - { os: ubuntu-latest, compiler: cl }
-          - { os: macos-latest, compiler: cl }
         include:
-          - { os: ubuntu-latest, compiler: gcc, c: gcc, cpp: g++ }
-          - { os: ubuntu-latest, compiler: clang, c: clang, cpp: clang++ }
-          - { os: windows-latest, compiler: cl, c: cl, cpp: cl }
-          - { os: macos-latest, compiler: clang, c: clang, cpp: clang++ }
-          - { os: macos-latest, compiler: gcc, c: gcc, cpp: g++ }
+          - { os: ubuntu-latest, build_type: Release, compiler: gcc, c: gcc, cpp: g++ }
+          - { os: ubuntu-latest, build_type: Debug,   compiler: gcc, c: gcc, cpp: g++ }
+          - { os: ubuntu-latest, build_type: Release, compiler: clang, c: clang, cpp: clang++ }
+          - { os: ubuntu-latest, build_type: Debug,   compiler: clang, c: clang, cpp: clang++ }
+          - { os: windows-latest, build_type: Release, compiler: cl, c: cl, cpp: cl }
+          - { os: windows-latest, build_type: Debug,   compiler: cl, c: cl, cpp: cl }
+          - { os: macos-15, build_type: Release, compiler: clang, c: clang, cpp: clang++ }
+          - { os: macos-15, build_type: Debug,   compiler: clang, c: clang, cpp: clang++ }
+          - { os: macos-15, build_type: Release, compiler: gcc, c: gcc, cpp: g++ }
+          - { os: macos-15, build_type: Debug,   compiler: gcc, c: gcc, cpp: g++ }
 
     steps:
       - uses: actions/checkout@v4
