@@ -9,20 +9,16 @@ on:
 
 jobs:
   # ── Build + Test (matrix) ──────────────────────────────────────────────
+  # Linux + Windows gate every PR and branch push; the macOS matrix is a
+  # separate tag-only job below (the hosted macos-15 pool kept reclaiming
+  # jobs mid-run — random cancellations at 5-28 min across three rerun
+  # rounds on #121, with every leg passing on at least one round, so pool
+  # weather, not code).
   build-test:
     name: Build + Test (${{ matrix.os }} / ${{ matrix.compiler }} / ${{ matrix.build_type }})
     runs-on: ${{ matrix.os }}
     continue-on-error: false
     timeout-minutes: 30
-    # macOS: TAGGED RELEASES ONLY. The hosted macos-15 pool reclaimed jobs
-    # mid-run repeatedly (random cancellations at 5-28 min across three
-    # rerun rounds on #121 — every leg passed on at least one round, so it
-    # is pool weather, not the code). PR and branch-push CI therefore gates
-    # on Linux + Windows only (the ruleset's required checks match), and
-    # the full macOS matrix runs on v* tags so every release is still
-    # fully tested on macOS — release.yml separately builds the macOS
-    # binaries from the same tag.
-    if: ${{ matrix.os != 'macos-15' || startsWith(github.ref, 'refs/tags/v') }}
 
     strategy:
       fail-fast: false
@@ -41,6 +37,55 @@ jobs:
           - { os: ubuntu-latest, build_type: Debug,   compiler: clang, c: clang, cpp: clang++ }
           - { os: windows-latest, build_type: Release, compiler: cl, c: cl, cpp: cl }
           - { os: windows-latest, build_type: Debug,   compiler: cl, c: cl, cpp: cl }
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Configure CMake
+        run: >
+          cmake -B build
+          -DCMAKE_CXX_COMPILER=${{ matrix.cpp }}
+          -DCMAKE_C_COMPILER=${{ matrix.c }}
+          -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
+          -DBUILD_TESTS=ON
+          -DBUILD_CAPI=ON
+          -S .
+
+      - name: Build
+        run: cmake --build build --config ${{ matrix.build_type }} --parallel
+
+      - name: Test
+        working-directory: build
+        run: ctest -C ${{ matrix.build_type }} --output-on-failure --timeout 120
+
+      - name: Upload test artifacts on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-${{ matrix.os }}-${{ matrix.compiler }}-${{ matrix.build_type }}
+          path: build/Testing/Temporary/LastTest.log
+          retention-days: 7
+
+  # ── Build + Test, macOS (tag releases only) ───────────────────────────
+  # The full macOS matrix runs on v* tags so every release is still fully
+  # tested on macOS; release.yml separately builds the macOS binaries from
+  # the same tag. NOT part of per-PR gating: the hosted macos-15 pool kept
+  # reclaiming jobs mid-run (see the comment on build-test), which blocked
+  # merges on pool weather. The branch ruleset's required checks therefore
+  # list no macOS contexts.
+  build-test-macos:
+    name: Build + Test (${{ matrix.os }} / ${{ matrix.compiler }} / ${{ matrix.build_type }})
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ${{ matrix.os }}
+    continue-on-error: false
+    timeout-minutes: 45
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
           - { os: macos-15, build_type: Release, compiler: clang, c: clang, cpp: clang++ }
           - { os: macos-15, build_type: Debug,   compiler: clang, c: clang, cpp: clang++ }
           - { os: macos-15, build_type: Release, compiler: gcc, c: gcc, cpp: g++ }
